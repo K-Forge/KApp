@@ -1,0 +1,19 @@
+:root {
+
+  /* Paleta institucional */
+  --color-blue: #539392;
+  --color-pink: #D51A65;
+  --color-green: #C9D329;
+  --color-mix-blue-pink: #522567;
+  --color-mix-pink-green: #B62325;
+  --color-mix-green-blue: #3E823E;
+  --color-mix-all: #592E2A;
+
+  /* Tema de la app (ajustables) */
+  --theme-header-bg: linear-gradient(135deg, var(--color-mix-blue-pink), var(--color-pink));
+  --theme-header-fg: #FFFFFF;
+  --theme-footer-bg: linear-gradient(180deg, #FFFFFF, #F7F3F9);
+  --theme-footer-fg: var(--color-mix-blue-pink);
+  --theme-accent: var(--color-pink);
+
+}
