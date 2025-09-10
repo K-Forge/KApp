@@ -47,8 +47,9 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 /* Carousel */
 .carousel { position: relative; overflow: hidden; border-radius: 12px; }
 .carousel-track { display: grid; }
-.slide { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 10px; padding: 10px; background: #f6f9f9; border: 1px solid #e7efef; border-radius: 12px; opacity: 0; pointer-events: none; transform: scale(.98); transition: opacity .3s ease, transform .3s ease; }
-.slide.is-active { opacity: 1; pointer-events: auto; transform: scale(1); }
+/* Evitar apilado vertical: solo se muestra el slide activo */
+.slide { display: none; grid-template-columns: 96px 1fr; align-items: center; gap: 10px; padding: 10px; background: #f6f9f9; border: 1px solid #e7efef; border-radius: 12px; }
+.slide.is-active { display: grid; }
 .slide img { width: 96px; height: 96px; object-fit: contain; }
 .slide-caption h3 { margin: 0; font-size: 15px; color: var(--color-mix-blue-pink); }
 .slide-caption p { margin: 4px 0 0; color: #444; font-size: 13px; }
