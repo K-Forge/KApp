@@ -82,3 +82,11 @@ $RECYCLE.BIN/
 !*.xcodeproj/xcshareddata/
 *.xcsettings
 *.xcscheme
+
+# Proyecto específico
+/K-APP FRONT v1/nbproject/private/
+
+# TomEE
+TomEE/apache-tomee-plus-10.1.1/logs/
+TomEE/apache-tomee-plus-10.1.1/work/
+TomEE/apache-tomee-plus-10.1.1/temp/
