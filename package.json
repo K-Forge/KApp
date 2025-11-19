@@ -1,15 +1,11 @@
 {
   "name": "k-app",
   "version": "1.0.0",
-  "description": "K-APP - Proyecto del club K-Forge.",
+  "description": "Frontend for K-APP",
   "scripts": {
-    "install:gitglow-hook": "sh ./scripts/macos-git-glow.sh",
-    "install:gitglow-hook:win": "powershell -ExecutionPolicy Bypass -File ./scripts/windows-git-glow.ps1"
+    "dev": "npx serve frontend"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/K-Forge/K-APP.git"
-  },
-  "author": "",
-  "license": "ISC"
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
 }
