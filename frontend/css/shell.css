@@ -97,7 +97,14 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 .menu-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 16px; background: #fff; border: 1px solid #eee; border-radius: 16px; text-decoration: none; color: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.03); transition: transform 0.2s, box-shadow 0.2s; }
 .menu-item:active { transform: scale(0.98); }
 .menu-item span { font-size: 13px; font-weight: 500; }
-
+/* Disabled state for menu items */
+.menu-item.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  filter: grayscale(100%);
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
 .icon-box { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; color: #fff; margin-bottom: 4px; }
 .icon-box svg { width: 26px; height: 26px; }
 
@@ -106,5 +113,44 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 .icon-box.green { background: linear-gradient(135deg, #C9D329 0%, #e0eb48 100%); box-shadow: 0 4px 10px rgba(201, 211, 41, 0.3); }
 .icon-box.orange { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); box-shadow: 0 4px 10px rgba(255, 154, 158, 0.3); }
 .icon-box.purple { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); box-shadow: 0 4px 10px rgba(161, 140, 209, 0.3); }
+.icon-box.pink { background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); box-shadow: 0 4px 10px rgba(255, 117, 140, 0.3); }
+.icon-box.indigo { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3); }
+.icon-box.yellow { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); box-shadow: 0 4px 10px rgba(246, 211, 101, 0.3); }
+.icon-box.cyan { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); box-shadow: 0 4px 10px rgba(132, 250, 176, 0.3); }
+
+/* Search Bar */
+.search-bar { position: relative; margin-bottom: 16px; }
+.search-bar input { width: 100%; height: 44px; padding: 10px 12px 10px 40px; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; color: #111; font-size: 14px; }
+.search-bar input:focus { outline: 2px solid rgba(83,147,146,.35); border-color: var(--color-blue); }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888; width: 20px; height: 20px; pointer-events: none; }
+
+/* List Items (Generic) */
+.list-group { display: grid; gap: 10px; }
+.list-item { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 12px; background: #fff; border: 1px solid #eee; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
+.list-item-content h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600; color: #333; }
+.list-item-content p { margin: 0; font-size: 12px; color: #666; }
+.list-item-action { display: flex; align-items: center; }
+
+/* Badges */
+.badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.badge.pending { background: #fff4e5; color: #b76e00; }
+.badge.submitted { background: #e6fffa; color: #2c7a7b; }
+.badge.date { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
+
+/* Course Card (Grid) */
+.course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.course-card { display: flex; flex-direction: column; background: #fff; border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,.04); text-decoration: none; color: inherit; }
+.course-header { height: 60px; background: var(--course-color, #eee); display: grid; place-items: center; color: #fff; }
+.course-body { padding: 10px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; }
+.course-title { font-size: 13px; font-weight: 600; margin: 0; line-height: 1.3; }
+.course-prof { font-size: 11px; color: #666; margin: 0; }
+
+/* Small Button */
+.btn-sm { height: 32px; padding: 0 12px; font-size: 12px; border-radius: 8px; }
+
+/* Segmented Control (Tabs) */
+.segmented-control { display: grid; grid-template-columns: 1fr 1fr; background: #f0f0f0; padding: 4px; border-radius: 12px; margin-bottom: 16px; }
+.segmented-btn { border: 0; background: transparent; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 600; color: #666; cursor: pointer; transition: all 0.2s; }
+.segmented-btn.active { background: #fff; color: var(--color-blue); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
 
