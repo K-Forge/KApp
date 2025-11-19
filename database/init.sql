@@ -516,3 +516,37 @@ CREATE TABLE notification (
     type VARCHAR(50)
 );
 */
+
+-- ==============================================================================================
+-- 8. GESTIÓN DE TAREAS (DASHBOARD)
+-- Tablas para el manejo de asignaciones y entregas en el dashboard dinámico.
+-- ==============================================================================================
+
+-- Tabla Assignment: Tareas creadas por profesores para un grupo de curso
+CREATE TABLE assignment (
+    assignment_id SERIAL PRIMARY KEY,
+    course_group_id INT REFERENCES course_group(course_group_id) NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    due_date TIMESTAMP,
+    max_score DECIMAL(5, 2) DEFAULT 5.0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TRIGGER update_assignment_modtime BEFORE UPDATE ON assignment FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER audit_assignment_changes AFTER INSERT OR UPDATE OR DELETE ON assignment FOR EACH ROW EXECUTE FUNCTION log_audit_event();
+
+-- Tabla Submission: Entregas de estudiantes para una tarea
+CREATE TABLE submission (
+    submission_id SERIAL PRIMARY KEY,
+    assignment_id INT REFERENCES assignment(assignment_id) NOT NULL,
+    student_id INT REFERENCES student(student_id) NOT NULL,
+    submission_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    content_url TEXT, -- URL al archivo o contenido de texto
+    grade DECIMAL(5, 2), -- Nota asignada por el profesor
+    feedback TEXT, -- Retroalimentación del profesor
+    UNIQUE(assignment_id, student_id) -- Un estudiante solo puede enviar una vez por tarea (o se actualiza)
+);
+
+CREATE TRIGGER audit_submission_changes AFTER INSERT OR UPDATE OR DELETE ON submission FOR EACH ROW EXECUTE FUNCTION log_audit_event();
