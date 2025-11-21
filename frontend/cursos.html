@@ -12,19 +12,23 @@
   <body class="app-shell dashboard-page">
     
     <!-- Header Partial Inlined -->
-    <header class="app-header" role="banner">
+    <header class="app-header" role="banner" style="position: relative;">
       <button id="btnMenu" class="icon-btn" aria-label="Abrir menú" aria-controls="drawer" aria-expanded="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z" fill="currentColor"/></svg>
       </button>
     
-      <div class="header-center">
-        <strong id="studentName">Estudiante</strong>
-        <small id="studentCode">000000</small>
-      </div>
-    
+      <a href="dashboard.html" class="icon-btn" aria-label="Ir al inicio" style="display: flex; align-items: center; justify-content: center; text-decoration: none; color: inherit;">
+        <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 24px; height: 24px;"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="currentColor"/></svg>
+      </a>
+
       <a class="avatar" href="login.html" title="Ver perfil">
         <img id="studentAvatar" src="images/avatar-placeholder.svg" alt="Foto de perfil"/>
       </a>
+    
+      <div class="header-center" style="position: absolute; left: 50%; transform: translateX(-50%); text-align: center;">
+        <strong id="studentName">Estudiante</strong>
+        <small id="studentCode">000000</small>
+      </div>
     </header>
     
     <!-- Drawer & overlay -->
