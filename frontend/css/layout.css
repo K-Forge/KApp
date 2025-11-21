@@ -1,3 +1,280 @@
-/* Extra layout helpers (kept minimal) */
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+/* =========================================
+   Login Page Styles
+   ========================================= */
+/* (Estilos de imagen de fondo eliminados para restaurar el color original) */
+
+/* =========================================
+   Dashboard Carousel (Hero Image)
+   ========================================= */
+.carousel {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+
+.slide {
+  position: relative;
+  width: 100%;
+  height: 250px; /* Altura base para móviles */
+}
+
+@media (min-width: 768px) {
+  .slide {
+    height: 400px; /* Altura mayor para pantallas grandes */
+  }
+}
+
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.slide-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 80px 25px 40px; /* Padding aumentado para soportar texto gigante */
+  background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); /* Gradiente más fuerte */
+  color: white;
+  text-shadow: 0 3px 6px rgba(0,0,0,0.7);
+}
+
+.slide-caption h3 {
+  margin: 0 0 10px 0;
+  font-size: 3.5rem; /* Tamaño gigante */
+  font-weight: 900; /* Extra bold */
+  line-height: 0.95; /* Interlineado ajustado para títulos grandes */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.slide-caption p {
+  margin: 0;
+  font-size: 1.5rem; /* Descripción muy visible */
+  opacity: 1;
+  font-weight: 600;
+  max-width: 100%;
+  line-height: 1.3;
+}
+
+/* Indicadores del carrusel (Puntos) */
+.carousel-indicators {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 3;
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  padding: 0;
+}
+
+.indicator.active {
+  background-color: #ffffff;
+  transform: scale(1.2);
+}
+
+.indicator:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Controles flotantes */
+.carousel-controls {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.carousel-btn {
+  pointer-events: auto;
+  background: rgba(255,255,255,0.3);
+  backdrop-filter: blur(2px);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+}
+
+.carousel-btn:hover {
+  background: rgba(255,255,255,0.5);
+}
+
+/* =========================================
+   Estilos del Menú Lateral (Drawer)
+   ========================================= */
+.drawer-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+  gap: 0.25rem; /* Espacio pequeño entre elementos */
+}
+
+.drawer-link {
+  display: block;
+  width: 100%;
+  padding: 0.7rem 1rem; /* Relleno reducido para hacerlos más pequeños */
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; /* Fuente moderna y limpia */
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #4a4a4a;
+  text-decoration: none;
+  background-color: transparent;
+  border: none;
+  text-align: left;
+  border-radius: 10px; /* Bordes redondeados para un toque juvenil */
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.drawer-link:hover {
+  background-color: #f0f4f8;
+  color: #003366; /* Azul académico al pasar el mouse */
+  transform: translateX(2px); /* Sutil movimiento */
+}
+
+.drawer-link.danger {
+  color: #d32f2f;
+}
+
+.drawer-link.danger:hover {
+  background-color: #ffebee;
+  color: #b71c1c;
+}
+
+.drawer-nav hr {
+  margin: 0.5rem 0;
+  border: 0;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Ajuste del Header del Drawer para alinear el botón de cerrar */
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Separa el usuario del botón de cerrar */
+  padding-right: 8px; /* Un poco de espacio para el botón */
+}
+
+/* =========================================
+   Ajustes de Header y Navegación
+   ========================================= */
+
+/* Importar fuente Inter si no está disponible localmente (opcional, pero recomendado para asegurar el estilo) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&display=swap');
+
+/* Estilos específicos para el nombre del estudiante en el header y drawer */
+#studentName, #drawerName {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-weight: 500; /* Inter Medium */
+}
+
+/* Título de sección (Novedades): Grande, centrado, estilo publicitario/académico */
+.section-title {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif; /* Fuente Inter */
+  font-size: 2rem;
+  text-align: center;
+  font-weight: 700; /* Inter Bold */
+  color: #37474f;
+  margin: 1rem 0 1.5rem;
+  text-transform: uppercase; /* Mayúsculas para impacto publicitario */
+  letter-spacing: 1px;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+/* Línea decorativa debajo del título */
+.section-title::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background-color: #003366; /* Azul académico */
+  margin: 10px auto 0;
+}
+
+/* Grid de navegación: Items gigantes y centrados (4x2) */
+.grid-menu {
+  display: grid;
+  gap: 15px; /* Espacio entre elementos */
+  grid-template-columns: repeat(4, 1fr); /* 4 columnas forzadas para lograr 4 arriba y 4 abajo */
+  justify-items: center; /* Centrar horizontalmente en la celda */
+  max-width: 900px; /* Limitar ancho en pantallas grandes */
+  margin: 0 auto; /* Centrar el grid en la página */
+  padding: 0 10px;
+}
+
+.menu-item {
+  padding: 15px 5px; /* Padding ajustado */
+  min-height: auto; /* Quitar altura mínima forzada */
+  border-radius: 16px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Transición suave para el efecto */
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Efecto de iluminación y elevación al pasar el cursor */
+.menu-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.12); /* Sombra difusa tipo luz */
+  background-color: #ffffff;
+  z-index: 1;
+}
+
+.menu-item .icon-box {
+  width: 90px; /* Aumentado significativamente (antes 64px) */
+  height: 90px;
+  margin-bottom: 12px;
+  border-radius: 22px; /* Radio ajustado al nuevo tamaño */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-item .icon-box svg {
+  width: 48px; /* Ajustar el SVG interno proporcionalmente */
+  height: 48px;
+}
+
+.menu-item span {
+  font-size: 0.95rem; /* Texto más grande */
+  line-height: 1.2;
+  /* Fuente actualizada: Juvenil, académica y con más peso */
+  font-family: 'Segoe UI Semibold', 'Segoe UI', system-ui, sans-serif;
+  font-weight: 600;
+  color: #455a64;
+  letter-spacing: 0.3px;
+  text-align: center;
+}
 
