@@ -1,0 +1,548 @@
+{
+	"info": {
+		"_postman_id": "c7b9d6e3-2345-5678-9012-bcdef2345678",
+		"name": "K-APP Admin CRUD",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"token\", jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@konradlorenz.edu.co\",\n    \"password\": \"123123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "People",
+			"item": [
+				{
+					"name": "Get All People",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/people", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "people" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Create Person",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"newPersonId\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"identificationNumber\": {{$randomInt}},\n    \"identificationType\": \"CC\",\n    \"firstName\": \"Nuevo\",\n    \"lastName\": \"Usuario\",\n    \"phone\": \"3001234567\",\n    \"homeAddress\": \"Calle Nueva 123\",\n    \"birthDate\": \"2000-01-01\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/people", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "people" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Update Person",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"identificationNumber\": {{$randomInt}},\n    \"identificationType\": \"CC\",\n    \"firstName\": \"Usuario\",\n    \"lastName\": \"Actualizado\",\n    \"phone\": \"3009999999\",\n    \"homeAddress\": \"Calle Actualizada 123\",\n    \"birthDate\": \"2000-01-01\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/people/{{newPersonId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "people", "{{newPersonId}}" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Person",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "DELETE",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/people/{{newPersonId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "people", "{{newPersonId}}" ] }
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Members",
+			"item": [
+				{
+					"name": "Get All Members",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/members", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "members" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Create Member",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var pid = pm.collectionVariables.get(\"newPersonId\");",
+									"console.log(\"Current newPersonId:\", pid);",
+									"if (typeof pid === 'object' && pid !== null) {",
+									"    console.warn(\"newPersonId is an object, attempting to fix...\");",
+									"    if (pid.id) {",
+									"        pm.collectionVariables.set(\"newPersonId\", pid.id);",
+									"    } else if (pid.personId) {",
+									"        pm.collectionVariables.set(\"newPersonId\", pid.personId);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"newMemberId\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"personId\": {{newPersonId}},\n    \"universityCode\": \"NEW{{$randomInt}}\",\n    \"universityEmail\": \"nuevo{{$randomInt}}@konradlorenz.edu.co\",\n    \"password\": \"123123\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/members", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "members" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Update Member",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"personId\": {{newPersonId}},\n    \"universityCode\": \"UPD{{$randomInt}}\",\n    \"universityEmail\": \"updated{{$randomInt}}@konradlorenz.edu.co\",\n    \"password\": \"newpassword123\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/members/{{newMemberId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "members", "{{newMemberId}}" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Member",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "DELETE",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/members/{{newMemberId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "members", "{{newMemberId}}" ] }
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Students",
+			"item": [
+				{
+					"name": "Get All Students",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/students", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "students" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Create Student",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"newStudentId\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"memberId\": {{newMemberId}},\n    \"studentCode\": \"EST_NEW_{{$randomInt}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/students", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "students" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Update Student",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"memberId\": {{newMemberId}},\n    \"studentCode\": \"EST_UPD_{{$randomInt}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/students/{{newStudentId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "students", "{{newStudentId}}" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Student",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "DELETE",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/students/{{newStudentId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "students", "{{newStudentId}}" ] }
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employees",
+			"item": [
+				{
+					"name": "Get All Employees",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/employees", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "employees" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Create Employee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"newEmployeeId\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"memberId\": {{newMemberId}},\n    \"employeeCode\": \"EMP_NEW_{{$randomInt}}\",\n    \"employeeRole\": \"PROFESOR_CATEDRA\",\n    \"employeeType\": \"ACADEMICO\",\n    \"contractType\": \"TIEMPO_PARCIAL\",\n    \"salary\": 2500000,\n    \"status\": \"ACTIVO\",\n    \"hireDate\": \"2025-02-01\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/employees", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "employees" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Update Employee",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"memberId\": {{newMemberId}},\n    \"employeeCode\": \"EMP_UPD_{{$randomInt}}\",\n    \"employeeRole\": \"PROFESOR_PLANTA\",\n    \"employeeType\": \"ADMINISTRATIVO\",\n    \"contractType\": \"TIEMPO_COMPLETO\",\n    \"salary\": 3500000,\n    \"status\": \"ACTIVO\",\n    \"hireDate\": \"2025-03-01\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/employees/{{newEmployeeId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "employees", "{{newEmployeeId}}" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Employee",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "DELETE",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/employees/{{newEmployeeId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "employees", "{{newEmployeeId}}" ] }
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Courses",
+			"item": [
+				{
+					"name": "Get All Courses",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/courses", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "courses" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Create Course",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"newCourseId\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"programId\": 1,\n    \"code\": \"NEW{{$randomInt}}\",\n    \"name\": \"Nuevo Curso\",\n    \"credits\": 3,\n    \"level\": 1\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/courses", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "courses" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Update Course",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"programId\": 1,\n    \"code\": \"UPD{{$randomInt}}\",\n    \"name\": \"Curso Actualizado\",\n    \"credits\": 4,\n    \"level\": 2\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/courses/{{newCourseId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "courses", "{{newCourseId}}" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Course",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "DELETE",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/courses/{{newCourseId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "courses", "{{newCourseId}}" ] }
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Groups",
+			"item": [
+				{
+					"name": "Get All Groups",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/groups", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "groups" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Create Group",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"newGroupId\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"courseId\": {{newCourseId}},\n    \"periodId\": 1,\n    \"professorId\": {{newEmployeeId}},\n    \"groupCode\": \"G{{$randomInt}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/groups", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "groups" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Update Group",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"courseId\": {{newCourseId}},\n    \"periodId\": 1,\n    \"professorId\": {{newEmployeeId}},\n    \"groupCode\": \"G_UPD_{{$randomInt}}\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/groups/{{newGroupId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "groups", "{{newGroupId}}" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Group",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "DELETE",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/groups/{{newGroupId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "groups", "{{newGroupId}}" ] }
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Assignments",
+			"item": [
+				{
+					"name": "Get All Assignments",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/assignments", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "assignments" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Create Assignment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"newAssignmentId\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"courseGroupId\": {{newGroupId}},\n    \"title\": \"Tarea Admin\",\n    \"description\": \"Creada por admin\",\n    \"dueDate\": \"2025-12-31T23:59:00.000+00:00\",\n    \"maxScore\": 5.0\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/assignments", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "assignments" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Update Assignment",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"courseGroupId\": {{newGroupId}},\n    \"title\": \"Tarea Actualizada\",\n    \"description\": \"Actualizada por admin\",\n    \"dueDate\": \"2026-01-01T23:59:00.000+00:00\",\n    \"maxScore\": 4.5\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "http://localhost:8080/api/admin/assignments/{{newAssignmentId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "assignments", "{{newAssignmentId}}" ] }
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Assignment",
+					"request": {
+						"auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+						"method": "DELETE",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/api/admin/assignments/{{newAssignmentId}}", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "api", "admin", "assignments", "{{newAssignmentId}}" ] }
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": ""
+		}
+	]
+}
