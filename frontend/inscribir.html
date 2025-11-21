@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>K-APP • Inscribir</title>
+    <link rel="icon" href="images/konrad-logo.png" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/shell.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+  </head>
+  <body class="app-shell dashboard-page">
+    
+    <!-- Header Partial Inlined -->
+    <header class="app-header" role="banner">
+      <button id="btnMenu" class="icon-btn" aria-label="Abrir menú" aria-controls="drawer" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z" fill="currentColor"/></svg>
+      </button>
+    
+      <div class="header-center">
+        <strong id="studentName">Estudiante</strong>
+        <small id="studentCode">000000</small>
+      </div>
+    
+      <a class="avatar" href="login.html" title="Ver perfil">
+        <img id="studentAvatar" src="images/avatar-placeholder.svg" alt="Foto de perfil"/>
+      </a>
+    </header>
+    
+    <!-- Drawer & overlay -->
+    <div class="drawer-overlay" id="drawerOverlay" hidden></div>
+    <aside class="drawer" id="drawer" aria-hidden="true">
+      <header class="drawer-header">
+        <div class="drawer-user">
+          <img id="drawerAvatar" src="images/avatar-placeholder.svg" alt="Avatar" />
+          <div>
+            <strong id="drawerName">Estudiante</strong>
+            <small id="drawerCode">000000</small>
+          </div>
+        </div>
+      </header>
+      <nav class="drawer-nav" aria-label="Menú">
+        <a href="dashboard.html" class="drawer-link">Inicio</a>
+        <a href="#" class="drawer-link" data-action="perfil">Perfil</a>
+        <a href="#" class="drawer-link" data-action="ajustes">Ajustes</a>
+        <hr/>
+        <button id="logoutBtn" class="drawer-link danger" type="button">Cerrar sesión</button>
+      </nav>
+    </aside>
+    <!-- End Header Partial -->
+
+    <main class="app-content" role="main">
+      <section class="card section-gap">
+        <h2 class="section-title">Inscripción de Materias</h2>
+        
+        <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" placeholder="Buscar materia por nombre o código..." aria-label="Buscar materia">
+        </div>
+
+        <div class="list-group" id="subjects-container">
+          <!-- Mock Data: Ready for backend integration -->
+          <div class="list-item">
+            <div class="list-item-content">
+              <h3>Ingeniería de Software II</h3>
+              <p>Código: IS202 • 3 Créditos</p>
+            </div>
+            <div class="list-item-action">
+              <button class="btn primary btn-sm">Inscribir</button>
+            </div>
+          </div>
+
+          <div class="list-item">
+            <div class="list-item-content">
+              <h3>Bases de Datos Avanzadas</h3>
+              <p>Código: BD301 • 3 Créditos</p>
+            </div>
+            <div class="list-item-action">
+              <button class="btn primary btn-sm">Inscribir</button>
+            </div>
+          </div>
+
+          <div class="list-item">
+            <div class="list-item-content">
+              <h3>Inteligencia Artificial</h3>
+              <p>Código: IA405 • 4 Créditos</p>
+            </div>
+            <div class="list-item-action">
+              <button class="btn primary btn-sm">Inscribir</button>
+            </div>
+          </div>
+          
+          <div class="list-item">
+            <div class="list-item-content">
+              <h3>Arquitectura de Computadores</h3>
+              <p>Código: AC102 • 3 Créditos</p>
+            </div>
+            <div class="list-item-action">
+              <button class="btn primary btn-sm">Inscribir</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="js/app.js"></script>
+  </body>
+</html>

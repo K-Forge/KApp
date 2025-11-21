@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>K-APP • Tareas</title>
+    <link rel="icon" href="images/konrad-logo.png" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/shell.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+  </head>
+  <body class="app-shell dashboard-page">
+    
+    <!-- Header Partial Inlined -->
+    <header class="app-header" role="banner">
+      <button id="btnMenu" class="icon-btn" aria-label="Abrir menú" aria-controls="drawer" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z" fill="currentColor"/></svg>
+      </button>
+    
+      <div class="header-center">
+        <strong id="studentName">Estudiante</strong>
+        <small id="studentCode">000000</small>
+      </div>
+    
+      <a class="avatar" href="login.html" title="Ver perfil">
+        <img id="studentAvatar" src="images/avatar-placeholder.svg" alt="Foto de perfil"/>
+      </a>
+    </header>
+    
+    <!-- Drawer & overlay -->
+    <div class="drawer-overlay" id="drawerOverlay" hidden></div>
+    <aside class="drawer" id="drawer" aria-hidden="true">
+      <header class="drawer-header">
+        <div class="drawer-user">
+          <img id="drawerAvatar" src="images/avatar-placeholder.svg" alt="Avatar" />
+          <div>
+            <strong id="drawerName">Estudiante</strong>
+            <small id="drawerCode">000000</small>
+          </div>
+        </div>
+      </header>
+      <nav class="drawer-nav" aria-label="Menú">
+        <a href="dashboard.html" class="drawer-link">Inicio</a>
+        <a href="#" class="drawer-link" data-action="perfil">Perfil</a>
+        <a href="#" class="drawer-link" data-action="ajustes">Ajustes</a>
+        <hr/>
+        <button id="logoutBtn" class="drawer-link danger" type="button">Cerrar sesión</button>
+      </nav>
+    </aside>
+    <!-- End Header Partial -->
+
+    <main class="app-content" role="main">
+      <section class="card section-gap">
+        <h2 class="section-title">Tareas</h2>
+        
+        <!-- Filter Tabs -->
+        <div class="segmented-control">
+          <button class="segmented-btn active" onclick="filterTasks('pending')">Pendientes</button>
+          <button class="segmented-btn" onclick="filterTasks('submitted')">Entregadas</button>
+        </div>
+
+        <!-- Course Filter -->
+        <div style="margin-bottom: 16px;">
+          <select id="courseFilter" class="form-select" onchange="filterTasks()">
+            <option value="all">Todos los cursos</option>
+            <option value="Matemáticas Discretas">Matemáticas Discretas</option>
+            <option value="Programación Orientada a Objetos">Programación Orientada a Objetos</option>
+            <option value="Cálculo Diferencial">Cálculo Diferencial</option>
+            <option value="Inglés III">Inglés III</option>
+          </select>
+        </div>
+
+        <div class="list-group" id="tasks-container">
+          <!-- Mock Data: Ready for backend integration -->
+          <!-- Sorted by due date -->
+          
+          <div class="list-item" data-status="pending">
+            <div class="list-item-content">
+              <span class="badge date" style="margin-bottom: 4px;">18 NOV</span>
+              <h3>Taller de Grafos</h3>
+              <p>Matemáticas Discretas</p>
+            </div>
+            <div class="list-item-action">
+              <span class="badge pending">Pendiente</span>
+            </div>
+          </div>
+
+          <div class="list-item" data-status="pending">
+            <div class="list-item-content">
+              <span class="badge date" style="margin-bottom: 4px;">20 NOV</span>
+              <h3>Proyecto Final: Fase 1</h3>
+              <p>Programación Orientada a Objetos</p>
+            </div>
+            <div class="list-item-action">
+              <span class="badge pending">Pendiente</span>
+            </div>
+          </div>
+
+          <div class="list-item" data-status="submitted" style="display: none;">
+            <div class="list-item-content">
+              <span class="badge date" style="margin-bottom: 4px;">22 NOV</span>
+              <h3>Ensayo sobre Límites</h3>
+              <p>Cálculo Diferencial</p>
+            </div>
+            <div class="list-item-action">
+              <span class="badge submitted">Entregado</span>
+            </div>
+          </div>
+
+          <div class="list-item" data-status="pending">
+            <div class="list-item-content">
+              <span class="badge date" style="margin-bottom: 4px;">25 NOV</span>
+              <h3>Presentación Oral</h3>
+              <p>Inglés III</p>
+            </div>
+            <div class="list-item-action">
+              <span class="badge pending">Pendiente</span>
+            </div>
+          </div>
+
+          <div class="list-item" data-status="submitted" style="display: none;">
+            <div class="list-item-content">
+              <span class="badge date" style="margin-bottom: 4px;">15 NOV</span>
+              <h3>Quiz de Vocabulario</h3>
+              <p>Inglés III</p>
+            </div>
+            <div class="list-item-action">
+              <span class="badge submitted">Entregado</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <script>
+      let currentStatus = 'pending';
+
+      function filterTasks(status) {
+        if (status) {
+          currentStatus = status;
+        }
+
+        // Update buttons
+        document.querySelectorAll('.segmented-btn').forEach(btn => {
+          btn.classList.remove('active');
+          if (btn.textContent.toLowerCase().includes(currentStatus === 'pending' ? 'pendientes' : 'entregadas')) {
+            btn.classList.add('active');
+          }
+        });
+
+        // Get selected course
+        const courseFilter = document.getElementById('courseFilter');
+        const selectedCourse = courseFilter ? courseFilter.value : 'all';
+
+        // Filter items
+        const items = document.querySelectorAll('.list-item');
+        items.forEach(item => {
+          const itemStatus = item.dataset.status;
+          const itemCourse = item.querySelector('p').textContent.trim();
+          
+          const statusMatch = itemStatus === currentStatus;
+          const courseMatch = selectedCourse === 'all' || itemCourse === selectedCourse;
+
+          if (statusMatch && courseMatch) {
+            item.style.display = 'grid';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      }
+    </script>
+
+    <script src="js/app.js"></script>
+  </body>
+</html>
