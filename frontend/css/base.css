@@ -10,7 +10,8 @@
   --color-mix-all: #592E2A;
 
   /* Tema de la app (ajustables) */
-  --theme-header-bg: linear-gradient(135deg, var(--color-mix-blue-pink), var(--color-pink));
+  /* Se aplica opacidad (0.85) a los colores del degradado usando rgba */
+  --theme-header-bg: linear-gradient(135deg, rgba(82, 37, 103, 0.85), rgba(213, 26, 101, 0.85));
   --theme-header-fg: #FFFFFF;
   --theme-footer-bg: linear-gradient(180deg, #FFFFFF, #F7F3F9);
   --theme-footer-fg: var(--color-mix-blue-pink);
