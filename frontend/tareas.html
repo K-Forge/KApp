@@ -59,6 +59,17 @@
           <button class="segmented-btn" onclick="filterTasks('submitted')">Entregadas</button>
         </div>
 
+        <!-- Course Filter -->
+        <div style="margin-bottom: 16px;">
+          <select id="courseFilter" class="form-select" onchange="filterTasks()">
+            <option value="all">Todos los cursos</option>
+            <option value="Matemáticas Discretas">Matemáticas Discretas</option>
+            <option value="Programación Orientada a Objetos">Programación Orientada a Objetos</option>
+            <option value="Cálculo Diferencial">Cálculo Diferencial</option>
+            <option value="Inglés III">Inglés III</option>
+          </select>
+        </div>
+
         <div class="list-group" id="tasks-container">
           <!-- Mock Data: Ready for backend integration -->
           <!-- Sorted by due date -->
@@ -123,19 +134,35 @@
     </main>
 
     <script>
+      let currentStatus = 'pending';
+
       function filterTasks(status) {
+        if (status) {
+          currentStatus = status;
+        }
+
         // Update buttons
         document.querySelectorAll('.segmented-btn').forEach(btn => {
           btn.classList.remove('active');
-          if (btn.textContent.toLowerCase().includes(status === 'pending' ? 'pendientes' : 'entregadas')) {
+          if (btn.textContent.toLowerCase().includes(currentStatus === 'pending' ? 'pendientes' : 'entregadas')) {
             btn.classList.add('active');
           }
         });
 
+        // Get selected course
+        const courseFilter = document.getElementById('courseFilter');
+        const selectedCourse = courseFilter ? courseFilter.value : 'all';
+
         // Filter items
         const items = document.querySelectorAll('.list-item');
         items.forEach(item => {
-          if (item.dataset.status === status) {
+          const itemStatus = item.dataset.status;
+          const itemCourse = item.querySelector('p').textContent.trim();
+          
+          const statusMatch = itemStatus === currentStatus;
+          const courseMatch = selectedCourse === 'all' || itemCourse === selectedCourse;
+
+          if (statusMatch && courseMatch) {
             item.style.display = 'grid';
           } else {
             item.style.display = 'none';
