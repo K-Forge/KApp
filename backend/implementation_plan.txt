@@ -26,43 +26,43 @@ Create a dynamic dashboard for Students, Professors, and Admins with JWT authent
 ## Implementation Steps
 
 ### 1. Dependencies & Database
--   [ ] **Update pom.xml**: Add `jjwt-api`, `jjwt-impl`, `jjwt-jackson`.
--   [ ] **Update init.sql**: Add `assignment` and `submission` tables.
+-   [x] **Update pom.xml**: Add `jjwt-api`, `jjwt-impl`, `jjwt-jackson`.
+-   [x] **Update init.sql**: Add `assignment` and `submission` tables.
 
 ### 2. Security Layer (JWT)
--   [ ] **JwtTokenProvider**: Generate and validate tokens.
--   [ ] **JwtAuthenticationFilter**: Intercept requests, parse token, set SecurityContext.
--   [ ] **SecurityConfig**: Configure filter chain, disable CSRF (stateless), set permissions.
--   [ ] **CustomUserDetailsService**: Load user details from DB (Person/Member).
+-   [x] **JwtTokenProvider**: Generate and validate tokens.
+-   [x] **JwtAuthenticationFilter**: Intercept requests, parse token, set SecurityContext.
+-   [x] **SecurityConfig**: Configure filter chain, disable CSRF (stateless), set permissions.
+-   [x] **CustomUserDetailsService**: Load user details from DB (Person/Member).
 
 ### 3. Domain & DTOs
--   [ ] **Entities**: `Assignment`, `Submission`. (Ensure `User`/`Role` mapping exists).
--   [ ] **DTOs**:
+-   [x] **Entities**: `Assignment`, `Submission`. (Ensure `User`/`Role` mapping exists).
+-   [x] **DTOs**:
     -   `LoginRequest`, `JwtResponse`
     -   `AssignmentDTO`, `SubmissionDTO`
     -   `CourseDTO`, `StudentDTO`
 
 ### 4. Repositories
--   [ ] `AssignmentRepository`
--   [ ] `SubmissionRepository`
--   [ ] `CourseGroupRepository` (verify existing)
--   [ ] `StudentCourseRepository` (verify existing)
+-   [x] `AssignmentRepository`
+-   [x] `SubmissionRepository`
+-   [x] `CourseGroupRepository` (verify existing)
+-   [x] `StudentCourseRepository` (verify existing)
 
 ### 5. Services
--   [ ] **AuthService**: Login logic.
--   [ ] **StudentService**: `getEnrolledCourses`, `getAssignments`, `submitAssignment`.
--   [ ] **ProfessorService**: `getTeachingCourses`, `createAssignment`, `gradeSubmission`.
--   [ ] **AdminService**: Generic CRUD methods.
+-   [x] **AuthService**: Login logic.
+-   [x] **StudentService**: `getEnrolledCourses`, `getAssignments`, `submitAssignment`.
+-   [x] **ProfessorService**: `getTeachingCourses`, `createAssignment`, `gradeSubmission`.
+-   [x] **AdminService**: Generic CRUD methods (Read implemented).
 
 ### 6. Controllers
--   [ ] **AuthController**: `/auth/login`
--   [ ] **DashboardController**:
-    -   `GET /api/student/dashboard`
-    -   `GET /api/professor/dashboard`
--   [ ] **AssignmentController**:
-    -   `POST /api/assignments` (Prof)
-    -   `GET /api/assignments/course/{groupId}`
-    -   `POST /api/assignments/{id}/submit` (Student)
+-   [x] **AuthController**: `/auth/login`
+-   [x] **DashboardController** (Implemented as Role Controllers):
+    -   `GET /api/student/courses`
+    -   `GET /api/professor/courses`
+-   [x] **AssignmentController** (Implemented in Role Controllers):
+    -   `POST /api/professor/assignments`
+    -   `GET /api/student/assignments/pending`
+    -   `POST /api/student/assignments/{id}/submit`
 
 ## Notes
 -   Skip unit tests for Alpha.

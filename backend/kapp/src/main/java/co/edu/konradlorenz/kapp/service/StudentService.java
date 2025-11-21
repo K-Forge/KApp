@@ -43,8 +43,12 @@ public class StudentService {
             dto.setCourseName(group.getCourse().getName());
             dto.setCourseCode(group.getCourse().getCode());
             dto.setGroupCode(group.getGroupCode());
-            dto.setProfessorName(group.getProfessor().getMember().getPerson().getFirstName() + " " +
-                    group.getProfessor().getMember().getPerson().getLastName());
+            if (group.getProfessor() != null && group.getProfessor().getMember() != null && group.getProfessor().getMember().getPerson() != null) {
+                dto.setProfessorName(group.getProfessor().getMember().getPerson().getFirstName() + " " +
+                        group.getProfessor().getMember().getPerson().getLastName());
+            } else {
+                dto.setProfessorName("TBA");
+            }
             return dto;
         }).collect(Collectors.toList());
     }
