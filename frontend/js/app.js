@@ -191,6 +191,10 @@
   // --- 3. Role Specific Functions ---
 
   async function setupStudentDashboard() {
+    // Ensure filters are visible
+    const filters = document.querySelector('#view-tasks .segmented-control');
+    if(filters) filters.style.display = 'flex';
+
     // Load Courses
     const coursesRes = await fetchApi('/student/courses');
     if (coursesRes && coursesRes.ok) {
@@ -207,19 +211,74 @@
   }
 
   async function setupProfessorDashboard() {
-    // Override Home button to go to professor view
-    const btnHome = document.getElementById('btnHome');
-    if(btnHome) btnHome.onclick = () => switchView('view-professor');
+    // 1. Stay on Dashboard (don't switch view immediately)
+    if (window.switchView) window.switchView('view-dashboard');
 
-    // Load Professor Courses
+    // 2. Override Home button
+    const btnHome = document.getElementById('btnHome');
+    if(btnHome) btnHome.onclick = () => switchView('view-dashboard');
+
+    // 3. Override "Courses" button on Dashboard
+    const coursesBtn = document.querySelector('a[onclick*="view-courses"]');
+    if (coursesBtn) {
+        coursesBtn.onclick = (e) => {
+            e.preventDefault();
+            switchView('view-professor');
+        };
+    }
+
+    // 4. Override "Tasks" button on Dashboard
+    const tasksBtn = document.querySelector('a[onclick*="view-tasks"]');
+    if (tasksBtn) {
+        tasksBtn.onclick = (e) => {
+            e.preventDefault();
+            loadProfessorTasks();
+            switchView('view-tasks');
+        };
+    }
+
+    // Load Professor Courses (into view-professor)
     const coursesRes = await fetchApi('/professor/courses');
     if (coursesRes && coursesRes.ok) {
       const courses = await coursesRes.json();
       renderProfessorCourses(courses, 'prof-courses-container');
     }
-    
-    // Switch to view
-    if (window.switchView) window.switchView('view-professor');
+  }
+
+  async function loadProfessorTasks() {
+      const container = document.getElementById('tasks-container');
+      if(!container) return;
+      container.innerHTML = '<div class="list-item">Cargando tareas...</div>';
+      
+      // Hide filters for professor
+      const filters = document.querySelector('#view-tasks .segmented-control');
+      if(filters) filters.style.display = 'none';
+
+      const res = await fetchApi('/professor/assignments');
+      if (res && res.ok) {
+          const tasks = await res.json();
+          if (tasks.length === 0) {
+              container.innerHTML = '<div class="list-item">No has creado tareas.</div>';
+              return;
+          }
+          
+          container.innerHTML = tasks.map(t => `
+            <div class="list-item">
+                <div class="list-item-content">
+                    <span class="badge date" style="margin-bottom: 4px;">${t.dueDate ? new Date(t.dueDate).toLocaleDateString() : 'Sin fecha'}</span>
+                    <h3>${t.title}</h3>
+                    <p>${t.description || ''}</p>
+                    <small>Puntos: ${t.maxScore}</small>
+                </div>
+                <div class="list-item-action">
+                    <button class="btn small secondary" onclick="openProfessorEditTaskModal(${t.id})">Editar</button>
+                    <button class="btn small danger" onclick="deleteProfessorTask(${t.id})">Eliminar</button>
+                </div>
+            </div>
+          `).join('');
+      } else {
+          container.innerHTML = '<div class="list-item">Error cargando tareas.</div>';
+      }
   }
 
   async function setupAdminDashboard() {
@@ -685,6 +744,39 @@
     modal.showModal();
   };
 
+  window.openProfessorEditTaskModal = async (id) => {
+    const modal = document.getElementById('crudModal');
+    const title = document.getElementById('modalTitle');
+    const fields = document.getElementById('modalFields');
+    const form = document.getElementById('crudForm');
+    
+    title.textContent = 'Editar Tarea';
+    form.dataset.type = 'professor-task';
+    form.dataset.mode = 'edit';
+    form.dataset.editId = id;
+
+    const res = await fetchApi(`/professor/assignments/${id}`);
+    if (!res || !res.ok) { showToast('Error cargando datos', 'error'); return; }
+    const data = await res.json();
+
+    let dateStr = '';
+    if(data.dueDate) {
+        const d = new Date(data.dueDate);
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        dateStr = d.toISOString().slice(0,16);
+    }
+
+    fields.innerHTML = `
+      <div class="input-group"><label>Título</label><input type="text" name="title" value="${data.title}" required></div>
+      <div class="input-group"><label>Descripción</label><textarea name="description">${data.description || ''}</textarea></div>
+      <div class="input-group"><label>Fecha de Entrega</label><input type="datetime-local" name="dueDate" value="${dateStr}" required></div>
+      <div class="input-group"><label>Puntaje Máximo</label><input type="number" step="0.1" name="maxScore" value="${data.maxScore}" required></div>
+      <input type="hidden" name="courseGroupId" value="${data.courseGroupId}">
+    `;
+    
+    modal.showModal();
+  };
+
   // Handle Form Submit
   const crudForm = document.getElementById('crudForm');
   if (crudForm) {
@@ -862,9 +954,17 @@
                 courseGroupId: Number(formData.get('courseGroupId'))
             };
             
-            await fetchApi('/professor/assignments', { method: 'POST', body: JSON.stringify(body) });
-            showToast('Tarea creada exitosamente');
-            // Refresh professor courses/tasks if needed, but currently we don't show tasks in the same view
+            if (mode === 'create') {
+                await fetchApi('/professor/assignments', { method: 'POST', body: JSON.stringify(body) });
+                showToast('Tarea creada exitosamente');
+            } else {
+                await fetchApi(`/professor/assignments/${editId}`, { method: 'PUT', body: JSON.stringify(body) });
+                showToast('Tarea actualizada exitosamente');
+            }
+            
+            if(document.getElementById('view-tasks').classList.contains('active')) {
+                loadProfessorTasks();
+            }
         } else if (type === 'submission') {
             const contentUrl = formData.get('contentUrl');
             await fetchApi(`/student/assignments/${editId}/submit`, { 
@@ -924,6 +1024,18 @@
     if (res && res.ok) {
       showToast('Tarea eliminada');
       loadAdminTasks();
+    } else {
+      showToast('Error al eliminar tarea', 'error');
+    }
+  };
+
+  window.deleteProfessorTask = async (id) => {
+    if (!await showConfirm('¿Estás seguro de eliminar esta tarea?')) return;
+    
+    const res = await fetchApi(`/professor/assignments/${id}`, { method: 'DELETE' });
+    if (res && res.ok) {
+      showToast('Tarea eliminada');
+      loadProfessorTasks();
     } else {
       showToast('Error al eliminar tarea', 'error');
     }

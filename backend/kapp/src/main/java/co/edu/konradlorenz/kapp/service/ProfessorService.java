@@ -111,4 +111,78 @@ public class ProfessorService {
             return dto;
         }).collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public List<AssignmentDTO> getProfessorAssignments(String email) {
+        Employee professor = getProfessor(email);
+        List<CourseGroup> groups = courseGroupRepository.findByProfessorId(professor.getId());
+        
+        List<Assignment> allAssignments = new java.util.ArrayList<>();
+        for (CourseGroup group : groups) {
+            allAssignments.addAll(assignmentRepository.findByCourseGroupId(group.getId()));
+        }
+
+        return allAssignments.stream().map(assignment -> {
+            AssignmentDTO dto = new AssignmentDTO();
+            dto.setId(assignment.getId());
+            dto.setTitle(assignment.getTitle());
+            dto.setDescription(assignment.getDescription());
+            dto.setDueDate(assignment.getDueDate());
+            dto.setMaxScore(assignment.getMaxScore());
+            dto.setCourseGroupId(assignment.getCourseGroup().getId());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public AssignmentDTO getAssignment(String email, Long assignmentId) {
+        Employee professor = getProfessor(email);
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new RuntimeException("Assignment not found"));
+        
+        if (!assignment.getCourseGroup().getProfessor().getId().equals(professor.getId())) {
+             throw new RuntimeException("Access denied");
+        }
+        
+        AssignmentDTO dto = new AssignmentDTO();
+        dto.setId(assignment.getId());
+        dto.setTitle(assignment.getTitle());
+        dto.setDescription(assignment.getDescription());
+        dto.setDueDate(assignment.getDueDate());
+        dto.setMaxScore(assignment.getMaxScore());
+        dto.setCourseGroupId(assignment.getCourseGroup().getId());
+        return dto;
+    }
+
+    @Transactional
+    public AssignmentDTO updateAssignment(String email, Long assignmentId, AssignmentDTO dto) {
+        Employee professor = getProfessor(email);
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new RuntimeException("Assignment not found"));
+
+        if (!assignment.getCourseGroup().getProfessor().getId().equals(professor.getId())) {
+             throw new RuntimeException("Access denied");
+        }
+
+        assignment.setTitle(dto.getTitle());
+        assignment.setDescription(dto.getDescription());
+        assignment.setDueDate(dto.getDueDate());
+        assignment.setMaxScore(dto.getMaxScore());
+        
+        assignment = assignmentRepository.save(assignment);
+        return dto;
+    }
+
+    @Transactional
+    public void deleteAssignment(String email, Long assignmentId) {
+        Employee professor = getProfessor(email);
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new RuntimeException("Assignment not found"));
+
+        if (!assignment.getCourseGroup().getProfessor().getId().equals(professor.getId())) {
+             throw new RuntimeException("Access denied");
+        }
+
+        assignmentRepository.delete(assignment);
+    }
 }

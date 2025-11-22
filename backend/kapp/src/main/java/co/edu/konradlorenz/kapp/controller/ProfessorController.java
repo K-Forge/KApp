@@ -47,4 +47,28 @@ public class ProfessorController {
             @PathVariable Long groupId) {
         return ResponseEntity.ok(professorService.getGroupStudents(authentication.getName(), groupId));
     }
+
+    @GetMapping("/assignments")
+    public ResponseEntity<List<AssignmentDTO>> getProfessorAssignments(Authentication authentication) {
+        return ResponseEntity.ok(professorService.getProfessorAssignments(authentication.getName()));
+    }
+
+    @GetMapping("/assignments/{id}")
+    public ResponseEntity<AssignmentDTO> getAssignment(Authentication authentication, @PathVariable Long id) {
+        return ResponseEntity.ok(professorService.getAssignment(authentication.getName(), id));
+    }
+
+    @PutMapping("/assignments/{id}")
+    public ResponseEntity<AssignmentDTO> updateAssignment(
+            Authentication authentication,
+            @PathVariable Long id,
+            @RequestBody AssignmentDTO dto) {
+        return ResponseEntity.ok(professorService.updateAssignment(authentication.getName(), id, dto));
+    }
+
+    @DeleteMapping("/assignments/{id}")
+    public ResponseEntity<Void> deleteAssignment(Authentication authentication, @PathVariable Long id) {
+        professorService.deleteAssignment(authentication.getName(), id);
+        return ResponseEntity.ok().build();
+    }
 }
