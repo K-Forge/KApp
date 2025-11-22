@@ -191,9 +191,15 @@
   // --- 3. Role Specific Functions ---
 
   async function setupStudentDashboard() {
-    // Ensure filters are visible
+    // UI Adjustments for Student
     const filters = document.querySelector('#view-tasks .segmented-control');
     if(filters) filters.style.display = 'flex';
+
+    const actions = document.getElementById('prof-tasks-actions');
+    if(actions) actions.style.display = 'none';
+
+    const title = document.getElementById('tasks-view-title');
+    if(title) title.textContent = 'Tareas Pendientes';
 
     // Load Courses
     const coursesRes = await fetchApi('/student/courses');
@@ -203,11 +209,42 @@
     }
 
     // Load Tasks
-    const tasksRes = await fetchApi('/student/assignments/pending');
-    if (tasksRes && tasksRes.ok) {
-      const tasks = await tasksRes.json();
-      renderTasks(tasks, 'tasks-container');
-    }
+    loadStudentTasks();
+  }
+
+  async function loadStudentTasks() {
+      const container = document.getElementById('tasks-container');
+      if(!container) return;
+      container.innerHTML = ''; // Clear once
+
+      let hasTasks = false;
+
+      // Pending
+      const pendingRes = await fetchApi('/student/assignments/pending');
+      if (pendingRes && pendingRes.ok) {
+          const pending = await pendingRes.json();
+          if(pending.length > 0) {
+              renderTasks(pending, 'tasks-container', 'pending');
+              hasTasks = true;
+          }
+      }
+
+      // Submitted
+      const submittedRes = await fetchApi('/student/assignments/submitted');
+      if (submittedRes && submittedRes.ok) {
+          const submitted = await submittedRes.json();
+          if(submitted.length > 0) {
+              renderTasks(submitted, 'tasks-container', 'submitted');
+              hasTasks = true;
+          }
+      }
+
+      if (!hasTasks) {
+          container.innerHTML = '<div class="list-item">No tienes tareas.</div>';
+      }
+      
+      // Re-apply filter
+      if(window.filterTasks) window.filterTasks('pending');
   }
 
   async function setupProfessorDashboard() {
@@ -250,9 +287,15 @@
       if(!container) return;
       container.innerHTML = '<div class="list-item">Cargando tareas...</div>';
       
-      // Hide filters for professor
+      // UI Adjustments for Professor
       const filters = document.querySelector('#view-tasks .segmented-control');
       if(filters) filters.style.display = 'none';
+      
+      const actions = document.getElementById('prof-tasks-actions');
+      if(actions) actions.style.display = 'flex';
+
+      const title = document.getElementById('tasks-view-title');
+      if(title) title.textContent = 'Mis Tareas';
 
       const res = await fetchApi('/professor/assignments');
       if (res && res.ok) {
@@ -323,27 +366,34 @@
     `).join('');
   }
 
-  function renderTasks(tasks, containerId) {
+  function renderTasks(tasks, containerId, status = 'pending') {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    if (tasks.length === 0) {
-      container.innerHTML = '<div class="list-item">No tienes tareas pendientes.</div>';
-      return;
-    }
+    // If clearing container (first load), do it outside or handle appending.
+    // Here we assume we might call this multiple times (for pending and submitted).
+    // So we won't clear if we are appending, but usually we clear before loading all.
+    // Let's assume the caller clears the container.
 
-    container.innerHTML = tasks.map(t => `
-      <div class="list-item" data-status="pending">
+    if (tasks.length === 0) return; // Don't render anything if empty, caller handles "no tasks" message if both are empty
+
+    const html = tasks.map(t => `
+      <div class="list-item" data-status="${status}">
         <div class="list-item-content">
           <span class="badge date" style="margin-bottom: 4px;">${t.dueDate ? new Date(t.dueDate).toLocaleDateString() : 'Sin fecha'}</span>
           <h3>${t.title}</h3>
           <p>${t.description || ''}</p>
         </div>
         <div class="list-item-action">
-          <span class="badge pending">Pendiente</span>
+          ${status === 'pending' 
+            ? `<button class="btn small primary" onclick="openSubmitTaskModal(${t.id}, '${t.title}')">Entregar</button>` 
+            : `<span class="badge submitted">Entregada</span>`
+          }
         </div>
       </div>
     `).join('');
+    
+    container.insertAdjacentHTML('beforeend', html);
   }
 
   function renderProfessorCourses(courses, containerId) {
@@ -363,7 +413,7 @@
         <div class="course-body">
           <h3 class="course-title">${c.courseName}</h3>
           <p class="course-prof">Grupo: ${c.groupCode}</p>
-          <div style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
+          <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
             <button class="btn small primary" onclick="openProfessorStudentsModal(${c.courseGroupId})">Estudiantes</button>
             <button class="btn small secondary" onclick="openProfessorCreateTaskModal(${c.courseGroupId})">Nueva Tarea</button>
           </div>
@@ -645,7 +695,7 @@
     modal.showModal();
   };
 
-  window.openCreateCourseModal = () => {
+  window.openCreateCourseModal = async () => {
     const modal = document.getElementById('crudModal');
     const title = document.getElementById('modalTitle');
     const fields = document.getElementById('modalFields');
@@ -655,12 +705,22 @@
     form.dataset.type = 'course';
     form.dataset.mode = 'create';
     
+    // Fetch programs
+    let programOptions = '<option value="">Seleccione un programa...</option>';
+    try {
+        const res = await fetchApi('/admin/programs');
+        if (res && res.ok) {
+            const programs = await res.json();
+            programOptions += programs.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        }
+    } catch (e) { console.error(e); }
+
     fields.innerHTML = `
       <div class="input-group"><label>Nombre del Curso</label><input type="text" name="name" required></div>
       <div class="input-group"><label>Código</label><input type="text" name="code" required></div>
       <div class="input-group"><label>Créditos</label><input type="number" name="credits" required></div>
       <div class="input-group"><label>Nivel (Semestre)</label><input type="number" name="level" required></div>
-      <div class="input-group"><label>ID Programa</label><input type="number" name="programId" value="1" required></div>
+      <div class="input-group"><label>Programa</label><select name="programId" required>${programOptions}</select></div>
     `;
     
     modal.showModal();
@@ -681,17 +741,29 @@
     if (!res || !res.ok) { showToast('Error cargando datos', 'error'); return; }
     const data = await res.json();
 
+    // Fetch programs
+    let programOptions = '<option value="">Seleccione un programa...</option>';
+    try {
+        const pRes = await fetchApi('/admin/programs');
+        if (pRes && pRes.ok) {
+            const programs = await pRes.json();
+            programOptions += programs.map(p => 
+                `<option value="${p.id}" ${p.id === data.programId ? 'selected' : ''}>${p.name}</option>`
+            ).join('');
+        }
+    } catch (e) { console.error(e); }
+
     fields.innerHTML = `
       <div class="input-group"><label>Nombre del Curso</label><input type="text" name="name" value="${data.name}" required></div>
       <div class="input-group"><label>Código</label><input type="text" name="code" value="${data.code}" required></div>
       <div class="input-group"><label>Créditos</label><input type="number" name="credits" value="${data.credits}" required></div>
       <div class="input-group"><label>Nivel</label><input type="number" name="level" value="${data.level}" required></div>
-      <div class="input-group"><label>ID Programa</label><input type="number" name="programId" value="${data.programId}" required></div>
+      <div class="input-group"><label>Programa</label><select name="programId" required>${programOptions}</select></div>
     `;
     modal.showModal();
   };
 
-  window.openCreateTaskModal = () => {
+  window.openCreateTaskModal = async () => {
     const modal = document.getElementById('crudModal');
     const title = document.getElementById('modalTitle');
     const fields = document.getElementById('modalFields');
@@ -701,12 +773,24 @@
     form.dataset.type = 'task';
     form.dataset.mode = 'create';
     
+    // Fetch all course groups for admin
+    let groupOptions = '<option value="">Seleccione un grupo...</option>';
+    try {
+        const res = await fetchApi('/admin/groups');
+        if (res && res.ok) {
+            const groups = await res.json();
+            groupOptions += groups.map(g => 
+                `<option value="${g.id}">${g.course.name} (Grupo ${g.groupCode})</option>`
+            ).join('');
+        }
+    } catch (e) { console.error(e); }
+
     fields.innerHTML = `
       <div class="input-group"><label>Título</label><input type="text" name="title" required></div>
+      <div class="input-group"><label>Grupo del Curso</label><select name="courseGroupId" required>${groupOptions}</select></div>
       <div class="input-group"><label>Descripción</label><textarea name="description"></textarea></div>
       <div class="input-group"><label>Fecha de Entrega</label><input type="datetime-local" name="dueDate" required></div>
       <div class="input-group"><label>Puntaje Máximo</label><input type="number" step="0.1" name="maxScore" required></div>
-      <div class="input-group"><label>ID Grupo Curso</label><input type="number" name="courseGroupId" required></div>
     `;
     
     modal.showModal();
@@ -727,6 +811,18 @@
     if (!res || !res.ok) { showToast('Error cargando datos', 'error'); return; }
     const data = await res.json();
 
+    // Fetch all course groups for admin
+    let groupOptions = '<option value="">Seleccione un grupo...</option>';
+    try {
+        const gRes = await fetchApi('/admin/groups');
+        if (gRes && gRes.ok) {
+            const groups = await gRes.json();
+            groupOptions += groups.map(g => 
+                `<option value="${g.id}" ${g.id === data.courseGroupId ? 'selected' : ''}>${g.course.name} (Grupo ${g.groupCode})</option>`
+            ).join('');
+        }
+    } catch (e) { console.error(e); }
+
     let dateStr = '';
     if(data.dueDate) {
         const d = new Date(data.dueDate);
@@ -736,10 +832,10 @@
 
     fields.innerHTML = `
       <div class="input-group"><label>Título</label><input type="text" name="title" value="${data.title}" required></div>
+      <div class="input-group"><label>Grupo del Curso</label><select name="courseGroupId" required>${groupOptions}</select></div>
       <div class="input-group"><label>Descripción</label><textarea name="description">${data.description || ''}</textarea></div>
       <div class="input-group"><label>Fecha de Entrega</label><input type="datetime-local" name="dueDate" value="${dateStr}" required></div>
       <div class="input-group"><label>Puntaje Máximo</label><input type="number" step="0.1" name="maxScore" value="${data.maxScore}" required></div>
-      <div class="input-group"><label>ID Grupo Curso</label><input type="number" name="courseGroupId" value="${data.courseGroupId}" required></div>
     `;
     modal.showModal();
   };
@@ -759,6 +855,18 @@
     if (!res || !res.ok) { showToast('Error cargando datos', 'error'); return; }
     const data = await res.json();
 
+    // Fetch courses for select
+    let courseOptions = '<option value="">Seleccione un curso...</option>';
+    try {
+        const cRes = await fetchApi('/professor/courses');
+        if (cRes && cRes.ok) {
+            const courses = await cRes.json();
+            courseOptions += courses.map(c => 
+                `<option value="${c.courseGroupId}" ${c.courseGroupId === data.courseGroupId ? 'selected' : ''}>${c.courseName} (Grupo ${c.groupCode})</option>`
+            ).join('');
+        }
+    } catch (e) { console.error(e); }
+
     let dateStr = '';
     if(data.dueDate) {
         const d = new Date(data.dueDate);
@@ -768,10 +876,10 @@
 
     fields.innerHTML = `
       <div class="input-group"><label>Título</label><input type="text" name="title" value="${data.title}" required></div>
+      <div class="input-group"><label>Curso</label><select name="courseGroupId" required>${courseOptions}</select></div>
       <div class="input-group"><label>Descripción</label><textarea name="description">${data.description || ''}</textarea></div>
       <div class="input-group"><label>Fecha de Entrega</label><input type="datetime-local" name="dueDate" value="${dateStr}" required></div>
       <div class="input-group"><label>Puntaje Máximo</label><input type="number" step="0.1" name="maxScore" value="${data.maxScore}" required></div>
-      <input type="hidden" name="courseGroupId" value="${data.courseGroupId}">
     `;
     
     modal.showModal();
@@ -975,7 +1083,7 @@
             showToast('Tarea entregada exitosamente');
             // Refresh tasks view if active
             if(document.getElementById('view-tasks').classList.contains('active')) {
-                setupStudentDashboard(); // Reloads tasks
+                loadStudentTasks(); // Reloads tasks
             }
         }
         
@@ -1072,22 +1180,34 @@
     }
   };
 
-  window.openProfessorCreateTaskModal = (groupId) => {
+  window.openProfessorCreateTaskModal = async (groupId) => {
     const modal = document.getElementById('crudModal');
     const title = document.getElementById('modalTitle');
     const fields = document.getElementById('modalFields');
     const form = document.getElementById('crudForm');
     
     title.textContent = 'Crear Nueva Tarea';
-    form.dataset.type = 'professor-task'; // Special type for professor
+    form.dataset.type = 'professor-task';
     form.dataset.mode = 'create';
     
+    // Fetch courses to populate select
+    let courseOptions = '<option value="">Seleccione un curso...</option>';
+    try {
+        const res = await fetchApi('/professor/courses');
+        if (res && res.ok) {
+            const courses = await res.json();
+            courseOptions += courses.map(c => 
+                `<option value="${c.courseGroupId}" ${c.courseGroupId == groupId ? 'selected' : ''}>${c.courseName} (Grupo ${c.groupCode})</option>`
+            ).join('');
+        }
+    } catch (e) { console.error(e); }
+
     fields.innerHTML = `
-      <div class="input-group"><label>Título</label><input type="text" name="title" required></div>
-      <div class="input-group"><label>Descripción</label><textarea name="description"></textarea></div>
+      <div class="input-group"><label>Título</label><input type="text" name="title" required placeholder="Ej: Taller de Matemáticas"></div>
+      <div class="input-group"><label>Curso</label><select name="courseGroupId" required>${courseOptions}</select></div>
+      <div class="input-group"><label>Descripción</label><textarea name="description" placeholder="Detalles de la tarea..."></textarea></div>
       <div class="input-group"><label>Fecha de Entrega</label><input type="datetime-local" name="dueDate" required></div>
-      <div class="input-group"><label>Puntaje Máximo</label><input type="number" step="0.1" name="maxScore" required></div>
-      <input type="hidden" name="courseGroupId" value="${groupId}">
+      <div class="input-group"><label>Puntaje Máximo</label><input type="number" step="0.1" name="maxScore" required placeholder="5.0"></div>
     `;
     
     modal.showModal();

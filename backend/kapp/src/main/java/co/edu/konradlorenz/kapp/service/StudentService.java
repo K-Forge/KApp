@@ -78,6 +78,31 @@ public class StudentService {
         return pending;
     }
 
+    @Transactional(readOnly = true)
+    public List<AssignmentDTO> getSubmittedAssignments(String email) {
+        Student student = getStudent(email);
+        List<StudentCourse> enrollments = studentCourseRepository.findByStudentId(student.getId());
+        List<AssignmentDTO> submittedList = new ArrayList<>();
+
+        for (StudentCourse sc : enrollments) {
+            List<Assignment> assignments = assignmentRepository.findByCourseGroupId(sc.getGroup().getId());
+            for (Assignment a : assignments) {
+                boolean submitted = submissionRepository.findByAssignmentIdAndStudentId(a.getId(), student.getId()).isPresent();
+                if (submitted) {
+                    AssignmentDTO dto = new AssignmentDTO();
+                    dto.setId(a.getId());
+                    dto.setCourseGroupId(a.getCourseGroup().getId());
+                    dto.setTitle(a.getTitle());
+                    dto.setDescription(a.getDescription());
+                    dto.setDueDate(a.getDueDate());
+                    dto.setMaxScore(a.getMaxScore());
+                    submittedList.add(dto);
+                }
+            }
+        }
+        return submittedList;
+    }
+
     @Transactional
     public SubmissionDTO submitAssignment(String email, Long assignmentId, String contentUrl) {
         Student student = getStudent(email);

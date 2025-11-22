@@ -37,4 +37,9 @@ public class StudentController {
             @RequestBody String contentUrl) {
         return ResponseEntity.ok(studentService.submitAssignment(authentication.getName(), assignmentId, contentUrl));
     }
+
+    @GetMapping("/assignments/submitted")
+    public ResponseEntity<List<AssignmentDTO>> getSubmittedAssignments(Authentication authentication) {
+        return ResponseEntity.ok(studentService.getSubmittedAssignments(authentication.getName()));
+    }
 }

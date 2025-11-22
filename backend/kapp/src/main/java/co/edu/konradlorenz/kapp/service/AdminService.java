@@ -212,4 +212,7 @@ public class AdminService {
         assignment.setDueDate(dto.getDueDate());
         assignment.setMaxScore(dto.getMaxScore());
     }
+
+    // --- Programs ---
+    public List<Program> getAllPrograms() { return programRepository.findAll(); }
 }

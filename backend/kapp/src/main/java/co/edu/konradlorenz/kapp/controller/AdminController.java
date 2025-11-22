@@ -66,4 +66,7 @@ public class AdminController {
     @PostMapping("/assignments") public ResponseEntity<Assignment> createAssignment(@RequestBody AssignmentDTO dto) { return ResponseEntity.ok(adminService.createAssignment(dto)); }
     @PutMapping("/assignments/{id}") public ResponseEntity<Assignment> updateAssignment(@PathVariable Long id, @RequestBody AssignmentDTO dto) { return ResponseEntity.ok(adminService.updateAssignment(id, dto)); }
     @DeleteMapping("/assignments/{id}") public ResponseEntity<Void> deleteAssignment(@PathVariable Long id) { adminService.deleteAssignment(id); return ResponseEntity.noContent().build(); }
+
+    // --- Programs ---
+    @GetMapping("/programs") public ResponseEntity<List<Program>> getAllPrograms() { return ResponseEntity.ok(adminService.getAllPrograms()); }
 }

@@ -207,8 +207,13 @@
       <!-- VISTA 3: TAREAS -->
       <div id="view-tasks" class="view-section">
         <section class="section-gap">
-          <h2 class="section-title">Tareas Pendientes</h2>
+          <h2 class="section-title" id="tasks-view-title">Tareas Pendientes</h2>
           
+          <!-- Professor Action Button (Hidden by default) -->
+          <div id="prof-tasks-actions" style="margin-bottom: 15px; display: none; justify-content: flex-end;">
+             <button class="btn primary" onclick="openProfessorCreateTaskModal()">+ Nueva Tarea</button>
+          </div>
+
           <!-- Filtros de tareas -->
           <div class="segmented-control" style="margin-bottom: 20px;">
             <button class="segmented-btn active" onclick="filterTasks('pending')">Pendientes</button>
@@ -251,7 +256,7 @@
 
           <!-- Admin: Cursos -->
           <div id="admin-tab-courses" class="admin-tab" style="display: none;">
-            <div style="margin-bottom: 15px;">
+            <div style="margin-bottom: 15px; display: flex; justify-content: flex-end;">
                <button class="btn primary" onclick="openCreateCourseModal()">+ Nuevo Curso</button>
             </div>
             <div class="list-group" id="admin-courses-list">
@@ -261,7 +266,7 @@
 
           <!-- Admin: Tareas -->
           <div id="admin-tab-tasks" class="admin-tab" style="display: none;">
-             <div style="margin-bottom: 15px;">
+             <div style="margin-bottom: 15px; display: flex; justify-content: flex-end;">
                <button class="btn primary" onclick="openCreateTaskModal()">+ Nueva Tarea</button>
             </div>
             <div class="list-group" id="admin-tasks-list">

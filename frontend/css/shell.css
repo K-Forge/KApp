@@ -77,13 +77,101 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 .login-title { margin: 4px 0 0; font-size: 22px; color: var(--color-mix-blue-pink); }
 .login-subtitle { margin: 0; color: #666; font-size: 13px; }
 .login-form { display: grid; gap: 12px; margin-top: 6px; }
-.input-group span { display: block; font-size: 12px; color: #555; margin-bottom: 6px; }
-.input-group input { width: 100%; height: 44px; padding: 10px 12px; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; color: #111; }
-.input-group input:focus { outline: 2px solid rgba(83,147,146,.35); border-color: var(--color-blue); }
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 13px;
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+  outline: none;
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 3px rgba(83, 147, 146, 0.1);
+}
+
+.input-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
 .checkbox { display: inline-grid; grid-auto-flow: column; gap: 8px; align-items: center; font-size: 13px; color: #444; }
-.btn { display: inline-grid; place-items: center; height: 44px; padding: 0 14px; border-radius: 12px; border: 0; cursor: pointer; font-weight: 600; }
-.btn.primary { background: var(--color-pink); color: #fff; }
-.btn.primary:hover { filter: brightness(.95); }
+.btn { 
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center; 
+  height: 44px; 
+  padding: 0 16px; 
+  border-radius: 12px; 
+  border: 0; 
+  cursor: pointer; 
+  font-weight: 600; 
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.96); }
+
+.btn.primary { 
+  background: var(--color-pink); 
+  color: #fff; 
+  box-shadow: 0 4px 12px rgba(213, 26, 101, 0.2);
+}
+.btn.primary:hover { 
+  filter: brightness(1.1); 
+  box-shadow: 0 6px 16px rgba(213, 26, 101, 0.3);
+  transform: translateY(-1px);
+}
+.btn.small {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+.btn.secondary {
+  background: #fff;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.btn.secondary:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #111;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.btn.danger {
+  background: #fff;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  box-shadow: 0 1px 2px rgba(220, 38, 38, 0.05);
+}
+.btn.danger:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(220, 38, 38, 0.1);
+}
 .login-footer { margin-top: 14px; text-align: center; color: #777; }
 
 @media (min-width: 540px) {
@@ -130,7 +218,7 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 .list-item { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 12px; background: #fff; border: 1px solid #eee; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
 .list-item-content h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600; color: #333; }
 .list-item-content p { margin: 0; font-size: 12px; color: #666; }
-.list-item-action { display: flex; align-items: center; }
+.list-item-action { display: flex; align-items: center; gap: 8px; /* Space between buttons */ }
 
 /* Badges */
 .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
