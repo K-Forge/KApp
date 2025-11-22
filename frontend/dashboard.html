@@ -34,9 +34,27 @@
         height: 84px !important; /* Header ampliado un poco más */
       }
       
-      /* Se eliminó el estilo que reducía el tamaño del título para restaurarlo */
-      
-      /* Se eliminaron los estilos que reducían el tamaño del carrusel para restaurarlo */
+      /* CORRECCIÓN DRAWER: Evitar que nombres largos rompan el diseño */
+      .drawer {
+        width: 280px; /* Forzar un ancho fijo estándar */
+        max-width: 80vw; /* Asegurar que no supere el ancho en móviles */
+      }
+
+      .drawer-user {
+        overflow: hidden; /* Contener elementos desbordados */
+      }
+
+      .drawer-user > div {
+        min-width: 0; /* Truco de Flexbox para permitir que el texto se encoja */
+        width: 100%;
+      }
+
+      #drawerName {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis; /* Pone '...' si es muy largo */
+      }
     </style>
   </head>
   <body class="app-shell dashboard-page">
