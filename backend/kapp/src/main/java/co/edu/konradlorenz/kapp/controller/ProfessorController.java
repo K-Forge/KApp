@@ -2,6 +2,7 @@ package co.edu.konradlorenz.kapp.controller;
 
 import co.edu.konradlorenz.kapp.dto.AssignmentDTO;
 import co.edu.konradlorenz.kapp.dto.CourseDTO;
+import co.edu.konradlorenz.kapp.dto.StudentSummaryDTO;
 import co.edu.konradlorenz.kapp.dto.SubmissionDTO;
 import co.edu.konradlorenz.kapp.service.ProfessorService;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +39,12 @@ public class ProfessorController {
             @RequestParam Double grade,
             @RequestParam String feedback) {
         return ResponseEntity.ok(professorService.gradeSubmission(submissionId, grade, feedback));
+    }
+
+    @GetMapping("/courses/{groupId}/students")
+    public ResponseEntity<List<StudentSummaryDTO>> getGroupStudents(
+            Authentication authentication,
+            @PathVariable Long groupId) {
+        return ResponseEntity.ok(professorService.getGroupStudents(authentication.getName(), groupId));
     }
 }

@@ -2,6 +2,7 @@ package co.edu.konradlorenz.kapp.service;
 
 import co.edu.konradlorenz.kapp.dto.AssignmentDTO;
 import co.edu.konradlorenz.kapp.dto.CourseDTO;
+import co.edu.konradlorenz.kapp.dto.StudentSummaryDTO;
 import co.edu.konradlorenz.kapp.dto.SubmissionDTO;
 import co.edu.konradlorenz.kapp.entity.*;
 import co.edu.konradlorenz.kapp.repository.*;
@@ -21,6 +22,7 @@ public class ProfessorService {
     private final CourseGroupRepository courseGroupRepository;
     private final AssignmentRepository assignmentRepository;
     private final SubmissionRepository submissionRepository;
+    private final StudentCourseRepository studentCourseRepository;
 
     private Employee getProfessor(String email) {
         Member member = memberRepository.findByUniversityEmail(email)
@@ -84,5 +86,29 @@ public class ProfessorService {
         dto.setGrade(submission.getGrade());
         dto.setFeedback(submission.getFeedback());
         return dto;
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudentSummaryDTO> getGroupStudents(String email, Long groupId) {
+        Employee professor = getProfessor(email);
+        CourseGroup group = courseGroupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Course Group not found"));
+
+        if (!group.getProfessor().getId().equals(professor.getId())) {
+            throw new RuntimeException("You are not the professor of this course");
+        }
+
+        List<StudentCourse> enrollments = studentCourseRepository.findByGroupId(groupId);
+        return enrollments.stream().map(enrollment -> {
+            Student student = enrollment.getStudent();
+            Person person = student.getMember().getPerson();
+            
+            StudentSummaryDTO dto = new StudentSummaryDTO();
+            dto.setId(student.getId());
+            dto.setFullName(person.getFirstName() + " " + person.getLastName());
+            dto.setStudentCode(student.getStudentCode());
+            dto.setEmail(student.getMember().getUniversityEmail());
+            return dto;
+        }).collect(Collectors.toList());
     }
 }

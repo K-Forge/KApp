@@ -117,6 +117,7 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 .icon-box.indigo { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3); }
 .icon-box.yellow { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); box-shadow: 0 4px 10px rgba(246, 211, 101, 0.3); }
 .icon-box.cyan { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); box-shadow: 0 4px 10px rgba(132, 250, 176, 0.3); }
+.icon-box.red { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); box-shadow: 0 4px 10px rgba(255, 65, 108, 0.3); }
 
 /* Search Bar */
 .search-bar { position: relative; margin-bottom: 16px; }
