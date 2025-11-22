@@ -15,10 +15,20 @@
   margin-bottom: 1rem;
 }
 
+/* Pista del carrusel: Flexbox para alinear slides horizontalmente + Transición */
+.carousel-track {
+  display: flex;
+  width: 100%;
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); /* Animación suave */
+}
+
 .slide {
   position: relative;
+  min-width: 100%; /* Forzar ancho completo */
   width: 100%;
-  height: 250px; /* Altura base para móviles */
+  flex-shrink: 0; /* Evitar que se encoja */
+  height: 250px; /* Altura base */
+  display: block !important; /* Asegurar visibilidad para el flex */
 }
 
 @media (min-width: 768px) {
@@ -106,7 +116,7 @@
   justify-content: space-between;
   padding: 0 10px;
   pointer-events: none;
-  z-index: 2;
+  z-index: 10; /* Z-index alto */
 }
 
 .carousel-btn {

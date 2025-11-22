@@ -28,6 +28,33 @@
       .home-btn-hidden {
         display: none !important;
       }
+
+      /* Ajustes visuales solicitados */
+      .app-header {
+        height: 84px !important; /* Header ampliado un poco más */
+      }
+      
+      /* CORRECCIÓN DRAWER: Evitar que nombres largos rompan el diseño */
+      .drawer {
+        width: 280px; /* Forzar un ancho fijo estándar */
+        max-width: 80vw; /* Asegurar que no supere el ancho en móviles */
+      }
+
+      .drawer-user {
+        overflow: hidden; /* Contener elementos desbordados */
+      }
+
+      .drawer-user > div {
+        min-width: 0; /* Truco de Flexbox para permitir que el texto se encoja */
+        width: 100%;
+      }
+
+      #drawerName {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis; /* Pone '...' si es muy largo */
+      }
     </style>
   </head>
   <body class="app-shell dashboard-page">
@@ -39,22 +66,28 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z" fill="currentColor"/></svg>
         </button>
 
-        <!-- Botón Home (Se muestra/oculta vía JS) -->
-        <button id="btnHome" class="icon-btn home-btn-hidden" aria-label="Ir al inicio" onclick="switchView('view-dashboard')" style="display: flex; align-items: center; justify-content: center; color: inherit;">
+        <!-- Botón Home (Siempre visible) -->
+        <button id="btnHome" class="icon-btn" aria-label="Ir al inicio" onclick="switchView('view-dashboard')" style="display: flex; align-items: center; justify-content: center; color: inherit;">
           <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 24px; height: 24px;"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="currentColor"/></svg>
         </button>
       </div>
     
-      <!-- Título Centrado -->
-      <div class="header-center" style="position: absolute; left: 50%; transform: translateX(-50%); text-align: center;">
-        <strong id="headerTitle">Estudiante</strong>
-        <small id="studentCode">000000</small>
+      <!-- Logo Centrado y Ampliado -->
+      <!-- Se añade top: 50% y translate(-50%, -50%) para asegurar el centrado vertical con la nueva altura -->
+      <div class="header-center" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center;">
+        <img src="images/konrad-logo.png" alt="Logo Konrad" style="height: 45px; width: auto;">
       </div>
     
-      <!-- Avatar a la derecha -->
-      <a class="avatar" href="login.html" title="Ver perfil" style="margin-left: auto;">
-        <img id="studentAvatar" src="images/avatar-placeholder.svg" alt="Foto de perfil"/>
-      </a>
+      <!-- Texto de Bienvenida y Avatar a la derecha -->
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+        <div style="text-align: right; display: flex; flex-direction: column; justify-content: center;">
+          <strong id="headerTitle" style="line-height: 1.2; font-size: 0.85rem;">Bienvenido estudiante:</strong>
+          <small id="studentCode" style="line-height: 1; font-size: 0.75rem;">000000</small>
+        </div>
+        <a class="avatar" href="login.html" title="Ver perfil">
+          <img id="studentAvatar" src="images/avatar-placeholder.svg" alt="Foto de perfil"/>
+        </a>
+      </div>
     </header>
     
     <!-- Drawer & overlay -->
@@ -73,9 +106,13 @@
         </button>
       </header>
       <nav class="drawer-nav" aria-label="Menú">
-        <button onclick="switchView('view-dashboard'); document.getElementById('drawerOverlay').click()" class="drawer-link">Inicio</button>
-        <button onclick="switchView('view-courses'); document.getElementById('drawerOverlay').click()" class="drawer-link">Cursos</button>
-        <button onclick="switchView('view-tasks'); document.getElementById('drawerOverlay').click()" class="drawer-link">Tareas</button>
+        <!-- Botón Inicio (Oculto por defecto en el dashboard) -->
+        <button id="drawerBtnHome" onclick="switchView('view-dashboard'); document.getElementById('drawerOverlay').click()" class="drawer-link" style="display: none;">Inicio</button>
+        
+        <!-- Nuevos botones Perfil y Ajustes (Sin acción) -->
+        <button class="drawer-link">Perfil</button>
+        <button class="drawer-link">Ajustes</button>
+        
         <hr/>
         <button id="logoutBtn" class="drawer-link danger" type="button">Cerrar sesión</button>
       </nav>
@@ -86,10 +123,10 @@
       <!-- VISTA 1: DASHBOARD (Inicio) -->
       <div id="view-dashboard" class="view-section active">
         <!-- Carrusel de novedades -->
-        <section class="card section-gap">
+        <section class="card section-gap" id="novedades-section">
           <h2 class="section-title">Novedades</h2>
           <div class="carousel">
-            <div class="carousel-track" data-autoplay="10000">
+            <div class="carousel-track" data-autoplay="5000">
               <article class="slide is-active">
                 <img src="images/news-1.svg" alt="Novedad 1"/>
                 <div class="slide-caption">
@@ -300,6 +337,18 @@
         </div>
       </form>
     </dialog>
+    <script src="js/app.js"></script>
+    <script>
+      // Lógica para cambiar de vistas (SPA)
+      function switchView(viewId) {
+        document.querySelectorAll('.view-section').forEach(el => {
+          el.classList.remove('active');
+        });
+        const target = document.getElementById(viewId);
+        if (target) target.classList.add('active');
+        
+        // Controlar botón Inicio del Drawer
+        const drawerBtnHome = document.getElementById('drawerBtnHome');
 
     <!-- Modal de Confirmación -->
     <dialog id="confirmModal" style="padding: 20px; border-radius: 8px; border: 1px solid #ccc; max-width: 400px;">
@@ -310,6 +359,15 @@
         <button id="btnAcceptConfirm" class="btn danger">Eliminar</button>
       </div>
     </dialog>
+        if (viewId === 'view-dashboard') {
+          // Estamos en el Dashboard
+          if (drawerBtnHome) drawerBtnHome.style.display = 'none';
+        } else {
+          // Estamos en una sección interna (Cursos, Tareas, etc.)
+          if (drawerBtnHome) drawerBtnHome.style.display = 'block';
+        }
+        window.scrollTo(0, 0);
+      }
 
     <!-- Modal de Lista (Para ver estudiantes, etc) -->
     <dialog id="listModal" style="padding: 20px; border-radius: 8px; border: 1px solid #ccc; min-width: 300px; max-width: 500px;">
@@ -325,35 +383,121 @@
     <!-- Contenedor de Notificaciones (Toasts) -->
     <div id="toastContainer" style="position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1000;"></div>
 
-    <script src="js/app.js"></script>
-    <script>
-      // Lógica de indicadores del carrusel
+      // Lógica de filtrado de tareas
+      let currentStatus = 'pending';
+      function filterTasks(status) {
+        if (status) currentStatus = status;
+        
+        // Actualizar botones
+        document.querySelectorAll('.segmented-btn').forEach(btn => {
+          btn.classList.remove('active');
+          if (btn.textContent.toLowerCase().includes(currentStatus === 'pending' ? 'pendientes' : 'entregadas')) {
+            btn.classList.add('active');
+          }
+        });
+
+        // Obtener curso seleccionado
+        const courseFilter = document.getElementById('courseFilter');
+        const selectedCourse = courseFilter ? courseFilter.value : 'all';
+
+        // Filtrar items
+        const items = document.querySelectorAll('.list-item');
+        items.forEach(item => {
+          const itemStatus = item.dataset.status;
+          const itemCourse = item.querySelector('p').textContent.trim();
+          
+          const statusMatch = itemStatus === currentStatus;
+          const courseMatch = selectedCourse === 'all' || itemCourse === selectedCourse;
+
+          if (statusMatch && courseMatch) {
+            item.style.display = 'grid';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      }
+
+      // Lógica del Carrusel (Banner)
       document.addEventListener('DOMContentLoaded', () => {
+        const track = document.querySelector('.carousel-track');
         const slides = document.querySelectorAll('.slide');
         const indicators = document.querySelectorAll('.indicator');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        
+        if (!track || slides.length === 0) return;
 
-        const updateIndicators = () => {
+        let currentIndex = 0;
+        const totalSlides = slides.length;
+        let autoplayInterval;
+
+        const updateCarousel = () => {
+          // Deslizar el track
+          track.style.transform = `translateX(-${currentIndex * 100}%)`;
+          
+          // Actualizar indicadores
+          indicators.forEach((ind, index) => {
+            ind.classList.toggle('active', index === currentIndex);
+          });
+
+          // Actualizar clase activa en slides
           slides.forEach((slide, index) => {
-            if (slide.classList.contains('is-active')) {
-              indicators.forEach(ind => ind.classList.remove('active'));
-              if (indicators[index]) {
-                indicators[index].classList.add('active');
-              }
-            }
+            slide.classList.toggle('is-active', index === currentIndex);
           });
         };
 
-        const observer = new MutationObserver((mutations) => {
-          mutations.forEach((mutation) => {
-            if (mutation.attributeName === 'class') {
-              updateIndicators();
-            }
+        const nextSlide = () => {
+          currentIndex = (currentIndex + 1) % totalSlides;
+          updateCarousel();
+        };
+
+        const prevSlide = () => {
+          currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+          updateCarousel();
+        };
+
+        // Reemplazar botones para eliminar eventos antiguos y asegurar funcionamiento
+        if (nextBtn && prevBtn) {
+          const newNextBtn = nextBtn.cloneNode(true);
+          const newPrevBtn = prevBtn.cloneNode(true);
+          nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+          prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
+
+          newNextBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            nextSlide();
+            resetAutoplay();
+          });
+
+          newPrevBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            prevSlide();
+            resetAutoplay();
+          });
+        }
+
+        // Eventos para indicadores
+        indicators.forEach((ind, index) => {
+          ind.addEventListener('click', () => {
+            currentIndex = index;
+            updateCarousel();
+            resetAutoplay();
           });
         });
 
-        slides.forEach(slide => {
-          observer.observe(slide, { attributes: true });
-        });
+        // Autoplay
+        const startAutoplay = () => {
+          autoplayInterval = setInterval(nextSlide, 5000);
+        };
+
+        const resetAutoplay = () => {
+          clearInterval(autoplayInterval);
+          startAutoplay();
+        };
+
+        // Inicializar
+        updateCarousel();
+        startAutoplay();
       });
     </script>
   </body>
