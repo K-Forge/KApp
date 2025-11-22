@@ -337,18 +337,6 @@
         </div>
       </form>
     </dialog>
-    <script src="js/app.js"></script>
-    <script>
-      // Lógica para cambiar de vistas (SPA)
-      function switchView(viewId) {
-        document.querySelectorAll('.view-section').forEach(el => {
-          el.classList.remove('active');
-        });
-        const target = document.getElementById(viewId);
-        if (target) target.classList.add('active');
-        
-        // Controlar botón Inicio del Drawer
-        const drawerBtnHome = document.getElementById('drawerBtnHome');
 
     <!-- Modal de Confirmación -->
     <dialog id="confirmModal" style="padding: 20px; border-radius: 8px; border: 1px solid #ccc; max-width: 400px;">
@@ -359,15 +347,6 @@
         <button id="btnAcceptConfirm" class="btn danger">Eliminar</button>
       </div>
     </dialog>
-        if (viewId === 'view-dashboard') {
-          // Estamos en el Dashboard
-          if (drawerBtnHome) drawerBtnHome.style.display = 'none';
-        } else {
-          // Estamos en una sección interna (Cursos, Tareas, etc.)
-          if (drawerBtnHome) drawerBtnHome.style.display = 'block';
-        }
-        window.scrollTo(0, 0);
-      }
 
     <!-- Modal de Lista (Para ver estudiantes, etc) -->
     <dialog id="listModal" style="padding: 20px; border-radius: 8px; border: 1px solid #ccc; min-width: 300px; max-width: 500px;">
@@ -382,6 +361,29 @@
 
     <!-- Contenedor de Notificaciones (Toasts) -->
     <div id="toastContainer" style="position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 1000;"></div>
+
+    <script src="js/app.js"></script>
+    <script>
+      // Lógica para cambiar de vistas (SPA)
+      function switchView(viewId) {
+        document.querySelectorAll('.view-section').forEach(el => {
+          el.classList.remove('active');
+        });
+        const target = document.getElementById(viewId);
+        if (target) target.classList.add('active');
+        
+        // Controlar botón Inicio del Drawer
+        const drawerBtnHome = document.getElementById('drawerBtnHome');
+
+        if (viewId === 'view-dashboard') {
+          // Estamos en el Dashboard
+          if (drawerBtnHome) drawerBtnHome.style.display = 'none';
+        } else {
+          // Estamos en una sección interna (Cursos, Tareas, etc.)
+          if (drawerBtnHome) drawerBtnHome.style.display = 'block';
+        }
+        window.scrollTo(0, 0);
+      }
 
       // Lógica de filtrado de tareas
       let currentStatus = 'pending';

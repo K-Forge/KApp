@@ -1152,6 +1152,8 @@
   // --- 9. Professor Functions ---
 
   window.openProfessorStudentsModal = async (groupId) => {
+    console.log('Opening students modal for group:', groupId);
+    // alert('Intentando abrir estudiantes para grupo: ' + groupId); // Debug
     const modal = document.getElementById('listModal');
     const title = document.getElementById('listModalTitle');
     const content = document.getElementById('listModalContent');
@@ -1160,23 +1162,31 @@
     content.innerHTML = '<div class="list-item">Cargando...</div>';
     modal.showModal();
 
-    const res = await fetchApi(`/professor/courses/${groupId}/students`);
-    if (res && res.ok) {
-      const students = await res.json();
-      if (students.length === 0) {
-        content.innerHTML = '<div class="list-item">No hay estudiantes inscritos.</div>';
-      } else {
-        content.innerHTML = students.map(s => `
-          <div class="list-item">
-            <div class="list-item-content">
-              <h3>${s.fullName}</h3>
-              <p>${s.studentCode} | ${s.email}</p>
-            </div>
-          </div>
-        `).join('');
-      }
-    } else {
-      content.innerHTML = '<div class="list-item">Error cargando estudiantes.</div>';
+    try {
+        const res = await fetchApi(`/professor/courses/${groupId}/students`);
+        if (res && res.ok) {
+          const students = await res.json();
+          if (students.length === 0) {
+            content.innerHTML = '<div class="list-item">No hay estudiantes inscritos.</div>';
+          } else {
+            content.innerHTML = students.map(s => `
+              <div class="list-item">
+                <div class="list-item-content">
+                  <h3>${s.fullName}</h3>
+                  <p>${s.studentCode} | ${s.email}</p>
+                </div>
+              </div>
+            `).join('');
+          }
+        } else {
+          console.error('Error fetching students:', res ? res.status : 'No response');
+          content.innerHTML = '<div class="list-item">Error cargando estudiantes.</div>';
+          showToast('Error al cargar estudiantes', 'error');
+        }
+    } catch (e) {
+        console.error('Exception fetching students:', e);
+        content.innerHTML = '<div class="list-item">Error de conexión.</div>';
+        showToast('Error de conexión', 'error');
     }
   };
 
