@@ -31,7 +31,7 @@
 
       /* Ajustes visuales solicitados */
       .app-header {
-        height: 72px !important; /* Header un poco más grande */
+        height: 84px !important; /* Header ampliado un poco más */
       }
       
       /* Se eliminó el estilo que reducía el tamaño del título para restaurarlo */
@@ -54,17 +54,22 @@
         </button>
       </div>
     
-      <!-- Título Centrado con Logo -->
-      <div class="header-center" style="position: absolute; left: 50%; transform: translateX(-50%); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <img src="images/konrad-logo.png" alt="Logo Konrad" style="height: 24px; width: auto; margin-bottom: 2px;">
-        <strong id="headerTitle" style="line-height: 1.1; font-size: 0.9rem;">Bienvenido estudiante:</strong>
-        <small id="studentCode" style="line-height: 1; font-size: 0.75rem;">000000</small>
+      <!-- Logo Centrado y Ampliado -->
+      <!-- Se añade top: 50% y translate(-50%, -50%) para asegurar el centrado vertical con la nueva altura -->
+      <div class="header-center" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center;">
+        <img src="images/konrad-logo.png" alt="Logo Konrad" style="height: 45px; width: auto;">
       </div>
     
-      <!-- Avatar a la derecha -->
-      <a class="avatar" href="login.html" title="Ver perfil" style="margin-left: auto;">
-        <img id="studentAvatar" src="images/avatar-placeholder.svg" alt="Foto de perfil"/>
-      </a>
+      <!-- Texto de Bienvenida y Avatar a la derecha -->
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+        <div style="text-align: right; display: flex; flex-direction: column; justify-content: center;">
+          <strong id="headerTitle" style="line-height: 1.2; font-size: 0.85rem;">Bienvenido estudiante:</strong>
+          <small id="studentCode" style="line-height: 1; font-size: 0.75rem;">000000</small>
+        </div>
+        <a class="avatar" href="login.html" title="Ver perfil">
+          <img id="studentAvatar" src="images/avatar-placeholder.svg" alt="Foto de perfil"/>
+        </a>
+      </div>
     </header>
     
     <!-- Drawer & overlay -->
