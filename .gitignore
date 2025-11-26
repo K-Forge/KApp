@@ -90,3 +90,5 @@ $RECYCLE.BIN/
 TomEE/apache-tomee-plus-10.1.1/logs/
 TomEE/apache-tomee-plus-10.1.1/work/
 TomEE/apache-tomee-plus-10.1.1/temp/
+
+backend/kapp/target/classes/

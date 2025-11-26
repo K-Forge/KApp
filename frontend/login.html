@@ -17,10 +17,10 @@
         <p class="login-subtitle">Portal estudiante</p>
       </header>
 
-      <form class="login-form" action="dashboard.html" method="get" onsubmit="return window.__loginSubmit(event)">
+      <form class="login-form" id="loginForm">
         <label class="input-group">
-          <span>Código estudiantil</span>
-          <input type="text" inputmode="numeric" name="codigo" id="codigo" placeholder="Ej: 202512345" required />
+          <span>Código o Correo Institucional</span>
+          <input type="text" name="email" id="email" placeholder="Código o usuario@konradlorenz.edu.co" required />
         </label>
         <label class="input-group">
           <span>Contraseña</span>
@@ -30,7 +30,8 @@
           <input type="checkbox" id="remember" name="remember" />
           <span>Recordar sesión</span>
         </label>
-        <button class="btn primary" type="submit">Ingresar</button>
+        <button class="btn primary" type="submit" id="loginBtn">Ingresar</button>
+        <p id="error-msg" style="color: red; text-align: center; display: none; margin-top: 10px;">Credenciales inválidas</p>
       </form>
 
       <footer class="login-footer">
@@ -39,19 +40,58 @@
     </main>
 
     <script>
-      // Minimal client-side login handling (demo)
-      window.__loginSubmit = function (e) {
+      const API_URL = 'http://localhost:8080/auth/login';
+
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const codigo = document.getElementById('codigo').value.trim();
+        let email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
         const remember = document.getElementById('remember').checked;
-        if (!codigo) return false;
-        const student = { codigo, nombre: 'Estudiante ' + codigo, avatar: 'images/avatar-placeholder.svg' };
-        sessionStorage.setItem('student', JSON.stringify(student));
-        if (remember) localStorage.setItem('student', JSON.stringify(student));
-        
-        window.location.href = 'dashboard.html';
-        return false;
-      };
+        const btn = document.getElementById('loginBtn');
+        const errorMsg = document.getElementById('error-msg');
+
+        // Si no tiene @, asumimos que es un código/usuario y agregamos el dominio
+        if (!email.includes('@')) {
+            email = email + '@konradlorenz.edu.co';
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Ingresando...';
+        errorMsg.style.display = 'none';
+
+        try {
+          const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+
+          if (!response.ok) throw new Error('Login failed');
+
+          const data = await response.json();
+          
+          // Guardar sesión
+          const sessionData = JSON.stringify(data);
+          if (remember) {
+            localStorage.setItem('user_session', sessionData);
+          } else {
+            sessionStorage.setItem('user_session', sessionData);
+          }
+
+          window.location.href = 'dashboard.html';
+
+        } catch (error) {
+          console.error(error);
+          if (error.message === 'Login failed') {
+             errorMsg.textContent = 'Credenciales inválidas';
+          } else {
+             errorMsg.textContent = 'Error de conexión con el servidor';
+          }
+          errorMsg.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Ingresar';
+        }
+      });
 
       document.getElementById('year').textContent = new Date().getFullYear();
     </script>
