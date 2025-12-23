@@ -1,0 +1,539 @@
+================================================================================
+                    ARQUITECTURA DE MICROSERVICIOS K-APP
+                    Documentación de Funcionamiento
+================================================================================
+
+ÍNDICE
+------
+1. Introducción
+2. Arquitectura General
+3. Descripción de Microservicios
+4. Comunicación entre Servicios
+5. Seguridad y Autenticación
+6. Configuración de Puertos
+7. Cómo Ejecutar
+8. Endpoints Disponibles
+9. Buenas Prácticas Implementadas
+10. Ventajas de la Arquitectura
+
+================================================================================
+1. INTRODUCCIÓN
+================================================================================
+
+Este documento describe la migración del monolito K-APP a una arquitectura de 
+microservicios. El sistema original consistía en una sola aplicación Spring Boot 
+que manejaba todas las funcionalidades: autenticación, gestión de usuarios, 
+cursos y tareas.
+
+La nueva arquitectura divide la aplicación en servicios independientes, cada uno
+con su propia responsabilidad, siguiendo los principios de:
+- Responsabilidad Única (Single Responsibility)
+- Bajo Acoplamiento (Loose Coupling)
+- Alta Cohesión (High Cohesion)
+- Domain-Driven Design (DDD)
+
+================================================================================
+2. ARQUITECTURA GENERAL
+================================================================================
+
+                              ┌─────────────────┐
+                              │    Frontend     │
+                              │   (HTML/JS)     │
+                              └────────┬────────┘
+                                       │
+                                       ▼
+                              ┌─────────────────┐
+                              │   API Gateway   │
+                              │   (Port 8080)   │
+                              └────────┬────────┘
+                                       │
+           ┌───────────────────────────┼───────────────────────────┐
+           │                           │                           │
+           ▼                           ▼                           ▼
+   ┌───────────────┐          ┌───────────────┐          ┌───────────────┐
+   │ Auth Service  │          │ User Service  │          │Course Service │
+   │  (Port 8081)  │          │  (Port 8082)  │          │  (Port 8083)  │
+   └───────────────┘          └───────────────┘          └───────────────┘
+                                                                  │
+                                                                  │
+                                                         ┌───────────────┐
+                                                         │  Assignment   │
+                                                         │   Service     │
+                                                         │  (Port 8084)  │
+                                                         └───────────────┘
+                                       │
+                              ┌────────┴────────┐
+                              │ Discovery Server│
+                              │    (Eureka)     │
+                              │   (Port 8761)   │
+                              └─────────────────┘
+                                       │
+                              ┌────────┴────────┐
+                              │   PostgreSQL    │
+                              │   (Port 5432)   │
+                              └─────────────────┘
+
+================================================================================
+3. DESCRIPCIÓN DE MICROSERVICIOS
+================================================================================
+
+3.1 DISCOVERY SERVER (Eureka) - Puerto 8761
+--------------------------------------------
+Ubicación: microservices/discovery-server/
+
+Responsabilidad:
+- Registro y descubrimiento de servicios
+- Los microservicios se registran automáticamente
+- Permite balanceo de carga y tolerancia a fallos
+
+Tecnologías:
+- Spring Cloud Netflix Eureka Server
+- Spring Security (configuración básica)
+
+Archivos principales:
+- DiscoveryServerApplication.java: Clase principal con @EnableEurekaServer
+- SecurityConfig.java: Permite acceso sin autenticación al dashboard
+- application.properties: Configuración del servidor Eureka
+
+
+3.2 API GATEWAY - Puerto 8080
+-----------------------------
+Ubicación: microservices/api-gateway/
+
+Responsabilidad:
+- Punto de entrada único para todas las peticiones
+- Enrutamiento inteligente a los microservicios
+- Validación de JWT en todas las peticiones
+- Configuración CORS centralizada
+- Circuit Breaker para tolerancia a fallos
+
+Tecnologías:
+- Spring Cloud Gateway (reactivo)
+- Spring Cloud Netflix Eureka Client
+- Resilience4j Circuit Breaker
+- JJWT para validación de tokens
+
+Archivos principales:
+- ApiGatewayApplication.java: Clase principal
+- GatewayConfig.java: Define las rutas a cada microservicio
+- JwtAuthenticationFilter.java: Filtro global que valida JWT
+- CorsConfig.java: Configuración CORS global
+- application.properties: Rutas, timeouts y circuit breaker
+
+Flujo de una petición:
+1. La petición llega al Gateway
+2. El filtro JWT valida el token (excepto rutas públicas como /auth/*)
+3. Si es válido, agrega el header X-User-Email
+4. Enruta la petición al microservicio correspondiente
+5. Retorna la respuesta al cliente
+
+
+3.3 AUTH SERVICE - Puerto 8081
+------------------------------
+Ubicación: microservices/auth-service/
+
+Responsabilidad:
+- Autenticación de usuarios
+- Generación de tokens JWT
+- Validación de credenciales
+- Determinación de roles (STUDENT, PROFESSOR, ADMIN)
+
+Tecnologías:
+- Spring Boot Web
+- Spring Security
+- Spring Data JPA
+- JJWT para generación de tokens
+- BCrypt para hash de contraseñas
+
+Archivos principales:
+- AuthServiceApplication.java: Clase principal
+- AuthController.java: Endpoint POST /auth/login
+- AuthService.java: Lógica de autenticación
+- JwtTokenProvider.java: Generación y validación de JWT
+- CustomUserDetailsService.java: Carga usuarios de la BD
+- SecurityConfig.java: Configuración de Spring Security
+
+Flujo de autenticación:
+1. Usuario envía email y password a POST /auth/login
+2. AuthService autentica con AuthenticationManager
+3. Se determina el rol del usuario (estudiante/profesor/admin)
+4. Se genera un JWT con el email y roles
+5. Se retorna el token al cliente
+
+Entidades:
+- Person: Información personal
+- Member: Credenciales universitarias
+- Student: Información de estudiante
+- Employee: Información de empleado
+
+
+3.4 USER SERVICE - Puerto 8082
+------------------------------
+Ubicación: microservices/user-service/
+
+Responsabilidad:
+- CRUD completo de personas, miembros, estudiantes y empleados
+- Proporcionar datos de usuarios a otros microservicios
+- Gestión de credenciales (hash de passwords)
+
+Tecnologías:
+- Spring Boot Web
+- Spring Data JPA
+- Spring Cloud OpenFeign
+- Spring Cloud Eureka Client
+- BCrypt Password Encoder
+
+Archivos principales:
+- UserServiceApplication.java: Clase principal con @EnableFeignClients
+- UserAdminController.java: CRUD para admin (/api/admin/*)
+- UserInternalController.java: Endpoints internos para otros servicios
+- UserAdminService.java: Lógica de negocio
+
+Endpoints externos (Admin):
+- GET/POST/PUT/DELETE /api/admin/people/{id}
+- GET/POST/PUT/DELETE /api/admin/members/{id}
+- GET/POST/PUT/DELETE /api/admin/students/{id}
+- GET/POST/PUT/DELETE /api/admin/employees/{id}
+
+Endpoints internos (para otros microservicios):
+- GET /api/users/internal/student/by-email?email=...
+- GET /api/users/internal/student/id/by-email?email=...
+- GET /api/users/internal/employee/id/by-email?email=...
+
+
+3.5 COURSE SERVICE - Puerto 8083
+--------------------------------
+Ubicación: microservices/course-service/
+
+Responsabilidad:
+- Gestión de cursos, grupos, programas y periodos académicos
+- Matrículas de estudiantes en grupos
+- Proporcionar información de cursos a profesores y estudiantes
+
+Tecnologías:
+- Spring Boot Web
+- Spring Data JPA
+- Spring Cloud OpenFeign (comunicación con User Service)
+- Spring Cloud Eureka Client
+
+Archivos principales:
+- CourseServiceApplication.java: Clase principal
+- CourseAdminController.java: CRUD para admin
+- StudentCourseController.java: Cursos del estudiante
+- ProfessorCourseController.java: Cursos del profesor
+- CourseInternalController.java: Endpoints internos
+- UserServiceClient.java: Cliente Feign para User Service
+
+Endpoints:
+- GET /api/student/courses: Cursos inscritos del estudiante
+- GET /api/professor/courses: Cursos que imparte el profesor
+- GET /api/professor/courses/{groupId}/students: Estudiantes del grupo
+- CRUD /api/admin/courses/*
+- CRUD /api/admin/groups/*
+- GET /api/admin/programs
+
+Comunicación:
+- Usa Feign para obtener IDs de estudiantes/profesores del User Service
+
+
+3.6 ASSIGNMENT SERVICE - Puerto 8084
+-------------------------------------
+Ubicación: microservices/assignment-service/
+
+Responsabilidad:
+- Gestión de tareas (assignments)
+- Gestión de entregas (submissions)
+- Calificación de entregas
+
+Tecnologías:
+- Spring Boot Web
+- Spring Data JPA
+- Spring Cloud OpenFeign (comunicación con User y Course Service)
+- Spring Cloud Eureka Client
+
+Archivos principales:
+- AssignmentServiceApplication.java: Clase principal
+- AssignmentAdminController.java: CRUD admin de tareas
+- StudentAssignmentController.java: Tareas del estudiante
+- ProfessorAssignmentController.java: Gestión de tareas por profesor
+- UserServiceClient.java: Cliente Feign para User Service
+- CourseServiceClient.java: Cliente Feign para Course Service
+
+Endpoints:
+- GET /api/student/assignments/pending: Tareas pendientes
+- GET /api/student/assignments/submitted: Tareas entregadas
+- POST /api/student/assignments/{id}/submit: Entregar tarea
+- POST /api/professor/assignments: Crear tarea
+- GET/PUT/DELETE /api/professor/assignments/{id}
+- POST /api/professor/submissions/{id}/grade: Calificar
+- CRUD /api/admin/assignments/*
+
+
+3.7 COMMON LIBRARY
+------------------
+Ubicación: microservices/common/
+
+Responsabilidad:
+- DTOs compartidos entre microservicios
+- Excepciones personalizadas
+- Manejador global de excepciones
+
+Contenido:
+- DTOs: PersonDTO, MemberDTO, StudentDTO, EmployeeDTO, CourseDTO, etc.
+- Excepciones: ResourceNotFoundException, AccessDeniedException
+- GlobalExceptionHandler: Manejo uniforme de errores
+
+================================================================================
+4. COMUNICACIÓN ENTRE SERVICIOS
+================================================================================
+
+4.1 Comunicación Síncrona (OpenFeign)
+-------------------------------------
+Los microservicios se comunican entre sí usando OpenFeign, un cliente HTTP 
+declarativo que se integra con Eureka para descubrimiento de servicios.
+
+Ejemplo - Course Service llama a User Service:
+
+@FeignClient(name = "user-service", path = "/api/users/internal")
+public interface UserServiceClient {
+    @GetMapping("/student/id/by-email")
+    Long getStudentIdByEmail(@RequestParam("email") String email);
+}
+
+El servicio se descubre automáticamente por nombre ("user-service") usando Eureka.
+
+
+4.2 Headers de Comunicación
+---------------------------
+El API Gateway agrega el header X-User-Email a todas las peticiones autenticadas.
+Los microservicios leen este header para identificar al usuario:
+
+@GetMapping("/courses")
+public ResponseEntity<List<CourseDTO>> getEnrolledCourses(
+        @RequestHeader("X-User-Email") String email) {
+    return ResponseEntity.ok(service.getEnrolledCourses(email));
+}
+
+
+4.3 Flujo de una Petición (Ejemplo: Obtener cursos del estudiante)
+------------------------------------------------------------------
+1. Frontend envía GET /api/student/courses con JWT en header Authorization
+2. API Gateway valida JWT y extrae el email del usuario
+3. Gateway agrega header X-User-Email y enruta a Course Service
+4. Course Service recibe la petición con el email del usuario
+5. Course Service llama a User Service para obtener el ID del estudiante
+6. Course Service consulta los cursos inscritos del estudiante
+7. Respuesta viaja de vuelta al frontend
+
+================================================================================
+5. SEGURIDAD Y AUTENTICACIÓN
+================================================================================
+
+5.1 Flujo de Autenticación JWT
+------------------------------
+1. Usuario envía credenciales a POST /auth/login
+2. Auth Service valida credenciales contra la BD
+3. Si son válidas, genera un JWT con:
+   - Subject: email del usuario
+   - Claim "roles": roles del usuario (ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN)
+   - Expiración: 24 horas
+4. Token se firma con HS512 y un secreto compartido
+5. Frontend almacena el token y lo envía en cada petición
+
+5.2 Validación en API Gateway
+-----------------------------
+- Todas las peticiones (excepto /auth/*) requieren JWT válido
+- El filtro JwtAuthenticationFilter valida:
+  - Presencia del header Authorization
+  - Formato "Bearer <token>"
+  - Firma válida del token
+  - Token no expirado
+- Si es válido, extrae el email y lo pasa a los microservicios
+
+5.3 Secreto JWT Compartido
+--------------------------
+Todos los servicios que manejan JWT comparten el mismo secreto:
+jwt.secret=9a4f2c8d3b7a1e6f4c5d8e9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c
+
+NOTA: En producción, esto debe estar en un Config Server o vault seguro.
+
+================================================================================
+6. CONFIGURACIÓN DE PUERTOS
+================================================================================
+
+Servicio              Puerto    Descripción
+------------------   -------   ------------------------------------------
+Discovery Server      8761     Dashboard Eureka: http://localhost:8761
+API Gateway           8080     Punto de entrada único
+Auth Service          8081     Autenticación
+User Service          8082     Gestión de usuarios
+Course Service        8083     Gestión de cursos
+Assignment Service    8084     Gestión de tareas
+PostgreSQL            5432     Base de datos
+
+================================================================================
+7. CÓMO EJECUTAR
+================================================================================
+
+7.1 Requisitos Previos
+----------------------
+- Java 21+
+- Maven 3.9+
+- PostgreSQL 15+ (o Docker)
+- Docker y Docker Compose (opcional)
+
+7.2 Ejecución con Docker Compose (Recomendado)
+----------------------------------------------
+cd backend/microservices
+docker-compose up -d
+
+Esto iniciará todos los servicios y la base de datos.
+
+7.3 Ejecución Manual
+--------------------
+Orden de inicio (importante):
+
+1. Iniciar PostgreSQL (debe estar corriendo en puerto 5432)
+
+2. Iniciar Discovery Server:
+   cd discovery-server
+   mvn spring-boot:run
+
+3. Esperar a que Eureka esté disponible (http://localhost:8761)
+
+4. Iniciar los demás servicios (pueden ejecutarse en paralelo):
+   cd auth-service && mvn spring-boot:run
+   cd user-service && mvn spring-boot:run
+   cd course-service && mvn spring-boot:run
+   cd assignment-service && mvn spring-boot:run
+
+5. Iniciar API Gateway:
+   cd api-gateway && mvn spring-boot:run
+
+7.4 Verificar el Estado
+-----------------------
+- Eureka Dashboard: http://localhost:8761
+- Health del Gateway: http://localhost:8080/actuator/health
+- Auth Health: http://localhost:8081/auth/health
+
+================================================================================
+8. ENDPOINTS DISPONIBLES
+================================================================================
+
+8.1 Autenticación (Públicos)
+----------------------------
+POST /auth/login
+Body: { "email": "...", "password": "..." }
+Response: { "token": "...", "type": "Bearer", "username": "...", "role": "..." }
+
+8.2 Estudiantes (Requieren ROLE_STUDENT)
+-----------------------------------------
+GET /api/student/courses
+GET /api/student/assignments/pending?groupIds=1,2,3
+GET /api/student/assignments/submitted?groupIds=1,2,3
+POST /api/student/assignments/{id}/submit
+
+8.3 Profesores (Requieren ROLE_PROFESSOR)
+------------------------------------------
+GET /api/professor/courses
+GET /api/professor/courses/{groupId}/students
+POST /api/professor/assignments
+GET/PUT/DELETE /api/professor/assignments/{id}
+POST /api/professor/submissions/{id}/grade?grade=...&feedback=...
+
+8.4 Administración (Requieren ROLE_ADMIN)
+------------------------------------------
+CRUD /api/admin/people/{id}
+CRUD /api/admin/members/{id}
+CRUD /api/admin/students/{id}
+CRUD /api/admin/employees/{id}
+CRUD /api/admin/courses/{id}
+CRUD /api/admin/groups/{id}
+CRUD /api/admin/assignments/{id}
+GET /api/admin/programs
+
+================================================================================
+9. BUENAS PRÁCTICAS IMPLEMENTADAS
+================================================================================
+
+9.1 Seguridad
+-------------
+✓ JWT para autenticación stateless
+✓ Passwords hasheados con BCrypt
+✓ Validación de tokens en el Gateway (centralizado)
+✓ Roles y autorizaciones por endpoint
+✓ CORS configurado de forma segura
+✓ Timeouts configurados para prevenir ataques
+
+9.2 Resiliencia
+---------------
+✓ Circuit Breaker con Resilience4j
+✓ Timeouts en comunicación entre servicios
+✓ Health checks en Docker Compose
+✓ Eureka para tolerancia a fallos
+
+9.3 Diseño
+----------
+✓ Separación de responsabilidades (cada servicio tiene un dominio)
+✓ DTOs compartidos en módulo common
+✓ Repositorios con interfaces JPA
+✓ Servicios transaccionales
+✓ Controladores delgados (lógica en servicios)
+✓ Manejo global de excepciones
+
+9.4 Escalabilidad
+-----------------
+✓ Servicios independientes pueden escalar por separado
+✓ Base de datos compartida (puede migrar a BD por servicio)
+✓ Descubrimiento dinámico con Eureka
+✓ Gateway preparado para balanceo de carga
+
+9.5 Mantenibilidad
+------------------
+✓ Código bien documentado
+✓ Nombres descriptivos
+✓ Logs configurados para debug
+✓ Configuración externalizada en properties
+
+================================================================================
+10. VENTAJAS DE LA ARQUITECTURA
+================================================================================
+
+10.1 Comparación Monolito vs Microservicios
+-------------------------------------------
+                    Monolito                    Microservicios
+---------------------------------------------------------------------------
+Despliegue         Todo o nada                 Servicios independientes
+Escalabilidad      Escalar todo                Escalar lo necesario
+Fallo              Cae todo                    Fallo aislado
+Tecnología         Una sola                    Políglota posible
+Equipo             Un equipo grande            Equipos pequeños por servicio
+Complejidad        Simple al inicio            Más compleja inicialmente
+Testing            End-to-end                  Por servicio + integración
+
+10.2 Beneficios Específicos para K-APP
+--------------------------------------
+1. Auth Service puede escalar en periodos de alta demanda (inicio de semestre)
+2. Course Service puede escalar durante inscripciones
+3. Assignment Service puede tener más recursos cerca de fechas de entrega
+4. Un bug en asignaciones no afecta la autenticación
+5. Diferentes equipos pueden trabajar en diferentes servicios
+6. Actualizaciones graduales sin downtime completo
+
+10.3 Consideraciones Futuras
+----------------------------
+- Implementar Config Server para configuración centralizada
+- Agregar mensaje queue (RabbitMQ/Kafka) para comunicación asíncrona
+- Implementar API versioning
+- Agregar rate limiting en el Gateway
+- Implementar distributed tracing (Zipkin/Jaeger)
+- Separar bases de datos por servicio (data sovereignty)
+- Implementar CQRS para operaciones de lectura intensiva
+
+================================================================================
+                              FIN DEL DOCUMENTO
+================================================================================
+
+Autor: Sistema automatizado de migración
+Fecha: Diciembre 2024
+Versión: 1.0.0
