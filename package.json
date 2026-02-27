@@ -1,11 +1,16 @@
 {
-  "name": "k-app",
+  "name": "kapp",
   "version": "1.0.0",
-  "description": "Frontend for K-APP",
+  "private": true,
+  "description": "K-APP – Plataforma universitaria Konrad Lorenz",
   "scripts": {
-    "dev": "npx serve frontend"
+    "dev:web": "bunx serve frontend/web",
+    "start:backend": "bash scripts/start-backend.sh",
+    "start:microservices": "bash scripts/start-microservices.sh",
+    "start:frontend": "bash scripts/start-frontend.sh"
   },
   "devDependencies": {
     "serve": "^14.2.4"
-  }
+  },
+  "packageManager": "bun"
 }
