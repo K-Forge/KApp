@@ -1,4 +1,4 @@
-# K-APP
+# KApp
 
 Plataforma universitaria de la **Fundación Universitaria Konrad Lorenz**, desarrollada por **K-Forge**.
 
@@ -32,7 +32,7 @@ Plataforma universitaria de la **Fundación Universitaria Konrad Lorenz**, desar
 ## Estructura
 
 ```
-K-APP/
+KApp/
 ├── backend/microservices/    # 6 microservicios Spring Boot
 ├── frontend/web/             # Web app
 ├── frontend/kotlin/          # Android (futuro)

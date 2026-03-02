@@ -1,10 +1,10 @@
-# 👥 Contribuyentes de K-APP
+# 👥 Contribuyentes de KApp
 Desarrollo realizado como parte del club de desarrollo **K-Forge** en la Fundación Universitaria Konrad Lorenz.
 ---
 
-A continuación se listan las personas que han contribuido activamente en el desarrollo de **K-APP**:
+A continuación se listan las personas que han contribuido activamente en el desarrollo de **KApp**:
 
-## 🧑‍💻 Equipo de Desarrollo de K-APP
+## 🧑‍💻 Equipo de Desarrollo de KApp
 
 - **Brian Steven Vargas Clavijo** – _Rol o área de enfoque pendiente_
 - **Julián David Avila Cortes** – _Rol o área de enfoque pendiente_
@@ -16,5 +16,5 @@ A continuación se listan las personas que han contribuido activamente en el des
 ## 💡 ¿Te interesa unirte?
 
 K-Forge está abierto a estudiantes activos de la universidad que quieran participar en proyectos por pasión.  
-Si te interesa unirte al equipo de K-APP, escríbenos a 📧 **kforge.dev@gmail.com**  
+Si te interesa unirte al equipo de KApp, escríbenos a 📧 **kforge.dev@gmail.com**  
 (puedes usar un asunto como: `[Unirme]`) o pregúntanos por los horarios en los que nos reunimos en la universidad.

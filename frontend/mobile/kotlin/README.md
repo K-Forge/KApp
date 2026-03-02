@@ -1,4 +1,4 @@
-# K-APP · Mobile (Kotlin/Android)
+# KApp · Mobile (Kotlin/Android)
 
 > 🚧 **Implementación futura**
 

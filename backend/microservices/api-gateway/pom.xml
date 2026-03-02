@@ -12,7 +12,7 @@
 
     <artifactId>api-gateway</artifactId>
     <name>API Gateway</name>
-    <description>API Gateway para K-APP - Punto de entrada único</description>
+    <description>API Gateway para KApp - Punto de entrada único</description>
 
     <dependencies>
         <!-- Spring Cloud Gateway -->

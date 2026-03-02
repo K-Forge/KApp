@@ -1,4 +1,4 @@
-# K-APP · Estado de Implementación
+# KApp · Estado de Implementación
 
 > Última actualización: Febrero 2026
 
@@ -114,7 +114,7 @@
 ## Estructura del Proyecto
 
 ```
-K-APP/
+KApp/
 ├── backend/
 │   ├── kapp/                   # Monolito (legacy)
 │   ├── microservices/          # Arquitectura actual

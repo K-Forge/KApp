@@ -2,7 +2,7 @@
   "name": "kapp",
   "version": "1.0.0",
   "private": true,
-  "description": "K-APP – Plataforma universitaria Konrad Lorenz",
+  "description": "KApp – Plataforma universitaria Konrad Lorenz",
   "scripts": {
     "dev:web": "bunx serve frontend/web",
     "start:web": "bunx serve frontend/web -s -l 3000",

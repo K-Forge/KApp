@@ -1,4 +1,4 @@
-# K-APP · Documento de Requerimientos
+# KApp · Documento de Requerimientos
 
 > Versión 1.0 · Febrero 2026  
 > Club de Desarrollo K-Forge · Fundación Universitaria Konrad Lorenz
@@ -7,7 +7,7 @@
 
 ## 1. Descripción General
 
-K-APP es una plataforma universitaria que centraliza servicios académicos y administrativos para estudiantes, profesores y administradores de la Fundación Universitaria Konrad Lorenz.
+KApp es una plataforma universitaria que centraliza servicios académicos y administrativos para estudiantes, profesores y administradores de la Fundación Universitaria Konrad Lorenz.
 
 **Objetivo:** Mejorar la experiencia universitaria mediante una arquitectura de microservicios moderna, accesible desde web y aplicaciones móviles nativas.
 

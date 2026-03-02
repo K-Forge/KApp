@@ -1,5 +1,5 @@
--- Script de inicialización de base de datos para K-APP (PostgreSQL)
--- Versión Unificada: K-APP SRS + Diagramas de Draw.io + Jerarquía de Clases
+-- Script de inicialización de base de datos para KApp (PostgreSQL)
+-- Versión Unificada: KApp SRS + Diagramas de Draw.io + Jerarquía de Clases
 
 -- ==============================================================================================
 -- 1. ENUMS Y TIPOS DE DATOS

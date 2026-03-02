@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────
-# K-APP · Start frontend web (dev server)
+# KApp · Start frontend web (dev server)
 # ─────────────────────────────────────────────
 set -euo pipefail
 
@@ -10,6 +10,6 @@ if ! command -v bun &>/dev/null; then
   echo "❌ bun is not installed. Install it: https://bun.sh" && exit 1
 fi
 
-echo "🌐 Starting K-APP web frontend on http://localhost:3000 ..."
+echo "🌐 Starting KApp web frontend on http://localhost:3000 ..."
 cd "$ROOT"
 bun run dev:web

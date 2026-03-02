@@ -1,4 +1,4 @@
-# K-APP · Swift (iOS)
+# KApp · Swift (iOS)
 
 > 🚧 **Implementación futura**
 

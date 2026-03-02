@@ -1,4 +1,4 @@
-# K-APP · Documento de Diseño
+# KApp · Documento de Diseño
 
 > Versión 1.0 · Febrero 2026  
 > Club de Desarrollo K-Forge · Fundación Universitaria Konrad Lorenz
@@ -7,7 +7,7 @@
 
 ## 1. Visión Arquitectónica
 
-K-APP sigue una **arquitectura de microservicios** con Spring Cloud, migrando desde un monolito inicial. Cada servicio encapsula un dominio de negocio y se comunica vía REST + Eureka.
+KApp sigue una **arquitectura de microservicios** con Spring Cloud, migrando desde un monolito inicial. Cada servicio encapsula un dominio de negocio y se comunica vía REST + Eureka.
 
 ```mermaid
 graph TD

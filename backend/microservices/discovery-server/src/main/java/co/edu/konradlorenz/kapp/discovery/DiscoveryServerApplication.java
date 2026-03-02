@@ -6,7 +6,7 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
 /**
  * Discovery Server - Eureka Server
- * Servicio de descubrimiento para la arquitectura de microservicios de K-APP.
+ * Servicio de descubrimiento para la arquitectura de microservicios de KApp.
  * Permite que los microservicios se registren y descubran entre sí.
  */
 @SpringBootApplication

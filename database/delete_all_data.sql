@@ -1,6 +1,6 @@
 -- ==============================================================================================
 -- SCRIPT DE ELIMINACIÓN DE DATOS - PostgreSQL
--- Proyecto: K-APP
+-- Proyecto: KApp
 -- Descripción: Elimina todos los datos de las tablas para permitir una reinserción limpia.
 --              Utiliza TRUNCATE ... CASCADE para limpiar tablas dependientes automáticamente.
 -- ==============================================================================================

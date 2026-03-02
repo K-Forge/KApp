@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────
-# K-APP · Start monolith backend (legacy)
+# KApp · Start monolith backend (legacy)
 # ─────────────────────────────────────────────
 set -euo pipefail
 
@@ -11,7 +11,7 @@ if [ ! -f "$BACKEND/mvnw" ]; then
   echo "❌ Maven wrapper not found in $BACKEND" && exit 1
 fi
 
-echo "🚀 Starting K-APP monolith backend..."
+echo "🚀 Starting KApp monolith backend..."
 cd "$BACKEND"
 chmod +x mvnw
 ./mvnw spring-boot:run

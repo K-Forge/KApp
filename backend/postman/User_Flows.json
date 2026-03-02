@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "b6a8c5d2-1234-4567-8901-abcdef123456",
-		"name": "K-APP User Flows",
+		"name": "KApp User Flows",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [

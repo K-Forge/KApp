@@ -1,4 +1,4 @@
-# K-APP · Guía de Containerización con Docker Desktop
+# KApp · Guía de Containerización con Docker Desktop
 
 > Guía paso a paso para contenerizar y ejecutar los microservicios en Docker Desktop.
 

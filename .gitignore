@@ -1,15 +1,69 @@
-# === JAVA / MAVEN / SPRING BOOT ===
-# Compiled class files
-*.class
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  KApp — .gitignore                                             ║
+# ║  Spring Boot · Kotlin · Swift · Web · Docker                   ║
+# ║  macOS · Windows · Linux                                       ║
+# ╚══════════════════════════════════════════════════════════════════╝
 
-# Package files
+# ─────────────────────────────────────────────
+# OS — macOS
+# ─────────────────────────────────────────────
+*.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+Icon?
+
+# ─────────────────────────────────────────────
+# OS — Windows
+# ─────────────────────────────────────────────
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.stackdump
+[Dd]esktop.ini
+*.lnk
+
+# ─────────────────────────────────────────────
+# OS — Linux
+# ─────────────────────────────────────────────
+*~
+.nfs*
+.directory
+.Trash-*
+
+# ─────────────────────────────────────────────
+# Java / JVM
+# ─────────────────────────────────────────────
+*.class
 *.jar
 *.war
 *.ear
 *.nar
+hs_err_pid*
+replay_pid*
+*.jfr
 
+# ─────────────────────────────────────────────
 # Maven
-target/
+# ─────────────────────────────────────────────
+**/target/
+!**/src/main/**/target/
+!**/src/test/**/target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -19,47 +73,50 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
 
-# Gradle
+# ─────────────────────────────────────────────
+# Gradle (Kotlin / Android projects)
+# ─────────────────────────────────────────────
 .gradle/
 build/
+!**/src/main/**/build/
+!**/src/test/**/build/
 !gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+gradle-app.setting
+.gradletasknamecache
 
-# IDE - IntelliJ IDEA
-*.iml
-*.ipr
-*.iws
-.idea/
-out/
+# ─────────────────────────────────────────────
+# Spring Boot
+# ─────────────────────────────────────────────
+*.pid
+HELP.md
 
-# IDE - Eclipse
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings/
-.springBeans
-.sts4-cache
+# ─────────────────────────────────────────────
+# Kotlin
+# ─────────────────────────────────────────────
+*.kotlin_module
+.kotlin/
 
-# Android
+# ─────────────────────────────────────────────
+# Android (Kotlin mobile)
+# ─────────────────────────────────────────────
 local.properties
 *.jks
 *.keystore
+*.apk
+*.aab
+*.ap_
+*.dex
+captures/
+.externalNativeBuild/
+.cxx/
+google-services.json
 
-# Coverage
-coverage/
-*.lcov
-
-# Entornos
-.env
-.env.production
-.env.test
-
-# Husky
-.husky/_/
-
-# iOS
-build/
+# ─────────────────────────────────────────────
+# Swift / Xcode / iOS / macOS apps
+# ─────────────────────────────────────────────
 DerivedData/
 *.mode1v3
 !default.mode1v3
@@ -71,73 +128,180 @@ DerivedData/
 !default.perspectivev3
 xcuserdata/
 *.xcuserstate
-*.xcworkspace
+*.xccheckout
+*.xcsettings
+*.xcscheme
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+*.xcworkspace/*
+!*.xcworkspace/contents.xcworkspacedata
+!*.xcworkspace/xcshareddata/
+*.playground/*
+!*.playground/Contents.swift
+!*.playground/contents.xcplayground
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+timeline.xctimeline
+playground.xcworkspace
+Pods/
+Podfile.lock
+.build/
+Package.resolved
 
-# Linux
-.nfs*
+# Swift Package Manager
+.swiftpm/
+Packages/
 
-# Locks
+# Carthage
+Carthage/Build/
+Carthage/Checkouts/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# ─────────────────────────────────────────────
+# Web (HTML / CSS / JS)
+# ─────────────────────────────────────────────
+node_modules/
+dist/
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.output/
+.turbo/
+*.tsbuildinfo
+
+# Package manager lockfiles (uncomment if you don't want to track them)
+# package-lock.json
+# yarn.lock
 bun.lockb
 pnpm-lock.yaml
 
+# ─────────────────────────────────────────────
+# IDE — IntelliJ IDEA / Android Studio
+# ─────────────────────────────────────────────
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+cmake-build-*/
+
+# ─────────────────────────────────────────────
+# IDE — Eclipse / STS
+# ─────────────────────────────────────────────
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# ─────────────────────────────────────────────
+# IDE — VS Code
+# ─────────────────────────────────────────────
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# ─────────────────────────────────────────────
+# IDE — NetBeans
+# ─────────────────────────────────────────────
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# ─────────────────────────────────────────────
+# IDE — Fleet
+# ─────────────────────────────────────────────
+.fleet/
+
+# ─────────────────────────────────────────────
+# Docker
+# ─────────────────────────────────────────────
+docker-compose.override.yml
+.docker/
+
+# ─────────────────────────────────────────────
+# Environment & secrets
+# ─────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+!.env.template
+*.pem
+*.key
+*.p12
+*.pfx
+
+# ─────────────────────────────────────────────
 # Logs
+# ─────────────────────────────────────────────
 *.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+spring.log
 
-# macOS
-.DS_Store
+# ─────────────────────────────────────────────
+# Testing & coverage
+# ─────────────────────────────────────────────
+coverage/
+*.lcov
+.nyc_output/
+test-results/
+surefire-reports/
+jacoco.exec
+*.gcda
+*.gcno
+*.gcov
 
-# NetBeans
-nbproject/private/
-
-# Node.js
-node_modules/
-
-# Producción
-dist/
-
-# Temporales
+# ─────────────────────────────────────────────
+# Temporary & backup files
+# ─────────────────────────────────────────────
 *.bak
 *.swp
 *.swo
 *.tmp
-*~
+*.orig
+*.rej
+*.patch
 
-# VS Code
-.vscode/
+# ─────────────────────────────────────────────
+# Husky
+# ─────────────────────────────────────────────
+.husky/_/
 
-# Windows
-Desktop.ini
-Thumbs.db
-ehthumbs.db
-$RECYCLE.BIN/
-
-# Xcode
-*.xccheckout
-*.xcodeproj/*
-!*.xcodeproj/project.pbxproj
-!*.xcodeproj/xcshareddata/
-*.xcsettings
-*.xcscheme
-
-# PID files (microservices startup)
+# ─────────────────────────────────────────────
+# Misc
+# ─────────────────────────────────────────────
+*.pid
 .pids/
 
-# Proyecto específico
-/K-APP FRONT v1/nbproject/private/
+# ─────────────────────────────────────────────
+# Proyecto — KApp específico
+# ─────────────────────────────────────────────
+/KApp FRONT v1/nbproject/private/
 
 # TomEE
-TomEE/apache-tomee-plus-10.1.1/logs/
-TomEE/apache-tomee-plus-10.1.1/work/
-TomEE/apache-tomee-plus-10.1.1/temp/
-
-# All target directories (monolith + microservices)
-**/target/
-
-# Spring Boot
-*.pid
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+TomEE/apache-tomee-plus-*/logs/
+TomEE/apache-tomee-plus-*/work/
+TomEE/apache-tomee-plus-*/temp/

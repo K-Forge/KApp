@@ -1,4 +1,4 @@
-# K-APP · Kotlin (Android)
+# KApp · Kotlin (Android)
 
 > 🚧 **Implementación futura**
 

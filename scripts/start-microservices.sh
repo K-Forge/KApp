@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
-# K-APP · Start all microservices (local development)
+# KApp · Start all microservices (local development)
 # ─────────────────────────────────────────────────────────────
 # Usage:
 #   ./scripts/start-microservices.sh          Start all services
@@ -129,7 +129,7 @@ case "${1:-start}" in
   start)
     echo ""
     echo "╔══════════════════════════════════════════╗"
-    echo "║   K-APP Microservices · Local Startup    ║"
+    echo "║   KApp Microservices · Local Startup    ║"
     echo "╚══════════════════════════════════════════╝"
     echo ""
 

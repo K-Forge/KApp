@@ -12,7 +12,7 @@
 
     <artifactId>discovery-server</artifactId>
     <name>Discovery Server</name>
-    <description>Eureka Discovery Server para K-APP</description>
+    <description>Eureka Discovery Server para KApp</description>
 
     <dependencies>
         <dependency>

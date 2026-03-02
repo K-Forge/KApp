@@ -1,4 +1,4 @@
--- Script de Datos de Prueba para K-APP
+-- Script de Datos de Prueba para KApp
 -- Contraseña para todos los usuarios: 123123
 -- Hash BCrypt: $2b$12$8g50C8rO7r/hbTIXv90JuefGBWsv/WJjERcIgXRfs3S/zAv/Ok70e
 
