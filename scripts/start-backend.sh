@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
-# ──────────────────────────────────────────────────
-# K-APP · Iniciar backend monolito (legacy)
-# ──────────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# K-APP · Start monolith backend (legacy)
+# ─────────────────────────────────────────────
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$ROOT/backend/kapp"
+BACKEND="$ROOT/backend/kapp"
 
-echo "🚀 Iniciando K-APP monolito (puerto 8080)…"
+if [ ! -f "$BACKEND/mvnw" ]; then
+  echo "❌ Maven wrapper not found in $BACKEND" && exit 1
+fi
+
+echo "🚀 Starting K-APP monolith backend..."
+cd "$BACKEND"
+chmod +x mvnw
 ./mvnw spring-boot:run

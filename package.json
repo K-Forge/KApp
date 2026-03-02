@@ -5,6 +5,7 @@
   "description": "K-APP – Plataforma universitaria Konrad Lorenz",
   "scripts": {
     "dev:web": "bunx serve frontend/web",
+    "start:web": "bunx serve frontend/web -s -l 3000",
     "start:backend": "bash scripts/start-backend.sh",
     "start:microservices": "bash scripts/start-microservices.sh",
     "start:frontend": "bash scripts/start-frontend.sh"

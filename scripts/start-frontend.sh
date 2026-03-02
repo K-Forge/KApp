@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
-# ──────────────────────────────────────────────────
-# K-APP · Iniciar frontend web (dev server)
-# ──────────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# K-APP · Start frontend web (dev server)
+# ─────────────────────────────────────────────
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-echo "🌐 Iniciando frontend web…"
+if ! command -v bun &>/dev/null; then
+  echo "❌ bun is not installed. Install it: https://bun.sh" && exit 1
+fi
+
+echo "🌐 Starting K-APP web frontend on http://localhost:3000 ..."
 cd "$ROOT"
-bunx serve frontend/web
+bun run dev:web

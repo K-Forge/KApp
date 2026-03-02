@@ -122,6 +122,9 @@ $RECYCLE.BIN/
 *.xcsettings
 *.xcscheme
 
+# PID files (microservices startup)
+.pids/
+
 # Proyecto específico
 /K-APP FRONT v1/nbproject/private/
 
