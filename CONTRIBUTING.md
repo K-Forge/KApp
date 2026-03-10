@@ -1,4 +1,4 @@
-# 🛠️ Guía para Contribuir a K-APP
+# 🛠️ Guía para Contribuir a KApp
 
 ## 🤝 ¿Quién puede contribuir?
 Este proyecto es parte de K-Forge y está restringido a miembros autorizados.  

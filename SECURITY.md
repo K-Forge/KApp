@@ -1,6 +1,6 @@
-# 🔐 Política de Seguridad – K-APP
+# 🔐 Política de Seguridad – KApp
 
-Este documento describe cómo manejamos temas relacionados con la seguridad en el proyecto **K-APP**, desarrollado por el club de desarrollo **K-Forge**.
+Este documento describe cómo manejamos temas relacionados con la seguridad en el proyecto **KApp**, desarrollado por el club de desarrollo **K-Forge**.
 
 ---
 
@@ -8,7 +8,7 @@ Este documento describe cómo manejamos temas relacionados con la seguridad en e
 
 ### 📬 Canales de Reporte
 
-- Habla directamente con cualquier miembro del equipo de desarrollo de K-APP.
+- Habla directamente con cualquier miembro del equipo de desarrollo de KApp.
 - Escríbenos a 📧 **kforge.dev@gmail.com**  
   _(Asunto sugerido: `[Seguridad] Descripción breve del problema`)_
 
@@ -22,10 +22,10 @@ Este documento describe cómo manejamos temas relacionados con la seguridad en e
 
 ## 📌 Alcance
 
-- K-APP es un sistema de uso interno en la Fundación Universitaria Konrad Lorenz.
+- KApp es un sistema de uso interno en la Fundación Universitaria Konrad Lorenz.
 - Está diseñado para manejar información relacionada con los usuarios de la comunidad universitaria.
 - Por ello, tratamos la seguridad de los datos con el máximo nivel de responsabilidad y confidencialidad.
 
 ## 🙌 Gracias
 
-Gracias por ayudar a que **K-APP** sea una aplicación más segura para todos los miembros del club y la comunidad universitaria.
+Gracias por ayudar a que **KApp** sea una aplicación más segura para todos los miembros del club y la comunidad universitaria.

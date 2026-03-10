@@ -1,34 +1,57 @@
-# ✨ K-APP 📱
+# KApp
 
-## 📌 Estado del Proyecto
-🟡 En desarrollo – primeras versiones en construcción
+Plataforma universitaria de la **Fundación Universitaria Konrad Lorenz**, desarrollada por **K-Forge**.
 
-K-APP es una aplicación móvil desarrollada por el club de desarrollo **K-Forge** para la **Fundación Universitaria Konrad Lorenz**, con el objetivo de mejorar la comunicación y la experiencia universitaria de manera innovadora. 📚✨
+> 🟡 En desarrollo
 
-## 🚀 Características  
-- 🧭 Información centralizada para estudiantes, docentes y funcionarios  
-- 🗓️ Gestión de eventos, horarios y notificaciones  
-- 🖌️ Interfaz intuitiva y adaptada a las necesidades de la comunidad Konradista  
-- 🔗 Integración con otros servicios y plataformas universitarias  
+---
 
-## 🛠️ Tecnologías  
-- **Frontend:** *Próximamente...*  
-- **Backend:** *Próximamente...*  
-- **Base de Datos:** *Próximamente...*  
+## Stack
 
-## 👨‍💻 Equipo de Desarrollo  
-El equipo de desarrollo de **K-APP**, parte del club **K-Forge** 💻✨
+| Capa       | Tecnología                                     |
+|------------|-------------------------------------------------|
+| Backend    | Java 21 · Spring Boot 3.2 · Spring Cloud        |
+| Frontend   | Web (Angular) · Android (Kotlin) · iOS (Swift)   |
+| Database   | PostgreSQL 15+                                   |
+| Infra      | Eureka · API Gateway · Docker · Resilience4j     |
+| Security   | Spring Security · JWT · BCrypt                    |
 
-## 📄 Licencia  
-Este software (**K-APP**) ha sido desarrollado por el equipo de **K-APP**, parte del club **K-Forge**, como un proyecto impulsado por la pasión y el compromiso con la comunidad de la **Fundación Universitaria Konrad Lorenz**.  
-Su uso está limitado a personas autorizadas dentro de dicha comunidad.  
-Consulta el archivo 📄 [LICENSE](./LICENSE) para más detalles.
+## Quick Start
 
-## 💡 ¿Quieres ser parte de K-Forge?  
-K-Forge está abierto a estudiantes activos de la **Fundación Universitaria Konrad Lorenz** que quieran aprender, crear y colaborar en proyectos de desarrollo. 🚀
+```bash
+# Microservicios (todos)
+./scripts/start-microservices.sh
 
-Si te interesa unirte al equipo:
-- 📧 Escríbenos a: kforge.dev@gmail.com (asunto: *Unirme*)
-- Consulta el archivo 👥 [CONTRIBUTORS.md](./CONTRIBUTORS.md) para más información sobre nuestro equipo.
+# Frontend web
+./scripts/start-frontend.sh
 
-¡Siempre estamos buscando nuevas ideas y talentos! 🌱
+# Estado de servicios
+./scripts/start-microservices.sh status
+```
+
+## Estructura
+
+```
+KApp/
+├── backend/microservices/    # 6 microservicios Spring Boot
+├── frontend/web/             # Web app
+├── frontend/kotlin/          # Android (futuro)
+├── frontend/swift/           # iOS (futuro)
+├── database/                 # SQL schemas
+├── docs/                     # Requerimientos, diseño, Docker
+└── scripts/                  # Bash de inicio
+```
+
+## Documentación
+
+| Documento                                    | Descripción                   |
+|----------------------------------------------|-------------------------------|
+| [Requerimientos](docs/REQUIREMENTS.md)       | Requisitos funcionales y NFR  |
+| [Diseño](docs/DESIGN.md)                     | Arquitectura y decisiones     |
+| [Docker](docs/DOCKER-GUIDE.md)               | Guía de containerización      |
+| [Progreso](PROGRESS.md)                      | Estado de implementación      |
+| [Contribuir](CONTRIBUTING.md)                | Guía de contribución          |
+
+## Equipo
+
+Desarrollado por [K-Forge](mailto:kforge.dev@gmail.com) · [Contributors](CONTRIBUTORS.md) · [License](LICENSE)

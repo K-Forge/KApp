@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "c7b9d6e3-2345-5678-9012-bcdef2345678",
-		"name": "K-APP Admin CRUD",
+		"name": "KApp Admin CRUD",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
