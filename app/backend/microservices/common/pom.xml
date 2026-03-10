@@ -16,6 +16,12 @@
     <description>Biblioteca común con DTOs y utilidades compartidas</description>
 
     <dependencies>
+        <!-- Web (provides Spring MVC, ResponseEntity, @RestControllerAdvice) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
         <!-- Validation -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
