@@ -12,46 +12,15 @@ La meta es simple: **dejar una base sólida de ideas bien pensadas** que nos per
 
 ¿Tienes una idea? ¡Genial! Sigue estos pasos para agregarla:
 
-1. **Copia la plantilla base** que encontrarás en la sección siguiente.
-2. **Pégala al final de este documento**, debajo de la última idea registrada.
-3. **Llena cada campo** con la mayor claridad posible. No necesitas tener todos los detalles técnicos resueltos; lo importante es comunicar bien la idea.
-4. **Pon tu nombre o usuario de GitHub** para que el equipo sepa a quién contactar si quiere discutir la propuesta.
-5. **Haz commit y abre un PR** con el título: `idea: Nombre del Microservicio`.
+1. **Agrega una nueva fila a la tabla** de la sección "Ideas Registradas", completando todos los campos.
+2. **Ubica tu idea en la posición correcta** según su nivel de dificultad (primero Bajo, luego Medio, luego Alto).
+3. **Pon tu nombre o usuario de GitHub** para que el equipo sepa a quién contactar si quiere discutir la propuesta.
+4. **Haz commit y abre un PR** con el título: `idea: Nombre del Microservicio`.
 
 > **Tip:** Si no estás seguro sobre algún campo (como el nivel de dificultad), haz tu mejor estimación. La lluvia de ideas es para explorar, no para tener certezas absolutas.
 
----
-
-## 🧩 Plantilla Base
-
-Copia el siguiente bloque tal cual y complétalo con tu idea:
-
-```markdown
----
-
-### 🔹 Nombre del Microservicio
-
-**[Escribe el nombre aquí]**
-
-**Descripción breve:**
-
-> ¿Qué hace este microservicio y qué problema resuelve?
-
-**Público Objetivo:**
-
-> ¿A quién beneficia? (Estudiantes / Profesores / Administrativos / Todos)
-
-**Nivel de Dificultad:**
-
-> (Bajo / Medio / Alto)
-
-**Impacto / Valor para el usuario:**
-
-> (Bajo / Medio / Alto)
-
-**Propuesto por:** @tu-usuario-de-github
-**Fecha:** YYYY-MM-DD
-```
+> [!IMPORTANT]
+> **Regla de ordenamiento:** Las ideas **siempre** deben estar ordenadas por nivel de dificultad: **Bajo → Medio → Alto**. Al agregar una nueva idea, insértala al final del grupo de su dificultad correspondiente, nunca al final del documento sin importar el orden.
 
 ---
 
@@ -59,36 +28,40 @@ Copia el siguiente bloque tal cual y complétalo con tu idea:
 
 A continuación encontrarás las ideas propuestas por el equipo. Lee las existentes antes de agregar la tuya para evitar duplicados y, si ves algo que te gusta, ¡no dudes en comentarlo en el PR correspondiente!
 
----
+<!-- ⚠️ NOTA PARA AGENTES DE IA Y CONTRIBUYENTES:
+  Las filas de esta tabla SIEMPRE deben estar ordenadas por Nivel de Dificultad:
+    1. Bajo (primero)
+    2. Medio (después)
+    3. Alto (al final)
+  Dentro del mismo nivel de dificultad, el orden es cronológico (por fecha).
+  Cuando se agregue una nueva idea, debe insertarse al final del grupo de su dificultad.
+  NUNCA agregar una fila al final sin respetar este orden.
+-->
 
-### 🔹 Nombre del Microservicio
+| #   | Microservicio                     | Slug                          | Descripción                                                                                                                                                                                  | Público                                  | Dificultad | Impacto | Propuesto por               | Fecha    |
+| --- | --------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- | ---------- | ------- | --------------------------- | -------- |
+| 1   | Reporte de Espacios Dañados       | report-service                | Denunciar espacios o recursos dañados (tableros, sillas, baños, proyectores) para que mantenimiento priorice y dé seguimiento a las reparaciones.                                            | Estudiantes, profesores, administrativos | Bajo       | Alto    | KApp Team                   | 26/02/25 |
+| 2   | Objetos Perdidos                  | lost-and-found-service        | Registrar y buscar objetos perdidos en el campus. Quien encuentra un objeto lo reporta y quien lo perdió busca coincidencias para coordinar la devolución.                                   | Estudiantes, profesores, administrativos | Bajo       | Medio   | Brian Steven Vargas Clavijo | 10/03/26 |
+| 3   | Mapa Interactivo                  | map-service                   | Buscar salones, aulas, edificios y espacios del campus mediante un mapa interactivo con orientación visual.                                                                                  | Estudiantes, profesores, invitados       | Medio      | Alto    | KApp Team                   | 26/02/25 |
+| 4   | Gestión de Clubes                 | club-service                  | Crear, consultar y gestionar clubes estudiantiles: descubrir clubes, inscribirse, administrar miembros, publicar actividades y coordinar reuniones.                                          | Estudiantes, administradores             | Medio      | Alto    | Brian Steven Vargas Clavijo | 10/03/26 |
+| 5   | Citas de Bienestar y Coordinación | bienestar-appointment-service | Agendar citas con Bienestar Universitario, coordinación académica y psicología. Cascarón extensible para que cada dependencia configure su disponibilidad y flujo de agendamiento.           | Estudiantes, profesores, administrativos | Medio      | Alto    | KApp Team                   | 26/02/25 |
+| 6   | Menú y Pedidos del Restaurante    | restaurant-service            | Consultar el menú del día del restaurante universitario y realizar pedidos o compras de comida desde la app.                                                                                 | Estudiantes, profesores, administrativos | Medio      | Alto    | KApp Team                   | 26/02/25 |
+| 7   | Semáforo Estudiantil              | student-semaphore-service     | Consultar el semáforo académico de cada estudiante (promedio, créditos, alertas) e identificar estudiantes en riesgo para acompañamiento oportuno.                                           | Estudiantes, administradores             | Medio      | Alto    | KApp Team                   | 26/02/25 |
+| 8   | Biblioteca                        | library-service               | Consultar catálogo, ver historial de préstamos, renovar préstamos y reservar libros o inscribirse en lista de espera.                                                                        | Estudiantes, profesores                  | Medio      | Alto    | KApp Team                   | 26/02/25 |
+| 9   | Eventos y Actividades             | event-service                 | Centralizar eventos universitarios (culturales, deportivos, académicos), filtrar por categoría, inscribirse y agregar al calendario personal.                                                | Todos                                    | Medio      | Alto    | KApp Team                   | 26/02/25 |
+| 10  | Notificaciones                    | notification-service          | Servicio transversal de notificaciones push en tiempo real. Centraliza alertas de todos los microservicios (horarios, mensajes, eventos, citas) con configuración personalizada por usuario. | Todos                                    | Medio      | Alto    | KApp Team                   | 26/02/25 |
+| 11  | Parqueadero                       | parking-service               | Reservar espacios de parqueo, consultar disponibilidad en tiempo real y realizar pagos por uso del parqueadero universitario.                                                                | Estudiantes, profesores, administrativos | Medio      | Medio   | KApp Team                   | 26/02/25 |
+| 12  | Carné Digital                     | carnet-service                | Carné universitario digital con código QR vinculado a la identidad del estudiante o profesor para identificación en accesos y servicios.                                                     | Estudiantes, profesores                  | Medio      | Bajo    | KApp Team                   | 26/02/25 |
+| 13  | Chat por Materia                  | chat-service                  | Mensajería organizada por materia: profesor ↔ grupo, estudiante ↔ estudiante, facultad ↔ miembros académicos. Reemplaza canales informales (WhatsApp, correo).                               | Estudiantes, profesores, facultad        | Alto       | Alto    | KApp Team                   | 26/02/25 |
 
-**Reserva de Tutorías (`tutoring-service`)**
-
-**Descripción breve:**
-
-> Permite a los estudiantes buscar y reservar sesiones de tutoría con monitores o profesores disponibles. Resuelve el problema de la coordinación informal (grupos de WhatsApp, correos perdidos) centralizando la oferta de tutorías en un solo lugar con disponibilidad en tiempo real.
-
-**Público Objetivo:**
-
-> Estudiantes y profesores/monitores.
-
-**Nivel de Dificultad:**
-
-> Medio
-
-**Impacto / Valor para el usuario:**
-
-> Alto — La falta de acceso oportuno a tutorías es una de las principales quejas estudiantiles. Un sistema claro de reservas reduce la deserción y mejora el rendimiento académico.
-
-**Propuesto por:** @equipo-kapp
-**Fecha:** 2026-03-09
+> **KApp Team:** Brian Steven Vargas Clavijo, Julián David Avila Cortes, Santiago Rocha Ramirez, Diego Ali Lares Rondon.
 
 ---
 
 <!--
   ┌─────────────────────────────────────────────┐
-  │  ¡Agrega tu idea debajo de esta línea!      │
-  │  Copia la plantilla base y complétala.      │
+  │  ¡Agrega tu idea como nueva fila a la       │
+  │  tabla, respetando el orden por dificultad!  │
+  │  (Bajo → Medio → Alto)                      │
   └─────────────────────────────────────────────┘
 -->
