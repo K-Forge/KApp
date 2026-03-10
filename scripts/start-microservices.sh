@@ -10,7 +10,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-MS_DIR="$ROOT/backend/microservices"
+MS_DIR="$ROOT/app/backend/microservices"
 PIDS_DIR="$ROOT/.pids"
 
 # Service definitions: name → port (order matters for startup)
@@ -39,17 +39,33 @@ ok()   { log "✅ $1"; }
 fail() { log "❌ $1"; }
 info() { log "ℹ️  $1"; }
 
+preflight() {
+  command -v java &>/dev/null || { fail "Java is not installed. Required: Java 21+"; exit 1; }
+  command -v curl &>/dev/null || { fail "curl is required for health checks"; exit 1; }
+
+  local java_ver
+  java_ver=$(java -version 2>&1 | head -1 | grep -oE '"[0-9]+' | tr -d '"')
+  if [ "${java_ver:-0}" -lt 21 ]; then
+    fail "Java 21+ required, found Java $java_ver"; exit 1
+  fi
+  ok "Java $java_ver detected"
+
+  [ -d "$MS_DIR" ] || { fail "Microservices directory not found: $MS_DIR"; exit 1; }
+}
+
 wait_for_port() {
-  local port=$1 name=$2 retries=60
+  local port=$1 name=$2 timeout=${3:-120} elapsed=0
   info "Waiting for $name on port $port..."
   while ! curl -sf "http://localhost:$port/actuator/health" &>/dev/null; do
-    retries=$((retries - 1))
-    if [ $retries -le 0 ]; then
-      fail "$name did not start on port $port" && return 1
+    elapsed=$((elapsed + 2))
+    if [ $elapsed -ge $timeout ]; then
+      fail "$name did not start on port $port after ${timeout}s"
+      cat "$PIDS_DIR/$name.log" 2>/dev/null | tail -20
+      return 1
     fi
     sleep 2
   done
-  ok "$name is ready on port $port"
+  ok "$name is ready on port $port (${elapsed}s)"
 }
 
 start_service() {
@@ -131,6 +147,9 @@ case "${1:-start}" in
     echo "╔══════════════════════════════════════════╗"
     echo "║   KApp Microservices · Local Startup    ║"
     echo "╚══════════════════════════════════════════╝"
+    echo ""
+
+    preflight
     echo ""
 
     # Phase 1: Infrastructure
