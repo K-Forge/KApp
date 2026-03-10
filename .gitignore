@@ -297,11 +297,10 @@ jacoco.exec
 .pids/
 
 # ─────────────────────────────────────────────
-# Proyecto — KApp específico
+# Proyecto — KApp
 # ─────────────────────────────────────────────
-/KApp FRONT v1/nbproject/private/
 
-# TomEE
-TomEE/apache-tomee-plus-*/logs/
-TomEE/apache-tomee-plus-*/work/
-TomEE/apache-tomee-plus-*/temp/
+# Duplicate directories (macOS copy artifacts)
+**/*(1)*
+**/* 2/
+**/* 2.*

@@ -171,6 +171,75 @@ git push origin feature/course-enrollment
 
 ---
 
+## 🏷️ Versionamiento
+
+Usamos un esquema inspirado en **SemVer** con formato `MAJOR.MINOR` y `.PATCH` solo cuando es necesario. Se omiten ceros innecesarios para mantenerlo limpio.
+
+```
+MAJOR.MINOR.PATCH
+```
+
+- **MAJOR** — Rediseño grande o cambio que rompe compatibilidad
+- **MINOR** — Nueva funcionalidad
+- **PATCH** — Corrección de errores (solo aparece si hace falta)
+
+### Versiones estables
+
+| Versión | Rama          | Tag      | Significado             |
+| ------- | ------------- | -------- | ----------------------- |
+| `1.0`   | `release/1.0` | `v1.0`   | Primera versión estable |
+| `1.1`   | `release/1.1` | `v1.1`   | Nueva feature           |
+| `1.1.1` | `hotfix/*`    | `v1.1.1` | Hotfix sobre producción |
+| `2.0`   | `release/2.0` | `v2.0`   | Rediseño grande         |
+
+### Pre-releases (alpha, beta)
+
+Para versiones que aún no son estables, se añade un sufijo con guión:
+
+| Versión     | Rama                | Tag          | Significado                              |
+| ----------- | ------------------- | ------------ | ---------------------------------------- |
+| `1.0-alpha` | `release/1.0-alpha` | `v1.0-alpha` | En desarrollo, funcional pero incompleta |
+| `1.0-beta`  | `release/1.0-beta`  | `v1.0-beta`  | Estable para pruebas                     |
+| `1.0`       | `release/1.0`       | `v1.0`       | Versión final                            |
+
+Si se necesitan múltiples iteraciones: `v1.0-alpha.2`, `v1.0-beta.3`, etc.
+
+### Ciclo de vida de una versión
+
+```
+alpha → beta → release estable
+```
+
+```bash
+# 1. Crear rama de release desde develop
+git checkout develop
+git checkout -b release/1.0-alpha
+
+# 2. Commit de preparación
+git commit -m "release: prepare v1.0-alpha"
+
+# 3. Mergear a main y taggear
+git checkout main
+git merge release/1.0-alpha
+git tag -a v1.0-alpha -m "release: v1.0-alpha"
+git push origin main --tags
+
+# 4. Mergear de vuelta a develop
+git checkout develop
+git merge release/1.0-alpha
+```
+
+### Cuándo incrementar cada número
+
+| Cambio                             | Ejemplo                   | Incremento             |
+| ---------------------------------- | ------------------------- | ---------------------- |
+| Nuevo módulo, pantalla o API       | Agregar sistema de notas  | Minor: `1.0` → `1.1`   |
+| Bug fix en producción              | Corregir error de login   | Patch: `1.1` → `1.1.1` |
+| Rediseño de arquitectura           | Migrar a microservicios   | Major: `1.x` → `2.0`   |
+| Múltiples features nuevas (sprint) | Dashboard + inscripciones | Minor: `1.1` → `1.2`   |
+
+---
+
 📚 Para más información sobre Git Glow, visita [GitHub - Git Glow](https://github.com/arthurdenner/git-glow) o consulta la documentación interna del equipo.
 
 ---
