@@ -63,6 +63,8 @@ A continuación encontrarás las ideas propuestas por el equipo. Lee las existen
 | Objetos Perdidos                  | lost-and-found-service        | Registrar y buscar objetos perdidos en el campus. Quien encuentra un objeto lo reporta y quien lo perdió busca coincidencias para coordinar la devolución.                                   | Estudiantes, profesores, administrativos | Medio   | Bajo       | Brian Steven Vargas Clavijo | 10/03/26 |
 | Parqueadero                       | parking-service               | Reservar espacios de parqueo, consultar disponibilidad en tiempo real y realizar pagos por uso del parqueadero universitario.                                                                | Estudiantes, profesores, administrativos | Medio   | Medio      | KApp Team                   | 26/02/25 |
 | Carné Digital                     | carnet-service                | Carné universitario digital con código QR vinculado a la identidad del estudiante o profesor para identificación en accesos y servicios.                                                     | Estudiantes, profesores                  | Bajo    | Medio      | KApp Team                   | 26/02/25 |
+| Salones Disponibles | available-classrooms | Consulta en tiempo real de aulas libres y su disponibilidad por piso para evitar interrupciones por clases. | Estudiantes | Medio | Alto | @DIEGO-ALI | 10/03/26 |
+
 
 > **KApp Team:** Brian Steven Vargas Clavijo, Julián David Avila Cortes, Santiago Rocha Ramirez, Diego Ali Lares Rondon.
 
