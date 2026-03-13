@@ -64,7 +64,8 @@ A continuación encontrarás las ideas propuestas por el equipo. Lee las existen
 | Parqueadero                       | parking-service               | Reservar espacios de parqueo, consultar disponibilidad en tiempo real y realizar pagos por uso del parqueadero universitario.                                                                | Estudiantes, profesores, administrativos | Medio   | Medio      | KApp Team                   | 26/02/25 |
 | Carné Digital                     | carnet-service                | Carné universitario digital con código QR vinculado a la identidad del estudiante o profesor para identificación en accesos y servicios.                                                     | Estudiantes, profesores                  | Bajo    | Medio      | KApp Team                   | 26/02/25 |
 | Salones Disponibles | available-classrooms | Consulta en tiempo real de aulas libres y su disponibilidad por piso para evitar interrupciones por clases. | Estudiantes | Medio | Alto | @DIEGO-ALI | 10/03/26 |
-
+| Reserva de espacios edificio Bienestar | recreation-bookings | Consulta de la dispoibilidad de los espacios de bienestar (mesas de Ping Pong, sala de danzas, mesas de billar, etc), agendamiento de espacios con cupos limitados y en los horarios especificos de atención. | Estudiantes | Medio | Bajo | Zavithar_17 | 12/03/26 |
+| Gestion de Gimnasio | gym-management | Inscripción al servicio de gimnasio de la universidad, gestión de rutinas diseñadas por los profesores, sección de recomendaciones alimenticias para cumplimiento de objetivos. | Estudiantes y entrenadores | Medio | Medio | Zavithar_17 | 12/03/26 |
 
 > **KApp Team:** Brian Steven Vargas Clavijo, Julián David Avila Cortes, Santiago Rocha Ramirez, Diego Ali Lares Rondon.
 
