@@ -67,7 +67,8 @@ A continuación encontrarás las ideas propuestas por el equipo. Lee las existen
 | Carné Digital                     | carnet-service                | Carné universitario digital con código QR vinculado a la identidad del estudiante o profesor para identificación en accesos y servicios.                                                     | Estudiantes, profesores                  | Bajo    | Medio      | KApp Team                   | 26/02/25 |
 | Parqueadero                       | parking-service               | Reservar espacios de parqueo, consultar disponibilidad en tiempo real y realizar pagos por uso del parqueadero universitario.                                                                | Estudiantes, profesores, administrativos | Medio   | Medio      | KApp Team                   | 26/02/25 |
 | Gestion de Gimnasio | gym-management | Inscripción al servicio de gimnasio de la universidad, gestión de rutinas diseñadas por los profesores, sección de recomendaciones alimenticias para cumplimiento de objetivos. | Estudiantes y entrenadores | Medio | Medio | Zavithar_17 | 12/03/26 |
-
+| Limpieza de Baños | bathroom-cleaning-service | Reportar la necesidad de limpieza en baños del campus para que el equipo de mantenimiento responda rápidamente. | Estudiantes, profesores, administrativos | Medio | Bajo | Julián Ávila | 13/03/26 |
+| Pagos en Cafetería | cafeteria-payment-service | Facilitar pagos digitales por consumiciones en la cafetería universitaria, integrando con el sistema de pagos institucional. | Estudiantes, profesores, administrativos | Medio | Bajo | Julián Ávila | 13/03/26 |
 
 > **KApp Team:** Brian Steven Vargas Clavijo, Julián David Avila Cortes, Santiago Rocha Ramirez, Diego Ali Lares Rondon.
 
