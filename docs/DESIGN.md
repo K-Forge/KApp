@@ -214,20 +214,20 @@ erDiagram
 
 ## 9. Roadmap Técnico
 
-1. ✅ Migración a microservicios
-2. ✅ Service Discovery (Eureka)
-3. ✅ API Gateway + JWT
-4. ✅ Circuit Breaker
-5. 🔲 Config Server centralizado
-6. 🔲 Frontend Angular
-7. 🔲 Frontend Kotlin (Android)
-8. 🔲 Frontend Swift (iOS)
-9. 🔲 Rate Limiting en Gateway
-10. 🔲 Distributed Tracing (Zipkin)
-11. 🔲 Message Queue (async communication)
-12. 🔲 Database per service
-13. 🔲 CI/CD Pipeline
-14. 🔲 Kubernetes deployment
+1. [X] Migración a microservicios
+2. [X] Service Discovery (Eureka)
+3. [X] API Gateway + JWT
+4. [X] Circuit Breaker
+5. [ ] Config Server centralizado
+6. [ ] Frontend Angular
+7. [ ] Frontend Kotlin (Android)
+8. [ ] Frontend Swift (iOS)
+9. [ ] Rate Limiting en Gateway
+10. [ ] Distributed Tracing (Zipkin)
+11. [ ] Message Queue (async communication)
+12. [ ] Database per service
+13. [ ] CI/CD Pipeline
+14. [ ] Kubernetes deployment
 
 ---
 

@@ -1,247 +1,288 @@
-# 🛠️ Guía para Contribuir a KApp
+# Guía para Contribuir a KApp
 
-## 🤝 ¿Quién puede contribuir?
+## ¿Quién puede contribuir?
 
-Este proyecto es parte de K-Forge y está restringido a miembros autorizados.  
-Si formas parte del equipo de desarrollo, sigue estas pautas para contribuir al código.
+Este proyecto es parte de K-Forge y está restringido a miembros autorizados de la Fundación Universitaria Konrad Lorenz. Si formas parte del equipo de desarrollo, sigue estas pautas para contribuir al código.
 
 ---
 
-## 📌 Flujo de trabajo y convención de commits
+## Convención para Commits
 
-Para mantener un historial limpio y comprensible, seguimos la convención **Git Glow** y el flujo de trabajo basado en ramas. Usa el siguiente formato para tus commits:
+Para mantener un historial limpio y comprensible, seguimos la convención de **Conventional Commits** y usamos la herramienta **Git Glow** para hooks. Usa el siguiente formato para tus mensajes de commit:
 
 ```
 type: short message in english
 ```
 
-> Todos los commits deben estar **en inglés**, en minúscula y sin corchetes.
+> El mensaje siempre debe estar en **inglés**, en **minúsculas**, y sin punto final.
 
 ---
 
-### 🧾 Tipos de Commits
+### Tipos de Commits
 
-El _type_ indica la naturaleza del cambio realizado.
-
-- **feat** — Nueva funcionalidad
-- **fix** — Corrección de errores
-- **chore** — Tareas de mantenimiento del proyecto
-- **release** — Preparación de una nueva versión
-- **hotfix** — Corrección urgente en producción
-- **docs** — Cambios en documentación
-- **refactor** — Reestructuración de código sin cambiar funcionalidad
-- **test** — Agregar o modificar tests
-
----
-
-### ✅ Ejemplos Correctos
-
-- `feat: add login screen`
-- `fix: resolve jwt token expiration bug`
-- `chore: update spring boot dependencies`
-- `docs: add branching guide to contributing`
-- `refactor: extract user validation logic`
-- `release: prepare version 1.0.0`
+| Tipo       | Descripción                                    |
+| ---------- | ---------------------------------------------- |
+| `feat`     | Nueva funcionalidad                            |
+| `fix`      | Corrección de errores                          |
+| `chore`    | Tareas de mantenimiento del proyecto           |
+| `release`  | Preparación de una nueva versión               |
+| `hotfix`   | Corrección urgente en producción               |
+| `docs`     | Cambios en documentación                       |
+| `refactor` | Refactorización de código sin cambiar comportamiento |
+| `test`     | Agregar o modificar tests                      |
 
 ---
 
-### ⛔ Ejemplos Incorrectos
+### Ejemplos Correctos
 
-- `update` → No describe nada útil
-- `[FEAT][UI] Agregar pantalla` → No usar corchetes ni español
-- `Fix bug` → Debe ser minúscula: `fix: ...`
-- `cambios varios` → Muy ambiguo y en español
+```
+feat: add login screen
+fix: resolve jwt token expiration bug
+chore: update spring boot dependencies
+docs: add branching guide to contributing
+refactor: extract user validation logic
+test: add integration tests for user service
+release: prepare version 1.0.0
+hotfix: fix cors config in gateway
+```
+
+### Ejemplos Incorrectos
+
+```
+update                          → No describe nada útil
+[FEAT][UI] Agregar pantalla     → No usar corchetes ni español
+Fix bug                         → Debe ser minúscula
+cambios varios                  → Muy ambiguo, y no está en inglés
+```
 
 ---
 
-## 🌿 Ramas (Branching)
+## Modelo de Ramas — Git Flow
 
-Seguimos **Git Flow**. Todas las ramas deben partir de `develop` (excepto `hotfix/*`, que parte de `main`).
+Seguimos el modelo **Git Flow** para organizar el trabajo en ramas. Todas las ramas deben partir de `develop` (excepto `hotfix/*`, que parte de `main`).
 
 ### Diagrama de ramas
 
 ```mermaid
 gitGraph
-    commit id: "init"
-    branch develop
-    commit id: "setup project"
-    branch feature/login
-    commit id: "feat: add login screen"
-    commit id: "feat: add jwt auth"
-    checkout develop
-    merge feature/login
-    branch feature/courses
-    commit id: "feat: add course list"
-    checkout develop
-    merge feature/courses
-    branch test/sprint-1
-    commit id: "test: integration tests"
-    commit id: "fix: resolve test failures"
-    checkout develop
-    merge test/sprint-1
-    branch release/1.0.0
-    commit id: "release: prepare v1.0.0"
-    checkout main
-    merge release/1.0.0 tag: "v1.0.0"
-    checkout develop
-    merge release/1.0.0
-    checkout main
-    branch hotfix/fix-cors
-    commit id: "hotfix: fix cors config"
-    checkout main
-    merge hotfix/fix-cors tag: "v1.0.1"
-    checkout develop
-    merge hotfix/fix-cors
+   commit id: "init"
+   branch develop
+   checkout develop
+   commit id: "setup project"
+   branch feature/login
+   checkout feature/login
+   commit id: "feat: add login screen"
+   commit id: "feat: add jwt auth"
+   checkout develop
+   merge feature/login
+   branch feature/courses
+   checkout feature/courses
+   commit id: "feat: add course list"
+   checkout develop
+   merge feature/courses
+   branch chore/update-docs
+   checkout chore/update-docs
+   commit id: "docs: add api documentation"
+   checkout develop
+   merge chore/update-docs
+   branch test/sprint-1
+   checkout test/sprint-1
+   commit id: "test: integration tests"
+   commit id: "fix: resolve test failures"
+   checkout develop
+   merge test/sprint-1
+   branch release/1.0.0
+   checkout release/1.0.0
+   commit id: "release: prepare v1.0.0"
+   checkout main
+   merge release/1.0.0 tag: "v1.0.0"
+   checkout develop
+   merge release/1.0.0
+   checkout main
+   branch hotfix/fix-cors
+   checkout hotfix/fix-cors
+   commit id: "hotfix: fix cors config"
+   checkout main
+   merge hotfix/fix-cors tag: "v1.0.1"
+   checkout develop
+   merge hotfix/fix-cors
 ```
 
-### Tipos de ramas
+---
 
-| Rama        | Base      | Se mergea a          | Uso                              |
-| ----------- | --------- | -------------------- | -------------------------------- |
-| `main`      | —         | —                    | Producción estable               |
-| `develop`   | `main`    | `main` (via release) | Integración de features          |
-| `feature/*` | `develop` | `develop`            | Nueva funcionalidad              |
-| `test/*`    | `develop` | `develop`            | Pruebas de integración / QA      |
-| `hotfix/*`  | `main`    | `main` + `develop`   | Corrección urgente en producción |
-| `release/*` | `develop` | `main` + `develop`   | Preparación de una versión       |
+### Tipos de Ramas
 
-### Crear una rama
+| Rama           | Propósito                                    | Nace de     | Se fusiona en         |
+| -------------- | -------------------------------------------- | ----------- | --------------------- |
+| `main`         | Código estable en producción                 | —           | —                     |
+| `develop`      | Integración de funcionalidades en desarrollo | `main`      | `release/*`, `main`   |
+| `feature/*`    | Desarrollo de nuevas funcionalidades         | `develop`   | `develop`             |
+| `chore/*`      | Mantenimiento (docs, configs, dependencias)  | `develop`   | `develop`             |
+| `bugfix/*`     | Corrección de bugs no urgentes en desarrollo | `develop`   | `develop`             |
+| `test/*`       | Pruebas de integración o experimentación     | `develop`   | `develop`             |
+| `hotfix/*`     | Correcciones urgentes en producción          | `main`      | `main`, `develop`     |
+| `release/*`    | Preparación de una versión para producción   | `develop`   | `main`, `develop`     |
 
-```bash
-# Feature nueva
-git checkout develop
-git pull origin develop
-git checkout -b feature/login-screen
+---
 
-# Hotfix urgente
-git checkout main
-git pull origin main
-git checkout -b hotfix/fix-jwt-expiration
-
-# Test / QA
-git checkout develop
-git pull origin develop
-git checkout -b test/sprint-1
-
-# Release
-git checkout develop
-git checkout -b release/1.2.0
-```
-
-### Nombrar ramas
-
-Usa kebab-case descriptivo después del prefijo:
-
-✅ **Correcto:**
-
-- `feature/student-dashboard`
-- `feature/assignment-submission-api`
-- `hotfix/fix-cors-gateway`
-- `test/sprint-3`
-- `release/2.0.0`
-
-⛔ **Incorrecto:**
-
-- `feature/changes` → Muy vago
-- `mi-rama` → Sin prefijo
-- `feature/StudentDashboard` → No usar camelCase
-- `feat/login` → Usar `feature`, no `feat`
-
-### Flujo completo (ejemplo)
+### Cómo crear ramas
 
 ```bash
-# 1. Crear la rama desde develop
+# Desde develop, crear una feature
 git checkout develop
 git pull origin develop
 git checkout -b feature/course-enrollment
 
-# 2. Hacer commits siguiendo la convención
+# Mantenimiento (docs, configs, refactor de estructura)
+git checkout develop
+git pull origin develop
+git checkout -b chore/update-dependencies
+
+# Corrección de bug no urgente
+git checkout develop
+git pull origin develop
+git checkout -b bugfix/fix-jwt-expiration
+
+# Desde develop, crear una rama de test
+git checkout develop
+git checkout -b test/sprint-1
+
+# Desde main, crear un hotfix
+git checkout main
+git pull origin main
+git checkout -b hotfix/fix-cors-gateway
+
+# Desde develop, crear un release
+git checkout develop
+git checkout -b release/1.0.0
+```
+
+---
+
+### Convención de nombres para ramas
+
+Usa **kebab-case** (minúsculas separadas por guiones) después del prefijo.
+
+- `feature/student-dashboard`          (correcto)
+- `feature/assignment-submission-api`  (correcto)
+- `chore/update-spring-dependencies`   (correcto)
+- `chore/add-api-documentation`        (correcto)
+- `bugfix/fix-null-pointer-product`    (correcto)
+- `hotfix/fix-cors-gateway`            (correcto)
+- `release/1.2.0`                      (correcto)
+- `test/sprint-3`                      (correcto)
+
+- `feature/changes`                    (incorrecto — muy vago)
+- `mi-rama`                            (incorrecto — falta prefijo)
+- `feature/StudentDashboard`           (incorrecto — no usar camelCase)
+- `feat/login`                         (incorrecto — usar feature, no feat)
+
+---
+
+### Flujo completo de trabajo — Ejemplo
+
+```bash
+# 1. Actualizar develop
+git checkout develop
+git pull origin develop
+
+# 2. Crear feature
+git checkout -b feature/course-enrollment
+
+# 3. Trabajar y hacer commits
 git add .
 git commit -m "feat: add course enrollment endpoint"
 
 git add .
 git commit -m "feat: add enrollment screen"
 
-# 3. Push de la rama
+# 4. Push de la rama
 git push origin feature/course-enrollment
 
-# 4. Crear Pull Request en GitHub → develop
-# 5. Tras aprobación, mergear y eliminar la rama
+# 5. Crear Pull Request → develop
+# Esperar code review y aprobación
+
+# 6. Merge a develop (vía PR)
+# 7. Eliminar la rama feature
+git branch -d feature/course-enrollment
 ```
 
 ---
 
-## 🏷️ Versionamiento
+## Versionamiento
 
-Usamos un esquema inspirado en **SemVer** con formato `MAJOR.MINOR` y `.PATCH` solo cuando es necesario. Se omiten ceros innecesarios para mantenerlo limpio.
+Seguimos un esquema inspirado en **SemVer** (Semantic Versioning) con formato `MAJOR.MINOR.PATCH`. Se omiten ceros innecesarios para mantenerlo limpio si es necesario, aunque se recomienda la estructura completa.
 
 ```
 MAJOR.MINOR.PATCH
 ```
 
-- **MAJOR** — Rediseño grande o cambio que rompe compatibilidad
-- **MINOR** — Nueva funcionalidad
-- **PATCH** — Corrección de errores (solo aparece si hace falta)
+| Segmento | Cuándo incrementar                                         | Ejemplo               |
+| -------- | ---------------------------------------------------------- | --------------------- |
+| `MAJOR`  | Rediseño grande o cambio que rompe compatibilidad          | `1.x` → `2.0.0`       |
+| `MINOR`  | Nueva funcionalidad compatible hacia atrás                 | `1.0.0` → `1.1.0`     |
+| `PATCH`  | Correcciones de errores en producción (hotfix)             | `1.1.0` → `1.1.1`     |
 
-### Versiones estables
-
-| Versión | Rama          | Tag      | Significado             |
-| ------- | ------------- | -------- | ----------------------- |
-| `1.0`   | `release/1.0` | `v1.0`   | Primera versión estable |
-| `1.1`   | `release/1.1` | `v1.1`   | Nueva feature           |
-| `1.1.1` | `hotfix/*`    | `v1.1.1` | Hotfix sobre producción |
-| `2.0`   | `release/2.0` | `v2.0`   | Rediseño grande         |
-
-### Pre-releases (alpha, beta)
+### Versiones Pre-release
 
 Para versiones que aún no son estables, se añade un sufijo con guión:
 
-| Versión     | Rama                | Tag          | Significado                              |
-| ----------- | ------------------- | ------------ | ---------------------------------------- |
-| `1.0-alpha` | `release/1.0-alpha` | `v1.0-alpha` | En desarrollo, funcional pero incompleta |
-| `1.0-beta`  | `release/1.0-beta`  | `v1.0-beta`  | Estable para pruebas                     |
-| `1.0`       | `release/1.0`       | `v1.0`       | Versión final                            |
-
-Si se necesitan múltiples iteraciones: `v1.0-alpha.2`, `v1.0-beta.3`, etc.
+| Versión          | Rama                | Tag               | Significado                              |
+| ---------------- | ------------------- | ----------------- | ---------------------------------------- |
+| `1.0.0-alpha.1`  | `release/1.0.0-alpha` | `v1.0.0-alpha.1`  | En desarrollo, funcional pero incompleta |
+| `1.0.0-beta.1`   | `release/1.0.0-beta`  | `v1.0.0-beta.1`   | Estable para pruebas                     |
+| `1.0.0`          | `release/1.0.0`       | `v1.0.0`          | Versión final                            |
 
 ### Ciclo de vida de una versión
 
-```
-alpha → beta → release estable
+```mermaid
+graph LR
+    A[alpha] --> B[beta]
+    B --> C[release candidate]
+    C --> D[stable]
+    D --> E[maintenance / patch]
 ```
 
 ```bash
 # 1. Crear rama de release desde develop
 git checkout develop
-git checkout -b release/1.0-alpha
+git checkout -b release/1.0.0-alpha
 
 # 2. Commit de preparación
-git commit -m "release: prepare v1.0-alpha"
+git commit -m "release: prepare v1.0.0-alpha"
 
 # 3. Mergear a main y taggear
 git checkout main
-git merge release/1.0-alpha
-git tag -a v1.0-alpha -m "release: v1.0-alpha"
+git merge release/1.0.0-alpha
+git tag -a v1.0.0-alpha -m "release: v1.0.0-alpha"
 git push origin main --tags
 
 # 4. Mergear de vuelta a develop
 git checkout develop
-git merge release/1.0-alpha
+git merge release/1.0.0-alpha
 ```
 
-### Cuándo incrementar cada número
+---
 
-| Cambio                             | Ejemplo                   | Incremento             |
-| ---------------------------------- | ------------------------- | ---------------------- |
-| Nuevo módulo, pantalla o API       | Agregar sistema de notas  | Minor: `1.0` → `1.1`   |
-| Bug fix en producción              | Corregir error de login   | Patch: `1.1` → `1.1.1` |
-| Rediseño de arquitectura           | Migrar a microservicios   | Major: `1.x` → `2.0`   |
-| Múltiples features nuevas (sprint) | Dashboard + inscripciones | Minor: `1.1` → `1.2`   |
+## Estándares de Código
+
+### Frontend (Angular / Web)
+
+Actualmente en migración hacia Angular. Se recomienda el uso de **Prettier** y **EditorConfig** para mantener un estilo consistente. 
+
+### Backend (Spring Boot)
+
+El backend utiliza **Java 21** y **Spring Boot 3.2**. Se recomienda seguir las convenciones estándar de Java:
+
+- Nombres de clases en **PascalCase**
+- Nombres de métodos y variables en **camelCase**
+- Constantes en **UPPER_SNAKE_CASE**
+- Paquetes en **minúsculas**
+- Indentación con 4 espacios (convención Java estándar)
+- Uso de **Lombok** para reducir código repetitivo (getters, setters, constructores).
 
 ---
 
-📚 Para más información sobre Git Glow, visita [GitHub - Git Glow](https://github.com/arthurdenner/git-glow) o consulta la documentación interna del equipo.
-
----
+Para más información sobre Git Glow, consulta la documentación interna del equipo.
 
 <!-- Los scripts de instalación de hooks se encuentran en la carpeta scripts/ y están diferenciados por plataforma: macos-git-glow.sh y windows-git-glow.ps1. -->

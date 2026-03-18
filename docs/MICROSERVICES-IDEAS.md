@@ -1,4 +1,4 @@
-# 💡 Ideas de Microservicios — KApp
+#  Ideas de Microservicios — KApp
 
 > **"Las mejores arquitecturas nacen de buenas ideas compartidas."**
 
@@ -8,7 +8,7 @@ La meta es simple: **dejar una base sólida de ideas bien pensadas** que nos per
 
 ---
 
-## 📋 Instrucciones de Uso
+##  Instrucciones de Uso
 
 ¿Tienes una idea? ¡Genial! Sigue estos pasos para agregarla:
 
@@ -24,25 +24,25 @@ La meta es simple: **dejar una base sólida de ideas bien pensadas** que nos per
 
 ---
 
-## 📊 Matriz Impacto × Dificultad
+##  Matriz Impacto × Dificultad
 
 A continuación encontrarás las ideas propuestas por el equipo. Lee las existentes antes de agregar la tuya para evitar duplicados y, si ves algo que te gusta, ¡no dudes en comentarlo en el PR correspondiente!
 
 |                        | Baja Dificultad                                | Media/Alta Dificultad                           |
 | ---------------------- | ---------------------------------------------- | ----------------------------------------------- |
-| **Alto Impacto**       | 🏆 **Quick wins** <br> _Hacer primero_         | 🎯 **Proyectos estratégicos** <br> _Planificar_ |
-| **Medio/Bajo Impacto** | 🧩 **Relleno** <br> _Hacer cuando haya tiempo_ | ⏸️ **Evitar o posponer** <br> _Baja prioridad_  |
+| **Alto Impacto**       |  **Quick wins** <br> _Hacer primero_         |  **Proyectos estratégicos** <br> _Planificar_ |
+| **Medio/Bajo Impacto** |  **Relleno** <br> _Hacer cuando haya tiempo_ |  **Evitar o posponer** <br> _Baja prioridad_  |
 
 ---
 
-## 🚀 Ideas Registradas
+##  Ideas Registradas
 
-<!-- ⚠️ NOTA PARA AGENTES DE IA Y CONTRIBUYENTES:
+<!-- IMPORTANTE: NOTA PARA AGENTES DE IA Y CONTRIBUYENTES:
   Las filas de esta tabla SIEMPRE deben estar ordenadas por la matriz Impacto × Dificultad:
-    1. 🏆 Quick wins — Alto Impacto + Baja Dificultad (primero)
-    2. 🎯 Proyectos estratégicos — Alto Impacto + Media/Alta Dificultad
-    3. 🧩 Relleno — Bajo/Medio Impacto + Baja Dificultad
-    4. ⏸️ Evitar o posponer — Bajo/Medio Impacto + Media/Alta Dificultad (al final)
+    1.  Quick wins — Alto Impacto + Baja Dificultad (primero)
+    2.  Proyectos estratégicos — Alto Impacto + Media/Alta Dificultad
+    3.  Relleno — Bajo/Medio Impacto + Baja Dificultad
+    4.  Evitar o posponer — Bajo/Medio Impacto + Media/Alta Dificultad (al final)
   Dentro de la misma categoría, el orden es cronológico (por fecha).
   Cuando se agregue una nueva idea, debe insertarse al final del grupo de su categoría.
   NUNCA agregar una fila al final sin respetar este orden.
@@ -77,6 +77,6 @@ A continuación encontrarás las ideas propuestas por el equipo. Lee las existen
   ┌──────────────────────────────────────────────────────────────────┐
   │  ¡Agrega tu idea como nueva fila a la tabla, respetando el     │
   │  orden de la matriz Impacto × Dificultad!                      │
-  │  🏆 Quick wins → 🎯 Estratégicos → 🧩 Relleno → ⏸️ Posponer   │
+  │   Quick wins →  Estratégicos →  Relleno →  Posponer   │
   └──────────────────────────────────────────────────────────────────┘
 -->

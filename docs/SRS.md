@@ -247,7 +247,7 @@ K-APP es una aplicación móvil independiente que se integrará con los sistemas
 
 ---
 
-> ⚠️ **TODO:** Las secciones 4 a 10 están siendo reformateadas y reestructuradas para mayor claridad.
+> IMPORTANTE: **TODO:** Las secciones 4 a 10 están siendo reformateadas y reestructuradas para mayor claridad.
 
 ---
 

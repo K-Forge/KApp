@@ -2,7 +2,7 @@
 
 Plataforma universitaria de la **Fundación Universitaria Konrad Lorenz**, desarrollada por **K-Forge**.
 
-> 🟡 En desarrollo
+> Estado: En desarrollo
 
 ---
 

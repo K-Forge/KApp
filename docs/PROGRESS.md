@@ -8,13 +8,13 @@
 
 | Área               | Estado      | Progreso |
 |--------------------|-------------|----------|
-| Infraestructura    | ✅ Completa | 100%     |
-| Backend Services   | ✅ Completa | 100%     |
-| Frontend Web       | 🟡 Parcial  | 30%      |
-| Frontend Android   | 🔲 Pendiente| 0%       |
-| Frontend iOS       | 🔲 Pendiente| 0%       |
-| DevOps             | 🟡 Parcial  | 40%      |
-| Documentación      | 🟡 Parcial  | 50%      |
+| Infraestructura    | [X] Completa | 100%     |
+| Backend Services   | [X] Completa | 100%     |
+| Frontend Web       | [Med] Parcial  | 30%      |
+| Frontend Android   | [ ] Pendiente| 0%       |
+| Frontend iOS       | [ ] Pendiente| 0%       |
+| DevOps             | [Med] Parcial  | 40%      |
+| Documentación      | [Med] Parcial  | 50%      |
 
 ---
 
@@ -22,13 +22,13 @@
 
 | Servicio              | Puerto | Estado       | Notas                              |
 |-----------------------|--------|--------------|------------------------------------|
-| Discovery Server      | 8761   | ✅ Operativo | Eureka dashboard funcional          |
-| API Gateway           | 8080   | ✅ Operativo | JWT validation + routing            |
-| Auth Service          | 8081   | ✅ Operativo | Login + JWT generation              |
-| User Service          | 8082   | ✅ Operativo | CRUD completo + endpoints internos  |
-| Course Service        | 8083   | ✅ Operativo | Cursos, grupos, matrículas          |
-| Assignment Service    | 8084   | ✅ Operativo | Tareas, entregas, calificaciones    |
-| Common Library        | —      | ✅ Operativo | DTOs + excepciones compartidas      |
+| Discovery Server      | 8761   | [X] Operativo | Eureka dashboard funcional          |
+| API Gateway           | 8080   | [X] Operativo | JWT validation + routing            |
+| Auth Service          | 8081   | [X] Operativo | Login + JWT generation              |
+| User Service          | 8082   | [X] Operativo | CRUD completo + endpoints internos  |
+| Course Service        | 8083   | [X] Operativo | Cursos, grupos, matrículas          |
+| Assignment Service    | 8084   | [X] Operativo | Tareas, entregas, calificaciones    |
+| Common Library        | —      | [X] Operativo | DTOs + excepciones compartidas      |
 
 ---
 
@@ -101,13 +101,13 @@
 
 ## Próximos Pasos (Prioridad)
 
-1. 🔴 **Config Server** — Centralizar configuración
-2. 🔴 **Angular Web** — Migrar frontend a Angular
-3. 🟡 **Refresh Tokens** — Mejorar flujo de auth
-4. 🟡 **Rate Limiting** — Protección del Gateway
-5. 🟢 **Kotlin App** — Implementar app Android
-6. 🟢 **Swift App** — Implementar app iOS
-7. 🟢 **CI/CD** — Pipeline de GitHub Actions
+1. [High] **Config Server** — Centralizar configuración
+2. [High] **Angular Web** — Migrar frontend a Angular
+3. [Med] **Refresh Tokens** — Mejorar flujo de auth
+4. [Med] **Rate Limiting** — Protección del Gateway
+5. [Low] **Kotlin App** — Implementar app Android
+6. [Low] **Swift App** — Implementar app iOS
+7. [Low] **CI/CD** — Pipeline de GitHub Actions
 
 ---
 
