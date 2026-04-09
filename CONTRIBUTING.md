@@ -2,36 +2,34 @@
 
 ## ¿Quién puede contribuir?
 
-Este proyecto es parte de K-Forge y está restringido a miembros autorizados de la Fundación Universitaria Konrad Lorenz. Si formas parte del equipo de desarrollo, sigue estas pautas para contribuir al código.
+Este proyecto es parte de **K-Forge** y está restringido a miembros autorizados de la Fundación Universitaria Konrad Lorenz. Si formas parte del equipo de desarrollo, sigue estas pautas para contribuir al código.
 
 ---
 
 ## Convención para Commits
 
-Para mantener un historial limpio y comprensible, seguimos la convención de **Conventional Commits** y usamos la herramienta **Git Glow** para hooks. Usa el siguiente formato para tus mensajes de commit:
+Para mantener un historial limpio y comprensible, seguimos la convención de **Conventional Commits** y usamos la herramienta **Git Glow** para hooks automáticos de validación.
+
+Formato:
 
 ```
 type: short message in english
 ```
 
-> El mensaje siempre debe estar en **inglés**, en **minúsculas**, y sin punto final.
-
----
+> El mensaje siempre debe estar en **inglés**, en **minúsculas**, y sin punto final. No usar scopes entre paréntesis.
 
 ### Tipos de Commits
 
-| Tipo       | Descripción                                    |
-| ---------- | ---------------------------------------------- |
-| `feat`     | Nueva funcionalidad                            |
-| `fix`      | Corrección de errores                          |
-| `chore`    | Tareas de mantenimiento del proyecto           |
-| `release`  | Preparación de una nueva versión               |
-| `hotfix`   | Corrección urgente en producción               |
-| `docs`     | Cambios en documentación                       |
-| `refactor` | Refactorización de código sin cambiar comportamiento |
-| `test`     | Agregar o modificar tests                      |
-
----
+| Tipo       | Descripción                                                  |
+| ---------- | ------------------------------------------------------------ |
+| `feat`     | Nueva funcionalidad                                          |
+| `fix`      | Corrección de errores                                        |
+| `chore`    | Tareas de mantenimiento del proyecto                         |
+| `release`  | Preparación de una nueva versión                             |
+| `hotfix`   | Corrección urgente en producción                             |
+| `docs`     | Cambios en documentación                                     |
+| `refactor` | Refactorización de código sin cambiar comportamiento         |
+| `test`     | Agregar o modificar tests                                    |
 
 ### Ejemplos Correctos
 
@@ -52,7 +50,8 @@ hotfix: fix cors config in gateway
 update                          → No describe nada útil
 [FEAT][UI] Agregar pantalla     → No usar corchetes ni español
 Fix bug                         → Debe ser minúscula
-cambios varios                  → Muy ambiguo, y no está en inglés
+cambios varios                  → Muy ambiguo y no está en inglés
+feat(api): add endpoint         → No usar scopes entre paréntesis
 ```
 
 ---
@@ -108,22 +107,18 @@ gitGraph
    merge hotfix/fix-cors
 ```
 
----
-
 ### Tipos de Ramas
 
-| Rama           | Propósito                                    | Nace de     | Se fusiona en         |
-| -------------- | -------------------------------------------- | ----------- | --------------------- |
-| `main`         | Código estable en producción                 | —           | —                     |
-| `develop`      | Integración de funcionalidades en desarrollo | `main`      | `release/*`, `main`   |
-| `feature/*`    | Desarrollo de nuevas funcionalidades         | `develop`   | `develop`             |
-| `chore/*`      | Mantenimiento (docs, configs, dependencias)  | `develop`   | `develop`             |
-| `bugfix/*`     | Corrección de bugs no urgentes en desarrollo | `develop`   | `develop`             |
-| `test/*`       | Pruebas de integración o experimentación     | `develop`   | `develop`             |
-| `hotfix/*`     | Correcciones urgentes en producción          | `main`      | `main`, `develop`     |
-| `release/*`    | Preparación de una versión para producción   | `develop`   | `main`, `develop`     |
-
----
+| Rama        | Propósito                                           | Nace de   | Se fusiona en       |
+| ----------- | --------------------------------------------------- | --------- | ------------------- |
+| `main`      | Código estable en producción                        | —         | —                   |
+| `develop`   | Integración de funcionalidades en desarrollo        | `main`    | `release/*`, `main` |
+| `feature/*` | Desarrollo de nuevas funcionalidades                | `develop` | `develop`           |
+| `chore/*`   | Mantenimiento (docs, configs, dependencias, CI/CD)  | `develop` | `develop`           |
+| `bugfix/*`  | Corrección de bugs no urgentes en desarrollo        | `develop` | `develop`           |
+| `test/*`    | Pruebas de integración o experimentación            | `develop` | `develop`           |
+| `hotfix/*`  | Correcciones urgentes en producción                 | `main`    | `main`, `develop`   |
+| `release/*` | Preparación de una versión para producción          | `develop` | `main`, `develop`   |
 
 ### Cómo crear ramas
 
@@ -145,6 +140,7 @@ git checkout -b bugfix/fix-jwt-expiration
 
 # Desde develop, crear una rama de test
 git checkout develop
+git pull origin develop
 git checkout -b test/sprint-1
 
 # Desde main, crear un hotfix
@@ -154,30 +150,28 @@ git checkout -b hotfix/fix-cors-gateway
 
 # Desde develop, crear un release
 git checkout develop
+git pull origin develop
 git checkout -b release/1.0.0
 ```
 
----
-
 ### Convención de nombres para ramas
 
-Usa **kebab-case** (minúsculas separadas por guiones) después del prefijo.
+Usar **kebab-case** (minúsculas separadas por guiones) después del prefijo. Ser descriptivo pero conciso.
 
-- `feature/student-dashboard`          (correcto)
-- `feature/assignment-submission-api`  (correcto)
-- `chore/update-spring-dependencies`   (correcto)
-- `chore/add-api-documentation`        (correcto)
-- `bugfix/fix-null-pointer-product`    (correcto)
-- `hotfix/fix-cors-gateway`            (correcto)
-- `release/1.2.0`                      (correcto)
-- `test/sprint-3`                      (correcto)
+```
+feature/student-dashboard           (correcto)
+feature/assignment-submission-api   (correcto)
+chore/update-spring-dependencies    (correcto)
+bugfix/fix-null-pointer-product     (correcto)
+hotfix/fix-cors-gateway             (correcto)
+release/1.2.0                       (correcto)
+test/sprint-3                       (correcto)
 
-- `feature/changes`                    (incorrecto — muy vago)
-- `mi-rama`                            (incorrecto — falta prefijo)
-- `feature/StudentDashboard`           (incorrecto — no usar camelCase)
-- `feat/login`                         (incorrecto — usar feature, no feat)
-
----
+feature/changes                     (incorrecto — muy vago)
+mi-rama                             (incorrecto — falta prefijo)
+feature/StudentDashboard            (incorrecto — no usar camelCase)
+feat/login                          (incorrecto — usar feature, no feat)
+```
 
 ### Flujo completo de trabajo — Ejemplo
 
@@ -211,27 +205,25 @@ git branch -d feature/course-enrollment
 
 ## Versionamiento
 
-Seguimos un esquema inspirado en **SemVer** (Semantic Versioning) con formato `MAJOR.MINOR.PATCH`. Se omiten ceros innecesarios para mantenerlo limpio si es necesario, aunque se recomienda la estructura completa.
+Seguimos **SemVer** (Semantic Versioning) con formato `MAJOR.MINOR.PATCH`.
 
-```
-MAJOR.MINOR.PATCH
-```
-
-| Segmento | Cuándo incrementar                                         | Ejemplo               |
-| -------- | ---------------------------------------------------------- | --------------------- |
-| `MAJOR`  | Rediseño grande o cambio que rompe compatibilidad          | `1.x` → `2.0.0`       |
-| `MINOR`  | Nueva funcionalidad compatible hacia atrás                 | `1.0.0` → `1.1.0`     |
-| `PATCH`  | Correcciones de errores en producción (hotfix)             | `1.1.0` → `1.1.1`     |
+| Segmento | Cuándo incrementar                                | Ejemplo            |
+| -------- | ------------------------------------------------- | ------------------ |
+| `MAJOR`  | Cambios incompatibles con versiones anteriores    | `1.0.0` → `2.0.0`  |
+| `MINOR`  | Nueva funcionalidad compatible hacia atrás        | `1.0.0` → `1.1.0`  |
+| `PATCH`  | Correcciones de errores en producción (hotfix)    | `1.1.0` → `1.1.1`  |
 
 ### Versiones Pre-release
 
-Para versiones que aún no son estables, se añade un sufijo con guión:
+Para versiones en desarrollo o pruebas, se agrega un sufijo:
 
-| Versión          | Rama                | Tag               | Significado                              |
-| ---------------- | ------------------- | ----------------- | ---------------------------------------- |
-| `1.0.0-alpha.1`  | `release/1.0.0-alpha` | `v1.0.0-alpha.1`  | En desarrollo, funcional pero incompleta |
-| `1.0.0-beta.1`   | `release/1.0.0-beta`  | `v1.0.0-beta.1`   | Estable para pruebas                     |
-| `1.0.0`          | `release/1.0.0`       | `v1.0.0`          | Versión final                            |
+```
+1.0.0-alpha.1    → Primera iteración en desarrollo, puede ser inestable
+1.0.0-alpha.2    → Segunda iteración en desarrollo
+1.0.0-beta.1     → Primera versión en pruebas, funcionalidad completa
+1.0.0-beta.2     → Segunda versión en pruebas
+1.0.0            → Versión estable lista para producción
+```
 
 ### Ciclo de vida de una versión
 
@@ -243,9 +235,16 @@ graph LR
     D --> E[maintenance / patch]
 ```
 
+1. **Alpha** — Funcionalidad en desarrollo, puede ser inestable
+2. **Beta** — Funcionalidad completa, en fase de pruebas
+3. **Release Candidate** — Candidata a versión estable
+4. **Stable** — Versión lista para producción
+5. **Maintenance** — Correcciones post-release (patches)
+
 ```bash
 # 1. Crear rama de release desde develop
 git checkout develop
+git pull origin develop
 git checkout -b release/1.0.0-alpha
 
 # 2. Commit de preparación
@@ -266,23 +265,41 @@ git merge release/1.0.0-alpha
 
 ## Estándares de Código
 
-### Frontend (Angular / Web)
-
-Actualmente en migración hacia Angular. Se recomienda el uso de **Prettier** y **EditorConfig** para mantener un estilo consistente. 
-
 ### Backend (Spring Boot)
 
-El backend utiliza **Java 21** y **Spring Boot 3.2**. Se recomienda seguir las convenciones estándar de Java:
+El backend utiliza **Java 21** y **Spring Boot 3.2** con arquitectura de microservicios. Seguir las convenciones estándar de Java:
 
 - Nombres de clases en **PascalCase**
 - Nombres de métodos y variables en **camelCase**
 - Constantes en **UPPER_SNAKE_CASE**
 - Paquetes en **minúsculas**
 - Indentación con 4 espacios (convención Java estándar)
-- Uso de **Lombok** para reducir código repetitivo (getters, setters, constructores).
+- Usar **Lombok** para reducir código repetitivo (getters, setters, constructores)
+- Todo código nuevo va en `app/backend/microservices/`, no en el monolito legado
+
+### Frontend (Angular)
+
+El proyecto frontend utiliza **Prettier** y **EditorConfig** para mantener un estilo consistente. Configuraciones en `app/frontend/`.
+
+Reglas principales de Prettier:
+
+- Ancho máximo de línea: **100 caracteres**
+- Comillas simples (`'`) en lugar de dobles
+- Archivos `.html` formateados con el parser de Angular
+
+Para formatear manualmente:
+
+```bash
+cd app/frontend
+npx prettier --write "src/**/*.{ts,html,scss}"
+```
+
+Extensiones recomendadas en VS Code:
+
+- **Angular Language Service** (`angular.ng-template`)
+- **EditorConfig for VS Code** (`editorconfig.editorconfig`)
+- **Prettier - Code formatter** (`esbenp.prettier-vscode`)
 
 ---
 
-Para más información sobre Git Glow, consulta la documentación interna del equipo.
-
-<!-- Los scripts de instalación de hooks se encuentran en la carpeta scripts/ y están diferenciados por plataforma: macos-git-glow.sh y windows-git-glow.ps1. -->
+> Para instalar los hooks de Git Glow, ejecuta el script correspondiente a tu plataforma en la carpeta `scripts/`: `macos-git-glow.sh` o `windows-git-glow.ps1`.
