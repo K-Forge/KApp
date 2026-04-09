@@ -9,7 +9,7 @@
 
 ---
 
-> Queda prohibido cualquier tipo de explotación y, en particular, la reproducción, distribución, comunicación pública y/o transformación, total o parcial, por cualquier medio, de este documento sin el previo consentimiento expreso y por escrito de Brian Steven Vargas Clavijo, Santiago Rocha Ramírez, María Fernanda Vanegas Rey.
+> Queda prohibido cualquier tipo de explotación y, en particular, la reproducción, distribución, comunicación pública y/o transformación, total o parcial, por cualquier medio, de este documento sin el previo consentimiento expreso y por escrito de Brian Steven Vargas Clavijo y Santiago Rocha Ramírez.
 
 ---
 
