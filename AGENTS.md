@@ -1,12 +1,12 @@
 # KApp · Agent Context
 
-> Context and instructions for AI agents working in this repository.
+> Operational context and rules for AI agents in this repository.
 
 ---
 
 ## Project Overview
 
-**KApp** is a university platform for the Fundación Universitaria Konrad Lorenz, developed by the K-Forge club. It implements a microservices architecture using Spring Boot.
+**KApp** is a university platform for Fundación Universitaria Konrad Lorenz, developed by the K-Forge club. The backend uses a Spring Boot microservices architecture.
 
 ## Tech Stack
 
@@ -20,8 +20,14 @@
 - **Database:** PostgreSQL 15+ (Neon cloud)
 - **Build:** Maven multi-module
 - **Containers:** Docker + Docker Compose
-- **Frontend:** HTML/JS/CSS (migrating to Angular), Kotlin (future), Swift (future)
-- **Package Manager:** Bun
+- **Frontend:** Web (HTML/JS/CSS, migrating to Angular), Android (Kotlin, future), iOS (Swift, future)
+- **Package Manager:** pnpm (dependencies) + Bun (script runner)
+
+## Frontend Tooling Policy
+
+- Instalar herramientas (una sola vez): `corepack enable && corepack prepare pnpm@latest --activate` y `curl -fsSL https://bun.sh/install | bash`
+- Instalar dependencias del frontend: `pnpm install`
+- Ejecutar scripts del frontend con Bun: `bun start`, `bun dev`, `bun run build`
 
 ## Microservices
 
@@ -52,7 +58,7 @@ KApp/
 │   │   │   ├── course-service/
 │   │   │   ├── assignment-service/
 │   │   │   └── common/              # Shared DTOs and exceptions
-│   │   └── postman/                 # Postman collections for testing
+│   │   └── postman/                 # Postman collections for API testing
 │   ├── frontend/
 │   │   ├── web/                     # Web frontend (HTML/JS/CSS → migrating to Angular)
 │   │   └── mobile/
@@ -75,13 +81,12 @@ KApp/
 │   └── start-microservices.sh       # Starts all microservices
 ├── CONTRIBUTING.md
 ├── CONTRIBUTORS.md
-├── SECURITY.md
 └── package.json
 ```
 
 ## Conventions
 
-- **Commits:** `type: message in english` (e.g., `feat: add login screen`, `fix: resolve token bug`). Must follow Conventional Commits.
+- **Commits:** `type: message in english` (e.g., `feat: add login screen`, `fix: resolve token bug`). Follow Conventional Commits.
 - **Branches:** Git Flow (`main`, `develop`, `feature/*`, `chore/*`, `bugfix/*`, `test/*`, `release/*`, `hotfix/*`). Refer to `CONTRIBUTING.md`.
 - **Java:** Use Lombok to reduce boilerplate. DTOs and global exceptions must reside in the `common` module.
 - **Security:** JWT is validated at the API Gateway. Internal requests are trusted and carry the `X-User-Email` header.
@@ -89,12 +94,12 @@ KApp/
 
 ## Versioning
 
-Format: `MAJOR.MINOR.PATCH` (dropping unused zeros where appropriate, but recommended full structure).
+Format: `MAJOR.MINOR.PATCH`.
 - `MAJOR` for large refactors or breaking changes.
 - `MINOR` for new backward-compatible features.
 - `PATCH` for bug fixes.
 
-Release flow follows standard `alpha` → `beta` → `stable` cycles. See `CONTRIBUTING.md` for branch commands.
+Release flow follows `alpha` -> `beta` -> `stable`. See `CONTRIBUTING.md` for branch commands.
 
 ## Inter-Service Communication
 
@@ -104,12 +109,12 @@ graph LR
 ```
 
 - Services are discovered by name via Eureka.
-- The Gateway validates JWTs and appends the `X-User-Email` header to all routed requests.
+- The Gateway validates JWTs and appends the `X-User-Email` header to routed requests.
 - Internal microservices trust the header forwarded by the Gateway.
 
 ## Database Guidelines
 
-- **Schema:** Defined in `app/database/init.sql`. Always update this file when adding new tables or columns.
+- **Schema:** Defined in `app/database/init.sql`. Always update it when adding new tables or columns.
 - **Core Tables:** `person`, `member`, `student`, `employee`, `course`, `course_group`, `student_course`, `assignment`, `submission`, `audit_log`.
 - **Enums:** `id_type`, `employee_type`, `contract_type`, `student_status`, `course_status`.
 - **Auditing:** The `audit_log` table captures changes automatically via PostgreSQL triggers.
@@ -132,7 +137,7 @@ graph LR
 - **Legacy Code:** Do not add new features to `app/backend/kapp/`. It is a legacy monolith.
 - **New Features:** Must be developed within `app/backend/microservices/`.
 - **Frontend Code:** Current web development resides in `app/frontend/web/`.
-- **Testing:** Run tests per microservice using `mvn test`.
+- **Testing:** Run tests per microservice with `mvn test`.
 - **Build Command:** `cd app/backend/microservices && mvn clean package -DskipTests`
 - **Docker Command:** `cd app/backend/microservices && docker compose up -d --build`
 - **Knowledge Sync:** Always read `docs/PROGRESS.md` to understand current progress before suggesting massive overhauls. Read `CONTRIBUTING.md` for specific formatting rules.
