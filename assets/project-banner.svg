@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 180" width="800" height="180">
+  <defs>
+    <linearGradient id="bg-kapp" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A1500"/>
+      <stop offset="50%" stop-color="#2A2200"/>
+      <stop offset="100%" stop-color="#3D3510"/>
+    </linearGradient>
+    <linearGradient id="glow-kapp" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#EAB308" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#FACC15" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#EAB308" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="txt-kapp" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FEF3C7"/>
+    </linearGradient>
+    <pattern id="grid-kapp" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="#EAB308" stroke-opacity="0.06" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="800" height="180" rx="14" fill="url(#bg-kapp)"/>
+  <rect width="800" height="180" rx="14" fill="url(#grid-kapp)"/>
+
+  <path d="M20 50L20 16L54 16" stroke="#EAB308" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-opacity="0.9"/>
+  <path d="M780 50L780 16L746 16" stroke="#EAB308" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-opacity="0.9"/>
+  <path d="M20 130L20 164L54 164" stroke="#EAB308" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-opacity="0.9"/>
+  <path d="M780 130L780 164L746 164" stroke="#EAB308" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-opacity="0.9"/>
+
+  <g stroke="#CA8A04" stroke-opacity="0.55" stroke-width="1.3" fill="none" stroke-linecap="round">
+    <path d="M0 56H108L142 28"/>
+    <path d="M0 124H96L132 152"/>
+    <path d="M800 56H692L658 28"/>
+    <path d="M800 124H704L668 152"/>
+  </g>
+
+  <g fill="#FACC15">
+    <circle cx="142" cy="28" r="4"/>
+    <circle cx="132" cy="152" r="4"/>
+    <circle cx="658" cy="28" r="4"/>
+    <circle cx="668" cy="152" r="4"/>
+  </g>
+  <g fill="#CA8A04" fill-opacity="0.6">
+    <circle cx="108" cy="56" r="2.5"/>
+    <circle cx="96" cy="124" r="2.5"/>
+    <circle cx="692" cy="56" r="2.5"/>
+    <circle cx="704" cy="124" r="2.5"/>
+  </g>
+
+  <rect x="170" y="89" width="460" height="1.5" rx="1" fill="url(#glow-kapp)"/>
+  <rect x="230" y="136" width="340" height="1" rx="0.5" fill="#CA8A04" opacity="0.45"/>
+
+  <g transform="translate(400, 44)" stroke="#FDE68A" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M-22 -10L-32 0L-22 10"/>
+    <path d="M22 -10L32 0L22 10"/>
+    <line x1="7" y1="-12" x2="-7" y2="12"/>
+  </g>
+
+  <text x="400" y="100" font-family="'Segoe UI', Arial, sans-serif" font-size="44" font-weight="700" fill="#EAB308" fill-opacity="0.35" text-anchor="middle" letter-spacing="4">KApp</text>
+  <text x="400" y="100" font-family="'Segoe UI', Arial, sans-serif" font-size="44" font-weight="700" fill="url(#txt-kapp)" text-anchor="middle" letter-spacing="4">KApp</text>
+
+  <text x="400" y="124" font-family="'Segoe UI', Arial, sans-serif" font-size="11.5" fill="#FACC15" text-anchor="middle" letter-spacing="6">PLATAFORMA UNIVERSITARIA</text>
+
+  <text x="400" y="155" font-family="'Segoe UI', Arial, sans-serif" font-size="9.5" fill="#FEF3C7" fill-opacity="0.65" text-anchor="middle" letter-spacing="2.5">&#9670;  KONRAD LORENZ  &#9670;</text>
+</svg>
