@@ -114,7 +114,7 @@ KApp es una plataforma universitaria que centraliza servicios académicos y admi
 - **Java:** 21+
 - **Spring Boot:** 3.2+
 - **Uso interno:** Solo comunidad Konrad Lorenz
-- **Paquetes frontend:** Bun como package manager
+- **Paquetes frontend:** pnpm para instalar dependencias y Bun para ejecutar scripts
 
 ---
 

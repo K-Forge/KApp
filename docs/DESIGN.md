@@ -208,7 +208,7 @@ erDiagram
 | Feign sobre RestTemplate      | Declarativo, integración con Eureka        |
 | BD compartida (por ahora)     | Simplicidad inicial, migrar a DB-per-svc   |
 | Gateway reactivo              | Non-blocking I/O para routing              |
-| Bun sobre npm                 | Rendimiento superior en resolución de deps |
+| Bun + pnpm                    | pnpm para dependencias y Bun para scripts  |
 
 ---
 

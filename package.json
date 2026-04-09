@@ -13,5 +13,5 @@
   "devDependencies": {
     "serve": "^14.2.4"
   },
-  "packageManager": "bun"
+  "packageManager": "pnpm@10.33.0"
 }
