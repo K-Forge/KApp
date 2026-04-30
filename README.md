@@ -1,21 +1,17 @@
 <a id="top"></a>
 
-<div align="center">
-  <table style="border: none; background-color: transparent;">
-    <tr style="border: none; background-color: transparent;">
-      <td align="center" width="20%" style="border: none;">
-        <!-- ESPACIO RESERVADO PARA LOGO OFICIAL K-FORGE -->
-        <img src="./assets/KForge-Yellow-Logo.png" alt="K-Forge Oficial Logo" width="120" style="border-radius: 10px;" />
-      </td>
-      <td align="center" width="80%" style="border: none;">
-        <!-- BANNER CIBERNETICO DEL PROYECTO -->
-        <img src="./assets/project-banner.svg" alt="Banner del Proyecto" width="100%" />
-      </td>
-    </tr>
-  </table>
-</div>
+<table width="100%" style="border: none; background-color: transparent;">
+  <tr style="border: none; background-color: transparent;">
+    <td align="center" width="20%" style="border: none; padding: 0;">
+      <img src="./assets/KForge-Yellow-Logo.png" alt="K-Forge Logo" width="100%" style="max-width: 180px; border-radius: 10px;" />
+    </td>
+    <td align="center" width="80%" style="border: none; padding: 0;">
+      <img src="./assets/project-banner.svg" alt="KApp Banner" width="100%" />
+    </td>
+  </tr>
+</table>
 
-<p align="center"><strong>Plataforma universitaria de la Fundacion Universitaria Konrad Lorenz para gestionar procesos academicos y administrativos.</strong></p>
+<p align="center"><strong>Plataforma universitaria de la Fundación Universitaria Konrad Lorenz para gestionar procesos académicos y administrativos.</strong></p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 21"/>
@@ -30,25 +26,85 @@
 
 ## Tabla de Contenidos
 
-- [Descripcion](#descripcion)
-- [Stack y arquitectura](#stack-y-arquitectura-resumen)
-- [Microservicios](#microservicios)
-- [Inicio rapido](#inicio-rapido)
-- [Estructura del repositorio](#estructura-del-repositorio)
-- [Documentacion](#documentacion)
-- [Enlaces rapidos](#enlaces-rapidos)
-- [Equipo](#equipo)
+- [Descripción](#descripción)
+- [Inicio rápido](#inicio-rápido)
+- [Comandos npm](#comandos-npm)
+- [Arquitectura](#arquitectura)
+- [Contributing](#contributing)
+- [Contributors](#contributors)
 - [Licencia](#licencia)
 
 ---
 
-## Descripcion
+## Descripción
 
-KApp implementa una arquitectura de microservicios en Spring Boot con autenticacion centralizada por JWT en el API Gateway. El backend esta operativo y el frontend web actual se mantiene en `HTML/CSS/JS`, con migracion progresiva a Angular.
+KApp es una plataforma integral desarrollada por el equipo K-Forge para la Fundación Universitaria Konrad Lorenz. Implementa una arquitectura robusta de microservicios en Spring Boot con autenticación centralizada por JWT en el API Gateway. El backend se encuentra operativo proveyendo servicios escalables, y el frontend web actual (en `HTML/CSS/JS`) se está migrando progresivamente hacia Angular para mejorar la reactividad y la experiencia de usuario.
 
-## Stack y arquitectura (resumen)
+---
 
-| Capa            | Tecnologias principales                                                                |
+## Inicio rápido
+
+Para inicializar y ejecutar el proyecto en ambiente local, utiliza los comandos definidos en `package.json`.
+
+### 1. Clonar el repositorio e instalar herramientas
+Asegúrate de contar con Java 21, Maven, Docker, PostgreSQL 15+, pnpm y Bun instalados.
+```bash
+# Habilitar Corepack y activar pnpm
+corepack enable && corepack prepare pnpm@latest --activate
+
+# Instalar dependencias del repositorio
+pnpm install
+```
+
+### 2. Levantar microservicios
+```bash
+pnpm run microservices:start
+```
+
+Ver estado y detener servicios:
+```bash
+pnpm run microservices:status
+pnpm run microservices:stop
+```
+
+### 3. Levantar frontend web
+```bash
+pnpm run web:start:script
+```
+
+---
+
+## Comandos npm
+
+Comandos recomendados (nueva convención explícita):
+
+| Comando | Descripción |
+| ------- | ----------- |
+| `pnpm run web:dev` | Sirve `app/frontend/web` en modo desarrollo con `serve`. |
+| `pnpm run web:start` | Sirve el frontend en puerto `3000` con SPA fallback (`-s`). |
+| `pnpm run web:start:script` | Levanta frontend usando `scripts/start-frontend.sh` (permite `PORT`). |
+| `pnpm run microservices:start` | Inicia microservicios en orden con health checks. |
+| `pnpm run microservices:status` | Consulta estado de los microservicios. |
+| `pnpm run microservices:stop` | Detiene microservicios iniciados por script. |
+| `pnpm run backend:legacy:start` | Inicia el backend monolítico legado (`app/backend/kapp`). |
+
+Compatibilidad (alias heredados):
+
+| Alias | Equivalente recomendado |
+| ----- | ----------------------- |
+| `pnpm run dev:web` | `pnpm run web:dev` |
+| `pnpm run start:web` | `pnpm run web:start` |
+| `pnpm run start:frontend` | `pnpm run web:start:script` |
+| `pnpm run start:microservices` | `pnpm run microservices:start` |
+| `pnpm run start:backend` | `pnpm run backend:legacy:start` |
+
+---
+
+## Arquitectura
+
+La plataforma sigue un diseño orientado a microservicios para garantizar alta disponibilidad y una clara separación de responsabilidades.
+
+| Capa            | Tecnologías principales                                                                |
 | --------------- | -------------------------------------------------------------------------------------- |
 | Backend         | Java 21, Spring Boot 3.2, Spring Cloud 2023.0.0                                        |
 | Seguridad       | Spring Security, JWT (JJWT), BCrypt                                                    |
@@ -56,94 +112,50 @@ KApp implementa una arquitectura de microservicios en Spring Boot con autenticac
 | Infraestructura | Eureka, Spring Cloud Gateway, OpenFeign, Resilience4j, Docker                          |
 | Frontend        | Web (`HTML/CSS/JS`, migrando a Angular), Android (Kotlin, futuro), iOS (Swift, futuro) |
 
-## Microservicios
+Los servicios principales alojados en `app/backend/microservices/` son:
+- **Discovery Server (8761)**: Registro y descubrimiento de servicios mediante Eureka.
+- **API Gateway (8080)**: Punto de entrada único, enrutamiento y validación JWT.
+- **Auth Service (8081)**: Autenticación, registro y emisión de tokens.
+- **User Service (8082)**: Gestión centralizada de usuarios y perfiles.
+- **Course Service (8083)**: Administración de cursos, grupos y matrículas.
+- **Assignment Service (8084)**: Tareas, entregas y proceso de calificaciones.
+- **Common Library**: Módulo transversal de DTOs y excepciones estandarizadas.
 
-Los servicios principales se encuentran en `app/backend/microservices/`.
+---
 
-| Servicio           | Puerto | Rol                                             |
-| ------------------ | ------ | ----------------------------------------------- |
-| Discovery Server   | 8761   | Registro y descubrimiento de servicios (Eureka) |
-| API Gateway        | 8080   | Entrada unica, enrutamiento y validacion de JWT |
-| Auth Service       | 8081   | Autenticacion y emision de tokens               |
-| User Service       | 8082   | Gestion de usuarios y perfiles                  |
-| Course Service     | 8083   | Gestion de cursos, grupos y matriculas          |
-| Assignment Service | 8084   | Gestion de tareas, entregas y calificaciones    |
-| Common Library     | —      | DTOs y excepciones compartidas                  |
+## Contributing
 
-## Inicio rapido
+El mantenimiento de este código está restringido estrictamente a miembros autorizados de K-Forge y la Fundación Universitaria Konrad Lorenz. No se aceptan Pull Requests de usuarios externos ajenos al proyecto.
 
-```bash
-# Levantar microservicios
-./scripts/start-microservices.sh
+Si eres miembro autorizado:
+- Revisa las reglas de convenciones de commits y ramas (`feature/*`, `bugfix/*`).
+- Todo cambio en el esquema debe reflejarse en `app/database/init.sql`.
+- El monolito antiguo bajo `app/backend/kapp/` se encuentra congelado y no se deben añadir nuevas funciones allí. Todo desarrollo debe apuntar a la carpeta `app/backend/microservices/`.
 
-# Iniciar frontend web
-./scripts/start-frontend.sh
+---
 
-# Consultar estado de microservicios
-./scripts/start-microservices.sh status
-```
+## Contributors
 
-## Estructura del repositorio
+Agradecimientos a los miembros del club que forjan e impulsan este proyecto de software.
 
-```text
-KApp/
-├── app/
-│   ├── backend/
-│   │   ├── microservices/   # Arquitectura principal (actual)
-│   │   ├── kapp/            # Monolito legado (sin nuevas funcionalidades)
-│   │   └── postman/         # Colecciones para pruebas API
-│   ├── frontend/
-│   │   ├── web/             # Frontend web actual
-│   │   └── mobile/          # Kotlin (Android) y Swift (iOS)
-│   └── database/            # Esquema y scripts SQL
-├── docs/                    # Requerimientos, diseno y guias tecnicas
-├── scripts/                 # Scripts de arranque
-├── CONTRIBUTING.md
-├── CONTRIBUTORS.md
-└── LICENSE
-```
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/13rianVargas"><img src="https://github.com/13rianVargas.png" width="100px;" alt="13rianVargas"/><br /><sub><b>Brian Vargas</b></sub></a></td>
+    <td align="center"><a href="https://github.com/SantiagoRR17"><img src="https://github.com/SantiagoRR17.png" width="100px;" alt="SantiagoRR17"/><br /><sub><b>SantiagoRR17</b></sub></a></td>
+    <td align="center"><a href="https://github.com/MaferVaRey"><img src="https://github.com/MaferVaRey.png" width="100px;" alt="MaferVaRey"/><br /><sub><b>MaferVaRey</b></sub></a></td>
+    <td align="center"><a href="https://github.com/DIEGO-ALI"><img src="https://github.com/DIEGO-ALI.png" width="100px;" alt="DIEGO-ALI"/><br /><sub><b>DIEGO-ALI</b></sub></a></td>
+    <td align="center"><a href="https://github.com/Landrea28"><img src="https://github.com/Landrea28.png" width="100px;" alt="Landrea28"/><br /><sub><b>Landrea28</b></sub></a></td>
+  </tr>
+</table>
 
-## Documentacion
-
-| Documento                            | Contenido                                    |
-| ------------------------------------ | -------------------------------------------- |
-| [SRS](docs/SRS.md)                   | Especificacion de requerimientos de software |
-| [REQUIREMENTS](docs/REQUIREMENTS.md) | Requisitos funcionales y no funcionales      |
-| [DESIGN](docs/DESIGN.md)             | Decisiones de arquitectura y diseno tecnico  |
-| [DOCKER-GUIDE](docs/DOCKER-GUIDE.md) | Guia de despliegue y contenedores            |
-| [PROGRESS](docs/PROGRESS.md)         | Estado de implementacion por modulos         |
-| [K-COLORS](docs/K-COLORS.md)         | Guia de color de la marca                    |
-| [CONTRIBUTING](CONTRIBUTING.md)      | Flujo de ramas, commits y contribucion       |
-
-## Enlaces rapidos
-
-| Recurso               | Enlace                                           |
-| --------------------- | ------------------------------------------------ |
-| Organizacion K-Forge  | [github.com/K-Forge](https://github.com/K-Forge) |
-| Web oficial K-Forge   | [kforge.vercel.app](https://kforge.vercel.app)   |
-| Guia de contribucion  | [CONTRIBUTING.md](CONTRIBUTING.md)               |
-| Contribuyentes        | [CONTRIBUTORS.md](CONTRIBUTORS.md)               |
-| Diseno y arquitectura | [docs/DESIGN.md](docs/DESIGN.md)                 |
-| Contacto              | kforge.dev@gmail.com                             |
-
-## Equipo
-
-Proyecto desarrollado por el club [K-Forge](https://kforge.vercel.app) en la Fundacion Universitaria Konrad Lorenz.
-
-- Integrantes y contribuyentes: [CONTRIBUTORS.md](CONTRIBUTORS.md)
-- Contacto del equipo: `kforge.dev@gmail.com`
-
-## Acceso y contribucion
-
-Repositorio visible para consulta academica y tecnica.
-
-El mantenimiento del codigo esta restringido a miembros autorizados de K-Forge y de la Fundacion Universitaria Konrad Lorenz. Para contribuir, sigue la guia de [CONTRIBUTING.md](CONTRIBUTING.md).
+---
 
 ## Licencia
 
 Proyecto bajo [Licencia de Uso Interno](LICENSE).
 
-El uso, modificacion y distribucion estan restringidos segun los terminos definidos por el equipo KApp/K-Forge para la Fundacion Universitaria Konrad Lorenz.
+© 2026 K-Forge Developers. Todos los derechos reservados.
+El uso, modificación y distribución están restringidos según los términos definidos por el equipo KApp/K-Forge para la Fundación Universitaria Konrad Lorenz.
 
 ---
 
