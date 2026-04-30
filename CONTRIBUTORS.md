@@ -1,22 +1,36 @@
+<a id="top"></a>
+
 # Contribuyentes de KApp
 
-Desarrollo realizado como parte del club de desarrollo **K-Forge** en la Fundación Universitaria Konrad Lorenz.
+Desarrollo realizado como parte del club de desarrollo **K-Forge** en la Fundacion Universitaria Konrad Lorenz.
+
+<br/>
+
+## ◈ Equipo de Desarrollo
+
+<div align="center">
+
+| <a href="https://github.com/13rianVargas"><img src="https://github.com/13rianVargas.png" width="120px;" alt="Brian Vargas"/><br /><sub><b>Brian Vargas</b></sub><br /><sub>@13rianVargas</sub><br /><sub><img src="https://img.shields.io/badge/Lider-8B5CF6?style=flat-square" alt="Lider"/></sub></a> | <a href="https://github.com/JulianAvila259"><img src="https://github.com/JulianAvila259.png" width="120px;" alt="Julian Avila"/><br /><sub><b>Julian Avila</b></sub><br /><sub>@JulianAvila259</sub><br /><sub><img src="https://img.shields.io/badge/Dev-A78BFA?style=flat-square" alt="Dev"/></sub></a> | <a href="https://github.com/SantiagoRR17"><img src="https://github.com/SantiagoRR17.png" width="120px;" alt="Santiago Rocha"/><br /><sub><b>Santiago Rocha</b></sub><br /><sub>@SantiagoRR17</sub><br /><sub><img src="https://img.shields.io/badge/Dev-A78BFA?style=flat-square" alt="Dev"/></sub></a> | <a href="https://github.com/DIEGO-ALI"><img src="https://github.com/DIEGO-ALI.png" width="120px;" alt="Diego Lares"/><br /><sub><b>Diego Lares</b></sub><br /><sub>@DIEGO-ALI</sub><br /><sub><img src="https://img.shields.io/badge/Dev-A78BFA?style=flat-square" alt="Dev"/></sub></a> |
+| :---: | :---: | :---: | :---: |
+
+</div>
+
+<br/>
 
 ---
 
-A continuación se listan las personas que han contribuido activamente en el desarrollo de **KApp**:
-
-## Equipo de Desarrollo de KApp
-
-- **Brian Steven Vargas Clavijo** – *Rol o área de enfoque pendiente*
-- **Julián David Avila Cortes** – *Rol o área de enfoque pendiente*
-- **Santiago Rocha Ramirez** – *Rol o área de enfoque pendiente*
-- **Diego Ali Lares Rondon** – *Rol o área de enfoque pendiente*
-
----
-
-## ¿Te interesa unirte?
-
-K-Forge está abierto a estudiantes activos de la universidad que quieran participar en proyectos por pasión.  
-Si te interesa unirte al equipo de KApp, escríbenos a **kforge.dev@gmail.com**  
-(puedes usar un asunto como: `[Unirme]`) o pregúntanos por los horarios en los que nos reunimos en la universidad.
+<div align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=100&color=0:000000,100:8B5CF6&section=footer" width="100%"/>
+  <br/>
+  <a href="https://github.com/K-Forge">
+    <img src="https://img.shields.io/badge/GitHub-K--Forge-111827?style=for-the-badge&logo=github&logoColor=8B5CF6" alt="GitHub K-Forge"/>
+  </a>
+  &nbsp;
+  <a href="mailto:kforge.dev@gmail.com">
+    <img src="https://img.shields.io/badge/Unirme-kforge.dev-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Unirme"/>
+  </a>
+  <br/><br/>
+  <a href="#top">
+    <img src="https://img.shields.io/badge/%E2%96%B2_Volver_arriba-8B5CF6?style=flat-square" alt="Volver arriba"/>
+  </a>
+</div>
