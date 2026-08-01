@@ -1,124 +1,126 @@
-# KApp · Documento de Requerimientos
+# KApp · Requirements Document
 
-> Versión 1.0 · Febrero 2026  
-> Club de Desarrollo K-Forge · Fundación Universitaria Konrad Lorenz
-
----
-
-## 1. Descripción General
-
-KApp es una plataforma universitaria que centraliza servicios académicos y administrativos para estudiantes, profesores y administradores de la Fundación Universitaria Konrad Lorenz.
-
-**Objetivo:** Mejorar la experiencia universitaria mediante una arquitectura de microservicios moderna, accesible desde web y aplicaciones móviles nativas.
+> Version 1.0 · February 2026
+> K-Forge Development Club · Fundación Universitaria Konrad Lorenz
 
 ---
 
-## 2. Actores del Sistema
+## 1. General Description
 
-| Actor          | Descripción                                      |
-| -------------- | ------------------------------------------------ |
-| **Estudiante** | Consulta cursos, tareas, notas y horarios        |
-| **Profesor**   | Gestiona cursos, crea tareas, califica entregas  |
-| **Admin**      | CRUD completo de usuarios, cursos y asignaciones |
-| **Sistema**    | Procesos automáticos (JWT, auditoría, registro)  |
+KApp is a university platform that centralizes academic and administrative services for students, professors and
+administrators of Fundación Universitaria Konrad Lorenz.
+
+**Goal:** improve the university experience through a modern microservices architecture, accessible from the web and
+from native mobile applications.
 
 ---
 
-## 3. Requerimientos Funcionales
+## 2. System Actors
 
-### 3.1 Autenticación y Autorización (AUTH)
+| Actor          | Description                                          |
+| -------------- | ---------------------------------------------------- |
+| **Student**    | Consults courses, assignments, grades and schedules   |
+| **Professor**  | Manages courses, creates assignments, grades work     |
+| **Admin**      | Full CRUD over users, courses and assignments         |
+| **System**     | Automated processes (JWT, auditing, registration)     |
 
-| ID      | Requisito                                               | Prioridad |
-| ------- | ------------------------------------------------------- | --------- |
-| AUTH-01 | Login con email institucional y contraseña              | Alta      |
-| AUTH-02 | Generación de JWT con roles (STUDENT, PROFESSOR, ADMIN) | Alta      |
-| AUTH-03 | Expiración de tokens configurable (default 24h)         | Alta      |
-| AUTH-04 | Validación centralizada de JWT en API Gateway           | Alta      |
-| AUTH-05 | Hash de contraseñas con BCrypt                          | Alta      |
-| AUTH-06 | Logout (invalidación de token) — futuro                 | Media     |
-| AUTH-07 | Refresh token — futuro                                  | Media     |
+---
 
-### 3.2 Gestión de Usuarios (USER)
+## 3. Functional Requirements
 
-| ID      | Requisito                                            | Prioridad |
-| ------- | ---------------------------------------------------- | --------- |
-| USER-01 | CRUD de personas (datos personales)                  | Alta      |
-| USER-02 | CRUD de miembros (credenciales universitarias)       | Alta      |
-| USER-03 | CRUD de estudiantes (programa, semestre, estado)     | Alta      |
-| USER-04 | CRUD de empleados (tipo, contrato, rol)              | Alta      |
-| USER-05 | Endpoints internos para comunicación entre servicios | Alta      |
-| USER-06 | Búsqueda por email para resolución de identidad      | Alta      |
+### 3.1 Authentication and Authorization (AUTH)
 
-### 3.3 Gestión de Cursos (COURSE)
+| ID      | Requirement                                              | Priority |
+| ------- | -------------------------------------------------------- | -------- |
+| AUTH-01 | Login with institutional e-mail and password             | High     |
+| AUTH-02 | JWT generation with roles (STUDENT, PROFESSOR, ADMIN)    | High     |
+| AUTH-03 | Configurable token expiry (default 24 h)                 | High     |
+| AUTH-04 | Centralized JWT validation at the API Gateway            | High     |
+| AUTH-05 | Password hashing with BCrypt                             | High     |
+| AUTH-06 | Logout (token invalidation) — future                     | Medium   |
+| AUTH-07 | Refresh token — future                                   | Medium   |
 
-| ID        | Requisito                                   | Prioridad |
-| --------- | ------------------------------------------- | --------- |
-| COURSE-01 | CRUD de cursos y grupos                     | Alta      |
-| COURSE-02 | Matrícula de estudiantes en grupos          | Alta      |
-| COURSE-03 | Consulta de cursos inscritos por estudiante | Alta      |
-| COURSE-04 | Consulta de cursos impartidos por profesor  | Alta      |
-| COURSE-05 | Listado de estudiantes por grupo            | Alta      |
-| COURSE-06 | Gestión de programas académicos             | Media     |
-| COURSE-07 | Gestión de periodos académicos              | Media     |
+### 3.2 User Management (USER)
 
-### 3.4 Gestión de Tareas (ASSIGNMENT)
+| ID      | Requirement                                              | Priority |
+| ------- | -------------------------------------------------------- | -------- |
+| USER-01 | Person CRUD (personal data)                              | High     |
+| USER-02 | Member CRUD (university credentials)                     | High     |
+| USER-03 | Student CRUD (program, semester, status)                 | High     |
+| USER-04 | Employee CRUD (type, contract, role)                     | High     |
+| USER-05 | Internal endpoints for service-to-service communication  | High     |
+| USER-06 | Lookup by e-mail for identity resolution                 | High     |
 
-| ID        | Requisito                                    | Prioridad |
-| --------- | -------------------------------------------- | --------- |
-| ASSIGN-01 | Creación de tareas por profesor              | Alta      |
-| ASSIGN-02 | Consulta de tareas pendientes por estudiante | Alta      |
-| ASSIGN-03 | Entrega de tareas (submissions)              | Alta      |
-| ASSIGN-04 | Calificación de entregas con feedback        | Alta      |
-| ASSIGN-05 | Historial de tareas entregadas               | Media     |
-| ASSIGN-06 | Notificaciones de tareas próximas — futuro   | Baja      |
+### 3.3 Course Management (COURSE)
 
-### 3.5 Infraestructura (INFRA)
+| ID        | Requirement                                  | Priority |
+| --------- | -------------------------------------------- | -------- |
+| COURSE-01 | Course and group CRUD                        | High     |
+| COURSE-02 | Student enrollment into groups               | High     |
+| COURSE-03 | Query enrolled courses per student           | High     |
+| COURSE-04 | Query taught courses per professor           | High     |
+| COURSE-05 | List students per group                      | High     |
+| COURSE-06 | Academic program management                  | Medium   |
+| COURSE-07 | Academic period management                   | Medium   |
 
-| ID       | Requisito                               | Prioridad |
-| -------- | --------------------------------------- | --------- |
-| INFRA-01 | Service Discovery con Eureka            | Alta      |
-| INFRA-02 | API Gateway como punto de entrada único | Alta      |
-| INFRA-03 | Circuit Breaker con Resilience4j        | Media     |
-| INFRA-04 | Config Server centralizado — futuro     | Media     |
-| INFRA-05 | Distributed Tracing (Zipkin) — futuro   | Baja      |
-| INFRA-06 | Message Queue (RabbitMQ/Kafka) — futuro | Baja      |
+### 3.4 Assignment Management (ASSIGNMENT)
+
+| ID        | Requirement                                     | Priority |
+| --------- | ----------------------------------------------- | -------- |
+| ASSIGN-01 | Assignment creation by professors               | High     |
+| ASSIGN-02 | Query pending assignments per student           | High     |
+| ASSIGN-03 | Assignment submissions                          | High     |
+| ASSIGN-04 | Grading of submissions with feedback            | High     |
+| ASSIGN-05 | History of submitted assignments                | Medium   |
+| ASSIGN-06 | Notifications for upcoming assignments — future | Low      |
+
+### 3.5 Infrastructure (INFRA)
+
+| ID       | Requirement                                | Priority |
+| -------- | ------------------------------------------ | -------- |
+| INFRA-01 | Service discovery with Eureka              | High     |
+| INFRA-02 | API Gateway as single entry point          | High     |
+| INFRA-03 | Circuit breaker with Resilience4j          | Medium   |
+| INFRA-04 | Centralized Config Server — future         | Medium   |
+| INFRA-05 | Distributed tracing (Zipkin) — future      | Low      |
+| INFRA-06 | Message queue (RabbitMQ/Kafka) — future    | Low      |
 
 ### 3.6 Frontend (FRONT)
 
-| ID       | Requisito                                         | Prioridad |
-| -------- | ------------------------------------------------- | --------- |
-| FRONT-01 | Web app con Angular para visualización de avances | Alta      |
-| FRONT-02 | App nativa Android con Kotlin — futuro            | Media     |
-| FRONT-03 | App nativa iOS con Swift — futuro                 | Media     |
-| FRONT-04 | Diseño responsivo y accesible                     | Alta      |
+| ID       | Requirement                                    | Priority |
+| -------- | ---------------------------------------------- | -------- |
+| FRONT-01 | Angular web app for progress visualization     | High     |
+| FRONT-02 | Native Android app with Kotlin — future        | Medium   |
+| FRONT-03 | Native iOS app with Swift — future             | Medium   |
+| FRONT-04 | Responsive and accessible design               | High     |
 
 ---
 
-## 4. Requerimientos No Funcionales
+## 4. Non-Functional Requirements
 
-| ID     | Categoría      | Requisito                                      |
-| ------ | -------------- | ---------------------------------------------- |
-| NFR-01 | Seguridad      | JWT stateless, CORS configurado, HTTPS en prod |
-| NFR-02 | Rendimiento    | Respuesta < 500ms en endpoints principales     |
-| NFR-03 | Disponibilidad | Fallo aislado por servicio (fault isolation)   |
-| NFR-04 | Escalabilidad  | Servicios independientes, escalado horizontal  |
-| NFR-05 | Mantenibilidad | Código limpio, DTOs compartidos, logs estándar |
-| NFR-06 | Portabilidad   | Containerización Docker, CI/CD compatible      |
-| NFR-07 | Auditoría      | Logging de operaciones CRUD en audit_log       |
+| ID     | Category        | Requirement                                              |
+| ------ | --------------- | -------------------------------------------------------- |
+| NFR-01 | Security        | Stateless JWT, configured CORS, HTTPS in production       |
+| NFR-02 | Performance     | Under 500 ms response time on primary endpoints           |
+| NFR-03 | Availability    | Fault isolation per service                               |
+| NFR-04 | Scalability     | Independent services, horizontal scaling                  |
+| NFR-05 | Maintainability | Clean code, shared DTOs, standard logging                 |
+| NFR-06 | Portability     | Docker containerization, CI/CD compatible                 |
+| NFR-07 | Auditability    | CRUD operation logging in `audit_log`                     |
 
 ---
 
-## 5. Restricciones
+## 5. Constraints
 
-- **Base de datos:** PostgreSQL 15+ (Neon cloud en desarrollo)
+- **Database:** PostgreSQL 15+ (Neon cloud during development)
 - **Java:** 21+
 - **Spring Boot:** 3.2+
-- **Uso interno:** Solo comunidad Konrad Lorenz
-- **Paquetes frontend:** pnpm para instalar dependencias y Bun para ejecutar scripts
+- **Internal use:** Konrad Lorenz community only
+- **Frontend packages:** pnpm to install dependencies, Bun to run scripts
 
 ---
 
-## 6. Entidades del Dominio
+## 6. Domain Entities
 
 ```mermaid
 graph LR
@@ -137,16 +139,19 @@ graph LR
 
 ---
 
-## 7. Mapa de Endpoints
+## 7. Endpoint Map
 
-| Ruta                         | Servicio      | Acceso    |
+| Route                        | Service       | Access    |
 | ---------------------------- | ------------- | --------- |
-| `POST /auth/login`           | auth-service  | Público   |
+| `POST /auth/login`           | auth-service  | Public    |
 | `GET  /api/student/*`        | course/assign | STUDENT   |
 | `GET  /api/professor/*`      | course/assign | PROFESSOR |
 | `CRUD /api/admin/*`          | user/course   | ADMIN     |
-| `GET  /api/users/internal/*` | user-service  | Interno   |
+| `GET  /api/users/internal/*` | user-service  | Internal  |
+
+> Access column states the intended policy. Enforcement is not implemented yet: see `SECURITY-AUDIT.md`,
+> findings S1 and S2.
 
 ---
 
-_Documento base — se expandirá conforme avance el desarrollo._
+_Baseline document — it will grow as development advances._

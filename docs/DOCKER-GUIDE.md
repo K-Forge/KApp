@@ -1,18 +1,18 @@
-# KApp · Guía de Containerización con Docker Desktop
+# KApp · Containerization Guide with Docker Desktop
 
-> Guía paso a paso para contenerizar y ejecutar los microservicios en Docker Desktop.
+> Step-by-step guide to containerize and run the microservices on Docker Desktop.
 
 ---
 
-## 1. Prerrequisitos
+## 1. Prerequisites
 
-| Herramienta    | Versión mínima | Instalación                                    |
-| -------------- | -------------- | ---------------------------------------------- |
-| Docker Desktop | 4.x            | https://www.docker.com/products/docker-desktop |
-| Java           | 21             | Solo para compilar (no en runtime Docker)      |
-| Maven          | 3.9+           | Incluido como wrapper (`mvnw`)                 |
+| Tool           | Minimum version | Installation                                   |
+| -------------- | --------------- | ---------------------------------------------- |
+| Docker Desktop | 4.x             | https://www.docker.com/products/docker-desktop |
+| Java           | 21              | Build only (not needed in the Docker runtime)  |
+| Maven          | 3.9+            | Included as a wrapper (`mvnw`)                 |
 
-Verificar instalación:
+Verify the installation:
 
 ```bash
 docker --version
@@ -22,11 +22,11 @@ java -version
 
 ---
 
-## 2. Estructura de Archivos Docker
+## 2. Docker File Layout
 
 ```
-backend/microservices/
-├── docker-compose.yml          # Orquestación de todos los servicios
+app/backend/microservices/
+├── docker-compose.yml          # Orchestration for all services
 ├── discovery-server/Dockerfile
 ├── api-gateway/Dockerfile
 ├── auth-service/Dockerfile
@@ -37,22 +37,22 @@ backend/microservices/
 
 ---
 
-## 3. Compilar los Microservicios
+## 3. Build the Microservices
 
-Antes de contenerizar, compilar todos los módulos:
+Before containerizing, build every module:
 
 ```bash
-cd backend/microservices
+cd app/backend/microservices
 ./mvnw clean package -DskipTests
 ```
 
-> Esto genera los `.jar` en `{service}/target/`.
+> This produces the `.jar` files under `{service}/target/`.
 
 ---
 
-## 4. Dockerfile (ejemplo)
+## 4. Dockerfile (example)
 
-Cada microservicio ya tiene su `Dockerfile`. Ejemplo estándar:
+Every microservice already has its own `Dockerfile`. Standard example:
 
 ```dockerfile
 # Stage 1: Build
@@ -70,68 +70,70 @@ EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
 
-**Mejores prácticas:**
+**Best practices:**
 
-- Multi-stage build (imagen final sin Maven/JDK)
-- Base `alpine` para imágenes ligeras (~150MB)
-- `EXPOSE` documenta el puerto del servicio
+- Multi-stage build (final image without Maven/JDK)
+- `alpine` base for lightweight images (around 150 MB)
+- `EXPOSE` documents the service port
 
 ---
 
-## 5. Levantar con Docker Compose
+## 5. Start with Docker Compose
 
-### 5.1 Configurar variables de entorno
+### 5.1 Configure environment variables
 
-Crear archivo `.env` en `backend/microservices/`:
+Create a `.env` file in `app/backend/microservices/` (see [`.env.example`](../.env.example) at the repository root
+for the full list):
 
 ```env
-PGHOST=tu-host-postgresql
-PGDATABASE=tu-database
-PGUSER=tu-usuario
-PGPASSWORD=tu-password
+PGHOST=your-postgresql-host
+PGDATABASE=your-database
+PGUSER=your-user
+PGPASSWORD=your-password
 PGSSLMODE=require
+JWT_SECRET=your-64-byte-minimum-secret
 ```
 
-### 5.2 Levantar todos los servicios
+### 5.2 Start every service
 
 ```bash
-cd backend/microservices
+cd app/backend/microservices
 docker compose up -d --build
 ```
 
-### 5.3 Verificar estado
+### 5.3 Check the status
 
 ```bash
-# Ver servicios en ejecución
+# List running services
 docker compose ps
 
-# Ver logs en tiempo real
+# Follow logs in real time
 docker compose logs -f
 
-# Logs de un servicio específico
+# Logs for a specific service
 docker compose logs -f api-gateway
 ```
 
-### 5.4 Verificar en Docker Desktop
+### 5.4 Check in Docker Desktop
 
-1. Abrir **Docker Desktop**
-2. Ir a la pestaña **Containers**
-3. Buscar el grupo `microservices`
-4. Verificar que todos los contenedores estén en estado **Running** (verde)
+1. Open **Docker Desktop**
+2. Go to the **Containers** tab
+3. Look for the `microservices` group
+4. Confirm every container is **Running** (green)
 
 ---
 
-## 6. Orden de Inicio (automático)
+## 6. Startup Order (automatic)
 
-Docker Compose maneja las dependencias:
+Docker Compose resolves the dependencies:
 
 ```mermaid
 graph TD
-    DS["discovery-server\n(primero, con healthcheck)"] --> GW[api-gateway]
+    DS["discovery-server<br/>(first, with healthcheck)"] --> GW[api-gateway]
     DS --> AUTH[auth-service]
     DS --> USER[user-service]
-    DS --> COURSE["course-service\n(espera a user-service)"]
-    DS --> ASSIGN["assignment-service\n(espera a user-service + course-service)"]
+    DS --> COURSE["course-service<br/>(waits for user-service)"]
+    DS --> ASSIGN["assignment-service<br/>(waits for user-service + course-service)"]
     USER --> COURSE
     USER --> ASSIGN
     COURSE --> ASSIGN
@@ -139,44 +141,47 @@ graph TD
 
 ---
 
-## 7. URLs del Sistema
+## 7. System URLs
 
-| Servicio           | URL Local             | Contenedor      |
+| Service            | Local URL             | Container       |
 | ------------------ | --------------------- | --------------- |
-| Eureka Dashboard   | http://localhost:8761 | kapp-discovery  |
+| Eureka dashboard   | http://localhost:8761 | kapp-discovery  |
 | API Gateway        | http://localhost:8080 | kapp-gateway    |
 | Auth Service       | http://localhost:8081 | kapp-auth       |
 | User Service       | http://localhost:8082 | kapp-user       |
 | Course Service     | http://localhost:8083 | kapp-course     |
 | Assignment Service | http://localhost:8084 | kapp-assignment |
 
+> Publishing ports 8081-8084 is a local development convenience. It also makes the domain services reachable without
+> going through the gateway: see [SECURITY-AUDIT.md](SECURITY-AUDIT.md), finding S1.
+
 ---
 
-## 8. Comandos Frecuentes
+## 8. Common Commands
 
 ```bash
-# Levantar servicios (rebuild)
+# Start services (rebuild)
 docker compose up -d --build
 
-# Detener servicios
+# Stop services
 docker compose down
 
-# Detener y eliminar volúmenes
+# Stop and remove volumes
 docker compose down -v
 
-# Rebuild de un solo servicio
+# Rebuild a single service
 docker compose up -d --build auth-service
 
-# Ver logs en tiempo real
+# Follow logs in real time
 docker compose logs -f
 
-# Restart de un servicio
+# Restart a service
 docker compose restart user-service
 
-# Ejecutar shell dentro de un contenedor
+# Open a shell inside a container
 docker exec -it kapp-auth sh
 
-# Ver uso de recursos
+# Inspect resource usage
 docker stats
 ```
 
@@ -184,37 +189,37 @@ docker stats
 
 ## 9. Troubleshooting
 
-### El servicio no arranca
+### A service does not start
 
 ```bash
-# Ver logs detallados
+# Detailed logs
 docker compose logs auth-service
 
-# Verificar que la imagen se compiló bien
+# Confirm the image builds
 docker compose build auth-service
 ```
 
-### Error de conexión a la base de datos
+### Database connection error
 
 ```bash
-# Verificar variables de entorno
+# Check environment variables
 docker compose config
 
-# Verificar conectividad desde el contenedor
+# Check connectivity from inside the container
 docker exec -it kapp-auth sh -c "curl -v $PGHOST:5432"
 ```
 
-### Eureka no registra un servicio
+### Eureka does not register a service
 
 ```bash
-# Verificar que discovery-server está healthy
+# Confirm discovery-server is healthy
 docker inspect kapp-discovery | grep -A5 Health
 
-# Verificar la URL de Eureka en el servicio
+# Check the Eureka URL used by the service
 docker exec -it kapp-auth env | grep EUREKA
 ```
 
-### Limpiar todo y reiniciar
+### Clean everything and restart
 
 ```bash
 docker compose down -v --rmi all
@@ -224,26 +229,26 @@ docker compose up -d --build
 
 ---
 
-## 10. Optimización de Imágenes
+## 10. Image Optimization
 
-### Reducir tamaño de imagen
+### Reduce image size
 
 ```dockerfile
-# Usar JRE en vez de JDK
+# Use the JRE instead of the JDK
 FROM eclipse-temurin:21-jre-alpine
 
-# Agregar .dockerignore en cada servicio
-# Contenido sugerido:
+# Add a .dockerignore in each service
+# Suggested contents:
 target/
 *.md
 .git
 .idea
 ```
 
-### Caché de dependencias Maven
+### Maven dependency cache
 
 ```dockerfile
-# Copiar pom.xml primero para aprovechar caché
+# Copy pom.xml first to take advantage of layer caching
 COPY pom.xml .
 RUN mvn dependency:go-offline
 COPY src ./src
@@ -252,16 +257,17 @@ RUN mvn package -DskipTests
 
 ---
 
-## 11. Producción (consideraciones)
+## 11. Production Considerations
 
-- [ ] Usar Docker secrets en lugar de variables `.env`
-- [ ] Implementar health checks en todos los servicios
-- [ ] Configurar límites de CPU/memoria por contenedor
-- [ ] Usar un registry privado para las imágenes
-- [ ] Considerar Kubernetes para orquestación en producción
-- [ ] Implementar logging centralizado (ELK/Loki)
-- [ ] Configurar alertas con Prometheus + Grafana
+- [ ] Use Docker secrets instead of `.env` variables
+- [ ] Keep service ports internal to the container network; expose only the gateway
+- [ ] Implement health checks on every service
+- [ ] Configure CPU/memory limits per container
+- [ ] Use a private registry for the images
+- [ ] Consider Kubernetes for production orchestration
+- [ ] Implement centralized logging (ELK/Loki)
+- [ ] Configure alerting with Prometheus + Grafana
 
 ---
 
-_Para más detalles sobre la arquitectura, ver [`docs/DESIGN.md`](./DESIGN.md)._
+_For more detail on the architecture, see [`docs/DESIGN.md`](./DESIGN.md)._

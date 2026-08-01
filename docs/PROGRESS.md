@@ -1,158 +1,175 @@
-# KApp · Estado de Implementación
+# KApp · Implementation Status
 
-> Última actualización: Febrero 2026
+> Last updated: July 2026
 
----
-
-## Resumen
-
-| Área               | Estado      | Progreso |
-|--------------------|-------------|----------|
-| Infraestructura    | [X] Completa | 100%     |
-| Backend Services   | [X] Completa | 100%     |
-| Frontend Web       | [Med] Parcial  | 30%      |
-| Frontend Android   | [ ] Pendiente| 0%       |
-| Frontend iOS       | [ ] Pendiente| 0%       |
-| DevOps             | [Med] Parcial  | 40%      |
-| Documentación      | [Med] Parcial  | 50%      |
+Delivery is sequenced **backend first, web second, mobile third**. The web client is the surface used to test the
+API and to settle the interface design; the Kotlin and Swift clients inherit that design afterwards. Their low
+position in the priority list below is that sequencing, not a change of target: the mobile apps are the product.
 
 ---
 
-## Microservicios
+## Summary
 
-| Servicio              | Puerto | Estado       | Notas                              |
-|-----------------------|--------|--------------|------------------------------------|
-| Discovery Server      | 8761   | [X] Operativo | Eureka dashboard funcional          |
-| API Gateway           | 8080   | [X] Operativo | JWT validation + routing            |
-| Auth Service          | 8081   | [X] Operativo | Login + JWT generation              |
-| User Service          | 8082   | [X] Operativo | CRUD completo + endpoints internos  |
-| Course Service        | 8083   | [X] Operativo | Cursos, grupos, matrículas          |
-| Assignment Service    | 8084   | [X] Operativo | Tareas, entregas, calificaciones    |
-| Common Library        | —      | [X] Operativo | DTOs + excepciones compartidas      |
+| Area                          | Status       | Progress |
+|-------------------------------|--------------|----------|
+| Infrastructure                | [X] Complete | 100%     |
+| Backend services              | [X] Complete | 100%     |
+| Web frontend (test surface)   | [Med] Partial | 30%     |
+| Android frontend (product)    | [ ] Not started | 0%    |
+| iOS frontend (product)        | [ ] Not started | 0%    |
+| DevOps                        | [Med] Partial | 50%     |
+| Documentation                 | [Med] Partial | 70%     |
 
 ---
 
-## Funcionalidades
+## Microservices
 
-### Autenticación
-- [x] Login con email y password
-- [x] JWT con roles (STUDENT, PROFESSOR, ADMIN)
-- [x] Validación centralizada en Gateway
-- [x] BCrypt para passwords
+| Service               | Port   | Status         | Notes                              |
+|-----------------------|--------|----------------|------------------------------------|
+| Discovery Server      | 8761   | [X] Operational | Eureka dashboard working           |
+| API Gateway           | 8080   | [X] Operational | JWT validation + routing           |
+| Auth Service          | 8081   | [X] Operational | Login + JWT generation             |
+| User Service          | 8082   | [X] Operational | Full CRUD + internal endpoints     |
+| Course Service        | 8083   | [X] Operational | Courses, groups, enrollment        |
+| Assignment Service    | 8084   | [X] Operational | Assignments, submissions, grading  |
+| Common Library        | —      | [X] Operational | Shared DTOs + exceptions           |
+
+---
+
+## Features
+
+### Authentication
+- [x] Login with email and password
+- [x] JWT with roles (STUDENT, PROFESSOR, ADMIN)
+- [x] Centralized validation at the Gateway
+- [x] BCrypt password hashing
 - [ ] Refresh tokens
-- [ ] Logout / invalidación de tokens
+- [ ] Logout / token invalidation
+- [ ] Role-based authorization enforcement (see `SECURITY-AUDIT.md`, finding S2)
 
-### Usuarios
-- [x] CRUD personas
-- [x] CRUD miembros
-- [x] CRUD estudiantes
-- [x] CRUD empleados
-- [x] Endpoints internos (Feign)
-- [ ] Perfil de usuario editable
+### Users
+- [x] Person CRUD
+- [x] Member CRUD
+- [x] Student CRUD
+- [x] Employee CRUD
+- [x] Internal endpoints (Feign)
+- [ ] Editable user profile
 
-### Cursos
-- [x] CRUD cursos y grupos
-- [x] Matrícula de estudiantes
-- [x] Cursos del estudiante
-- [x] Cursos del profesor
-- [x] Estudiantes por grupo
-- [ ] Horarios
-- [ ] Programas académicos detallados
+### Courses
+- [x] Course and group CRUD
+- [x] Student enrollment
+- [x] Student course list
+- [x] Professor course list
+- [x] Students per group
+- [ ] Schedules
+- [ ] Detailed academic programs
 
-### Tareas
-- [x] Crear tareas (profesor)
-- [x] Tareas pendientes (estudiante)
-- [x] Entregar tareas
-- [x] Calificar entregas
-- [ ] Adjuntar archivos
-- [ ] Notificaciones
+### Assignments
+- [x] Create assignments (professor)
+- [x] Pending assignments (student)
+- [x] Submit assignments
+- [x] Grade submissions
+- [ ] File attachments
+- [ ] Notifications
 
-### Infraestructura
-- [x] Eureka Service Discovery
+### Infrastructure
+- [x] Eureka service discovery
 - [x] API Gateway (Spring Cloud)
-- [x] Circuit Breaker (Resilience4j)
+- [x] Circuit breaker (Resilience4j)
 - [x] Docker Compose
-- [x] Dockerfiles por servicio
+- [x] Per-service Dockerfiles
 - [ ] Config Server
-- [ ] Distributed Tracing
-- [ ] CI/CD Pipeline
-- [ ] Rate Limiting
+- [ ] Distributed tracing
+- [x] CI build pipeline (GitHub Actions)
+- [ ] Continuous deployment
+- [ ] Rate limiting
 
 ### Frontend
+
+Web screens double as the design reference for the mobile clients.
+
 - [x] Login page
 - [x] Dashboard
-- [x] Vista de cursos
-- [x] Vista de tareas
-- [x] Vista de notas
-- [x] Vista de horarios
-- [ ] Migración a Angular
-- [ ] App Android (Kotlin)
-- [ ] App iOS (Swift)
+- [x] Courses view
+- [x] Assignments view
+- [x] Grades view
+- [x] Schedule view
+- [x] Demo mode with sample data for backend-less static deployments (`js/demo.js`)
+- [ ] Angular migration
+- [ ] Android app (Kotlin)
+- [ ] iOS app (Swift)
 
 ### DevOps
 - [x] Docker Compose orchestration
-- [x] Bash scripts de inicio
-- [x] Documentación técnica
+- [x] Bash startup scripts
+- [x] Technical documentation
+- [x] CI build pipeline (GitHub Actions, `mvn verify` on JDK 21)
+- [ ] CD / automated deployment
 - [ ] Kubernetes manifests
-- [ ] CI/CD (GitHub Actions)
 - [ ] Monitoring (Prometheus/Grafana)
 
 ---
 
-## Próximos Pasos (Prioridad)
+## Next Steps (by priority)
 
-1. [High] **Config Server** — Centralizar configuración
-2. [High] **Angular Web** — Migrar frontend a Angular
-3. [Med] **Refresh Tokens** — Mejorar flujo de auth
-4. [Med] **Rate Limiting** — Protección del Gateway
-5. [Low] **Kotlin App** — Implementar app Android
-6. [Low] **Swift App** — Implementar app iOS
-7. [Low] **CI/CD** — Pipeline de GitHub Actions
+1. [High] **Authorization** — Enforce roles at the gateway and close the header-trust gap (`SECURITY-AUDIT.md` S1, S2)
+2. [High] **Config Server** — Centralize configuration
+3. [High] **Angular web** — Migrate the web frontend to Angular
+4. [Med] **Refresh tokens** — Improve the authentication flow
+5. [Med] **Rate limiting** — Protect the Gateway
+6. [Low] **Kotlin app** — Build the Android client from the settled web design (low by sequence, not by value)
+7. [Low] **Swift app** — Build the iOS client
+8. [Low] **CD** — Extend the GitHub Actions pipeline to automated deployment
 
 ---
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 KApp/
-├── backend/
-│   ├── kapp/                   # Monolito (legacy)
-│   ├── microservices/          # Arquitectura actual
-│   │   ├── discovery-server/
-│   │   ├── api-gateway/
-│   │   ├── auth-service/
-│   │   ├── user-service/
-│   │   ├── course-service/
-│   │   ├── assignment-service/
-│   │   ├── common/
-│   │   ├── docker-compose.yml
-│   │   └── pom.xml
-│   └── postman/                # Colecciones de testing
-├── frontend/
-│   ├── web/                    # Web (HTML/JS → Angular)
-│   ├── kotlin/                 # Android (futuro)
-│   └── swift/                  # iOS (futuro)
-├── database/
-│   ├── init.sql
-│   ├── test_data.sql
-│   └── delete_all_data.sql
+├── app/
+│   ├── backend/
+│   │   ├── microservices/          # Backend — the only application code
+│   │   │   ├── discovery-server/
+│   │   │   ├── api-gateway/
+│   │   │   ├── auth-service/
+│   │   │   ├── user-service/
+│   │   │   ├── course-service/
+│   │   │   ├── assignment-service/
+│   │   │   ├── common/
+│   │   │   ├── docker-compose.yml
+│   │   │   └── pom.xml
+│   │   └── postman/                # Testing collections
+│   ├── frontend/
+│   │   ├── web/                    # Web client (HTML/JS to Angular)
+│   │   └── mobile/
+│   │       ├── kotlin/             # Android (planned)
+│   │       └── swift/              # iOS (planned)
+│   └── database/
+│       ├── init.sql
+│       ├── test_data.sql
+│       └── delete_all_data.sql
 ├── docs/
+│   ├── SRS.md
 │   ├── REQUIREMENTS.md
 │   ├── DESIGN.md
-│   └── DOCKER-GUIDE.md
+│   ├── DOCKER-GUIDE.md
+│   ├── MICROSERVICES-IDEAS.md
+│   ├── SECURITY-AUDIT.md
+│   ├── K-COLORS.md
+│   ├── researches/                 # Academic article reviews (PDF)
+│   └── PROGRESS.md                 # This file
 ├── scripts/
-│   ├── start-backend.sh
 │   ├── start-frontend.sh
 │   └── start-microservices.sh
-├── .ai-context.md
-├── CONTRIBUTING.md
+├── .github/
+│   └── workflows/ci.yml
+├── AGENTS.md
 ├── CONTRIBUTORS.md
 ├── LICENSE
-├── PROGRESS.md                 # ← Este archivo
-├── README.md
-└── SECURITY.md
+└── README.md
 ```
 
 ---
 
-*Actualizar este archivo después de cada milestone completado.*
+*Update this file after every completed milestone.*

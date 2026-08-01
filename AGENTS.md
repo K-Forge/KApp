@@ -1,45 +1,64 @@
 # KApp · Agent Context
 
-> Operational context and rules for AI agents in this repository.
+> Operational context and rules for AI agents working in this repository.
+
+---
+
+## K-Forge Ecosystem
+
+K-Forge is a software development club at Fundación Universitaria Konrad Lorenz (FUKL), Bogotá, founded by Brian Vargas (@13rianVargas). The club builds real-world software products for the university and community.
+
+| Project | Repo | Description |
+|---------|------|-------------|
+| K-Forge Website | `K-Forge/` | Public landing page (Angular, Vercel) |
+| **KApp** | `KApp/` | University mobile app for Konrad Lorenz — you are here |
+| TiendaQ | `TiendaQ/` | University e-commerce system (Spring Boot + Angular) |
+| Roastory | `Roastory/` | Library-cafe management system (Node.js + MongoDB) |
 
 ---
 
 ## Project Overview
 
-**KApp** is a university platform for Fundación Universitaria Konrad Lorenz, developed by the K-Forge club. The backend uses a Spring Boot microservices architecture.
+**KApp** is the **mobile application** for the Fundación Universitaria Konrad Lorenz community, developed by the K-Forge club. The product vision is mobile-first: native Android (Kotlin) and iOS (Swift) clients that give students and staff access to academic management — courses, assignments, users, and authentication — from their phones.
+
+The mobile clients are powered by a **Spring Boot microservices backend** that exposes a unified API behind a Gateway. Delivery is sequenced backend first, web second, mobile third: the web frontend exercises the API while the backend is built and settles the interface design that the Kotlin and Swift clients will inherit.
+
+---
 
 ## Tech Stack
 
-- **Backend:** Java 21, Spring Boot 3.2, Spring Cloud 2023.0.0
-- **Discovery:** Netflix Eureka (`:8761`)
-- **Gateway:** Spring Cloud Gateway (`:8080`)
-- **Security:** Spring Security + JWT (JJWT 0.11.5, BCrypt)
-- **IPC:** OpenFeign (service-to-service REST)
-- **Resilience:** Resilience4j Circuit Breaker
-- **ORM:** Spring Data JPA + Hibernate
-- **Database:** PostgreSQL 15+ (Neon cloud)
-- **Build:** Maven multi-module
-- **Containers:** Docker + Docker Compose
-- **Frontend:** Web (HTML/JS/CSS, migrating to Angular), Android (Kotlin, future), iOS (Swift, future)
-- **Package Manager:** pnpm (dependencies) + Bun (script runner)
+| Layer | Technology |
+|-------|-----------|
+| Mobile (Android) | Kotlin — final product, not started |
+| Mobile (iOS) | Swift — final product, not started |
+| Web (API test surface, design reference) | HTML/JS/CSS → migrating to Angular |
+| Backend | Java 21, Spring Boot 3.2, Spring Cloud 2023.0.0 |
+| Service discovery | Netflix Eureka (`:8761`) |
+| API Gateway | Spring Cloud Gateway (`:8080`) |
+| Security | Spring Security + JWT (JJWT 0.11.5, BCrypt) |
+| IPC | OpenFeign (service-to-service REST) |
+| Resilience | Resilience4j Circuit Breaker |
+| ORM | Spring Data JPA + Hibernate |
+| Database | PostgreSQL 15+ (Neon cloud) |
+| Build | Maven multi-module |
+| Containers | Docker + Docker Compose |
+| Package manager | pnpm (install) + Bun (scripts) |
 
-## Frontend Tooling Policy
-
-- Instalar herramientas (una sola vez): `corepack enable && corepack prepare pnpm@latest --activate` y `curl -fsSL https://bun.sh/install | bash`
-- Instalar dependencias del frontend: `pnpm install`
-- Ejecutar scripts del frontend con Bun: `bun start`, `bun dev`, `bun run build`
+---
 
 ## Microservices
 
-| Service            | Port | Artifact ID        | Directory                                       |
-| ------------------ | ---- | ------------------ | ----------------------------------------------- |
-| Discovery Server   | 8761 | discovery-server   | `app/backend/microservices/discovery-server/`   |
-| API Gateway        | 8080 | api-gateway        | `app/backend/microservices/api-gateway/`        |
-| Auth Service       | 8081 | auth-service       | `app/backend/microservices/auth-service/`       |
-| User Service       | 8082 | user-service       | `app/backend/microservices/user-service/`       |
-| Course Service     | 8083 | course-service     | `app/backend/microservices/course-service/`     |
-| Assignment Service | 8084 | assignment-service | `app/backend/microservices/assignment-service/` |
-| Common Library     | —    | common             | `app/backend/microservices/common/`             |
+| Service | Port | Directory |
+|---------|------|-----------|
+| Discovery Server | 8761 | `app/backend/microservices/discovery-server/` |
+| API Gateway | 8080 | `app/backend/microservices/api-gateway/` |
+| Auth Service | 8081 | `app/backend/microservices/auth-service/` |
+| User Service | 8082 | `app/backend/microservices/user-service/` |
+| Course Service | 8083 | `app/backend/microservices/course-service/` |
+| Assignment Service | 8084 | `app/backend/microservices/assignment-service/` |
+| Common Library | — | `app/backend/microservices/common/` |
+
+---
 
 ## Repository Structure
 
@@ -47,8 +66,7 @@
 KApp/
 ├── app/
 │   ├── backend/
-│   │   ├── kapp/                    # Legacy Spring Boot monolith (do not use for new features)
-│   │   ├── microservices/           # Main application code
+│   │   ├── microservices/           # Backend — the only application code
 │   │   │   ├── pom.xml              # Parent POM (multi-module)
 │   │   │   ├── docker-compose.yml
 │   │   │   ├── discovery-server/
@@ -58,87 +76,148 @@ KApp/
 │   │   │   ├── course-service/
 │   │   │   ├── assignment-service/
 │   │   │   └── common/              # Shared DTOs and exceptions
-│   │   └── postman/                 # Postman collections for API testing
+│   │   └── postman/                 # Postman collections
 │   ├── frontend/
-│   │   ├── web/                     # Web frontend (HTML/JS/CSS → migrating to Angular)
+│   │   ├── web/                     # Web client (HTML/JS/CSS → migrating to Angular)
 │   │   └── mobile/
-│   │       ├── kotlin/              # Android app (future)
-│   │       └── swift/               # iOS app (future)
+│   │       ├── kotlin/              # Android (future)
+│   │       └── swift/               # iOS (future)
 │   └── database/
-│       ├── init.sql                 # Complete schema (enums, tables, triggers)
+│       ├── init.sql                 # Full schema (enums, tables, triggers)
 │       ├── test_data.sql            # Mock data
-│       └── delete_all_data.sql      # Data cleanup script
+│       └── delete_all_data.sql      # Cleanup
 ├── docs/
 │   ├── SRS.md                       # Software Requirements Specification
-│   ├── REQUIREMENTS.md              # Functional and Non-Functional Requirements
-│   ├── DESIGN.md                    # Architecture design and decisions
-│   ├── DOCKER-GUIDE.md              # Containerization guide
-│   ├── K-COLORS.md                  # Brand color palette
-│   ├── PROGRESS.md                  # Implementation status
-│   └── diagrams/                    # Architecture and sequence diagrams
+│   ├── REQUIREMENTS.md
+│   ├── DESIGN.md
+│   ├── DOCKER-GUIDE.md
+│   ├── K-COLORS.md
+│   ├── PROGRESS.md                  # Implementation status — read before large changes
+│   └── diagrams/
 ├── scripts/
-│   ├── start-frontend.sh            # Starts web frontend
-│   └── start-microservices.sh       # Starts all microservices
-├── CONTRIBUTING.md
-├── CONTRIBUTORS.md
+│   ├── start-frontend.sh
+│   └── start-microservices.sh
 └── package.json
 ```
 
-## Conventions
+---
 
-- **Commits:** `type: message in english` (e.g., `feat: add login screen`, `fix: resolve token bug`). Follow Conventional Commits.
-- **Branches:** Git Flow (`main`, `develop`, `feature/*`, `chore/*`, `bugfix/*`, `test/*`, `release/*`, `hotfix/*`). Refer to `CONTRIBUTING.md`.
-- **Java:** Use Lombok to reduce boilerplate. DTOs and global exceptions must reside in the `common` module.
-- **Security:** JWT is validated at the API Gateway. Internal requests are trusted and carry the `X-User-Email` header.
-- **Roles:** `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+## Dev Commands
 
-## Versioning
+```bash
+# One-time tooling setup
+corepack enable && corepack prepare pnpm@latest --activate
+curl -fsSL https://bun.sh/install | bash
 
-Format: `MAJOR.MINOR.PATCH`.
-- `MAJOR` for large refactors or breaking changes.
-- `MINOR` for new backward-compatible features.
-- `PATCH` for bug fixes.
+# Start all microservices
+./scripts/start-microservices.sh
 
-Release flow follows `alpha` -> `beta` -> `stable`. See `CONTRIBUTING.md` for branch commands.
+# Start frontend
+./scripts/start-frontend.sh
 
-## Inter-Service Communication
+# Build (skip tests)
+cd app/backend/microservices && mvn clean package -DskipTests
 
-```mermaid
-graph LR
-    ASSIGN["Assignment Service"] -- Feign --> COURSE["Course Service"] -- Feign --> USER["User Service"]
+# Test (per service)
+cd app/backend/microservices/<service> && mvn test
+
+# Docker
+cd app/backend/microservices && docker compose up -d --build
 ```
 
-- Services are discovered by name via Eureka.
-- The Gateway validates JWTs and appends the `X-User-Email` header to routed requests.
-- Internal microservices trust the header forwarded by the Gateway.
+---
 
-## Database Guidelines
+## Conventions
 
-- **Schema:** Defined in `app/database/init.sql`. Always update it when adding new tables or columns.
-- **Core Tables:** `person`, `member`, `student`, `employee`, `course`, `course_group`, `student_course`, `assignment`, `submission`, `audit_log`.
-- **Enums:** `id_type`, `employee_type`, `contract_type`, `student_status`, `course_status`.
-- **Auditing:** The `audit_log` table captures changes automatically via PostgreSQL triggers.
+### Java
 
-## High-Priority Tasks
+- Use Lombok to reduce boilerplate.
+- DTOs and global exceptions live in the `common` module — not in individual services.
+- Roles: `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
 
-1. Centralize configuration via Spring Cloud Config Server.
-2. Complete frontend migration to Angular.
-3. Implement refresh tokens and logout flows.
-4. Add rate limiting at the Gateway level.
-5. Setup CI/CD pipelines with GitHub Actions.
-6. Implement Distributed Tracing (Zipkin/Sleuth).
-7. Migrate to a database-per-service pattern.
-8. Prepare Kubernetes deployment manifests.
+### Security
+
+- JWT validated at the API Gateway. Internal microservices are trusted.
+- Gateway appends `X-User-Email` header to routed requests. Services read from this header.
+- Never expose JWT secrets or DB credentials. Use environment variables.
+
+### Database
+
+- Schema defined in `app/database/init.sql`. Update it when adding tables/columns.
+- Core tables: `person`, `member`, `student`, `employee`, `course`, `course_group`, `student_course`, `assignment`, `submission`, `audit_log`.
+- Enums: `id_type`, `employee_type`, `contract_type`, `student_status`, `course_status`.
+- Auditing via PostgreSQL triggers into `audit_log`.
+
+### Inter-Service Communication
+
+```
+Assignment Service → (Feign) → Course Service → (Feign) → User Service
+```
+
+Services discovered by name via Eureka.
+
+### Git
+
+- **Commits:** Conventional Commits, English, lowercase, no scope, no final period.
+  ```
+  feat: add course enrollment endpoint
+  fix: resolve jwt expiry handling
+  chore: update spring boot to 3.2.5
+  ```
+- **Branches:** Git Flow — `main`, `develop`, `feature/*`, `bugfix/*`, `test/*`, `hotfix/*`, `release/*`.
+
+### Versioning
+
+SemVer `MAJOR.MINOR.PATCH`. Release cycle: alpha → beta → stable.
+
+---
+
+## Current State
+
+Read `docs/PROGRESS.md` for up-to-date implementation status before proposing large changes.
+
+- **Backend (current focus):** 6 microservices operational (discovery, gateway, auth, user, course, assignment). JWT validated at the gateway; role-based authorization still missing (see `docs/SECURITY-AUDIT.md`, S1 and S2).
+- **Web (current test surface):** HTML/JS/CSS client that exercises the API end to end and settles the interface design. Angular migration pending.
+- **Mobile (final product, not started):** Kotlin and Swift clients. They come after the web design is stable, and they inherit that design.
+
+---
+
+## Roadmap
+
+Ordered by the delivery sequence: harden the backend, settle the design on web, then port to mobile. Keep this list
+in sync with `docs/PROGRESS.md` and `docs/DESIGN.md`.
+
+1. Enforce role-based authorization and close the gateway header-trust gap (`docs/SECURITY-AUDIT.md`, S1 and S2).
+2. Centralize backend configuration via Spring Cloud Config Server.
+3. Complete the web frontend migration to Angular — this is the reference design for the mobile clients.
+4. Implement refresh tokens and logout flows.
+5. Add rate limiting at the Gateway.
+6. Build the Kotlin (Android) client from the settled web design.
+7. Build the Swift (iOS) client.
+8. Extend the CI pipeline into continuous deployment.
+9. Implement distributed tracing (Zipkin).
+10. Migrate to the database-per-service pattern.
+11. Kubernetes deployment manifests.
+
+---
 
 ## AI Agent Instructions
 
-- **Do NOT modify:** `.env` (contains secrets).
-- **Schema Stability:** Modify `app/database/init.sql` carefully. Ensure data types align with existing structures.
-- **Legacy Code:** Do not add new features to `app/backend/kapp/`. It is a legacy monolith.
-- **New Features:** Must be developed within `app/backend/microservices/`.
-- **Frontend Code:** Current web development resides in `app/frontend/web/`.
-- **Testing:** Run tests per microservice with `mvn test`.
-- **Build Command:** `cd app/backend/microservices && mvn clean package -DskipTests`
-- **Docker Command:** `cd app/backend/microservices && docker compose up -d --build`
-- **Knowledge Sync:** Always read `docs/PROGRESS.md` to understand current progress before suggesting massive overhauls. Read `CONTRIBUTING.md` for specific formatting rules.
-- **Communication:** Never use emojis in technical documents (e.g. `.md` files). Keep structures professional and formal.
+- **Never modify** `.env` files (contains secrets).
+- **Backend location:** all backend work goes in `app/backend/microservices/`. The original monolith was deleted once the migration completed; it is only retrievable from the git history and must not be resurrected.
+- **Schema:** Modify `app/database/init.sql` carefully. Align data types with existing structures.
+- **Before large changes:** Read `docs/PROGRESS.md` and the contribution guidelines published by the K-Forge organization first.
+- **Product identity:** KApp is a **mobile app** for Konrad Lorenz. The microservices are the backend that powers the mobile clients. Do not describe KApp as a "web platform" — it is a mobile-first product.
+- **Demo mode:** `app/frontend/web/js/demo.js` intercepts API calls with sample data and activates only when the client is served from a host other than `localhost` (or forced with `?demo=1`). It exists so the interface can be deployed statically while no backend is hosted. Never point it at real data, and never let it change behaviour during local development.
+- **Delivery sequence:** backend first, web second, mobile third. Web (`app/frontend/web/`) is the surface used to test the API and to settle the interface design; that design is later ported to Kotlin (`app/frontend/mobile/kotlin/`) and Swift (`app/frontend/mobile/swift/`), which are the final product. The mobile clients sitting at low priority in `docs/PROGRESS.md` is intentional sequencing, not a change of target.
+- **No emojis** in technical markdown documents.
+- **No automatic commits.** Present changes for review first.
+- **Documentation language:** English for repository documentation.
+
+
+---
+
+## Temporary Files
+
+- `tmp/` is gitignored. Store one-off scripts and throwaway files there.
+- Delete after use. Never commit anything from `tmp/`.

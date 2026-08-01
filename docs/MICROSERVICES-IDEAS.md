@@ -1,72 +1,81 @@
-#  Ideas de Microservicios — KApp
+# Microservice Ideas — KApp
 
-> **"Las mejores arquitecturas nacen de buenas ideas compartidas."**
+> **"The best architectures grow out of good shared ideas."**
 
-Bienvenido al banco de ideas de microservicios de KApp. Este documento existe para que todo el equipo pueda proponer, documentar y discutir ideas de nuevos microservicios de forma estructurada, sin la presión de desarrollarlas todas de inmediato.
+Welcome to the KApp microservice idea bank. This document exists so the whole team can propose, document and discuss
+new microservice ideas in a structured way, without the pressure of building them all right away.
 
-La meta es simple: **dejar una base sólida de ideas bien pensadas** que nos permita priorizar, planificar y construir el futuro de KApp con claridad. No importa si tu idea es pequeña o ambiciosa — si resuelve un problema real para la comunidad universitaria, merece estar aquí.
+The goal is simple: **leave a solid base of well-thought-out ideas** that lets us prioritize, plan and build the
+future of KApp with clarity. It does not matter whether your idea is small or ambitious — if it solves a real problem
+for the university community, it belongs here.
 
 ---
 
-##  Instrucciones de Uso
+## How to Use This Document
 
-¿Tienes una idea? ¡Genial! Sigue estos pasos para agregarla:
+Got an idea? Follow these steps to add it:
 
-1. **Agrega una nueva fila a la tabla** de la sección "Ideas Registradas", completando todos los campos.
-2. **Ubica tu idea en la posición correcta** según la matriz Impacto × Dificultad: primero las de **alto impacto y baja dificultad** (Quick wins), luego las de **alto impacto y alta dificultad** (Proyectos estratégicos), después las de **bajo/medio impacto y baja dificultad** (Relleno), y al final las de **bajo/medio impacto y alta dificultad** (Evitar o posponer).
-3. **Pon tu nombre o usuario de GitHub** para que el equipo sepa a quién contactar si quiere discutir la propuesta.
-4. **Haz commit y abre un PR** con el título: `idea: Nombre del Microservicio`.
+1. **Add a new row to the table** in the "Registered Ideas" section, filling in every field.
+2. **Place your idea in the right position** according to the Impact × Difficulty matrix: first **high impact, low
+   difficulty** (quick wins), then **high impact, high difficulty** (strategic projects), then **low/medium impact,
+   low difficulty** (filler), and finally **low/medium impact, high difficulty** (avoid or postpone).
+3. **Add your name or GitHub handle** so the team knows who to contact to discuss the proposal.
+4. **Commit and open a PR** titled: `idea: Microservice Name`.
 
-> **Tip:** Si no estás seguro sobre algún campo (como el nivel de dificultad), haz tu mejor estimación. La lluvia de ideas es para explorar, no para tener certezas absolutas.
+> **Tip:** if you are unsure about a field (such as the difficulty level), make your best estimate. Brainstorming is
+> for exploring, not for absolute certainty.
 
 > [!IMPORTANT]
-> **Regla de ordenamiento:** Las ideas **siempre** deben estar ordenadas por **Impacto descendente** (Alto → Medio → Bajo) y como desempate por **Dificultad ascendente** (Bajo → Medio → Alto). Al agregar una nueva idea, insértala en la categoría correcta según la matriz Impacto × Dificultad, nunca al final del documento sin respetar el orden.
+> **Ordering rule:** ideas must **always** be sorted by **descending impact** (High → Medium → Low), breaking ties by
+> **ascending difficulty** (Low → Medium → High). When adding a new idea, insert it in the right category according
+> to the Impact × Difficulty matrix; never append it at the end of the document ignoring the order.
 
 ---
 
-##  Matriz Impacto × Dificultad
+## Impact × Difficulty Matrix
 
-A continuación encontrarás las ideas propuestas por el equipo. Lee las existentes antes de agregar la tuya para evitar duplicados y, si ves algo que te gusta, ¡no dudes en comentarlo en el PR correspondiente!
+Below are the ideas proposed by the team. Read the existing ones before adding yours to avoid duplicates, and if you
+like one of them, comment on the corresponding PR.
 
-|                        | Baja Dificultad                                | Media/Alta Dificultad                           |
-| ---------------------- | ---------------------------------------------- | ----------------------------------------------- |
-| **Alto Impacto**       |  **Quick wins** <br> _Hacer primero_         |  **Proyectos estratégicos** <br> _Planificar_ |
-| **Medio/Bajo Impacto** |  **Relleno** <br> _Hacer cuando haya tiempo_ |  **Evitar o posponer** <br> _Baja prioridad_  |
+|                        | Low Difficulty                              | Medium/High Difficulty                        |
+| ---------------------- | ------------------------------------------- | --------------------------------------------- |
+| **High Impact**        | **Quick wins** <br> _Do first_              | **Strategic projects** <br> _Plan ahead_      |
+| **Medium/Low Impact**  | **Filler** <br> _Do when there is time_     | **Avoid or postpone** <br> _Low priority_     |
 
 ---
 
-##  Ideas Registradas
+## Registered Ideas
 
-<!-- IMPORTANTE: NOTA PARA AGENTES DE IA Y CONTRIBUYENTES:
-  Las filas de esta tabla SIEMPRE deben estar ordenadas por la matriz Impacto × Dificultad:
-    1.  Quick wins — Alto Impacto + Baja Dificultad (primero)
-    2.  Proyectos estratégicos — Alto Impacto + Media/Alta Dificultad
-    3.  Relleno — Bajo/Medio Impacto + Baja Dificultad
-    4.  Evitar o posponer — Bajo/Medio Impacto + Media/Alta Dificultad (al final)
-  Dentro de la misma categoría, el orden es cronológico (por fecha).
-  Cuando se agregue una nueva idea, debe insertarse al final del grupo de su categoría.
-  NUNCA agregar una fila al final sin respetar este orden.
+<!-- IMPORTANT: NOTE FOR AI AGENTS AND CONTRIBUTORS:
+  The rows of this table MUST ALWAYS be sorted by the Impact x Difficulty matrix:
+    1. Quick wins — High Impact + Low Difficulty (first)
+    2. Strategic projects — High Impact + Medium/High Difficulty
+    3. Filler — Low/Medium Impact + Low Difficulty
+    4. Avoid or postpone — Low/Medium Impact + Medium/High Difficulty (last)
+  Within the same category, order is chronological (by date).
+  When a new idea is added, insert it at the end of its category group.
+  NEVER append a row at the end without respecting this order.
 -->
 
-| Microservicio                     | Slug/Identificador URL        | Descripción                                                                                                                                                                                  | Público                                  | Impacto | Dificultad | Propuesto por               | Fecha    |
-| --------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- | ------- | ---------- | --------------------------- | -------- |
-| Reporte de Espacios Dañados       | report-service                | Denunciar espacios o recursos dañados (tableros, sillas, baños, proyectores) para que mantenimiento priorice y dé seguimiento a las reparaciones.                                            | Estudiantes, profesores, administrativos | Alto    | Bajo       | KApp Team                   | 26/02/25 |
-| Mapa Interactivo                  | map-service                   | Buscar salones, aulas, edificios y espacios del campus mediante un mapa interactivo con orientación visual.                                                                                  | Estudiantes, profesores, invitados       | Alto    | Medio      | KApp Team                   | 26/02/25 |
-| Citas de Bienestar y Coordinación | bienestar-appointment-service | Agendar citas con Bienestar Universitario, coordinación académica y psicología. Cascarón extensible para que cada dependencia configure su disponibilidad y flujo de agendamiento.           | Estudiantes, profesores, administrativos | Alto    | Medio      | KApp Team                   | 26/02/25 |
-| Menú y Pedidos del Restaurante    | restaurant-service            | Consultar el menú del día del restaurante universitario y realizar pedidos o compras de comida desde la app.                                                                                 | Estudiantes, profesores, administrativos | Alto    | Medio      | KApp Team                   | 26/02/25 |
-| Semáforo Estudiantil              | student-semaphore-service     | Consultar el semáforo académico de cada estudiante (promedio, créditos, alertas) e identificar estudiantes en riesgo para acompañamiento oportuno.                                           | Estudiantes, administradores             | Alto    | Medio      | KApp Team                   | 26/02/25 |
-| Biblioteca                        | library-service               | Consultar catálogo, ver historial de préstamos, renovar préstamos y reservar libros o inscribirse en lista de espera.                                                                        | Estudiantes, profesores                  | Alto    | Medio      | KApp Team                   | 26/02/25 |
-| Eventos y Actividades             | event-service                 | Centralizar eventos universitarios (culturales, deportivos, académicos), filtrar por categoría, inscribirse y agregar al calendario personal.                                                | Todos                                    | Alto    | Medio      | KApp Team                   | 26/02/25 |
-| Notificaciones                    | notification-service          | Servicio transversal de notificaciones push en tiempo real. Centraliza alertas de todos los microservicios (horarios, mensajes, eventos, citas) con configuración personalizada por usuario. | Todos                                    | Alto    | Medio      | KApp Team                   | 26/02/25 |
-| Gestión de Clubes                 | club-service                  | Crear, consultar y gestionar clubes estudiantiles: descubrir clubes, inscribirse, administrar miembros, publicar actividades y coordinar reuniones.                                          | Estudiantes, administradores             | Alto    | Medio      | Brian Steven Vargas Clavijo | 10/03/26 |
-| Trámites Académicos | academic-procedures-service | Registrar y dar seguimiento en tiempo real a trámites académicos (homologaciones, cancelaciones, certificados, revisiones de nota, entre otros), centralizando solicitudes administrativas y mejorando la transparencia del proceso. | Estudiantes, administrativos | Alto | Medio | @DIEGO-ALI | 13/03/26 |
-| Chat por Materia                  | chat-service                  | Mensajería organizada por materia: profesor ↔ grupo, estudiante ↔ estudiante, facultad ↔ miembros académicos. Reemplaza canales informales (WhatsApp, correo).                               | Estudiantes, profesores, facultad        | Alto    | Alto       | KApp Team                   | 26/02/25 |
-| Objetos Perdidos                  | lost-and-found-service        | Registrar y buscar objetos perdidos en el campus. Quien encuentra un objeto lo reporta y quien lo perdió busca coincidencias para coordinar la devolución.                                   | Estudiantes, profesores, administrativos | Medio   | Bajo       | Brian Steven Vargas Clavijo | 10/03/26 |
-| Salones Disponibles | available-classrooms | Consulta en tiempo real de aulas libres y su disponibilidad por piso para evitar interrupciones por clases. | Estudiantes | Medio | Bajo | @DIEGO-ALI | 10/03/26 |
-| Parqueadero                       | parking-service               | Reservar espacios de parqueo, consultar disponibilidad en tiempo real y realizar pagos por uso del parqueadero universitario.                                                                | Estudiantes, profesores, administrativos | Medio   | Medio      | KApp Team                   | 26/02/25 |
-| Carné Digital                     | carnet-service                | Carné universitario digital con código QR vinculado a la identidad del estudiante o profesor para identificación en accesos y servicios.                                                     | Estudiantes, profesores                  | Bajo    | Medio      | KApp Team                   | 26/02/25 |
-| Reserva de espacios edificio Bienestar | recreation-bookings | Consulta de la dispoibilidad de los espacios de bienestar (mesas de Ping Pong, sala de danzas, mesas de billar, etc), agendamiento de espacios con cupos limitados y en los horarios especificos de atención. | Estudiantes | Medio | Bajo | Zavithar_17 | 12/03/26 |
-| Gestion de Gimnasio | gym-management | Inscripción al servicio de gimnasio de la universidad, gestión de rutinas diseñadas por los profesores, sección de recomendaciones alimenticias para cumplimiento de objetivos. | Estudiantes y entrenadores | Medio | Medio | Zavithar_17 | 12/03/26 |
+| Microservice                        | Slug / URL identifier         | Description                                                                                                                                                                          | Audience                                 | Impact | Difficulty | Proposed by                 | Date     |
+| ----------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- | ------ | ---------- | --------------------------- | -------- |
+| Damaged Facility Reports            | report-service                | Report damaged spaces or resources (boards, chairs, restrooms, projectors) so maintenance can prioritize repairs and track them.                                                       | Students, professors, staff              | High   | Low        | KApp Team                   | 26/02/25 |
+| Interactive Map                     | map-service                   | Find classrooms, buildings and campus spaces through an interactive map with visual orientation.                                                                                       | Students, professors, visitors           | High   | Medium     | KApp Team                   | 26/02/25 |
+| Wellbeing and Coordination Bookings | bienestar-appointment-service | Book appointments with student wellbeing services, academic coordination and psychology. Extensible shell so each department configures its own availability and booking flow.         | Students, professors, staff              | High   | Medium     | KApp Team                   | 26/02/25 |
+| Restaurant Menu and Orders          | restaurant-service            | Check the university restaurant daily menu and place food orders from the app.                                                                                                         | Students, professors, staff              | High   | Medium     | KApp Team                   | 26/02/25 |
+| Student Academic Traffic Light      | student-semaphore-service     | Check each student's academic status (average, credits, alerts) and identify at-risk students for timely support.                                                                      | Students, administrators                 | High   | Medium     | KApp Team                   | 26/02/25 |
+| Library                             | library-service               | Browse the catalog, review loan history, renew loans, and reserve books or join a waiting list.                                                                                        | Students, professors                     | High   | Medium     | KApp Team                   | 26/02/25 |
+| Events and Activities               | event-service                 | Centralize university events (cultural, sports, academic), filter by category, register and add them to a personal calendar.                                                           | Everyone                                 | High   | Medium     | KApp Team                   | 26/02/25 |
+| Notifications                       | notification-service          | Cross-cutting real-time push notification service. Centralizes alerts from every microservice (schedules, messages, events, appointments) with per-user configuration.                 | Everyone                                 | High   | Medium     | KApp Team                   | 26/02/25 |
+| Club Management                     | club-service                  | Create, browse and manage student clubs: discover clubs, join them, manage members, publish activities and coordinate meetings.                                                        | Students, administrators                 | High   | Medium     | Brian Steven Vargas Clavijo | 10/03/26 |
+| Academic Procedures                 | academic-procedures-service   | Register and track academic procedures in real time (credit transfers, cancellations, certificates, grade reviews and others), centralizing administrative requests and improving process transparency. | Students, staff                          | High   | Medium     | @DIEGO-ALI                  | 13/03/26 |
+| Per-Course Chat                     | chat-service                  | Messaging organized by course: professor ↔ group, student ↔ student, faculty ↔ academic members. Replaces informal channels (WhatsApp, e-mail).                                        | Students, professors, faculty            | High   | High       | KApp Team                   | 26/02/25 |
+| Lost and Found                      | lost-and-found-service        | Register and search for items lost on campus. Whoever finds an item reports it, and whoever lost it looks for matches to arrange the return.                                           | Students, professors, staff              | Medium | Low        | Brian Steven Vargas Clavijo | 10/03/26 |
+| Available Classrooms                | available-classrooms          | Real-time view of free classrooms and their availability per floor, to avoid interrupting ongoing classes.                                                                             | Students                                 | Medium | Low        | @DIEGO-ALI                  | 10/03/26 |
+| Parking                             | parking-service               | Reserve parking spots, check real-time availability and pay for use of the university parking lot.                                                                                     | Students, professors, staff              | Medium | Medium     | KApp Team                   | 26/02/25 |
+| Digital ID Card                     | carnet-service                | Digital university ID card with a QR code bound to the student or professor identity, for access control and services.                                                                 | Students, professors                     | Low    | Medium     | KApp Team                   | 26/02/25 |
+| Wellbeing Building Space Booking    | recreation-bookings           | Check availability of wellbeing spaces (ping-pong tables, dance studio, pool tables and others) and book limited slots within their opening hours.                                     | Students                                 | Medium | Low        | Zavithar_17                 | 12/03/26 |
+| Gym Management                      | gym-management                | Enroll in the university gym service, manage routines designed by trainers, and get nutrition recommendations aligned with each goal.                                                  | Students and trainers                    | Medium | Medium     | Zavithar_17                 | 12/03/26 |
 
 
 > **KApp Team:** Brian Steven Vargas Clavijo, Julián David Avila Cortes, Santiago Rocha Ramirez, Diego Ali Lares Rondon.
@@ -75,8 +84,8 @@ A continuación encontrarás las ideas propuestas por el equipo. Lee las existen
 
 <!--
   ┌──────────────────────────────────────────────────────────────────┐
-  │  ¡Agrega tu idea como nueva fila a la tabla, respetando el     │
-  │  orden de la matriz Impacto × Dificultad!                      │
-  │   Quick wins →  Estratégicos →  Relleno →  Posponer   │
+  │  Add your idea as a new row in the table, respecting the         │
+  │  Impact x Difficulty matrix order.                               │
+  │  Quick wins -> Strategic -> Filler -> Postpone                   │
   └──────────────────────────────────────────────────────────────────┘
 -->
