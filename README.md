@@ -102,31 +102,30 @@ any credentials. It is powered by a demo mode ([`js/demo.js`](app/frontend/web/j
 with sample data when no backend is reachable, so the interface can be browsed by anyone. The mode stays inert
 during local development — see [Demo mode](#demo-mode).
 
+Captured at phone width (390 x 844), the viewport the layout is designed around: the stylesheets are mobile-first,
+and the desktop arrangement is the enhancement layered on top through breakpoints.
+
 <table>
   <tr>
-    <td width="50%" align="center">
+    <td width="20%" align="center" valign="top">
       <img src="./assets/screenshots/01-login.png" alt="Authentication screen" width="100%"/>
-      <br/><sub><b>Authentication</b> — institutional credentials, JWT issued by <code>auth-service</code></sub>
+      <br/><sub><b>Authentication</b><br/>Institutional credentials, JWT issued by <code>auth-service</code></sub>
     </td>
-    <td width="50%" align="center">
+    <td width="20%" align="center" valign="top">
       <img src="./assets/screenshots/02-dashboard.png" alt="Student dashboard" width="100%"/>
-      <br/><sub><b>Dashboard</b> — announcements and role-aware navigation</sub>
+      <br/><sub><b>Dashboard</b><br/>Announcements and role-aware navigation</sub>
     </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
+    <td width="20%" align="center" valign="top">
       <img src="./assets/screenshots/03-courses.png" alt="Enrolled courses" width="100%"/>
-      <br/><sub><b>Courses</b> — enrollment served by <code>course-service</code></sub>
+      <br/><sub><b>Courses</b><br/>Enrollment served by <code>course-service</code></sub>
     </td>
-    <td width="50%" align="center">
+    <td width="20%" align="center" valign="top">
       <img src="./assets/screenshots/04-assignments.png" alt="Assignments" width="100%"/>
-      <br/><sub><b>Assignments</b> — pending and submitted work from <code>assignment-service</code></sub>
+      <br/><sub><b>Assignments</b><br/>Pending and submitted work from <code>assignment-service</code></sub>
     </td>
-  </tr>
-  <tr>
-    <td colspan="2" align="center">
+    <td width="20%" align="center" valign="top">
       <img src="./assets/screenshots/05-admin.png" alt="Administration panel" width="100%"/>
-      <br/><sub><b>Administration</b> — user, course and assignment management, rendered only for the admin role</sub>
+      <br/><sub><b>Administration</b><br/>User, course and assignment management, admin role only</sub>
     </td>
   </tr>
 </table>
