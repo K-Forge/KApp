@@ -2,12 +2,17 @@
   "name": "kapp",
   "version": "1.0.0",
   "private": true,
-  "description": "KApp – Plataforma universitaria Konrad Lorenz",
+  "description": "KApp – University mobile app for Konrad Lorenz, powered by a Spring Boot microservices backend",
   "scripts": {
+    "web:dev": "bunx serve app/frontend/web",
+    "web:start": "bunx serve app/frontend/web -s -l 3000",
+    "web:start:script": "bash scripts/start-frontend.sh",
+    "microservices:start": "bash scripts/start-microservices.sh start",
+    "microservices:stop": "bash scripts/start-microservices.sh stop",
+    "microservices:status": "bash scripts/start-microservices.sh status",
     "dev:web": "bunx serve app/frontend/web",
     "start:web": "bunx serve app/frontend/web -s -l 3000",
-    "start:backend": "bash scripts/start-backend.sh",
-    "start:microservices": "bash scripts/start-microservices.sh",
+    "start:microservices": "bash scripts/start-microservices.sh start",
     "start:frontend": "bash scripts/start-frontend.sh"
   },
   "devDependencies": {
