@@ -15,6 +15,8 @@
 
 <p align="center">
   <a href="https://github.com/K-Forge/KApp/actions/workflows/ci.yml"><img src="https://github.com/K-Forge/KApp/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"/></a>
+  &nbsp;
+  <a href="https://kapp-black.vercel.app"><img src="https://img.shields.io/badge/Live%20demo-kapp--black.vercel.app-000000?logo=vercel&logoColor=white" alt="Live demo"/></a>
   <br/><br/>
   <img src="https://img.shields.io/badge/Android-Kotlin-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android (Kotlin)"/>
   <img src="https://img.shields.io/badge/iOS-Swift-F05138?style=for-the-badge&logo=swift&logoColor=white" alt="iOS (Swift)"/>
@@ -95,9 +97,10 @@ What that means when reading this repository:
 The web client is where the API is exercised end to end, and it holds the interface design that the Kotlin and
 Swift clients will inherit. The screens below run against the microservices backend; the data shown is sample data.
 
-The client also ships a **demo mode** ([`js/demo.js`](app/frontend/web/js/demo.js)) that answers the API with sample
-data when no backend is reachable, so the interface can be deployed as a static site and browsed by anyone. It stays
-inert during local development — see [Demo mode](#demo-mode).
+A **live demo** of these screens runs at **[kapp-black.vercel.app](https://kapp-black.vercel.app)** — sign in with
+any credentials. It is powered by a demo mode ([`js/demo.js`](app/frontend/web/js/demo.js)) that answers the API
+with sample data when no backend is reachable, so the interface can be browsed by anyone. The mode stays inert
+during local development — see [Demo mode](#demo-mode).
 
 <table>
   <tr>

@@ -306,3 +306,4 @@ jacoco.exec
 **/* 2.*
 # Temp scripts
 tmp/
+.vercel
