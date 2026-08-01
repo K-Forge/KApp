@@ -170,7 +170,13 @@
     const updateUserInfo = (idPrefix) => {
       const elName = document.getElementById(idPrefix + 'Name');
       const elCode = document.getElementById(idPrefix + 'Code');
-      if (elName) elName.textContent = currentUser.username;
+      // El identificador es el correo institucional. En el encabezado se muestra
+      // solo la parte local: el dominio no aporta y desborda en pantallas de
+      // teléfono. El correo completo queda disponible en el tooltip.
+      if (elName) {
+        elName.textContent = (currentUser.username || '').split('@')[0];
+        elName.title = currentUser.username || '';
+      }
       if (elCode) elCode.textContent = currentUser.role.replace('ROLE_', '');
     };
     updateUserInfo('student'); // Header

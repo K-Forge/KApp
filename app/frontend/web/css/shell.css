@@ -18,6 +18,32 @@ body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI
 .avatar { justify-self: end; width: 40px; height: 40px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 2px rgba(255,255,255,.5); background: #fff; display: block; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
+/* El identificador del usuario es un correo institucional y puede ser largo.
+   Sin recorte empuja el ancho del header y provoca scroll horizontal en
+   pantallas de teléfono. Se recorta con puntos suspensivos, igual que el
+   nombre del drawer. */
+.app-header > div { min-width: 0; }
+#studentName, #studentCode {
+  display: block;
+  max-width: 46vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* En teléfono no hay ancho para un logo centrado y el identificador a la vez:
+   el logo se alinea a continuación de los botones, como en cualquier header
+   móvil, y el identificador conserva su espacio a la derecha.
+   Las reglas llevan !important porque el posicionamiento del logo está en un
+   atributo style del marcado. */
+@media (max-width: 539px) {
+  .app-header .header-center {
+    left: 104px !important;
+    transform: translateY(-50%) !important;
+  }
+  #studentName, #studentCode { max-width: 130px; font-size: 12px; }
+}
+
 /* Drawer */
 .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.32); opacity: 0; pointer-events: none; transition: opacity .2s ease; }
 .drawer-overlay.is-open { opacity: 1; pointer-events: auto; }

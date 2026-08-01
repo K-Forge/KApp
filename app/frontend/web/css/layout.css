@@ -231,15 +231,23 @@
   margin: 10px auto 0;
 }
 
-/* Grid de navegación: Items gigantes y centrados (4x2) */
+/* Grid de navegación: items gigantes y centrados.
+   Móvil primero: 2 columnas, que es lo que cabe en un teléfono. Cuatro
+   columnas fijas obligaban a un ancho mínimo de ~473px y desbordaban la
+   pantalla, arrastrando toda la página al scroll horizontal. */
 .grid-menu {
   display: grid;
   gap: 15px; /* Espacio entre elementos */
-  grid-template-columns: repeat(4, 1fr); /* 4 columnas forzadas para lograr 4 arriba y 4 abajo */
+  grid-template-columns: repeat(2, 1fr);
   justify-items: center; /* Centrar horizontalmente en la celda */
   max-width: 900px; /* Limitar ancho en pantallas grandes */
   margin: 0 auto; /* Centrar el grid en la página */
   padding: 0 10px;
+}
+
+/* A partir de tablet, la disposición prevista de 4x2 */
+@media (min-width: 540px) {
+  .grid-menu { grid-template-columns: repeat(4, 1fr); }
 }
 
 .menu-item {
