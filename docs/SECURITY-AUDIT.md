@@ -263,7 +263,9 @@ Observations from the same review that are not security defects but affect maint
 
 ### 5.1 Repository hygiene (the repository is already public)
 
-Nothing here is a deployment concern. These are the housekeeping items for a public source repository.
+Nothing here is a deployment concern. These are the housekeeping items for a public source repository. The
+governance items — branch protection, secret scanning, push protection, Dependabot and test coverage — are tracked
+as an explicit pending list in [PROGRESS.md](PROGRESS.md#pending--repository-governance-and-security).
 
 - [x] Legacy monolith deleted from the tree, removing its hardcoded signing key from `HEAD`.
 - [x] Post-deletion secret sweep over the working tree came back clean.

@@ -123,6 +123,22 @@ Web screens double as the design reference for the mobile clients.
 
 ---
 
+## Pending — Repository Governance and Security
+
+Deliberately deferred: the project is a prototype in the thesis pre-proposal phase, nothing is deployed, and these
+items pay off once the codebase carries real work. Recorded here so they are decisions, not oversights. Details and
+evidence live in [SECURITY-AUDIT.md](SECURITY-AUDIT.md).
+
+| Item | Current state | What to do |
+| ---- | ------------- | ---------- |
+| Branch protection | Ruleset active on `main` and `develop`, but soft: zero required approvals, code owner review enabled with no `CODEOWNERS` file, no required status check, organization admins bypass it. | Add `CODEOWNERS`, require at least one approval, and make the CI workflow a required status check so a red build blocks the merge. |
+| Secret scanning | Disabled | Enable it: GitHub scans the tree and history for known credential formats and reports what it finds. Free on public repositories. |
+| Push protection | Disabled | Enable it: rejects a push that carries a recognizable secret before it reaches the history. This is the control that would have prevented both credentials recorded as H1. |
+| Dependabot | Disabled, and no `.github/dependabot.yml` | Enable the alerts, then add the configuration file so Maven updates arrive as pull requests. Spring Boot 3.2.0 and Spring Cloud 2023.0.0 both have newer patch releases. |
+| Test coverage | Zero across the six microservices | Cover the authorization path first — it is the area the audit flags as critical (S1, S2) and the one that must not regress silently. |
+
+---
+
 ## Project Structure
 
 ```
