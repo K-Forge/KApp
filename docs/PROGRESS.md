@@ -123,19 +123,44 @@ Web screens double as the design reference for the mobile clients.
 
 ---
 
-## Pending — Repository Governance and Security
+## Pending Work
 
-Deliberately deferred: the project is a prototype in the thesis pre-proposal phase, nothing is deployed, and these
-items pay off once the codebase carries real work. Recorded here so they are decisions, not oversights. Details and
-evidence live in [SECURITY-AUDIT.md](SECURITY-AUDIT.md).
+Everything below is known and deliberately deferred: the project is a prototype in the thesis pre-proposal phase and
+nothing is deployed. Recorded so it reads as a decision rather than an oversight. Security details and evidence live
+in [SECURITY-AUDIT.md](SECURITY-AUDIT.md).
+
+### Repository governance
 
 | Item | Current state | What to do |
 | ---- | ------------- | ---------- |
-| Branch protection | Ruleset active on `main` and `develop`, but soft: zero required approvals, code owner review enabled with no `CODEOWNERS` file, no required status check, organization admins bypass it. | Add `CODEOWNERS`, require at least one approval, and make the CI workflow a required status check so a red build blocks the merge. |
+| Branch protection ruleset | Active on `main` and `develop`, but soft: zero required approvals, code owner review enabled with no `CODEOWNERS` file, no required status check, and organization admins bypass it. | Require one approval and make the CI workflow a required status check, so a red build blocks the merge. |
+| Ruleset merge conflict | The ruleset requires linear history **and** allows merge commits only. Those are mutually exclusive: a pull request that is not fast-forward cannot be merged. | Switch the allowed merge method to squash, which also leaves one commit per pull request in `main`. |
+| `CODEOWNERS` | Missing. It is a per-repository file and is **not** inherited from `K-Forge/.github`, unlike `CONTRIBUTING.md`, `SECURITY.md` and `CODE_OF_CONDUCT.md`. | Add `* @K-Forge/kapp-team`. Ownership must be the team, not a single person: GitHub does not accept a code owner approving their own pull request, so a sole owner blocks their own work. |
 | Secret scanning | Disabled | Enable it: GitHub scans the tree and history for known credential formats and reports what it finds. Free on public repositories. |
-| Push protection | Disabled | Enable it: rejects a push that carries a recognizable secret before it reaches the history. This is the control that would have prevented both credentials recorded as H1. |
-| Dependabot | Disabled, and no `.github/dependabot.yml` | Enable the alerts, then add the configuration file so Maven updates arrive as pull requests. Spring Boot 3.2.0 and Spring Cloud 2023.0.0 both have newer patch releases. |
-| Test coverage | Zero across the six microservices | Cover the authorization path first — it is the area the audit flags as critical (S1, S2) and the one that must not regress silently. |
+| Push protection | Disabled | Enable it: rejects a push carrying a recognizable secret before it reaches the history. This is the control that would have prevented both credentials recorded as H1. |
+| Dependabot | Alerts disabled, no `.github/dependabot.yml` | Enable the alerts, then add the configuration so Maven updates arrive as pull requests. Spring Boot 3.2.0 and Spring Cloud 2023.0.0 both have newer patch releases. |
+
+### Presentation
+
+| Item | Current state | What to do |
+| ---- | ------------- | ---------- |
+| Social preview image | Not set, so shared links render the generic GitHub card. | Upload `portfolio-cover.png` (already 1200 x 630, the exact size) under Settings, General, Social preview. There is no API for this; it has to be done from the interface. |
+| Placeholder screens | `notas`, `horario`, `chat`, `clubes`, `pqr` and `inscribir` are empty shells. They are unreachable from the dashboard — the corresponding tiles are disabled and point at `#` — so the demo never lands on one. | Build them, or keep them unreachable until they exist. Do not link them from the navigation while empty. |
+
+### Engineering
+
+| Item | Current state | What to do |
+| ---- | ------------- | ---------- |
+| Test coverage | Zero across the six microservices. Deleting the monolith removed the only test file in the repository. | Cover the authorization path first: it is what the audit flags as critical (S1, S2) and what must not regress silently. |
+| Authorization (S1, S2) | The gateway can be bypassed and no role is enforced anywhere. | Keep service ports off the host, make the propagated identity verifiable, and map `/api/admin/**`, `/api/professor/**` and `/api/student/**` to their roles. Tests first. |
+| CI action versions | `actions/checkout@v4` and `actions/setup-java@v4` target Node 20, deprecated; the runner forces them onto Node 24 and annotates every run with a warning. | Bump both to `v5`. |
+| Drawer identity field | `dashboard.html` declares `drawerCodeDrawer` while the other eight pages use `drawerCode`, which is the id `app.js` hydrates. The drawer therefore never shows the user code. Same class of defect as the two already fixed in the header. | Rename the id to `drawerCode`. |
+
+### External and manual
+
+| Item | Current state | What to do |
+| ---- | ------------- | ---------- |
+| Credential rotation (H1) | Two development credentials remain readable in the git history. | Confirm neither is reused anywhere and change them if they are. A fork of the repository exists, so rewriting history would not erase them from that copy. |
 
 ---
 

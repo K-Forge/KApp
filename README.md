@@ -90,6 +90,9 @@ What that means when reading this repository:
 - The original Spring Boot monolith was removed once the migration to microservices completed. It remains
   retrievable from the git history; `app/backend/microservices/` is the only backend.
 
+Known gaps are not left implicit. [docs/PROGRESS.md](docs/PROGRESS.md#pending-work) lists the pending work —
+governance, presentation, engineering and manual items — with the current state of each and what it needs.
+
 ---
 
 ## Interface
@@ -453,7 +456,7 @@ KApp/
 | [docs/DESIGN.md](docs/DESIGN.md)                           | System and interface design decisions.                |
 | [docs/MICROSERVICES-IDEAS.md](docs/MICROSERVICES-IDEAS.md) | Service decomposition analysis.                       |
 | [docs/DOCKER-GUIDE.md](docs/DOCKER-GUIDE.md)               | Container setup and operation guide.                  |
-| [docs/PROGRESS.md](docs/PROGRESS.md)                       | Implementation progress log.                          |
+| [docs/PROGRESS.md](docs/PROGRESS.md)                       | Implementation progress and the explicit list of pending work. |
 | [docs/K-COLORS.md](docs/K-COLORS.md)                       | Brand color palette.                                  |
 | [docs/SECURITY-AUDIT.md](docs/SECURITY-AUDIT.md)           | Security audit findings and public-release checklist. |
 | [docs/researches/](docs/researches/)                       | Academic research: article reviews on university mobile apps and student engagement (ScienceDirect, Taylor & Francis, Scopus). |
