@@ -160,7 +160,7 @@ in [SECURITY-AUDIT.md](SECURITY-AUDIT.md).
 
 | Item | Current state | What to do |
 | ---- | ------------- | ---------- |
-| Credential rotation (H1) | Two development credentials remain readable in the git history. | Confirm neither is reused anywhere and change them if they are. A fork of the repository exists, so rewriting history would not erase them from that copy. |
+| Credential rotation (H1) | Two development credentials remain readable in the git history. | Confirm neither is reused anywhere and change them if they are. Rotation is the fix: the repository has been public since it was created, so any existing clone keeps the values regardless of what the history is rewritten to. |
 
 ---
 

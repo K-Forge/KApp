@@ -4,6 +4,10 @@
 
 Developed as part of the **K-Forge** development club at Fundación Universitaria Konrad Lorenz.
 
+> This page lists the **current development team**. It is not a record of authorship: the GitHub contributors graph
+> is derived from commit history and also credits former members who worked on earlier stages of the project. Both
+> are accurate, and they answer different questions — who maintains KApp today, and who wrote what.
+
 <br/>
 
 ## ◈ Development Team
