@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive icons are 108dp with only the middle 72dp guaranteed visible, so the crest is inset to
+  stay inside the safe zone whatever mask the launcher applies.
+-->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/konrad_logo"
+    android:insetBottom="26dp"
+    android:insetLeft="26dp"
+    android:insetRight="26dp"
+    android:insetTop="26dp" />

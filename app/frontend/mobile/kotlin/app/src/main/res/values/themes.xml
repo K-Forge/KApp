@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The activity theme does almost nothing: Compose paints everything, and enableEdgeToEdge() in
+  MainActivity takes over the system bars. This exists so the window has no action bar and does
+  not flash a dark background before the first frame.
+-->
+<resources>
+    <style name="Theme.KApp" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/white</item>
+    </style>
+</resources>

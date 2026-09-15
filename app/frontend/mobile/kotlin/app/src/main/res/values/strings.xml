@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Interface strings are in Spanish, like the mockups in docs/design/mobile/. Repository
+  documentation and code comments stay in English, as AGENTS.md asks.
+
+  The institutional domain is not here: a resource value starting with "@" is read as a
+  reference. It lives in LoginViewModel.kt as INSTITUTIONAL_DOMAIN.
+-->
+<resources>
+    <string name="app_name">KApp</string>
+    <string name="app_subtitle">Fundación Universitaria Konrad Lorenz</string>
+    <string name="app_logo_description">Escudo de la Fundación Universitaria Konrad Lorenz</string>
+
+    <string name="login_email_label">Correo institucional</string>
+    <string name="login_email_placeholder">pepito.perez</string>
+    <string name="login_password_label">Contraseña</string>
+    <string name="login_password_show">Mostrar la contraseña</string>
+    <string name="login_password_hide">Ocultar la contraseña</string>
+    <string name="login_keep_signed_in">Mantener la sesión iniciada</string>
+    <string name="login_submit">Ingresar</string>
+    <string name="login_first_time">¿Primera vez?</string>
+    <string name="login_invitation_link">Usa tu código de invitación</string>
+    <string name="login_copyright">© 2026 Fundación Universitaria Konrad Lorenz</string>
+
+    <string name="home_greeting">Hola, %1$s</string>
+    <string name="home_loading">Cargando</string>
+
+    <string name="home_next_class">PRÓXIMA CLASE</string>
+    <string name="home_next_starts_in">Empieza en %1$d min</string>
+    <!-- Start, end, room and building: "8:00 – 10:00 · Salón 401 · Bloque B". -->
+    <string name="home_next_when_where">%1$s – %2$s · %3$s · %4$s</string>
+    <string name="home_directions">Cómo llegar</string>
+
+    <string name="home_free_day_title">Hoy no tienes clases</string>
+    <string name="home_free_day_link">Ver la semana</string>
+    <string name="home_no_schedule_title">Aún no armas tu horario</string>
+    <string name="home_no_schedule_body">Agrega tus materias y aparecerán aquí.</string>
+    <string name="home_no_schedule_action">Armar mi horario</string>
+
+    <string name="home_shortcut_semaphore">Semáforo</string>
+    <string name="home_shortcut_schedule">Horario</string>
+    <string name="home_shortcut_map">Mapa</string>
+    <string name="home_shortcut_profile">Perfil</string>
+    <string name="home_tab_home">Inicio</string>
+
+    <string name="home_semester_title">Tu semestre</string>
+    <string name="home_semester_link">Ver semáforo</string>
+    <string name="home_semester_level">Semestre %1$d</string>
+    <string name="home_semester_percent">%1$d%%</string>
+
+    <string name="home_rest_title">Resto del día</string>
+    <string name="home_rest_link">Ver horario</string>
+    <!-- Room and building: "Salón 302 · Bloque A". -->
+    <string name="home_class_where">%1$s · %2$s</string>
+
+    <string name="placeholder_pending">Esta pantalla todavía no existe</string>
+    <string name="placeholder_profile_contract">Se alimentará de GET /api/users/me.</string>
+    <string name="placeholder_semaphore_contract">Se alimentará de GET /api/semaphore/me.</string>
+    <string name="placeholder_map_contract">Se alimentará de GET /api/map/buildings.</string>
+    <string name="placeholder_schedule_contract">Se alimentará de GET /api/schedule/me/week.</string>
+    <string name="placeholder_home_contract">Se alimentará de GET /api/schedule/me/day.</string>
+
+    <string name="invitation_title">Código de invitación</string>
+    <string name="invitation_pending">El registro con código de invitación todavía no existe. Su contrato es POST /auth/register en docs/api/auth.openapi.yaml.</string>
+    <string name="invitation_back">Volver</string>
+
+    <!--
+      The semester card counts credits, which is what GET /api/semaphore/me/summary returns. Only
+      the second line of it counts courses.
+    -->
+    <plurals name="home_semester_courses">
+        <item quantity="one">%1$d materia en curso</item>
+        <item quantity="other">%1$d materias en curso</item>
+    </plurals>
+    <plurals name="home_credits_passed">
+        <item quantity="one">%1$d aprobado</item>
+        <item quantity="other">%1$d aprobados</item>
+    </plurals>
+    <plurals name="home_credits_in_progress">
+        <item quantity="one">%1$d en curso</item>
+        <item quantity="other">%1$d en curso</item>
+    </plurals>
+    <plurals name="home_credits_remaining">
+        <item quantity="one">%1$d restante</item>
+        <item quantity="other">%1$d restantes</item>
+    </plurals>
+</resources>
