@@ -30,9 +30,10 @@ import java.util.List;
  * {@code sinuCode}. Everything else uses a generated {@code IS-*} slug so that nobody can
  * mistake a reconstruction for institutional data. The declared header totals - 142
  * credits and 194 weekly hours - are kept exactly as the printed plan states them even
- * though the seeded items do not sum to them. {@code PensumSeedTotalsTest} measures
- * the gap and {@code NEEDS_VERIFICATION.md} lists every mismatch, because a semaforo that
- * quietly lies is worse than one that reports a discrepancy.
+ * though the seeded items do not sum to them, because a semaforo that quietly lies is worse
+ * than one that reports a discrepancy.
+ *
+ * <p>{@code V006_SeedThePublishedPensums} replaces this reconstruction with the printed plan.
  *
  * <p>Change units are append-only. Never edit one that has run; add a new one.
  */

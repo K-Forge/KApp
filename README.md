@@ -97,8 +97,8 @@ What that means when reading this repository:
   installing anything. `docker compose --profile cloud` points at it;
   [`docs/ONBOARDING.md`](docs/ONBOARDING.md) is the setup a teammate follows.
 - **What is still blocked, and on whom**, is listed in [`docs/PROGRESS.md`](docs/PROGRESS.md) — an
-  SMTP relay, an Entra ID application registration, the floor sketches, and the 24 pensums as
-  PDFs.
+  SMTP relay, an Entra ID application registration, the floor sketches, and the institutional codes
+  the published pensums do not print.
 - The original Spring Boot monolith was removed once the migration completed. It remains retrievable
   from the git history; `app/backend/microservices/` is the only backend.
 
@@ -374,6 +374,7 @@ KApp/
 ├── docs/
 │   ├── api/                          # Five OpenAPI 3.1 contracts — the source of truth
 │   ├── adr/                          # Architecture decision records
+│   ├── pensums/                      # The published plans: transcriptions, extraction tools, seed builder
 │   ├── templates/                    # The pensum import CSV and its column reference
 │   ├── PROGRESS.md                   # What is built, and what is blocked on whom
 │   ├── RUNBOOK.md                    # How to start, stop and troubleshoot it
@@ -402,6 +403,7 @@ KApp/
 | [docs/RUNBOOK.md](docs/RUNBOOK.md) | **How to run it.** Profiles, accounts, and a troubleshooting section where every entry is a failure we actually hit. |
 | [docs/PROGRESS.md](docs/PROGRESS.md) | **What is built**, what each phase delivered, and what is blocked on whom. |
 | [docs/api/](docs/api/) | The OpenAPI 3.1 contracts, one per service. **The source of truth** — linted in CI and served as mocks. |
+| [docs/pensums/](docs/pensums/README.md) | The 23 published plans of study: how each PDF was read, what was loaded, and what the PDFs could not answer. |
 | [docs/adr/](docs/adr/) | Architecture decision records: what was decided, what else was considered, and the consequences including the bad ones. |
 | [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | Scope. Every entry is built or explicitly out — no pending requirements nobody intends to implement. |
 | [docs/DESIGN.md](docs/DESIGN.md) | The system as it is, with diagrams. |

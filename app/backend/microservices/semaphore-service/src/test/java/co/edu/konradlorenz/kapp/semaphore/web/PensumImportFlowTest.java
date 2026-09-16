@@ -35,8 +35,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * <p>Two behaviours carry the weight. **Nothing is written unless everything validates** — a
  * partial import would leave the catalogue in a state nobody chose. And **declared totals are
- * checked rather than trusted**, which is the case that already exists in the seeded plan: it
- * declares 142 credits where its courses add up to 144.
+ * checked rather than trusted**, which is the case the reconstructed Ingeniería de Sistemas seed
+ * had: it declared 142 credits where its courses added up to 144.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
