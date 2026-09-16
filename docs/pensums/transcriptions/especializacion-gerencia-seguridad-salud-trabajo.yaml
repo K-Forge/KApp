@@ -1,0 +1,22 @@
+source: pensum_gerencia_seguridad_salud_trabajo.pdf
+program: Especialización en Gerencia de la Seguridad y Salud en el Trabajo
+faculty: Facultad de Ciencias Empresariales   # not printed; inferred
+programLevel: ESPECIALIZACION
+period: semestre
+declaredCredits: null
+levels:
+  1:
+    - [Seguridad social y legislación en riesgos laborales, 2]
+    - [Aspectos psicológicos en contextos laborales, 2]
+    - [Gerencia de proyectos, 2]
+    - [Analítica de datos para la toma de decisiones gerenciales, 2]
+    - [Electiva, 2]
+    - [Higiene y seguridad industrial, 3]
+  2:
+    - [Sistema de gestión en seguridad y salud en el trabajo, 2]
+    - [Sistemas integrados de gestión, 2]
+    - [Sistema de vigilancia epidemiológica, 2]
+    - ["Medicina preventiva, del trabajo y laboral", 3]
+    - [Ergonomía, 2]
+    - [Riesgo psicosocial en el trabajo, 4]
+    - [Trabajo de grado, 2]

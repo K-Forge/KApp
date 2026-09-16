@@ -1,0 +1,22 @@
+source: pensum_evaluacion_clinica_tratamiento.pdf
+program: Especialización en Evaluación Clínica y Tratamiento de Trastornos Emocionales y Afectivos
+faculty: Facultad de Psicología                # not printed; inferred
+programLevel: ESPECIALIZACION                  # the brochure does not say; two semesters like the other specialisations
+period: semestre
+declaredCredits: null
+levels:
+  1:
+    - [Avances y aplicaciones de la terapia cognitivo-conductual, 3]
+    - [Evaluación psicológica y análisis funcional, 3]
+    - [Fundamentos de aprendizaje en el contexto clínico, 2]
+    - [Práctica en psicología clínica I, 3]
+    - [Diseños de investigación clínica I, 2]
+    - [Electiva I, 2]
+    - [Entrenamiento en habilidades clínicas I, 2]
+  2:
+    - ["Terapias contextuales I: ACT y PAF", 3]
+    - ["Terapias contextuales II: activación conductual y DBT", 3]
+    - [Práctica en psicología clínica II, 3]
+    - [Electiva II, 2]
+    - [Seminario investigativo, 2]
+    - [Entrenamiento en habilidades clínicas II, 2]

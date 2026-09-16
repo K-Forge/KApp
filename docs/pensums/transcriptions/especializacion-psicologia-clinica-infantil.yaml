@@ -1,0 +1,22 @@
+source: pensum_especializacion_psicologia_clinica_infantil.pdf
+program: Especialización en Psicología Clínica Infantil, del Adolescente y la Familia
+faculty: Facultad de Psicología                # not printed; inferred
+programLevel: ESPECIALIZACION
+period: semestre
+declaredCredits: null
+levels:
+  1:
+    - [Bases y aplicaciones del análisis conductual aplicado, 3]
+    - [Evaluación psicológica y análisis funcional, 3]
+    - [Perspectiva dimensional en clínica infantil, 2]
+    - [Práctica en Psicología Clínica I, 3]
+    - [Diseños de investigación Clínica I, 2]
+    - [Electiva I, 2]
+    - [Entrenamiento en habilidades clínicas I, 2]
+  2:
+    - ["Terapias contextuales I: ACT y PAF", 3]
+    - [Aplicaciones del análisis de la conducta verbal en dificultades del desarrollo, 3]
+    - [Práctica en Psicología Clínica II, 3]
+    - [Electiva II, 2]
+    - [Seminario investigativo, 2]
+    - [Entrenamiento en habilidades clínicas II, 2]

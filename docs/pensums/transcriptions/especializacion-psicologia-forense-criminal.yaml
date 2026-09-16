@@ -1,0 +1,21 @@
+source: pensum_especializacion_psicologia_forense.pdf
+program: Especialización en Psicología Forense y Criminal
+faculty: Facultad de Psicología                # not printed; inferred
+programLevel: ESPECIALIZACION
+period: semestre
+declaredCredits: null                          # neither per-course credits nor a total are printed
+levels:
+  1:
+    - [Criminología y Victimología, null]
+    - [Fundamentos de Derecho Penal y Procesal, null]
+    - [Psicopatología Forense I, null]
+    - [Evaluación Forense y Técnicas de Entrevista, null]
+    - [Práctica forense I, null]
+    - [Electiva I, null]
+  2:
+    - [Fundamentos de Investigación Criminal, null]
+    - [Fundamentos de Derecho de Familia, null]
+    - [Psicopatología Forense de la Familia, null]
+    - [Técnicas de oralidad, null]
+    - [Práctica forense II, null]
+    - [Electiva II, null]
