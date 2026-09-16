@@ -1,0 +1,23 @@
+source: Plan-estudios-Maestria-en-Inteligencia-Artificial-Aplicada-a-Contextos-Humanos-y-Sociales.pdf
+program: Maestría en Inteligencia Artificial Aplicada a Contextos Humanos y Sociales
+faculty: Facultad de Psicología                # not printed; inferred
+programLevel: MAESTRIA
+period: semestre
+declaredCredits: 34                            # only the total is printed, no per-course credits
+levels:
+  1:
+    - [Fundamentos conceptuales y profesionales, null, Perfeccionamiento Profesional]
+    - [Procesos y metodologías disciplinares, null, Perfeccionamiento Profesional]
+    - [Perspectivas profesionales contemporáneas, null, Perfeccionamiento Profesional]
+    - [Introducción a la inteligencia artificial aplicada, null, IA aplicada]
+    - [Herramientas y técnicas de IA aplicada, null, IA aplicada]
+  2:
+    - [Intervención y análisis aplicado, null, Perfeccionamiento Profesional]
+    - [Diseño y desarrollo de estrategias, null, Perfeccionamiento Profesional]
+    - [Evaluación y toma de decisiones profesionales, null, Perfeccionamiento Profesional]
+    - [Análisis de datos y toma de decisiones asistida por IA, null, IA aplicada]
+    - [Metodologías para Proyectos Aplicados con Inteligencia Artificial, null, Investigación]
+  3:
+    - [IA aplicada a la disciplina, null, IA aplicada]
+    - [Diseño estratégico de soluciones con IA, null, IA aplicada]
+    - [Trabajo de grado, null, Investigación]

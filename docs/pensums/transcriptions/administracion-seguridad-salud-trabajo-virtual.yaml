@@ -1,0 +1,71 @@
+source: Plan-de-estudio-administracion-SST.pdf
+program: Administración en Seguridad y Salud en el Trabajo (virtual)
+faculty: Facultad de Ciencias Empresariales   # not printed; inferred
+programLevel: PREGRADO
+period: semestre
+declaredCredits: null                          # the brochure prints no total
+notes:
+  - Credits are printed blank for Cultura II and Electiva 1 to 4.
+levels:
+  1:
+    - [Fundamentos de administración, 2]
+    - [Introducción a procesos productivos, 3]
+    - [Pensamiento científico, 2]
+    - [Fundamentos de matemáticas, 3]
+    - [Cultura I, 2]
+    - [Habilidades comunicativas, 2]
+    - [Ingles intermedio bajo, 2]
+  2:
+    - [Marco general de la seguridad social, 3]
+    - [Medicina preventiva, 4]
+    - [Peligros y riesgos ocupacionales, 5]
+    - [Técnicas de indagación, 2]
+    - [Cultura II, null]
+  3:
+    - [Dirección y control organizacional, 2]
+    - [Normativa laboral y técnica, 2]
+    - [Medicina del trabajo, 3]
+    - [Higiene industrial, 2]
+    - [Estadística descriptiva, 3]
+    - [Gestión ambiental, 2]
+    - [Electiva 1, null]
+    - [Inglés intermedio, 2]
+  4:
+    - [Análisis financiero, 3]
+    - [Fundamentos de sistema de gestión en SST, 3]
+    - [Seguridad industrial, 4]
+    - [Formulación de propuestas en SST, 2]
+    - [Ambiente de trabajo, 2]
+    - [Electiva 2, null]
+    - [Cultura III, 2]
+  5:
+    - [Emprendimiento e innovación, 3]
+    - [Práctica tecnólogo, 9]
+    - [Comunicación persuasiva, 2]
+    - [Inglés intermedio alto, 2]
+  6:
+    - [Gestión del talento humano, 2]
+    - [Enfermedades laborales, 2]
+    - [Ocupaciones de alto riesgo, 4]
+    - [Gestión de la información, 2]
+    - [Electiva 3, null]
+    - [Capacitaciones efectivas, 2]
+    - [Inglés avanzado, 2]
+  7:
+    - [Gerencia estratégica con escenarios de simulación, 4]
+    - [Estándares de cumplimiento del sistema de gestión de SST, 4]
+    - [Epidemiología en ambientes laborales, 2]
+    - [Investigación accidentes de trabajo y enfermedades laborales, 2]
+    - [Ética, 2]
+    - [Inglés proficiencia, 2]
+  8:
+    - [Metodologías ágiles para la gestión de proyectos, 3]
+    - [Sistemas integrados de gestión, 4]
+    - [Controles a peligros y riesgos en SST, 3]
+    - [Proyecto de grado, 2]
+    - [Analítica de datos, 2]
+    - [Electiva 4, null]
+  9:
+    - [Indicadores de gestión, 3]
+    - [Práctica profesional, 10]
+    - [Trabajo de grado, 3]
