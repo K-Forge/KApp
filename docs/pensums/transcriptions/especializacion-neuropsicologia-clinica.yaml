@@ -1,0 +1,22 @@
+source: Pensum-esp-neuropsicologia-clinica.pdf
+program: Especialización en Neuropsicología Clínica
+faculty: Facultad de Psicología                # not printed; inferred
+programLevel: ESPECIALIZACION
+period: semestre
+declaredCredits: 33                            # only the total is printed, no per-course credits
+levels:
+  1:
+    - [Neurología Básica, null]
+    - [Neurodesarrollo y procesos cognitivos, null]
+    - [Neuropsiquiatría Básica, null]
+    - [Trastornos Neuropsicológicos en Niños y Adolescentes, null]
+    - [Evaluación Neuropsicológica en Niños y Adolescentes, null]
+    - [Seminario Electivo, null]
+    - [Entrevista Neuropsicológica, null]
+  2:
+    - [Intervención Neuropsicológica, null]
+    - [Trastornos Neuropsicológicos en Adultos, null]
+    - [Evaluación Neuropsicológica en Adultos, null]
+    - [Seminario de Casos, null]
+    - [Práctica Profesional Supervisada, null]
+    - [Diseños de Estudios de Caso, null]
