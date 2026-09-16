@@ -82,8 +82,11 @@ buildNumber.properties
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-!gradle/wrapper/gradle-wrapper.jar
-!gradle/wrapper/gradle-wrapper.properties
+# The wrapper has to be committed or a fresh clone cannot build. These need the `**/` because the
+# Gradle project lives at app/frontend/mobile/kotlin/, and a pattern with a slash in it is anchored
+# to this file's directory - without it, `*.jar` above wins and the jar is silently left behind.
+!**/gradle/wrapper/gradle-wrapper.jar
+!**/gradle/wrapper/gradle-wrapper.properties
 gradle-app.setting
 .gradletasknamecache
 
