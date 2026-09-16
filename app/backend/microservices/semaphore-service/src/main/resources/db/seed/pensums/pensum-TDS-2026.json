@@ -1,0 +1,493 @@
+{
+  "pensumCode": "TDS-2026",
+  "programCode": "TEC-DESARROLLO",
+  "programName": "Tecnología en Desarrollo",
+  "faculty": "Facultad de Matemáticas e Ingenierías",
+  "reform": "Plan publicado, consultado en septiembre de 2026 · cuatrimestres",
+  "status": "DRAFT",
+  "totalCredits": 96,
+  "totalHours": 0,
+  "levels": 6,
+  "areas": [
+    {
+      "code": "CB",
+      "name": "Ciencias Básicas",
+      "color": "#539392",
+      "credits": 21,
+      "hours": 0
+    },
+    {
+      "code": "BTDS",
+      "name": "Básicas de Tecnología en Desarrollo de Software",
+      "color": "#522567",
+      "credits": 12,
+      "hours": 0
+    },
+    {
+      "code": "TDSA",
+      "name": "Tecnología en Desarrollo de Software Aplicada",
+      "color": "#C9D329",
+      "credits": 45,
+      "hours": 0
+    },
+    {
+      "code": "SI",
+      "name": "Sociedad e Interculturalidad",
+      "color": "#D51A65",
+      "credits": 18,
+      "hours": 0
+    }
+  ],
+  "courses": [
+    {
+      "code": "TDS-101",
+      "pensumItemCode": "TDS-101",
+      "name": "Precálculo",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-102",
+      "pensumItemCode": "TDS-102",
+      "name": "Lógica Matemática",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-103",
+      "pensumItemCode": "TDS-103",
+      "name": "Fundamentos de Programación",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "BTDS",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-104",
+      "pensumItemCode": "TDS-104",
+      "name": "Introducción al Desarrollo de Software",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-105",
+      "pensumItemCode": "TDS-105",
+      "name": "Habilidades Digitales",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-106",
+      "pensumItemCode": "TDS-106",
+      "name": "Inglés Intermedio Bajo",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-201",
+      "pensumItemCode": "TDS-201",
+      "name": "Cálculo I",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-101"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-202",
+      "pensumItemCode": "TDS-202",
+      "name": "Algebra Lineal",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-203",
+      "pensumItemCode": "TDS-203",
+      "name": "Técnicas de Programación I",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "BTDS",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-103"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-204",
+      "pensumItemCode": "TDS-204",
+      "name": "Fundamentos de Programación Web",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "BTDS",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-103"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-205",
+      "pensumItemCode": "TDS-205",
+      "name": "Habilidades Comunicativas",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-206",
+      "pensumItemCode": "TDS-206",
+      "name": "Inglés Intermedio Medio",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-301",
+      "pensumItemCode": "TDS-301",
+      "name": "Cálculo II",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-201"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-302",
+      "pensumItemCode": "TDS-302",
+      "name": "Técnicas de Programación II",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "BTDS",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-203"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-303",
+      "pensumItemCode": "TDS-303",
+      "name": "Diseño de Bases de datos",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-203",
+        "TDS-204"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-304",
+      "pensumItemCode": "TDS-304",
+      "name": "Análisis y Diseño de Sistemas",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-203"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-305",
+      "pensumItemCode": "TDS-305",
+      "name": "Cultura I",
+      "level": 3,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-306",
+      "pensumItemCode": "TDS-306",
+      "name": "Inglés Intermedio Alto",
+      "level": 3,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-401",
+      "pensumItemCode": "TDS-401",
+      "name": "Matemáticas Discretas",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-202"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-402",
+      "pensumItemCode": "TDS-402",
+      "name": "Diseño de Interfaces de Usuario",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-204"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-403",
+      "pensumItemCode": "TDS-403",
+      "name": "Nuevas Tecnologías de Desarrollo",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-304"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "TDS-404",
+      "name": "Electiva I",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": true,
+      "prerequisites": [
+        "TDS-203"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "TDS-405",
+      "name": "Cultura II (electiva)",
+      "level": 4,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "SI",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-406",
+      "pensumItemCode": "TDS-406",
+      "name": "Inglés Avanzado",
+      "level": 4,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-501",
+      "pensumItemCode": "TDS-501",
+      "name": "Estadística Descriptiva",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-201"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-502",
+      "pensumItemCode": "TDS-502",
+      "name": "Taller de Programación Web",
+      "level": 5,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-204",
+        "TDS-402"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-503",
+      "pensumItemCode": "TDS-503",
+      "name": "Pruebas y Calidad del Software",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-402",
+        "TDS-403"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-504",
+      "pensumItemCode": "TDS-504",
+      "name": "Desarrollo Móvil",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-402",
+        "TDS-403"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "TDS-505",
+      "name": "Electiva II",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": true,
+      "prerequisites": [
+        "TDS-203"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-506",
+      "pensumItemCode": "TDS-506",
+      "name": "Inglés Proficiencia",
+      "level": 5,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-601",
+      "pensumItemCode": "TDS-601",
+      "name": "Emprendimiento",
+      "level": 6,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "TDS-602",
+      "pensumItemCode": "TDS-602",
+      "name": "Práctica",
+      "level": 6,
+      "credits": 8,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "TDS-502",
+        "TDS-503",
+        "TDS-504"
+      ],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "TDS-603",
+      "name": "Electiva Institucional",
+      "level": 6,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "TDS-604",
+      "name": "Electiva III",
+      "level": 6,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "TDSA",
+      "isElectiveSlot": true,
+      "prerequisites": [
+        "TDS-203"
+      ],
+      "sinuCode": null
+    }
+  ]
+}

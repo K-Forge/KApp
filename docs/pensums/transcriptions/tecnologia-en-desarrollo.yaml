@@ -16,10 +16,10 @@ notes:
     its own; it crosses the connector coming from Fundamentos de Programación Web, so it is
     attributed to that course.
 areas:
-  CIENCIAS BÁSICAS: CB
-  BÁSICAS DE TECNOLOGÍA EN DESARROLLO DE SOFTWARE: BTDS
-  TECNOLOGÍA EN DESARROLLO DE SOFTWARE APLICADA: TDSA
-  SOCIEDAD E INTERCULTURALIDAD: SI
+  CB: "Ciencias Básicas"
+  BTDS: "Básicas de Tecnología en Desarrollo de Software"
+  TDSA: "Tecnología en Desarrollo de Software Aplicada"
+  SI: "Sociedad e Interculturalidad"
 levels:
   1:
     - [Precálculo, 3, CB]

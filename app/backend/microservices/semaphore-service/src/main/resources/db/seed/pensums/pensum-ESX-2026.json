@@ -1,0 +1,166 @@
+{
+  "pensumCode": "ESX-2026",
+  "programCode": "ESP-SEXUALIDAD",
+  "programName": "Especialización en Sexualidad",
+  "faculty": "Facultad de Psicología",
+  "reform": "Plan publicado, consultado en septiembre de 2026",
+  "status": "DRAFT",
+  "totalCredits": 30,
+  "totalHours": 0,
+  "levels": 2,
+  "areas": [
+    {
+      "code": "PLAN",
+      "name": "Plan de estudios",
+      "color": "#539392",
+      "credits": 30,
+      "hours": 0
+    }
+  ],
+  "courses": [
+    {
+      "code": "ESX-101",
+      "pensumItemCode": "ESX-101",
+      "name": "Introducción a la sexualidad humana",
+      "level": 1,
+      "credits": 4,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ESX-102",
+      "pensumItemCode": "ESX-102",
+      "name": "Ética y jurídica en la sexualidad",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ESX-103",
+      "pensumItemCode": "ESX-103",
+      "name": "Sexualidad y diversidad",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ESX-104",
+      "pensumItemCode": "ESX-104",
+      "name": "Promoción de la salud sexual",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ESX-105",
+      "pensumItemCode": "ESX-105",
+      "name": "Investigación aplicada a la sexualidad humana I",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "ESX-106",
+      "name": "Electiva I",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ESX-201",
+      "pensumItemCode": "ESX-201",
+      "name": "Violencia y sexualidad",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ESX-202",
+      "pensumItemCode": "ESX-202",
+      "name": "Educación sexual",
+      "level": 2,
+      "credits": 4,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ESX-203",
+      "pensumItemCode": "ESX-203",
+      "name": "Género, desigualdad e interseccionalidad",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ESX-204",
+      "pensumItemCode": "ESX-204",
+      "name": "Sexualidad y discapacidad",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ESX-205",
+      "pensumItemCode": "ESX-205",
+      "name": "Investigación aplicada a la sexualidad humana II",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "ESX-206",
+      "name": "Electiva II",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    }
+  ]
+}

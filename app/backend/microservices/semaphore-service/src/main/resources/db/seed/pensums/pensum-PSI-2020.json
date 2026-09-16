@@ -1,0 +1,739 @@
+{
+  "pensumCode": "PSI-2020",
+  "programCode": "PSICOLOGIA",
+  "programName": "Psicología",
+  "faculty": "Facultad de Psicología",
+  "reform": "Plan de estudios Facultad de Psicología 2020",
+  "status": "ACTIVE",
+  "totalCredits": 151,
+  "totalHours": 174,
+  "levels": 9,
+  "areas": [
+    {
+      "code": "BD",
+      "name": "Básica Disciplinar",
+      "color": "#539392",
+      "credits": 37,
+      "hours": 49
+    },
+    {
+      "code": "INTERDISCIPLINAR",
+      "name": "Interdisciplinar",
+      "color": "#522567",
+      "credits": 25,
+      "hours": 26
+    },
+    {
+      "code": "INVESTIGATIVA",
+      "name": "Investigativa",
+      "color": "#C9D329",
+      "credits": 21,
+      "hours": 21
+    },
+    {
+      "code": "PROFESIONAL",
+      "name": "Profesional",
+      "color": "#3E823E",
+      "credits": 50,
+      "hours": 50
+    },
+    {
+      "code": "SI",
+      "name": "Sociedad e Interculturalidad",
+      "color": "#D51A65",
+      "credits": 18,
+      "hours": 29
+    }
+  ],
+  "courses": [
+    {
+      "code": "P2105",
+      "pensumItemCode": "P2105",
+      "name": "Introducción a la psicología",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 5,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P2105"
+    },
+    {
+      "code": "P3105",
+      "pensumItemCode": "P3105",
+      "name": "Construcción del conocimiento científico",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "INTERDISCIPLINAR",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P3105"
+    },
+    {
+      "code": "P4106",
+      "pensumItemCode": "P4106",
+      "name": "Lógica y Razonamiento matemático",
+      "level": 1,
+      "credits": 4,
+      "weeklyHours": 4,
+      "area": "INVESTIGATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P4106"
+    },
+    {
+      "code": "71221",
+      "pensumItemCode": "71221",
+      "name": "Cátedra de Cultura I",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "71221"
+    },
+    {
+      "code": "71071",
+      "pensumItemCode": "71071",
+      "name": "Habilidades Comunicativas",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "71071"
+    },
+    {
+      "code": "71181",
+      "pensumItemCode": "71181",
+      "name": "Inglés I Intermedio Bajo",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "71181"
+    },
+    {
+      "code": "P2205",
+      "pensumItemCode": "P2205",
+      "name": "Percepción",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P2105"
+      ],
+      "sinuCode": "P2205"
+    },
+    {
+      "code": "P2206",
+      "pensumItemCode": "P2206",
+      "name": "Teorías del aprendizaje",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P2105"
+      ],
+      "sinuCode": "P2206"
+    },
+    {
+      "code": "P3205",
+      "pensumItemCode": "P3205",
+      "name": "Construcción del conocimiento científico II",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "INTERDISCIPLINAR",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P3205"
+    },
+    {
+      "code": "P3206",
+      "pensumItemCode": "P3206",
+      "name": "Bases biológicas de la conducta",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "INTERDISCIPLINAR",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P3206"
+    },
+    {
+      "code": "P4205",
+      "pensumItemCode": "P4205",
+      "name": "Metodología de la Investigación",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "INVESTIGATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P4205"
+    },
+    {
+      "code": "P4206",
+      "pensumItemCode": "P4206",
+      "name": "Estadística",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "INVESTIGATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P4106"
+      ],
+      "sinuCode": "P4206"
+    },
+    {
+      "code": "72081",
+      "pensumItemCode": "72081",
+      "name": "Inglés II intermedio Medio",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "71181"
+      ],
+      "sinuCode": "72081"
+    },
+    {
+      "code": "P2305",
+      "pensumItemCode": "P2305",
+      "name": "Procesos cognoscitivos",
+      "level": 3,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P2305"
+    },
+    {
+      "code": "P2306",
+      "pensumItemCode": "P2306",
+      "name": "Análisis del Comportamiento I",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P2306"
+    },
+    {
+      "code": "P2307",
+      "pensumItemCode": "P2307",
+      "name": "Psicobiología",
+      "level": 3,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P3206"
+      ],
+      "sinuCode": "P2307"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "P3305",
+      "name": "Electiva I",
+      "level": 3,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "INTERDISCIPLINAR",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "P3305"
+    },
+    {
+      "code": "P4305",
+      "pensumItemCode": "P4305",
+      "name": "Lógica de la ciencia",
+      "level": 3,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "INVESTIGATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P4305"
+    },
+    {
+      "code": "P4306",
+      "pensumItemCode": "P4306",
+      "name": "Diseños de investigación I",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "INVESTIGATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P4206"
+      ],
+      "sinuCode": "P4306"
+    },
+    {
+      "code": "76081",
+      "pensumItemCode": "76081",
+      "name": "Cátedra de Cultura II",
+      "level": 3,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "76081"
+    },
+    {
+      "code": "73081",
+      "pensumItemCode": "73081",
+      "name": "Inglés III Intermedio Alto",
+      "level": 3,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "72081"
+      ],
+      "sinuCode": "73081"
+    },
+    {
+      "code": "P2405",
+      "pensumItemCode": "P2405",
+      "name": "Motivación y emoción",
+      "level": 4,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P2306"
+      ],
+      "sinuCode": "P2405"
+    },
+    {
+      "code": "P2406",
+      "pensumItemCode": "P2406",
+      "name": "Análisis del Comportamiento II",
+      "level": 4,
+      "credits": 4,
+      "weeklyHours": 4,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P2406"
+    },
+    {
+      "code": "P2407",
+      "pensumItemCode": "P2407",
+      "name": "Procesos Sociales",
+      "level": 4,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P2407"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "P3405",
+      "name": "Electiva Institucional",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "INTERDISCIPLINAR",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "P3405"
+    },
+    {
+      "code": "P4406",
+      "pensumItemCode": "P4406",
+      "name": "Diseños de investigación II",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "INVESTIGATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P4406"
+    },
+    {
+      "code": "P5405",
+      "pensumItemCode": "P5405",
+      "name": "Neuropsicología",
+      "level": 4,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P2307"
+      ],
+      "sinuCode": "P5405"
+    },
+    {
+      "code": "74081",
+      "pensumItemCode": "74081",
+      "name": "Inglés IV Intermedio Avanzado",
+      "level": 4,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "73081"
+      ],
+      "sinuCode": "74081"
+    },
+    {
+      "code": "P2505",
+      "pensumItemCode": "P2505",
+      "name": "Decisión y elección",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P2305",
+        "P2406"
+      ],
+      "sinuCode": "P2505"
+    },
+    {
+      "code": "P2506",
+      "pensumItemCode": "P2506",
+      "name": "Análisis del Comportamiento III",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P2406"
+      ],
+      "sinuCode": "P2506"
+    },
+    {
+      "code": "P3506",
+      "pensumItemCode": "P3506",
+      "name": "Socioantropología",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "INTERDISCIPLINAR",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P3506"
+    },
+    {
+      "code": "P4506",
+      "pensumItemCode": "P4506",
+      "name": "Método Cualitativo",
+      "level": 5,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "INVESTIGATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P4506"
+    },
+    {
+      "code": "P5505",
+      "pensumItemCode": "P5505",
+      "name": "Psicopatología y Psicología de lo Anormal",
+      "level": 5,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P2307"
+      ],
+      "sinuCode": "P5505"
+    },
+    {
+      "code": "P5506",
+      "pensumItemCode": "P5506",
+      "name": "Evaluación y Formulación",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P5506"
+    },
+    {
+      "code": "75081",
+      "pensumItemCode": "75081",
+      "name": "Inglés V Proficiencia",
+      "level": 5,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "74081"
+      ],
+      "sinuCode": "75081"
+    },
+    {
+      "code": "P2605",
+      "pensumItemCode": "P2605",
+      "name": "Psicología del Desarrollo I",
+      "level": 6,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P2605"
+    },
+    {
+      "code": "P2606",
+      "pensumItemCode": "P2606",
+      "name": "Análisis conductual Aplicado",
+      "level": 6,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P2506"
+      ],
+      "sinuCode": "P2606"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "P3605",
+      "name": "Electiva II",
+      "level": 6,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "INTERDISCIPLINAR",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "P3605"
+    },
+    {
+      "code": "P5605",
+      "pensumItemCode": "P5605",
+      "name": "Psicología Social",
+      "level": 6,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P2407"
+      ],
+      "sinuCode": "P5605"
+    },
+    {
+      "code": "P5606",
+      "pensumItemCode": "P5606",
+      "name": "Psicometría",
+      "level": 6,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P4206"
+      ],
+      "sinuCode": "P5606"
+    },
+    {
+      "code": "P5607",
+      "pensumItemCode": "P5607",
+      "name": "Psicología Clínica en Adultos",
+      "level": 6,
+      "credits": 4,
+      "weeklyHours": 4,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P2307"
+      ],
+      "sinuCode": "P5607"
+    },
+    {
+      "code": "P2705",
+      "pensumItemCode": "P2705",
+      "name": "Psicología del Desarrollo II",
+      "level": 7,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "BD",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P2705"
+    },
+    {
+      "code": "P3706",
+      "pensumItemCode": "P3706",
+      "name": "Formulación y evaluación de proyectos y programas de intervención",
+      "level": 7,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "INTERDISCIPLINAR",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P5506"
+      ],
+      "sinuCode": "P3706"
+    },
+    {
+      "code": "P4706",
+      "pensumItemCode": "P4706",
+      "name": "Estudios Mixtos",
+      "level": 7,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "INVESTIGATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P4706"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "P5706",
+      "name": "Área profesional I: Electiva",
+      "level": 7,
+      "credits": 4,
+      "weeklyHours": 4,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "P5706"
+    },
+    {
+      "code": "P5707",
+      "pensumItemCode": "P5707",
+      "name": "Psicología clínica infantil y del adolescentes",
+      "level": 7,
+      "credits": 4,
+      "weeklyHours": 4,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P5707"
+    },
+    {
+      "code": "70012",
+      "pensumItemCode": "70012",
+      "name": "Cátedra de Cultura III",
+      "level": 7,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "70012"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "P3805",
+      "name": "Electiva III",
+      "level": 8,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "INTERDISCIPLINAR",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "P3805"
+    },
+    {
+      "code": "P5805",
+      "pensumItemCode": "P5805",
+      "name": "Práctica profesional Área Clínica",
+      "level": 8,
+      "credits": 9,
+      "weeklyHours": 5,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P5805"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "P5806",
+      "name": "Área profesional II: Electiva",
+      "level": 8,
+      "credits": 4,
+      "weeklyHours": 4,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "P5806"
+    },
+    {
+      "code": "P5807",
+      "pensumItemCode": "P5807",
+      "name": "Trabajo de Grado I",
+      "level": 8,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P5807"
+    },
+    {
+      "code": "P3905",
+      "pensumItemCode": "P3905",
+      "name": "Contexto social y Política Pública",
+      "level": 9,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "INTERDISCIPLINAR",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P3905"
+    },
+    {
+      "code": "P5905",
+      "pensumItemCode": "P5905",
+      "name": "Práctica profesional Área Electiva",
+      "level": 9,
+      "credits": 9,
+      "weeklyHours": 5,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "P5905"
+    },
+    {
+      "code": "P5907",
+      "pensumItemCode": "P5907",
+      "name": "Trabajo de Grado II",
+      "level": 9,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "P5807"
+      ],
+      "sinuCode": "P5907"
+    }
+  ]
+}

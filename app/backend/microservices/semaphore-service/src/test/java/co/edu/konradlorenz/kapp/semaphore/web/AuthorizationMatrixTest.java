@@ -76,8 +76,8 @@ class AuthorizationMatrixTest {
 
     private static final String SEEDED_PENSUM = "1015";
     private static final String SEEDED_PROGRAM = "506";
-    private static final String SEEDED_COURSE_CODE = "10011";
-    private static final String SEEDED_ELECTIVE = "ELECTIVA_VI";
+    private static final String SEEDED_COURSE_CODE = "11015";
+    private static final String SEEDED_ELECTIVE = "59098";
 
     // ==================================================================================
     // GET /api/catalog/programs - any authenticated role except GUEST; ADMIN not required
