@@ -1,0 +1,99 @@
+source: "Planes industrial con código 2021 (1020).pdf"
+program: Ingeniería Industrial
+faculty: Facultad de Matemáticas e Ingenierías
+programLevel: PREGRADO
+period: semestre
+reform: "Reforma del plan de estudios 2021-1"
+declaredCredits: 142
+declaredHours: 173
+notes:
+  - "Cells print H (weekly contact hours) and C (credits); the grid prints totals of 173 hours and 142 credits and the extraction adds up to exactly that, per semester too."
+  - "The box listing TECNOLOGIA, GESTION HUMANA, PRODUCCIÓN Y LOGÍSTICA, GESTIÓN Y EMPRESA and FACULTAD names the elective lines; it is not a course."
+columns: [code, name, credits, hours, area]    # hours = weekly contact hours as printed
+areas:
+  CB: "CIENCIAS BÁSICAS"
+  BI: "BÁSICAS DE INGENIERÍA"
+  IIA: "INGENIERÍA INDUSTRIAL APLICADA"
+  SI: "SOCIEDAD E INTERCULTURA RIDAD"
+levels:
+  1:
+    - ["11015", "Precálculo", 3, 4, CB]
+    - ["21012", "Lógica Matemática", 3, 3, CB]
+    - ["41025", "Fundamentos de Programación", 3, 4, BI]
+    - ["41013", "Introducción a la Ingeniería Industrial", 3, 3, BI]
+    - ["71181", "Inglés Intermedio bajo", 2, 4, SI]
+    - ["71071", "Habilidades Comunicativas", 2, 3, SI]
+  2:
+    - ["12015", "Cálculo I", 3, 4, CB]
+    - ["63202", "Algebra Lineal", 3, 4, CB]
+    - ["23213", "Física Mecánica", 3, 4, CB]
+    - ["31013", "Técnicas de Programación I", 3, 4, BI]
+    - ["72081", "Inglés Intermerdio Medio", 2, 4, SI]
+    - ["71221", "Cultura I", 2, 2, SI]
+  3:
+    - ["13015", "Cálculo II", 3, 4, CB]
+    - ["54044", "Electromagnetismo", 3, 4, CB]
+    - ["31014", "Técnicas de Programación II", 3, 4, BI]
+    - ["45040", "Diseño Digital 3D", 3, 4, IIA]
+    - ["73081", "Inglés intermedio alto", 2, 4, SI]
+    - ["76011", "Cátedra de Cultura II", 2, 2, SI]
+  4:
+    - ["14015", "Cálculo III", 3, 4, CB]
+    - ["55040", "Termodinámica", 3, 4, CB]
+    - ["45045", "Introducción a simulación física", 2, 3, CB]
+    - ["46040", "Tecnologías de Manufactura", 3, 4, IIA]
+    - ["74302", "Contabilidad Gerencial", 3, 4, IIA]
+    - ["74081", "Inglés Avanzado", 2, 4, SI]
+  5:
+    - ["13013", "Ecuaciones Diferenciales", 3, 4, CB]
+    - ["17080", "Estadística Descriptiva", 3, 3, CB]
+    - ["54042", "Bases de Datos", 3, 4, BI]
+    - ["47040", "Producción Eficiente", 3, 4, IIA]
+    - ["48031", "Costos y Presupuestos", 2, 4, IIA]
+    - ["75081", "Inglés proficiencia", 2, 4, SI]
+  6:
+    - ["17070", "Inferencia Estadística", 3, 3, CB]
+    - ["14016", "Investigación de Operaciones I", 2, 3, CB]
+    - ["56045", "Ergonomía", 3, 3, IIA]
+    - ["57570", "Electiva I", 3, 3, IIA]
+    - ["57575", "Electiva II", 3, 3, IIA]
+    - ["70012", "Cultura III", 2, 2, SI]
+  7:
+    - ["17015", "Investigación de Operaciones II", 2, 3, CB]
+    - ["48040", "Logística para la Industria 4.0", 3, 4, IIA]
+    - ["44025", "Matemática Financiera", 2, 4, IIA]
+    - ["57581", "Seguridad y Salud en el Trabajo", 3, 3, IIA]
+    - ["57580", "Electiva III", 3, 3, IIA]
+    - ["57585", "Electiva IV", 3, 3, IIA]
+  8:
+    - ["56201", "Metodología de Investigación", 2, 2, BI]
+    - ["49040", "Analítica Operacional en Calidad", 2, 3, IIA]
+    - ["47923", "Proyectos", 3, 4, IIA]
+    - ["58001", "Gestión del Talento Humano", 3, 3, IIA]
+    - ["57590", "Electiva V", 3, 3, IIA]
+    - ["57595", "Electiva VI", 3, 3, IIA]
+  9:
+    - ["39020", "Trabajo de grado", 4, 2, IIA]
+    - ["9a020", "Práctica Profesional", 8, 2, IIA]
+    - ["57093", "Seminario de Gestión Empresarial", 2, 3, IIA]
+prerequisites:                 # course code: codes that must be passed first, read from the drawn connectors
+  "12015": ["11015"]
+  "31013": ["41025"]
+  "72081": ["71181"]
+  "13015": ["12015"]
+  "31014": ["31013"]
+  "73081": ["72081"]
+  "14015": ["13015"]
+  "45045": ["23213", "54044"]
+  "46040": ["45040"]
+  "74081": ["73081"]
+  "13013": ["14015"]
+  "47040": ["46040"]
+  "48031": ["74302"]
+  "54042": ["31014"]
+  "75081": ["74081"]
+  "17070": ["17080"]
+  "17015": ["14016"]
+  "44025": ["48031"]
+  "47923": ["44025"]
+  "49040": ["17070"]

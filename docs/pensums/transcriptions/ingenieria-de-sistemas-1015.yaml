@@ -1,0 +1,103 @@
+source: "Plan de estudios sistemas con códigos 2019 (1015).pdf"
+program: Ingeniería de Sistemas
+faculty: Facultad de Matemáticas e Ingenierías
+programLevel: PREGRADO
+period: semestre
+reform: "Plan de estudios 2019-1"
+declaredCredits: null   # the grid prints no totals
+declaredHours: null
+notes:
+  - "Every cell satisfies credits x 3 = HTD + HTI, the Colombian 48-hour credit, which is how the extraction was checked."
+  - "hours is HTD (horas de trabajo directo); HTI (independent) is 3 x credits - HTD and is not stored."
+  - "The printed area label reads INTERCULTURARIDAD; the area name is corrected, course names are verbatim."
+columns: [code, name, credits, hours, area]    # hours = weekly contact hours as printed
+areas:
+  CB: "CIENCIAS BÁSICAS"
+  BIS: "BÁSICAS DE INGENIERÍA DE SISTEMAS"
+  ISA: "INGENIERÍA DE SISTEMAS APLICADAS"
+  SI: "SOCIEDAD E INTERCULTURARIDAD"
+levels:
+  1:
+    - ["11015", "Precálculo", 3, 4, CB]
+    - ["21012", "Lógica Matemática", 3, 3, CB]
+    - ["41025", "Fundamentos de Programación", 3, 4, BIS]
+    - ["41012", "Introducción a la Ingeniería de Sistemas", 3, 3, BIS]
+    - ["71181", "Inglés Intermedio Bajo", 2, 4, SI]
+    - ["71071", "Habilidades comunicativas", 2, 3, SI]
+  2:
+    - ["12015", "Cálculo I", 3, 4, CB]
+    - ["63202", "Álgebra Lineal I", 3, 4, CB]
+    - ["23012", "Matemáticas Discretas", 3, 3, CB]
+    - ["31013", "Técnicas de Programación I", 3, 4, BIS]
+    - ["72081", "Inglés Intermedio Medio", 2, 4, SI]
+    - ["71221", "Cultura I", 2, 2, SI]
+  3:
+    - ["13015", "Cálculo II", 3, 4, CB]
+    - ["54034", "Cinemática", 3, 4, CB]
+    - ["31014", "Técnicas de Programación II", 3, 4, BIS]
+    - ["54033", "Estructuras de Datos", 3, 4, BIS]
+    - ["73081", "Inglés Internedio Alto", 2, 4, SI]
+    - ["76011", "Cátedra de Cultura II", 2, 2, SI]
+  4:
+    - ["14015", "Cálculo III", 3, 4, CB]
+    - ["54044", "Electromagnetismo", 3, 4, CB]
+    - ["54043", "Análisis y Diseño de Sistemas", 3, 4, BIS]
+    - ["31506", "Lógica Digital y Microprocesadores", 2, 3, BIS]
+    - ["45012", "Bases de Datos I", 3, 4, ISA]
+    - ["74081", "Inglés Avanzado", 2, 4, SI]
+  5:
+    - ["13013", "Ecuaciones Diferenciales", 3, 4, CB]
+    - ["46033", "Sistemas Operacionales", 2, 3, BIS]
+    - ["31404", "Diseño de Interfaces de usuario", 3, 3, ISA]
+    - ["31614", "Nuevas Tecnologías de Desarrollo", 3, 3, ISA]
+    - ["46012", "Bases de Datos II", 3, 4, ISA]
+    - ["75081", "Inglés Proficiencia", 2, 4, SI]
+  6:
+    - ["17018", "Estadística Descriptiva", 3, 3, CB]
+    - ["47022", "Ingeniería de Software I", 3, 4, ISA]
+    - ["31750", "Redes de Comunicación I", 2, 3, ISA]
+    - ["59075", "Electiva I", 3, 3, ISA]
+    - ["59078", "Electiva II", 3, 3, ISA]
+    - ["9a032", "Cátedra de cultura III: ética profesional", 2, 2, SI]
+  7:
+    - ["17070", "Inferencia Estadística", 3, 3, CB]
+    - ["48022", "Ingeniería de Software II", 3, 4, ISA]
+    - ["31850", "Redes de Comunicación II", 2, 3, ISA]
+    - ["40012", "Gestión en TIC", 2, 3, ISA]
+    - ["59085", "Electiva III", 3, 3, ISA]
+    - ["59088", "Electiva IV", 3, 3, ISA]
+  8:
+    - ["48050", "Arquitectura de Software", 3, 4, ISA]
+    - ["59035", "Desarrollo de Aplicac Móviles", 3, 4, ISA]
+    - ["59045", "Taller de emprendimiento", 3, 4, ISA]
+    - ["56201", "Metodología de Investigación", 2, 2, ISA]
+    - ["59096", "Electiva V", 3, 3, ISA]
+    - ["59098", "Electiva VI", 3, 3, ISA]
+  9:
+    - ["9a020", "Práctica Profesional", 8, 24, ISA]
+    - ["39020", "Trabajo de grado", 4, 2, ISA]
+    - ["4a033", "Gerencia de Proyectos TIC", 2, 3, ISA]
+prerequisites:                 # course code: codes that must be passed first, read from the drawn connectors
+  "12015": ["11015"]
+  "31013": ["41025"]
+  "63202": ["21012"]
+  "72081": ["71181"]
+  "13015": ["12015"]
+  "31014": ["31013"]
+  "54033": ["31013"]
+  "73081": ["72081"]
+  "14015": ["13015"]
+  "54043": ["31014"]
+  "74081": ["73081"]
+  "13013": ["14015"]
+  "31614": ["54043"]
+  "46012": ["45012"]
+  "75081": ["74081"]
+  "17018": ["13013"]
+  "31750": ["31506"]
+  "47022": ["31404"]
+  "17070": ["17018"]
+  "31850": ["31750"]
+  "48022": ["47022"]
+  "48050": ["48022"]
+  "39020": ["56201"]
