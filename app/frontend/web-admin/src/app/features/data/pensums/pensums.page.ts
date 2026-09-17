@@ -87,7 +87,7 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
               <dt>Status</dt>
               <dd><span class="badge badge-neutral">{{ c.status }}</span></dd>
               <dt>Totals</dt>
-              <dd>{{ c.totalCredits }} credits · {{ c.totalHours }} weekly hours · {{ c.levels }} levels</dd>
+              <dd>{{ totals(c) }}</dd>
             </dl>
 
             <h3>Knowledge areas ({{ c.areas.length }})</h3>
@@ -109,8 +109,8 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
                         <span class="area-dot" [style.background]="area.color"></span>
                         {{ area.name }}
                       </td>
-                      <td>{{ area.credits }}</td>
-                      <td>{{ area.hours }}</td>
+                      <td>{{ published(c, 'credits') ? area.credits : '—' }}</td>
+                      <td>{{ published(c, 'hours') ? area.hours : '—' }}</td>
                     </tr>
                   }
                 </tbody>
@@ -159,8 +159,8 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
                         </td>
                         <td>{{ course.name }}</td>
                         <td>{{ course.area }}</td>
-                        <td>{{ course.credits }}</td>
-                        <td>{{ course.weeklyHours }}</td>
+                        <td>{{ published(c, 'credits') ? course.credits : '—' }}</td>
+                        <td>{{ published(c, 'hours') ? course.weeklyHours : '—' }}</td>
                         <td class="text-muted">{{ course.prerequisites.length ? course.prerequisites.join(', ') : '—' }}</td>
                       </tr>
                     }
@@ -298,6 +298,28 @@ export class PensumsPage {
   /** The pensum currently on screen. Null until one is loaded. */
   readonly loaded = signal<Pensum | null>(null);
   readonly deleting = signal(false);
+  /**
+   * A plan whose document prints no credits (or no hours) stores zeros for them. Zeros on
+   * screen would read as "worth nothing", so those columns show a dash instead - the grid
+   * says in words which figure the document leaves out.
+   */
+  published(pensum: Pensum, figure: 'credits' | 'hours'): boolean {
+    return figure === 'credits'
+      ? pensum.courses.some((course) => course.credits > 0)
+      : pensum.courses.some((course) => course.weeklyHours > 0);
+  }
+
+  totals(pensum: Pensum): string {
+    const credits = this.published(pensum, 'credits')
+      ? `${pensum.totalCredits} credits`
+      : pensum.totalCredits
+        ? `${pensum.totalCredits} credits in total, none per course`
+        : 'credits not published';
+    return [credits, this.published(pensum, 'hours') ? `${pensum.totalHours} weekly hours` : '', `${pensum.levels} levels`]
+      .filter(Boolean)
+      .join(' · ');
+  }
+
   /** How the items are shown. The grid first: it is the view a pensum is checked against its PDF with. */
   readonly view = signal<'grid' | 'table'>('grid');
 
