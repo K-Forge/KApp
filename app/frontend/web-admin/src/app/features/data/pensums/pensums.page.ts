@@ -6,6 +6,7 @@ import { ApiErrorBannerComponent } from '../../../shared/ui/api-error-banner/api
 import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 import { ImportPanelComponent } from '../import/import-panel.component';
 import { PastePensumComponent } from '../import/paste-pensum.component';
+import { PensumGridComponent } from './pensum-grid.component';
 import { PensumsService } from './pensums.service';
 import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model';
 
@@ -18,7 +19,7 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
  */
 @Component({
   selector: 'app-pensums-page',
-  imports: [ApiErrorBannerComponent, ModalComponent, ImportPanelComponent, PageIntroComponent, PastePensumComponent],
+  imports: [ApiErrorBannerComponent, ModalComponent, ImportPanelComponent, PageIntroComponent, PastePensumComponent, PensumGridComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
@@ -116,33 +117,57 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
               </table>
             </div>
 
-            <h3>Pensum items ({{ c.courses.length }})</h3>
-            <div class="scroll-x table-scroll-y">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Level</th>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Area</th>
-                    <th>Credits</th>
-                    <th>Prerequisites</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (course of c.courses; track course.pensumItemCode) {
-                    <tr>
-                      <td>{{ course.level }}</td>
-                      <td class="mono">{{ course.code ?? '(elective slot)' }}</td>
-                      <td>{{ course.name }}</td>
-                      <td>{{ course.area }}</td>
-                      <td>{{ course.credits }}</td>
-                      <td class="text-muted">{{ course.prerequisites.length ? course.prerequisites.join(', ') : '—' }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
+            <div class="row-between">
+              <h3 style="margin:0">Pensum items ({{ c.courses.length }})</h3>
+              <!-- The grid is for checking a pensum against its printed plan; the table is the
+                   exact data, sortable by eye and readable by a screen reader. -->
+              <div class="view-toggle" role="group" aria-label="How to show the items">
+                <button type="button" class="btn btn-sm" [attr.aria-pressed]="view() === 'grid'" (click)="view.set('grid')">
+                  As printed
+                </button>
+                <button type="button" class="btn btn-sm" [attr.aria-pressed]="view() === 'table'" (click)="view.set('table')">
+                  Table
+                </button>
+              </div>
             </div>
+            @if (view() === 'grid') {
+              <app-pensum-grid [pensum]="c" />
+            } @else {
+              <div class="scroll-x table-scroll-y">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Level</th>
+                      <th>Code</th>
+                      <th>Name</th>
+                      <th>Area</th>
+                      <th>Credits</th>
+                      <th>Weekly hours</th>
+                      <th>Prerequisites</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (course of c.courses; track course.pensumItemCode) {
+                      <tr>
+                        <td>{{ course.level }}</td>
+                        <td class="mono">
+                          @if (course.isElectiveSlot) {
+                            {{ course.pensumItemCode }} <span class="text-muted">(elective)</span>
+                          } @else {
+                            {{ course.code }}
+                          }
+                        </td>
+                        <td>{{ course.name }}</td>
+                        <td>{{ course.area }}</td>
+                        <td>{{ course.credits }}</td>
+                        <td>{{ course.weeklyHours }}</td>
+                        <td class="text-muted">{{ course.prerequisites.length ? course.prerequisites.join(', ') : '—' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
           </div>
         }
       </div>
@@ -237,6 +262,24 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
       max-height: 22rem;
       overflow-y: auto;
     }
+    .view-toggle {
+      display: inline-flex;
+    }
+    .view-toggle .btn {
+      border-radius: 0;
+    }
+    .view-toggle .btn:first-child {
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+    }
+    .view-toggle .btn:last-child {
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-left: -1px;
+    }
+    .view-toggle .btn[aria-pressed='true'] {
+      background: var(--nav-active-bg);
+      color: var(--nav-active-text);
+      border-color: var(--border-strong);
+    }
   `,
 })
 export class PensumsPage {
@@ -255,6 +298,8 @@ export class PensumsPage {
   /** The pensum currently on screen. Null until one is loaded. */
   readonly loaded = signal<Pensum | null>(null);
   readonly deleting = signal(false);
+  /** How the items are shown. The grid first: it is the view a pensum is checked against its PDF with. */
+  readonly view = signal<'grid' | 'table'>('grid');
 
   readonly formMode = signal<'create' | 'edit'>('create');
   readonly formText = signal('');
