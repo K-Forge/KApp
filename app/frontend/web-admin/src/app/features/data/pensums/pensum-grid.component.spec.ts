@@ -75,8 +75,23 @@ describe('PensumGridComponent', () => {
     const el = render(brochure);
 
     expect(el.querySelector('.item-meta')).toBeNull();
-    expect(el.querySelector('.missing')!.textContent).toContain('only a total of 33');
+    expect(el.querySelector('.missing')!.textContent!.trim())
+      .toBe('The published plan prints neither credits nor weekly hours per course — only a total of 33 credits.');
     expect(Array.from(el.querySelectorAll('.level-total')).map((t) => t.textContent!.trim()))
       .toEqual(['1 course', '2 courses', '1 course']);
+  });
+
+  it('orders the items of a cell the way Spanish does, accents included', () => {
+    const accented: Pensum = {
+      ...PRINTED_GRID,
+      courses: [
+        course('90001', 'Violencia y sexualidad', 1, 'CB', 2, 2),
+        course('90002', 'Ética y jurídica en la sexualidad', 1, 'CB', 2, 2),
+      ],
+    };
+    const names = Array.from(render(accented).querySelectorAll('.cell')[0].querySelectorAll('.item-name'))
+      .map((n) => n.textContent!.trim());
+
+    expect(names).toEqual(['Ética y jurídica en la sexualidad', 'Violencia y sexualidad']);
   });
 });

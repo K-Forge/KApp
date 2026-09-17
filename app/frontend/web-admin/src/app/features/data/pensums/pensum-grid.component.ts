@@ -29,14 +29,7 @@ interface GridRow {
     @if (!hasCredits() || !hasHours()) {
       <!-- A zero here would read as "this course is worth nothing". It means the document the
            pensum was taken from does not print the figure, which is what the admin needs to know. -->
-      <p class="hint missing">
-        @if (!hasCredits()) {
-          The published plan prints no credits per course{{ pensum().totalCredits ? ' — only a total of ' + pensum().totalCredits : '' }}.
-        }
-        @if (!hasHours()) {
-          It prints no weekly hours.
-        }
-      </p>
+      <p class="hint missing">{{ missingNote() }}</p>
     }
     <div class="scroll-x">
       <!-- No table roles: the table view beside this is the accessible, exact form of the same
@@ -223,6 +216,18 @@ export class PensumGridComponent {
   /** False when the source document prints no weekly hours. */
   readonly hasHours = computed(() => this.pensum().courses.some((c) => c.weeklyHours > 0));
 
+  /** Says which figures the source document leaves out, so a missing one never reads as a zero. */
+  readonly missingNote = computed(() => {
+    const total = this.pensum().totalCredits;
+    if (!this.hasCredits() && !this.hasHours()) {
+      return `The published plan prints neither credits nor weekly hours per course${total ? ` — only a total of ${total} credits` : ''}.`;
+    }
+    if (!this.hasCredits()) {
+      return `The published plan prints no credits per course${total ? ` — only a total of ${total}` : ''}.`;
+    }
+    return 'The published plan prints no weekly hours per course.';
+  });
+
   readonly levelLabels = computed(() =>
     Array.from({ length: this.pensum().levels }, (_, i) => ROMAN[i] ?? String(i + 1)),
   );
@@ -233,7 +238,10 @@ export class PensumGridComponent {
       const items = p.courses.filter((c) => c.area === area.code);
       return {
         area,
-        cells: Array.from({ length: p.levels }, (_, i) => items.filter((c) => c.level === i + 1)),
+        // Spanish collation: the API orders by code points, which files "Ética" after "Violencia".
+        cells: Array.from({ length: p.levels }, (_, i) =>
+          items.filter((c) => c.level === i + 1).sort((a, b) => a.name.localeCompare(b.name, 'es')),
+        ),
         credits: items.reduce((sum, c) => sum + c.credits, 0),
       };
     });

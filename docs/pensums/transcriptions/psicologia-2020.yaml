@@ -9,6 +9,7 @@ declaredHours: 174
 notes:
   - "The grid prints 151 credits and 174 contact hours, per area (37, 25, 21, 50, 18) and per semester; the extraction adds up to all of them."
   - "Both professional practices print 4,5 contact hours. hours keeps the printed 4.5; the seed rounds it, see the README."
+  - "The printed semester hour totals (21, 21, 23, 21, 24, 20, 19, 15, 11) add up to 175, one more than the 174 printed as the overall total."
   - "Connectors are plain lines without arrowheads; each one runs from an earlier semester to a later one, which gives the direction."
   - "Dashed boxes mark 'clases con proyecto integrador'; the model has no field for it."
   - "Electiva III: the rendered page clips the P of P3805; the text layer has it."

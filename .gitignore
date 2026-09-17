@@ -319,3 +319,6 @@ jacoco.exec
 # Temp scripts
 tmp/
 .vercel
+
+# Python bytecode from the tools under docs/
+__pycache__/

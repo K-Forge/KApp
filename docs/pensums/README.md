@@ -14,7 +14,7 @@ The source is the set of 24 PDFs the university hands out (downloaded 2026-09-16
 | `tools/extract_psicologia_2020.py` | The same for the Psicología 2020 grid, which has its own cell shape. |
 | `tools/build_seed.py` | Turns the transcriptions into the seed JSON under `semaphore-service/src/main/resources/db/seed/pensums/`. |
 
-`V006_SeedThePublishedPensums` loads that seed, and `PublishedPensumSeedTest` pins what it loads.
+`V006_SeedThePublishedPensums` loads that seed, and `PublishedPensumSeedTest` pins what it loads. In the admin portal, **Pensums → As printed** draws each one as areas × levels, which is how every plan below was checked against its PDF.
 
 ## Changing a plan
 
@@ -56,7 +56,7 @@ vector geometry like the grids.
 | Decision | Why |
 | --- | --- |
 | `weeklyHours` is the printed contact hours (HTD, H, "Horas Presenciales"). | It is what the grids and brochures call hours, and what the Industrial and Psicología totals add up. |
-| A printed 4,5 or 1,5 hours rounds half up. | `weeklyHours` is an integer. It affects the two Psicología practices and the Marketing and Negocios Internacionales practices, and it is why Psicología adds up to 175 against the 174 it prints. |
+| A printed 4,5 or 1,5 hours rounds half up. | `weeklyHours` is an integer. It affects the two Psicología practices and the Marketing and Negocios Internacionales practices. Psicología then adds up to 175 against the 174 it prints overall — but its own printed semester totals (21, 21, 23, 21, 24, 20, 19, 15, 11) already add up to 175, so the document disagrees with itself. |
 | Missing credits or hours are stored as 0, and the pensum keeps the total the document prints. | Inventing per-course values would hide the gap; storing the printed total keeps it visible. |
 | A course whose name says it is an elective is an elective slot. | A slot has no course code, so the printed code moves to `pensumItemCode` and `sinuCode`. |
 | A prerequisite between two slots is not stored. | The model only accepts course codes as prerequisites. It drops Matemáticas' Énfasis I → II → III and Psicología's Área profesional I → II → Práctica profesional Área Electiva. |
@@ -70,7 +70,7 @@ vector geometry like the grids.
 | `1015` | Ingeniería de Sistemas (`506`) | Pregrado | ACTIVE | 51 | 143 | 194 | 23 |
 | `1017` | Matemáticas (`MATEMATICAS`) | Pregrado | ACTIVE | 51 | 143 | 197 vs 195 ⚠️ | 15 |
 | `1020` | Ingeniería Industrial (`ING-INDUSTRIAL`) | Pregrado | ACTIVE | 51 | 142 | 173 | 21 |
-| `PSI-2020` | Psicología (`PSICOLOGIA`) | Pregrado | ACTIVE | 54 | 151 | 175 vs 174 ⚠️ | 21 |
+| `PSI-2020` | Psicología (`PSICOLOGIA`) | Pregrado | ACTIVE | 54 | 151 | 175 vs 174 ⚠️ (its semester totals say 175) | 21 |
 | `TDS-2026` | Tecnología en Desarrollo (`TEC-DESARROLLO`) | Tecnología | DRAFT | 34 | 96 | — | 24 |
 | `ADV-2026` | Administración de Empresas (virtual) (`ADM-EMPRESAS-VIRT`) | Pregrado | DRAFT | 50 | 147 | — | — |
 | `SSTV-2026` | Administración en Seguridad y Salud en el Trabajo (virtual) (`ADM-SST-VIRTUAL`) | Pregrado | DRAFT | 53 | 138 | — | — |
