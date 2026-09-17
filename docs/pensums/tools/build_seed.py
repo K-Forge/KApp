@@ -37,7 +37,6 @@ TYPOS = {
 }
 ELECTIVE = re.compile(r"^(Electiva|Énfasis|Seminario Electivo)\b|: Electiva$|\(electiva\)$", re.IGNORECASE)
 STOP = {"de", "e", "y", "la", "las", "del", "en", "a", "el", "los"}
-MONTH = "septiembre de 2026"
 
 
 def fold(s):
@@ -161,7 +160,8 @@ def build(entry, problems):
             problems.append(f"note {entry['pensumCode']}: the document declares {printed} {label}, its courses add up to {computed}")
 
     period = " · cuatrimestres" if src.get("period") == "cuatrimestre" else ""
-    reform = src.get("reform") or f"Plan publicado, consultado en {MONTH}{period}"
+    # Short on purpose: it is shown after the program name in every picker.
+    reform = src.get("reform") or f"Folleto publicado 2026{period}"
     pensum = {
         "pensumCode": entry["pensumCode"], "programCode": entry["programCode"],
         "programName": src["program"], "faculty": src["faculty"], "reform": reform,
