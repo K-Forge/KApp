@@ -44,18 +44,21 @@ jenv add /opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
 
 ## Profiles
 
-Seven JVMs plus MongoDB is roughly 5 GB. You rarely need that, and on a laptop also running Xcode
-or Android Studio you actively do not want it.
+Seven JVMs is roughly 3.5 GB. You rarely need all of them, and on a laptop also running Xcode or
+Android Studio you actively do not want them.
 
-| Profile    | What starts                           | RAM     | Use it when                                       |
-| ---------- | ------------------------------------- | ------- | ------------------------------------------------- |
-| `mock`     | one Prism mock server per contract                  | ~200 MB | Building a mobile screen against the API contract |
-| `core`     | mongo, discovery, gateway, auth, user | ~2.5 GB | Working on sign-in or profiles                    |
-| `academic` | core + semaphore, schedule            | ~3.5 GB | Working on pensums or timetables                |
-| `map`      | core + map                            | ~3 GB   | Working on the campus map                         |
-| `full`     | everything                            | ~5 GB   | End-to-end checks before a merge                  |
-| `dev`      | the admin portal                      | ~50 MB  | Any time you want the web console                 |
-| `cloud`    | everything **except** MongoDB         | ~4.5 GB | Pointing the services at the Atlas dev cluster    |
+**There is no database in any of these profiles.** Every service talks to the shared Atlas
+cluster; see [ADR 0009](adr/0009-atlas-is-the-only-development-database.md) and
+[Pointing at Atlas](#pointing-at-atlas).
+
+| Profile    | What starts                        | RAM     | Use it when                                       |
+| ---------- | ---------------------------------- | ------- | ------------------------------------------------- |
+| `mock`     | one Prism mock server per contract | ~200 MB | Building a mobile screen against the API contract |
+| `core`     | discovery, gateway, auth, user     | ~1.5 GB | Working on sign-in or profiles                    |
+| `academic` | core + semaphore, schedule         | ~2.5 GB | Working on pensums or timetables                  |
+| `map`      | core + map                         | ~2 GB   | Working on the campus map                         |
+| `full`     | everything                         | ~4 GB   | End-to-end checks before a merge                  |
+| `dev`      | the admin portal                   | ~50 MB  | Any time you want the web console                 |
 
 Profiles combine. The portal on its own is not much use, so pair it with a backend:
 
@@ -151,14 +154,17 @@ All commands run from `app/backend/microservices/`.
 cd app/backend/microservices
 ```
 
-**Start** — `cloud` is the normal one now. The databases live in the shared Atlas cluster, so
-there is nothing local to start and nothing to seed:
+**Start.** The data lives in the shared Atlas cluster, so there is nothing to start besides the
+services themselves:
 
 ```bash
-docker compose --profile cloud --profile dev up -d     # the usual combination
-docker compose --profile mock up -d                    # mobile work, no backend at all
-docker compose --profile full --profile dev up -d      # everything, with a LOCAL database
+docker compose --profile academic --profile map --profile dev up -d   # the usual combination
+docker compose --profile mock up -d                                    # mobile work, no backend
+docker compose --profile full --profile dev up -d                      # everything, mocks included
 ```
+
+`pnpm run microservices:start` is the first of those three, from the repository root, and works
+the same on Windows.
 
 **The Atlas cluster is always on.** You do not start or stop it, and nothing has to be running on
 anybody's machine for the data to be there. A free M0 cluster only pauses after **60 days with no
@@ -167,12 +173,10 @@ connection at all**, which will not happen while anyone is working.
 **Stop**
 
 ```bash
-docker compose --profile cloud --profile dev down      # stop your containers
+docker compose --profile full --profile dev down       # stop your containers
 ```
 
-**Never `down -v` against the shared cluster.** It does not delete anything in Atlas — the `-v`
-removes local volumes — but it is a habit worth not having, because the same reflex against
-`--profile full` wipes a local database, and one day it will be the wrong one.
+`-v` no longer has anything to remove here: there are no volumes left in this stack.
 
 **M0 has no backups.** If somebody drops a collection there is no restore: the data is gone. What
 makes that survivable is that almost everything is reproducible — Mongock re-seeds the buildings,
@@ -266,27 +270,14 @@ The passwords are **not** shared here, in the repository or in the group chat: a
 one of those stays in its history forever, and rotating the password later does not remove it.
 Give each teammate their line from `.dev-accounts` privately.
 
-### Switching between the local database and Atlas
-
-```bash
-scripts/set-atlas-uris.sh          # point the services at the shared cluster
-scripts/set-atlas-uris.sh --local  # and back, for a plane or bad Wi-Fi
-```
-
-It rewrites only the five `MONGO_*_URI` lines in `.env` and saves the previous one as `.env.bak`.
-The local passwords are left alone, so switching back is one command and not a regeneration.
-
-With Atlas, start the stack with `--profile cloud` instead of `--profile full`: it runs every
-service and no local database.
-
 `--recreate` deletes the four and issues new passwords:
 
 ```bash
 scripts/create-dev-accounts.sh --recreate
 ```
 
-These live in **your** MongoDB. They are not shared between machines, and they disappear with
-`down -v`; run the script again afterwards.
+These live in the **shared cluster**, so they are the same four accounts for everybody and they
+survive every `down`. Create them once; running the script again reports them as existing.
 
 ### Visitors
 
@@ -331,17 +322,19 @@ credential endpoints and will answer 429.
 
 `ROLE_ADMIN` is never granted by an invitation code, on purpose: the codes ship in the repository,
 so a code that granted admin would let anyone who can read the repo escalate. Promote an existing
-account instead — note that this now needs the Mongo root credentials, which live in `.env`:
+account instead. The role lives in two databases, and no account reaches both, so it is two calls:
 
 ```bash
 cd app/backend/microservices
-docker compose exec -T -e P="$(grep '^MONGO_ROOT_PASSWORD=' .env | cut -d= -f2-)" \
-  mongo mongosh --quiet --eval '
-  db.getSiblingDB("admin").auth("kapp_root", process.env.P);
-  const email = "you@konradlorenz.edu.co";
-  db.getSiblingDB("kapp_auth").credentials.updateOne({email}, {$set:{roles:["ROLE_ADMIN"]}});
-  db.getSiblingDB("kapp_user").users.updateOne({email}, {$set:{role:"ROLE_ADMIN"}});'
+set -a; . ./.env; set +a
+EMAIL=you@konradlorenz.edu.co
+docker run --rm mongo:7 mongosh "$MONGO_AUTH_URI" --quiet --eval \
+  "db.credentials.updateOne({email:'$EMAIL'}, {\$set:{roles:['ROLE_ADMIN']}})"
+docker run --rm mongo:7 mongosh "$MONGO_USER_URI" --quiet --eval \
+  "db.users.updateOne({email:'$EMAIL'}, {\$set:{role:'ROLE_ADMIN'}})"
 ```
+
+`scripts/create-dev-accounts.sh` does exactly this for the four team accounts.
 
 ---
 
@@ -354,8 +347,9 @@ cd app/backend/microservices
 ./mvnw -B -pl map-service -am verify          # one service
 ```
 
-Tests use Testcontainers, so **Docker must be running** — they start their own MongoDB and do not
-touch the one from compose.
+Tests use Testcontainers, so **Docker must be running**. They start their own MongoDB, which is
+the only local database left anywhere in this repository: a test run has to be free to wipe its
+data, and the shared cluster is the last place that should be possible.
 
 Use `verify`, not `install`. `install` writes to the shared local Maven repository and races with
 anyone else building at the same time.
@@ -378,18 +372,14 @@ rather than only in the code.
 | `kapp_schedule`  | `kapp_schedule_user`    | schedule-service  |
 | `kapp_map`       | `kapp_map_user`         | map-service       |
 
-Plus `kapp_root`, which exists only to provision the other five and to run the admin commands in
-this runbook. No service uses it.
-
-The passwords live in `.env` and are generated per machine:
+All five live in the shared Atlas cluster. Their connection strings go in `.env`, one per
+service, and nothing generates them for you: they come from the cluster, through
+[ATLAS-SETUP.md](ATLAS-SETUP.md) or from a teammate, privately.
 
 ```bash
 cd app/backend/microservices
-../../../scripts/generate-dev-secrets.sh > .env
+../../../scripts/generate-dev-secrets.sh back > .env   # everything else, and blanks for these five
 ```
-
-Re-running produces a **different** set. If the volume already holds accounts created with the old
-passwords, mongo will refuse to start healthy and say so — see the troubleshooting entry below.
 
 **To prove the isolation actually holds:**
 
@@ -397,59 +387,49 @@ passwords, mongo will refuse to start healthy and say so — see the troubleshoo
 scripts/verify-db-isolation.sh
 ```
 
-Each of the five accounts must reach its own database and be refused on the other four — 25 checks.
-Run it after any change to `mongo-init/rs-init.js`.
+Each of the five accounts must reach its own database and be refused on the other four — 25 checks,
+against the cluster itself. It needs nothing running: it connects with the strings from `.env`
+through a throwaway mongosh container. Run it after any change to the cluster's database users.
 
 ---
 
 ## Inspecting the database
 
-mongosh now needs credentials. For a single service's data, use that service's account:
+Each service's string opens that service's database and no other, so pick the one whose data you
+want. A throwaway container saves installing mongosh:
 
 ```bash
 cd app/backend/microservices
-docker compose exec -T -e U=kapp_map_user -e P="$(grep '^MONGO_MAP_PASSWORD=' .env | cut -d= -f2-)" \
-  mongo mongosh --quiet --eval '
-  db.getSiblingDB("kapp_map").auth(process.env.U, process.env.P);
-  db.getSiblingDB("kapp_map").spaces.find().limit(5).forEach(printjson);'
+set -a; . ./.env; set +a
+docker run --rm mongo:7 mongosh "$MONGO_MAP_URI" --quiet --eval \
+  'db.spaces.find().limit(5).forEach(printjson)'
 ```
 
-For anything spanning services, use root:
+Sourcing `.env` is why every `MONGO_*_URI` in it is single-quoted: unquoted, the shell reads the
+`&` as "run the rest in the background" and leaves the variable empty.
 
-```bash
-docker compose exec -T -e P="$(grep '^MONGO_ROOT_PASSWORD=' .env | cut -d= -f2-)" \
-  mongo mongosh --quiet --eval '
-  db.getSiblingDB("admin").auth("kapp_root", process.env.P);
-  db.getSiblingDB("kapp_user").users.countDocuments({role: "ROLE_STUDENT"});'
-```
+There is no account that spans the five databases, by design ([ADR 0005](adr/0005-per-service-database-credentials.md)).
+A question that crosses services is two queries.
 
-The password goes in as an environment variable rather than on the command line, because anything
-in `argv` is readable by every process in the container through `/proc`.
+For an interactive session, paste the same string into Compass.
 
-For an interactive session, Compass or `mongosh` from the host connect with
-`mongodb://kapp_root:<password>@localhost:27017/?authSource=admin&directConnection=true`. The
-`directConnection=true` matters: the replica set advertises itself as `mongo:27017`, which does not
-resolve from your Mac.
+**Remember whose data this is.** It is the cluster the whole team is looking at; a `drop()` typed
+here is everyone's afternoon.
 
 ---
 
 ## Pointing at Atlas
 
-The `cloud` profile starts everything **except** the local MongoDB, so the services talk to the
-shared Atlas development cluster instead:
-
-```bash
-docker compose --profile cloud --profile dev up -d
-```
-
-It reads the same five `MONGO_*_URI` variables from `.env`; replace their values with the cluster's
-strings:
+Every profile talks to the shared Atlas development cluster: there is no other option, and no
+local database to fall back to ([ADR 0009](adr/0009-atlas-is-the-only-development-database.md)).
+Compose reads the five `MONGO_*_URI` variables from `.env` and **refuses to start** if one is
+missing, naming it. They look like this:
 
 ```
 MONGO_MAP_URI=mongodb+srv://kapp_map_user:<password>@<cluster>.mongodb.net/kapp_map?retryWrites=true&w=majority
 ```
 
-Two parameters that belong in the local URI must **not** appear in the Atlas one:
+Two parameters must **not** appear in them:
 
 - **`replicaSet`** — the SRV record already carries it.
 - **`authSource`** — Atlas stores every database user in `admin` regardless of which database it
@@ -457,10 +437,9 @@ Two parameters that belong in the local URI must **not** appear in the Atlas one
   a message that reads exactly like a wrong password. The isolation still holds; it comes from the
   privilege, not from where the user is stored.
 
-Create the five accounts in Atlas with the same one-database-each rule: *Specific Privileges* →
+Create the five accounts with the same one-database-each rule: *Specific Privileges* →
 `readWrite` on that one database, never the "read and write to any database" built-in role.
-`scripts/verify-db-isolation.sh` assumes the local container, so check Atlas isolation from the
-Atlas UI instead.
+`scripts/verify-db-isolation.sh` proves it from outside the UI.
 
 **Full walkthrough: [ATLAS-SETUP.md](ATLAS-SETUP.md)** — creating the cluster, the five users, the
 network rules and the connection strings, step by step.
@@ -536,48 +515,24 @@ A handful of classes means the skeleton; several dozen means the real service. F
 `up -d` again once the build has finished — Compose recreates only the containers whose image
 changed.
 
-### The mongo container never becomes healthy
-
-Read what the probe actually said:
-
-```bash
-docker inspect -f '{{range .State.Health.Log}}exit={{.ExitCode}} {{.Output}}{{end}}' \
-  "$(docker compose ps -q mongo)" | tail -5
-```
-
-One `exit=1` at the very start is normal — the probe runs before the replica set has elected itself
-and correctly refuses to report healthy until the node can accept writes.
-
-A repeated `FATAL: cannot authenticate as kapp_root and cannot create it` means your `.env` no
-longer matches the volume: the accounts were provisioned with a different set of passwords, most
-likely because `generate-dev-secrets.sh` was run again. The passwords in `.env` are the only copy,
-so the fix is to discard the local data:
-
-```bash
-docker compose --profile full --profile dev down -v
-docker compose --profile core --profile dev up -d
-```
-
 ### A service starts and then dies with `MongoSecurityException`
 
-Its `MONGODB_URI` and the volume disagree. Same cause and same fix as the entry above. Check what
-the container is actually using, with the password redacted:
+Its `MONGODB_URI` no longer matches the cluster — usually a rotated password that `.env` did not
+follow, or a string pasted with the `&` unquoted so everything after it was lost. Check what the
+container is actually using, with the password redacted:
 
 ```bash
 docker compose exec -T map-service printenv MONGODB_URI | sed -E 's#://([^:]+):[^@]+@#://\1:REDACTED@#'
 ```
 
-### Editing `mongo-init/rs-init.js` and errors vanish without a message
+If the host is right and the password is not, get the current string from Atlas
+(*Database Access → Edit → connection string*) and paste it back into `.env`, single-quoted.
 
-mongosh rewrites the **top-level** program to await the driver's promises, but it does not rewrite
-the body of an ordinary function declaration. Inside a function, a failing call rejects a promise
-that a synchronous `catch` never sees, so the error escapes the `try` entirely and kills the
-process — the container goes unhealthy with a bare `MongoServerError` and no clue which line
-produced it.
+### A service cannot reach the cluster at all
 
-Keep every `try`/`catch` at the top level of that script, including the ones inside the loop. A
-top-level `try` **around** a call to a function does work; one written **inside** the function does
-not. This cost an afternoon; the script's header says so too.
+`MongoTimeoutException` rather than a security error means the network, not the credential. Atlas
+only answers addresses on its access list: check yours is there
+(*Network Access → IP Access List*), which changes every time you move between campus and home.
 
 ### Everything is slow, the fan is loud
 
@@ -587,17 +542,17 @@ with a narrower profile.
 ### Starting fresh
 
 ```bash
-docker compose --profile full --profile dev down -v    # wipes the database
-docker compose --profile core --profile dev up -d
+docker compose --profile full --profile dev down
+docker compose --profile academic --profile map --profile dev up -d --build
 ```
 
-The seed data — pensums, buildings, spaces, invitation codes — is reloaded automatically by
-Mongock on startup, and the MongoDB accounts are re-provisioned by the healthcheck. User accounts
-are not; recreate the four development ones:
+That is as fresh as it gets from here: the containers are new, the images rebuilt, and the data is
+untouched because it is not on this machine. Mongock's change units have already run against the
+cluster and will not run again.
 
-```bash
-scripts/create-dev-accounts.sh
-```
+**Wiping the data is a different thing entirely, and it is everybody's data.** If a collection has
+to go, say so in the group chat first, do it deliberately from Atlas, and remember M0 has no
+backups — the seeds come back on the next start, anything typed into the portal does not.
 
 The passwords will be new, and `.dev-accounts` is overwritten with them.
 
