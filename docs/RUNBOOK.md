@@ -68,8 +68,9 @@ docker compose --profile core --profile dev up -d
 ## Stacks: one per worktree
 
 Everybody works in their own worktree, and more than one stack ends up running on the same
-laptop. `KAPP_STACK` is what keeps them apart: it names the Compose project, every container and
-every image tag. Set it once, in `app/backend/microservices/.env` of that worktree:
+laptop. `KAPP_STACK` is what keeps them apart: it names every container and every image tag. The
+Compose project stays `kapp`, so everything still shows up under one heading in Docker Desktop.
+Set it once, in `app/backend/microservices/.env` of that worktree:
 
 ```bash
 echo 'KAPP_STACK=swift' >> app/backend/microservices/.env
@@ -102,7 +103,16 @@ failures were silent.
 
 ### Two stacks at the same time
 
-They still need different host ports. Set these in the same `.env`:
+Two stacks that run **different** services — a backend and somebody's mocks — coexist fine. Two
+that run the **same** services do not, even with different container names: Compose tracks a
+service by project plus service name, so starting one recreates the other's containers. If you
+really need two backends at once, give one of them its own project as well:
+
+```bash
+echo 'KAPP_PROJECT=kapp-experiment' >> app/backend/microservices/.env
+```
+
+Either way they need different host ports. Set these in the same `.env`:
 
 | Variable            | Default | Variable                   | Default |
 | ------------------- | ------- | -------------------------- | ------- |
@@ -117,18 +127,19 @@ URL in the portal's own **Gateway** box on the sign-in screen.
 
 ### The first time after this change
 
-The old containers, images and local volume belong to a project name nothing uses any more:
+Stop what is running, so the old `kapp-*` containers go away instead of sitting there stopped, and
+drop the images that carried the old shared tag:
 
 ```bash
-docker compose -p kapp --profile full --profile dev down -v
+docker compose --profile full --profile dev down
 ```
 
 ```bash
 docker images 'kapp/*:local' -q | xargs -r docker rmi
 ```
 
-Then start as usual. The images are rebuilt under the new tag on the first `--build`, and a local
-Mongo starts empty and re-seeds itself. Atlas is untouched by any of this.
+Then start as usual with `--build`, which builds the images under the new tag. The project name
+does not change, so the local Mongo volume and its data are untouched — and so is Atlas.
 
 ---
 

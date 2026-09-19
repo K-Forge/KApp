@@ -30,12 +30,17 @@
 #   back (default)   the backend worktree          front / web      the portal worktree
 #   swift            the iOS worktree              kotlin           the Android worktree
 #
-# It names the Compose project, every container (`back-auth-service`, `swift-auth-service-mock`)
-# and every image tag (`kapp/auth-service:back`). One variable, because the three used to be
-# shared across worktrees and that cost us twice in one week: two stacks fought over ports 8080
-# and 4300 until neither was reachable, and a stack silently ran an image another worktree had
-# just rebuilt from a different branch - which applied that branch's migrations to the shared
-# Atlas cluster.
+# It names every container (`back-auth-service`, `swift-auth-service-mock`) and every image tag
+# (`kapp/auth-service:back`). Both used to be fixed and shared across worktrees, and that cost us
+# twice in one week: two stacks fought over ports 8080 and 4300 until neither was reachable, and a
+# stack silently ran an image another worktree had just rebuilt from a different branch - which
+# applied that branch's migrations to the shared Atlas cluster.
+#
+# The Compose PROJECT stays `kapp`, so every stack still appears under one heading in Docker
+# Desktop. That is also why two stacks that run the same services - two backends, say - still
+# collide: Compose tracks a service by project plus service name, so starting one recreates the
+# other's containers. The mocks are safe, because they are different services. If you genuinely
+# need two backends at once, give one of them KAPP_PROJECT=kapp-<something> as well.
 #
 # Two stacks at once also need different ports. Set these in the same .env:
 #
@@ -53,7 +58,7 @@
 #
 # `version:` is intentionally absent - the Compose Specification dropped it and v2 warns.
 
-name: ${KAPP_STACK:-back}
+name: ${KAPP_PROJECT:-kapp}
 
 services:
   # ---------------------------------------------------------------------------------
