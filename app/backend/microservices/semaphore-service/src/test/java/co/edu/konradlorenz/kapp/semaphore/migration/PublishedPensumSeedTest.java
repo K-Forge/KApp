@@ -3,6 +3,7 @@ package co.edu.konradlorenz.kapp.semaphore.migration;
 import co.edu.konradlorenz.kapp.semaphore.domain.Pensum;
 import co.edu.konradlorenz.kapp.semaphore.domain.PensumCourse;
 import co.edu.konradlorenz.kapp.semaphore.domain.PensumStatus;
+import co.edu.konradlorenz.kapp.semaphore.domain.WeeklyHours;
 import co.edu.konradlorenz.kapp.semaphore.repository.PensumRepository;
 import co.edu.konradlorenz.kapp.semaphore.repository.ProgramRepository;
 import co.edu.konradlorenz.kapp.semaphore.service.PensumValidator;
@@ -50,13 +51,12 @@ class PublishedPensumSeedTest {
     static final MongoDBContainer MONGO = new MongoDBContainer("mongo:7.0");
 
     /** pensumCode -> {declared credits, computed credits, declared hours, computed hours}. */
-    private static final Map<String, int[]> KNOWN_GAPS = Map.of(
-            "1017", new int[]{143, 143, 195, 197},
-            "PSI-2020", new int[]{151, 151, 174, 175},
-            "ENC-2026", new int[]{33, 0, 0, 0},
-            "MPC-2026", new int[]{52, 0, 0, 0},
-            "MIAC-2026", new int[]{34, 0, 0, 0},
-            "MPCL-2026", new int[]{59, 0, 0, 0});
+    private static final Map<String, double[]> KNOWN_GAPS = Map.of(
+            "1017", new double[]{143, 143, 195, 197},
+            "ENC-2026", new double[]{33, 0, 0, 0},
+            "MPC-2026", new double[]{52, 0, 0, 0},
+            "MIAC-2026", new double[]{34, 0, 0, 0},
+            "MPCL-2026", new double[]{59, 0, 0, 0});
 
     @Autowired
     private PensumRepository pensums;
@@ -99,10 +99,10 @@ class PublishedPensumSeedTest {
     void declaredTotalsMatchOrAreKnownGaps() {
         for (Pensum seeded : new V006_SeedThePublishedPensums().readPensums()) {
             int credits = seeded.courses().stream().mapToInt(PensumCourse::credits).sum();
-            int hours = seeded.courses().stream().mapToInt(PensumCourse::weeklyHours).sum();
-            int[] expected = KNOWN_GAPS.getOrDefault(seeded.pensumCode(),
-                    new int[]{credits, credits, hours, hours});
-            assertThat(new int[]{seeded.totalCredits(), credits, seeded.totalHours(), hours})
+            double hours = seeded.courses().stream().mapToDouble(PensumCourse::weeklyHours).sum();
+            double[] expected = KNOWN_GAPS.getOrDefault(seeded.pensumCode(),
+                    new double[]{credits, credits, hours, hours});
+            assertThat(new double[]{seeded.totalCredits(), credits, seeded.totalHours(), hours})
                     .as(seeded.pensumCode()).containsExactly(expected);
         }
     }
@@ -130,6 +130,38 @@ class PublishedPensumSeedTest {
                 .allSatisfy(c -> assertThat(c.sinuCode()).isEqualTo(c.pensumItemCode()));
     }
 
+    @Test
+    @DisplayName("the four practices printed with a half hour keep it, and Psicología adds up again")
+    void halfHoursAreKept() {
+        assertThat(hoursOf("PSI-2020", "P5805")).isEqualTo(4.5);
+        assertThat(hoursOf("PSI-2020", "P5905")).isEqualTo(4.5);
+        assertThat(hoursOf("MKT-2026", "MKT-902")).isEqualTo(1.5);
+        assertThat(hoursOf("ANI-2026", "ANI-903")).isEqualTo(1.5);
+
+        // The gap this closes: rounding those two practices up is what made the plan add up to
+        // 175 against the 174 it prints. The document's own per-semester totals round the same
+        // halves up - 14,5 printed as 15 and 10,5 as 11 - which is where its 175 came from.
+        Pensum psychology = pensum("PSI-2020");
+        assertThat(psychology.courses().stream().mapToDouble(PensumCourse::weeklyHours).sum())
+                .isEqualTo(psychology.totalHours())
+                .isEqualTo(174);
+    }
+
+    @Test
+    @DisplayName("every seeded item lands on a whole hour or a half")
+    void hoursAreWholeOrHalf() {
+        for (Pensum seeded : new V006_SeedThePublishedPensums().readPensums()) {
+            assertThat(seeded.courses())
+                    .as(seeded.pensumCode())
+                    .allSatisfy(c -> assertThat(WeeklyHours.isValid(c.weeklyHours()))
+                            .as(c.name()).isTrue());
+        }
+    }
+
+    private double hoursOf(String pensumCode, String itemCode) {
+        return pensum(pensumCode).byPensumItemCode().get(itemCode).weeklyHours();
+    }
+
     // ── Ingeniería de Sistemas 1015: the reconstruction V002 seeded is gone ──────────────
 
     @Test
@@ -155,7 +187,7 @@ class PublishedPensumSeedTest {
             var items = pensum.courses().stream().filter(c -> c.level() == l).toList();
             assertThat(items.stream().mapToInt(PensumCourse::credits).sum()).as("level %d credits", l)
                     .isEqualTo(expected[l - 1][0]);
-            assertThat(items.stream().mapToInt(PensumCourse::weeklyHours).sum()).as("level %d hours", l)
+            assertThat(items.stream().mapToDouble(PensumCourse::weeklyHours).sum()).as("level %d hours", l)
                     .isEqualTo(expected[l - 1][1]);
         }
     }

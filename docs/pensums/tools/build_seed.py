@@ -8,14 +8,15 @@ programs.json, under semaphore-service/src/main/resources/db/seed/pensums/. The 
 generated; edit the transcriptions or catalog.yaml, never the JSON.
 
 What it decides, so the transcriptions do not have to:
-  * weeklyHours is an integer in the model; a printed 4,5 or 1,5 rounds half up.
+  * weeklyHours keeps the printed figure, including the four practices printed with a half.
+    Whole hours stay whole in the JSON - 4, never 4.0 - so only those four carry a decimal.
   * A missing credit or hour value is stored as 0. The pensum keeps the total the document
     prints, so the gap stays visible instead of being papered over.
   * A course is an elective slot when its name says so. A slot has no course code, so
     prerequisites between two slots cannot be stored and are reported.
   * Printed typos in course names are corrected from TYPOS below, and nowhere else.
 """
-import json, math, re, sys, unicodedata
+import json, re, sys, unicodedata
 from pathlib import Path
 import yaml
 
@@ -49,6 +50,11 @@ def area_code(name):
     return code[:20]
 
 
+def whole(total):
+    """A sum that landed on a whole number is written as one: 166, not 166.0."""
+    return int(total) if float(total).is_integer() else total
+
+
 def fix(name):
     name = re.sub(r"\s+", " ", str(name)).strip()
     for wrong, right in TYPOS.items():
@@ -57,7 +63,17 @@ def fix(name):
 
 
 def hours(value):
-    return 0 if value is None else int(math.floor(float(value) + 0.5))
+    """Weekly hours as printed: a whole number, or a whole number and a half.
+
+    Returned as an int when whole, so the seed JSON keeps whole hours whole and the four
+    practices printed with a half are the only decimals in it.
+    """
+    if value is None:
+        return 0
+    h = float(value)
+    if h < 0 or abs(h - round(h * 2) / 2) > 1e-9:
+        raise ValueError(f"{value} is not a whole number of weekly hours or a half")
+    return int(h) if h.is_integer() else h
 
 
 def build(entry, problems):
@@ -106,15 +122,18 @@ def build(entry, problems):
         if printed is None and generated is None:
             problems.append(f"{entry['file']}: {name} has neither a printed code nor a prefix to generate one")
             continue
-        if isinstance(r.get("hours"), float) and not float(r["hours"]).is_integer():
-            problems.append(f"note {entry['pensumCode']}: {name} prints {r['hours']} weekly hours, stored as {hours(r['hours'])}")
+        try:
+            weekly = hours(r.get("hours"))
+        except ValueError as e:
+            problems.append(f"{entry['file']}: {name} {e}")
+            continue
         courses.append({
             "code": None if slot else item_code,
             "pensumItemCode": item_code,
             "name": name,
             "level": r["level"],
             "credits": int(r["credits"]) if r.get("credits") is not None else 0,
-            "weeklyHours": hours(r.get("hours")),
+            "weeklyHours": weekly,
             "area": lookup(r),
             "isElectiveSlot": slot,
             "prerequisites": [],
@@ -149,10 +168,11 @@ def build(entry, problems):
         label = label if not label.isupper() else " ".join(
             w.lower() if w.lower() in STOP else w.capitalize() for w in label.lower().split())
         areas.append({"code": code, "name": label, "color": colours[code],
-                      "credits": sum(c["credits"] for c in members), "hours": sum(c["weeklyHours"] for c in members)})
+                      "credits": sum(c["credits"] for c in members),
+                      "hours": whole(sum(c["weeklyHours"] for c in members))})
 
     credits = sum(c["credits"] for c in courses)
-    weekly = sum(c["weeklyHours"] for c in courses)
+    weekly = whole(sum(c["weeklyHours"] for c in courses))
     declared_credits = src.get("declaredCredits")
     declared_hours = src.get("declaredHours")
     for label, printed, computed in (("credits", declared_credits, credits), ("hours", declared_hours, weekly)):
@@ -167,7 +187,7 @@ def build(entry, problems):
         "programName": src["program"], "faculty": src["faculty"], "reform": reform,
         "status": entry["status"],
         "totalCredits": declared_credits if declared_credits is not None else credits,
-        "totalHours": declared_hours if declared_hours is not None else weekly,
+        "totalHours": whole(declared_hours) if declared_hours is not None else weekly,
         "levels": max(c["level"] for c in courses), "areas": areas, "courses": courses,
     }
     program = {"code": entry["programCode"], "name": src["program"], "faculty": src["faculty"], "level": src["programLevel"]}

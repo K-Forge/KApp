@@ -17,6 +17,7 @@ import {
   looksLikeHeadingRow,
   looksTrue,
   mapFromHeadings,
+  parseHours,
   parsePaste,
   type ItemField,
   type PensumHeader,
@@ -144,7 +145,8 @@ import {
           </div>
           <div class="field">
             <label for="pp-dh">Declared weekly hours</label>
-            <input id="pp-dh" type="number" [ngModel]="header().declaredHours" (ngModelChange)="patch('declaredHours', $event)" />
+            <!-- step, because a plan may declare a half: Marketing's own hours end in one. -->
+            <input id="pp-dh" type="number" step="0.5" [ngModel]="header().declaredHours" (ngModelChange)="patch('declaredHours', $event)" />
           </div>
           <div class="field">
             <label for="pp-lv">Levels</label>
@@ -755,6 +757,9 @@ export class PastePensumComponent {
     const columnValues = (c: number) => sample.map((r) => (r.cells[c] ?? '').trim()).filter(Boolean);
     const allSmallInts = (vals: string[], max: number) =>
       vals.length > 0 && vals.every((v) => /^\d{1,2}$/.test(v) && Number(v) <= max);
+    // Hours, unlike a level or a credit count, may end in a half.
+    const allSmallHours = (vals: string[]) =>
+      vals.length > 0 && vals.every((v) => parseHours(v) <= 20);
 
     for (const c of Array.from({ length: Math.max(...rows.map((r) => r.cells.length), 0) }, (_, i) => i)) {
       if (out[c]) continue;
@@ -777,7 +782,7 @@ export class PastePensumComponent {
         take('courseLevel');
       } else if (allSmallInts(vals, 12) && !used.has('credits')) {
         take('credits');
-      } else if (allSmallInts(vals, 20) && !used.has('weeklyHours')) {
+      } else if (allSmallHours(vals) && !used.has('weeklyHours')) {
         take('weeklyHours');
       } else if (vals.every((v) => /^[A-Z]{2,5}$/.test(v)) && !used.has('areaCode')) {
         take('areaCode');
@@ -862,9 +867,13 @@ export class PastePensumComponent {
         if (!this.hasSource(f.key)) continue;
         if (!this.valueOf(row, f.key)) problems.push(`${f.label} is empty`);
       }
-      for (const numeric of ['courseLevel', 'credits', 'weeklyHours'] as const) {
+      for (const numeric of ['courseLevel', 'credits'] as const) {
         const v = this.valueOf(row, numeric);
         if (v && !/^\d+$/.test(v)) problems.push(`${numeric} is not a whole number`);
+      }
+      const hours = this.valueOf(row, 'weeklyHours');
+      if (hours && Number.isNaN(parseHours(hours))) {
+        problems.push('weeklyHours is not a whole number of hours or a half');
       }
       // An elective slot has no course code; anything else must have one.
       const elective = looksTrue(this.valueOf(row, 'isElectiveSlot'));
@@ -884,7 +893,8 @@ export class PastePensumComponent {
     const spec = ITEM_FIELDS.find((f) => f.key === field);
     const value = (row.cells[column] ?? '').trim();
     if (spec?.required && !value) return true;
-    if (['courseLevel', 'credits', 'weeklyHours'].includes(field) && value && !/^\d+$/.test(value)) return true;
+    if (['courseLevel', 'credits'].includes(field) && value && !/^\d+$/.test(value)) return true;
+    if (field === 'weeklyHours' && value && Number.isNaN(parseHours(value))) return true;
     return false;
   }
 
@@ -915,7 +925,7 @@ export class PastePensumComponent {
     let hours = 0;
     for (const row of this.rows()) {
       credits += Number(this.valueOf(row, 'credits')) || 0;
-      hours += Number(this.valueOf(row, 'weeklyHours')) || 0;
+      hours += parseHours(this.valueOf(row, 'weeklyHours')) || 0;
     }
     return { credits, hours };
   });
@@ -1008,7 +1018,9 @@ export class PastePensumComponent {
         this.valueOf(row, 'courseName'),
         this.valueOf(row, 'courseLevel'),
         this.valueOf(row, 'credits'),
-        this.valueOf(row, 'weeklyHours'),
+        // The decimal point, never the comma the document prints: an unquoted comma in a CSV
+        // cell is not a decimal mark, it is the next column.
+        this.valueOf(row, 'weeklyHours').replace(',', '.'),
         String(elective),
         prereqs,
         '',

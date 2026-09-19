@@ -1,6 +1,8 @@
 package co.edu.konradlorenz.kapp.semaphore.web.dto;
 
 import co.edu.konradlorenz.kapp.semaphore.domain.PensumArea;
+import co.edu.konradlorenz.kapp.semaphore.domain.WeeklyHours;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -16,7 +18,7 @@ public record PensumAreaDto(
         @NotBlank @Pattern(regexp = "^#[0-9A-Fa-f]{6}$",
                 message = "must be an RGB hex triplet such as #539392") String color,
         @Min(0) int credits,
-        @Min(0) int hours
+        @Min(0) @JsonSerialize(using = WeeklyHours.Serializer.class) double hours
 ) {
 
     public static PensumAreaDto from(PensumArea area) {

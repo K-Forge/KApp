@@ -57,6 +57,21 @@ describe('PensumGridComponent', () => {
     expect(totals).toEqual(['3 cr · 4 h', '5 cr · 6 h', '3 cr · 3 h']);
   });
 
+  // Four items across the published plans print half an hour. The grid is what those are
+  // checked against the PDF with, so it has to show the half rather than a rounded figure.
+  it('shows half an hour as a half, in the item and in the level total', () => {
+    const withPractice: Pensum = {
+      ...PRINTED_GRID,
+      totalHours: 12.5,
+      courses: [...PRINTED_GRID.courses.slice(0, 3), course('P5805', 'Práctica profesional', 3, 'SI', 9, 4.5)],
+    };
+    const el = render(withPractice);
+
+    expect(el.textContent).toContain('9 cr · 4.5 h');
+    expect(Array.from(el.querySelectorAll('.level-total')).map((t) => t.textContent!.trim()))
+      .toEqual(['3 cr · 4 h', '5 cr · 6 h', '9 cr · 4.5 h']);
+  });
+
   it('shows the pensum item code of an elective slot and its prerequisites by code', () => {
     const el = render(PRINTED_GRID);
     const slot = el.querySelector('.item.slot') as HTMLElement;

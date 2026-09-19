@@ -165,6 +165,41 @@ class PensumImportFlowTest {
                 .andExpect(jsonPath("$.details[?(@.field=~/.*declaredHours.*/)]").isNotEmpty());
     }
 
+    // ── Half hours ─────────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("a practice printed as 4,5 hours imports as 4.5, and as 72 hours a semester")
+    void halfHoursImport() throws Exception {
+        // The Spanish decimal comma, quoted, which is what a spreadsheet in this country
+        // exports. Unquoted it would break the row in two, and Commons CSV says so first.
+        mockMvc.perform(upload(HEADER + "\n" + halfHourRow("\"4,5\"")))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/catalog/pensums/{code}", "IMP-HALF").with(admin("half")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.courses[0].weeklyHours").value(4.5))
+                .andExpect(jsonPath("$.courses[0].totalHours").value(72))
+                .andExpect(jsonPath("$.areas[0].hours").value(4.5))
+                .andExpect(jsonPath("$.totalHours").value(4.5));
+    }
+
+    @Test
+    @DisplayName("a fraction of an hour that is not a half is refused, naming the row")
+    void otherFractionsAreRefused() throws Exception {
+        mockMvc.perform(upload(HEADER + "\n" + halfHourRow("4.3")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[?(@.field=~/row 2.*/)]").isNotEmpty());
+
+        assertThat(pensums.findById("IMP-HALF")).isEmpty();
+    }
+
+    /** One course worth {@code hours} weekly hours, declared as the pensum's total as well. */
+    private static String halfHourRow(String hours) {
+        return ("IMP-PROG,Programa,Facultad,PREGRADO,IMP-HALF,R,DRAFT,9,%s,2,"
+                + "CB,Ciencias,#539392,P5805,P5805,Practica profesional,1,9,%s,false,,\n")
+                .formatted(hours, hours);
+    }
+
     // ── Per-row errors ─────────────────────────────────────────────────────────────
 
     @Test

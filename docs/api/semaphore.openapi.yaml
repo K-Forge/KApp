@@ -23,6 +23,18 @@ info:
       `totalHours` for the full 16-week semester. The invariant is `weeklyHours * 16 == totalHours`.
       At *pensum* and *area* level, `totalHours` and `hours` are sums of **weekly** hours across
       the plan (the Ingeniería de Sistemas plan totals 142 credits and 194 weekly hours).
+
+      `weeklyHours` is a **number, not an integer**: it may carry a half. Four items across the
+      published plans print one — Psicología's two professional practices at 4,5 hours, and the
+      practices of Marketing and Negocios Internacionales at 1,5 — and rounding them up was what
+      made Psicología add up to 175 weekly hours against the 174 its own document prints. No
+      other fraction is accepted: a value that is neither a whole hour nor a half is rejected
+      with `400`.
+
+      **Whole hours are still written whole.** `4`, never `4.0`, so those four items are the only
+      place in the API where hours carry a decimal point — but a client that reads them into an
+      integer type breaks on exactly those four, and should read a decimal. `totalHours` stays an
+      integer everywhere: half an hour a week is eight whole hours a semester.
     - **Elective slots are slots, not courses.** The Reforma 2018 plan carries six of them
       (Electiva I..VI). A slot has credits and hours but no fixed content: its `code` is `null`,
       `isElectiveSlot` is `true`, and it is addressed by its stable `pensumItemCode`
@@ -387,6 +399,9 @@ paths:
         hours, which is what a pensum's `totalHours` means. The seeded Ingeniería de Sistemas
         plan declares 142 and 194 where its courses give 144 and 197; accepting that silently
         would put the discrepancy in front of a student months later.
+
+        **Hours may carry a half**, in either `4.5` or the Spanish `4,5` — the latter has to be
+        quoted, or it is not one cell but two. Any other fraction is refused against its row.
 
         Column reference and a template: `docs/templates/`.
       tags: [Catalog]
@@ -1353,9 +1368,12 @@ components:
           minimum: 0
           example: 36
         hours:
-          type: integer
-          description: Total **weekly** hours the plan assigns to this area.
+          type: number
+          description: |
+            Total **weekly** hours the plan assigns to this area. A sum of its items, so it
+            carries a half wherever one of them does.
           minimum: 0
+          multipleOf: 0.5
           example: 44
 
     PensumCourse:
@@ -1396,9 +1414,13 @@ components:
           minimum: 0
           example: 3
         weeklyHours:
-          type: integer
-          description: Contact hours per week.
+          type: number
+          description: |
+            Contact hours per week: a whole number of hours, or a whole number and a half.
+
+            Only halves; `4.3` is rejected. A whole figure is written whole (`4`, not `4.0`).
           minimum: 0
+          multipleOf: 0.5
           example: 4
         totalHours:
           type: integer
@@ -1473,10 +1495,13 @@ components:
           minimum: 0
           example: 142
         totalHours:
-          type: integer
+          type: number
           description: |
-            Sum of the **weekly** hours of every item in the plan — not semester hours.
+            The **weekly** hours the printed plan declares — not semester hours, and not
+            recomputed from the items. Where the document prints no total, it is the sum of the
+            items and carries a half wherever one of them does.
           minimum: 0
+          multipleOf: 0.5
           example: 194
         levels:
           type: integer
