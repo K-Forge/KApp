@@ -17,15 +17,48 @@
 # That is deliberate: it keeps `depends_on` inside the set of services the activated
 # profile actually starts, which is the case Compose refuses to resolve otherwise.
 #
-# Published host ports:
+# Published host ports (defaults; every one is overridable - see KAPP_STACK below):
 #
 #   8080         api-gateway   the only JVM port on the host - see the note below
+#   4300         web-admin     the admin portal, with the `dev` profile
 #   27017        mongo         local debugging only
 #   4010-4014    Prism mocks   auth, user, semaphore, schedule, map (in that order)
 #
+# ---------------------------------------------------------------------------------------------
+# KAPP_STACK - which checkout this stack belongs to. Set it in this directory's .env.
+#
+#   back (default)   the backend worktree          front / web      the portal worktree
+#   swift            the iOS worktree              kotlin           the Android worktree
+#
+# It names every container (`back-auth-service`, `swift-auth-service-mock`) and every image tag
+# (`kapp/auth-service:back`). Both used to be fixed and shared across worktrees, and that cost us
+# twice in one week: two stacks fought over ports 8080 and 4300 until neither was reachable, and a
+# stack silently ran an image another worktree had just rebuilt from a different branch - which
+# applied that branch's migrations to the shared Atlas cluster.
+#
+# The Compose PROJECT stays `kapp`, so every stack still appears under one heading in Docker
+# Desktop. That is also why two stacks that run the same services - two backends, say - still
+# collide: Compose tracks a service by project plus service name, so starting one recreates the
+# other's containers. The mocks are safe, because they are different services. If you genuinely
+# need two backends at once, give one of them KAPP_PROJECT=kapp-<something> as well.
+#
+# Two stacks at once also need different ports. Set these in the same .env:
+#
+#   KAPP_GATEWAY_PORT   KAPP_PORTAL_PORT   KAPP_MONGO_PORT
+#   KAPP_MOCK_AUTH_PORT   KAPP_MOCK_USER_PORT   KAPP_MOCK_SEMAPHORE_PORT
+#   KAPP_MOCK_SCHEDULE_PORT   KAPP_MOCK_MAP_PORT
+#
+# The mobile worktrees run only `--profile mock`, so KAPP_STACK is all they need:
+#
+#   echo 'KAPP_STACK=swift' >> app/backend/microservices/.env
+#   pnpm run microservices:mock          # -> swift-auth-service-mock, and so on
+#
+# docs/RUNBOOK.md has the whole procedure, including what to do the first time after this change.
+# ---------------------------------------------------------------------------------------------
+#
 # `version:` is intentionally absent - the Compose Specification dropped it and v2 warns.
 
-name: kapp
+name: ${KAPP_PROJECT:-kapp}
 
 services:
   # ---------------------------------------------------------------------------------
@@ -41,7 +74,7 @@ services:
   # ---------------------------------------------------------------------------------
   mongo:
     image: mongo:7.0
-    container_name: kapp-mongo
+    container_name: ${KAPP_STACK:-back}-mongo
     profiles: ["core", "academic", "map", "full"]
     # Auth on a replica set requires a keyFile for internal member authentication - even
     # with a single member, where there is no member-to-member traffic. The file must be
@@ -82,7 +115,7 @@ services:
       # The replica set member is registered as `mongo:27017`, a name that does not
       # resolve on the host, so host clients must pin the connection:
       #   mongodb://localhost:27017/?directConnection=true
-      - "27017:27017"
+      - "${KAPP_MONGO_PORT:-27017}:27017"
     volumes:
       - mongo-data:/data/db
       - mongo-config:/data/configdb
@@ -112,8 +145,8 @@ services:
       # wrapper live here, not in the service directory. See user-service/Dockerfile.
       context: .
       dockerfile: discovery-server/Dockerfile
-    image: kapp/discovery-server:local
-    container_name: kapp-discovery
+    image: kapp/discovery-server:${KAPP_STACK:-back}
+    container_name: ${KAPP_STACK:-back}-discovery-server
     profiles: ["core", "academic", "map", "full", "cloud"]
     mem_limit: 512m
     healthcheck:
@@ -141,11 +174,11 @@ services:
     build:
       context: .
       dockerfile: api-gateway/Dockerfile
-    image: kapp/api-gateway:local
-    container_name: kapp-gateway
+    image: kapp/api-gateway:${KAPP_STACK:-back}
+    container_name: ${KAPP_STACK:-back}-api-gateway
     profiles: ["core", "academic", "map", "full", "cloud"]
     ports:
-      - "8080:8080"
+      - "${KAPP_GATEWAY_PORT:-8080}:8080"
     environment:
       SERVER_PORT: 8080
       EUREKA_URI: http://discovery-server:8761/eureka/
@@ -173,8 +206,8 @@ services:
     build:
       context: .
       dockerfile: auth-service/Dockerfile
-    image: kapp/auth-service:local
-    container_name: kapp-auth
+    image: kapp/auth-service:${KAPP_STACK:-back}
+    container_name: ${KAPP_STACK:-back}-auth-service
     profiles: ["core", "academic", "map", "full", "cloud"]
     environment:
       SERVER_PORT: 8081
@@ -240,8 +273,8 @@ services:
     build:
       context: .
       dockerfile: user-service/Dockerfile
-    image: kapp/user-service:local
-    container_name: kapp-user
+    image: kapp/user-service:${KAPP_STACK:-back}
+    container_name: ${KAPP_STACK:-back}-user-service
     profiles: ["core", "academic", "map", "full", "cloud"]
     environment:
       SERVER_PORT: 8082
@@ -277,8 +310,8 @@ services:
     build:
       context: .
       dockerfile: semaphore-service/Dockerfile
-    image: kapp/semaphore-service:local
-    container_name: kapp-semaphore
+    image: kapp/semaphore-service:${KAPP_STACK:-back}
+    container_name: ${KAPP_STACK:-back}-semaphore-service
     profiles: ["academic", "full", "cloud"]
     environment:
       SERVER_PORT: 8083
@@ -308,8 +341,8 @@ services:
     build:
       context: .
       dockerfile: schedule-service/Dockerfile
-    image: kapp/schedule-service:local
-    container_name: kapp-schedule
+    image: kapp/schedule-service:${KAPP_STACK:-back}
+    container_name: ${KAPP_STACK:-back}-schedule-service
     profiles: ["academic", "full", "cloud"]
     environment:
       SERVER_PORT: 8084
@@ -339,8 +372,8 @@ services:
     build:
       context: .
       dockerfile: map-service/Dockerfile
-    image: kapp/map-service:local
-    container_name: kapp-map
+    image: kapp/map-service:${KAPP_STACK:-back}
+    container_name: ${KAPP_STACK:-back}-map-service
     profiles: ["map", "full", "cloud"]
     environment:
       SERVER_PORT: 8085
@@ -387,11 +420,11 @@ services:
     # process serving canned examples is not something emulation makes slow enough to
     # notice. Declared per service because Compose has no file-level default.
     platform: linux/amd64
-    container_name: kapp-mock-auth
+    container_name: ${KAPP_STACK:-back}-auth-service-mock
     profiles: ["mock", "full"]
     command: mock -h 0.0.0.0 /specs/auth.openapi.yaml
     ports:
-      - "4010:4010"
+      - "${KAPP_MOCK_AUTH_PORT:-4010}:4010"
     volumes:
       - ../../../docs/api:/specs:ro
     mem_limit: 256m
@@ -401,11 +434,11 @@ services:
     image: stoplight/prism:4
     # linux/amd64 only - see the note on mock-auth.
     platform: linux/amd64
-    container_name: kapp-mock-user
+    container_name: ${KAPP_STACK:-back}-user-service-mock
     profiles: ["mock", "full"]
     command: mock -h 0.0.0.0 /specs/user.openapi.yaml
     ports:
-      - "4011:4010"
+      - "${KAPP_MOCK_USER_PORT:-4011}:4010"
     volumes:
       - ../../../docs/api:/specs:ro
     mem_limit: 256m
@@ -415,11 +448,11 @@ services:
     image: stoplight/prism:4
     # linux/amd64 only - see the note on mock-auth.
     platform: linux/amd64
-    container_name: kapp-mock-semaphore
+    container_name: ${KAPP_STACK:-back}-semaphore-service-mock
     profiles: ["mock", "full"]
     command: mock -h 0.0.0.0 /specs/semaphore.openapi.yaml
     ports:
-      - "4012:4010"
+      - "${KAPP_MOCK_SEMAPHORE_PORT:-4012}:4010"
     volumes:
       - ../../../docs/api:/specs:ro
     mem_limit: 256m
@@ -429,11 +462,11 @@ services:
     image: stoplight/prism:4
     # linux/amd64 only - see the note on mock-auth.
     platform: linux/amd64
-    container_name: kapp-mock-schedule
+    container_name: ${KAPP_STACK:-back}-schedule-service-mock
     profiles: ["mock", "full"]
     command: mock -h 0.0.0.0 /specs/schedule.openapi.yaml
     ports:
-      - "4013:4010"
+      - "${KAPP_MOCK_SCHEDULE_PORT:-4013}:4010"
     volumes:
       - ../../../docs/api:/specs:ro
     mem_limit: 256m
@@ -443,11 +476,11 @@ services:
     image: stoplight/prism:4
     # linux/amd64 only - see the note on mock-auth.
     platform: linux/amd64
-    container_name: kapp-mock-map
+    container_name: ${KAPP_STACK:-back}-map-service-mock
     profiles: ["mock", "full"]
     command: mock -h 0.0.0.0 /specs/map.openapi.yaml
     ports:
-      - "4014:4010"
+      - "${KAPP_MOCK_MAP_PORT:-4014}:4010"
     volumes:
       - ../../../docs/api:/specs:ro
     mem_limit: 256m
@@ -472,11 +505,11 @@ services:
       # inspector), the same specs the Prism mocks above read.
       context: ../../..
       dockerfile: app/frontend/web-admin/Dockerfile
-    image: kapp/web-admin:local
-    container_name: kapp-web-admin
+    image: kapp/web-admin:${KAPP_STACK:-back}
+    container_name: ${KAPP_STACK:-back}-web-admin
     profiles: ["dev"]
     ports:
-      - "4300:80"
+      - "${KAPP_PORTAL_PORT:-4300}:80"
     healthcheck:
       # 127.0.0.1, not localhost: this custom server block only listens on IPv4, and Alpine's
       # resolver tries the ::1 (IPv6) loopback first, so `localhost` reliably fails here even

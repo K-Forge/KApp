@@ -65,6 +65,84 @@ docker compose --profile core --profile dev up -d
 
 ---
 
+## Stacks: one per worktree
+
+Everybody works in their own worktree, and more than one stack ends up running on the same
+laptop. `KAPP_STACK` is what keeps them apart: it names every container and every image tag. The
+Compose project stays `kapp`, so everything still shows up under one heading in Docker Desktop.
+Set it once, in `app/backend/microservices/.env` of that worktree:
+
+```bash
+echo 'KAPP_STACK=swift' >> app/backend/microservices/.env
+```
+
+`scripts/generate-dev-secrets.sh <stack> > .env` writes it for you. Without it, a stack is `back`.
+
+| Worktree             | `KAPP_STACK` | Containers                                                    |
+| -------------------- | ------------ | ------------------------------------------------------------- |
+| backend              | `back`       | `back-api-gateway`, `back-auth-service`, `back-mongo`, …       |
+| portal               | `front`      | `front-api-gateway`, `front-web-admin`, …                      |
+| iOS (mocks only)     | `swift`      | `swift-auth-service-mock`, `swift-semaphore-service-mock`, …   |
+| Android (mocks only) | `kotlin`     | `kotlin-auth-service-mock`, `kotlin-semaphore-service-mock`, … |
+
+So the mobile team needs exactly two commands:
+
+```bash
+echo 'KAPP_STACK=kotlin' >> app/backend/microservices/.env
+```
+
+```bash
+pnpm run microservices:mock
+```
+
+**Why it matters, twice over.** The names used to be fixed (`kapp-auth`, `kapp/auth-service:local`)
+and shared by every checkout. Two stacks then fought over ports 8080 and 4300 until neither
+answered, and — worse — a stack started with an image tag another worktree had just rebuilt from a
+different branch, which ran that branch's migrations against the shared Atlas cluster. Both
+failures were silent.
+
+### Two stacks at the same time
+
+Two stacks that run **different** services — a backend and somebody's mocks — coexist fine. Two
+that run the **same** services do not, even with different container names: Compose tracks a
+service by project plus service name, so starting one recreates the other's containers. If you
+really need two backends at once, give one of them its own project as well:
+
+```bash
+echo 'KAPP_PROJECT=kapp-experiment' >> app/backend/microservices/.env
+```
+
+Either way they need different host ports. Set these in the same `.env`:
+
+| Variable            | Default | Variable                   | Default |
+| ------------------- | ------- | -------------------------- | ------- |
+| `KAPP_GATEWAY_PORT` | 8080    | `KAPP_MOCK_AUTH_PORT`      | 4010    |
+| `KAPP_PORTAL_PORT`  | 4300    | `KAPP_MOCK_USER_PORT`      | 4011    |
+| `KAPP_MONGO_PORT`   | 27017   | `KAPP_MOCK_SEMAPHORE_PORT` | 4012    |
+|                     |         | `KAPP_MOCK_SCHEDULE_PORT`  | 4013    |
+|                     |         | `KAPP_MOCK_MAP_PORT`       | 4014    |
+
+The portal reaches the gateway from the browser, so if you move `KAPP_GATEWAY_PORT`, set the base
+URL in the portal's own **Gateway** box on the sign-in screen.
+
+### The first time after this change
+
+Stop what is running, so the old `kapp-*` containers go away instead of sitting there stopped, and
+drop the images that carried the old shared tag:
+
+```bash
+docker compose --profile full --profile dev down
+```
+
+```bash
+docker images 'kapp/*:local' -q | xargs -r docker rmi
+```
+
+Then start as usual with `--build`, which builds the images under the new tag. The project name
+does not change, so the local Mongo volume and its data are untouched — and so is Atlas.
+
+---
+
 ## Starting and stopping
 
 All commands run from `app/backend/microservices/`.
@@ -463,7 +541,8 @@ changed.
 Read what the probe actually said:
 
 ```bash
-docker inspect -f '{{range .State.Health.Log}}exit={{.ExitCode}} {{.Output}}{{end}}' kapp-mongo | tail -5
+docker inspect -f '{{range .State.Health.Log}}exit={{.ExitCode}} {{.Output}}{{end}}' \
+  "$(docker compose ps -q mongo)" | tail -5
 ```
 
 One `exit=1` at the very start is normal — the probe runs before the replica set has elected itself
@@ -536,4 +615,5 @@ The `pnpm run microservices:*` commands it backed now wrap `docker compose` dire
 everything has actually run since the migration, and which behaves the same on Windows and macOS.
 
 `scripts/start-frontend.sh` stays. It serves the frozen prototype in `app/frontend/web/`, it works,
-and `pnpm run web:start:script` still uses it.
+and `PORT=4000 scripts/start-frontend.sh` still uses it; `pnpm run prototype:serve` is the
+same thing on port 3000.

@@ -10,13 +10,7 @@
     "microservices:status": "docker compose -f app/backend/microservices/docker-compose.yml --profile full --profile dev ps",
     "microservices:logs": "docker compose -f app/backend/microservices/docker-compose.yml logs -f --tail=60",
     "microservices:stop": "docker compose -f app/backend/microservices/docker-compose.yml --profile full --profile dev down",
-    "web:dev": "bunx serve app/frontend/web",
-    "web:start": "bunx serve app/frontend/web -s -l 3000",
-    "web:start:script": "bash scripts/start-frontend.sh",
-    "dev:web": "bunx serve app/frontend/web",
-    "start:web": "bunx serve app/frontend/web -s -l 3000",
-    "start:microservices": "docker compose -f app/backend/microservices/docker-compose.yml --profile academic --profile map up -d",
-    "start:frontend": "bash scripts/start-frontend.sh"
+    "prototype:serve": "pnpm exec serve app/frontend/web -s -l 3000"
   },
   "devDependencies": {
     "serve": "^14.2.4"
