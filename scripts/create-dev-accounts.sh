@@ -109,9 +109,11 @@ mongo_for() {
     mongosh "$uri" --quiet --eval "$script"
 }
 
-# The network the stack is on, taken from a running container rather than assumed: the
-# name is derived from the directory, so it is not the same on every checkout.
-COMPOSE_NETWORK=$(docker inspect kapp-auth \
+# The network the stack is on, asked of Compose rather than assumed: the network name comes
+# from the project name, and the project name is KAPP_STACK - `back` here, `swift` in the iOS
+# worktree - so no container name can be hardcoded.
+AUTH_CONTAINER=$(docker compose ps -q auth-service 2>/dev/null | head -1)
+COMPOSE_NETWORK=$([ -n "$AUTH_CONTAINER" ] && docker inspect "$AUTH_CONTAINER" \
   --format '{{range $k, $v := .NetworkSettings.Networks}}{{$k}}{{end}}' 2>/dev/null || true)
 if [ -z "$COMPOSE_NETWORK" ]; then
   echo "The stack does not appear to be running - start it first." >&2

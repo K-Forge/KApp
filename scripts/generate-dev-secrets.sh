@@ -3,7 +3,11 @@
 # Generates every secret the local stack needs and prints a complete .env to stdout.
 #
 #   cd app/backend/microservices
-#   ../../../scripts/generate-dev-secrets.sh > .env
+#   ../../../scripts/generate-dev-secrets.sh [stack] > .env
+#
+# `stack` names the checkout this .env belongs to - back (default), front, swift, kotlin. It
+# becomes KAPP_STACK, which names the Compose project, the containers and the image tags, so
+# two worktrees can run at once without taking each other's names, ports or images.
 #
 # The secrets are generated ON THIS MACHINE and never leave it. That is the point: a
 # password pasted into a chat, an issue or a commit stays in that history forever, and
@@ -14,6 +18,8 @@
 # with `docker compose --profile full down -v`, which discards the local data.
 #
 set -euo pipefail
+
+STACK="${1:-back}"
 
 # 32 alphanumeric characters. Deliberately no symbols: these end up inside MongoDB
 # connection strings, where '@', ':', '/' and '?' are delimiters and would have to be
@@ -76,6 +82,7 @@ MONGO_MAP_URI='mongodb://kapp_map_user:${MAP_PW}@mongo:27017/kapp_map?replicaSet
 KAPP_INTERNAL_TOKEN=${INTERNAL_TOKEN}
 
 KAPP_JWT_KEY_ID=${JWT_KEY_ID}
+KAPP_STACK=${STACK}
 KAPP_REQUIRE_EMAIL_VERIFICATION=false
 KAPP_LOG_LEVEL=INFO
 EOF

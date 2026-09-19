@@ -147,14 +147,18 @@ graph TD
 
 ## 7. System URLs
 
-| Service            | Local URL             | Container       |
-| ------------------ | --------------------- | --------------- |
-| Eureka dashboard   | http://localhost:8761 | kapp-discovery  |
-| API Gateway        | http://localhost:8080 | kapp-gateway    |
-| Auth Service       | http://localhost:8081 | kapp-auth       |
-| User Service       | http://localhost:8082 | kapp-user       |
-| Course Service     | http://localhost:8083 | kapp-course     |
-| Assignment Service | http://localhost:8084 | kapp-assignment |
+Container names carry the stack they belong to — `back-auth-service` in the backend worktree,
+`swift-auth-service-mock` in the iOS one. Address services by their Compose name instead, which is
+the same everywhere: see [RUNBOOK.md](RUNBOOK.md#stacks-one-per-worktree).
+
+| Service            | Local URL             | Compose service   |
+| ------------------ | --------------------- | ----------------- |
+| Eureka dashboard   | http://localhost:8761 | discovery-server  |
+| API Gateway        | http://localhost:8080 | api-gateway       |
+| Auth Service       | http://localhost:8081 | auth-service      |
+| User Service       | http://localhost:8082 | user-service      |
+| Course Service     | http://localhost:8083 | course-service    |
+| Assignment Service | http://localhost:8084 | assignment-service |
 
 > Publishing ports 8081-8084 is a local development convenience. It also makes the domain services reachable without
 > going through the gateway: see [SECURITY-AUDIT.md](SECURITY-AUDIT.md), finding S1.
@@ -183,7 +187,7 @@ docker compose logs -f
 docker compose restart user-service
 
 # Open a shell inside a container
-docker exec -it kapp-auth sh
+docker compose exec auth-service sh
 
 # Inspect resource usage
 docker stats
@@ -210,17 +214,17 @@ docker compose build auth-service
 docker compose config
 
 # Check connectivity from inside the container
-docker exec -it kapp-auth sh -c "curl -v $PGHOST:5432"
+docker compose exec auth-service sh -c "curl -v $PGHOST:5432"
 ```
 
 ### Eureka does not register a service
 
 ```bash
 # Confirm discovery-server is healthy
-docker inspect kapp-discovery | grep -A5 Health
+docker inspect "$(docker compose ps -q discovery-server)" | grep -A5 Health
 
 # Check the Eureka URL used by the service
-docker exec -it kapp-auth env | grep EUREKA
+docker compose exec auth-service env | grep EUREKA
 ```
 
 ### Clean everything and restart
