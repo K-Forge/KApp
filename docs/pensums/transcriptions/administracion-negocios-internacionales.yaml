@@ -1,0 +1,70 @@
+source: pensum-negocios-internacionales.pdf
+program: Administración de Negocios Internacionales
+faculty: Escuela de Negocios   # not printed; inferred from the discipline
+programLevel: PREGRADO
+period: semestre
+declaredCredits: null
+columns: [name, hours, credits]                # hours are "Horas Presenciales" as printed
+notes:
+  - The last page lists Cultura II among the electives, with its theme.
+levels:
+  1:
+    - [Matemáticas I, 4, 4]
+    - [Fundamentos de Economía, 4, 4]
+    - [Mundo Empresarial, 4, 4]
+    - [Habilidades Comunicativas, 2, 2]
+    - [Inglés Intermedio Bajo, 4, 2]
+  2:
+    - [Matemáticas II, 4, 4]
+    - [Macroeconomía, 4, 3]
+    - [Contabilidad Gerencial, 4, 3]
+    - [Administración y Organizaciones, 2, 2]
+    - [Cultura I, 2, 2]
+    - [Inglés Intermedio Medio, 4, 2]
+  3:
+    - [Estadística I, 4, 4]
+    - [Costos y Presupuestos, 4, 3]
+    - [Fundamentos de Mercadeo, 4, 3]
+    - [Gestión de la Información, 2, 2]
+    - [Contexto Internacional, 2, 2]
+    - [Inglés Intermedio Alto, 4, 2]
+  4:
+    - [Estadística II, 4, 4]
+    - [Matemática Financiera, 4, 3]
+    - [Metodología de la Investigación, 4, 3]
+    - [Comercio Exterior I, 2, 2]
+    - [Cultura II, 2, 2]
+    - [Inglés Avanzado, 4, 2]
+  5:
+    - [Derecho en los Negocios, 3, 3]
+    - [Gestión de Operaciones, 4, 4]
+    - [Investigación de Mercados, 4, 3]
+    - [Comercio Exterior II, 2, 2]
+    - [Electiva Profesional I, 2, 2]
+    - [Inglés Proficiencia, 4, 2]
+  6:
+    - [Administración Financiera, 4, 3]
+    - [Pensamiento Estratégico, 2, 2]
+    - [Gestión del Talento Humano, 2, 2]
+    - [Economía Internacional, 3, 3]
+    - [Electiva Profesional II, 2, 2]
+    - [Cultura III, 2, 2]
+    - [Inglés / Especializado I, 4, 2]
+  7:
+    - [Empresariado, 2, 2]
+    - [Negocios Internacionales, 3, 3]
+    - [Finanzas Internacionales, 4, 4]
+    - [Electiva Profesional III, 2, 2]
+    - [Logística y Distribución Física Internacional, 4, 3]
+    - [Inglés / Especializado II, 4, 2]
+  8:
+    - [Proyectos, 4, 4]
+    - [Marketing Internacional, 4, 3]
+    - [Gerencia Estratégica Internacional, 4, 4]
+    - [Derecho Económico Internacional, 2, 2]
+    - [Electiva I Institucional, 3, 3]
+  9:
+    - [Trabajo de Grado, 2, 2]
+    - [Geopolítica y Relaciones Internacionales, 2, 2]
+    - [Práctica Profesional, 1.5, 10]           # printed "1,5"
+    - [Electiva Profesional IV, 2, 2]

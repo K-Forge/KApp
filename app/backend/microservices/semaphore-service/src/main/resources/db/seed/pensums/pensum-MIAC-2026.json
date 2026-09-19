@@ -1,0 +1,192 @@
+{
+  "pensumCode": "MIAC-2026",
+  "programCode": "MAE-IA-APLICADA",
+  "programName": "Maestría en Inteligencia Artificial Aplicada a Contextos Humanos y Sociales",
+  "faculty": "Escuela de Posgrados",
+  "reform": "Folleto publicado 2026",
+  "status": "DRAFT",
+  "totalCredits": 34,
+  "totalHours": 0,
+  "levels": 3,
+  "areas": [
+    {
+      "code": "PP",
+      "name": "Perfeccionamiento Profesional",
+      "color": "#539392",
+      "credits": 0,
+      "hours": 0
+    },
+    {
+      "code": "IA",
+      "name": "IA aplicada",
+      "color": "#522567",
+      "credits": 0,
+      "hours": 0
+    },
+    {
+      "code": "INVESTIGACION",
+      "name": "Investigación",
+      "color": "#C9D329",
+      "credits": 0,
+      "hours": 0
+    }
+  ],
+  "courses": [
+    {
+      "code": "MIAC-101",
+      "pensumItemCode": "MIAC-101",
+      "name": "Fundamentos conceptuales y profesionales",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PP",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MIAC-102",
+      "pensumItemCode": "MIAC-102",
+      "name": "Procesos y metodologías disciplinares",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PP",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MIAC-103",
+      "pensumItemCode": "MIAC-103",
+      "name": "Perspectivas profesionales contemporáneas",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PP",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MIAC-104",
+      "pensumItemCode": "MIAC-104",
+      "name": "Introducción a la inteligencia artificial aplicada",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "IA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MIAC-105",
+      "pensumItemCode": "MIAC-105",
+      "name": "Herramientas y técnicas de IA aplicada",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "IA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MIAC-201",
+      "pensumItemCode": "MIAC-201",
+      "name": "Intervención y análisis aplicado",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PP",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MIAC-202",
+      "pensumItemCode": "MIAC-202",
+      "name": "Diseño y desarrollo de estrategias",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PP",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MIAC-203",
+      "pensumItemCode": "MIAC-203",
+      "name": "Evaluación y toma de decisiones profesionales",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PP",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MIAC-204",
+      "pensumItemCode": "MIAC-204",
+      "name": "Análisis de datos y toma de decisiones asistida por IA",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "IA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MIAC-205",
+      "pensumItemCode": "MIAC-205",
+      "name": "Metodologías para Proyectos Aplicados con Inteligencia Artificial",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "INVESTIGACION",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MIAC-301",
+      "pensumItemCode": "MIAC-301",
+      "name": "IA aplicada a la disciplina",
+      "level": 3,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "IA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MIAC-302",
+      "pensumItemCode": "MIAC-302",
+      "name": "Diseño estratégico de soluciones con IA",
+      "level": 3,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "IA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MIAC-303",
+      "pensumItemCode": "MIAC-303",
+      "name": "Trabajo de grado",
+      "level": 3,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "INVESTIGACION",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    }
+  ]
+}

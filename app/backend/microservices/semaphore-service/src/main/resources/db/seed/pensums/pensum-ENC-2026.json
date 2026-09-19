@@ -1,0 +1,178 @@
+{
+  "pensumCode": "ENC-2026",
+  "programCode": "ESP-NEUROPSICOLOGIA",
+  "programName": "Especialización en Neuropsicología Clínica",
+  "faculty": "Escuela de Posgrados",
+  "reform": "Folleto publicado 2026",
+  "status": "DRAFT",
+  "totalCredits": 33,
+  "totalHours": 0,
+  "levels": 2,
+  "areas": [
+    {
+      "code": "PLAN",
+      "name": "Plan de estudios",
+      "color": "#539392",
+      "credits": 0,
+      "hours": 0
+    }
+  ],
+  "courses": [
+    {
+      "code": "ENC-101",
+      "pensumItemCode": "ENC-101",
+      "name": "Neurología Básica",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ENC-102",
+      "pensumItemCode": "ENC-102",
+      "name": "Neurodesarrollo y procesos cognitivos",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ENC-103",
+      "pensumItemCode": "ENC-103",
+      "name": "Neuropsiquiatría Básica",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ENC-104",
+      "pensumItemCode": "ENC-104",
+      "name": "Trastornos Neuropsicológicos en Niños y Adolescentes",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ENC-105",
+      "pensumItemCode": "ENC-105",
+      "name": "Evaluación Neuropsicológica en Niños y Adolescentes",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "ENC-106",
+      "name": "Seminario Electivo",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ENC-107",
+      "pensumItemCode": "ENC-107",
+      "name": "Entrevista Neuropsicológica",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ENC-201",
+      "pensumItemCode": "ENC-201",
+      "name": "Intervención Neuropsicológica",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ENC-202",
+      "pensumItemCode": "ENC-202",
+      "name": "Trastornos Neuropsicológicos en Adultos",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ENC-203",
+      "pensumItemCode": "ENC-203",
+      "name": "Evaluación Neuropsicológica en Adultos",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ENC-204",
+      "pensumItemCode": "ENC-204",
+      "name": "Seminario de Casos",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ENC-205",
+      "pensumItemCode": "ENC-205",
+      "name": "Práctica Profesional Supervisada",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "ENC-206",
+      "pensumItemCode": "ENC-206",
+      "name": "Diseños de Estudios de Caso",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    }
+  ]
+}

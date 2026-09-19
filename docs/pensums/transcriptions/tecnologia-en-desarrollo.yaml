@@ -1,0 +1,82 @@
+source: plan-estudios-tec-desarrollo-konrad.pdf
+program: Tecnología en Desarrollo
+faculty: Facultad de Matemáticas e Ingenierías   # not printed; inferred from the discipline
+programLevel: TECNOLOGIA
+period: cuatrimestre
+declaredCredits: 96                              # 16 per cuatrimestre, printed under each column
+columns: [name, credits, area]
+notes:
+  - Credits are printed per course ("3 Cd.") and each cuatrimestre adds up to the 16 printed below it.
+  - >-
+    Prerequisites are read from the connector geometry of the PDF, not guessed from the picture.
+    Two brackets join several arrows at once (after Diseño de Interfaces de Usuario and before
+    Práctica); every course a bracket reaches is listed, which is the strict reading.
+  - >-
+    The bracket above Diseño de Bases de datos and Taller de Programación Web has no origin of
+    its own; it crosses the connector coming from Fundamentos de Programación Web, so it is
+    attributed to that course.
+areas:
+  CB: "Ciencias Básicas"
+  BTDS: "Básicas de Tecnología en Desarrollo de Software"
+  TDSA: "Tecnología en Desarrollo de Software Aplicada"
+  SI: "Sociedad e Interculturalidad"
+levels:
+  1:
+    - [Precálculo, 3, CB]
+    - [Lógica Matemática, 3, CB]
+    - [Fundamentos de Programación, 3, BTDS]
+    - [Introducción al Desarrollo de Software, 3, TDSA]
+    - [Habilidades Digitales, 2, SI]
+    - [Inglés Intermedio Bajo, 2, SI]
+  2:
+    - [Cálculo I, 3, CB]
+    - [Algebra Lineal, 3, CB]
+    - [Técnicas de Programación I, 3, BTDS]
+    - [Fundamentos de Programación Web, 3, BTDS]
+    - [Habilidades Comunicativas, 2, SI]
+    - [Inglés Intermedio Medio, 2, SI]
+  3:
+    - [Cálculo II, 3, CB]
+    - [Técnicas de Programación II, 3, BTDS]
+    - [Diseño de Bases de datos, 3, TDSA]
+    - [Análisis y Diseño de Sistemas, 3, TDSA]
+    - [Cultura I, 2, SI]
+    - [Inglés Intermedio Alto, 2, SI]
+  4:
+    - [Matemáticas Discretas, 3, CB]
+    - [Diseño de Interfaces de Usuario, 3, TDSA]
+    - [Nuevas Tecnologías de Desarrollo, 3, TDSA]
+    - [Electiva I, 3, TDSA]
+    - [Cultura II (electiva), 2, SI]
+    - [Inglés Avanzado, 2, SI]
+  5:
+    - [Estadística Descriptiva, 3, CB]
+    - [Taller de Programación Web, 2, TDSA]
+    - [Pruebas y Calidad del Sofware, 3, TDSA]
+    - [Desarrollo Móvil, 3, TDSA]
+    - [Electiva II, 3, TDSA]
+    - [Inglés Proficiencia, 2, SI]
+  6:
+    - [Emprendimiento, 2, TDSA]
+    - [Práctica, 8, TDSA]
+    - [Electiva Institucional, 3, TDSA]
+    - [Electiva III, 3, TDSA]
+prerequisites:
+  Cálculo I: [Precálculo]
+  Cálculo II: [Cálculo I]
+  Estadística Descriptiva: [Cálculo I]
+  Matemáticas Discretas: [Algebra Lineal]
+  Técnicas de Programación I: [Fundamentos de Programación]
+  Fundamentos de Programación Web: [Fundamentos de Programación]
+  Técnicas de Programación II: [Técnicas de Programación I]
+  Diseño de Bases de datos: [Técnicas de Programación I, Fundamentos de Programación Web]
+  Análisis y Diseño de Sistemas: [Técnicas de Programación I]
+  Electiva I: [Técnicas de Programación I]
+  Electiva II: [Técnicas de Programación I]
+  Electiva III: [Técnicas de Programación I]
+  Diseño de Interfaces de Usuario: [Fundamentos de Programación Web]
+  Nuevas Tecnologías de Desarrollo: [Análisis y Diseño de Sistemas]
+  Taller de Programación Web: [Fundamentos de Programación Web, Diseño de Interfaces de Usuario]
+  Pruebas y Calidad del Sofware: [Diseño de Interfaces de Usuario, Nuevas Tecnologías de Desarrollo]
+  Desarrollo Móvil: [Diseño de Interfaces de Usuario, Nuevas Tecnologías de Desarrollo]
+  Práctica: [Taller de Programación Web, Pruebas y Calidad del Sofware, Desarrollo Móvil]

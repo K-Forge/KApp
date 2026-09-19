@@ -1,0 +1,266 @@
+{
+  "pensumCode": "MPC-2026",
+  "programCode": "MAE-PSI-CONSUMIDOR",
+  "programName": "Maestría en Psicología del Consumidor",
+  "faculty": "Escuela de Posgrados",
+  "reform": "Folleto publicado 2026",
+  "status": "DRAFT",
+  "totalCredits": 52,
+  "totalHours": 0,
+  "levels": 4,
+  "areas": [
+    {
+      "code": "FUNDAMENTACION",
+      "name": "Fundamentación",
+      "color": "#539392",
+      "credits": 0,
+      "hours": 0
+    },
+    {
+      "code": "PROFESIONAL",
+      "name": "Profesional",
+      "color": "#522567",
+      "credits": 0,
+      "hours": 0
+    },
+    {
+      "code": "METODOLOGIA",
+      "name": "Metodología",
+      "color": "#C9D329",
+      "credits": 0,
+      "hours": 0
+    },
+    {
+      "code": "PTG",
+      "name": "Proyecto de Trabajo de Grado",
+      "color": "#3E823E",
+      "credits": 0,
+      "hours": 0
+    },
+    {
+      "code": "PROFUNDIZACION",
+      "name": "Profundización",
+      "color": "#B62325",
+      "credits": 0,
+      "hours": 0
+    }
+  ],
+  "courses": [
+    {
+      "code": "MPC-101",
+      "pensumItemCode": "MPC-101",
+      "name": "Fundamentos de Psicología del Consumidor",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "FUNDAMENTACION",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-102",
+      "pensumItemCode": "MPC-102",
+      "name": "Estrategias de Marketing Centradas en el Consumidor",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-103",
+      "pensumItemCode": "MPC-103",
+      "name": "Enfoques y Procesos de Investigación del Consumidor",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "METODOLOGIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-104",
+      "pensumItemCode": "MPC-104",
+      "name": "Formulación de Proyectos I",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PTG",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-201",
+      "pensumItemCode": "MPC-201",
+      "name": "Perspectivas Socioculturales del Consumo",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "FUNDAMENTACION",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-202",
+      "pensumItemCode": "MPC-202",
+      "name": "Gestión del Valor al Cliente",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-203",
+      "pensumItemCode": "MPC-203",
+      "name": "Métodos y Técnicas de Investigación del Consumidor",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "METODOLOGIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-204",
+      "pensumItemCode": "MPC-204",
+      "name": "Formulación de Proyectos II",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PTG",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-301",
+      "pensumItemCode": "MPC-301",
+      "name": "Neurociencias Aplicadas en Contexto de Consumo",
+      "level": 3,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "FUNDAMENTACION",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-302",
+      "pensumItemCode": "MPC-302",
+      "name": "Marketing para Productos Digitales",
+      "level": 3,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-303",
+      "pensumItemCode": "MPC-303",
+      "name": "Analítica de Datos para la Investigación del Consumidor I",
+      "level": 3,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "METODOLOGIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "MPC-304",
+      "name": "Electiva de Profundización I",
+      "level": 3,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PROFUNDIZACION",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-305",
+      "pensumItemCode": "MPC-305",
+      "name": "Trabajo de Grado I",
+      "level": 3,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PTG",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-401",
+      "pensumItemCode": "MPC-401",
+      "name": "Economía Conductual",
+      "level": 4,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "FUNDAMENTACION",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-402",
+      "pensumItemCode": "MPC-402",
+      "name": "Experiencia de Usuario y Diseño de Servicios",
+      "level": 4,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-403",
+      "pensumItemCode": "MPC-403",
+      "name": "Analítica de Datos para la Investigación del Consumidor II",
+      "level": 4,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "METODOLOGIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "MPC-404",
+      "name": "Electiva de Profundización II",
+      "level": 4,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PROFUNDIZACION",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "MPC-405",
+      "pensumItemCode": "MPC-405",
+      "name": "Trabajo de Grado II",
+      "level": 4,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PTG",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    }
+  ]
+}

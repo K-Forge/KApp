@@ -76,6 +76,26 @@ jobs:
       - name: Lint specs
         run: npx --package=@redocly/cli@latest redocly lint docs/api/*.yaml
 
+  pensum-seed:
+    name: Pensum seed matches its transcriptions
+    runs-on: ubuntu-latest
+
+    # The seed under db/seed/pensums/ is generated from docs/pensums/transcriptions/. Editing a
+    # transcription and forgetting to regenerate already shipped a wrong area name once, and a
+    # seed only a migration reads is not something a reviewer notices by eye.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install PyYAML
+        run: python3 -m pip install --quiet pyyaml
+
+      - name: Regenerate and compare
+        run: |
+          python3 docs/pensums/tools/build_seed.py
+          git diff --exit-code -- app/backend/microservices/semaphore-service/src/main/resources/db/seed/pensums \
+            || { echo "::error::The pensum seed is out of date. Run docs/pensums/tools/build_seed.py and commit the result."; exit 1; }
+
   portal:
     name: Build and test the admin portal
     runs-on: ubuntu-latest

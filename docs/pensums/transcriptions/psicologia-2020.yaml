@@ -1,0 +1,109 @@
+source: "Nuevo plan 2020 - plan de estudios psicologia.pdf"
+program: Psicología
+faculty: Facultad de Psicología
+programLevel: PREGRADO
+period: semestre
+reform: "Plan de estudios Facultad de Psicología 2020"
+declaredCredits: 151
+declaredHours: 174
+notes:
+  - "The grid prints 151 credits and 174 contact hours, per area (37, 25, 21, 50, 18) and per semester; the extraction adds up to all of them."
+  - "Both professional practices print 4,5 contact hours. hours keeps the printed 4.5; the seed rounds it, see the README."
+  - "The printed semester hour totals (21, 21, 23, 21, 24, 20, 19, 15, 11) add up to 175, one more than the 174 printed as the overall total."
+  - "Connectors are plain lines without arrowheads; each one runs from an earlier semester to a later one, which gives the direction."
+  - "Dashed boxes mark 'clases con proyecto integrador'; the model has no field for it."
+  - "Electiva III: the rendered page clips the P of P3805; the text layer has it."
+columns: [code, name, credits, hours, area]    # hours = weekly contact hours as printed
+areas:
+  BD: "Básica Disciplinar"
+  INTERDISCIPLINAR: "Interdisciplinar"
+  INVESTIGATIVA: "Investigativa"
+  PROFESIONAL: "Profesional"
+  SI: "Sociedad e Interculturalidad"
+levels:
+  1:
+    - ["P2105", "Introducción a la psicología", 3, 5, BD]
+    - ["P3105", "Construcción del conocimiento científico", 3, 3, INTERDISCIPLINAR]
+    - ["P4106", "Lógica y Razonamiento matemático", 4, 4, INVESTIGATIVA]
+    - ["71221", "Cátedra de Cultura I", 2, 2, SI]
+    - ["71071", "Habilidades Comunicativas", 2, 3, SI]
+    - ["71181", "Inglés I Intermedio Bajo", 2, 4, SI]
+  2:
+    - ["P2205", "Percepción", 3, 3, BD]
+    - ["P2206", "Teorías del aprendizaje", 2, 3, BD]
+    - ["P3205", "Construcción del conocimiento científico II", 2, 3, INTERDISCIPLINAR]
+    - ["P3206", "Bases biológicas de la conducta", 3, 3, INTERDISCIPLINAR]
+    - ["P4205", "Metodología de la Investigación", 2, 2, INVESTIGATIVA]
+    - ["P4206", "Estadística", 3, 3, INVESTIGATIVA]
+    - ["72081", "Inglés II intermedio Medio", 2, 4, SI]
+  3:
+    - ["P2305", "Procesos cognoscitivos", 2, 2, BD]
+    - ["P2306", "Análisis del Comportamiento I", 3, 4, BD]
+    - ["P2307", "Psicobiología", 2, 4, BD]
+    - ["P3305", "Electiva I", 2, 2, INTERDISCIPLINAR]
+    - ["P4305", "Lógica de la ciencia", 2, 2, INVESTIGATIVA]
+    - ["P4306", "Diseños de investigación I", 3, 3, INVESTIGATIVA]
+    - ["76081", "Cátedra de Cultura II", 2, 2, SI]
+    - ["73081", "Inglés III Intermedio Alto", 2, 4, SI]
+  4:
+    - ["P2405", "Motivación y emoción", 2, 3, BD]
+    - ["P2406", "Análisis del Comportamiento II", 4, 4, BD]
+    - ["P2407", "Procesos Sociales", 2, 2, BD]
+    - ["P3405", "Electiva Institucional", 3, 3, INTERDISCIPLINAR]
+    - ["P4406", "Diseños de investigación II", 3, 3, INVESTIGATIVA]
+    - ["P5405", "Neuropsicología", 2, 2, PROFESIONAL]
+    - ["74081", "Inglés IV Intermedio Avanzado", 2, 4, SI]
+  5:
+    - ["P2505", "Decisión y elección", 3, 3, BD]
+    - ["P2506", "Análisis del Comportamiento III", 3, 4, BD]
+    - ["P3506", "Socioantropología", 3, 3, INTERDISCIPLINAR]
+    - ["P4506", "Método Cualitativo", 2, 2, INVESTIGATIVA]
+    - ["P5505", "Psicopatología y Psicología de lo Anormal", 2, 4, PROFESIONAL]
+    - ["P5506", "Evaluación y Formulación", 3, 4, PROFESIONAL]
+    - ["75081", "Inglés V Proficiencia", 2, 4, SI]
+  6:
+    - ["P2605", "Psicología del Desarrollo I", 3, 4, BD]
+    - ["P2606", "Análisis conductual Aplicado", 3, 4, BD]
+    - ["P3605", "Electiva II", 2, 2, INTERDISCIPLINAR]
+    - ["P5605", "Psicología Social", 2, 2, PROFESIONAL]
+    - ["P5606", "Psicometría", 3, 4, PROFESIONAL]
+    - ["P5607", "Psicología Clínica en Adultos", 4, 4, PROFESIONAL]
+  7:
+    - ["P2705", "Psicología del Desarrollo II", 2, 4, BD]
+    - ["P3706", "Formulación y evaluación de proyectos y programas de intervención", 3, 3, INTERDISCIPLINAR]
+    - ["P4706", "Estudios Mixtos", 2, 2, INVESTIGATIVA]
+    - ["P5706", "Área profesional I: Electiva", 4, 4, PROFESIONAL]
+    - ["P5707", "Psicología clínica infantil y del adolescentes", 4, 4, PROFESIONAL]
+    - ["70012", "Cátedra de Cultura III", 2, 2, SI]
+  8:
+    - ["P3805", "Electiva III", 2, 2, INTERDISCIPLINAR]
+    - ["P5805", "Práctica profesional Área Clínica", 9, 4.5, PROFESIONAL]
+    - ["P5806", "Área profesional II: Electiva", 4, 4, PROFESIONAL]
+    - ["P5807", "Trabajo de Grado I", 2, 4, PROFESIONAL]
+  9:
+    - ["P3905", "Contexto social y Política Publica", 2, 2, INTERDISCIPLINAR]
+    - ["P5905", "Práctica profesional Área Electiva", 9, 4.5, PROFESIONAL]
+    - ["P5907", "Trabajo de Grado II", 2, 4, PROFESIONAL]
+prerequisites:                 # course code: codes that must be passed first, read from the drawn connectors
+  "P2205": ["P2105"]
+  "P2206": ["P2105"]
+  "P2307": ["P3206"]
+  "P4206": ["P4106"]
+  "P4306": ["P4206"]
+  "P2405": ["P2306"]
+  "P2505": ["P2305", "P2406"]
+  "P2506": ["P2406"]
+  "P5405": ["P2307"]
+  "P5505": ["P2307"]
+  "P2606": ["P2506"]
+  "P5605": ["P2407"]
+  "P5606": ["P4206"]
+  "P5607": ["P2307"]
+  "P3706": ["P5506"]
+  "P5806": ["P5706"]
+  "P5905": ["P5806"]
+  "P5907": ["P5807"]
+  "72081": ["71181"]
+  "73081": ["72081"]
+  "74081": ["73081"]
+  "75081": ["74081"]

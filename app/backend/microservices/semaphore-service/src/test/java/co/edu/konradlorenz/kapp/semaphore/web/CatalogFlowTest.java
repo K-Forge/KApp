@@ -126,7 +126,7 @@ class CatalogFlowTest {
                         .param("isElectiveSlot", "true")
                         .with(student("filter-elective-student")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(6)) // ELECTIVA_I..VI, per the seed
+                .andExpect(jsonPath("$.length()").value(6)) // Electiva I..VI of the printed 1015
                 .andExpect(jsonPath("$[0].isElectiveSlot").value(true));
     }
 

@@ -1,0 +1,36 @@
+source: pensum_doctorado_psicologia.pdf
+program: Doctorado en Psicología
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
+programLevel: DOCTORADO
+period: semestre
+declaredCredits: null
+levels:
+  1:
+    - [Énfasis I, 2]
+    - [Epistemología y ética de la ciencia, 2]
+    - [Metodología de la ciencia, 2]
+    - [Revisión sistemática, 2]
+    - [Tesis I, 5]
+  2:
+    - [Énfasis II, 2]
+    - [Metaanálisis, 2]
+    - [Técnicas cuantitativas I, 4]
+    - [Electiva Metodológica I, 2]
+    - [Tesis II, 5]
+  3:
+    - [Énfasis III, 2]
+    - [Técnicas Cuantitativas II, 4]
+    - [Electiva Metodológica II, 2]
+    - [Tesis III, 5]
+  4:
+    - [Énfasis IV, 2]
+    - [Cienciometría y transferencia de conocimiento, 2]
+    - [Electiva Metodologíca III, 2]
+    - [Tesis IV, 5]
+  5:
+    - [Tesis V, 5]
+    - [Pasantía, 10]
+  6:
+    - [Tesis VI, 5]
+    - [Seminario Tesis Doctoral, 4]
+    - [Interacción Profesional Especializada, 4]

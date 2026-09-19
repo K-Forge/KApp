@@ -1,0 +1,706 @@
+{
+  "pensumCode": "1017",
+  "programCode": "MATEMATICAS",
+  "programName": "Matemáticas",
+  "faculty": "Facultad de Matemáticas e Ingenierías",
+  "reform": "Plan de estudios 2019-2",
+  "status": "ACTIVE",
+  "totalCredits": 143,
+  "totalHours": 195,
+  "levels": 9,
+  "areas": [
+    {
+      "code": "BASICA",
+      "name": "Básica",
+      "color": "#539392",
+      "credits": 39,
+      "hours": 48
+    },
+    {
+      "code": "DEMOSTRATIVA",
+      "name": "Demostrativa",
+      "color": "#522567",
+      "credits": 27,
+      "hours": 35
+    },
+    {
+      "code": "APLICATIVA",
+      "name": "Aplicativa",
+      "color": "#C9D329",
+      "credits": 25,
+      "hours": 48
+    },
+    {
+      "code": "TEORICA",
+      "name": "Teórica",
+      "color": "#3E823E",
+      "credits": 6,
+      "hours": 8
+    },
+    {
+      "code": "ELECTIVA",
+      "name": "Electiva",
+      "color": "#B62325",
+      "credits": 21,
+      "hours": 24
+    },
+    {
+      "code": "INVESTIGACION",
+      "name": "Investigación",
+      "color": "#592E2A",
+      "credits": 7,
+      "hours": 5
+    },
+    {
+      "code": "SI",
+      "name": "Sociedad e interculturalidad",
+      "color": "#D51A65",
+      "credits": 18,
+      "hours": 29
+    }
+  ],
+  "courses": [
+    {
+      "code": "11015",
+      "pensumItemCode": "11015",
+      "name": "Precálculo",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BASICA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "11015"
+    },
+    {
+      "code": "21012",
+      "pensumItemCode": "21012",
+      "name": "Lógica Matemática",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "BASICA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "21012"
+    },
+    {
+      "code": "41025",
+      "pensumItemCode": "41025",
+      "name": "Fundamentos de Programación",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BASICA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "41025"
+    },
+    {
+      "code": "11018",
+      "pensumItemCode": "11018",
+      "name": "Matemática fundamental",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "DEMOSTRATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "11018"
+    },
+    {
+      "code": "71181",
+      "pensumItemCode": "71181",
+      "name": "Inglés Intermedio Bajo",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "71181"
+    },
+    {
+      "code": "71081",
+      "pensumItemCode": "71081",
+      "name": "Habilidades Comunicativas",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "71081"
+    },
+    {
+      "code": "12015",
+      "pensumItemCode": "12015",
+      "name": "Cálculo I",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BASICA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "11015"
+      ],
+      "sinuCode": "12015"
+    },
+    {
+      "code": "23012",
+      "pensumItemCode": "23012",
+      "name": "Matemáticas Discretas",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "BASICA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "23012"
+    },
+    {
+      "code": "31013",
+      "pensumItemCode": "31013",
+      "name": "Técnicas de Programación I",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BASICA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "41025"
+      ],
+      "sinuCode": "31013"
+    },
+    {
+      "code": "63202",
+      "pensumItemCode": "63202",
+      "name": "Álgebra Lineal I",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BASICA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "63202"
+    },
+    {
+      "code": "72081",
+      "pensumItemCode": "72081",
+      "name": "Inglés Intermedio Medio",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "71181"
+      ],
+      "sinuCode": "72081"
+    },
+    {
+      "code": "71221",
+      "pensumItemCode": "71221",
+      "name": "Cultura I",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "71221"
+    },
+    {
+      "code": "13015",
+      "pensumItemCode": "13015",
+      "name": "Cálculo II",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BASICA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "12015"
+      ],
+      "sinuCode": "13015"
+    },
+    {
+      "code": "31014",
+      "pensumItemCode": "31014",
+      "name": "Técnicas de Programación II",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BASICA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "31013"
+      ],
+      "sinuCode": "31014"
+    },
+    {
+      "code": "64220",
+      "pensumItemCode": "64220",
+      "name": "Álgebra Lineal II",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "DEMOSTRATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "63202"
+      ],
+      "sinuCode": "64220"
+    },
+    {
+      "code": "65024",
+      "pensumItemCode": "65024",
+      "name": "Historia de las Matemáticas",
+      "level": 3,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "TEORICA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "65024"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "22144",
+      "name": "Énfasis I",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "ELECTIVA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "22144"
+    },
+    {
+      "code": "73081",
+      "pensumItemCode": "73081",
+      "name": "Inglés Intermedio Alto",
+      "level": 3,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "72081"
+      ],
+      "sinuCode": "73081"
+    },
+    {
+      "code": "14015",
+      "pensumItemCode": "14015",
+      "name": "Cálculo III",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BASICA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "13015"
+      ],
+      "sinuCode": "14015"
+    },
+    {
+      "code": "66802",
+      "pensumItemCode": "66802",
+      "name": "Análisis Vectorial",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "DEMOSTRATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "66802"
+    },
+    {
+      "code": "65023",
+      "pensumItemCode": "65023",
+      "name": "Análisis Numérico",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "APLICATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "65023"
+    },
+    {
+      "code": "14023",
+      "pensumItemCode": "14023",
+      "name": "Modelación y Simulación I",
+      "level": 4,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "APLICATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "14023"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "22344",
+      "name": "Énfasis II",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "ELECTIVA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "22344"
+    },
+    {
+      "code": "74081",
+      "pensumItemCode": "74081",
+      "name": "Inglés Avanzado",
+      "level": 4,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "73081"
+      ],
+      "sinuCode": "74081"
+    },
+    {
+      "code": "13013",
+      "pensumItemCode": "13013",
+      "name": "Ecuaciones Diferenciales",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BASICA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "13013"
+    },
+    {
+      "code": "15013",
+      "pensumItemCode": "15013",
+      "name": "Investigación de Operaciones",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "BASICA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "15013"
+    },
+    {
+      "code": "25014",
+      "pensumItemCode": "25014",
+      "name": "Teoría de Conjuntos",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "DEMOSTRATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "25014"
+    },
+    {
+      "code": "15023",
+      "pensumItemCode": "15023",
+      "name": "Modelación y Simulación II",
+      "level": 5,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "APLICATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "14023"
+      ],
+      "sinuCode": "15023"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "22544",
+      "name": "Énfasis III",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "ELECTIVA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "22544"
+    },
+    {
+      "code": "75081",
+      "pensumItemCode": "75081",
+      "name": "Inglés Proficiencia",
+      "level": 5,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "74081"
+      ],
+      "sinuCode": "75081"
+    },
+    {
+      "code": "66502",
+      "pensumItemCode": "66502",
+      "name": "Estadística y Probabilidad",
+      "level": 6,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "BASICA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "66502"
+    },
+    {
+      "code": "27012",
+      "pensumItemCode": "27012",
+      "name": "Topología General",
+      "level": 6,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "DEMOSTRATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "27012"
+    },
+    {
+      "code": "63063",
+      "pensumItemCode": "63063",
+      "name": "Ecuaciones Diferenciales Parciales",
+      "level": 6,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "APLICATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "63063"
+    },
+    {
+      "code": "34015",
+      "pensumItemCode": "34015",
+      "name": "Computación Científica I",
+      "level": 6,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "APLICATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "34015"
+    },
+    {
+      "code": "64022",
+      "pensumItemCode": "64022",
+      "name": "Epistemología de la Matemática",
+      "level": 6,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "TEORICA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "64022"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "68076",
+      "name": "Electiva 1",
+      "level": 6,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "ELECTIVA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "68076"
+    },
+    {
+      "code": "62601",
+      "pensumItemCode": "62601",
+      "name": "Algebra Abstracta",
+      "level": 7,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "DEMOSTRATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "62601"
+    },
+    {
+      "code": "61701",
+      "pensumItemCode": "61701",
+      "name": "Análisis Matemático I",
+      "level": 7,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "DEMOSTRATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "61701"
+    },
+    {
+      "code": "63602",
+      "pensumItemCode": "63602",
+      "name": "Estadística Matemática",
+      "level": 7,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "APLICATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "63602"
+    },
+    {
+      "code": "35015",
+      "pensumItemCode": "35015",
+      "name": "Computación Científica II",
+      "level": 7,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "APLICATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "34015"
+      ],
+      "sinuCode": "35015"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "69066",
+      "name": "Electiva 2",
+      "level": 7,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "ELECTIVA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "69066"
+    },
+    {
+      "code": "76011",
+      "pensumItemCode": "76011",
+      "name": "Cátedra de Cultura II",
+      "level": 7,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "76011"
+    },
+    {
+      "code": "61802",
+      "pensumItemCode": "61802",
+      "name": "Variable Compleja",
+      "level": 8,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "DEMOSTRATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "61802"
+    },
+    {
+      "code": "18012",
+      "pensumItemCode": "18012",
+      "name": "Análisis Matemático II",
+      "level": 8,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "DEMOSTRATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "61701"
+      ],
+      "sinuCode": "18012"
+    },
+    {
+      "code": "68040",
+      "pensumItemCode": "68040",
+      "name": "Enseñanza de las Matemáticas",
+      "level": 8,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "TEORICA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "68040"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "69076",
+      "name": "Electiva 3",
+      "level": 8,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "ELECTIVA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "69076"
+    },
+    {
+      "code": "56205",
+      "pensumItemCode": "56205",
+      "name": "Metodología de la Investigación",
+      "level": 8,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "INVESTIGACION",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "56205"
+    },
+    {
+      "code": "70012",
+      "pensumItemCode": "70012",
+      "name": "Cultura III",
+      "level": 8,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "70012"
+    },
+    {
+      "code": "9a020",
+      "pensumItemCode": "9a020",
+      "name": "Práctica Profesional",
+      "level": 9,
+      "credits": 8,
+      "weeklyHours": 24,
+      "area": "APLICATIVA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "18012"
+      ],
+      "sinuCode": "9a020"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "68086",
+      "name": "Electiva 4",
+      "level": 9,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "ELECTIVA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "68086"
+    },
+    {
+      "code": "39020",
+      "pensumItemCode": "39020",
+      "name": "Trabajo de Grado",
+      "level": 9,
+      "credits": 4,
+      "weeklyHours": 2,
+      "area": "INVESTIGACION",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "56205"
+      ],
+      "sinuCode": "39020"
+    }
+  ]
+}

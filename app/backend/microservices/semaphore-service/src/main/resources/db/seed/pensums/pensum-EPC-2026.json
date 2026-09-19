@@ -1,0 +1,139 @@
+{
+  "pensumCode": "EPC-2026",
+  "programCode": "ESP-PSI-CONSUMIDOR",
+  "programName": "Especialización en Psicología del Consumidor",
+  "faculty": "Escuela de Posgrados",
+  "reform": "Folleto publicado 2026",
+  "status": "DRAFT",
+  "totalCredits": 24,
+  "totalHours": 0,
+  "levels": 2,
+  "areas": [
+    {
+      "code": "FUNDAMENTACION",
+      "name": "Fundamentación",
+      "color": "#539392",
+      "credits": 7,
+      "hours": 0
+    },
+    {
+      "code": "PROFESIONAL",
+      "name": "Profesional",
+      "color": "#522567",
+      "credits": 7,
+      "hours": 0
+    },
+    {
+      "code": "METODOLOGIA",
+      "name": "Metodología",
+      "color": "#C9D329",
+      "credits": 6,
+      "hours": 0
+    },
+    {
+      "code": "PROFUNDIZACION",
+      "name": "Profundización",
+      "color": "#3E823E",
+      "credits": 4,
+      "hours": 0
+    }
+  ],
+  "courses": [
+    {
+      "code": "EPC-101",
+      "pensumItemCode": "EPC-101",
+      "name": "Fundamentos de Psicología del Consumidor",
+      "level": 1,
+      "credits": 4,
+      "weeklyHours": 0,
+      "area": "FUNDAMENTACION",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPC-102",
+      "pensumItemCode": "EPC-102",
+      "name": "Estrategias de marketing centradas en el consumidor",
+      "level": 1,
+      "credits": 4,
+      "weeklyHours": 0,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPC-103",
+      "pensumItemCode": "EPC-103",
+      "name": "Enfoques y Procesos de Investigación del Consumidor",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "METODOLOGIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "EPC-104",
+      "name": "Electiva I",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "PROFUNDIZACION",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPC-201",
+      "pensumItemCode": "EPC-201",
+      "name": "Perspectivas Socioculturales del Consumo",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "FUNDAMENTACION",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPC-202",
+      "pensumItemCode": "EPC-202",
+      "name": "Gestión del Valor al Cliente",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "PROFESIONAL",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPC-203",
+      "pensumItemCode": "EPC-203",
+      "name": "Métodos y técnicas de Investigación del Consumidor",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 0,
+      "area": "METODOLOGIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "EPC-204",
+      "name": "Electiva II",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 0,
+      "area": "PROFUNDIZACION",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+source: Plan-estudios-maestria-psicologia-clinica.pdf
+program: Maestría en Psicología Clínica
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
+programLevel: MAESTRIA
+period: semestre
+declaredCredits: 59                            # only the total is printed, no per-course credits
+notes:
+  - Semesters I and II list courses of two emphases side by side (énfasis adultos, énfasis infantil);
+    a student takes one, so the grid holds more courses than any one student sees.
+levels:
+  1:
+    - [Avances y aplicaciones de la terapia cognitivo-conductual (énfasis adultos), null]
+    - [Bases y aplicaciones del análisis conductual aplicado (énfasis infantil), null]
+    - [Evaluación psicológica y análisis funcional, null]
+    - [Fundamentos de aprendizaje en el contexto clínico (énfasis adultos), null]
+    - [Perspectiva dimensional en clínica infantil (énfasis infantil), null]
+    - [Entrenamiento en habilidades clínicas I, null]
+    - [Práctica en Psicología Clínica I, null]
+    - [Diseños de investigación clínica I, null]
+  2:
+    - ["Terapias contextuales I: ACT y PAF", null]
+    - ["Terapias contextuales II: Activación conductual y DBT (énfasis adultos)", null]
+    - [Aplicaciones del análisis de la conducta verbal en dificultades del desarrollo (énfasis infantil), null]
+    - [Entrenamiento en habilidades clínicas II, null]
+    - [Práctica en psicología clínica II, null]
+    - [Diseños de investigación clínica II, null]
+    - [Trabajo de grado I, null]
+    - [Electiva I, null]
+  3:
+    - [Alternativas terapéuticas con apoyo empírico, null]
+    - [Evaluación e intervención en pareja y familia, null]
+    - [Práctica en psicología clínica III, null]
+    - [Trabajo de grado II, null]
+    - [Electiva II, null]
+  4:
+    - [El Psicólogo clínico en el contexto colombiano, null]
+    - [Práctica en Psicología Clínica IV, null]
+    - [Trabajo de grado III, null]
+    - [Electiva III, null]

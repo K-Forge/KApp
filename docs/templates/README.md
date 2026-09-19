@@ -23,7 +23,7 @@ curl -X POST 'http://localhost:8080/api/catalog/pensums/import?dryRun=true' \
 | `programCode` … `programLevel` | The program. `programLevel` is one of PREGRADO, POSGRADO, TECNOLOGIA, MAESTRIA, DOCTORADO, CURSOS_DIPLOMADOS, ESPECIALIZACION. |
 | `pensumCode`, `reform` | Identify the plan. |
 | `pensumStatus` | DRAFT, ACTIVE or OBSOLETE. Import as DRAFT and activate deliberately. |
-| `declaredCredits`, `declaredHours` | What the official document says. **Checked, not trusted** — see below. `declaredHours` is the sum of **weekly** hours across the plan, not contact hours: the Ingeniería de Sistemas plan declares 194, which is what its 48 courses' `weeklyHours` add up to (approximately — see below). |
+| `declaredCredits`, `declaredHours` | What the official document says. **Checked, not trusted** — see below. `declaredHours` is the sum of **weekly** hours across the plan, not hours per semester: the Ingeniería de Sistemas grid adds up to 194. |
 | `levels` | How many semesters the plan has. |
 | `areaCode`, `areaName`, `areaColor` | The semáforo row this item belongs to. Name and colour need only be right on the first row that mentions the area. Area totals are **summed from the courses**, so there is nothing to transcribe. |
 | `pensumItemCode` | Stable identifier of the square in the grid. Must be unique within the pensum. |
@@ -38,11 +38,12 @@ curl -X POST 'http://localhost:8080/api/catalog/pensums/import?dryRun=true' \
 The import adds up the courses and compares against `declaredCredits` and `declaredHours`. If
 they disagree, **nothing is written** and the report says both numbers.
 
-That check exists because it already caught something. The seeded Ingeniería de Sistemas plan
-declares 142 credits and 194 weekly hours; adding up its 48 courses gives **144 and 197**. Both
-totals are off, and nobody noticed until the import was written. One side of each pair is wrong,
-and finding out at import time is much cheaper than finding out when a student's semáforo does
-not add up.
+That check exists because it already caught something. The first Ingeniería de Sistemas seed,
+reconstructed from a drawing, declared 142 credits and 194 weekly hours while its 48 courses added
+up to **144 and 197**, and nobody noticed until the import was written. Finding that out at import
+time is much cheaper than finding out when a student's semáforo does not add up.
+
+The plans the university publishes are already loaded; see [`docs/pensums/`](../pensums/README.md).
 
 Area credits and hours are not transcribed at all — they are summed from the courses of that
 area, so there is one fewer number to get wrong.
