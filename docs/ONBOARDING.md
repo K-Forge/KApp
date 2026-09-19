@@ -43,14 +43,25 @@ nada de lo de abajo funciona.
 ```bash
 git clone https://github.com/K-Forge/KApp.git
 cd KApp
+scripts/install-git-hooks.sh
 ```
 
-**Pregúntale a Brian en qué rama o versión ponerte.** El backend se va a publicar como una
-versión etiquetada en cuanto el portal de administración esté verificado; hasta entonces vive en
-una rama de trabajo y no quieres construir encima de algo que todavía se mueve.
+El último comando activa un hook que revisa cada commit antes de guardarlo. Si el mensaje o la
+rama no siguen las reglas, te dice qué está mal en vez de dejarlo pasar hasta la revisión.
 
-Tú no vas a tocar el backend: lo levantas para tener contra qué programar. Cuando empieces a
-escribir código del móvil, sácate tu propia rama desde la que te haya dicho.
+**Lee [CONTRIBUTING.md](../CONTRIBUTING.md) antes de tu primera rama.** Lo importante:
+
+- **Todo sale de `develop`.** Nunca trabajas en `main` ni commiteas directo en `develop`.
+- Tu rama se llama `feature/<descripcion-en-kebab-case>`, o `bugfix/...` si corriges algo.
+- Los commits van en inglés y minúsculas, con uno de ocho tipos: `feat: add login screen`.
+- Tu trabajo entra por una Pull Request hacia `develop`, con una aprobación y el CI en verde.
+
+```bash
+git switch develop && git pull
+git switch -c feature/<lo-que-vas-a-hacer>
+```
+
+Tú no vas a tocar el backend: lo levantas para tener contra qué programar.
 
 ## 3. Generar tus propios secretos
 
