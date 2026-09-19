@@ -62,8 +62,8 @@ if [ ! -f .env ]; then
 fi
 set -a; . ./.env; set +a
 
-if [ -z "${MONGO_ROOT_PASSWORD:-}" ]; then
-  echo "MONGO_ROOT_PASSWORD is empty in .env. Promotion to ROLE_ADMIN needs it." >&2
+if [ -z "${MONGO_AUTH_URI:-}" ] || [ -z "${MONGO_USER_URI:-}" ]; then
+  echo "MONGO_AUTH_URI and MONGO_USER_URI must be set in .env - see docs/ATLAS-SETUP.md." >&2
   exit 1
 fi
 

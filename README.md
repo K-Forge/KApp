@@ -23,7 +23,7 @@
   <img src="https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 21"/>
   <img src="https://img.shields.io/badge/Spring%20Boot-3.5-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot 3.5"/>
   <img src="https://img.shields.io/badge/Spring%20Cloud-2025.0-6DB33F?style=for-the-badge&logo=spring&logoColor=white" alt="Spring Cloud 2025.0"/>
-  <img src="https://img.shields.io/badge/MongoDB-7%20local%20%C2%B7%20Atlas%208-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB 7 local, Atlas 8 shared"/>
+  <img src="https://img.shields.io/badge/MongoDB-Atlas%208-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB Atlas 8"/>
   <img src="https://img.shields.io/badge/Tests-691%20backend%20%C2%B7%2059%20portal-0EA5E9?style=for-the-badge" alt="691 backend and 59 portal tests"/>
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
   <img src="https://img.shields.io/badge/Backend-MVP%20complete-22C55E?style=for-the-badge" alt="Backend MVP complete"/>
@@ -92,9 +92,10 @@ What that means when reading this repository:
   implicit.
 - **There is no production deployment.** It runs on the lead developer's machine until university
   hardware exists, and it has not been hardened for a public network. See [Security](#security).
-- **The shared development database is live.** A MongoDB Atlas cluster holds the five databases,
-  one per service with its own account, so the whole team works against the same data without
-  installing anything. `docker compose --profile cloud` points at it;
+- **The development database is a shared Atlas cluster, and the only one.** It holds the five
+  databases, one per service with its own account, so the whole team works against the same data
+  and nobody installs a server. There is no local MongoDB to fall back to — the stack needs the
+  network ([ADR 0009](docs/adr/0009-atlas-is-the-only-development-database.md));
   [`docs/ONBOARDING.md`](docs/ONBOARDING.md) is the setup a teammate follows.
 - **What is still blocked, and on whom**, is listed in [`docs/PROGRESS.md`](docs/PROGRESS.md) — an
   SMTP relay, an Entra ID application registration, the floor sketches, and the institutional codes
@@ -217,7 +218,7 @@ asserts it by connecting with each account against every database
 | OpenFeign | Inter-service calls | Three edges only, all one-directional. |
 | Spring Data MongoDB | Persistence | Document-shaped aggregates with a single writer each. See [ADR 0001](docs/adr/0001-mongodb-over-postgresql.md). |
 | **Mongock 5.5.1** | Migrations | Versioned, ordered, audited change units with a distributed lock — which the project previously had none of. |
-| MongoDB 7 (local) · Atlas 8 (shared) | Database | One engine, not polyglot. See [ADR 0004](docs/adr/0004-one-database-engine-not-polyglot.md). A shared Atlas cluster carries the five development databases so nobody installs a server; the tests still use Testcontainers locally, because pointing them at a shared cluster would make one person's run wipe another's data. |
+| MongoDB Atlas 8 | Database | One engine, not polyglot ([ADR 0004](docs/adr/0004-one-database-engine-not-polyglot.md)), and one cluster, shared, with no local alternative ([ADR 0009](docs/adr/0009-atlas-is-the-only-development-database.md)). The tests are the exception: Testcontainers starts them their own, because a test run has to be free to wipe its data. |
 | Testcontainers | Testing | Real MongoDB per suite; no in-memory substitute pretending to be a database. |
 | OpenAPI 3.1 + Prism | Contracts | Hand-written, linted in CI, served as mocks so client work never waits. |
 | Maven (multi-module) | Build | The parent POM centralises every version, so parallel branches never edit it. |
@@ -246,15 +247,15 @@ corepack enable && pnpm install
 # passes through a chat or a commit stays in that history forever.
 cd app/backend/microservices && ../../../scripts/generate-dev-secrets.sh > .env && cd -
 
-pnpm run microservices:start     # the five services against a local MongoDB
+pnpm run microservices:start     # the five services, the gateway and the portal
 pnpm run microservices:status    # what came up
 ```
 
 There is nothing to initialise afterwards. Mongock creates every index and loads the seed data —
 pensums, buildings, spaces, invitation codes — the first time a service starts.
 
-Working against the **shared Atlas cluster** instead of a local MongoDB, the profiles, what listens
-on which port, the local accounts, and what to do when something will not start are all in
+The profiles, what listens on which port, the development accounts, and what to do when something
+will not start are all in
 **[`docs/RUNBOOK.md`](docs/RUNBOOK.md)**. It is the operational document; this section is only the
 shortest path to a running stack.
 
@@ -262,7 +263,7 @@ shortest path to a running stack.
 
 | Command                         | Description                                                               |
 | ------------------------------- | ------------------------------------------------------------------------- |
-| `pnpm run microservices:start`  | Starts the five services against a local MongoDB.                         |
+| `pnpm run microservices:start`  | Starts the five services, the gateway and the admin portal.               |
 | `pnpm run microservices:cloud`  | Starts them against the shared Atlas cluster, plus the admin portal.      |
 | `pnpm run microservices:mock`   | Prism mocks only — no JVM, no database. For client work.                  |
 | `pnpm run microservices:status` | Shows what is running.                                                    |
@@ -287,7 +288,7 @@ rather than which is better:
 Prism mocks. Every endpoint answers with the examples in the contract, immediately, with no
 database and no sign-in. This is the one to use while a screen is being laid out.
 
-**Against the real services.** `docker compose --profile cloud --profile core up -d` starts the
+**Against the real services.** `docker compose --profile core up -d` starts the
 services against the shared Atlas cluster — real data, real tokens, real 403s. Ask Brian for the
 `.env`; [`docs/ONBOARDING.md`](docs/ONBOARDING.md) is the walkthrough.
 
@@ -358,8 +359,7 @@ KApp/
 │   │   │   ├── common/               # Error envelope, CurrentUser, role constants
 │   │   │   ├── course-service/       # FROZEN — out of the reactor, compose and CI
 │   │   │   ├── assignment-service/   # FROZEN — same
-│   │   │   ├── mongo-init/rs-init.js # Replica set, service accounts, and the health probe
-│   │   │   ├── docker-compose.yml    # Profiles: mock, core, academic, map, full, dev, cloud
+│   │   │   ├── docker-compose.yml    # Profiles: mock, core, academic, map, full, dev
 │   │   │   └── pom.xml               # Parent POM — every version lives here
 │   │   └── postman/                  # API collections
 │   ├── frontend/

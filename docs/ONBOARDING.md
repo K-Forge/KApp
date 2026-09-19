@@ -79,9 +79,7 @@ MONGO_MAP_URI='mongodb://...'
 **Reemplázalas por las cinco que te pasó Brian**, tal cual, con las comillas simples incluidas.
 Las suyas empiezan por `mongodb+srv://` y llevan `.mongodb.net` en medio.
 
-**No toques nada más del archivo.** Las que dicen `MONGO_ROOT_PASSWORD`, `MONGO_AUTH_PASSWORD` y
-así son de una base local que probablemente nunca uses, pero si las borras se rompe la vuelta
-atrás.
+**No toques nada más del archivo.** Lo demás lo generó el script en tu máquina y es tuyo.
 
 > **Las comillas simples importan.** Esas líneas llevan un `&`, y sin comillas cualquier script
 > las lee mal — en silencio, dejando la variable vacía. Si copias y pegas la línea entera desde
@@ -91,13 +89,14 @@ atrás.
 
 ```bash
 cd app/backend/microservices
-docker compose --profile cloud --profile dev up -d
+docker compose --profile academic --profile map --profile dev up -d
 ```
 
 La primera vez tarda: está descargando y construyendo siete imágenes. Diez o quince minutos, una
 sola vez.
 
-`cloud` levanta todos los servicios **sin** base de datos local, porque usas la de la nube.
+No hay base de datos que levantar: todos los servicios usan la de la nube. Si te falta alguna de
+las cinco cadenas, Compose no arranca y te dice cuál.
 `dev` añade el portal de administración.
 
 Mira cómo va:
@@ -143,12 +142,12 @@ puertos 4010 a 4014. Pesan casi nada y no tocan la base compartida.
 script las borra y las vuelve a crear con contraseñas nuevas, y dejaría fuera a los otros cinco.
 Sólo Brian, y sólo si hay que rehacerlas.
 
-**No uses `down -v`.** Ese `-v` borra volúmenes. Contra la base local sólo pierdes tus datos de
-prueba; con la compartida no borra la nube, pero es un hábito que te va a morder el día que
-alguien lo corra en el sitio equivocado. Para apagar:
+**No borres datos de la base compartida.** Es la misma para los seis, no tiene copia de
+seguridad, y lo que borres se lo borras a todos. Si hay que hacerlo, avisa primero en el grupo.
+Para apagar tus contenedores:
 
 ```bash
-docker compose --profile cloud --profile dev down
+docker compose --profile full --profile dev down
 ```
 
 **No subas tu `.env`.** Está ignorado por git, pero no lo fuerces.
@@ -157,22 +156,16 @@ docker compose --profile cloud --profile dev down
 
 ## Trabajar sin internet
 
-La base compartida necesita conexión. Si estás en un avión o el wifi de la U no coopera:
+No se puede. La base de datos es la compartida en la nube y no hay una local a la que cambiarse:
+sin conexión, el backend no arranca. Lo que sí funciona sin internet, una vez descargadas las
+imágenes, son los mocks:
 
 ```bash
-scripts/set-atlas-uris.sh --local
-docker compose --profile full --profile dev up -d
+docker compose --profile mock up -d
 ```
 
-Eso arranca un MongoDB en tu máquina con los datos de semilla —los pensums, los edificios— y todo
-funciona igual. Las cuentas de la nube no están ahí; crea las tuyas con:
-
-```bash
-scripts/create-dev-accounts.sh
-```
-
-Cuando vuelvas a tener internet, `scripts/set-atlas-uris.sh` te devuelve a la compartida (te pide
-el host y las cinco contraseñas otra vez, así que pídeselas a Brian o guárdate el archivo).
+Sirven las respuestas de ejemplo de los contratos, que es suficiente para seguir armando pantallas.
+El porqué de esta decisión está en [ADR 0009](adr/0009-atlas-is-the-only-development-database.md).
 
 ---
 
@@ -215,7 +208,7 @@ como correo real; son identidades sólo para desarrollo.
 Estás levantando más de lo que necesitas. Si sólo trabajas en el mapa:
 
 ```bash
-docker compose --profile cloud --profile dev down
+docker compose --profile full --profile dev down
 docker compose --profile mock up -d
 ```
 
@@ -226,8 +219,8 @@ docker compose --profile mock up -d
 ```bash
 git pull
 cd app/backend/microservices
-docker compose --profile cloud --profile dev build
-docker compose --profile cloud --profile dev up -d
+docker compose --profile academic --profile map --profile dev build
+docker compose --profile academic --profile map --profile dev up -d
 ```
 
 Sin el `build`, Docker arranca la imagen vieja y el servicio responde 404 en cosas que juras que

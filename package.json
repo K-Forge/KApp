@@ -4,8 +4,7 @@
   "private": true,
   "description": "KApp – University mobile app for Konrad Lorenz, powered by a Spring Boot microservices backend",
   "scripts": {
-    "microservices:start": "docker compose -f app/backend/microservices/docker-compose.yml --profile academic --profile map up -d",
-    "microservices:cloud": "docker compose -f app/backend/microservices/docker-compose.yml --profile cloud --profile dev up -d",
+    "microservices:start": "docker compose -f app/backend/microservices/docker-compose.yml --profile academic --profile map --profile dev up -d",
     "microservices:mock": "docker compose -f app/backend/microservices/docker-compose.yml --profile mock up -d",
     "microservices:status": "docker compose -f app/backend/microservices/docker-compose.yml --profile full --profile dev ps",
     "microservices:logs": "docker compose -f app/backend/microservices/docker-compose.yml logs -f --tail=60",

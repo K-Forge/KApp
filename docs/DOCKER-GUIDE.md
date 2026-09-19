@@ -175,7 +175,7 @@ docker compose up -d --build
 docker compose down
 
 # Stop and remove volumes
-docker compose down -v
+docker compose down
 
 # Rebuild a single service
 docker compose up -d --build auth-service
@@ -230,7 +230,7 @@ docker compose exec auth-service env | grep EUREKA
 ### Clean everything and restart
 
 ```bash
-docker compose down -v --rmi all
+docker compose down --rmi all
 docker system prune -f
 docker compose up -d --build
 ```
