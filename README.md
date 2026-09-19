@@ -262,23 +262,21 @@ shortest path to a running stack.
 
 | Command                         | Description                                                               |
 | ------------------------------- | ------------------------------------------------------------------------- |
-| `pnpm run web:dev`              | Serves `app/frontend/web` in development mode.                            |
-| `pnpm run web:start`            | Serves the frontend on port 3000 with SPA fallback.                       |
-| `pnpm run web:start:script`     | Starts the frontend through `scripts/start-frontend.sh` (honours `PORT`). |
 | `pnpm run microservices:start`  | Starts the five services against a local MongoDB.                         |
 | `pnpm run microservices:cloud`  | Starts them against the shared Atlas cluster, plus the admin portal.      |
 | `pnpm run microservices:mock`   | Prism mocks only — no JVM, no database. For client work.                  |
 | `pnpm run microservices:status` | Shows what is running.                                                    |
 | `pnpm run microservices:logs`   | Follows the logs. Add `-- <service>` for one of them.                     |
 | `pnpm run microservices:stop`   | Stops everything, mocks and portal included.                              |
+| `pnpm run prototype:serve`      | Serves the frozen HTML prototype in `app/frontend/web` on port 3000.      |
+
+The admin portal has its own scripts, in `app/frontend/web-admin/package.json`, because they are
+its build and not the repository's: `pnpm start`, `pnpm build`, `pnpm test`.
 
 These are thin wrappers around `docker compose`, and deliberately so: **they work the same on
 Windows and macOS**. They pass the compose file by path rather than changing directory first,
 because `pnpm` runs scripts through `cmd.exe` on Windows and `sh` elsewhere, and the two do not
 agree about `cd` with forward slashes. Nothing in them is shell-specific.
-
-Older aliases `dev:web`, `start:web`, `start:frontend` and `start:microservices` are kept for backwards
-compatibility.
 
 ### Building a client against this
 
@@ -317,7 +315,7 @@ talking to the real microservices and nothing about the normal workflow changes.
 `?demo=1` (and `?demo=0` to leave it):
 
 ```bash
-pnpm run web:start   # then open http://localhost:3000/login.html?demo=1
+pnpm run prototype:serve   # then open http://localhost:3000/login.html?demo=1
 ```
 
 A persistent banner marks every screen as demo data, and offers a role switcher so the administrator panel is

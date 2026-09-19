@@ -615,4 +615,5 @@ The `pnpm run microservices:*` commands it backed now wrap `docker compose` dire
 everything has actually run since the migration, and which behaves the same on Windows and macOS.
 
 `scripts/start-frontend.sh` stays. It serves the frozen prototype in `app/frontend/web/`, it works,
-and `pnpm run web:start:script` still uses it.
+and `PORT=4000 scripts/start-frontend.sh` still uses it; `pnpm run prototype:serve` is the
+same thing on port 3000.
