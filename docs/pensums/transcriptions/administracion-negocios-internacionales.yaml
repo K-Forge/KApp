@@ -1,6 +1,6 @@
 source: pensum-negocios-internacionales.pdf
 program: Administración de Negocios Internacionales
-faculty: Facultad de Ciencias Empresariales   # not printed; inferred
+faculty: Escuela de Negocios   # not printed; inferred from the discipline
 programLevel: PREGRADO
 period: semestre
 declaredCredits: null

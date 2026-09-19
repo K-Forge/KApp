@@ -1,6 +1,6 @@
 source: Plan-de-estudio-administracion-SST.pdf
 program: Administración en Seguridad y Salud en el Trabajo (virtual)
-faculty: Facultad de Ciencias Empresariales   # not printed; inferred
+faculty: Escuela de Negocios   # not printed; inferred from the discipline
 programLevel: PREGRADO
 period: semestre
 declaredCredits: null                          # the brochure prints no total

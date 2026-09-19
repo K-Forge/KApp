@@ -1,6 +1,6 @@
 source: pensum_especializacion_psicologia_clinica_infantil.pdf
 program: Especialización en Psicología Clínica Infantil, del Adolescente y la Familia
-faculty: Facultad de Psicología                # not printed; inferred
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
 programLevel: ESPECIALIZACION
 period: semestre
 declaredCredits: null

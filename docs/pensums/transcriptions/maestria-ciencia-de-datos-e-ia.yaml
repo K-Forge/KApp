@@ -1,6 +1,6 @@
 source: Plan-de-estudios-Maestria-en-analitica-de-datos-e-IA.pdf
 program: Maestría en Ciencia de Datos e IA       # the file name says "analítica"; the document's title says this
-faculty: Facultad de Matemáticas e Ingenierías  # not printed; inferred
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
 programLevel: MAESTRIA
 period: semestre
 declaredCredits: null

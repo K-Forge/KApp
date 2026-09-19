@@ -1,6 +1,6 @@
 source: pensum_especializacion_psicologia_forense.pdf
 program: Especialización en Psicología Forense y Criminal
-faculty: Facultad de Psicología                # not printed; inferred
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
 programLevel: ESPECIALIZACION
 period: semestre
 declaredCredits: null                          # neither per-course credits nor a total are printed

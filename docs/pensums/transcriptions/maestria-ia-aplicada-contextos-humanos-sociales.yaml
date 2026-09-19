@@ -1,6 +1,6 @@
 source: Plan-estudios-Maestria-en-Inteligencia-Artificial-Aplicada-a-Contextos-Humanos-y-Sociales.pdf
 program: Maestría en Inteligencia Artificial Aplicada a Contextos Humanos y Sociales
-faculty: Facultad de Psicología                # not printed; inferred
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
 programLevel: MAESTRIA
 period: semestre
 declaredCredits: 34                            # only the total is printed, no per-course credits

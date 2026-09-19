@@ -1,6 +1,6 @@
 source: pensum_doctorado_psicologia.pdf
 program: Doctorado en Psicología
-faculty: Facultad de Psicología                # not printed; inferred
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
 programLevel: DOCTORADO
 period: semestre
 declaredCredits: null

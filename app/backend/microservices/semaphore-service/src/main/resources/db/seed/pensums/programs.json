@@ -32,109 +32,109 @@
   {
     "code": "ADM-EMPRESAS-VIRT",
     "name": "Administración de Empresas (virtual)",
-    "faculty": "Facultad de Ciencias Empresariales",
+    "faculty": "Escuela de Negocios",
     "level": "PREGRADO"
   },
   {
     "code": "ADM-SST-VIRTUAL",
     "name": "Administración en Seguridad y Salud en el Trabajo (virtual)",
-    "faculty": "Facultad de Ciencias Empresariales",
+    "faculty": "Escuela de Negocios",
     "level": "PREGRADO"
   },
   {
     "code": "MARKETING",
     "name": "Marketing",
-    "faculty": "Facultad de Ciencias Empresariales",
+    "faculty": "Escuela de Negocios",
     "level": "PREGRADO"
   },
   {
     "code": "NEGOCIOS-INTERNAC",
     "name": "Administración de Negocios Internacionales",
-    "faculty": "Facultad de Ciencias Empresariales",
+    "faculty": "Escuela de Negocios",
     "level": "PREGRADO"
   },
   {
     "code": "ESP-ANALITICA-IA",
     "name": "Especialización en Analítica de Datos e Inteligencia Artificial",
-    "faculty": "Facultad de Matemáticas e Ingenierías",
+    "faculty": "Escuela de Posgrados",
     "level": "ESPECIALIZACION"
   },
   {
     "code": "MAE-CIENCIA-DATOS",
     "name": "Maestría en Ciencia de Datos e IA",
-    "faculty": "Facultad de Matemáticas e Ingenierías",
+    "faculty": "Escuela de Posgrados",
     "level": "MAESTRIA"
   },
   {
     "code": "MAE-IA-APLICADA",
     "name": "Maestría en Inteligencia Artificial Aplicada a Contextos Humanos y Sociales",
-    "faculty": "Facultad de Psicología",
+    "faculty": "Escuela de Posgrados",
     "level": "MAESTRIA"
   },
   {
     "code": "MAE-PSI-CONSUMIDOR",
     "name": "Maestría en Psicología del Consumidor",
-    "faculty": "Facultad de Psicología",
+    "faculty": "Escuela de Posgrados",
     "level": "MAESTRIA"
   },
   {
     "code": "ESP-PSI-CONSUMIDOR",
     "name": "Especialización en Psicología del Consumidor",
-    "faculty": "Facultad de Psicología",
+    "faculty": "Escuela de Posgrados",
     "level": "ESPECIALIZACION"
   },
   {
     "code": "MAE-PSI-CLINICA",
     "name": "Maestría en Psicología Clínica",
-    "faculty": "Facultad de Psicología",
+    "faculty": "Escuela de Posgrados",
     "level": "MAESTRIA"
   },
   {
     "code": "ESP-NEUROPSICOLOGIA",
     "name": "Especialización en Neuropsicología Clínica",
-    "faculty": "Facultad de Psicología",
+    "faculty": "Escuela de Posgrados",
     "level": "ESPECIALIZACION"
   },
   {
     "code": "ESP-CLINICA-INFANTIL",
     "name": "Especialización en Psicología Clínica Infantil, del Adolescente y la Familia",
-    "faculty": "Facultad de Psicología",
+    "faculty": "Escuela de Posgrados",
     "level": "ESPECIALIZACION"
   },
   {
     "code": "ESP-PSI-FORENSE",
     "name": "Especialización en Psicología Forense y Criminal",
-    "faculty": "Facultad de Psicología",
+    "faculty": "Escuela de Posgrados",
     "level": "ESPECIALIZACION"
   },
   {
     "code": "ESP-SEXUALIDAD",
     "name": "Especialización en Sexualidad",
-    "faculty": "Facultad de Psicología",
+    "faculty": "Escuela de Posgrados",
     "level": "ESPECIALIZACION"
   },
   {
     "code": "ESP-EVAL-CLINICA",
     "name": "Especialización en Evaluación Clínica y Tratamiento de Trastornos Emocionales y Afectivos",
-    "faculty": "Facultad de Psicología",
+    "faculty": "Escuela de Posgrados",
     "level": "ESPECIALIZACION"
   },
   {
     "code": "ESP-GER-TALENTO",
     "name": "Especialización en Gerencia Estratégica del Talento Humano",
-    "faculty": "Facultad de Ciencias Empresariales",
+    "faculty": "Escuela de Posgrados",
     "level": "ESPECIALIZACION"
   },
   {
     "code": "ESP-GER-SST",
     "name": "Especialización en Gerencia de la Seguridad y Salud en el Trabajo",
-    "faculty": "Facultad de Ciencias Empresariales",
+    "faculty": "Escuela de Posgrados",
     "level": "ESPECIALIZACION"
   },
   {
     "code": "DOC-PSICOLOGIA",
     "name": "Doctorado en Psicología",
-    "faculty": "Facultad de Psicología",
+    "faculty": "Escuela de Posgrados",
     "level": "DOCTORADO"
   }
 ]

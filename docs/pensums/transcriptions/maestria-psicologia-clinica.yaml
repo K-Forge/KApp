@@ -1,6 +1,6 @@
 source: Plan-estudios-maestria-psicologia-clinica.pdf
 program: Maestría en Psicología Clínica
-faculty: Facultad de Psicología                # not printed; inferred
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
 programLevel: MAESTRIA
 period: semestre
 declaredCredits: 59                            # only the total is printed, no per-course credits

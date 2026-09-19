@@ -1,6 +1,6 @@
 source: pensum-especializacion-psicologia-del-consumidor-konrad-lorenz-1.pdf
 program: Especialización en Psicología del Consumidor
-faculty: Facultad de Psicología                # not printed; inferred
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
 programLevel: ESPECIALIZACION
 period: semestre
 declaredCredits: 24

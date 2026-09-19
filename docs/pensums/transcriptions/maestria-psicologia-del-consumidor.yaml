@@ -1,6 +1,6 @@
 source: Plan-Estudio-Maestria-en-Psicologia-del-Consumidor.pdf
 program: Maestría en Psicología del Consumidor
-faculty: Facultad de Psicología                # not printed; inferred
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
 programLevel: MAESTRIA
 period: semestre
 declaredCredits: 52                            # only the total is printed, no per-course credits

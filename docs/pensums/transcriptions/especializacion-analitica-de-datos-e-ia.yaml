@@ -1,6 +1,6 @@
 source: Plan-de-estudios-especializacion-analitica-de-datos-e-IA.pdf
 program: Especialización en Analítica de Datos e Inteligencia Artificial
-faculty: Facultad de Matemáticas e Ingenierías  # not printed; inferred
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
 programLevel: ESPECIALIZACION
 period: semestre
 declaredCredits: null

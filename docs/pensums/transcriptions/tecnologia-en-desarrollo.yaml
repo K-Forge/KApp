@@ -1,6 +1,6 @@
 source: plan-estudios-tec-desarrollo-konrad.pdf
 program: Tecnología en Desarrollo
-faculty: Facultad de Matemáticas e Ingenierías  # not printed; inferred
+faculty: Facultad de Matemáticas e Ingenierías   # not printed; inferred from the discipline
 programLevel: TECNOLOGIA
 period: cuatrimestre
 declaredCredits: 96                              # 16 per cuatrimestre, printed under each column

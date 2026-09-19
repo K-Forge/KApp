@@ -1,6 +1,6 @@
 source: Pensum-Administracion-Empresas.pdf
 program: Administración de Empresas (virtual)
-faculty: Facultad de Ciencias Empresariales   # not printed; inferred
+faculty: Escuela de Negocios   # not printed; inferred from the discipline
 programLevel: PREGRADO
 period: cuatrimestre
 declaredCredits: null                          # the brochure prints no total

@@ -1,6 +1,6 @@
 source: pensum-gerencia-estrategica-del-talento-humano.pdf
 program: Especialización en Gerencia Estratégica del Talento Humano
-faculty: Facultad de Ciencias Empresariales   # not printed; inferred
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
 programLevel: ESPECIALIZACION
 period: semestre
 declaredCredits: null

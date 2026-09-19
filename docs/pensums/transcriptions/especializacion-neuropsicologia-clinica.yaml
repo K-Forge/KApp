@@ -1,6 +1,6 @@
 source: Pensum-esp-neuropsicologia-clinica.pdf
 program: Especialización en Neuropsicología Clínica
-faculty: Facultad de Psicología                # not printed; inferred
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
 programLevel: ESPECIALIZACION
 period: semestre
 declaredCredits: 33                            # only the total is printed, no per-course credits

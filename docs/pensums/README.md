@@ -94,6 +94,8 @@ vector geometry like the grids.
 ## What the PDFs cannot answer
 
 These need the university — ideally a SINU export, which would settle most of them at once.
+**[`PREGUNTAS-PENDIENTES.md`](PREGUNTAS-PENDIENTES.md)** is the same list written to be taken to a
+meeting with the coordination office, in Spanish and with what each gap costs.
 
 1. **Institutional codes.** Only program `506` and the plan numbers 1015, 1017 and 1020 are real.
    The other program codes, the pensum codes of Psicología and the brochures, and every brochure
@@ -105,7 +107,10 @@ These need the university — ideally a SINU export, which would settle most of 
    and Psicología Forense (no total either). Administración en SST prints Cultura II and Electiva 1–4
    with the credit cell empty.
 3. **Weekly hours** are printed only by the four grids, Marketing and Negocios Internacionales.
-4. **Faculties** are not printed on the brochures; they were assigned by discipline.
+4. **Faculties.** The university has four — Facultad de Matemáticas e Ingenierías, Escuela de
+   Negocios, Escuela de Posgrados and Facultad de Psicología — and none of the brochures prints
+   one. Undergraduate programmes are assigned by discipline and every postgraduate programme to
+   the Escuela de Posgrados.
 5. **Half hours.** Four practices print 4,5 or 1,5 weekly hours. Storing them exactly means changing
    `weeklyHours` from an integer, which is a contract change for the mobile clients.
 6. **Prerequisites between electives** are drawn in Matemáticas and Psicología and cannot be stored
