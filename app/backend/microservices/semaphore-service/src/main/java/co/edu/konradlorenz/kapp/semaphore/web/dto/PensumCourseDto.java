@@ -26,9 +26,13 @@ import java.util.List;
  * only ones whose hours carry a decimal point. {@code totalHours} stays an integer: half an hour
  * a week is eight whole hours a semester.
  *
- * <p>{@code sinuCode} is an addition to the published schema, not a change to it: an extra
- * nullable field that clients may ignore. It exists so a generated placeholder code is
- * never mistaken for an institutional one.
+ * <p>{@code sinuCode} is the field a client puts on screen, and {@code code} is the one it
+ * addresses items by. Nineteen of the twenty-three published plans print no course codes at all,
+ * so {@code code} carries something this system generated to tell the items apart;
+ * {@code sinuCode} is present only where the code is the university's own. Showing a generated
+ * code would put an invented identifier in front of a student, who has no way to tell it from a
+ * real one - the contract says so where the clients read it,
+ * {@code docs/api/semaphore.openapi.yaml}.
  */
 public record PensumCourseDto(
         @Size(max = 20) String code,

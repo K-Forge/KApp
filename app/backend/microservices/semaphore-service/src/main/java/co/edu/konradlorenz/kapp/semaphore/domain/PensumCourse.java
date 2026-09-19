@@ -32,10 +32,13 @@ import java.util.List;
  * @param electiveSlot   true when the student later resolves this to a real course
  * @param prerequisites  codes of courses that must all be PASSED first; never null
  * @param sinuCode       the course code as it appears in the university's SINU system,
- *                       or {@code null} where it has not been confirmed. Only a handful
- *                       of the seeded items carry a confirmed one; the rest use a
- *                       generated slug as their {@code code} and leave this null so
- *                       nobody mistakes a reconstruction for institutional data.
+ *                       or {@code null} where it has not been confirmed. Only the four
+ *                       plans printed with codes carry one; the rest use a generated slug
+ *                       as their {@code code} and leave this null. It is what separates a
+ *                       real code from one of ours, which is why it is also the only one
+ *                       a client shows: an invented code on a student's screen is
+ *                       indistinguishable from an institutional one, and changes the day
+ *                       the real codes arrive.
  */
 public record PensumCourse(
         String code,

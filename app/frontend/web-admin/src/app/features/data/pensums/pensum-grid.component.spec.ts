@@ -2,9 +2,14 @@ import { TestBed } from '@angular/core/testing';
 import { PensumGridComponent } from './pensum-grid.component';
 import type { Pensum, PensumCourse } from './pensum.model';
 
+// sinuCode mirrors the code by default: that is a plan the university prints codes for, which is
+// the only kind whose codes are shown. A brochure plan is built by clearing it, as BROCHURE does.
 function course(code: string, name: string, level: number, area: string, credits: number, weeklyHours: number,
                 extra: Partial<PensumCourse> = {}): PensumCourse {
-  return { code, pensumItemCode: code, name, level, credits, weeklyHours, area, isElectiveSlot: false, prerequisites: [], ...extra };
+  return {
+    code, pensumItemCode: code, name, level, credits, weeklyHours, area,
+    isElectiveSlot: false, prerequisites: [], sinuCode: code, ...extra,
+  };
 }
 
 const PRINTED_GRID: Pensum = {
@@ -20,6 +25,13 @@ const PRINTED_GRID: Pensum = {
     course('71221', 'Cultura I', 2, 'SI', 2, 2),
     { ...course('59075', 'Electiva I', 3, 'SI', 3, 3), code: null, isElectiveSlot: true },
   ],
+};
+
+/** The same plan as published in a brochure: no printed codes, so KApp generated every one. */
+const BROCHURE: Pensum = {
+  ...PRINTED_GRID,
+  pensumCode: 'MKT-2026',
+  courses: PRINTED_GRID.courses.map((c) => ({ ...c, sinuCode: null })),
 };
 
 function render(pensum: Pensum) {
@@ -70,6 +82,22 @@ describe('PensumGridComponent', () => {
     expect(el.textContent).toContain('9 cr · 4.5 h');
     expect(Array.from(el.querySelectorAll('.level-total')).map((t) => t.textContent!.trim()))
       .toEqual(['3 cr · 4 h', '5 cr · 6 h', '9 cr · 4.5 h']);
+  });
+
+  // A generated code on screen reads as institutional to everybody who sees it, and changes the
+  // day the real codes arrive. So a plan that prints none shows none, and says why.
+  it('shows no code at all for a plan whose codes KApp generated, and says so', () => {
+    const el = render(BROCHURE);
+
+    expect(el.querySelector('.code')).toBeNull();
+    expect(el.textContent).toContain('This plan publishes no course codes');
+    expect(el.textContent).not.toContain('11015');
+  });
+
+  it('names the prerequisites of a plan that has no codes to name them by', () => {
+    const el = render(BROCHURE);
+
+    expect(el.textContent).toContain('needs Precálculo');
   });
 
   it('shows the pensum item code of an elective slot and its prerequisites by code', () => {

@@ -1,5 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import type { Pensum, PensumArea, PensumCourse } from './pensum.model';
+import {
+  coursesByCode,
+  officialCode as codeOf,
+  prerequisiteLabels,
+  publishesCourseCodes,
+  type Pensum,
+  type PensumArea,
+  type PensumCourse,
+} from './pensum.model';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 
@@ -31,6 +39,13 @@ interface GridRow {
            pensum was taken from does not print the figure, which is what the admin needs to know. -->
       <p class="hint missing">{{ missingNote() }}</p>
     }
+    @if (!hasOfficialCodes()) {
+      <p class="hint missing">
+        This plan publishes no course codes. KApp gives each item an internal identifier so the
+        system can tell them apart; it is not an institutional code, so it is not shown here and
+        never reaches a student. Prerequisites are named instead.
+      </p>
+    }
     <div class="scroll-x">
       <!-- No table roles: the table view beside this is the accessible, exact form of the same
            data, and ARIA rows on display:contents elements are unreliable across browsers. -->
@@ -55,19 +70,25 @@ interface GridRow {
               <div class="cell">
                 @for (item of cell; track item.pensumItemCode) {
                   <article class="item" [class.slot]="item.isElectiveSlot" [style.--area]="row.area.color">
-                    <div class="item-top">
-                      <span class="mono code">{{ item.code ?? item.pensumItemCode }}</span>
-                      @if (item.isElectiveSlot) {
-                        <span class="tag">elective</span>
-                      }
-                    </div>
+                    @if (officialCode(item) || item.isElectiveSlot) {
+                      <div class="item-top">
+                        <!-- Only the university's own code. A generated one here would be read as
+                             institutional by everybody who sees this screen. -->
+                        @if (officialCode(item); as code) {
+                          <span class="mono code">{{ code }}</span>
+                        }
+                        @if (item.isElectiveSlot) {
+                          <span class="tag">elective</span>
+                        }
+                      </div>
+                    }
                     <div class="item-name">{{ item.name }}</div>
                     @if (hasCredits() || hasHours()) {
                       <div class="item-meta">{{ figures(item.credits, item.weeklyHours) }}</div>
                     }
                     @if (item.prerequisites.length) {
-                      <div class="item-pre" [title]="'Prerequisites: ' + item.prerequisites.join(', ')">
-                        needs <span class="mono">{{ item.prerequisites.join(', ') }}</span>
+                      <div class="item-pre" [title]="'Prerequisites: ' + prerequisites(item).join(', ')">
+                        needs <span [class.mono]="hasOfficialCodes()">{{ prerequisites(item).join(', ') }}</span>
                       </div>
                     }
                   </article>
@@ -215,6 +236,10 @@ export class PensumGridComponent {
   readonly hasCredits = computed(() => this.pensum().courses.some((c) => c.credits > 0));
   /** False when the source document prints no weekly hours. */
   readonly hasHours = computed(() => this.pensum().courses.some((c) => c.weeklyHours > 0));
+  /** False when the plan's codes are KApp's own handles rather than the university's. */
+  readonly hasOfficialCodes = computed(() => publishesCourseCodes(this.pensum()));
+
+  private readonly byCode = computed(() => coursesByCode(this.pensum()));
 
   /** Says which figures the source document leaves out, so a missing one never reads as a zero. */
   readonly missingNote = computed(() => {
@@ -258,6 +283,16 @@ export class PensumGridComponent {
       };
     });
   });
+
+  /** The institutional code of an item, or null - which is what a brochure plan has. */
+  officialCode(course: PensumCourse): string | null {
+    return codeOf(course);
+  }
+
+  /** Prerequisites by code where the plan has real ones, by name where it does not. */
+  prerequisites(course: PensumCourse): string[] {
+    return prerequisiteLabels(this.byCode(), course);
+  }
 
   /** "3 cr · 4 h", leaving out whichever figure the plan does not publish. */
   figures(credits: number, hours: number): string {
