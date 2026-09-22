@@ -96,6 +96,45 @@ jobs:
           git diff --exit-code -- app/backend/microservices/semaphore-service/src/main/resources/db/seed/pensums \
             || { echo "::error::The pensum seed is out of date. Run docs/pensums/tools/build_seed.py and commit the result."; exit 1; }
 
+  android:
+    name: Build and test the android client (JDK 25)
+    runs-on: ubuntu-latest
+
+    # Nothing built the Android client until this job existed: it reached develop with four green
+    # checks, none of which compiled a line of Kotlin. The client is the product, so a broken build
+    # has to fail here rather than on the next person's laptop.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # 25, not 21 like the backend: gradle/gradle-daemon-jvm.properties asks the daemon for a
+      # Java 25 toolchain. Anything else and Gradle stops to provision one on every run.
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      # Caches ~/.gradle between runs and checks the committed wrapper jar against the published
+      # checksums - the jar is the one file in the repository that runs before anyone reads it.
+      # The runner already ships the Android SDK with its licences accepted, so nothing installs it.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # lint too: it is what catches a resource or manifest mistake that still compiles.
+      - name: Build, test and lint
+        working-directory: app/frontend/mobile/kotlin
+        run: ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
+
+      - name: Upload test and lint reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-reports
+          path: app/frontend/mobile/kotlin/app/build/reports/**
+          retention-days: 7
+          if-no-files-found: ignore
+
   portal:
     name: Build and test the admin portal
     runs-on: ubuntu-latest
