@@ -4,6 +4,29 @@
 *.sh          text eol=lf
 .githooks/*   text eol=lf
 gradlew       text eol=lf
+mvnw          text eol=lf
 
 # cmd.exe misreads labels and jumps in batch files without CRLF.
 *.bat         text eol=crlf
+*.cmd         text eol=crlf
+
+# Everything else is normalised to LF inside the repository, whatever each machine is configured
+# to do, so a file does not change line endings the first time a Windows clone saves it.
+*             text=auto
+
+# Binary. Git must not convert these, and a line-by-line diff of them helps nobody. The wrapper
+# jar is the one that matters: it runs before Gradle exists on the machine.
+*.jar         binary
+*.zip         binary
+*.png         binary
+*.jpg         binary
+*.webp        binary
+*.ico         binary
+*.pdf         binary
+*.ttf         binary
+*.otf         binary
+*.jks         binary
+*.keystore    binary
+*.so          binary
+*.apk         binary
+*.aab         binary
