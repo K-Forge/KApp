@@ -23,8 +23,8 @@ import co.edu.konradlorenz.kapp.ui.theme.Subject
  */
 enum class KAppDestination(
     val route: String,
-    @DrawableRes val icon: Int,
-    @StringRes val label: Int,
+    @param:DrawableRes val icon: Int,
+    @param:StringRes val label: Int,
     val colour: Color,
 ) {
     Profile("profile", R.drawable.ic_person, R.string.home_shortcut_profile, Person),
