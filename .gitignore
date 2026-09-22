@@ -175,6 +175,11 @@ fastlane/test_output
 node_modules/
 dist/
 .cache/
+# The Angular CLI's build cache: a compiler database, a tsbuildinfo and vitest results.
+# web-admin/.gitignore already ignores its own, but that rule starts with a slash, so it only
+# covers the copy beside angular.json - and the CLI writes another one wherever it was invoked
+# from, which for a command run at the repository root is here.
+.angular/
 .parcel-cache/
 .next/
 .nuxt/
