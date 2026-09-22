@@ -90,6 +90,21 @@ build/
 gradle-app.setting
 .gradletasknamecache
 
+# The shared build contract, tracked on purpose. These four decide which Gradle, which JDK and
+# which dependency versions a clone builds with, so everybody compiles the same thing:
+#
+#   gradle.properties                     build flags and JVM arguments
+#   gradle/libs.versions.toml             every dependency and plugin version
+#   gradle/wrapper/gradle-wrapper.*       the Gradle version, with its checksum
+#   gradle/gradle-daemon-jvm.properties   the JDK the Gradle daemon runs on
+#
+# Never ignore one of them to make a diff go away: the next person gets a different build. A
+# machine-specific value goes in ~/.gradle/gradle.properties or local.properties, which are
+# outside the repository by design. The negations below keep a future rule from swallowing them.
+!**/gradle.properties
+!**/gradle/libs.versions.toml
+!**/gradle/gradle-daemon-jvm.properties
+
 # ─────────────────────────────────────────────
 # Spring Boot
 # ─────────────────────────────────────────────
@@ -105,14 +120,20 @@ HELP.md
 # ─────────────────────────────────────────────
 # Android (Kotlin mobile)
 # ─────────────────────────────────────────────
+# The only per-machine file in the Android project: it holds the path to that developer's SDK.
+# Android Studio writes it on first open, so nobody has to create it by hand.
 local.properties
+
+# Signing. The keystore and the passwords that open it never reach the repository.
 *.jks
 *.keystore
+keystore.properties
 *.apk
 *.aab
 *.ap_
 *.dex
 captures/
+*.hprof
 .externalNativeBuild/
 .cxx/
 google-services.json
