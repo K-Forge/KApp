@@ -15,7 +15,9 @@
 set -u
 
 TYPES='feat|fix|chore|release|hotfix|docs|refactor|test'
-MAX_SUBJECT=72
+# 72 is the git tradition and what fits git log --oneline; 100 is commitlint's default and what
+# this team's narrative subjects need. The hard limit is 100, the guide asks people to aim for 72.
+MAX_SUBJECT=100
 CONTEXT=''
 
 fail() {
@@ -218,7 +220,8 @@ self_test() {
   expect fail check_subject 'wip: partial auth layer'
   expect fail check_subject 'ci: stop telling pnpm two different versions'
   expect fail check_subject 'Merge the MVP backend'
-  expect fail check_subject 'feat: add a subject that runs well past the seventy-two character limit set'
+  expect pass check_subject 'fix: your name, e-mail and student code were the API examples, in a public repository'
+  expect fail check_subject 'feat: add a subject that rambles well past the hard limit of one hundred characters, which is where a reader gives up'
 
   expect pass check_branch_target 'feature/student-dashboard' develop
   expect pass check_branch_target 'bugfix/fix-null-pointer-product' develop
