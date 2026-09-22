@@ -38,9 +38,10 @@ Seguimos **Conventional Commits** con reglas propias. Formato de la primera line
 type: short message in english
 ```
 
-> En **ingles**, en **minusculas**, sin punto final y sin scopes entre parentesis. Maximo **72 caracteres**. Los
-> identificadores de codigo (clases, variables, rutas) conservan su grafia original. Se escribe en **imperativo**,
-> como una orden: `add`, `fix`, `remove`; no `added` ni `fixes`.
+> En **ingles**, en **minusculas**, sin punto final y sin scopes entre parentesis. Apunta a **72 caracteres**, que es
+> lo que cabe en `git log --oneline` sin cortarse; el limite duro son **100**. Los identificadores de codigo (clases,
+> variables, rutas) conservan su grafia original. Se escribe en **imperativo**, como una orden: `add`, `fix`,
+> `remove`; no `added` ni `fixes`.
 
 ### Tipos de Commits
 
@@ -364,8 +365,11 @@ Ciclo: **alpha** → **beta** → **release candidate** → **stable** → **mai
 - **Trabajo a medias en borrador.** Abre la PR como **Draft** para mostrar avance o pedir opinion temprano, en lugar de
   subir commits `wip`. Pasala a **Ready for review** cuando este lista.
 - **Checks de CI en verde** para fusionar.
-- **Aprobacion de al menos 1 miembro** distinto del autor. Las conversaciones abiertas se resuelven antes de fusionar.
-- **Fusiona el autor**, con el metodo de la tabla de estrategia de merge.
+- **Aprobacion del responsable del repositorio**, que figura como code owner y revisa toda PR. Nadie fusiona su
+  propio trabajo sin esa revision. Las conversaciones abiertas se resuelven antes de fusionar.
+- **Fusiona el autor** una vez tiene la aprobacion y los checks en verde, con el metodo de la tabla de estrategia de
+  merge. El responsable no puede aprobarse a si mismo: fusiona sus propias PR igual que las demas, **por la PR y
+  nunca con un push** a `main` o `develop`.
 - **Revertir:** el boton **Revert** de GitHub propone el titulo `Revert "..."`; cambialo a `fix: revert <descripcion>`.
 
 <br/>
