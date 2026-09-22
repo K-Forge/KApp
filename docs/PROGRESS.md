@@ -26,7 +26,7 @@ production deployment.
 | **Campus map** | **Merged** | **50** | Schematic floors on a grid, wings, corridors, a basement, and an offline grid editor. No floor plan images |
 | **Admin and developer portal** | **Merged** | **30** | Angular, from a compose `dev` profile. Full CRUD, bulk import, an API console driven by the specs, and a role inspector |
 | **Visitor day pass** | **Merged** | **23** | A one-day token that opens the map and nothing else. No account, no e-mail. Identity documents deleted after 30 days by a TTL index |
-| Android (Kotlin) | Not started | — | The product. Unblocked by the mocks |
+| Android (Kotlin) | In progress | 13 | Login and Inicio, drawn against the mockups. No network layer yet |
 | iOS (Swift) | Not started | — | The product. Unblocked by the mocks |
 | Deployment | Not started | — | Runs locally; university hardware pending |
 
