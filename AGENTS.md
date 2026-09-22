@@ -232,15 +232,19 @@ Rules specific to KApp:
   request, never to push. Every pull request needs the lead's review: `.github/CODEOWNERS` owns every path.
 - **One session, one worktree.** Two sessions in the same folder share one index and one set of files: they stage
   each other's changes, overwrite each other's edits and run Gradle or Maven over each other's builds. A second
-  session on an area gets its own worktree, `../KApp-worktrees/<area>-<topic>`, on its own branch. The defaults:
+  session on an area gets its own worktree, `../KApp-worktrees/<area>-<topic>`, on its own branch.
 
-  | Path | Holds |
+  **The worktree follows the area you touch; the branch prefix follows the kind of change** (CONTRIBUTING.md).
+  The two are independent: `chore/kotlin-build-config` is maintenance, so it is a `chore/*`, and it edits Gradle
+  files, so it belongs in the `mobile-kotlin` worktree — not in `docs`. The defaults:
+
+  | Path | Work on |
   |---|---|
-  | `KApp/` | `develop`, for pulling and reviewing. Never commit here |
-  | `../KApp-worktrees/docs` | `chore/*` branches: documentation, CI, repository configuration |
-  | `../KApp-worktrees/backend` | `feature/*` and `bugfix/*` branches under `app/backend/` |
-  | `../KApp-worktrees/mobile-kotlin` | `feature/*` and `bugfix/*` branches under `app/frontend/mobile/kotlin/` |
-  | `../KApp-worktrees/mobile-swift` | `feature/*` and `bugfix/*` branches under `app/frontend/mobile/swift/` |
+  | `KApp/` | Nothing. It holds `develop`, for pulling and reviewing. Never commit here |
+  | `../KApp-worktrees/docs` | `docs/`, `README.md`, this file, `.github/` and repository configuration |
+  | `../KApp-worktrees/backend` | `app/backend/` |
+  | `../KApp-worktrees/mobile-kotlin` | `app/frontend/mobile/kotlin/`, its Gradle and build files included |
+  | `../KApp-worktrees/mobile-swift` | `app/frontend/mobile/swift/`, its Xcode project included |
 
   Ignored files do not follow a new worktree: copy `app/backend/microservices/.env` and
   `app/frontend/mobile/kotlin/local.properties`, or regenerate them. Compose names its project after the directory,
