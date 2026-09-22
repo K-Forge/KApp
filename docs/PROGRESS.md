@@ -183,7 +183,7 @@ than an oversight.
 | Item | Note |
 |---|---|
 | Branch protection | Was one ruleset with an administrator bypass set to "always", 0 approvals, no required checks, and linear history alongside merge-commit-only merging, so nobody but the bypass could merge. `develop` fell 143 commits behind `main`. Now two rulesets, no bypass: `develop` takes squash and merge commits, `main` merge commits only; one approval and green checks on both. Git Flow's release and hotfix merges need merge commits, which is why linear history went rather than merge commits |
-| `CODEOWNERS` | Missing, so the rulesets do not require code owner review. Ownership must be the team: GitHub does not accept a code owner approving their own pull request |
+| `CODEOWNERS` | `.github/CODEOWNERS` makes the lead the owner of every path, so the ruleset's code owner review has something to require. GitHub never counts an author's own approval, which is why the lead's pull requests need the admin bypass, scoped to pull requests only |
 | Git conventions | `CONTRIBUTING.md` copied from the organization, enforced by `scripts/check-git-conventions.sh` in CI and in a commit hook. Open branches predating it need their commits reworded before they merge |
 | Secret scanning, push protection | Disabled |
 | Dependabot | Disabled, no `.github/dependabot.yml` |

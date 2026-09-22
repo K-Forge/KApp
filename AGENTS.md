@@ -95,9 +95,11 @@ KApp/
 │   ├── generate-dev-secrets.sh  create-dev-accounts.sh  verify-db-isolation.sh
 │   └── start-frontend.sh
 ├── .githooks/commit-msg             # Refuses a commit that breaks CONTRIBUTING.md
-├── .github/workflows/
-│   ├── ci.yml                       # Backend, contracts and portal
-│   └── conventions.yml              # Branch, title and commits of every pull request
+├── .github/
+│   ├── CODEOWNERS                   # The lead reviews every path
+│   └── workflows/
+│       ├── ci.yml                   # Backend, contracts and portal
+│       └── conventions.yml          # Branch, title and commits of every pull request
 ├── CONTRIBUTING.md                  # Verbatim copy of the K-Forge guide. Never edit here
 └── package.json
 ```
@@ -226,7 +228,8 @@ Rules specific to KApp:
 
 - **Base branch is `develop`.** `main` only receives `release/*` and `hotfix/*`.
 - **KApp has no production deployment, so there are no hotfixes.** A defect is a `bugfix/*` into `develop`.
-- **Nobody pushes to `main` or `develop`**, administrators included. The rulesets have no bypass.
+- **Nobody pushes to `main` or `develop`**, administrators included. Admins may bypass only when merging a pull
+  request, never to push. Every pull request needs the lead's review: `.github/CODEOWNERS` owns every path.
 - **One session, one worktree.** Two sessions in the same folder share one index and one set of files: they stage
   each other's changes, overwrite each other's edits and run Gradle or Maven over each other's builds. A second
   session on an area gets its own worktree, `../KApp-worktrees/<area>-<topic>`, on its own branch. The defaults:
