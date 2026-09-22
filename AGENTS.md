@@ -4,22 +4,9 @@
 
 ---
 
-## K-Forge Ecosystem
-
-K-Forge is a software development club at Fundación Universitaria Konrad Lorenz (FUKL), Bogotá, founded by Brian Vargas (@13rianVargas). The club builds real-world software products for the university and community.
-
-| Project | Repo | Description |
-|---------|------|-------------|
-| K-Forge Website | `K-Forge/` | Public landing page (Angular, Vercel) |
-| **KApp** | `KApp/` | University mobile app for Konrad Lorenz — you are here |
-| TiendaQ | `TiendaQ/` | University e-commerce system (Spring Boot + Angular) |
-| Roastory | `Roastory/` | Library-cafe management system (Node.js + MongoDB) |
-
----
-
 ## Project Overview
 
-**KApp** is the **mobile application** for the Fundación Universitaria Konrad Lorenz community, developed by the K-Forge club. The product vision is mobile-first: native Android (Kotlin) and iOS (Swift) clients that give students and staff access to academic management — courses, assignments, users, and authentication — from their phones.
+**KApp** is the **mobile application** for the Fundación Universitaria Konrad Lorenz community. The product vision is mobile-first: native Android (Kotlin) and iOS (Swift) clients that give students and staff access to academic management — courses, assignments, users, and authentication — from their phones.
 
 The mobile clients are powered by a **Spring Boot microservices backend** behind a single gateway. Delivery is backend first, then mobile directly: the clients build against the hand-written OpenAPI contracts in `docs/api/`, served as Prism mocks, so client and server progress in parallel rather than in sequence. The old HTML/JS client was a prototype of the mobile layout and is frozen.
 
@@ -102,7 +89,18 @@ KApp/
 │   ├── SECURITY-AUDIT.md  SRS.md  REQUIREMENTS.md  DESIGN.md  K-COLORS.md
 │   └── DOCKER-GUIDE.md              # Superseded by RUNBOOK.md
 ├── scripts/
-│   ├── start-frontend.sh
+│   ├── check-git-conventions.sh     # The git rules as code: CI and the commit-msg hook run it
+│   ├── install-git-hooks.sh         # Once per clone: enables .githooks/
+│   ├── sync-contributing.sh         # Refreshes CONTRIBUTING.md from the organization
+│   ├── generate-dev-secrets.sh  create-dev-accounts.sh  verify-db-isolation.sh
+│   └── start-frontend.sh
+├── .githooks/commit-msg             # Refuses a commit that breaks CONTRIBUTING.md
+├── .github/
+│   ├── CODEOWNERS                   # The lead reviews every path
+│   └── workflows/
+│       ├── ci.yml                   # Backend, contracts and portal
+│       └── conventions.yml          # Branch, title and commits of every pull request
+├── CONTRIBUTING.md                  # Verbatim copy of the K-Forge guide. Never edit here
 └── package.json
 ```
 
@@ -131,7 +129,7 @@ Compose profiles exist so nobody has to run seven JVMs to work on one service:
 ```bash
 cd app/backend/microservices
 
-# Mobile / frontend work: the the Prism mocks alone. No JVM, no Mongo, ~200 MB.
+# Mobile / frontend work: the Prism mocks alone. No JVM, no Mongo, ~200 MB.
 docker compose --profile mock up -d      # ports 4010-4014
 
 # Backend work: only what you need
@@ -216,17 +214,39 @@ shared internal secret and has no gateway route.
 
 ### Git
 
-- **Commits:** Conventional Commits, English, lowercase, no scope, no final period.
-  ```
-  feat: add course enrollment endpoint
-  fix: resolve jwt expiry handling
-  chore: update spring boot to 3.2.5
-  ```
-- **Branches:** Git Flow — `main`, `develop`, `feature/*`, `bugfix/*`, `test/*`, `hotfix/*`, `release/*`.
+**Read [CONTRIBUTING.md](CONTRIBUTING.md) before creating a branch, a commit or a pull request.** It holds the
+full rules: the eight allowed commit types, Git Flow with the base and target of every branch type, the merge
+strategy, SemVer, and a section written for AI agents. It is a verbatim copy of the K-Forge organization's canonical
+guide, kept here because organization files are not included in a clone. Never edit it in this repository; run
+`scripts/sync-contributing.sh` after the canonical one changes.
 
-### Versioning
+`scripts/check-git-conventions.sh` is the executable form of those rules. CI runs it on every pull request into
+`main` or `develop` as the required `Git conventions` check, and `scripts/install-git-hooks.sh` (once per clone)
+runs it before every local commit. When a rule here and the script disagree, fix one of them; do not work around it.
 
-SemVer `MAJOR.MINOR.PATCH`. Release cycle: alpha → beta → stable.
+Rules specific to KApp:
+
+- **Base branch is `develop`.** `main` only receives `release/*` and `hotfix/*`.
+- **KApp has no production deployment, so there are no hotfixes.** A defect is a `bugfix/*` into `develop`.
+- **Nobody pushes to `main` or `develop`**, administrators included. Admins may bypass only when merging a pull
+  request, never to push. Every pull request needs the lead's review: `.github/CODEOWNERS` owns every path.
+- **One session, one worktree.** Two sessions in the same folder share one index and one set of files: they stage
+  each other's changes, overwrite each other's edits and run Gradle or Maven over each other's builds. A second
+  session on an area gets its own worktree, `../KApp-worktrees/<area>-<topic>`, on its own branch. The defaults:
+
+  | Path | Holds |
+  |---|---|
+  | `KApp/` | `develop`, for pulling and reviewing. Never commit here |
+  | `../KApp-worktrees/docs` | `chore/*` branches: documentation, CI, repository configuration |
+  | `../KApp-worktrees/backend` | `feature/*` and `bugfix/*` branches under `app/backend/` |
+  | `../KApp-worktrees/mobile-kotlin` | `feature/*` and `bugfix/*` branches under `app/frontend/mobile/kotlin/` |
+  | `../KApp-worktrees/mobile-swift` | `feature/*` and `bugfix/*` branches under `app/frontend/mobile/swift/` |
+
+  Ignored files do not follow a new worktree: copy `app/backend/microservices/.env` and
+  `app/frontend/mobile/kotlin/local.properties`, or regenerate them. Compose names its project after the directory,
+  so stop the stack in one worktree before starting it in another.
+- **A branch built on an unmerged branch** opens its pull request against that branch, and is retargeted to
+  `develop` once the parent merges.
 
 ---
 
@@ -241,8 +261,10 @@ Read `docs/PROGRESS.md` for up-to-date implementation status before proposing la
   the source of truth. Write the spec first; springdoc output is a drift check against it, not the
   other way round.
 - **Mobile (the product, in progress):** Kotlin and Swift clients, built against the mocks.
-- **Web:** the old HTML/JS client was a prototype of the mobile design and is frozen. There is no
-  Angular app; the planned one is an admin UI for preloaded data, not a student-facing client.
+- **Web:** the admin and developer portal (Angular, `app/frontend/web-admin/`) is built, tested in CI and used by
+  the mobile team to sign in as a role and reproduce a failing call. The old HTML/JS client under
+  `app/frontend/web/` was a prototype of the mobile design and is frozen: it is not student-facing and nothing
+  new is built on it.
 
 ---
 
@@ -269,8 +291,13 @@ semaforo. Everything else is deferred. Keep this list in sync with `docs/PROGRES
 
 - **Never modify** `.env` files (contains secrets).
 - **Backend location:** all backend work goes in `app/backend/microservices/`. The original monolith was deleted once the migration completed; it is only retrievable from the git history and must not be resurrected.
-- **Schema:** Modify `app/database/init.sql` carefully. Align data types with existing structures.
-- **Before large changes:** Read `docs/PROGRESS.md` and the contribution guidelines published by the K-Forge organization first.
+- **Schema:** changes go in Mongock change units (see Database). `app/database/init.sql` is the legacy PostgreSQL schema; nothing reads it, so do not update it.
+- **Before large changes:** Read `docs/PROGRESS.md` first.
+- **Before any git operation:** Read [CONTRIBUTING.md](CONTRIBUTING.md), including its section for AI agents. The commit author is the member running the session, never the agent.
+- **No tool attribution, anywhere.** Never write a `Co-Authored-By` trailer for a tool, a "generated with" line, a
+  signature or the name of the assistant used — not in commits, pull request titles or descriptions, code, or
+  documentation. `scripts/check-git-conventions.sh` refuses a commit authored by an automated identity or one whose
+  message credits one. The history records what the team built, not what wrote it.
 - **Product identity:** KApp is a **mobile app** for Konrad Lorenz. The microservices are the backend that powers the mobile clients. Do not describe KApp as a "web platform" — it is a mobile-first product.
 - **Demo mode:** `app/frontend/web/js/demo.js` intercepts API calls with sample data and activates only when the client is served from a host other than `localhost` (or forced with `?demo=1`). It exists so the interface can be deployed statically while no backend is hosted. Never point it at real data, and never let it change behaviour during local development.
 - **Delivery sequence:** backend first, then **mobile directly**. The web client was a prototype of

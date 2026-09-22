@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Enabled by scripts/install-git-hooks.sh. Refuses a commit whose message or branch breaks CONTRIBUTING.md.
+exec bash "$(git rev-parse --show-toplevel)/scripts/check-git-conventions.sh" commit-msg "$1"

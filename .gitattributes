@@ -1,0 +1,9 @@
+# Shell scripts and git hooks run under bash on every platform, Git for Windows included. A Windows
+# clone with core.autocrlf=true would otherwise check them out with CRLF, and bash reads every \r as
+# part of the command: the commit hook and every script under scripts/ fail on their first line.
+*.sh          text eol=lf
+.githooks/*   text eol=lf
+gradlew       text eol=lf
+
+# cmd.exe misreads labels and jumps in batch files without CRLF.
+*.bat         text eol=crlf

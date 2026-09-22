@@ -383,8 +383,12 @@ KApp/
 │   ├── generate-dev-secrets.sh       # Writes .env — secrets never leave the machine
 │   ├── create-dev-accounts.sh        # The four team accounts
 │   ├── verify-db-isolation.sh        # Proves each service reaches its own database and no other
-│   └── verify-visitor-pass.py        # End-to-end check of the day pass through the gateway
-├── .github/workflows/ci.yml          # Backend, contracts and portal
+│   ├── verify-visitor-pass.py        # End-to-end check of the day pass through the gateway
+│   └── check-git-conventions.sh      # The contributing rules as code, run by CI and the commit hook
+├── .github/workflows/
+│   ├── ci.yml                        # Backend, contracts and portal
+│   └── conventions.yml               # Branch, title and commits of every pull request
+├── CONTRIBUTING.md                   # Git Flow and commit rules, copied from the K-Forge organization
 ├── AGENTS.md                         # Operational context for AI agents
 └── package.json                      # Repository tooling
 ```
@@ -413,6 +417,7 @@ KApp/
 | [docs/MICROSERVICES-IDEAS.md](docs/MICROSERVICES-IDEAS.md) | Service decomposition analysis. Ideas, not commitments. |
 | [docs/DOCKER-GUIDE.md](docs/DOCKER-GUIDE.md) · [docs/K-COLORS.md](docs/K-COLORS.md) | Container guide; brand palette. |
 | [docs/researches/](docs/researches/) | Academic article reviews on university mobile apps and student engagement. |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | **Before your first branch.** Git Flow, commit types, merge strategy and rules for AI agents. In Spanish. |
 | [AGENTS.md](AGENTS.md) | Repository context and rules for AI agents. |
 
 ---
@@ -454,16 +459,25 @@ issue for security reports.
 Maintenance of this codebase is restricted to authorized members of K-Forge and the Fundación Universitaria Konrad
 Lorenz. External pull requests are not accepted.
 
-Contribution guidelines, issue templates and the security policy are maintained at the organization level in
-[K-Forge/.github](https://github.com/K-Forge) and apply to this repository.
+**Read [CONTRIBUTING.md](CONTRIBUTING.md) before your first branch.** It is a verbatim copy of the
+[K-Forge organization guide](https://github.com/K-Forge/.github/blob/main/CONTRIBUTING.md), kept in the repository
+because organization files are not included in a clone. In short:
 
-Repository-specific rules for authorized members:
+- Branches start from `develop` and are named `feature/*`, `bugfix/*`, `chore/*` or `test/*`. Only `release/*` and
+  `hotfix/*` reach `main`, and KApp has no production deployment, so there are no hotfixes yet.
+- Commits and pull request titles use one of eight types (`feat`, `fix`, `chore`, `release`, `hotfix`, `docs`,
+  `refactor`, `test`), in English and lowercase: `feat: add course enrollment endpoint`.
+- Every change enters through a pull request with one approval and green checks. Nobody pushes to `main` or
+  `develop`, administrators included.
 
-- Branch naming follows `feature/*` and `bugfix/*`; commits follow the Conventional Commits specification.
-- Any schema change must be reflected in `app/database/init.sql`.
-- Backend work targets `app/backend/microservices/`. The web client under `app/frontend/web/` is the test surface for
-  that API and the reference design for the future Kotlin and Swift clients: keep its screens in sync with what the
-  mobile apps are meant to deliver.
+Run this once after cloning, so a commit that breaks the rules is refused on your machine instead of in review:
+
+```bash
+scripts/install-git-hooks.sh
+```
+
+The same check, `scripts/check-git-conventions.sh`, runs in CI on every pull request. Issue templates and the
+security policy are maintained at the organization level in [K-Forge/.github](https://github.com/K-Forge/.github).
 
 ---
 
