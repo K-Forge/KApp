@@ -26,7 +26,7 @@ production deployment.
 | **Campus map** | **Merged** | **50** | Schematic floors on a grid, wings, corridors, a basement, and an offline grid editor. No floor plan images |
 | **Admin and developer portal** | **Merged** | **30** | Angular, from a compose `dev` profile. Full CRUD, bulk import, an API console driven by the specs, and a role inspector |
 | **Visitor day pass** | **Merged** | **23** | A one-day token that opens the map and nothing else. No account, no e-mail. Identity documents deleted after 30 days by a TTL index |
-| Android (Kotlin) | Not started | — | The product. Unblocked by the mocks |
+| Android (Kotlin) | In progress | 13 | Login and Inicio, drawn against the mockups. No network layer yet |
 | iOS (Swift) | Not started | — | The product. Unblocked by the mocks |
 | Deployment | Not started | — | Runs locally; university hardware pending |
 
@@ -41,7 +41,7 @@ matter.
 |---|---|
 | 1 · Per-service credentials | Each service holds its own MongoDB account with `readWrite` on one database. The separation between services is now enforced by the engine rather than respected by the code — 25 of 25 checks. Four development accounts are created by `scripts/create-dev-accounts.sh`, which generates their passwords locally. **Atlas is pending Brian creating the cluster** — see `ATLAS-SETUP.md` |
 | 2 · Admin endpoints | The eight operations the contracts already promised: program create/replace/delete, pensum delete, and invitation-code list/create/activate/delete. Deleting never cascades, and every `409` names what blocks it |
-| 3 · Plans and bulk import | Personal academic plans stored as deltas over the immutable pensum, and a CSV import for the 24 programs that validates the whole file before writing anything |
+| 3 · Plans and bulk import | Personal academic plans stored as deltas over the immutable pensum, and a CSV import that validates the whole file before writing anything |
 | 4 · Schematic map | A floor is a grid the client draws, not a photograph with pins on it. Wings as a field, corridors with the colour they are painted, a basement at level −1, and `accessVia` so the app can say "sube por el ascensor central". **This removed the longest-lead item on the project** — obtaining architectural plans was human latency, and a schematic floor is captured by walking it with `/admin/grid-editor.html` |
 | 5 · Visitor day pass | Reception issues a code; a visitor redeems it with an identity document and gets 24 hours of map-only access. No account is created. The token is an ordinary `ROLE_GUEST` one, so "map only" is the matrix every service already enforces rather than a second mechanism that could drift. Open guest registration is gone. **KApp now stores personal data under Ley 1581** — 30-day retention, enforced by MongoDB rather than by a job |
 | 6 · Admin portal | CRUD over everything administrable, with a `409` shown as its reason rather than a generic error. Fixed a regression the map change caused — the portal's models still carried `planImageUrl` and pin percentages, so editing a building or space through it would have failed. Two pages said a capability did not exist; both were true when written and had stopped being so. Also closed a real defect: `accessVia` was never validated, and a code matching nothing produces directions to a lift that is not there |
@@ -124,8 +124,10 @@ Tracked in `docs/SECURITY-AUDIT.md`.
 **The mobile clients.** They are the product and they have not been started. They are unblocked: the
 the contracts are served as Prism mocks, so Kotlin and Swift work does not wait on anything here.
 
-**The data.** The 24 pensums and roughly 40 floors are transcription, not programming — the CSV
-import and the grid editor exist so the team can do it in parallel without touching code.
+**The data.** The 23 plans the university publishes are loaded (`docs/pensums/`); what the PDFs could
+not answer — mostly institutional codes, and credits or hours on some brochures — is listed there.
+The roughly 40 floors are still transcription, and the grid editor exists so the team can do it in
+parallel without touching code.
 
 ### Blocked on somebody else
 
@@ -135,7 +137,7 @@ import and the grid editor exist so the team can do it in parallel without touch
 | SMTP relay | Dirección de TI | E-mail verification. Behind a flag, so nothing else waits |
 | Entra ID application registration | Dirección de TI | Institutional sign-in |
 | A sketch or photo of one floor | Brian | Modelling the first floor; the rest are captured with the editor |
-| The 24 pensums as CSV | The team | Bulk import exists and validates; the data does not |
+| Institutional codes, and the credits and hours some brochures omit | Dirección de TI (a SINU export) | Brochure plans stay `DRAFT` until their course codes are real |
 | Mobile clients | Iván, Alejandro, Santiago, Brian | Unblocked — the contracts and mocks are ready |
 | Telling Dirección de TI that KApp now stores identity documents | Brian | Nothing technical. The summary shared with Gabriel says KApp stores no institutional records, and that stopped being accurate with Phase 5 |
 
@@ -180,8 +182,9 @@ than an oversight.
 
 | Item | Note |
 |---|---|
-| Branch protection | Ruleset requires linear history and allows merge commits, which are mutually exclusive. Fix: squash |
-| `CODEOWNERS` | Missing. Ownership must be the team: GitHub does not accept a code owner approving their own pull request |
+| Branch protection | Was one ruleset with an administrator bypass set to "always", 0 approvals, no required checks, and linear history alongside merge-commit-only merging, so nobody but the bypass could merge. `develop` fell 143 commits behind `main`. Now two rulesets: `develop` takes squash and merge commits, `main` merge commits only; one approval, a code owner review and five green checks on both. Admins bypass only when merging a pull request, so not even they can push to either branch - verified against a throwaway branch carrying the same ruleset. Git Flow's release and hotfix merges need merge commits, which is why linear history went rather than merge commits |
+| `CODEOWNERS` | `.github/CODEOWNERS` makes the lead the owner of every path, so the ruleset's code owner review has something to require. GitHub never counts an author's own approval, which is why the lead's pull requests need the admin bypass, scoped to pull requests only |
+| Git conventions | `CONTRIBUTING.md` copied from the organization, enforced by `scripts/check-git-conventions.sh` in CI and in a commit hook. Open branches predating it need their commits reworded before they merge |
 | Secret scanning, push protection | Disabled |
 | Dependabot | Disabled, no `.github/dependabot.yml` |
 | Social preview | `portfolio-cover.png` is already 1200x630 but must be uploaded through the GitHub UI |

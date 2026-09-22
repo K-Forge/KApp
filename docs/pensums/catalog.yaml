@@ -1,0 +1,122 @@
+# Which transcription becomes which pensum, under which codes.
+#
+# Only the Ingeniería de Sistemas program code (506) and the three printed plan numbers
+# (1015, 1017, 1020) come from the university. Every other programCode, pensumCode and
+# course code below is KApp's own placeholder: readable, stable, and marked in the seed by
+# an empty sinuCode, so nobody mistakes it for an institutional one. Replace them here, run
+# tools/build_seed.py, and the seed follows.
+#
+# ACTIVE plans are the four printed with course codes. The brochures load as DRAFT: their
+# course codes are placeholders, and a student pinned to a placeholder code would lose that
+# pin the day the real codes arrive.
+- file: ingenieria-de-sistemas-1015.yaml
+  programCode: "506"
+  pensumCode: "1015"
+  status: ACTIVE
+- file: matematicas-1017.yaml
+  programCode: MATEMATICAS
+  pensumCode: "1017"
+  status: ACTIVE
+- file: ingenieria-industrial-1020.yaml
+  programCode: ING-INDUSTRIAL
+  pensumCode: "1020"
+  status: ACTIVE
+- file: psicologia-2020.yaml
+  programCode: PSICOLOGIA
+  pensumCode: PSI-2020
+  status: ACTIVE
+- file: tecnologia-en-desarrollo.yaml
+  programCode: TEC-DESARROLLO
+  pensumCode: TDS-2026
+  prefix: TDS
+  status: DRAFT
+- file: administracion-de-empresas-virtual.yaml
+  programCode: ADM-EMPRESAS-VIRT
+  pensumCode: ADV-2026
+  prefix: ADV
+  status: DRAFT
+- file: administracion-seguridad-salud-trabajo-virtual.yaml
+  programCode: ADM-SST-VIRTUAL
+  pensumCode: SSTV-2026
+  prefix: SSTV
+  status: DRAFT
+- file: marketing.yaml
+  programCode: MARKETING
+  pensumCode: MKT-2026
+  prefix: MKT
+  status: DRAFT
+- file: administracion-negocios-internacionales.yaml
+  programCode: NEGOCIOS-INTERNAC
+  pensumCode: ANI-2026
+  prefix: ANI
+  status: DRAFT
+- file: especializacion-analitica-de-datos-e-ia.yaml
+  programCode: ESP-ANALITICA-IA
+  pensumCode: EADI-2026
+  prefix: EADI
+  status: DRAFT
+- file: maestria-ciencia-de-datos-e-ia.yaml
+  programCode: MAE-CIENCIA-DATOS
+  pensumCode: MCDI-2026
+  prefix: MCDI
+  status: DRAFT
+- file: maestria-ia-aplicada-contextos-humanos-sociales.yaml
+  programCode: MAE-IA-APLICADA
+  pensumCode: MIAC-2026
+  prefix: MIAC
+  status: DRAFT
+- file: maestria-psicologia-del-consumidor.yaml
+  programCode: MAE-PSI-CONSUMIDOR
+  pensumCode: MPC-2026
+  prefix: MPC
+  status: DRAFT
+- file: especializacion-psicologia-del-consumidor.yaml
+  programCode: ESP-PSI-CONSUMIDOR
+  pensumCode: EPC-2026
+  prefix: EPC
+  status: DRAFT
+- file: maestria-psicologia-clinica.yaml
+  programCode: MAE-PSI-CLINICA
+  pensumCode: MPCL-2026
+  prefix: MPCL
+  status: DRAFT
+- file: especializacion-neuropsicologia-clinica.yaml
+  programCode: ESP-NEUROPSICOLOGIA
+  pensumCode: ENC-2026
+  prefix: ENC
+  status: DRAFT
+- file: especializacion-psicologia-clinica-infantil.yaml
+  programCode: ESP-CLINICA-INFANTIL
+  pensumCode: ECI-2026
+  prefix: ECI
+  status: DRAFT
+- file: especializacion-psicologia-forense-criminal.yaml
+  programCode: ESP-PSI-FORENSE
+  pensumCode: EPF-2026
+  prefix: EPF
+  status: DRAFT
+- file: especializacion-sexualidad.yaml
+  programCode: ESP-SEXUALIDAD
+  pensumCode: ESX-2026
+  prefix: ESX
+  status: DRAFT
+- file: especializacion-evaluacion-clinica-tratamiento.yaml
+  programCode: ESP-EVAL-CLINICA
+  pensumCode: ECT-2026
+  prefix: ECT
+  status: DRAFT
+- file: especializacion-gerencia-estrategica-talento-humano.yaml
+  programCode: ESP-GER-TALENTO
+  pensumCode: EGTH-2026
+  prefix: EGTH
+  status: DRAFT
+- file: especializacion-gerencia-seguridad-salud-trabajo.yaml
+  programCode: ESP-GER-SST
+  pensumCode: EGSST-2026
+  prefix: EGSST
+  status: DRAFT
+- file: doctorado-psicologia.yaml
+  programCode: DOC-PSICOLOGIA
+  pensumCode: DPSI-2026
+  prefix: DPSI
+  status: DRAFT

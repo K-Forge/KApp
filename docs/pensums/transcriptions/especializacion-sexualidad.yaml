@@ -1,0 +1,21 @@
+source: pensum_especializacion_sexualidad.pdf
+program: Especialización en Sexualidad
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
+programLevel: ESPECIALIZACION
+period: semestre
+declaredCredits: null
+levels:
+  1:
+    - [Introducción a la sexualidad humana, 4]
+    - [Ética y jurídica en la sexualidad, 2]
+    - [Sexualidad y diversidad, 2]
+    - [Promoción de la salud sexual, 3]
+    - [Investigación aplicada a la sexualidad humana I, 2]
+    - [Electiva I, 2]
+  2:
+    - [Violencia y sexualidad, 2]
+    - [Educación sexual, 4]
+    - ["Género, desigualdad e interseccionalidad", 3]
+    - [Sexualidad y discapacidad, 2]
+    - [Investigación aplicada a la sexualidad humana II, 2]
+    - [Electiva II, 2]

@@ -18,6 +18,7 @@ somewhere right.
 | [0006](0006-schematic-map-not-floor-plan-images.md) | A schematic map drawn from data, not floor plan images | Implemented |
 | [0007](0007-visitor-day-pass-instead-of-guest-accounts.md) | A visitor day pass instead of guest accounts | Implemented |
 | [0008](0008-invitation-codes-are-temporary.md) | Invitation codes are temporary, and this is how they go away | Step 1 implemented |
+| [0009](0009-atlas-is-the-only-development-database.md) | Atlas is the only development database | Implemented |
 
 ## Still to record
 

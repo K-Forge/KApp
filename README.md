@@ -23,7 +23,7 @@
   <img src="https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 21"/>
   <img src="https://img.shields.io/badge/Spring%20Boot-3.5-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot 3.5"/>
   <img src="https://img.shields.io/badge/Spring%20Cloud-2025.0-6DB33F?style=for-the-badge&logo=spring&logoColor=white" alt="Spring Cloud 2025.0"/>
-  <img src="https://img.shields.io/badge/MongoDB-7%20local%20%C2%B7%20Atlas%208-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB 7 local, Atlas 8 shared"/>
+  <img src="https://img.shields.io/badge/MongoDB-Atlas%208-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB Atlas 8"/>
   <img src="https://img.shields.io/badge/Tests-691%20backend%20%C2%B7%2059%20portal-0EA5E9?style=for-the-badge" alt="691 backend and 59 portal tests"/>
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
   <img src="https://img.shields.io/badge/Backend-MVP%20complete-22C55E?style=for-the-badge" alt="Backend MVP complete"/>
@@ -92,13 +92,14 @@ What that means when reading this repository:
   implicit.
 - **There is no production deployment.** It runs on the lead developer's machine until university
   hardware exists, and it has not been hardened for a public network. See [Security](#security).
-- **The shared development database is live.** A MongoDB Atlas cluster holds the five databases,
-  one per service with its own account, so the whole team works against the same data without
-  installing anything. `docker compose --profile cloud` points at it;
+- **The development database is a shared Atlas cluster, and the only one.** It holds the five
+  databases, one per service with its own account, so the whole team works against the same data
+  and nobody installs a server. There is no local MongoDB to fall back to — the stack needs the
+  network ([ADR 0009](docs/adr/0009-atlas-is-the-only-development-database.md));
   [`docs/ONBOARDING.md`](docs/ONBOARDING.md) is the setup a teammate follows.
 - **What is still blocked, and on whom**, is listed in [`docs/PROGRESS.md`](docs/PROGRESS.md) — an
-  SMTP relay, an Entra ID application registration, the floor sketches, and the 24 pensums as
-  PDFs.
+  SMTP relay, an Entra ID application registration, the floor sketches, and the institutional codes
+  the published pensums do not print.
 - The original Spring Boot monolith was removed once the migration completed. It remains retrievable
   from the git history; `app/backend/microservices/` is the only backend.
 
@@ -217,7 +218,7 @@ asserts it by connecting with each account against every database
 | OpenFeign | Inter-service calls | Three edges only, all one-directional. |
 | Spring Data MongoDB | Persistence | Document-shaped aggregates with a single writer each. See [ADR 0001](docs/adr/0001-mongodb-over-postgresql.md). |
 | **Mongock 5.5.1** | Migrations | Versioned, ordered, audited change units with a distributed lock — which the project previously had none of. |
-| MongoDB 7 (local) · Atlas 8 (shared) | Database | One engine, not polyglot. See [ADR 0004](docs/adr/0004-one-database-engine-not-polyglot.md). A shared Atlas cluster carries the five development databases so nobody installs a server; the tests still use Testcontainers locally, because pointing them at a shared cluster would make one person's run wipe another's data. |
+| MongoDB Atlas 8 | Database | One engine, not polyglot ([ADR 0004](docs/adr/0004-one-database-engine-not-polyglot.md)), and one cluster, shared, with no local alternative ([ADR 0009](docs/adr/0009-atlas-is-the-only-development-database.md)). The tests are the exception: Testcontainers starts them their own, because a test run has to be free to wipe its data. |
 | Testcontainers | Testing | Real MongoDB per suite; no in-memory substitute pretending to be a database. |
 | OpenAPI 3.1 + Prism | Contracts | Hand-written, linted in CI, served as mocks so client work never waits. |
 | Maven (multi-module) | Build | The parent POM centralises every version, so parallel branches never edit it. |
@@ -246,15 +247,15 @@ corepack enable && pnpm install
 # passes through a chat or a commit stays in that history forever.
 cd app/backend/microservices && ../../../scripts/generate-dev-secrets.sh > .env && cd -
 
-pnpm run microservices:start     # the five services against a local MongoDB
+pnpm run microservices:start     # the five services, the gateway and the portal
 pnpm run microservices:status    # what came up
 ```
 
 There is nothing to initialise afterwards. Mongock creates every index and loads the seed data —
 pensums, buildings, spaces, invitation codes — the first time a service starts.
 
-Working against the **shared Atlas cluster** instead of a local MongoDB, the profiles, what listens
-on which port, the local accounts, and what to do when something will not start are all in
+The profiles, what listens on which port, the development accounts, and what to do when something
+will not start are all in
 **[`docs/RUNBOOK.md`](docs/RUNBOOK.md)**. It is the operational document; this section is only the
 shortest path to a running stack.
 
@@ -262,23 +263,21 @@ shortest path to a running stack.
 
 | Command                         | Description                                                               |
 | ------------------------------- | ------------------------------------------------------------------------- |
-| `pnpm run web:dev`              | Serves `app/frontend/web` in development mode.                            |
-| `pnpm run web:start`            | Serves the frontend on port 3000 with SPA fallback.                       |
-| `pnpm run web:start:script`     | Starts the frontend through `scripts/start-frontend.sh` (honours `PORT`). |
-| `pnpm run microservices:start`  | Starts the five services against a local MongoDB.                         |
+| `pnpm run microservices:start`  | Starts the five services, the gateway and the admin portal.               |
 | `pnpm run microservices:cloud`  | Starts them against the shared Atlas cluster, plus the admin portal.      |
 | `pnpm run microservices:mock`   | Prism mocks only — no JVM, no database. For client work.                  |
 | `pnpm run microservices:status` | Shows what is running.                                                    |
 | `pnpm run microservices:logs`   | Follows the logs. Add `-- <service>` for one of them.                     |
 | `pnpm run microservices:stop`   | Stops everything, mocks and portal included.                              |
+| `pnpm run prototype:serve`      | Serves the frozen HTML prototype in `app/frontend/web` on port 3000.      |
+
+The admin portal has its own scripts, in `app/frontend/web-admin/package.json`, because they are
+its build and not the repository's: `pnpm start`, `pnpm build`, `pnpm test`.
 
 These are thin wrappers around `docker compose`, and deliberately so: **they work the same on
 Windows and macOS**. They pass the compose file by path rather than changing directory first,
 because `pnpm` runs scripts through `cmd.exe` on Windows and `sh` elsewhere, and the two do not
 agree about `cd` with forward slashes. Nothing in them is shell-specific.
-
-Older aliases `dev:web`, `start:web`, `start:frontend` and `start:microservices` are kept for backwards
-compatibility.
 
 ### Building a client against this
 
@@ -289,7 +288,7 @@ rather than which is better:
 Prism mocks. Every endpoint answers with the examples in the contract, immediately, with no
 database and no sign-in. This is the one to use while a screen is being laid out.
 
-**Against the real services.** `docker compose --profile cloud --profile core up -d` starts the
+**Against the real services.** `docker compose --profile core up -d` starts the
 services against the shared Atlas cluster — real data, real tokens, real 403s. Ask Brian for the
 `.env`; [`docs/ONBOARDING.md`](docs/ONBOARDING.md) is the walkthrough.
 
@@ -317,7 +316,7 @@ talking to the real microservices and nothing about the normal workflow changes.
 `?demo=1` (and `?demo=0` to leave it):
 
 ```bash
-pnpm run web:start   # then open http://localhost:3000/login.html?demo=1
+pnpm run prototype:serve   # then open http://localhost:3000/login.html?demo=1
 ```
 
 A persistent banner marks every screen as demo data, and offers a role switcher so the administrator panel is
@@ -360,8 +359,7 @@ KApp/
 │   │   │   ├── common/               # Error envelope, CurrentUser, role constants
 │   │   │   ├── course-service/       # FROZEN — out of the reactor, compose and CI
 │   │   │   ├── assignment-service/   # FROZEN — same
-│   │   │   ├── mongo-init/rs-init.js # Replica set, service accounts, and the health probe
-│   │   │   ├── docker-compose.yml    # Profiles: mock, core, academic, map, full, dev, cloud
+│   │   │   ├── docker-compose.yml    # Profiles: mock, core, academic, map, full, dev
 │   │   │   └── pom.xml               # Parent POM — every version lives here
 │   │   └── postman/                  # API collections
 │   ├── frontend/
@@ -374,6 +372,7 @@ KApp/
 ├── docs/
 │   ├── api/                          # Five OpenAPI 3.1 contracts — the source of truth
 │   ├── adr/                          # Architecture decision records
+│   ├── pensums/                      # The published plans: transcriptions, extraction tools, seed builder
 │   ├── templates/                    # The pensum import CSV and its column reference
 │   ├── PROGRESS.md                   # What is built, and what is blocked on whom
 │   ├── RUNBOOK.md                    # How to start, stop and troubleshoot it
@@ -384,8 +383,12 @@ KApp/
 │   ├── generate-dev-secrets.sh       # Writes .env — secrets never leave the machine
 │   ├── create-dev-accounts.sh        # The four team accounts
 │   ├── verify-db-isolation.sh        # Proves each service reaches its own database and no other
-│   └── verify-visitor-pass.py        # End-to-end check of the day pass through the gateway
-├── .github/workflows/ci.yml          # Backend, contracts and portal
+│   ├── verify-visitor-pass.py        # End-to-end check of the day pass through the gateway
+│   └── check-git-conventions.sh      # The contributing rules as code, run by CI and the commit hook
+├── .github/workflows/
+│   ├── ci.yml                        # Backend, contracts and portal
+│   └── conventions.yml               # Branch, title and commits of every pull request
+├── CONTRIBUTING.md                   # Git Flow and commit rules, copied from the K-Forge organization
 ├── AGENTS.md                         # Operational context for AI agents
 └── package.json                      # Repository tooling
 ```
@@ -402,6 +405,7 @@ KApp/
 | [docs/RUNBOOK.md](docs/RUNBOOK.md) | **How to run it.** Profiles, accounts, and a troubleshooting section where every entry is a failure we actually hit. |
 | [docs/PROGRESS.md](docs/PROGRESS.md) | **What is built**, what each phase delivered, and what is blocked on whom. |
 | [docs/api/](docs/api/) | The OpenAPI 3.1 contracts, one per service. **The source of truth** — linted in CI and served as mocks. |
+| [docs/pensums/](docs/pensums/README.md) | The 23 published plans of study: how each PDF was read, what was loaded, and what the PDFs could not answer. |
 | [docs/adr/](docs/adr/) | Architecture decision records: what was decided, what else was considered, and the consequences including the bad ones. |
 | [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | Scope. Every entry is built or explicitly out — no pending requirements nobody intends to implement. |
 | [docs/DESIGN.md](docs/DESIGN.md) | The system as it is, with diagrams. |
@@ -413,6 +417,7 @@ KApp/
 | [docs/MICROSERVICES-IDEAS.md](docs/MICROSERVICES-IDEAS.md) | Service decomposition analysis. Ideas, not commitments. |
 | [docs/DOCKER-GUIDE.md](docs/DOCKER-GUIDE.md) · [docs/K-COLORS.md](docs/K-COLORS.md) | Container guide; brand palette. |
 | [docs/researches/](docs/researches/) | Academic article reviews on university mobile apps and student engagement. |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | **Before your first branch.** Git Flow, commit types, merge strategy and rules for AI agents. In Spanish. |
 | [AGENTS.md](AGENTS.md) | Repository context and rules for AI agents. |
 
 ---
@@ -454,16 +459,25 @@ issue for security reports.
 Maintenance of this codebase is restricted to authorized members of K-Forge and the Fundación Universitaria Konrad
 Lorenz. External pull requests are not accepted.
 
-Contribution guidelines, issue templates and the security policy are maintained at the organization level in
-[K-Forge/.github](https://github.com/K-Forge) and apply to this repository.
+**Read [CONTRIBUTING.md](CONTRIBUTING.md) before your first branch.** It is a verbatim copy of the
+[K-Forge organization guide](https://github.com/K-Forge/.github/blob/main/CONTRIBUTING.md), kept in the repository
+because organization files are not included in a clone. In short:
 
-Repository-specific rules for authorized members:
+- Branches start from `develop` and are named `feature/*`, `bugfix/*`, `chore/*` or `test/*`. Only `release/*` and
+  `hotfix/*` reach `main`, and KApp has no production deployment, so there are no hotfixes yet.
+- Commits and pull request titles use one of eight types (`feat`, `fix`, `chore`, `release`, `hotfix`, `docs`,
+  `refactor`, `test`), in English and lowercase: `feat: add course enrollment endpoint`.
+- Every change enters through a pull request with one approval and green checks. Nobody pushes to `main` or
+  `develop`, administrators included.
 
-- Branch naming follows `feature/*` and `bugfix/*`; commits follow the Conventional Commits specification.
-- Any schema change must be reflected in `app/database/init.sql`.
-- Backend work targets `app/backend/microservices/`. The web client under `app/frontend/web/` is the test surface for
-  that API and the reference design for the future Kotlin and Swift clients: keep its screens in sync with what the
-  mobile apps are meant to deliver.
+Run this once after cloning, so a commit that breaks the rules is refused on your machine instead of in review:
+
+```bash
+scripts/install-git-hooks.sh
+```
+
+The same check, `scripts/check-git-conventions.sh`, runs in CI on every pull request. Issue templates and the
+security policy are maintained at the organization level in [K-Forge/.github](https://github.com/K-Forge/.github).
 
 ---
 

@@ -1,74 +1,19 @@
 # Needs verification
 
-Findings from finishing `semaphore-service` that a human with access to the real
-Ingeniería de Sistemas Reforma 2018 plan (or to the published `docs/api/*.yaml`
-contracts) needs to resolve. Nothing below was silently patched over: the code and the
+Findings from finishing `semaphore-service` that a human with access to the university's
+records (or to the published `docs/api/*.yaml` contracts) needs to resolve. Nothing below was silently patched over: the code and the
 seed match what is written here, discrepancies included.
 
-## 1. The seeded pensum 1015 does not sum to its own declared totals
+## 1. The seeded pensum 1015 was a reconstruction — resolved
 
-`pensum-1015.json` was reconstructed from a printed diagram, not read from SINU. The
-change unit that loads it (`V002_SeedIngenieriaDeSistemas`) and `PensumSeedTotalsTest`
-both say so and both keep the *declared* header (`totalCredits: 142`, `totalHours: 194`)
-exactly as printed, deliberately not recomputed from the 48 seeded items - see the
-`Pensum` and `PensumArea` javadoc for why. The gap between what was printed and
-what the 48 reconstructed items actually add up to is the finding below.
+`V002` seeded Ingeniería de Sistemas from a drawing: 48 items, most under invented `IS-*` codes,
+summing to 144 credits and 197 weekly hours against a declared 142 and 194. `V006` replaces it with
+the printed 2019-1 grid — 51 items, every one with its institutional code, 143 credits and 194 weekly
+hours — and loads the other 22 plans the university publishes.
 
-**Only 48 items could be reconstructed**, against the "roughly 51" the plan is described
-as having in `docs/api/semaphore.openapi.yaml`. The 3 or so missing items are unknown,
-not guessed at - adding placeholder rows to force a count match would be inventing data.
-
-### Per level: computed vs. declared
-
-| Level | Items | Credits (computed) | Credits (declared) | Weekly hours (computed) | Weekly hours (declared) |
-|------:|------:|--------------------:|--------------------:|--------------------------:|--------------------------:|
-| 1 | 6 | 16 | 16 | **22** | **21** ⚠️ |
-| 2 | 5 | 16 | 16 | 22 | 22 |
-| 3 | 5 | **15** | **16** ⚠️ | 21 | 21 |
-| 4 | 5 | **15** | **16** ⚠️ | 23 | 23 |
-| 5 | 5 | **15** | **16** ⚠️ | **20** | **21** ⚠️ |
-| 6 | 6 | **18** | **16** ⚠️ | **23** | **18** ⚠️ |
-| 7 | 6 | **18** | **16** ⚠️ | **25** | **19** ⚠️ |
-| 8 | 6 | **17** | **16** ⚠️ | **21** | **20** ⚠️ |
-| 9 | 4 | 14 | 14 | **20** | **29** ⚠️ |
-| **Total** | **48** | **144** | **142** ⚠️ | **197** | **194** ⚠️ |
-
-Only level 2 has no mismatch at all. `PensumSeedTotalsTest` pins the *computed*
-column above as a regression baseline (one test per level, plus the two grand totals),
-so a future edit that moves a course between levels fails loudly instead of silently
-changing these numbers again.
-
-### Per knowledge area: computed vs. declared
-
-Given for the same reason - a wrong level assignment usually also means a course landed
-under the wrong area subtotal, which can help triangulate which item(s) actually moved.
-
-| Area | Items | Credits (computed) | Credits (declared) | Weekly hours (computed) | Weekly hours (declared) |
-|------|------:|--------------------:|--------------------:|--------------------------:|--------------------------:|
-| CB (Ciencias Básicas) | 12 | **38** | **36** ⚠️ | **49** | **44** ⚠️ |
-| BIS (Básicas de Ing. de Sistemas) | 9 | **27** | **28** ⚠️ | 40 | 40 |
-| ISA (Ing. de Sistemas Aplicada) | 22 | **67** | **66** ⚠️ | **91** | **92** ⚠️ |
-| SI (Sociedad e Interculturalidad) | 5 | 12 | 12 | **17** | **18** ⚠️ |
-
-### What to do with this
-
-A student or advisor with the real printed pensum should be able to spot, in minutes,
-which course(s) are at the wrong level - the per-level and per-area gaps above are small
-(1-7 credits/hours each) and consistent with a handful of courses being one level off,
-not a wholesale re-derivation. **Do not "fix" this by editing the declared header or the
-area totals to match the computed items** - fix it by moving the misplaced course(s) to
-their real level in `pensum-1015.json`, then update the hardcoded expectations in
-`PensumSeedTotalsTest` to match. If the totals still don't reconcile after that,
-report the new numbers here rather than forcing agreement.
-
-### SINU codes
-
-Only 10 of the 48 items carry a confirmed institutional SINU code (`sinuCode` set and
-equal to `code`): `10011, 20015, 10024, 20028, 20037, 17080, 46018, 48022, 59035, 56201`.
-The other 32 fixed courses use a generated `IS-*` slug as their `code` with `sinuCode:
-null`, and the 6 elective slots have no code at all. Nobody should treat an `IS-*` code
-as an institutional one; that is exactly what the nullable `sinuCode` field next to it is
-for.
+What the published PDFs still cannot answer (institutional codes for most programs, per-course
+credits and hours missing from several brochures, half hours, prerequisites between electives) is
+listed in [`docs/pensums/README.md`](../../../../docs/pensums/README.md#what-the-pdfs-cannot-answer).
 
 ## 2. `userId` type contradicts across the two published contracts
 

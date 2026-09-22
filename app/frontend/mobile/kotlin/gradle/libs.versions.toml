@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.1"
+agp = "9.3.2"
 kotlin = "2.2.21"
 coreKtx = "1.16.0"
 lifecycle = "2.9.0"
@@ -26,6 +26,6 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 [plugins]
+# No kotlin-android entry: AGP 9 has its own Kotlin compiler built in.
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

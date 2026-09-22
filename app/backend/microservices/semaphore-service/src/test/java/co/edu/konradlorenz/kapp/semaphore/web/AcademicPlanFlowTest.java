@@ -68,7 +68,7 @@ class AcademicPlanFlowTest {
     private static final String SEEDED_PENSUM = "1015";
     private static final String SEEDED_PROGRAM = "506";
     /** A first-level course of the seeded plan, so it is eligible from the start. */
-    private static final String FIRST_LEVEL_COURSE = "10011";
+    private static final String FIRST_LEVEL_COURSE = "11015";
 
     @AfterEach
     void clearPlans() {

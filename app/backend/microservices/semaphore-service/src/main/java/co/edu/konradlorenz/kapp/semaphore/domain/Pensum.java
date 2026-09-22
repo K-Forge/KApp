@@ -1,5 +1,6 @@
 package co.edu.konradlorenz.kapp.semaphore.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -31,7 +32,8 @@ import java.util.Optional;
  * @param reform       name of the curricular reform this plan belongs to
  * @param status       lifecycle state; only ACTIVE plans are pinned to new students
  * @param totalCredits credits the printed plan declares
- * @param totalHours   <strong>weekly</strong> hours the printed plan declares
+ * @param totalHours   <strong>weekly</strong> hours the printed plan declares; whole or half,
+ *                     because the items it adds up can be (see {@link WeeklyHours})
  * @param levels       number of levels (semesters) - the number of grid columns
  * @param areas        knowledge areas in display order - the grid rows
  * @param courses      every item of the plan, fixed courses and elective slots alike
@@ -45,7 +47,7 @@ public record Pensum(
         String reform,
         PensumStatus status,
         int totalCredits,
-        int totalHours,
+        @JsonSerialize(using = WeeklyHours.Serializer.class) double totalHours,
         int levels,
         List<PensumArea> areas,
         List<PensumCourse> courses

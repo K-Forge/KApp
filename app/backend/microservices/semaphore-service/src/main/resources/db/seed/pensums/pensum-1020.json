@@ -1,0 +1,696 @@
+{
+  "pensumCode": "1020",
+  "programCode": "ING-INDUSTRIAL",
+  "programName": "Ingeniería Industrial",
+  "faculty": "Facultad de Matemáticas e Ingenierías",
+  "reform": "Reforma del plan de estudios 2021-1",
+  "status": "ACTIVE",
+  "totalCredits": 142,
+  "totalHours": 173,
+  "levels": 9,
+  "areas": [
+    {
+      "code": "CB",
+      "name": "Ciencias Básicas",
+      "color": "#539392",
+      "credits": 42,
+      "hours": 54
+    },
+    {
+      "code": "BI",
+      "name": "Básicas de Ingeniería",
+      "color": "#522567",
+      "credits": 17,
+      "hours": 21
+    },
+    {
+      "code": "IIA",
+      "name": "Ingeniería Industrial Aplicada",
+      "color": "#C9D329",
+      "credits": 65,
+      "hours": 69
+    },
+    {
+      "code": "SI",
+      "name": "Sociedad e Interculturalidad",
+      "color": "#D51A65",
+      "credits": 18,
+      "hours": 29
+    }
+  ],
+  "courses": [
+    {
+      "code": "11015",
+      "pensumItemCode": "11015",
+      "name": "Precálculo",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "11015"
+    },
+    {
+      "code": "21012",
+      "pensumItemCode": "21012",
+      "name": "Lógica Matemática",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "21012"
+    },
+    {
+      "code": "41025",
+      "pensumItemCode": "41025",
+      "name": "Fundamentos de Programación",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "41025"
+    },
+    {
+      "code": "41013",
+      "pensumItemCode": "41013",
+      "name": "Introducción a la Ingeniería Industrial",
+      "level": 1,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "BI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "41013"
+    },
+    {
+      "code": "71181",
+      "pensumItemCode": "71181",
+      "name": "Inglés Intermedio bajo",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "71181"
+    },
+    {
+      "code": "71071",
+      "pensumItemCode": "71071",
+      "name": "Habilidades Comunicativas",
+      "level": 1,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "71071"
+    },
+    {
+      "code": "12015",
+      "pensumItemCode": "12015",
+      "name": "Cálculo I",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "11015"
+      ],
+      "sinuCode": "12015"
+    },
+    {
+      "code": "63202",
+      "pensumItemCode": "63202",
+      "name": "Algebra Lineal",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "63202"
+    },
+    {
+      "code": "23213",
+      "pensumItemCode": "23213",
+      "name": "Física Mecánica",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "23213"
+    },
+    {
+      "code": "31013",
+      "pensumItemCode": "31013",
+      "name": "Técnicas de Programación I",
+      "level": 2,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "41025"
+      ],
+      "sinuCode": "31013"
+    },
+    {
+      "code": "72081",
+      "pensumItemCode": "72081",
+      "name": "Inglés Intermedio Medio",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "71181"
+      ],
+      "sinuCode": "72081"
+    },
+    {
+      "code": "71221",
+      "pensumItemCode": "71221",
+      "name": "Cultura I",
+      "level": 2,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "71221"
+    },
+    {
+      "code": "13015",
+      "pensumItemCode": "13015",
+      "name": "Cálculo II",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "12015"
+      ],
+      "sinuCode": "13015"
+    },
+    {
+      "code": "54044",
+      "pensumItemCode": "54044",
+      "name": "Electromagnetismo",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "54044"
+    },
+    {
+      "code": "31014",
+      "pensumItemCode": "31014",
+      "name": "Técnicas de Programación II",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "31013"
+      ],
+      "sinuCode": "31014"
+    },
+    {
+      "code": "45040",
+      "pensumItemCode": "45040",
+      "name": "Diseño Digital 3D",
+      "level": 3,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "45040"
+    },
+    {
+      "code": "73081",
+      "pensumItemCode": "73081",
+      "name": "Inglés intermedio alto",
+      "level": 3,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "72081"
+      ],
+      "sinuCode": "73081"
+    },
+    {
+      "code": "76011",
+      "pensumItemCode": "76011",
+      "name": "Cátedra de Cultura II",
+      "level": 3,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "76011"
+    },
+    {
+      "code": "14015",
+      "pensumItemCode": "14015",
+      "name": "Cálculo III",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "13015"
+      ],
+      "sinuCode": "14015"
+    },
+    {
+      "code": "55040",
+      "pensumItemCode": "55040",
+      "name": "Termodinámica",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "55040"
+    },
+    {
+      "code": "45045",
+      "pensumItemCode": "45045",
+      "name": "Introducción a simulación física",
+      "level": 4,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "23213",
+        "54044"
+      ],
+      "sinuCode": "45045"
+    },
+    {
+      "code": "46040",
+      "pensumItemCode": "46040",
+      "name": "Tecnologías de Manufactura",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "45040"
+      ],
+      "sinuCode": "46040"
+    },
+    {
+      "code": "74302",
+      "pensumItemCode": "74302",
+      "name": "Contabilidad Gerencial",
+      "level": 4,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "74302"
+    },
+    {
+      "code": "74081",
+      "pensumItemCode": "74081",
+      "name": "Inglés Avanzado",
+      "level": 4,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "73081"
+      ],
+      "sinuCode": "74081"
+    },
+    {
+      "code": "13013",
+      "pensumItemCode": "13013",
+      "name": "Ecuaciones Diferenciales",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "14015"
+      ],
+      "sinuCode": "13013"
+    },
+    {
+      "code": "17080",
+      "pensumItemCode": "17080",
+      "name": "Estadística Descriptiva",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "17080"
+    },
+    {
+      "code": "54042",
+      "pensumItemCode": "54042",
+      "name": "Bases de Datos",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "BI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "31014"
+      ],
+      "sinuCode": "54042"
+    },
+    {
+      "code": "47040",
+      "pensumItemCode": "47040",
+      "name": "Producción Eficiente",
+      "level": 5,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "46040"
+      ],
+      "sinuCode": "47040"
+    },
+    {
+      "code": "48031",
+      "pensumItemCode": "48031",
+      "name": "Costos y Presupuestos",
+      "level": 5,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "74302"
+      ],
+      "sinuCode": "48031"
+    },
+    {
+      "code": "75081",
+      "pensumItemCode": "75081",
+      "name": "Inglés proficiencia",
+      "level": 5,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "74081"
+      ],
+      "sinuCode": "75081"
+    },
+    {
+      "code": "17070",
+      "pensumItemCode": "17070",
+      "name": "Inferencia Estadística",
+      "level": 6,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "17080"
+      ],
+      "sinuCode": "17070"
+    },
+    {
+      "code": "14016",
+      "pensumItemCode": "14016",
+      "name": "Investigación de Operaciones I",
+      "level": 6,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "14016"
+    },
+    {
+      "code": "56045",
+      "pensumItemCode": "56045",
+      "name": "Ergonomía",
+      "level": 6,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "56045"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "57570",
+      "name": "Electiva I",
+      "level": 6,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "IIA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "57570"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "57575",
+      "name": "Electiva II",
+      "level": 6,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "IIA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "57575"
+    },
+    {
+      "code": "70012",
+      "pensumItemCode": "70012",
+      "name": "Cultura III",
+      "level": 6,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "SI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "70012"
+    },
+    {
+      "code": "17015",
+      "pensumItemCode": "17015",
+      "name": "Investigación de Operaciones II",
+      "level": 7,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "CB",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "14016"
+      ],
+      "sinuCode": "17015"
+    },
+    {
+      "code": "48040",
+      "pensumItemCode": "48040",
+      "name": "Logística para la Industria 4.0",
+      "level": 7,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "48040"
+    },
+    {
+      "code": "44025",
+      "pensumItemCode": "44025",
+      "name": "Matemática Financiera",
+      "level": 7,
+      "credits": 2,
+      "weeklyHours": 4,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "48031"
+      ],
+      "sinuCode": "44025"
+    },
+    {
+      "code": "57581",
+      "pensumItemCode": "57581",
+      "name": "Seguridad y Salud en el Trabajo",
+      "level": 7,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "57581"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "57580",
+      "name": "Electiva III",
+      "level": 7,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "IIA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "57580"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "57585",
+      "name": "Electiva IV",
+      "level": 7,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "IIA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "57585"
+    },
+    {
+      "code": "56201",
+      "pensumItemCode": "56201",
+      "name": "Metodología de Investigación",
+      "level": 8,
+      "credits": 2,
+      "weeklyHours": 2,
+      "area": "BI",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "56201"
+    },
+    {
+      "code": "49040",
+      "pensumItemCode": "49040",
+      "name": "Analítica Operacional en Calidad",
+      "level": 8,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "17070"
+      ],
+      "sinuCode": "49040"
+    },
+    {
+      "code": "47923",
+      "pensumItemCode": "47923",
+      "name": "Proyectos",
+      "level": 8,
+      "credits": 3,
+      "weeklyHours": 4,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [
+        "44025"
+      ],
+      "sinuCode": "47923"
+    },
+    {
+      "code": "58001",
+      "pensumItemCode": "58001",
+      "name": "Gestión del Talento Humano",
+      "level": 8,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "58001"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "57590",
+      "name": "Electiva V",
+      "level": 8,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "IIA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "57590"
+    },
+    {
+      "code": null,
+      "pensumItemCode": "57595",
+      "name": "Electiva VI",
+      "level": 8,
+      "credits": 3,
+      "weeklyHours": 3,
+      "area": "IIA",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": "57595"
+    },
+    {
+      "code": "39020",
+      "pensumItemCode": "39020",
+      "name": "Trabajo de grado",
+      "level": 9,
+      "credits": 4,
+      "weeklyHours": 2,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "39020"
+    },
+    {
+      "code": "9a020",
+      "pensumItemCode": "9a020",
+      "name": "Práctica Profesional",
+      "level": 9,
+      "credits": 8,
+      "weeklyHours": 2,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "9a020"
+    },
+    {
+      "code": "57093",
+      "pensumItemCode": "57093",
+      "name": "Seminario de Gestión Empresarial",
+      "level": 9,
+      "credits": 2,
+      "weeklyHours": 3,
+      "area": "IIA",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": "57093"
+    }
+  ]
+}

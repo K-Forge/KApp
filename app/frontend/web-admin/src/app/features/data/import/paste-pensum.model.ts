@@ -122,6 +122,19 @@ export function mapFromHeadings(cells: string[]): Record<number, ItemField | und
   return out;
 }
 
+/**
+ * Weekly hours as a plan prints them: a whole number, or a whole number and a half.
+ *
+ * <p>Four items across the published plans print a half — Psicología's two professional
+ * practices at 4,5 hours and the practices of Marketing and Negocios Internacionales at 1,5 —
+ * and nothing prints anything finer. A `4,3` in a pasted table is a misread cell, and the
+ * server refuses it, so it is worth saying here rather than at the end of the import.
+ */
+export function parseHours(value: string): number {
+  const text = value.trim().replace(',', '.');
+  return /^\d{1,3}(\.5)?$/.test(text) ? Number(text) : NaN;
+}
+
 /** True/false in the forms a person actually types, including Spanish. */
 export function looksTrue(value: string): boolean {
   return ['true', '1', 'si', 'sí', 'yes', 'x', 'electiva'].includes(value.trim().toLowerCase());

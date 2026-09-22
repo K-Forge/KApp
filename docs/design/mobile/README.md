@@ -3,8 +3,6 @@
 Maquetas de **Login** e **Inicio** para los dos clientes nativos. Estáticas: sirven para
 escribir la vista mirándolas, no para navegar.
 
-Lienzo publicado: <https://claude.ai/code/artifact/73a5db81-690b-410e-a996-e70a59050c27>
-
 ## Archivos
 
 | Archivo | Qué es |
@@ -18,9 +16,8 @@ Lienzo publicado: <https://claude.ai/code/artifact/73a5db81-690b-410e-a996-e70a5
 | `Tokens.dc.html` | Paleta, semántica, tipografía, contraste |
 | `canvas.json` | Posición de cada lámina y las notas al margen |
 
-`kapp-login-e-inicio.html` es el lienzo armado: **ábrelo en el navegador y lo ves todo junto**,
-con zoom y las notas al margen. No lo edites a mano — se regenera desde los archivos de arriba,
-así que cualquier cambio hecho ahí se pierde en la siguiente generación.
+Cada lámina se abre sola en el navegador. Son estáticas y se editan a mano: son la fuente, y
+`canvas.json` guarda dónde va cada una y las notas al margen.
 
 ## Reglas de color
 

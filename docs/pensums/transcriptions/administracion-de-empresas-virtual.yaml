@@ -1,0 +1,66 @@
+source: Pensum-Administracion-Empresas.pdf
+program: Administración de Empresas (virtual)
+faculty: Escuela de Negocios   # not printed; inferred from the discipline
+programLevel: PREGRADO
+period: cuatrimestre
+declaredCredits: null                          # the brochure prints no total
+levels:
+  1:
+    - [Fundamentos de Economía, 4]
+    - [Introducción a la Administración, 4]
+    - [Fundamentos de Matemáticas, 4]
+    - [Habilidades Comunicativas, 2]
+    - [Inglés Intermedio Bajo, 2]
+  2:
+    - [Introducción a la Contabilidad, 3]
+    - [Teoría Organizacional, 2]
+    - [Ética Empresarial, 3]
+    - [Matemáticas para la Administración y los Negocios, 4]
+    - [Cultura I, 2]
+    - [Inglés Intermedio Medio, 2]
+  3:
+    - [Costos y Presupuestos con Herramientas Digitales, 3]
+    - [Fundamentos de Marketing, 4]
+    - [Electiva Profesional I, 2]
+    - [Estadística Descriptiva, 3]
+    - [Cultura II, 2]
+    - [Inglés Intermedio Alto, 2]
+  4:
+    - [Matemáticas Financieras con Herramientas Digitales, 3]
+    - [Pensamiento Estratégico, 2]
+    - [Investigación de Mercados, 3]
+    - [Electiva Institucional, 3]
+    - [Estadística Inferencial, 3]
+    - [Inglés Avanzado, 2]
+  5:
+    - [Gestión de la Información, 2]
+    - [Análisis Financiero, 2]
+    - [Emprendimiento e Innovación, 2]
+    - [Gerencia estratégica de Marketing con ambientes de IA, 4]
+    - [Talento humano y Legislación laboral, 2]
+    - [Electiva Profesional II, 2]
+    - [Ingles proficiencia, 2]
+  6:
+    - [Gerencia Financiera y Decisiones en Ambientes Digitales, 3]
+    - [Gerencia Estratégica con escenarios de simulación, 4]
+    - [Negocios Electrónicos y Comercio en canales digitales, 3]
+    - [Liderazgo, 2]
+    - [Electiva Profesional III, 2]
+    - [Habilidades Gerenciales I, 2]
+  7:
+    - [Finanzas Internacionales, 4]
+    - [Herramientas Digitales, 2]
+    - [Investigación de Operaciones, 3]
+    - [Gestión del Talento Humano, 3]
+    - [Electiva Profesional IV, 3]
+    - [Cultura III, 2]
+    - [Habilidades Gerenciales II, 2]
+  8:
+    - [Metodología de la Investigación, 3]
+    - [Formulación y Evaluación de Proyectos, 4]
+    - [Legislación Empresarial, 2]
+    - [Gerencia de Operaciones, 4]
+    - [Marketing Internacional, 3]
+  9:
+    - [Trabajo de grado, 2]
+    - [Práctica Profesional, 14]

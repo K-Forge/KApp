@@ -37,4 +37,4 @@ info "URL: http://localhost:$PORT"
 echo ""
 
 cd "$ROOT"
-bunx serve "$WEB_DIR" -l "$PORT"
+pnpm exec serve "$WEB_DIR" -l "$PORT"

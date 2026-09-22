@@ -2,6 +2,8 @@ package co.edu.konradlorenz.kapp.semaphore.web.dto;
 
 import co.edu.konradlorenz.kapp.semaphore.domain.Pensum;
 import co.edu.konradlorenz.kapp.semaphore.domain.PensumStatus;
+import co.edu.konradlorenz.kapp.semaphore.domain.WeeklyHours;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -20,7 +22,7 @@ public record PensumDto(
         @NotBlank @Size(max = 100) String reform,
         @NotNull PensumStatus status,
         @Min(0) int totalCredits,
-        @Min(0) int totalHours,
+        @Min(0) @JsonSerialize(using = WeeklyHours.Serializer.class) double totalHours,
         @Min(1) @Max(12) int levels,
         @NotEmpty @Valid List<PensumAreaDto> areas,
         @NotEmpty @Valid List<PensumCourseDto> courses

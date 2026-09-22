@@ -1,0 +1,30 @@
+source: Plan-de-estudios-Maestria-en-analitica-de-datos-e-IA.pdf
+program: Maestría en Ciencia de Datos e IA       # the file name says "analítica"; the document's title says this
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
+programLevel: MAESTRIA
+period: semestre
+declaredCredits: null
+levels:
+  1:
+    - [Gestión Estratégica de Proyectos de Analítica de Datos, 2]
+    - [Inteligencia de Negocios, 2]
+    - [Fundamentos de Programación y Bases de Datos para Analítica, 3]
+    - [Introducción a la IA y Ciencia de Datos, 2]
+    - [Visualización de Datos, 2]
+  2:
+    - [Gobernanza de Datos y Ética en la Analítica, 2]
+    - [Machine Learning y Procesamiento de Lenguaje Natural, 3]
+    - [Herramientas de Analítica y Despliegue en Nube, 3]
+    - [Formulación de Proyectos, 2]
+    - [Electiva de profundización I, 2]
+  3:
+    - [Métodos estadísticos para ciencia de datos, 3]
+    - [Deep Learning, 3]
+    - [Modelos avanzados de Machine Learning, 3]
+    - [Trabajo de Grado I, 2]
+    - [Electiva de profundización II, 2]
+  4:
+    - [IA Generativa, 3]
+    - [Visión por computador, 3]
+    - [MLOps, 3]
+    - [Trabajo de Grado II, 2]

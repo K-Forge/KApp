@@ -9,8 +9,9 @@
 # and write its OWN database, and that it is refused on the other four. A credential that
 # leaks out of one service must not open another service's data.
 #
-# Requires the stack's `mongo` container to be up and `.env` to hold the passwords that
-# provisioned it. Run it after any change to mongo-init/rs-init.js.
+# Needs nothing running: it connects to the Atlas cluster with each service's own string
+# from `.env`, through a throwaway mongosh container. Run it after any change to the
+# cluster's database users.
 set -euo pipefail
 
 cd "$(dirname "$0")/../app/backend/microservices"
@@ -32,15 +33,8 @@ const OWN = process.env.OWN_DB;
 const ALL = process.env.ALL_DBS.split(" ");
 let failures = 0;
 
-// Authenticating against the service's own database is the point of putting the user
-// there: the connection string never mentions `admin`.
-try {
-  db.getSiblingDB(OWN).auth(process.env.SVC_USER, process.env.SVC_PW);
-} catch (e) {
-  print("  CANNOT AUTHENTICATE against " + OWN + " (" + (e.codeName || e.message) + ")");
-  quit(1);
-}
-
+// No auth() call: the connection string carries the credential and its authSource, which
+// is the service's own database. If it were wrong we would not have a connection at all.
 for (const name of ALL) {
   let allowed = false;
   let detail = "";
@@ -83,22 +77,22 @@ JS
 status=0
 for svc in auth user semaphore schedule map; do
   own="kapp_${svc}"
-  user="kapp_${svc}_user"
-  pw_var="MONGO_$(printf '%s' "$svc" | tr '[:lower:]' '[:upper:]')_PASSWORD"
-  pw="${!pw_var:-}"
+  uri_var="MONGO_$(printf '%s' "$svc" | tr '[:lower:]' '[:upper:]')_URI"
+  # Indirect expansion WITHOUT a modifier: macOS ships bash 3.2, which rejects
+  # ${!var:-default} as a bad substitution.
+  eval "uri=\${$uri_var}"
 
-  if [ -z "$pw" ]; then
-    echo "${user}: $pw_var is not set in .env" >&2
+  if [ -z "${uri:-}" ]; then
+    echo "kapp_${svc}: $uri_var is not set in .env - see docs/ATLAS-SETUP.md" >&2
     status=1
     continue
   fi
 
-  echo "${user}:"
-  # The password goes in as an environment variable, not on the command line: anything in
-  # argv is visible to every process in the container via /proc.
-  if ! docker compose exec -T \
-      -e SVC_USER="$user" -e SVC_PW="$pw" -e OWN_DB="$own" -e ALL_DBS="$ALL_DBS" \
-      mongo mongosh --quiet --eval "$PROBE"; then
+  echo "kapp_${svc}_user:"
+  # The connection string goes in as an argument to a throwaway container that nothing else
+  # shares, and the probe reads only the two database names from the environment.
+  if ! docker run --rm -e OWN_DB="$own" -e ALL_DBS="$ALL_DBS" mongo:7 \
+      mongosh "$uri" --quiet --eval "$PROBE"; then
     status=1
   fi
   echo

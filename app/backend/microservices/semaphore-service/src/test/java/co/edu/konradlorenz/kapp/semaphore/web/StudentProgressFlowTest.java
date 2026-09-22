@@ -86,7 +86,7 @@ class StudentProgressFlowTest {
                 .andExpect(jsonPath("$.pensumCode").value(SEEDED_PENSUM))
                 .andExpect(jsonPath("$.programCode").value(SEEDED_PROGRAM))
                 .andExpect(jsonPath("$.studentCode").value("506999999"))
-                .andExpect(jsonPath("$.courses.length()").value(48))
+                .andExpect(jsonPath("$.courses.length()").value(51))
                 .andExpect(jsonPath("$.courses[0].status").value("PENDING"))
                 .andExpect(jsonPath("$.reconciliation.inSync").value(true))
                 .andExpect(jsonPath("$.reconciliation.addedCourses.length()").value(0))
@@ -164,7 +164,7 @@ class StudentProgressFlowTest {
         mockMvc.perform(get("/api/semaphore/me").with(student("flow-grade-high-student")))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(put("/api/semaphore/me/courses/{code}", "10011")
+        mockMvc.perform(put("/api/semaphore/me/courses/{code}", "11015")
                         .with(student("flow-grade-high-student"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -180,7 +180,7 @@ class StudentProgressFlowTest {
         mockMvc.perform(get("/api/semaphore/me").with(student("flow-grade-low-student")))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(put("/api/semaphore/me/courses/{code}", "10011")
+        mockMvc.perform(put("/api/semaphore/me/courses/{code}", "11015")
                         .with(student("flow-grade-low-student"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -196,7 +196,7 @@ class StudentProgressFlowTest {
         mockMvc.perform(get("/api/semaphore/me").with(student("flow-grade-boundary-student")))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(put("/api/semaphore/me/courses/{code}", "10011")
+        mockMvc.perform(put("/api/semaphore/me/courses/{code}", "11015")
                         .with(student("flow-grade-boundary-student"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""

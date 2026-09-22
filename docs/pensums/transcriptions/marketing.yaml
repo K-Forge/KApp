@@ -1,0 +1,67 @@
+source: pensum-marketing.pdf
+program: Marketing
+faculty: Escuela de Negocios   # not printed; inferred from the discipline
+programLevel: PREGRADO
+period: semestre
+declaredCredits: null
+columns: [name, hours, credits]                # hours are "Horas Presenciales" as printed
+levels:
+  1:
+    - [Matemáticas I, 4, 4]
+    - [Fundamentos de Economía, 4, 4]
+    - [Fundamentos de Marketing, 4, 4]
+    - [Habilidades Comunicativas, 3, 2]
+    - [Inglés Intermedio Bajo, 4, 2]
+  2:
+    - [Matemáticas II, 4, 4]
+    - [Contexto del Marketing en las Organizaciones, 2, 2]
+    - [Contabilidad Gerencial, 4, 3]
+    - [Gestión de Productos y Servicios en Marketing, 4, 3]
+    - [Cultura I, 2, 2]
+    - [Inglés Intermedio Medio, 4, 2]
+  3:
+    - [Estadística I, 4, 4]
+    - [Metodología de la Investigación, 4, 3]
+    - [Estrategias de Precio y Presupuestos de Marketing, 4, 4]
+    - [Factores Sociales del Consumo, 4, 3]
+    - [Inglés Intermedio Alto, 4, 2]
+  4:
+    - [Estadística II, 4, 4]
+    - [Matemática Financiera, 4, 3]
+    - [Investigación de Mercados Cualitativa, 4, 3]
+    - [Estrategias de Distribución, 2, 2]
+    - [Percepción y Tendencias del Consumidor, 2, 2]
+    - [Inglés Avanzado, 4, 2]
+  5:
+    - [Administración Financiera, 4, 3]
+    - [Investigación de Mercados Cuantitativa, 4, 3]
+    - [Procesos de Creación de Valor, 4, 4]
+    - [Comercio en Canales Digitales, 2, 2]
+    - [Cultura III, 2, 2]
+    - [Inglés Proficiencia, 4, 2]
+  6:
+    - [Gestión y Valor de Marca, 4, 3]
+    - [Gerencia Estratégica de Marketing, 4, 4]
+    - [Psicología del Consumidor, 4, 3]
+    - [Inteligencia de Negocios para la Toma de Decisiones, 2, 2]
+    - [Electiva I, 2, 2]
+    - [Inglés Especializado I, 4, 2]
+  7:
+    - [Estrategias de Comunicación y Publicidad, 2, 2]
+    - [Diseño de Planes de Marketing, 4, 4]
+    - [Planeación y Ejecución de Ventas, 4, 3]
+    - [Métricas para la Gestión del Marketing, 4, 3]
+    - [Electiva II, 2, 2]
+    - [Inglés Especializado II, 4, 2]
+  8:
+    - [Investigación y Estrategias de Internacionalización, 4, 3]
+    - [Juego Gerencial de Mercados, 2, 2]
+    - [Neuromarketing, 4, 3]
+    - [Trade Marketing y Administración de Categorías, 4, 3]
+    - [Electiva III, 3, 3]
+    - [Cultura II, 2, 2]
+  9:
+    - [Opción de Grado, 2, 2]
+    - [Práctica Profesional, 1.5, 10]           # printed "1,5"
+    - [Electiva IV, 2, 2]
+    - ["Entorno Global, Ética y Sociedad", 2, 2]

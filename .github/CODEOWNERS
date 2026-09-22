@@ -1,0 +1,7 @@
+# Every pull request needs a review from the repository lead, on every path. Without this file the
+# ruleset's "require code owner review" has nothing to require and lets any approval through.
+#
+# GitHub never counts an author's approval of their own pull request, so the lead's own pull requests
+# cannot satisfy this rule. They are merged through the admin bypass, which is scoped to pull requests
+# only: even the lead cannot push to main or develop.
+*       @13rianVargas

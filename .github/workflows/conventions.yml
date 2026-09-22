@@ -1,0 +1,67 @@
+name: Conventions
+
+on:
+  pull_request:
+    branches: [main, develop]
+    # A separate workflow from ci.yml so that correcting a title or retargeting a stacked pull request
+    # re-runs this check in seconds, without rebuilding seven services.
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: conventions-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  git:
+    # Required by the main and develop rulesets. Renaming this job silently un-requires it.
+    name: Git conventions
+    runs-on: ubuntu-latest
+
+    steps:
+      # Full history: the check walks every commit between the base and the head of the pull request.
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      # Everything from the event goes through env, never through ${{ }} inside run: a pull request
+      # title is text anyone opening a pull request controls, and interpolating it is a shell injection.
+      - name: Check branch, title and commits
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          status=0
+          bash scripts/check-git-conventions.sh branch "$HEAD_REF" "$BASE_REF" || status=1
+          bash scripts/check-git-conventions.sh title "$PR_TITLE" || status=1
+          # Dependabot writes its own commits and nobody can reword them. The title is still checked,
+          # because squash merging turns it into the commit that stays on develop.
+          case $HEAD_REF in
+            dependabot/*) echo "commits skipped: written by Dependabot" ;;
+            *) bash scripts/check-git-conventions.sh range "$BASE_SHA" "$HEAD_SHA" || status=1 ;;
+          esac
+          exit "$status"
+
+  contributing:
+    # Deliberately NOT required: a change to the organization's guide would otherwise block every open
+    # pull request here until someone syncs. The red mark on the pull request is the reminder.
+    name: CONTRIBUTING in sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Compare with the organization's canonical guide
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/K-Forge/.github/main/CONTRIBUTING.md -o "$RUNNER_TEMP/canonical.md"
+          if ! diff -u "$RUNNER_TEMP/canonical.md" CONTRIBUTING.md; then
+            echo "::error file=CONTRIBUTING.md::CONTRIBUTING.md differs from K-Forge/.github. Run scripts/sync-contributing.sh and commit the result."
+            exit 1
+          fi

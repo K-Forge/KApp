@@ -1,13 +1,23 @@
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
-import { ChangeDetectionStrategy, Component, ViewChild, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild, computed, effect, inject, input, signal } from '@angular/core';
 import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
 import { ApiErrorBannerComponent } from '../../../shared/ui/api-error-banner/api-error-banner.component';
 import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 import { ImportPanelComponent } from '../import/import-panel.component';
 import { PastePensumComponent } from '../import/paste-pensum.component';
+import { PensumGridComponent } from './pensum-grid.component';
 import { PensumsService } from './pensums.service';
-import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model';
+import {
+  PENSUM_SKELETON,
+  coursesByCode,
+  officialCode,
+  prerequisiteLabels,
+  publishesCourseCodes,
+  type Pensum,
+  type PensumCourse,
+  type PensumSummary,
+} from './pensum.model';
 
 /**
  * Lookup-by-code rather than a table: the semaphore contract has no "list pensums" endpoint,
@@ -18,7 +28,7 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
  */
 @Component({
   selector: 'app-pensums-page',
-  imports: [ApiErrorBannerComponent, ModalComponent, ImportPanelComponent, PageIntroComponent, PastePensumComponent],
+  imports: [ApiErrorBannerComponent, ModalComponent, ImportPanelComponent, PageIntroComponent, PastePensumComponent, PensumGridComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
@@ -86,7 +96,9 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
               <dt>Status</dt>
               <dd><span class="badge badge-neutral">{{ c.status }}</span></dd>
               <dt>Totals</dt>
-              <dd>{{ c.totalCredits }} credits · {{ c.totalHours }} weekly hours · {{ c.levels }} levels</dd>
+              <dd>{{ totals(c) }}</dd>
+              <dt>Course codes</dt>
+              <dd>{{ codesNote(c) }}</dd>
             </dl>
 
             <h3>Knowledge areas ({{ c.areas.length }})</h3>
@@ -108,41 +120,66 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
                         <span class="area-dot" [style.background]="area.color"></span>
                         {{ area.name }}
                       </td>
-                      <td>{{ area.credits }}</td>
-                      <td>{{ area.hours }}</td>
+                      <td>{{ published(c, 'credits') ? area.credits : '—' }}</td>
+                      <td>{{ published(c, 'hours') ? area.hours : '—' }}</td>
                     </tr>
                   }
                 </tbody>
               </table>
             </div>
 
-            <h3>Pensum items ({{ c.courses.length }})</h3>
-            <div class="scroll-x table-scroll-y">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Level</th>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Area</th>
-                    <th>Credits</th>
-                    <th>Prerequisites</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (course of c.courses; track course.pensumItemCode) {
-                    <tr>
-                      <td>{{ course.level }}</td>
-                      <td class="mono">{{ course.code ?? '(elective slot)' }}</td>
-                      <td>{{ course.name }}</td>
-                      <td>{{ course.area }}</td>
-                      <td>{{ course.credits }}</td>
-                      <td class="text-muted">{{ course.prerequisites.length ? course.prerequisites.join(', ') : '—' }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
+            <div class="row-between">
+              <h3 style="margin:0">Pensum items ({{ c.courses.length }})</h3>
+              <!-- The grid is for checking a pensum against its printed plan; the table is the
+                   exact data, sortable by eye and readable by a screen reader. -->
+              <div class="view-toggle" role="group" aria-label="How to show the items">
+                <button type="button" class="btn btn-sm" [attr.aria-pressed]="view() === 'grid'" (click)="view.set('grid')">
+                  As printed
+                </button>
+                <button type="button" class="btn btn-sm" [attr.aria-pressed]="view() === 'table'" (click)="view.set('table')">
+                  Table
+                </button>
+              </div>
             </div>
+            @if (view() === 'grid') {
+              <app-pensum-grid [pensum]="c" />
+            } @else {
+              <div class="scroll-x table-scroll-y">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Level</th>
+                      <th>Code</th>
+                      <th>Name</th>
+                      <th>Area</th>
+                      <th>Credits</th>
+                      <th>Weekly hours</th>
+                      <th>Prerequisites</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (course of c.courses; track course.pensumItemCode) {
+                      <tr>
+                        <td>{{ course.level }}</td>
+                        <!-- The university's own code or nothing: the internal identifier KApp
+                             gives an item of a plan that prints none is not shown anywhere. -->
+                        <td class="mono">
+                          {{ code(course) ?? '—' }}
+                          @if (course.isElectiveSlot) {
+                            <span class="text-muted">(elective)</span>
+                          }
+                        </td>
+                        <td>{{ course.name }}</td>
+                        <td>{{ course.area }}</td>
+                        <td>{{ published(c, 'credits') ? course.credits : '—' }}</td>
+                        <td>{{ published(c, 'hours') ? course.weeklyHours : '—' }}</td>
+                        <td class="text-muted">{{ prerequisites(course) || '—' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
           </div>
         }
       </div>
@@ -237,6 +274,24 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
       max-height: 22rem;
       overflow-y: auto;
     }
+    .view-toggle {
+      display: inline-flex;
+    }
+    .view-toggle .btn {
+      border-radius: 0;
+    }
+    .view-toggle .btn:first-child {
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+    }
+    .view-toggle .btn:last-child {
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-left: -1px;
+    }
+    .view-toggle .btn[aria-pressed='true'] {
+      background: var(--nav-active-bg);
+      color: var(--nav-active-text);
+      border-color: var(--border-strong);
+    }
   `,
 })
 export class PensumsPage {
@@ -255,6 +310,61 @@ export class PensumsPage {
   /** The pensum currently on screen. Null until one is loaded. */
   readonly loaded = signal<Pensum | null>(null);
   readonly deleting = signal(false);
+  /**
+   * A plan whose document prints no credits (or no hours) stores zeros for them. Zeros on
+   * screen would read as "worth nothing", so those columns show a dash instead - the grid
+   * says in words which figure the document leaves out.
+   */
+  published(pensum: Pensum, figure: 'credits' | 'hours'): boolean {
+    return figure === 'credits'
+      ? pensum.courses.some((course) => course.credits > 0)
+      : pensum.courses.some((course) => course.weeklyHours > 0);
+  }
+
+  totals(pensum: Pensum): string {
+    const credits = this.published(pensum, 'credits')
+      ? `${pensum.totalCredits} credits`
+      : pensum.totalCredits
+        ? `${pensum.totalCredits} credits in total, none per course`
+        : 'credits not published';
+    return [credits, this.published(pensum, 'hours') ? `${pensum.totalHours} weekly hours` : '', `${pensum.levels} levels`]
+      .filter(Boolean)
+      .join(' · ');
+  }
+
+  /**
+   * The code to put on screen for an item, or null.
+   *
+   * <p>Only four of the twenty-three published plans print course codes. For the rest KApp
+   * generates one so the system can tell the items apart, and that one is never shown: it looks
+   * institutional, it is not, and it changes the day the real codes arrive.
+   */
+  code(course: PensumCourse): string | null {
+    return officialCode(course);
+  }
+
+  /**
+   * The loaded pensum indexed by the code its prerequisites name items with. A computed rather
+   * than a call per row: the table renders sixty rows and the index would be rebuilt for each.
+   */
+  private readonly byCode = computed(() => {
+    const pensum = this.loaded();
+    return pensum ? coursesByCode(pensum) : new Map<string, PensumCourse>();
+  });
+
+  /** Prerequisites as they are shown: by code where the plan has real ones, by name where not. */
+  prerequisites(course: PensumCourse): string {
+    return prerequisiteLabels(this.byCode(), course).join(', ');
+  }
+
+  codesNote(pensum: Pensum): string {
+    return publishesCourseCodes(pensum)
+      ? 'The university\'s own, as the plan prints them.'
+      : 'Not published. KApp identifies these items internally; those identifiers are not institutional codes and are not shown.';
+  }
+
+  /** How the items are shown. The grid first: it is the view a pensum is checked against its PDF with. */
+  readonly view = signal<'grid' | 'table'>('grid');
 
   readonly formMode = signal<'create' | 'edit'>('create');
   readonly formText = signal('');

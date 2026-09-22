@@ -1,0 +1,166 @@
+{
+  "pensumCode": "EPF-2026",
+  "programCode": "ESP-PSI-FORENSE",
+  "programName": "Especialización en Psicología Forense y Criminal",
+  "faculty": "Escuela de Posgrados",
+  "reform": "Folleto publicado 2026",
+  "status": "DRAFT",
+  "totalCredits": 0,
+  "totalHours": 0,
+  "levels": 2,
+  "areas": [
+    {
+      "code": "PLAN",
+      "name": "Plan de estudios",
+      "color": "#539392",
+      "credits": 0,
+      "hours": 0
+    }
+  ],
+  "courses": [
+    {
+      "code": "EPF-101",
+      "pensumItemCode": "EPF-101",
+      "name": "Criminología y Victimología",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPF-102",
+      "pensumItemCode": "EPF-102",
+      "name": "Fundamentos de Derecho Penal y Procesal",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPF-103",
+      "pensumItemCode": "EPF-103",
+      "name": "Psicopatología Forense I",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPF-104",
+      "pensumItemCode": "EPF-104",
+      "name": "Evaluación Forense y Técnicas de Entrevista",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPF-105",
+      "pensumItemCode": "EPF-105",
+      "name": "Práctica forense I",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "EPF-106",
+      "name": "Electiva I",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPF-201",
+      "pensumItemCode": "EPF-201",
+      "name": "Fundamentos de Investigación Criminal",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPF-202",
+      "pensumItemCode": "EPF-202",
+      "name": "Fundamentos de Derecho de Familia",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPF-203",
+      "pensumItemCode": "EPF-203",
+      "name": "Psicopatología Forense de la Familia",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPF-204",
+      "pensumItemCode": "EPF-204",
+      "name": "Técnicas de oralidad",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": "EPF-205",
+      "pensumItemCode": "EPF-205",
+      "name": "Práctica forense II",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "code": null,
+      "pensumItemCode": "EPF-206",
+      "name": "Electiva II",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    }
+  ]
+}

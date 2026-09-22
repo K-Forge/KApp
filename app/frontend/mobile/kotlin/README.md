@@ -34,8 +34,10 @@ login are outside the bar: it would offer four destinations to somebody who has 
 
 ## Running it
 
-Requires JDK 17 or newer and the Android SDK with platform 36. Open the `kotlin/` folder in Android
-Studio, or from the command line:
+Requires the Android SDK with platform 36 and a JDK 25: `gradle/gradle-daemon-jvm.properties`
+asks for one and Gradle downloads it when the machine has none. Android Studio's bundled JBR
+already is one. Open the `kotlin/` folder in Android Studio - not `kotlin/app/`, which is a
+module and not the project - or from the command line:
 
 ```bash
 cd app/frontend/mobile/kotlin
@@ -94,5 +96,13 @@ names that sheet assigns. Two rules worth not rediscovering:
 
 ## Versions
 
-Pinned in `gradle/libs.versions.toml`. Android Studio will offer newer ones — take them through the
-AGP Upgrade Assistant rather than by hand, so Gradle and the Kotlin compiler move together.
+Pinned in `gradle/libs.versions.toml`, and Gradle itself in `gradle/wrapper/`, with the checksum of
+the distribution next to it so every clone runs the same build.
+
+Android Studio will offer newer versions — take them through the AGP Upgrade Assistant rather than
+by hand, so Gradle and the Kotlin compiler move together. Then read the diff: the assistant also
+writes a dozen `android.*` flags into `gradle.properties` that pin the behaviour of the previous
+AGP. They are deprecated the moment they are written and AGP 10 removes them, so take them out and
+fix what actually breaks. That is the whole point of upgrading.
+
+There is no Kotlin Android plugin in the build: AGP 9 compiles Kotlin itself.
