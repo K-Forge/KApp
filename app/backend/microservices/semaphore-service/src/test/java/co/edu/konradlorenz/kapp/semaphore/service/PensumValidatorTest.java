@@ -95,6 +95,28 @@ class PensumValidatorTest {
     }
 
     @Test
+    @DisplayName("half an hour a week is accepted, and its 72 contact hours with it")
+    void halfAnHourIsAccepted() {
+        PensumCourseDto practice = new PensumCourseDto(
+                "P5805", "P5805", "Práctica profesional", 8, 9, 4.5, 72, "CB", false, List.of(), null);
+        validator.validate(withCourses(List.of(practice)));
+        // No exception: that is the assertion.
+    }
+
+    @Test
+    @DisplayName("a fraction of an hour that is not a half is rejected")
+    void anHourAndAThirdIsRejected() {
+        PensumCourseDto odd = new PensumCourseDto(
+                "10011", "1001", "Precalculo", 1, 3, 4.3, null, "CB", false, List.of(), null);
+        PensumDto dto = withCourses(List.of(odd));
+
+        assertThatThrownBy(() -> validator.validate(dto))
+                .isInstanceOf(BusinessRuleException.class)
+                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getDetails())
+                        .anySatisfy(issue -> assertThat(issue.field()).isEqualTo("courses[0].weeklyHours")));
+    }
+
+    @Test
     @DisplayName("omitting totalHours on write is not an error - the server derives it")
     void omittedTotalHoursIsAccepted() {
         PensumCourseDto noHours = new PensumCourseDto(

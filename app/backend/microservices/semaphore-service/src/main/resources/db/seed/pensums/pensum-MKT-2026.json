@@ -6,7 +6,7 @@
   "reform": "Folleto publicado 2026",
   "status": "DRAFT",
   "totalCredits": 144,
-  "totalHours": 166,
+  "totalHours": 165.5,
   "levels": 9,
   "areas": [
     {
@@ -14,7 +14,7 @@
       "name": "Plan de estudios",
       "color": "#539392",
       "credits": 144,
-      "hours": 166
+      "hours": 165.5
     }
   ],
   "courses": [
@@ -588,7 +588,7 @@
       "name": "Práctica Profesional",
       "level": 9,
       "credits": 10,
-      "weeklyHours": 2,
+      "weeklyHours": 1.5,
       "area": "PLAN",
       "isElectiveSlot": false,
       "prerequisites": [],

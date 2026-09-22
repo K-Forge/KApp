@@ -30,8 +30,8 @@ public record PensumImportReport(
             int courses,
             int declaredCredits,
             int computedCredits,
-            int declaredHours,
-            int computedHours,
+            double declaredHours,
+            double computedHours,
             boolean programCreated,
             boolean pensumCreated
     ) {

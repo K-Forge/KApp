@@ -3,6 +3,7 @@ package co.edu.konradlorenz.kapp.semaphore.service;
 import co.edu.konradlorenz.kapp.common.error.ApiError;
 import co.edu.konradlorenz.kapp.common.error.BusinessRuleException;
 import co.edu.konradlorenz.kapp.semaphore.domain.PensumCourse;
+import co.edu.konradlorenz.kapp.semaphore.domain.WeeklyHours;
 import co.edu.konradlorenz.kapp.semaphore.web.dto.PensumAreaDto;
 import co.edu.konradlorenz.kapp.semaphore.web.dto.PensumCourseDto;
 import co.edu.konradlorenz.kapp.semaphore.web.dto.PensumDto;
@@ -54,8 +55,16 @@ public class PensumValidator {
                 issues.add(new ApiError.FieldIssue(prefix + ".area",
                         "'%s' is not one of the declared areas".formatted(course.area())));
             }
+            // A plan prints whole hours or halves and nothing else, so a 4.3 is a
+            // transcription slip. Caught here rather than by an annotation because bean
+            // validation has no "multiple of" for a decimal.
+            if (!WeeklyHours.isValid(course.weeklyHours())) {
+                issues.add(new ApiError.FieldIssue(prefix + ".weeklyHours",
+                        "must be a whole number of hours or a half, such as 4 or 4.5"));
+            }
             if (course.totalHours() != null
-                    && course.totalHours() != course.weeklyHours() * PensumCourse.WEEKS_PER_SEMESTER) {
+                    && course.totalHours() != Math.round(
+                            course.weeklyHours() * PensumCourse.WEEKS_PER_SEMESTER)) {
                 issues.add(new ApiError.FieldIssue(prefix + ".totalHours",
                         "must equal weeklyHours * %d when supplied".formatted(PensumCourse.WEEKS_PER_SEMESTER)));
             }

@@ -5,6 +5,7 @@ import co.edu.konradlorenz.kapp.common.error.BusinessRuleException;
 import co.edu.konradlorenz.kapp.semaphore.domain.PensumStatus;
 import co.edu.konradlorenz.kapp.semaphore.domain.Program;
 import co.edu.konradlorenz.kapp.semaphore.domain.ProgramLevel;
+import co.edu.konradlorenz.kapp.semaphore.domain.WeeklyHours;
 import co.edu.konradlorenz.kapp.semaphore.repository.PensumRepository;
 import co.edu.konradlorenz.kapp.semaphore.repository.ProgramRepository;
 import co.edu.konradlorenz.kapp.semaphore.web.dto.PensumAreaDto;
@@ -139,8 +140,8 @@ public class PensumCsvImporter {
             // The seeded Ingeniería de Sistemas plan declares 194 against 197 actual weekly
             // hours; summing weeklyHours * 16 instead would have produced 3152 and reported
             // every correct file as broken.
-            int computedHours = dto.courses().stream()
-                    .mapToInt(PensumCourseDto::weeklyHours).sum();
+            double computedHours = dto.courses().stream()
+                    .mapToDouble(PensumCourseDto::weeklyHours).sum();
 
             if (computedCredits != draft.declaredCredits) {
                 issues.add(new ApiError.FieldIssue(
@@ -151,8 +152,9 @@ public class PensumCsvImporter {
             if (computedHours != draft.declaredHours) {
                 issues.add(new ApiError.FieldIssue(
                         "pensum " + draft.pensumCode + " · declaredHours",
-                        "the file declares %d but its courses add up to %d"
-                                .formatted(draft.declaredHours, computedHours)));
+                        "the file declares %s but its courses add up to %s".formatted(
+                                WeeklyHours.format(draft.declaredHours),
+                                WeeklyHours.format(computedHours))));
             }
 
             // The annotations first - lengths, blanks, the colour pattern - then the rules that
@@ -265,11 +267,11 @@ public class PensumCsvImporter {
         /** True once the first row failed to parse: nothing about this pensum can be trusted. */
         private boolean headerBroken;
         private int declaredCredits;
-        private int declaredHours;
+        private double declaredHours;
         private int levels;
 
         private final Map<String, PensumAreaDto> areas = new LinkedHashMap<>();
-        private final Map<String, int[]> areaTotals = new LinkedHashMap<>();
+        private final Map<String, double[]> areaTotals = new LinkedHashMap<>();
         private final List<PensumCourseDto> courses = new ArrayList<>();
         private final Set<String> seenItemCodes = new LinkedHashSet<>();
 
@@ -285,7 +287,7 @@ public class PensumCsvImporter {
             reform = required(r, "reform");
             status = enumValue(PensumStatus.class, required(r, "pensumStatus"), "pensumStatus");
             declaredCredits = integer(r, "declaredCredits");
-            declaredHours = integer(r, "declaredHours");
+            declaredHours = hours(r, "declaredHours");
             levels = integer(r, "levels");
         }
 
@@ -293,8 +295,29 @@ public class PensumCsvImporter {
             compare(line, issues, "programCode", programCode, r.get("programCode"));
             compare(line, issues, "declaredCredits", String.valueOf(declaredCredits),
                     r.get("declaredCredits"));
-            compare(line, issues, "declaredHours", String.valueOf(declaredHours),
-                    r.get("declaredHours"));
+            compareHours(line, issues, "declaredHours", declaredHours, r.get("declaredHours"));
+        }
+
+        /**
+         * The same check as {@link #compare}, on the number rather than the text: a spreadsheet
+         * writes the first row's 194 and a later row's 194.0 for the same figure, and the
+         * Spanish locale writes 4,5 where another row says 4.5. Comparing the text would call
+         * those disagreements.
+         */
+        private void compareHours(long line, List<ApiError.FieldIssue> issues, String field,
+                                   double expected, String actual) {
+            if (actual == null || actual.isBlank()) {
+                return;
+            }
+            try {
+                if (WeeklyHours.parse(actual) != expected) {
+                    issues.add(issue(line, field,
+                            "disagrees with the first row of pensum %s, which says '%s'"
+                                    .formatted(pensumCode, WeeklyHours.format(expected))));
+                }
+            } catch (IllegalArgumentException e) {
+                issues.add(issue(line, field, e.getMessage()));
+            }
         }
 
         private void compare(long line, List<ApiError.FieldIssue> issues, String field,
@@ -316,9 +339,9 @@ public class PensumCsvImporter {
             // Area credits and hours are SUMMED from the courses rather than transcribed.
             // They are arithmetic on data the file already carries, and asking a person to
             // restate them only creates one more thing that can be wrong.
-            int[] totals = areaTotals.computeIfAbsent(code, c -> new int[2]);
+            double[] totals = areaTotals.computeIfAbsent(code, c -> new double[2]);
             totals[0] += intOrZero(r, "credits");
-            totals[1] += intOrZero(r, "weeklyHours");
+            totals[1] += hoursOrZero(r, "weeklyHours");
 
             String name = r.get("areaName");
             String color = r.get("areaColor");
@@ -342,7 +365,7 @@ public class PensumCsvImporter {
                     required(r, "courseName"),
                     integer(r, "courseLevel"),
                     integer(r, "credits"),
-                    integer(r, "weeklyHours"),
+                    hours(r, "weeklyHours"),
                     null, // derived as weeklyHours * 16 by the validator's own invariant
                     required(r, "areaCode"),
                     elective,
@@ -353,8 +376,8 @@ public class PensumCsvImporter {
         PensumDto toDto() {
             List<PensumAreaDto> withTotals = areas.values().stream()
                     .map(a -> {
-                        int[] t = areaTotals.getOrDefault(a.code(), new int[2]);
-                        return new PensumAreaDto(a.code(), a.name(), a.color(), t[0], t[1]);
+                        double[] t = areaTotals.getOrDefault(a.code(), new double[2]);
+                        return new PensumAreaDto(a.code(), a.name(), a.color(), (int) t[0], t[1]);
                     })
                     .toList();
             return new PensumDto(pensumCode, programCode, programName, faculty, reform,
@@ -403,6 +426,29 @@ public class PensumCsvImporter {
         private static int intOrZero(CSVRecord r, String column) {
             try {
                 return integer(r, column);
+            } catch (RuntimeException e) {
+                return 0;
+            }
+        }
+
+        /**
+         * Hours, which unlike every other figure in the file may carry a half: four practices
+         * across the published plans print one. A cell holding the Spanish 4,5 has to be quoted
+         * for the file to still be CSV, and a spreadsheet that drops those quotes breaks the row
+         * into two - which Commons CSV reports as a column count, before this is reached.
+         */
+        private static double hours(CSVRecord r, String column) {
+            String value = required(r, column);
+            try {
+                return WeeklyHours.parse(value);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("%s %s".formatted(column, e.getMessage()));
+            }
+        }
+
+        private static double hoursOrZero(CSVRecord r, String column) {
+            try {
+                return hours(r, column);
             } catch (RuntimeException e) {
                 return 0;
             }

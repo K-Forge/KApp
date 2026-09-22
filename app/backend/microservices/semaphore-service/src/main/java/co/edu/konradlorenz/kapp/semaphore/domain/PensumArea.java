@@ -1,5 +1,7 @@
 package co.edu.konradlorenz.kapp.semaphore.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 /**
  * A knowledge area - one row of the semaforo grid.
  *
@@ -16,13 +18,14 @@ package co.edu.konradlorenz.kapp.semaphore.domain;
  * @param name    display name
  * @param color   brand colour as an RGB hex triplet, used to tint the row
  * @param credits credits the plan assigns to this area, as declared
- * @param hours   <strong>weekly</strong> hours the plan assigns to this area, as declared
+ * @param hours   <strong>weekly</strong> hours the plan assigns to this area, as declared;
+ *                whole or half, because the items it adds up can be
  */
 public record PensumArea(
         String code,
         String name,
         String color,
         int credits,
-        int hours
+        @JsonSerialize(using = WeeklyHours.Serializer.class) double hours
 ) {
 }

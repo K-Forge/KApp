@@ -81,11 +81,15 @@ justamente la que nos dejó verificar que las cuatro mallas codificadas están b
 **Qué pasa.** Cuatro prácticas imprimen media hora: las dos Prácticas Profesionales de Psicología
 (4,5 horas) y las Prácticas Profesionales de Marketing y de Negocios Internacionales (1,5 horas).
 
-**Qué hace KApp.** El campo de horas es un entero, así que las redondea hacia arriba (5 y 2). Ya
-está decidido ampliarlo para aceptar medias horas; mientras tanto, Psicología suma 175 horas en
-vez de 174.
+**Qué hace KApp.** Ya las guarda tal como están impresas. El campo de horas acepta enteros y
+medias, y nada más fino: un 4,3 se rechaza como error de transcripción. Marketing queda entonces
+en 165,5 horas semanales y Negocios Internacionales en 159,5.
 
-**Qué confirmar.** Si esas medias horas son reales o una errata del documento.
+**Lo que esto resolvió.** Redondearlas era lo que hacía que Psicología sumara 175 horas contra las
+174 que imprime su propio documento. Guardando la media, suma 174 exactas. Ver el punto 6.
+
+**Qué confirmar.** Si esas medias horas son reales o una errata del documento. La aritmética dice
+que son reales, porque son justo lo que hace cuadrar el plan con su total impreso.
 
 ---
 
@@ -110,12 +114,19 @@ se confirme cuál manda, cualquier cuenta que hagamos sobre ese plan arrastra la
 
 ---
 
-## 6. Psicología: el total general no cuadra con sus propios semestres
+## 6. Psicología: el total general y los totales por semestre ~~no cuadran~~ ya cuadran
 
-El plan imprime **174** horas presenciales como total, pero sus totales por semestre
-(21, 21, 23, 21, 24, 20, 19, 15, 11) suman **175**. KApp muestra 175, que es lo que dicen los
-semestres. Vale confirmarlo junto con el punto 4, porque las dos prácticas de 4,5 horas son
-justamente las que descuadran la cuenta.
+**Resuelto, y vale la pena dejar escrito por qué.** El plan imprime **174** horas presenciales
+como total, mientras que sus totales por semestre (21, 21, 23, 21, 24, 20, 19, 15, 11) suman
+**175**. La diferencia no era del documento sino nuestra: las dos prácticas de 4,5 horas estaban
+redondeadas a 5.
+
+Guardando la media, las materias suman 174 —el total impreso— y los semestres VIII y IX suman
+14,5 y 10,5. Es decir que el documento redondea hacia arriba cada total de semestre para
+imprimirlo, y de ahí sale su 175. **Los dos números impresos son correctos**, cada uno a su
+manera.
+
+Queda una sola cosa por confirmar, la del punto 4: que las medias horas sean reales.
 
 ---
 

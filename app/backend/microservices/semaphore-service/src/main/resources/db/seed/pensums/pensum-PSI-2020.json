@@ -35,7 +35,7 @@
       "name": "Profesional",
       "color": "#3E823E",
       "credits": 50,
-      "hours": 50
+      "hours": 49
     },
     {
       "code": "SI",
@@ -667,7 +667,7 @@
       "name": "Práctica profesional Área Clínica",
       "level": 8,
       "credits": 9,
-      "weeklyHours": 5,
+      "weeklyHours": 4.5,
       "area": "PROFESIONAL",
       "isElectiveSlot": false,
       "prerequisites": [],
@@ -715,7 +715,7 @@
       "name": "Práctica profesional Área Electiva",
       "level": 9,
       "credits": 9,
-      "weeklyHours": 5,
+      "weeklyHours": 4.5,
       "area": "PROFESIONAL",
       "isElectiveSlot": false,
       "prerequisites": [],
