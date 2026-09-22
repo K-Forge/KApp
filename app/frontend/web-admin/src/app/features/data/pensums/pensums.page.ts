@@ -1,5 +1,5 @@
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
-import { ChangeDetectionStrategy, Component, ViewChild, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild, computed, effect, inject, input, signal } from '@angular/core';
 import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
 import { ApiErrorBannerComponent } from '../../../shared/ui/api-error-banner/api-error-banner.component';
@@ -8,7 +8,16 @@ import { ImportPanelComponent } from '../import/import-panel.component';
 import { PastePensumComponent } from '../import/paste-pensum.component';
 import { PensumGridComponent } from './pensum-grid.component';
 import { PensumsService } from './pensums.service';
-import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model';
+import {
+  PENSUM_SKELETON,
+  coursesByCode,
+  officialCode,
+  prerequisiteLabels,
+  publishesCourseCodes,
+  type Pensum,
+  type PensumCourse,
+  type PensumSummary,
+} from './pensum.model';
 
 /**
  * Lookup-by-code rather than a table: the semaphore contract has no "list pensums" endpoint,
@@ -88,6 +97,8 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
               <dd><span class="badge badge-neutral">{{ c.status }}</span></dd>
               <dt>Totals</dt>
               <dd>{{ totals(c) }}</dd>
+              <dt>Course codes</dt>
+              <dd>{{ codesNote(c) }}</dd>
             </dl>
 
             <h3>Knowledge areas ({{ c.areas.length }})</h3>
@@ -150,18 +161,19 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
                     @for (course of c.courses; track course.pensumItemCode) {
                       <tr>
                         <td>{{ course.level }}</td>
+                        <!-- The university's own code or nothing: the internal identifier KApp
+                             gives an item of a plan that prints none is not shown anywhere. -->
                         <td class="mono">
+                          {{ code(course) ?? '—' }}
                           @if (course.isElectiveSlot) {
-                            {{ course.pensumItemCode }} <span class="text-muted">(elective)</span>
-                          } @else {
-                            {{ course.code }}
+                            <span class="text-muted">(elective)</span>
                           }
                         </td>
                         <td>{{ course.name }}</td>
                         <td>{{ course.area }}</td>
                         <td>{{ published(c, 'credits') ? course.credits : '—' }}</td>
                         <td>{{ published(c, 'hours') ? course.weeklyHours : '—' }}</td>
-                        <td class="text-muted">{{ course.prerequisites.length ? course.prerequisites.join(', ') : '—' }}</td>
+                        <td class="text-muted">{{ prerequisites(course) || '—' }}</td>
                       </tr>
                     }
                   </tbody>
@@ -318,6 +330,37 @@ export class PensumsPage {
     return [credits, this.published(pensum, 'hours') ? `${pensum.totalHours} weekly hours` : '', `${pensum.levels} levels`]
       .filter(Boolean)
       .join(' · ');
+  }
+
+  /**
+   * The code to put on screen for an item, or null.
+   *
+   * <p>Only four of the twenty-three published plans print course codes. For the rest KApp
+   * generates one so the system can tell the items apart, and that one is never shown: it looks
+   * institutional, it is not, and it changes the day the real codes arrive.
+   */
+  code(course: PensumCourse): string | null {
+    return officialCode(course);
+  }
+
+  /**
+   * The loaded pensum indexed by the code its prerequisites name items with. A computed rather
+   * than a call per row: the table renders sixty rows and the index would be rebuilt for each.
+   */
+  private readonly byCode = computed(() => {
+    const pensum = this.loaded();
+    return pensum ? coursesByCode(pensum) : new Map<string, PensumCourse>();
+  });
+
+  /** Prerequisites as they are shown: by code where the plan has real ones, by name where not. */
+  prerequisites(course: PensumCourse): string {
+    return prerequisiteLabels(this.byCode(), course).join(', ');
+  }
+
+  codesNote(pensum: Pensum): string {
+    return publishesCourseCodes(pensum)
+      ? 'The university\'s own, as the plan prints them.'
+      : 'Not published. KApp identifies these items internally; those identifiers are not institutional codes and are not shown.';
   }
 
   /** How the items are shown. The grid first: it is the view a pensum is checked against its PDF with. */

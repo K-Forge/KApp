@@ -62,6 +62,7 @@ vector geometry like the grids.
 | A prerequisite between two slots is not stored. | The model only accepts course codes as prerequisites. It drops Matemáticas' Énfasis I → II → III and Psicología's Área profesional I → II → Práctica profesional Área Electiva. |
 | Printed typos in course names are corrected, and only those listed in `build_seed.py`. | *Internedio*, *Sofware*, *Aplicac Móviles* and the like would otherwise be on a student's screen. The transcriptions keep the printed text. |
 | Brochure plans load as `DRAFT`. | Their course codes are placeholders; a student pinned to one would lose the pin when the real codes arrive. |
+| A generated course code is never displayed. | `sinuCode` is filled only where the code is the university's own, and it is the only one any screen shows. An invented code looks institutional, and a student would quote it to the registrar. Plans without codes show their prerequisites by name instead. |
 
 ## What was loaded
 

@@ -43,6 +43,15 @@ info:
       Elective slots have no `code`, so wherever this API takes or returns a course identifier —
       path parameters and the `reconciliation` arrays included — a slot is represented by its
       `pensumItemCode`.
+    - **Not every `code` is a real course code, and a made-up one must never be shown.** Only
+      four of the twenty-three published plans print course codes. The other nineteen are
+      brochures that print none, so KApp generates one per item (`MKT-101`) to tell them apart.
+      `sinuCode` is what separates the two: **it is present only where the code is the
+      university's own**. A client displays `sinuCode`, never `code` — a generated code looks
+      exactly like an institutional one, a student would quote it to the registrar, and every
+      one of them changes the day the real codes arrive. Use `code` and `pensumItemCode` to
+      address items, as above; show `sinuCode`, or nothing. Where a plan has none, show its
+      prerequisites by course `name` instead.
     - **`BLOCKED` is not a stored status.** The five colours a client paints are `PASSED`,
       `IN_PROGRESS`, `PENDING`, `FAILED` and *blocked*, but only the first four are persisted.
       "Blocked" is derived: a `PENDING` item whose prerequisites are not all `PASSED`.
@@ -660,6 +669,7 @@ paths:
                   area: SI
                   isElectiveSlot: false
                   prerequisites: []
+                  sinuCode: "56201"
                 - code: null
                   pensumItemCode: ELECTIVA_VI
                   name: Electiva VI
@@ -670,6 +680,7 @@ paths:
                   area: ISA
                   isElectiveSlot: true
                   prerequisites: []
+                  sinuCode: null
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1383,12 +1394,20 @@ components:
 
         For an elective slot, `code` is `null` and `isElectiveSlot` is `true`; the slot is
         addressed by `pensumItemCode`. For a fixed course, `code` is always present.
+
+        **`code` is an identifier, `sinuCode` is what you display.** See "Not every `code` is a
+        real course code" above.
       required: [code, pensumItemCode, name, level, credits, weeklyHours, area, isElectiveSlot, prerequisites]
       properties:
         code:
           type: [string, "null"]
           description: |
-            Institutional course code. `null` for an elective slot, which has no fixed content.
+            The code this item is addressed by. `null` for an elective slot, which has no fixed
+            content.
+
+            It is the institutional course code where the plan prints one, and a KApp-generated
+            placeholder where it does not — `sinuCode` says which. **Not for display**: put
+            `sinuCode` on screen, or nothing.
           maxLength: 20
           example: "59035"
         pensumItemCode:
@@ -1437,6 +1456,17 @@ components:
           description: Code of the knowledge area this item belongs to — the grid row.
           maxLength: 20
           example: ISA
+        sinuCode:
+          type: [string, "null"]
+          description: |
+            The course code as the university's own system (SINU) carries it, or `null` where it
+            has not been confirmed.
+
+            This is the only field that says a code is real, and **the only one a client shows**.
+            Where it is `null`, the item's `code` is something KApp generated so the system could
+            tell the items apart; showing it would put an invented code in front of a student.
+          maxLength: 20
+          example: "59035"
         isElectiveSlot:
           type: boolean
           description: |
@@ -1879,6 +1909,7 @@ components:
           area: CB
           isElectiveSlot: false
           prerequisites: []
+          sinuCode: "10011"
         - code: "20015"
           pensumItemCode: "1004"
           name: Fundamentos de Programación
@@ -1889,6 +1920,7 @@ components:
           area: BIS
           isElectiveSlot: false
           prerequisites: []
+          sinuCode: "20015"
         - code: "10024"
           pensumItemCode: "1102"
           name: Cálculo I
@@ -1899,6 +1931,7 @@ components:
           area: CB
           isElectiveSlot: false
           prerequisites: ["10011"]
+          sinuCode: "10024"
         - code: "20028"
           pensumItemCode: "1105"
           name: Técnicas de Programación I
@@ -1909,6 +1942,7 @@ components:
           area: BIS
           isElectiveSlot: false
           prerequisites: ["20015"]
+          sinuCode: "20028"
         - code: "20037"
           pensumItemCode: "1203"
           name: Técnicas de Programación II
@@ -1919,6 +1953,7 @@ components:
           area: BIS
           isElectiveSlot: false
           prerequisites: ["20028"]
+          sinuCode: "20037"
         - code: "17080"
           pensumItemCode: "1602"
           name: Estadística Descriptiva
@@ -1929,6 +1964,7 @@ components:
           area: CB
           isElectiveSlot: false
           prerequisites: []
+          sinuCode: "17080"
         - code: "46018"
           pensumItemCode: "1604"
           name: Ingeniería de Software I
@@ -1939,6 +1975,7 @@ components:
           area: ISA
           isElectiveSlot: false
           prerequisites: ["20037"]
+          sinuCode: "46018"
         - code: "48022"
           pensumItemCode: "1703"
           name: Ingeniería de Software II
@@ -1949,6 +1986,7 @@ components:
           area: ISA
           isElectiveSlot: false
           prerequisites: ["46018"]
+          sinuCode: "48022"
         - code: "59035"
           pensumItemCode: "2033"
           name: Desarrollo de Aplicaciones Móviles
@@ -1959,6 +1997,7 @@ components:
           area: ISA
           isElectiveSlot: false
           prerequisites: ["48022"]
+          sinuCode: "59035"
         - code: "56201"
           pensumItemCode: "1806"
           name: Metodología de la Investigación
@@ -1969,6 +2008,7 @@ components:
           area: SI
           isElectiveSlot: false
           prerequisites: []
+          sinuCode: "56201"
         - code: null
           pensumItemCode: ELECTIVA_VI
           name: Electiva VI
@@ -1979,6 +2019,7 @@ components:
           area: ISA
           isElectiveSlot: true
           prerequisites: []
+          sinuCode: null
 
     Pensum1015:
       summary: Ingeniería de Sistemas, Reforma 2018 (pensum 1015)

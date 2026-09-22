@@ -14,8 +14,15 @@ La lista de lo que sí quedó cargado está en [README.md](README.md).
 programas llegan como folletos, sin un solo código.
 
 **Qué hace KApp mientras tanto.** Genera un código propio por materia (`MKT-101`, `EPF-204`) que
-**nunca se le muestra al estudiante**. Sirve para identificar la materia dentro del sistema y nada
-más. Los planes que dependen de esos códigos quedan en estado `DRAFT`.
+**no se muestra en ninguna pantalla**: ni al estudiante ni en el portal de administración. Sirve
+para identificar la materia dentro del sistema y nada más. Los planes que dependen de esos códigos
+quedan en estado `DRAFT`.
+
+El campo `sinuCode` es el que separa un código real de uno nuestro: solo viene lleno cuando el
+código es de la universidad, y es el único que los clientes pintan. Donde no hay, el portal no
+muestra código y lo dice con todas las letras, y los prerrequisitos se nombran por el nombre de la
+materia en vez de por un código inventado. La regla está escrita en el contrato
+(`docs/api/semaphore.openapi.yaml`), que es donde la leen las apps de Kotlin y Swift.
 
 **Por qué importa.** El día que lleguen los códigos reales hay que reemplazarlos, y el progreso de
 cualquier estudiante que ya estuviera enganchado a un código inventado se tiene que reconciliar.
