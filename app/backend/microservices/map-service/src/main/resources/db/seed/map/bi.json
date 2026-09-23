@@ -23,32 +23,59 @@
       "code": "P1",
       "level": 1,
       "name": "Piso 1",
-      "status": "UNMAPPED",
+      "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 12,
-      "gridColumns": 20,
+      "gridRows": 16,
+      "gridColumns": 8,
+      "corridors": [
+        {
+          "code": "PAS-P1",
+          "name": "Salida",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 9,
+              "col": 6
+            },
+            {
+              "row": 11,
+              "col": 6
+            },
+            {
+              "row": 11,
+              "col": 1
+            }
+          ]
+        }
+      ],
       "spaces": [
         {
           "code": "P1-ASC",
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
-          "rowSpan": 1,
-          "colSpan": 1
+          "gridRow": 13,
+          "gridColumn": 4,
+          "rowSpan": 2,
+          "colSpan": 2
         },
         {
           "code": "P1-BANOS",
           "wing": "O",
           "name": "Baños",
           "typeCode": "RESTROOM",
+          "gridRow": 15,
+          "gridColumn": 5,
           "rowSpan": 1,
-          "colSpan": 1
+          "colSpan": 3
         },
         {
           "code": "P1-ENTRADA",
           "wing": "O",
           "name": "Entrada",
           "typeCode": "ENTRANCE",
+          "gridRow": 11,
+          "gridColumn": 0,
           "rowSpan": 1,
           "colSpan": 1,
           "note": "Sale al oeste, a la Calle 62."
@@ -58,8 +85,10 @@
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
-          "rowSpan": 1,
-          "colSpan": 1
+          "gridRow": 13,
+          "gridColumn": 0,
+          "rowSpan": 3,
+          "colSpan": 4
         },
         {
           "code": "P1-JUEGOS-MESA",
@@ -71,8 +100,55 @@
             "zona de ajedrez",
             "Dance Revolution"
           ],
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 11,
+          "colSpan": 4
+        },
+        {
+          "code": "P1-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 4,
+          "rowSpan": 4,
+          "colSpan": 4
+        },
+        {
+          "code": "P1-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 5,
+          "gridColumn": 6,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P1-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 7,
+          "gridColumn": 6,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P1-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 4,
+          "gridColumn": 4,
+          "rowSpan": 5,
+          "colSpan": 2
+        },
+        {
+          "code": "P1-C05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 12,
+          "gridColumn": 0,
           "rowSpan": 1,
-          "colSpan": 1
+          "colSpan": 4
         }
       ]
     },
@@ -80,17 +156,36 @@
       "code": "P2",
       "level": 2,
       "name": "Piso 2",
-      "status": "UNMAPPED",
+      "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 12,
-      "gridColumns": 20,
+      "gridRows": 16,
+      "gridColumns": 8,
+      "corridors": [
+        {
+          "code": "PAS-P2",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 1,
+              "col": 4
+            },
+            {
+              "row": 11,
+              "col": 4
+            }
+          ]
+        }
+      ],
       "spaces": [
         {
           "code": "P2-ASC",
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
-          "rowSpan": 1,
+          "gridRow": 13,
+          "gridColumn": 5,
+          "rowSpan": 2,
           "colSpan": 1
         },
         {
@@ -114,8 +209,10 @@
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
-          "rowSpan": 1,
-          "colSpan": 1
+          "gridRow": 12,
+          "gridColumn": 0,
+          "rowSpan": 3,
+          "colSpan": 4
         },
         {
           "code": "P2-FUTBOLIN",
@@ -147,6 +244,33 @@
           ],
           "rowSpan": 1,
           "colSpan": 1
+        },
+        {
+          "code": "P2-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 12,
+          "gridColumn": 6,
+          "rowSpan": 4,
+          "colSpan": 2
+        },
+        {
+          "code": "P2-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 1,
+          "rowSpan": 1,
+          "colSpan": 3
+        },
+        {
+          "code": "P2-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 4,
+          "gridColumn": 5,
+          "rowSpan": 5,
+          "colSpan": 3
         }
       ]
     },
@@ -154,17 +278,19 @@
       "code": "P3",
       "level": 3,
       "name": "Piso 3",
-      "status": "UNMAPPED",
+      "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 12,
-      "gridColumns": 20,
+      "gridRows": 16,
+      "gridColumns": 8,
       "spaces": [
         {
           "code": "P3-ASC",
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
-          "rowSpan": 1,
+          "gridRow": 13,
+          "gridColumn": 5,
+          "rowSpan": 2,
           "colSpan": 1
         },
         {
@@ -172,8 +298,10 @@
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
-          "rowSpan": 1,
-          "colSpan": 1
+          "gridRow": 12,
+          "gridColumn": 0,
+          "rowSpan": 3,
+          "colSpan": 4
         },
         {
           "code": "P3-PING-PONG",
@@ -212,6 +340,87 @@
           ],
           "rowSpan": 1,
           "colSpan": 1
+        },
+        {
+          "code": "P3-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 1,
+          "gridColumn": 0,
+          "rowSpan": 5,
+          "colSpan": 4
+        },
+        {
+          "code": "P3-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 5,
+          "gridColumn": 4,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 5,
+          "gridColumn": 6,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 7,
+          "gridColumn": 4,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 7,
+          "gridColumn": 6,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 9,
+          "gridColumn": 4,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 9,
+          "gridColumn": 6,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C08",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 6,
+          "rowSpan": 5,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C09",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 1,
+          "rowSpan": 1,
+          "colSpan": 3
         }
       ]
     },
@@ -219,17 +428,19 @@
       "code": "P4",
       "level": 4,
       "name": "Piso 4",
-      "status": "UNMAPPED",
+      "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 12,
-      "gridColumns": 20,
+      "gridRows": 16,
+      "gridColumns": 8,
       "spaces": [
         {
           "code": "P4-ASC",
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
-          "rowSpan": 1,
+          "gridRow": 13,
+          "gridColumn": 5,
+          "rowSpan": 2,
           "colSpan": 1
         },
         {
@@ -237,8 +448,10 @@
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
-          "rowSpan": 1,
-          "colSpan": 1
+          "gridRow": 12,
+          "gridColumn": 0,
+          "rowSpan": 3,
+          "colSpan": 4
         },
         {
           "code": "P4-GIMNASIO",
@@ -248,8 +461,28 @@
           "aliases": [
             "gym"
           ],
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 11,
+          "colSpan": 5
+        },
+        {
+          "code": "P4-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 5,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 1,
           "rowSpan": 1,
-          "colSpan": 1
+          "colSpan": 3
         }
       ]
     },
@@ -257,17 +490,19 @@
       "code": "P5",
       "level": 5,
       "name": "Terraza",
-      "status": "UNMAPPED",
+      "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 12,
-      "gridColumns": 20,
+      "gridRows": 16,
+      "gridColumns": 8,
       "spaces": [
         {
           "code": "P5-ASC",
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
-          "rowSpan": 1,
+          "gridRow": 13,
+          "gridColumn": 5,
+          "rowSpan": 2,
           "colSpan": 1
         },
         {
@@ -286,8 +521,10 @@
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
-          "rowSpan": 1,
-          "colSpan": 1
+          "gridRow": 12,
+          "gridColumn": 1,
+          "rowSpan": 3,
+          "colSpan": 3
         },
         {
           "code": "P5-TERRAZA",
@@ -297,8 +534,10 @@
           "aliases": [
             "terraza café"
           ],
-          "rowSpan": 1,
-          "colSpan": 1
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 12,
+          "colSpan": 8
         }
       ]
     }
