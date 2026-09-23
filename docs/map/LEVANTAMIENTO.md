@@ -147,13 +147,20 @@ Por edificio. El detalle de cada punto está en su documento.
 
 - [ ] **Primera visita.**
 
-## Preguntas abiertas
+## Decisiones tomadas con Brian
 
-1. **¿Importan los espacios que no son para estudiantes?** Planta eléctrica, centro de acopio,
-   rack, cuartos de aseo. Existen, y a un administrativo le sirven, pero en la app de un estudiante
-   son ruido. Probablemente se guardan todos y se filtran por categoría.
-2. **Los nombres propios de los auditorios y la biblioteca** ("Sonia Fajardo Forero", "Juan Alberto
-   Aragón Bateman") se pueden guardar como alias, para que la búsqueda los encuentre por el nombre
-   que usa la gente.
-3. **¿El mapa debe decir si un nivel es accesible sin escaleras?** El mezzanine del JAAB sin
-   ascensor y la escalera exterior del MU son justo el caso en que importa.
+1. **Se mapea todo, incluidos los espacios que no son para estudiantes:** planta eléctrica, centro
+   de acopio, rack, cuartos de aseo. La app no es solo para estudiantes, docentes y visitantes:
+   también servirá a administrativos y funcionarios. Qué ve cada perfil lo decide el cliente, no
+   los datos.
+2. **Alias en espacios y también en edificios.** "Sonia Fajardo Forero" y "Juan Alberto Aragón
+   Bateman" son solo dos ejemplos: hay más lugares, e incluso edificios, que la gente conoce por
+   otros nombres, a veces varios.
+3. **La accesibilidad de cada zona se registra:** si se llega sin escaleras. El mezzanine del JAAB
+   sin ascensor, la escalera exterior del MU y la terraza norte del EC son los casos conocidos.
+   Mientras no se verifique, queda como desconocida, no como accesible.
+4. **Seis categorías fijas y tipos que crecen:** docencia, atención, oficina, bienestar y social,
+   servicio y circulación.
+   - Lo que se crea desde el portal son **tipos**: "Cuarto de TI", "Sala de lactancia"…
+   - Las categorías se quedan fijas porque las apps las usan para el color y el ícono. Una
+     séptima es un cambio de contrato chico, pero se hace a propósito, no desde un formulario.
