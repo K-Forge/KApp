@@ -1,16 +1,17 @@
 package co.edu.konradlorenz.kapp.map.service;
 
+import co.edu.konradlorenz.kapp.common.error.ApiError;
+import co.edu.konradlorenz.kapp.common.error.BusinessRuleException;
+import co.edu.konradlorenz.kapp.common.error.ConflictException;
 import co.edu.konradlorenz.kapp.common.error.DuplicateResourceException;
 import co.edu.konradlorenz.kapp.common.error.ResourceNotFoundException;
 import co.edu.konradlorenz.kapp.map.domain.BuildingDocument;
 import co.edu.konradlorenz.kapp.map.domain.Floor;
-import co.edu.konradlorenz.kapp.common.error.ApiError;
-import co.edu.konradlorenz.kapp.common.error.BusinessRuleException;
-import co.edu.konradlorenz.kapp.common.error.ConflictException;
+import co.edu.konradlorenz.kapp.map.domain.SpaceCategory;
 import co.edu.konradlorenz.kapp.map.domain.SpaceDocument;
-import co.edu.konradlorenz.kapp.map.domain.Wing;
 import co.edu.konradlorenz.kapp.map.domain.SpaceRepository;
-import co.edu.konradlorenz.kapp.map.domain.SpaceType;
+import co.edu.konradlorenz.kapp.map.domain.SpaceTypeDocument;
+import co.edu.konradlorenz.kapp.map.web.dto.LayoutSpaceDto;
 import co.edu.konradlorenz.kapp.map.web.dto.PageResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.SpaceDetailResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.SpaceRequest;
@@ -21,45 +22,67 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 /**
- * Spaces: the search, and the room-code lookup the schedule screen depends on.
+ * Spaces one at a time: the search, the room-code lookup the schedule screen depends on, and
+ * the single-space writes the portal's forms use. A whole floor is saved by
+ * {@link FloorLayoutService}, under the same {@link SpaceRules}.
  *
- * <p>A space is always addressed by its room code, because that is the key
- * {@code schedule-service} stores against a class and the number printed on the door. The
- * code is unique within a building but not across the map, so every lookup here can come
- * back ambiguous and says so rather than guessing.
+ * <p>A space is addressed by its {@code code}, the key {@code schedule-service} stores against a
+ * class. The code is unique within a building but not across the map, so every lookup here can
+ * come back ambiguous and says so rather than guessing.
  */
 @Service
 public class SpaceService {
-
-    /** What {@code accessVia} may point at: the things people actually travel through. */
-    private static final Set<SpaceType> CIRCULATION_TYPES =
-            Set.of(SpaceType.ELEVATOR, SpaceType.STAIRS, SpaceType.ENTRANCE);
 
     private static final Logger log = LoggerFactory.getLogger(SpaceService.class);
 
     private final SpaceRepository spaces;
     private final BuildingService buildingService;
     private final SpaceSearch search;
+    private final SpaceRendering rendering;
 
-    public SpaceService(SpaceRepository spaces, BuildingService buildingService, SpaceSearch search) {
+    public SpaceService(SpaceRepository spaces, BuildingService buildingService, SpaceSearch search,
+                        SpaceRendering rendering) {
         this.spaces = spaces;
         this.buildingService = buildingService;
         this.search = search;
+        this.rendering = rendering;
     }
 
-    public PageResponse<SpaceResponse> search(String q, String campus, SpaceType type,
-                                              String buildingCode, Wing wing, int page, int size) {
-        SpaceSearch.Result result = search.search(q, campus, type, buildingCode, wing, page, size);
-        return PageResponse.of(
-                result.content().stream().map(MapMapper::toSpaceResponse).toList(),
-                page,
-                size,
-                result.totalElements());
+    /**
+     * @param category narrows to the types in one category. Resolved here to the type codes it
+     *                 currently holds, because spaces store the type, not the category - a type
+     *                 moved between categories must not leave its spaces behind
+     */
+    public PageResponse<SpaceResponse> search(String q, String campus, String typeCode,
+                                              SpaceCategory category, String buildingCode,
+                                              String wing, String floorCode, int page, int size) {
+        List<String> typeCodes = null;
+        if (StringUtils.hasText(typeCode)) {
+            typeCodes = List.of(typeCode);
+        }
+        if (category != null) {
+            List<String> inCategory = rendering.typesByCode().values().stream()
+                    .filter(type -> type.category() == category)
+                    .map(SpaceTypeDocument::code)
+                    .toList();
+            typeCodes = typeCodes == null
+                    ? inCategory
+                    : typeCodes.stream().filter(inCategory::contains).toList();
+            if (typeCodes.isEmpty()) {
+                return PageResponse.of(List.of(), page, size, 0);
+            }
+        }
+        SpaceSearch.Result result = search.search(
+                new SpaceSearch.Filters(q, campus, typeCodes, buildingCode, wing, floorCode), page, size);
+        return PageResponse.of(rendering.render(result.content()), page, size, result.totalElements());
     }
 
     /**
@@ -69,59 +92,38 @@ public class SpaceService {
     public SpaceDetailResponse getDetail(String code, String buildingCode) {
         SpaceDocument space = resolve(code, buildingCode);
         BuildingDocument building = buildingService.require(space.buildingCode());
-
-        Floor floor = building.floorAt(space.floorLevel())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Floor %d of building %s".formatted(space.floorLevel(), building.code())));
-
-        return MapMapper.toSpaceDetail(space, floor, building);
+        Floor floor = BuildingService.requireFloor(building, space.floorCode());
+        return MapMapper.toSpaceDetail(space, rendering.typesByCode().get(space.typeCode()), floor, building);
     }
 
     public SpaceResponse create(SpaceRequest request) {
-        BuildingDocument building = requireBuildingWithFloor(request);
+        BuildingDocument building = buildingService.require(request.buildingCode());
+        Floor floor = BuildingService.requireFloor(building, request.floorCode());
 
         if (spaces.findByBuildingIdAndCode(building.id(), request.code()).isPresent()) {
             throw new DuplicateResourceException(
                     "Space %s in building %s".formatted(request.code(), building.code()),
                     request.code());
         }
-        checkFitsTheFloor(building, request, null);
+        check(building, floor, request.toLayoutSpace(), null);
 
         Instant now = Instant.now();
-        SpaceDocument saved = spaces.save(new SpaceDocument(
-                UUID.randomUUID().toString(),
-                request.code(),
-                SpaceDocument.baseCodeOf(request.code()),
-                wingOf(request),
-                request.name(),
-                request.type(),
-                building.id(),
-                building.code(),
-                building.campus(),
-                request.floorLevel(),
-                request.aliasesOrEmpty(),
-                request.gridRow(),
-                request.gridColumn(),
-                request.rowSpanOrOne(),
-                request.colSpanOrOne(),
-                request.accessVia(),
-                request.capacity(),
-                false,
-                now,
-                now));
+        SpaceDocument saved = spaces.save(toDocument(request.toLayoutSpace(), building, floor,
+                UUID.randomUUID().toString(), false, now, now));
 
         log.info("Created space {} in building {} on floor {}",
-                saved.code(), saved.buildingCode(), saved.floorLevel());
-        return MapMapper.toSpaceResponse(saved);
+                saved.code(), saved.buildingCode(), saved.floorCode());
+        return rendering.render(List.of(saved), building).get(0);
     }
 
     /**
-     * Replaces a space. Moving a room happens here, by sending a new grid cell - which is
-     * exactly what the grid editor's export produces.
+     * Replaces a space. Moving a room happens here too, by sending a new building, floor or
+     * grid cell.
      */
     public SpaceResponse update(String code, String buildingCode, SpaceRequest request) {
         SpaceDocument current = resolve(code, buildingCode);
-        BuildingDocument target = requireBuildingWithFloor(request);
+        BuildingDocument target = buildingService.require(request.buildingCode());
+        Floor floor = BuildingService.requireFloor(target, request.floorCode());
 
         spaces.findByBuildingIdAndCode(target.id(), request.code())
                 .filter(clash -> !clash.id().equals(current.id()))
@@ -130,43 +132,39 @@ public class SpaceService {
                             "Space %s in building %s".formatted(request.code(), target.code()),
                             request.code());
                 });
-        checkFitsTheFloor(target, request, current.id());
+        check(target, floor, request.toLayoutSpace(), current.id());
 
-        SpaceDocument saved = spaces.save(new SpaceDocument(
+        SpaceDocument saved = spaces.save(toDocument(request.toLayoutSpace(), target, floor,
                 current.id(),
-                request.code(),
-                SpaceDocument.baseCodeOf(request.code()),
-                wingOf(request),
-                request.name(),
-                request.type(),
-                target.id(),
-                target.code(),
-                target.campus(),
-                request.floorLevel(),
-                request.aliasesOrEmpty(),
-                request.gridRow(),
-                request.gridColumn(),
-                request.rowSpanOrOne(),
-                request.colSpanOrOne(),
-                request.accessVia(),
-                request.capacity(),
                 // Provenance, not content: a corrected cell on an invented floor is still on
                 // an invented floor. The flag clears when a real survey replaces the seed.
                 current.placeholder(),
-                current.createdAt(),
-                Instant.now()));
+                current.createdAt(), Instant.now()));
 
-        return MapMapper.toSpaceResponse(saved);
+        return rendering.render(List.of(saved), target).get(0);
     }
 
+    /**
+     * Deletes a space, unless another space names it as the way to get there - removing the
+     * lift three classrooms point at would leave them saying "sube por" nothing.
+     */
     public void delete(String code, String buildingCode) {
         SpaceDocument target = resolve(code, buildingCode);
+        List<SpaceDocument> pointingAtIt = spaces.findByBuildingIdAndAccessVia(target.buildingId(), target.code());
+        if (!pointingAtIt.isEmpty()) {
+            throw new MapConflictException(
+                    "Space %s is how %d other space(s) are reached. Point them elsewhere first."
+                            .formatted(target.code(), pointingAtIt.size()),
+                    pointingAtIt.stream()
+                            .map(s -> new ApiError.FieldIssue("accessVia", s.code()))
+                            .toList());
+        }
         spaces.delete(target);
         log.info("Deleted space {} from building {}", target.code(), target.buildingCode());
     }
 
     /**
-     * Resolves a room code to exactly one space.
+     * Resolves a code to exactly one space.
      *
      * <p>Three outcomes, and all three are in the contract: nothing matches (404), one
      * matches (the answer), or several buildings use the code and no disambiguator was
@@ -192,108 +190,73 @@ public class SpaceService {
         return matches.get(0);
     }
 
-    private BuildingDocument requireBuildingWithFloor(SpaceRequest request) {
-        BuildingDocument building = buildingService.require(request.buildingCode());
-
-        if (!building.hasFloor(request.floorLevel())) {
-            throw new ResourceNotFoundException("Floor %d of building %s"
-                    .formatted(request.floorLevel(), building.code()));
-        }
-        return building;
-    }
-
     /**
-     * A space has to fit on the floor it claims, and it may not sit on top of another.
+     * Runs {@link SpaceRules} over the floor as it would be with this space in it.
      *
-     * <p>Both are cheap to check and expensive to discover later: a room outside the grid
-     * simply does not render, and two rooms in the same cell render one on top of the other,
-     * so the second one is invisible rather than obviously wrong. Whoever is capturing a
-     * floor finds out immediately instead of when a student cannot find a classroom.
+     * <p>A mistake in the space itself is a 400. Landing on a cell another space already holds is
+     * a 409: the request is fine, the floor's current state is what it collides with.
      *
-     * @param excludeId the space being replaced, so an update does not collide with itself
+     * @param replacing the id of the space being replaced, so an update does not collide with
+     *                  itself; null on create
      */
-    private void checkFitsTheFloor(BuildingDocument building, SpaceRequest request,
-                                    String excludeId) {
-        Floor floor = building.floorAt(request.floorLevel())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Floor %d of building %s".formatted(request.floorLevel(), building.code())));
+    private void check(BuildingDocument building, Floor floor, LayoutSpaceDto candidate, String replacing) {
+        List<SpaceDocument> inBuilding = spaces.findByBuildingId(building.id()).stream()
+                .filter(space -> replacing == null || !space.id().equals(replacing))
+                .toList();
 
-        int lastRow = request.gridRow() + request.rowSpanOrOne() - 1;
-        int lastColumn = request.gridColumn() + request.colSpanOrOne() - 1;
-
-        if (lastRow >= floor.gridRows() || lastColumn >= floor.gridColumns()) {
-            throw new BusinessRuleException(
-                    "Space %s does not fit on floor %d of building %s, which is %d x %d"
-                            .formatted(request.code(), floor.level(), building.code(),
-                                    floor.gridRows(), floor.gridColumns()),
-                    List.of(new ApiError.FieldIssue("gridRow",
-                            "the space would occupy rows %d-%d and columns %d-%d"
-                                    .formatted(request.gridRow(), lastRow,
-                                            request.gridColumn(), lastColumn))));
+        List<LayoutSpaceDto> onFloor = new ArrayList<>();
+        onFloor.add(candidate);
+        List<SpaceDocument> elsewhere = new ArrayList<>();
+        for (SpaceDocument space : inBuilding) {
+            if (space.floorCode().equals(floor.code())) {
+                onFloor.add(SpaceRules.asLayout(space));
+            } else {
+                elsewhere.add(space);
+            }
         }
+        List<String> labels = new ArrayList<>(Collections.nCopies(onFloor.size(), ""));
 
-        checkAccessViaResolves(building, request);
+        Map<String, SpaceTypeDocument> types = rendering.typesByCode();
+        SpaceRules.Findings findings = SpaceRules.check(building, floor, onFloor, labels, Set.of(0),
+                elsewhere, types);
 
-        SpaceDocument candidate = new SpaceDocument(
-                null, request.code(), null, null, request.name(), request.type(),
-                building.id(), building.code(), building.campus(), request.floorLevel(),
-                List.of(), request.gridRow(), request.gridColumn(),
-                request.rowSpanOrOne(), request.colSpanOrOne(), null, null, false, null, null);
-
-        spaces.findByBuildingIdAndFloorLevelOrderByCodeAsc(building.id(), request.floorLevel()).stream()
-                .filter(other -> excludeId == null || !other.id().equals(excludeId))
-                .filter(candidate::overlaps)
-                .findFirst()
-                .ifPresent(other -> {
-                    throw new ConflictException(
-                            "Space %s would overlap %s on floor %d of building %s"
-                                    .formatted(request.code(), other.code(),
-                                            request.floorLevel(), building.code()),
-                            List.of(new ApiError.FieldIssue("gridRow", other.code())));
-                });
-    }
-
-    /**
-     * {@code accessVia} has to name a real lift, staircase or entrance in the same building.
-     *
-     * <p>This is the field that produces "piso 4, sube por el ascensor central". A code that
-     * matches nothing fails silently in the worst way: the app simply says nothing about how to
-     * get there, or worse, names something that is not where the visitor is. A typo here is
-     * invisible until a student is standing in the wrong corridor.
-     *
-     * <p>Only circulation types qualify. Pointing a classroom at another classroom would produce
-     * an instruction nobody can follow.
-     */
-    private void checkAccessViaResolves(BuildingDocument building, SpaceRequest request) {
-        String target = request.accessVia();
-        if (target == null || target.isBlank()) {
-            return;
+        if (!findings.invalid().isEmpty()) {
+            throw new BusinessRuleException("Space %s cannot be placed as sent".formatted(candidate.code()),
+                    findings.invalid());
         }
-
-        SpaceDocument circulation = spaces.findByBuildingIdAndCode(building.id(), target.trim())
-                .orElseThrow(() -> new BusinessRuleException(
-                        "%s is not a space in building %s".formatted(target, building.code()),
-                        List.of(new ApiError.FieldIssue("accessVia", "no such code in this building"))));
-
-        if (!CIRCULATION_TYPES.contains(circulation.type())) {
-            throw new BusinessRuleException(
-                    "%s is a %s, not something a visitor travels through"
-                            .formatted(target, circulation.type()),
-                    List.of(new ApiError.FieldIssue("accessVia",
-                            "must be an ELEVATOR, STAIRS or ENTRANCE")));
+        if (!findings.overlaps().isEmpty()) {
+            throw new ConflictException("Space %s would overlap another space on floor %s of building %s"
+                    .formatted(candidate.code(), floor.code(), building.code()), findings.overlaps());
         }
     }
 
-    /**
-     * The wing the caller sent, or the one implied by a {@code -N} / {@code -S} / {@code -C}
-     * suffix on the code.
-     *
-     * <p>Derived only as a fallback. Deriving it always would be wrong the first time a
-     * building names its wings something else, and refusing to derive it at all would mean
-     * every one of the central building's rooms has to repeat what its own code already
-     * says.
-     */
-    private static Wing wingOf(SpaceRequest request) {
-        return request.wing() != null ? request.wing() : SpaceDocument.wingOf(request.code());
+    static SpaceDocument toDocument(LayoutSpaceDto space, BuildingDocument building, Floor floor,
+                                    String id, boolean placeholder, Instant createdAt, Instant updatedAt) {
+        String doorCode = space.doorCodeOrNull();
+        return new SpaceDocument(
+                id,
+                space.code(),
+                doorCode,
+                SpaceDocument.baseCodeOf(doorCode, building.wings()),
+                space.wingOrNull(),
+                space.name().trim(),
+                space.typeCode(),
+                building.id(),
+                building.code(),
+                building.campus(),
+                floor.code(),
+                floor.level(),
+                space.aliasesOrEmpty().stream().map(String::trim).filter(a -> !a.isEmpty()).distinct().toList(),
+                space.gridRow(),
+                space.gridColumn(),
+                space.rowSpanOrOne(),
+                space.colSpanOrOne(),
+                space.accessViaOrNull(),
+                space.accessibility(),
+                MapMapper.blankToNull(space.note()),
+                space.capacity(),
+                placeholder,
+                createdAt,
+                updatedAt);
     }
 }

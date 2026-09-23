@@ -1,7 +1,6 @@
 package co.edu.konradlorenz.kapp.map.web;
 
-import co.edu.konradlorenz.kapp.map.domain.SpaceType;
-import co.edu.konradlorenz.kapp.map.domain.Wing;
+import co.edu.konradlorenz.kapp.map.domain.SpaceCategory;
 import co.edu.konradlorenz.kapp.map.service.SpaceService;
 import co.edu.konradlorenz.kapp.map.web.dto.PageResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.SpaceDetailResponse;
@@ -53,11 +52,11 @@ public class SpaceController {
 
     @GetMapping("/search")
     @Operation(summary = "Search or list spaces across the campus",
-            description = "With q: matches it against name, code and aliases, case- and "
-                    + "accent-insensitively, ordered by descending relevance then code. "
+            description = "With q: matches it against the door code, the name and the aliases, "
+                    + "case- and accent-insensitively, ordered by descending relevance. "
                     + "Without q: lists every space the filters allow, ordered by building, "
                     + "floor and code - which is how a floor is managed rather than how a "
-                    + "student finds a room. Filter by wing to separate 301, 301-N and 301-S. "
+                    + "student finds a room. type takes a type code, category a whole category. "
                     + "Allowed roles: ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN.")
     public PageResponse<SpaceResponse> search(
             // Optional, because "show me everything in building A" is a real question and the
@@ -65,13 +64,15 @@ public class SpaceController {
             // you had just created, and the building and type filters did nothing on their own.
             @RequestParam(required = false) @Size(min = 2, max = 100) String q,
             @RequestParam(required = false) @Size(min = 1, max = 120) String campus,
-            @RequestParam(required = false) SpaceType type,
+            @RequestParam(required = false) @Size(min = 1, max = 40) String type,
+            @RequestParam(required = false) SpaceCategory category,
             @RequestParam(required = false) @Size(min = 1, max = 10) String buildingCode,
-            @RequestParam(required = false) Wing wing,
+            @RequestParam(required = false) @Size(min = 1, max = 8) String wing,
+            @RequestParam(required = false) @Size(min = 1, max = 8) String floor,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
 
-        return spaces.search(q, campus, type, buildingCode, wing, page, size);
+        return spaces.search(q, campus, type, category, buildingCode, wing, floor, page, size);
     }
 
     @GetMapping("/{code}")
@@ -99,8 +100,8 @@ public class SpaceController {
 
     @PutMapping("/{code}")
     @Operation(summary = "Update a space",
-            description = "Moving a space is done here, by sending a new grid cell. "
-                    + "Allowed roles: ROLE_ADMIN only.")
+            description = "Moving a space is done here, by sending a new building, floor or grid "
+                    + "cell. Allowed roles: ROLE_ADMIN only.")
     public SpaceResponse update(
             @PathVariable @Size(min = 1, max = 20) String code,
             @RequestParam(required = false) @Size(min = 1, max = 10) String buildingCode,
@@ -109,7 +110,9 @@ public class SpaceController {
     }
 
     @DeleteMapping("/{code}")
-    @Operation(summary = "Delete a space", description = "Allowed roles: ROLE_ADMIN only.")
+    @Operation(summary = "Delete a space",
+            description = "Refused with 409 while other spaces name it as their accessVia. "
+                    + "Allowed roles: ROLE_ADMIN only.")
     public ResponseEntity<Void> delete(
             @PathVariable @Size(min = 1, max = 20) String code,
             @RequestParam(required = false) @Size(min = 1, max = 10) String buildingCode) {

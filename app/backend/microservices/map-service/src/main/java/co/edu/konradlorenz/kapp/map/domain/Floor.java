@@ -9,32 +9,43 @@ import java.util.List;
  * queried on their own: every read that wants a floor already knows the building. Spaces
  * are the opposite case and live in a flat collection of their own.
  *
+ * <h2>A code, not a number, is what identifies a floor</h2>
+ * The floor used to be addressed by an integer level. The campus does not fit that: the JAAB has
+ * a mezzanine between its first and second floors, Medio Universitario enters at {@code P0}, and
+ * Bienestar's directory numbers its terrace 5 while everyone calls it the terrace. So a floor is
+ * identified by {@code code} - {@code S1}, {@code P0}, {@code P1}, {@code MEZZ}, {@code T} - which
+ * is also what the API addresses it by, and {@code level} only orders the floors: the mezzanine is
+ * {@code 1.5}, between the two it sits between.
+ *
  * <h2>A grid, not a photograph</h2>
- * This used to carry {@code planImageUrl} and the image's pixel dimensions, with each space
- * pinned at a percentage of it. The floor is now described as data - rooms occupying cells
- * of a grid, corridors tracing paths through it - and the client draws it.
+ * The floor is described as data - rooms occupying cells of a grid, corridors tracing paths
+ * through it - and the client draws it. A schematic floor is captured by walking it, which the
+ * team can do itself without waiting for anybody's architectural plans.
  *
- * <p>That is not only a nicer rendering. Obtaining architectural plans for five buildings
- * depended on other people's calendars and was the single likeliest thing to slip before
- * November. A schematic floor is captured by walking it with the grid editor, which is work
- * the team can do itself, in an afternoon, without asking anybody's permission.
- *
- * @param level       floor number. Matches the first digit of the room codes on it, so room
- *                    {@code 708} is on level 7 - except in the basement, which is level
- *                    {@code -1} and whose rooms are coded however the building codes them
- * @param gridRows    how many rows the floor's grid has
- * @param gridColumns how many columns it has
- * @param corridors   walkable routes across this floor
+ * @param code          identifier within the building, and the path segment the API uses
+ * @param level         vertical order only; decimal so a mezzanine can sit between two floors
+ * @param status        how far the drawing is from verified; see {@link FloorStatus}
+ * @param accessibility whether the floor is reachable without stairs; its spaces inherit it
+ * @param note          how to get here when it is not obvious - "se sube por la escalera exterior"
+ * @param version       bumped by every layout save, so two people editing the same floor cannot
+ *                      silently overwrite each other; the second save is refused instead
  */
 public record Floor(
-        int level,
+        String code,
+        double level,
         String name,
+        FloorStatus status,
+        Accessibility accessibility,
+        String note,
         int gridRows,
         int gridColumns,
-        List<Corridor> corridors
+        List<Corridor> corridors,
+        long version
 ) {
 
     public Floor {
         corridors = corridors == null ? List.of() : List.copyOf(corridors);
+        status = status == null ? FloorStatus.UNMAPPED : status;
+        accessibility = accessibility == null ? Accessibility.UNKNOWN : accessibility;
     }
 }

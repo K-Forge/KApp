@@ -2,10 +2,7 @@ package co.edu.konradlorenz.kapp.map;
 
 import co.edu.konradlorenz.kapp.map.domain.BuildingDocument;
 import co.edu.konradlorenz.kapp.map.domain.BuildingRepository;
-import co.edu.konradlorenz.kapp.map.domain.Floor;
-import co.edu.konradlorenz.kapp.map.domain.SpaceDocument;
 import co.edu.konradlorenz.kapp.map.domain.SpaceRepository;
-import co.edu.konradlorenz.kapp.map.domain.SpaceType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +18,7 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -101,42 +96,11 @@ class MapAuthorizationMatrixTest {
 
     /** A building the seed migration does not know about, for writes to mutate freely. */
     private BuildingDocument saveBuilding(String code, boolean withSpaceLater) {
-        Instant now = Instant.now();
-        return buildings.save(new BuildingDocument(
-                UUID.randomUUID().toString(),
-                code,
-                "Matrix fixture " + code,
-                "Sede Test",
-                null,
-                List.of(new Floor(1, "Piso 1", 10, 10, List.of())),
-                false,
-                now,
-                now));
+        return buildings.save(MapFixtures.building(code));
     }
 
     private void saveSpace(BuildingDocument building, String code) {
-        Instant now = Instant.now();
-        spaces.save(new SpaceDocument(
-                UUID.randomUUID().toString(),
-                code,
-                SpaceDocument.baseCodeOf(code),
-                SpaceDocument.wingOf(code),
-                "Matrix fixture space " + code,
-                SpaceType.OFFICE,
-                building.id(),
-                building.code(),
-                building.campus(),
-                1,
-                List.of(),
-                1,
-                1,
-                1,
-                1,
-                null,
-                null,
-                false,
-                now,
-                now));
+        spaces.save(MapFixtures.space(building, code, "P1", 1, 1));
     }
 
     private static final String NEW_BUILDING_JSON = """
@@ -145,7 +109,7 @@ class MapAuthorizationMatrixTest {
               "name": "Auth Matrix Building",
               "campus": "Sede Test",
               "floors": [
-                {"level": 1, "name": "Piso 1", "gridRows": 10, "gridColumns": 10}
+                {"code": "P1", "level": 1, "name": "Piso 1", "gridRows": 10, "gridColumns": 10}
               ]
             }
             """;
@@ -157,7 +121,7 @@ class MapAuthorizationMatrixTest {
                   "name": "Renamed fixture",
                   "campus": "Sede Test",
                   "floors": [
-                    {"level": 1, "name": "Piso 1", "gridRows": 10, "gridColumns": 10}
+                    {"code": "P1", "level": 1, "name": "Piso 1", "gridRows": 10, "gridColumns": 10}
                   ]
                 }
                 """.formatted(code);
@@ -168,9 +132,9 @@ class MapAuthorizationMatrixTest {
                 {
                   "code": "%s",
                   "name": "Auth Matrix Space",
-                  "type": "OFFICE",
+                  "typeCode": "OFFICE",
                   "buildingCode": "A",
-                  "floorLevel": 1,
+                  "floorCode": "P1",
                   "aliases": [],
                   "gridRow": 1,
                   "gridColumn": 1
@@ -183,9 +147,9 @@ class MapAuthorizationMatrixTest {
                 {
                   "code": "%s",
                   "name": "Renamed fixture space",
-                  "type": "OFFICE",
+                  "typeCode": "OFFICE",
                   "buildingCode": "A",
-                  "floorLevel": 1,
+                  "floorCode": "P1",
                   "aliases": [],
                   "gridRow": 2,
                   "gridColumn": 2
@@ -219,13 +183,13 @@ class MapAuthorizationMatrixTest {
     }
 
     @Test
-    @DisplayName("GET /api/map/buildings/{code}/floors/{level}: guest, student, professor and admin succeed; anonymous is 401")
+    @DisplayName("GET /api/map/buildings/{code}/floors/{floorCode}: guest, student, professor and admin succeed; anonymous is 401")
     void getFloor_authorizationMatrix() throws Exception {
-        mockMvc.perform(get("/api/map/buildings/A/floors/3").with(guest())).andExpect(status().isOk());
-        mockMvc.perform(get("/api/map/buildings/A/floors/3").with(student())).andExpect(status().isOk());
-        mockMvc.perform(get("/api/map/buildings/A/floors/3").with(professor())).andExpect(status().isOk());
-        mockMvc.perform(get("/api/map/buildings/A/floors/3").with(admin())).andExpect(status().isOk());
-        mockMvc.perform(get("/api/map/buildings/A/floors/3")).andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/api/map/buildings/A/floors/P3").with(guest())).andExpect(status().isOk());
+        mockMvc.perform(get("/api/map/buildings/A/floors/P3").with(student())).andExpect(status().isOk());
+        mockMvc.perform(get("/api/map/buildings/A/floors/P3").with(professor())).andExpect(status().isOk());
+        mockMvc.perform(get("/api/map/buildings/A/floors/P3").with(admin())).andExpect(status().isOk());
+        mockMvc.perform(get("/api/map/buildings/A/floors/P3")).andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -380,5 +344,66 @@ class MapAuthorizationMatrixTest {
         mockMvc.perform(delete("/api/map/spaces/ZD2").with(professor())).andExpect(status().isForbidden());
         mockMvc.perform(delete("/api/map/spaces/ZD2")).andExpect(status().isUnauthorized());
         mockMvc.perform(delete("/api/map/spaces/ZD2").with(admin())).andExpect(status().isNoContent());
+    }
+
+    // ================================================================
+    // The space type catalogue and the floor layout save.
+    // ================================================================
+
+    @Test
+    @DisplayName("GET /api/map/space-types: guest, student, professor and admin succeed; anonymous is 401")
+    void listSpaceTypes_allReadersSucceed() throws Exception {
+        mockMvc.perform(get("/api/map/space-types").with(guest())).andExpect(status().isOk());
+        mockMvc.perform(get("/api/map/space-types").with(student())).andExpect(status().isOk());
+        mockMvc.perform(get("/api/map/space-types").with(professor())).andExpect(status().isOk());
+        mockMvc.perform(get("/api/map/space-types").with(admin())).andExpect(status().isOk());
+        mockMvc.perform(get("/api/map/space-types")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("POST, PUT and DELETE /api/map/space-types: guest, student and professor are refused; admin succeeds; anonymous is 401")
+    void spaceTypeWrites_authorizationMatrix() throws Exception {
+        String body = """
+                {"code": "ZZ_MATRIX", "name": "Tipo de prueba", "category": "OTHER"}
+                """;
+        mockMvc.perform(post("/api/map/space-types").with(guest())
+                .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/map/space-types").with(student())
+                .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/map/space-types").with(professor())
+                .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        mockMvc.perform(post("/api/map/space-types")
+                .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isUnauthorized());
+        mockMvc.perform(post("/api/map/space-types").with(admin())
+                .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isCreated());
+
+        mockMvc.perform(put("/api/map/space-types/ZZ_MATRIX").with(student())
+                .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        mockMvc.perform(put("/api/map/space-types/ZZ_MATRIX").with(admin())
+                .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isOk());
+
+        mockMvc.perform(delete("/api/map/space-types/ZZ_MATRIX").with(professor()))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(delete("/api/map/space-types/ZZ_MATRIX")).andExpect(status().isUnauthorized());
+        mockMvc.perform(delete("/api/map/space-types/ZZ_MATRIX").with(admin())).andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("PUT /api/map/buildings/{code}/floors/{floorCode}/layout: guest, student and professor are refused; admin succeeds; anonymous is 401")
+    void saveLayout_authorizationMatrix() throws Exception {
+        buildings.save(MapFixtures.building("ZL1"));
+        String body = """
+                {"version": 0, "gridRows": 10, "gridColumns": 10, "spaces": []}
+                """;
+        mockMvc.perform(put("/api/map/buildings/ZL1/floors/P1/layout").with(guest())
+                .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        mockMvc.perform(put("/api/map/buildings/ZL1/floors/P1/layout").with(student())
+                .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        mockMvc.perform(put("/api/map/buildings/ZL1/floors/P1/layout").with(professor())
+                .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());
+        mockMvc.perform(put("/api/map/buildings/ZL1/floors/P1/layout")
+                .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isUnauthorized());
+        mockMvc.perform(put("/api/map/buildings/ZL1/floors/P1/layout").with(admin())
+                .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isOk());
     }
 }
