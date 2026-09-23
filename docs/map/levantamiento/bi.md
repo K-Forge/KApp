@@ -4,22 +4,24 @@
 
 **Archivos:** `BI-P1-PE` · `BI-P1-PI` · `BI-P2-PE` · `BI-P2-PI` · `BI-P3-PE` · `BI-P3-PI` · `BI-P4-PE` · `BI-P4-PI` · `BI-T-PE`
 
-**Estado:** hay estructura de una sola de las dos alas. La otra, el ala oriental o "Centro de
-Investigaciones 2", no tiene ni una foto.
+**Estado:** hay estructura del edificio original, que es lo que dibujan los PE. La expansión con
+aulas y laboratorios no tiene ni una foto.
 
 ## Lo que vale para todo el edificio
 
-- **Dos alas conectadas por dentro,** por el P1 y por la terraza. La **occidental** es bienestar
-  estudiantil. La **oriental** es el "Centro de Investigaciones 2", con laboratorios y salones.
+- **Un edificio original y una expansión, conectados por dentro** por el P1 y por la terraza,
+  según Brian:
+  - **El edificio original** tiene todas las zonas de bienestar estudiantil: juegos, salas de
+    música y danza, gimnasio y la terraza. **Es lo que dibujan los PE.**
+  - **La expansión, pequeña y hacia el occidente,** tiene aulas pequeñas y laboratorios. Los PE no
+    la muestran. Brian la había llamado antes "ala oriental" o "Centro de Investigaciones 2": el
+    lado se cierra con la brújula, y el nombre, con la placa que tenga.
 - **Las placas se firman "Konrad Lorenz › MU › BI Bienestar Institucional".** Bienestar depende de
   Medio Universitario.
 - **Los PE dibujan una sola planta estrecha junto a la Calle 62,** con el ascensor y la escalera en
   el extremo norte. La fachada del PE es un render de un edificio moderno de cuatro pisos y
   terraza, con dos letreros verticales de la K.
-- **Qué ala muestran los PE, sin resolver.** Brian dijo primero que las fotos eran del ala
-  occidental (bienestar), y después que los PE del BI **no muestran la zona occidental**. Lo que
-  se ve es compatible con cualquiera de las dos: la PI habla de bienestar, pero la huella del
-  plano es la de un solo bloque, sin la otra ala. **Hay que confirmarlo en sitio.**
+- **Resuelto qué muestran los PE:** el edificio original de bienestar, sin la expansión.
 - **Los PE no conservan la orientación entre pisos:** la Calle 62 queda a la izquierda en el P1 y
   a la derecha del P2 al P4. Se alinean al transcribir.
 - **El punto de encuentro es la Plazoleta de Bomberos.**
@@ -39,7 +41,7 @@ Investigaciones 2", no tiene ni una foto.
 - **La terraza es el nivel 5.** El directorio la numera "5", y la foto de Brian la llama "T". Se
   guarda con los dos nombres.
 - **Las placas de cada piso repiten el directorio.** La del P2 escribe "Ping - Pong".
-- **La PI solo lista bienestar.** Ni una línea del ala oriental.
+- **La PI solo lista bienestar.** Ni una línea de la expansión.
 
 ## Por piso
 
@@ -51,14 +53,16 @@ Investigaciones 2", no tiene ni una foto.
 | **P4** | Ascensor, escaleras y la planta casi entera abierta: el gimnasio. Un recinto al suroeste |
 | **T / P5** | Terraza verde con senderos curvos y cinco estaciones circulares de ejercicio o descanso, **ascensor** y **escalera** |
 
-**Ni el café ni la otra ala aparecen en el PE de la terraza.**
+**Ni el café ni la expansión aparecen en el PE de la terraza.**
 
 ## Qué ir a confirmar
 
-- [ ] **Qué ala muestran los PE,** con la brújula en la mano.
-- [ ] **El ala oriental entera, a mano:** pisos, laboratorios, salones con sus números, baños,
-  escaleras y ascensor. No tiene una sola foto.
-- [ ] **Las placas del ala occidental**, que Brian traerá.
-- [ ] **Por dónde se cruza de un ala a la otra** en el P1 y en la terraza.
+- [x] **Qué muestran los PE:** el edificio original, sin la expansión.
+- [ ] **La expansión entera, a mano:** cuántos pisos tiene, las aulas con sus números, los
+  laboratorios, los baños, y si tiene escalera o ascensor propios. No tiene una sola foto.
+- [ ] **El lado y el nombre de la expansión:** occidente con la brújula, y si su placa dice
+  "Centro de Investigaciones 2".
+- [ ] **Las placas de la expansión**, que Brian traerá.
+- [ ] **Por dónde se cruza** del edificio original a la expansión, en el P1 y en la terraza.
 - [ ] **Dónde está el café** de la terraza.
 - [ ] **Baños** del P2 al P4, que el PE no dibuja.

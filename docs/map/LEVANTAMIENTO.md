@@ -18,7 +18,7 @@ del mapa sale de aquí, después de revisarlo juntos.
 | [EC · Edificio Central](levantamiento/ec.md) | 24 | Sótano, P1–P8 | PE, RS y PI en casi todos los pisos | Ala central completa. **Alas norte y sur, a mano** |
 | [CPC 1 · Centro de Psicología Clínica 1](levantamiento/cpc-1.md) | 15 | P1–P5 | PE, PI y RS en todos | El más completo |
 | [JAAB · Centro de Investigaciones Juan Alberto Aragón Bateman](levantamiento/jaab.md) | 12 | Sótano, P1, MEZZ, P2–P6 | PE de 5 niveles; PI de todos | **P1, P3 y sótano, a mano** |
-| [BI · Bienestar Institucional](levantamiento/bi.md) | 9 | P1–P4, terraza (P5) | PE y PI de una sola ala | **Ala oriental, a mano** |
+| [BI · Bienestar Institucional](levantamiento/bi.md) | 9 | P1–P4, terraza (P5) | PE y PI del edificio original | **La expansión con aulas y laboratorios, a mano** |
 | [MU · Casa Medio Universitario](levantamiento/mu.md) | 5 | P0, P1, P2 | PE y RS, sin PI | Se puede dibujar |
 | [EA · Edificio Administrativo](levantamiento/ea.md) | 3 | P2–P4 | Solo PI | **Todo a mano** |
 | **RH · Edificio de Recursos Humanos** | 0 | ? | — | **Sin visitar.** Casa de patrimonio, sin conexión interna con el EC |
@@ -112,16 +112,15 @@ Por edificio. El detalle de cada punto está en su documento.
 - [ ] **Ala norte, P1–P5**, y su escalera hacia la terraza norte del P6.
 - [ ] **Ala sur, P3–P6**, y por dónde se entra desde el ala central.
 - [ ] El formato de los números de puerta. Si "S-301 / S-304" es un rango.
-- [ ] El P7: 12 o 13 aulas, `7-01` o `701`.
+- [ ] El P7: si la puerta dice `7-01` o `701`. Ya se sabe que son 13 aulas.
 - [ ] El P1: dónde quedan Admisiones, Tesorería y el Call Center.
 - [ ] El sótano: si lo usan peatones.
 
 **BI**
 
-- [ ] Qué ala muestran los PE.
-- [ ] **El ala oriental entera.**
-- [ ] Las placas del ala occidental.
-- [ ] Por dónde se cruza de un ala a la otra.
+- [ ] **La expansión entera,** con su lado (occidente) y su nombre.
+- [ ] Las placas de la expansión.
+- [ ] Por dónde se cruza del edificio original a la expansión.
 
 **JAAB**
 

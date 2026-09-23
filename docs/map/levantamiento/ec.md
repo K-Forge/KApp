@@ -143,13 +143,18 @@ Pero ahí es muy bueno. **Las cantidades de salones coinciden con las placas:**
 - **La placa de piso coincide** con el directorio, pero no menciona la terraza norte.
 - **El RS dibuja 13 salones**, "Cancillería", "Profesional de Cancillería", "Oficina Jurídica" y
   **"Cafetería – Terraza"** al sur.
-- **Contradice lo que dijo Brian.** Él dijo que el P6 es solo ala central más dos terrazas, pero
-  placa y RS ponen oficinas del ala sur en este piso. **Hay que verlo.**
+- **Confirmado por Brian en sitio.** El ala sur del P6 son **oficinas pequeñas** (Cancillería,
+  Egresados y las demás de la placa) **entre los baños y la puerta que sale a la terraza**. La
+  terraza, con su cafetería, cubre toda el ala sur.
+- **Sigue en pie la terraza norte:** el techo del ala norte, desconectada del ala central, a la que
+  solo se llega por la escalera norte desde el P5.
 
 ### P7
 
 - **La placa de piso dice** "Cámara de **Gesell**" (la ortografía correcta) y "Aulas **7-01 a
   7-12**". El directorio dice "Gessel" y "701–713".
+- **Confirmado por Brian en sitio: son 13 salones**, como dicen el directorio y el RS. La placa del
+  piso tiene uno de menos.
 - **El RS dibuja 13 salones** y una **"Terraza"** al sur, entre dos escaleras exteriores.
 - **El PE rotula** la terraza.
 
@@ -171,8 +176,10 @@ Pero ahí es muy bueno. **Las cantidades de salones coinciden con las placas:**
 - [ ] **El ala sur, P3–P6, a mano:** aulas, decanaturas, direcciones, cancillería, egresados, la
   sala de profesores y la terraza sur. Cómo se entra desde el ala central en cada piso.
 - [ ] **El formato de las puertas:** `503-S`, y si "S-301 / S-304" es un rango.
-- [ ] **El P7:** si son 12 o 13 aulas, y si la puerta dice `7-01` o `701`.
-- [ ] **El P6:** qué hay de verdad en el ala sur, y cómo se sale a cada terraza.
+- [x] **El P7:** son 13 aulas.
+- [ ] **El P7:** si la puerta dice `7-01` o `701`.
+- [x] **El P6:** en el ala sur hay oficinas pequeñas entre los baños y la salida a la terraza
+  sur, que cubre toda el ala.
 - [ ] **El P1:** dónde quedan Admisiones, Tesorería y el Call Center, y cuál cafetería es cuál.
 - [ ] **El sótano (parqueadero):** si lo usan estudiantes, y por dónde se baja a pie.
 - [ ] **El auditorio:** si tiene acceso desde el P2, que la placa del P2 también lo lista.
