@@ -2,10 +2,8 @@ package co.edu.konradlorenz.kapp.map;
 
 import co.edu.konradlorenz.kapp.map.domain.BuildingDocument;
 import co.edu.konradlorenz.kapp.map.domain.BuildingRepository;
-import co.edu.konradlorenz.kapp.map.domain.Floor;
-import co.edu.konradlorenz.kapp.map.domain.SpaceDocument;
+import co.edu.konradlorenz.kapp.map.domain.Wing;
 import co.edu.konradlorenz.kapp.map.domain.SpaceRepository;
-import co.edu.konradlorenz.kapp.map.domain.SpaceType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +20,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -82,7 +78,8 @@ class MapBusinessRulesTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("708"))
                 .andExpect(jsonPath("$.buildingCode").value("A"))
-                .andExpect(jsonPath("$.floor.level").value(7))
+                .andExpect(jsonPath("$.floor.code").value("P7"))
+                .andExpect(jsonPath("$.floorCode").value("P7"))
                 .andExpect(jsonPath("$.floor.gridRows").value(11))
                 .andExpect(jsonPath("$.floor.gridColumns").value(16))
                 .andExpect(jsonPath("$.building.code").value("A"))
@@ -106,34 +103,9 @@ class MapBusinessRulesTest {
     @Test
     @DisplayName("dropping a floor that still has spaces on it is refused with 409")
     void droppingOccupiedFloorIsConflict() throws Exception {
-        Instant now = Instant.now();
-        BuildingDocument occupied = buildings.save(new BuildingDocument(
-                UUID.randomUUID().toString(), "OCC", "Occupied Floor Fixture", "Sede Test", null,
-                List.of(
-                        new Floor(1, "Piso 1", 10, 10, List.of()),
-                        new Floor(2, "Piso 2", 10, 10, List.of())),
-                false, now, now));
-        spaces.save(new SpaceDocument(
-                UUID.randomUUID().toString(),
-                "OCCSP",
-                SpaceDocument.baseCodeOf("OCCSP"),
-                SpaceDocument.wingOf("OCCSP"),
-                "Occupied fixture space",
-                SpaceType.OFFICE,
-                occupied.id(),
-                occupied.code(),
-                occupied.campus(),
-                2,
-                List.of(),
-                1,
-                1,
-                1,
-                1,
-                null,
-                null,
-                false,
-                now,
-                now));
+        BuildingDocument occupied = buildings.save(MapFixtures.building("OCC", List.of(),
+                MapFixtures.floor("P1", 1), MapFixtures.floor("P2", 2)));
+        spaces.save(MapFixtures.space(occupied, "OCCSP", "P2", 1, 1));
 
         String bodyDroppingFloor2 = """
                 {
@@ -141,7 +113,7 @@ class MapBusinessRulesTest {
                   "name": "Occupied Floor Fixture",
                   "campus": "Sede Test",
                   "floors": [
-                    {"level": 1, "name": "Piso 1", "gridRows": 10, "gridColumns": 10}
+                    {"code": "P1", "level": 1, "name": "Piso 1", "gridRows": 10, "gridColumns": 10}
                   ]
                 }
                 """;
@@ -159,56 +131,10 @@ class MapBusinessRulesTest {
     @Test
     @DisplayName("a room code shared by two buildings is refused with 409 listing the candidate buildings")
     void ambiguousRoomCodeListsCandidates() throws Exception {
-        Instant now = Instant.now();
-        BuildingDocument amb1 = buildings.save(new BuildingDocument(
-                UUID.randomUUID().toString(), "AMB1", "Ambiguity Fixture 1", "Sede Test", null,
-                List.of(new Floor(1, "Piso 1", 10, 10, List.of())), false, now, now));
-        BuildingDocument amb2 = buildings.save(new BuildingDocument(
-                UUID.randomUUID().toString(), "AMB2", "Ambiguity Fixture 2", "Sede Test", null,
-                List.of(new Floor(1, "Piso 1", 10, 10, List.of())), false, now, now));
-
-        spaces.save(new SpaceDocument(
-                UUID.randomUUID().toString(),
-                "AMB",
-                SpaceDocument.baseCodeOf("AMB"),
-                SpaceDocument.wingOf("AMB"),
-                "Shared code, building 1",
-                SpaceType.OFFICE,
-                amb1.id(),
-                amb1.code(),
-                amb1.campus(),
-                1,
-                List.of(),
-                1,
-                1,
-                1,
-                1,
-                null,
-                null,
-                false,
-                now,
-                now));
-        spaces.save(new SpaceDocument(
-                UUID.randomUUID().toString(),
-                "AMB",
-                SpaceDocument.baseCodeOf("AMB"),
-                SpaceDocument.wingOf("AMB"),
-                "Shared code, building 2",
-                SpaceType.OFFICE,
-                amb2.id(),
-                amb2.code(),
-                amb2.campus(),
-                1,
-                List.of(),
-                1,
-                1,
-                1,
-                1,
-                null,
-                null,
-                false,
-                now,
-                now));
+        BuildingDocument amb1 = buildings.save(MapFixtures.building("AMB1"));
+        BuildingDocument amb2 = buildings.save(MapFixtures.building("AMB2"));
+        spaces.save(MapFixtures.space(amb1, "AMB", "P1", 1, 1));
+        spaces.save(MapFixtures.space(amb2, "AMB", "P1", 1, 1));
 
         mockMvc.perform(get("/api/map/spaces/AMB").with(guest()))
                 .andExpect(status().isConflict())
@@ -228,35 +154,28 @@ class MapBusinessRulesTest {
     @Test
     @DisplayName("a basement floor can be read back, not only written")
     void basementFloorIsReadable() throws Exception {
-        Instant now = Instant.now();
-        BuildingDocument withBasement = buildings.save(new BuildingDocument(
-                UUID.randomUUID().toString(), "SOT", "Bloque con sotano", "Sede Test", null,
-                List.of(new Floor(-1, "Sotano", 4, 6, List.of())), false, now, now));
+        buildings.save(MapFixtures.building("SOT", List.of(), MapFixtures.floor("S1", -1)));
 
         mockMvc.perform(post("/api/map/spaces").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "code": "SOT-01",
+                                  "doorCode": "SOT-01",
                                   "name": "Deposito",
-                                  "type": "OTHER",
+                                  "typeCode": "STORAGE",
                                   "buildingCode": "SOT",
-                                  "floorLevel": -1,
+                                  "floorCode": "S1",
                                   "gridRow": 0,
                                   "gridColumn": 0
                                 }
                                 """))
                 .andExpect(status().isCreated());
 
-        // This is the half that was missing: SpaceRequest.floorLevel allowed -5, so the
-        // basement could be filled in, while the floor endpoint was @Min(0) and answered 400
-        // for the only level it mattered on. The data went in and could never be read back.
-        mockMvc.perform(get("/api/map/buildings/{code}/floors/{level}", "SOT", -1).with(guest()))
+        mockMvc.perform(get("/api/map/buildings/{code}/floors/{floor}", "SOT", "S1").with(guest()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.level").value(-1))
+                .andExpect(jsonPath("$.code").value("S1"))
                 .andExpect(jsonPath("$.spaces[0].code").value("SOT-01"));
-
-        assertThat(withBasement.code()).isEqualTo("SOT");
     }
 
     @Test
@@ -303,9 +222,9 @@ class MapBusinessRulesTest {
                                 {
                                   "code": "OUT-1",
                                   "name": "Fuera de la rejilla",
-                                  "type": "CLASSROOM",
+                                  "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
-                                  "floorLevel": 3,
+                                  "floorCode": "P3",
                                   "gridRow": 2,
                                   "gridColumn": 20
                                 }
@@ -323,9 +242,9 @@ class MapBusinessRulesTest {
                                 {
                                   "code": "OUT-2",
                                   "name": "Se sale por el borde",
-                                  "type": "AUDITORIUM",
+                                  "typeCode": "AUDITORIUM",
                                   "buildingCode": "A",
-                                  "floorLevel": 3,
+                                  "floorCode": "P3",
                                   "gridRow": 2,
                                   "gridColumn": 14,
                                   "colSpan": 6
@@ -344,15 +263,15 @@ class MapBusinessRulesTest {
                                 {
                                   "code": "OVER-1",
                                   "name": "Encima de 301",
-                                  "type": "CLASSROOM",
+                                  "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
-                                  "floorLevel": 3,
+                                  "floorCode": "P3",
                                   "gridRow": 5,
                                   "gridColumn": 5
                                 }
                                 """))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.details[0].issue").value("301"));
+                .andExpect(jsonPath("$.details[0].issue").value(org.hamcrest.Matchers.containsString("'301'")));
     }
 
     @Test
@@ -364,9 +283,9 @@ class MapBusinessRulesTest {
                                 {
                                   "code": "OK-1",
                                   "name": "Mismo lugar, otro piso",
-                                  "type": "CLASSROOM",
+                                  "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
-                                  "floorLevel": 2,
+                                  "floorCode": "P2",
                                   "gridRow": 5,
                                   "gridColumn": 4,
                                   "colSpan": 2
@@ -376,7 +295,7 @@ class MapBusinessRulesTest {
     }
 
     @Test
-    @DisplayName("a space in the basement is accepted: level -1 is a floor like any other")
+    @DisplayName("a space in the basement is accepted: S1 is a floor like any other")
     void basementSpacesAreAccepted() throws Exception {
         mockMvc.perform(post("/api/map/spaces").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -384,57 +303,197 @@ class MapBusinessRulesTest {
                                 {
                                   "code": "S-99",
                                   "name": "Cuarto de máquinas",
-                                  "type": "OTHER",
+                                  "typeCode": "OTHER",
                                   "buildingCode": "A",
-                                  "floorLevel": -1,
+                                  "floorCode": "S1",
                                   "gridRow": 0,
                                   "gridColumn": 0
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.floorLevel").value(-1));
+                .andExpect(jsonPath("$.floorCode").value("S1"));
     }
 
     @Test
-    @DisplayName("the wing is derived from a -N suffix when the caller does not send one")
-    void wingIsDerivedFromTheCode() throws Exception {
+    @DisplayName("the base code drops the suffix the wing declares, so 205-N is found as 205")
+    void baseCodeDropsTheWingsDoorSuffix() throws Exception {
         mockMvc.perform(post("/api/map/spaces").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "code": "205-N",
+                                  "doorCode": "205-N",
+                                  "wing": "N",
                                   "name": "Aula 205 Norte",
-                                  "type": "CLASSROOM",
+                                  "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
-                                  "floorLevel": 2,
+                                  "floorCode": "P2",
                                   "gridRow": 1,
                                   "gridColumn": 8
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.wing").value("NORTE"))
+                .andExpect(jsonPath("$.wing").value("N"))
                 .andExpect(jsonPath("$.baseCode").value("205"));
     }
 
     @Test
-    @DisplayName("an explicit wing wins over what the code implies")
-    void explicitWingWins() throws Exception {
+    @DisplayName("a wing the building does not declare is refused: Bienestar's are not north and south")
+    void undeclaredWingIsRefused() throws Exception {
         mockMvc.perform(post("/api/map/spaces").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "code": "206",
+                                  "doorCode": "206",
+                                  "wing": "OCC",
                                   "name": "Aula 206",
-                                  "type": "CLASSROOM",
+                                  "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
-                                  "floorLevel": 2,
+                                  "floorCode": "P2",
                                   "gridRow": 8,
-                                  "gridColumn": 8,
-                                  "wing": "CENTRAL"
+                                  "gridColumn": 8
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[0].field").value("wing"));
+    }
+
+    @Test
+    @DisplayName("a space with nothing on its door has no door code, and its code never becomes one")
+    void spaceWithoutDoorCode() throws Exception {
+        mockMvc.perform(post("/api/map/spaces").with(admin())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "code": "A-P2-DEP",
+                                  "name": "Dirección de Revistas Científicas",
+                                  "typeCode": "OFFICE",
+                                  "buildingCode": "A",
+                                  "floorCode": "P2",
+                                  "gridRow": 9,
+                                  "gridColumn": 12
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.wing").value("CENTRAL"));
+                .andExpect(jsonPath("$.code").value("A-P2-DEP"))
+                .andExpect(jsonPath("$.doorCode").doesNotExist())
+                .andExpect(jsonPath("$.baseCode").doesNotExist());
+
+        // The search matches door codes, not internal ones: typing the generated code finds nothing.
+        mockMvc.perform(get("/api/map/spaces/search").param("q", "A-P2-DEP").with(guest()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(0));
+        mockMvc.perform(get("/api/map/spaces/search").param("q", "revistas").with(guest()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].code").value("A-P2-DEP"));
+    }
+
+    @Test
+    @DisplayName("a space known from its plaque but not yet drawn is stored unplaced, and the search still finds it")
+    void unplacedSpaceIsStoredAndFound() throws Exception {
+        mockMvc.perform(post("/api/map/spaces").with(admin())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "code": "A-P2-SIN",
+                                  "name": "Sala de Formación Científica",
+                                  "typeCode": "MEETING_ROOM",
+                                  "buildingCode": "A",
+                                  "floorCode": "P2"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.gridRow").doesNotExist());
+
+        mockMvc.perform(get("/api/map/spaces/search").param("q", "formacion cientifica").with(guest()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].code").value("A-P2-SIN"))
+                .andExpect(jsonPath("$.content[0].category").value("OFFICE"));
+    }
+
+    @Test
+    @DisplayName("half a position is refused: a space is placed with both coordinates or with neither")
+    void halfAPositionIsRefused() throws Exception {
+        mockMvc.perform(post("/api/map/spaces").with(admin())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "code": "HALF-1",
+                                  "name": "Medio ubicado",
+                                  "typeCode": "OFFICE",
+                                  "buildingCode": "A",
+                                  "floorCode": "P2",
+                                  "gridRow": 3
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[0].field").value("gridColumn"));
+    }
+
+    @Test
+    @DisplayName("a space inherits its floor's accessibility unless it states its own")
+    void accessibilityIsInheritedUnlessStated() throws Exception {
+        // Bloque B's mezzanine is only reachable by stairs, and its lab says nothing of its own.
+        mockMvc.perform(get("/api/map/buildings/B/floors/MEZZ").with(guest()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessibility").value("STAIRS_ONLY"))
+                .andExpect(jsonPath("$.spaces[0].accessibility").doesNotExist())
+                .andExpect(jsonPath("$.spaces[0].effectiveAccessibility").value("STAIRS_ONLY"));
+    }
+
+    @Test
+    @DisplayName("the lift other rooms say to take cannot be deleted from under them")
+    void deletingAnAccessViaTargetIsRefused() throws Exception {
+        mockMvc.perform(delete("/api/map/spaces/B-ASC").param("buildingCode", "B").with(admin()))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @DisplayName("a building is found by any of its aliases, ignoring accents")
+    void buildingsAreFoundByAlias() throws Exception {
+        mockMvc.perform(get("/api/map/buildings").param("q", "psicologia").with(guest()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].code").value("B"));
+    }
+
+    @Test
+    @DisplayName("floors come back in vertical order, the mezzanine between the floors it sits between")
+    void mezzanineSortsBetweenItsFloors() throws Exception {
+        mockMvc.perform(get("/api/map/buildings/B").with(guest()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.floors[0].code").value("P1"))
+                .andExpect(jsonPath("$.floors[1].code").value("MEZZ"))
+                .andExpect(jsonPath("$.floors[2].code").value("P2"));
+    }
+
+    @Test
+    @DisplayName("dropping a wing that still has spaces in it is refused with 409")
+    void droppingOccupiedWingIsConflict() throws Exception {
+        BuildingDocument winged = buildings.save(MapFixtures.building("WNG",
+                List.of(new Wing("E", "Ala oriental", null, null)), MapFixtures.floor("P1", 1)));
+        var space = MapFixtures.space(winged, "WNG-1", "P1", 1, 1);
+        spaces.save(new co.edu.konradlorenz.kapp.map.domain.SpaceDocument(space.id(), space.code(),
+                space.doorCode(), space.baseCode(), "E", space.name(), space.typeCode(),
+                space.buildingId(), space.buildingCode(), space.campus(), space.floorCode(),
+                space.floorLevel(), space.aliases(), space.gridRow(), space.gridColumn(),
+                space.rowSpan(), space.colSpan(), null, null, null, null, false,
+                space.createdAt(), space.updatedAt()));
+
+        mockMvc.perform(put("/api/map/buildings/WNG").with(admin())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "code": "WNG",
+                                  "name": "Sin alas",
+                                  "campus": "Sede Test",
+                                  "floors": [
+                                    {"code": "P1", "level": 1, "name": "Piso 1", "gridRows": 10, "gridColumns": 10}
+                                  ]
+                                }
+                                """))
+                .andExpect(status().isConflict());
     }
 
     @Test
@@ -446,9 +505,9 @@ class MapBusinessRulesTest {
                                 {
                                   "code": "AV-1",
                                   "name": "Se llega por un ascensor inventado",
-                                  "type": "CLASSROOM",
+                                  "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
-                                  "floorLevel": 2,
+                                  "floorCode": "P2",
                                   "gridRow": 0,
                                   "gridColumn": 0,
                                   "accessVia": "ASC-QUE-NO-EXISTE"
@@ -467,16 +526,16 @@ class MapBusinessRulesTest {
                                 {
                                   "code": "AV-2",
                                   "name": "Se llega por otro salón",
-                                  "type": "CLASSROOM",
+                                  "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
-                                  "floorLevel": 2,
+                                  "floorCode": "P2",
                                   "gridRow": 0,
                                   "gridColumn": 2,
                                   "accessVia": "302"
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.details[0].issue").value("must be an ELEVATOR, STAIRS or ENTRANCE"));
+                .andExpect(jsonPath("$.details[0].field").value("accessVia"));
     }
 
     @Test
@@ -488,9 +547,9 @@ class MapBusinessRulesTest {
                                 {
                                   "code": "AV-3",
                                   "name": "Se llega por el ascensor central",
-                                  "type": "CLASSROOM",
+                                  "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
-                                  "floorLevel": 2,
+                                  "floorCode": "P2",
                                   "gridRow": 0,
                                   "gridColumn": 4,
                                   "accessVia": "ASC-CENTRAL"

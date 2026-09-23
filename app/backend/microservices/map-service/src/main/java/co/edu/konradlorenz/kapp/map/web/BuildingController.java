@@ -1,14 +1,15 @@
 package co.edu.konradlorenz.kapp.map.web;
 
 import co.edu.konradlorenz.kapp.map.service.BuildingService;
+import co.edu.konradlorenz.kapp.map.service.FloorLayoutService;
 import co.edu.konradlorenz.kapp.map.web.dto.BuildingRequest;
 import co.edu.konradlorenz.kapp.map.web.dto.BuildingResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.FloorDetailResponse;
+import co.edu.konradlorenz.kapp.map.web.dto.FloorLayoutRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -41,18 +42,22 @@ import java.util.List;
 public class BuildingController {
 
     private final BuildingService buildings;
+    private final FloorLayoutService layouts;
 
-    public BuildingController(BuildingService buildings) {
+    public BuildingController(BuildingService buildings, FloorLayoutService layouts) {
         this.buildings = buildings;
+        this.layouts = layouts;
     }
 
     @GetMapping
     @Operation(summary = "List buildings",
-            description = "Every building with its floors, ordered by code. "
+            description = "Every building with its wings and floors, ordered by code. q matches the "
+                    + "code, the name and every alias, ignoring case and accents. "
                     + "Allowed roles: ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN.")
     public List<BuildingResponse> list(
-            @RequestParam(required = false) @Size(min = 1, max = 120) String campus) {
-        return buildings.list(campus);
+            @RequestParam(required = false) @Size(min = 1, max = 120) String campus,
+            @RequestParam(required = false) @Size(min = 1, max = 120) String q) {
+        return buildings.list(campus, q);
     }
 
     @GetMapping("/{code}")
@@ -74,8 +79,9 @@ public class BuildingController {
 
     @PutMapping("/{code}")
     @Operation(summary = "Update a building",
-            description = "Replaces the building including its floors. Dropping a floor that "
-                    + "still has spaces on it is rejected with 409. Allowed roles: ROLE_ADMIN only.")
+            description = "Replaces the building including its wings and floors. Dropping a floor "
+                    + "or a wing that still has spaces is rejected with 409. Each floor keeps its "
+                    + "version. Allowed roles: ROLE_ADMIN only.")
     public BuildingResponse update(@PathVariable @Size(min = 1, max = 10) String code,
                                    @Valid @RequestBody BuildingRequest request) {
         return buildings.update(code, request);
@@ -90,17 +96,26 @@ public class BuildingController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{code}/floors/{level}")
+    @GetMapping("/{code}/floors/{floorCode}")
     @Operation(summary = "Get a floor and every space on it",
             description = "The call that renders a floor: draw a gridRows x gridColumns grid, "
                     + "place each space in its cell, and draw the corridors along their paths. "
-                    + "Level may be negative: -1 is the basement. "
+                    + "Spaces with no gridRow are on the floor but not yet placed. "
                     + "Allowed roles: ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN.")
-    // -5, matching SpaceRequest.floorLevel. It was @Min(0) while a space could already be
-    // created on level -1, so the basement of the central block could be filled in and then
-    // never read back: this endpoint answered 400 for the only level it mattered on.
     public FloorDetailResponse floor(@PathVariable @Size(min = 1, max = 10) String code,
-                                     @PathVariable @Min(-5) @Max(99) int level) {
-        return buildings.getFloor(code, level);
+                                     @PathVariable @Pattern(regexp = "^[A-Z0-9]{1,8}$") String floorCode) {
+        return buildings.getFloor(code, floorCode);
+    }
+
+    @PutMapping("/{code}/floors/{floorCode}/layout")
+    @Operation(summary = "Save everything drawn on a floor at once",
+            description = "What the floor editor sends. spaces is the complete list: a space of "
+                    + "this floor missing from it is deleted. All or nothing. Refused with 409 "
+                    + "when the floor was saved by someone else since the version sent. "
+                    + "Allowed roles: ROLE_ADMIN only.")
+    public FloorDetailResponse saveLayout(@PathVariable @Size(min = 1, max = 10) String code,
+                                          @PathVariable @Pattern(regexp = "^[A-Z0-9]{1,8}$") String floorCode,
+                                          @Valid @RequestBody FloorLayoutRequest request) {
+        return layouts.save(code, floorCode, request);
     }
 }

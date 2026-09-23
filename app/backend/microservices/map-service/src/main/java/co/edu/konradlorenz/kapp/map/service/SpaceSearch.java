@@ -1,8 +1,6 @@
 package co.edu.konradlorenz.kapp.map.service;
 
 import co.edu.konradlorenz.kapp.map.domain.SpaceDocument;
-import co.edu.konradlorenz.kapp.map.domain.SpaceType;
-import co.edu.konradlorenz.kapp.map.domain.Wing;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -30,12 +28,16 @@ import java.util.stream.Collectors;
  * <p>MongoDB's text index solves both properly. Terms are folded to lower case AND stripped
  * of diacritics when the index is built and again when the query is parsed, so the
  * insensitivity is a property of the index rather than something this code re-implements.
- * {@code V001_MapIndexes} declares one text index over {@code code}, {@code name} and
+ * {@code V004_MapModelV2} declares one text index over {@code doorCode}, {@code name} and
  * {@code aliases} with Spanish as the default language, so Spanish stemming and stop words
  * apply: "de" and "la" are dropped, and "salones" and "salon" reach each other.
  *
+ * <p>The index covers the door code, not the internal {@code code}. For a numbered room they
+ * are the same; for a dependency with nothing on its door the internal code is generated, and a
+ * search that matched it would put an invented identifier in front of the person searching.
+ *
  * <h2>Ranking</h2>
- * The index weights {@code code} 5, {@code name} 3 and {@code aliases} 2, and results are
+ * The index weights {@code doorCode} 5, {@code name} 3 and {@code aliases} 2, and results are
  * sorted by {@code $meta: "textScore"} descending, then by {@code code} ascending so that
  * equal scores come back in a stable order rather than in whatever order the storage engine
  * felt like. The weights are what make a search for "708" return room 708 itself ahead of
@@ -70,11 +72,20 @@ public class SpaceSearch {
     public record Result(List<SpaceDocument> content, long totalElements) {
     }
 
-    public Result search(String q, String campus, SpaceType type, String buildingCode,
-                          Wing wing, int page, int size) {
+    /**
+     * @param typeCodes null for any type; otherwise the space's type has to be one of these. A
+     *                  category filter arrives here already resolved to its types
+     * @param wing      a wing code of the building
+     * @param floorCode a floor code, meaningful together with a building
+     */
+    public record Filters(String q, String campus, List<String> typeCodes, String buildingCode,
+                          String wing, String floorCode) {
+    }
 
-        boolean searching = StringUtils.hasText(q);
-        String term = sanitize(q);
+    public Result search(Filters filters, int page, int size) {
+
+        boolean searching = StringUtils.hasText(filters.q());
+        String term = sanitize(filters.q());
 
         if (searching && term.isEmpty()) {
             // Everything the caller typed was punctuation the text query language would
@@ -89,10 +100,10 @@ public class SpaceSearch {
             // It cannot go through the text index - $search has nothing to match - so it is
             // an ordinary filtered query, ordered the way a person reads a building: by
             // floor, then by code.
-            return browse(campus, type, buildingCode, wing, page, size);
+            return browse(filters, page, size);
         }
 
-        TextQuery query = buildFilter(term, campus, type, buildingCode, wing);
+        TextQuery query = buildFilter(term, filters);
 
         // Counted before skip and limit are set: MongoTemplate folds both into the count's
         // options, so counting afterwards would return at most one page's worth.
@@ -112,21 +123,9 @@ public class SpaceSearch {
      * There is no text index involved and none is wanted: {@code $search} needs something to
      * match, and "everything in building A" has nothing to match on.
      */
-    private Result browse(String campus, SpaceType type, String buildingCode, Wing wing,
-                           int page, int size) {
+    private Result browse(Filters filters, int page, int size) {
         Query query = new Query();
-        if (StringUtils.hasText(campus)) {
-            query.addCriteria(Criteria.where("campus").is(campus));
-        }
-        if (type != null) {
-            query.addCriteria(Criteria.where("type").is(type));
-        }
-        if (StringUtils.hasText(buildingCode)) {
-            query.addCriteria(Criteria.where("buildingCode").is(buildingCode));
-        }
-        if (wing != null) {
-            query.addCriteria(Criteria.where("wing").is(wing));
-        }
+        addFilters(query, filters);
 
         long total = mongo.count(query, SpaceDocument.class);
 
@@ -145,26 +144,30 @@ public class SpaceSearch {
      *
      * @param term already sanitized by {@link #sanitize(String)}; not the raw {@code q}
      */
-    static TextQuery buildFilter(String term, String campus, SpaceType type,
-                                  String buildingCode, Wing wing) {
+    static TextQuery buildFilter(String term, Filters filters) {
         TextQuery query = new TextQuery(TextCriteria.forLanguage(LANGUAGE).matching(term));
-
-        if (StringUtils.hasText(campus)) {
-            query.addCriteria(Criteria.where("campus").is(campus));
-        }
-        if (type != null) {
-            query.addCriteria(Criteria.where("type").is(type));
-        }
-        if (StringUtils.hasText(buildingCode)) {
-            query.addCriteria(Criteria.where("buildingCode").is(buildingCode));
-        }
-        if (wing != null) {
-            // The wing is a stored field, not a suffix parsed out of the code at query
-            // time. Filtering on the last two characters of a string would break the first
-            // time a building names its wings anything but N/S/C.
-            query.addCriteria(Criteria.where("wing").is(wing));
-        }
+        addFilters(query, filters);
         return query;
+    }
+
+    private static void addFilters(Query query, Filters filters) {
+        if (StringUtils.hasText(filters.campus())) {
+            query.addCriteria(Criteria.where("campus").is(filters.campus()));
+        }
+        if (filters.typeCodes() != null) {
+            query.addCriteria(Criteria.where("typeCode").in(filters.typeCodes()));
+        }
+        if (StringUtils.hasText(filters.buildingCode())) {
+            query.addCriteria(Criteria.where("buildingCode").is(filters.buildingCode()));
+        }
+        if (StringUtils.hasText(filters.wing())) {
+            // The wing is a stored field, not a suffix parsed out of the code at query time:
+            // Bienestar's rooms carry no wing mark at all.
+            query.addCriteria(Criteria.where("wing").is(filters.wing()));
+        }
+        if (StringUtils.hasText(filters.floorCode())) {
+            query.addCriteria(Criteria.where("floorCode").is(filters.floorCode()));
+        }
     }
 
     /**

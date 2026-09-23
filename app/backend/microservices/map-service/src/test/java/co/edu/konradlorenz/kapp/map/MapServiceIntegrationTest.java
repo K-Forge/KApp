@@ -109,6 +109,7 @@ class MapServiceIntegrationTest {
                 .map(info -> info.getName())
                 .toList();
 
-        assertThat(indexNames).contains("uk_spaces_building_code", "ix_spaces_code", "tx_spaces_search");
+        assertThat(indexNames).contains("uk_spaces_building_code", "ix_spaces_code", "tx_spaces_search",
+                "ix_spaces_building_floor");
     }
 }

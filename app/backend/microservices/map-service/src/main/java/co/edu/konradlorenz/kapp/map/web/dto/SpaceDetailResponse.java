@@ -1,7 +1,7 @@
 package co.edu.konradlorenz.kapp.map.web.dto;
 
-import co.edu.konradlorenz.kapp.map.domain.SpaceType;
-import co.edu.konradlorenz.kapp.map.domain.Wing;
+import co.edu.konradlorenz.kapp.map.domain.Accessibility;
+import co.edu.konradlorenz.kapp.map.domain.SpaceCategory;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -23,20 +23,27 @@ import java.util.List;
 public record SpaceDetailResponse(
         String id,
         String code,
+        String doorCode,
         String baseCode,
-        Wing wing,
+        String wing,
         String name,
-        SpaceType type,
+        String typeCode,
+        String typeName,
+        SpaceCategory category,
         String buildingId,
         String buildingCode,
         String campus,
-        int floorLevel,
+        String floorCode,
+        double floorLevel,
         List<String> aliases,
-        int gridRow,
-        int gridColumn,
+        Integer gridRow,
+        Integer gridColumn,
         int rowSpan,
         int colSpan,
         String accessVia,
+        Accessibility accessibility,
+        Accessibility effectiveAccessibility,
+        String note,
         Integer capacity,
         FloorDto floor,
         BuildingSummaryResponse building

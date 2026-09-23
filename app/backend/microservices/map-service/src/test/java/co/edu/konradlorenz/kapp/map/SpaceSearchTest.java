@@ -2,10 +2,8 @@ package co.edu.konradlorenz.kapp.map;
 
 import co.edu.konradlorenz.kapp.map.domain.BuildingDocument;
 import co.edu.konradlorenz.kapp.map.domain.BuildingRepository;
-import co.edu.konradlorenz.kapp.map.domain.Floor;
 import co.edu.konradlorenz.kapp.map.domain.SpaceDocument;
 import co.edu.konradlorenz.kapp.map.domain.SpaceRepository;
-import co.edu.konradlorenz.kapp.map.domain.SpaceType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,9 +19,7 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -71,64 +67,24 @@ class SpaceSearchTest {
 
     @BeforeAll
     void seedRankingFixture() {
-        Instant now = Instant.now();
-        BuildingDocument rankBuilding = buildings.save(new BuildingDocument(
-                UUID.randomUUID().toString(),
-                "RANK",
-                "Ranking fixture building",
-                "Sede Test",
-                null,
-                List.of(new Floor(1, "Piso 1", 10, 10, List.of())),
-                false,
-                now,
-                now));
+        BuildingDocument rankBuilding = buildings.save(MapFixtures.building("RANK"));
 
-        // Matches "999" through its code (text index weight 5).
-        spaces.save(new SpaceDocument(
-                UUID.randomUUID().toString(),
-                RANK_CODE_EXACT,
-                SpaceDocument.baseCodeOf(RANK_CODE_EXACT),
-                SpaceDocument.wingOf(RANK_CODE_EXACT),
-                "Cuarto generico",
-                SpaceType.OTHER,
-                rankBuilding.id(),
-                rankBuilding.code(),
-                rankBuilding.campus(),
-                1,
-                List.of(),
-                1,
-                1,
-                1,
-                1,
-                null,
-                null,
-                false,
-                now,
-                now));
+        // Matches "999" through its door code (text index weight 5).
+        SpaceDocument exact = MapFixtures.space(rankBuilding, RANK_CODE_EXACT, "P1", 1, 1);
+        spaces.save(renamed(exact, "Cuarto generico"));
 
         // Matches "999" only because its NAME happens to mention the other room (weight 3),
-        // never through its own code. Ranking must still put RANK_CODE_EXACT first.
-        spaces.save(new SpaceDocument(
-                UUID.randomUUID().toString(),
-                RANK_CODE_MENTION,
-                SpaceDocument.baseCodeOf(RANK_CODE_MENTION),
-                SpaceDocument.wingOf(RANK_CODE_MENTION),
-                "Ver salon 999 para informacion",
-                SpaceType.OTHER,
-                rankBuilding.id(),
-                rankBuilding.code(),
-                rankBuilding.campus(),
-                1,
-                List.of(),
-                2,
-                2,
-                1,
-                1,
-                null,
-                null,
-                false,
-                now,
-                now));
+        // never through its own door code. Ranking must still put RANK_CODE_EXACT first.
+        SpaceDocument mention = MapFixtures.space(rankBuilding, RANK_CODE_MENTION, "P1", 2, 2);
+        spaces.save(renamed(mention, "Ver salon 999 para informacion"));
+    }
+
+    private static SpaceDocument renamed(SpaceDocument space, String name) {
+        return new SpaceDocument(space.id(), space.code(), space.doorCode(), space.baseCode(),
+                space.wing(), name, "OTHER", space.buildingId(), space.buildingCode(),
+                space.campus(), space.floorCode(), space.floorLevel(), space.aliases(),
+                space.gridRow(), space.gridColumn(), space.rowSpan(), space.colSpan(), null,
+                null, null, null, false, space.createdAt(), space.updatedAt());
     }
 
     private static org.springframework.test.web.servlet.request.RequestPostProcessor guest() {

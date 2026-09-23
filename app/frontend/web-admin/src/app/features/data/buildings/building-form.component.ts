@@ -1,12 +1,36 @@
 import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import type { Building, BuildingRequest, Floor } from './building.model';
+import {
+  ACCESSIBILITY,
+  ACCESSIBILITY_LABELS,
+  FLOOR_STATUSES,
+  FLOOR_STATUS_LABELS,
+  type Accessibility,
+  type Building,
+  type BuildingRequest,
+  type Floor,
+  type FloorStatus,
+  type Wing,
+} from './building.model';
+
+const CODE = /^[A-Z0-9]{1,8}$/;
 
 type FloorForm = FormGroup<{
+  code: FormControl<string>;
   level: FormControl<number>;
   name: FormControl<string>;
+  status: FormControl<FloorStatus>;
+  accessibility: FormControl<Accessibility>;
+  note: FormControl<string>;
   gridRows: FormControl<number>;
   gridColumns: FormControl<number>;
+}>;
+
+type WingForm = FormGroup<{
+  code: FormControl<string>;
+  name: FormControl<string>;
+  doorSuffix: FormControl<string>;
+  note: FormControl<string>;
 }>;
 
 type BuildingForm = FormGroup<{
@@ -14,24 +38,38 @@ type BuildingForm = FormGroup<{
   name: FormControl<string>;
   campus: FormControl<string>;
   description: FormControl<string>;
+  aliases: FormControl<string>;
+  wings: FormArray<WingForm>;
   floors: FormArray<FloorForm>;
 }>;
 
-function floorGroup(floor?: Floor): FloorForm {
+function floorGroup(floor?: Partial<Floor>): FloorForm {
   return new FormGroup({
-    // -5 rather than 0: the central building has a basement at level -1, and the rule that a
-    // room's first digit is its floor stops applying down there.
+    code: new FormControl(floor?.code ?? '', { nonNullable: true, validators: [Validators.required, Validators.pattern(CODE)] }),
+    // Decimal: a mezzanine sits at 1.5, between the two floors it is between.
     level: new FormControl(floor?.level ?? 1, { nonNullable: true, validators: [Validators.required, Validators.min(-5), Validators.max(99)] }),
-    name: new FormControl(floor?.name ?? '', { nonNullable: true, validators: [Validators.required, Validators.minLength(1), Validators.maxLength(60)] }),
+    name: new FormControl(floor?.name ?? '', { nonNullable: true, validators: [Validators.required, Validators.maxLength(60)] }),
+    status: new FormControl<FloorStatus>(floor?.status ?? 'UNMAPPED', { nonNullable: true }),
+    accessibility: new FormControl<Accessibility>(floor?.accessibility ?? 'UNKNOWN', { nonNullable: true }),
+    note: new FormControl(floor?.note ?? '', { nonNullable: true, validators: [Validators.maxLength(300)] }),
     gridRows: new FormControl(floor?.gridRows ?? 11, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(60)] }),
     gridColumns: new FormControl(floor?.gridColumns ?? 16, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(60)] }),
   });
 }
 
+function wingGroup(wing?: Partial<Wing>): WingForm {
+  return new FormGroup({
+    code: new FormControl(wing?.code ?? '', { nonNullable: true, validators: [Validators.required, Validators.pattern(CODE)] }),
+    name: new FormControl(wing?.name ?? '', { nonNullable: true, validators: [Validators.required, Validators.maxLength(60)] }),
+    doorSuffix: new FormControl(wing?.doorSuffix ?? '', { nonNullable: true, validators: [Validators.maxLength(4)] }),
+    note: new FormControl(wing?.note ?? '', { nonNullable: true, validators: [Validators.maxLength(300)] }),
+  });
+}
+
 /**
- * Create/edit form for a building, including its floor list. Constraints (lengths, minItems on
- * floors) come straight from BuildingRequest in docs/api/map.openapi.yaml - the point is that this
- * form can never be stricter or looser than what the server actually enforces.
+ * Create/edit form for a building: its aliases, its wings and its floors. Constraints come
+ * straight from BuildingRequest in docs/api/map.openapi.yaml, so the form is never stricter or
+ * looser than the server.
  */
 @Component({
   selector: 'app-building-form',
@@ -41,7 +79,7 @@ function floorGroup(floor?: Floor): FloorForm {
     <form [formGroup]="form" (ngSubmit)="submit()" class="stack">
       <div class="field" [class.invalid]="invalid('code')">
         <label for="b-code">Code</label>
-        <input id="b-code" type="text" formControlName="code" [readonly]="editing()" />
+        <input id="b-code" type="text" formControlName="code" [readonly]="editing()" placeholder="EC" />
         @if (invalid('code')) {
           <span class="error">Required, 1-10 characters.</span>
         }
@@ -49,7 +87,7 @@ function floorGroup(floor?: Floor): FloorForm {
 
       <div class="field" [class.invalid]="invalid('name')">
         <label for="b-name">Name</label>
-        <input id="b-name" type="text" formControlName="name" />
+        <input id="b-name" type="text" formControlName="name" placeholder="Edificio Central" />
         @if (invalid('name')) {
           <span class="error">Required, 1-120 characters.</span>
         }
@@ -64,54 +102,119 @@ function floorGroup(floor?: Floor): FloorForm {
       </div>
 
       <div class="field">
+        <label for="b-aliases">Other names</label>
+        <textarea id="b-aliases" rows="2" formControlName="aliases" placeholder="Bienestar&#10;Edificio de bienestar"></textarea>
+        <span class="hint">One per line. What people call the building besides its name - the search matches them.</span>
+      </div>
+
+      <div class="field">
         <label for="b-description">Description</label>
         <textarea id="b-description" rows="2" formControlName="description"></textarea>
         <span class="hint">Optional, up to 500 characters.</span>
       </div>
 
       <div class="row-between">
+        <h3 style="margin:0">Wings</h3>
+        <button type="button" class="btn btn-sm" (click)="addWing()">Add wing</button>
+      </div>
+      <p class="form-note">
+        Leave empty for a building with one body. The door suffix is what the doors of that wing
+        append to the number: <code>-S</code> for <code>503-S</code>. Leave it empty when they append nothing.
+      </p>
+      @for (wing of form.controls.wings.controls; track $index) {
+        <div class="card row-card" [formGroup]="wing">
+          <div class="cells">
+            <div class="field">
+              <label [for]="'w-code-' + $index">Code</label>
+              <input [id]="'w-code-' + $index" type="text" formControlName="code" placeholder="S" />
+            </div>
+            <div class="field">
+              <label [for]="'w-name-' + $index">Name</label>
+              <input [id]="'w-name-' + $index" type="text" formControlName="name" placeholder="Ala sur" />
+            </div>
+            <div class="field">
+              <label [for]="'w-suffix-' + $index">Door suffix</label>
+              <input [id]="'w-suffix-' + $index" type="text" formControlName="doorSuffix" placeholder="-S" />
+            </div>
+          </div>
+          <div class="field">
+            <label [for]="'w-note-' + $index">How to get in or across</label>
+            <input [id]="'w-note-' + $index" type="text" formControlName="note" placeholder="Se cruza por el P1 o por la terraza" />
+          </div>
+          <button type="button" class="btn btn-sm btn-danger" (click)="form.controls.wings.removeAt($index)">Remove wing</button>
+        </div>
+      }
+
+      <div class="row-between">
         <h3 style="margin:0">Floors</h3>
         <button type="button" class="btn btn-sm" (click)="addFloor()">Add floor</button>
       </div>
+      <p class="form-note">
+        The code is what the floor is called in addresses: <code>S1</code> for a basement,
+        <code>P0</code>, <code>P1</code>, <code>MEZZ</code> for a mezzanine, <code>T</code> for a terrace.
+        The level only orders them - a mezzanine between P1 and P2 is 1.5.
+      </p>
       @if (form.controls.floors.invalid && form.controls.floors.touched) {
-        <span class="error">At least one floor is required.</span>
+        <div class="field">
+          <span class="error">At least one floor is required, every code must be 1-8 uppercase letters or digits, and every floor needs a name.</span>
+        </div>
       }
 
       @for (floor of form.controls.floors.controls; track $index) {
-        <div class="card floor-row" [formGroup]="floor">
+        <div class="card row-card" [formGroup]="floor">
+          <div class="cells">
+            <div class="field">
+              <label [for]="'f-code-' + $index">Code</label>
+              <input [id]="'f-code-' + $index" type="text" formControlName="code" placeholder="P1" />
+            </div>
+            <div class="field">
+              <label [for]="'f-level-' + $index">Level</label>
+              <input [id]="'f-level-' + $index" type="number" step="0.5" formControlName="level" min="-5" max="99" />
+            </div>
+            <div class="field">
+              <label [for]="'f-name-' + $index">Name</label>
+              <input [id]="'f-name-' + $index" type="text" formControlName="name" placeholder="Piso 1" />
+            </div>
+            <div class="field">
+              <label [for]="'f-rows-' + $index">Grid rows</label>
+              <input [id]="'f-rows-' + $index" type="number" formControlName="gridRows" min="1" max="60" />
+            </div>
+            <div class="field">
+              <label [for]="'f-cols-' + $index">Grid columns</label>
+              <input [id]="'f-cols-' + $index" type="number" formControlName="gridColumns" min="1" max="60" />
+            </div>
+            <div class="field">
+              <label [for]="'f-status-' + $index">Status</label>
+              <select [id]="'f-status-' + $index" formControlName="status">
+                @for (status of statuses; track status) {
+                  <option [value]="status">{{ statusLabels[status] }}</option>
+                }
+              </select>
+            </div>
+            <div class="field">
+              <label [for]="'f-access-' + $index">Reachable without stairs?</label>
+              <select [id]="'f-access-' + $index" formControlName="accessibility">
+                @for (value of accessibility; track value) {
+                  <option [value]="value">{{ accessibilityLabels[value] }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label [for]="'f-note-' + $index">How to get here</label>
+            <input [id]="'f-note-' + $index" type="text" formControlName="note" placeholder="Se sube por la escalera exterior" />
+          </div>
           <div class="row-between">
-            <strong>Floor {{ $index + 1 }}</strong>
-            <button type="button" class="btn btn-sm btn-danger" (click)="removeFloor($index)" [disabled]="form.controls.floors.length <= 1">
-              Remove
+            @if (corridorCount(floor.controls.code.value); as count) {
+              <span class="form-note">{{ count }} corridor{{ count === 1 ? '' : 's' }} on this floor, kept as they are.</span>
+            } @else {
+              <span></span>
+            }
+            <button type="button" class="btn btn-sm btn-danger" (click)="form.controls.floors.removeAt($index)"
+                    [disabled]="form.controls.floors.length <= 1">
+              Remove floor
             </button>
           </div>
-          <div class="floor-grid">
-            <div class="field">
-              <label [for]="'level-' + $index">Level</label>
-              <input [id]="'level-' + $index" type="number" formControlName="level" min="-5" max="99" />
-              <span class="hint">-1 is the basement.</span>
-            </div>
-            <div class="field">
-              <label [for]="'name-' + $index">Name</label>
-              <input [id]="'name-' + $index" type="text" formControlName="name" />
-            </div>
-            <div class="field">
-              <label [for]="'rows-' + $index">Grid rows</label>
-              <input [id]="'rows-' + $index" type="number" formControlName="gridRows" min="1" max="60" />
-            </div>
-            <div class="field">
-              <label [for]="'cols-' + $index">Grid columns</label>
-              <input [id]="'cols-' + $index" type="number" formControlName="gridColumns" min="1" max="60" />
-            </div>
-          </div>
-          @if (corridorCount($index); as count) {
-            <p class="hint" style="margin:0.5rem 0 0">
-              {{ count }} corridor{{ count === 1 ? '' : 's' }} on this floor, kept as they are.
-              Corridors are drawn in the offline grid editor
-              (<code>map-service/src/main/resources/static/admin/grid-editor.html</code>), which
-              is also how a floor is captured in the first place.
-            </p>
-          }
         </div>
       }
 
@@ -124,14 +227,21 @@ function floorGroup(floor?: Floor): FloorForm {
     </form>
   `,
   styles: `
-    .floor-row {
-      padding: 0.75rem;
+    .form-note {
+      margin: 0;
+      font-size: 0.75rem;
+      color: var(--text-faint);
     }
-    .floor-grid {
+    .row-card {
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .cells {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
       gap: 0.75rem;
-      margin-top: 0.5rem;
     }
   `,
 })
@@ -140,6 +250,11 @@ export class BuildingFormComponent {
   readonly submitting = input(false);
   readonly submitted = output<BuildingRequest>();
   readonly cancelled = output<void>();
+
+  readonly statuses = FLOOR_STATUSES;
+  readonly statusLabels = FLOOR_STATUS_LABELS;
+  readonly accessibility = ACCESSIBILITY;
+  readonly accessibilityLabels = ACCESSIBILITY_LABELS;
 
   readonly editing = () => this.initial() !== null;
 
@@ -166,8 +281,10 @@ export class BuildingFormComponent {
         validators: [Validators.required, Validators.minLength(1), Validators.maxLength(120)],
       }),
       description: new FormControl(building?.description ?? '', { nonNullable: true, validators: [Validators.maxLength(500)] }),
+      aliases: new FormControl((building?.aliases ?? []).join('\n'), { nonNullable: true }),
+      wings: new FormArray((building?.wings ?? []).map((w) => wingGroup(w))),
       floors: new FormArray(
-        (building?.floors.length ? building.floors : [undefined]).map((f) => floorGroup(f)),
+        (building?.floors.length ? building.floors : [{ code: 'P1', level: 1, name: 'Piso 1' }]).map((f) => floorGroup(f)),
         [Validators.required, Validators.minLength(1)],
       ),
     });
@@ -179,18 +296,17 @@ export class BuildingFormComponent {
   }
 
   addFloor(): void {
-    this.form.controls.floors.push(
-      floorGroup({ level: this.form.controls.floors.length, name: '', gridRows: 11, gridColumns: 16 }),
-    );
+    const next = this.form.controls.floors.length + 1;
+    this.form.controls.floors.push(floorGroup({ code: `P${next}`, level: next, name: `Piso ${next}` }));
   }
 
-  /** How many corridors the floor at this index already has, so the form can say it keeps them. */
-  corridorCount(index: number): number {
-    return this.initial()?.floors[index]?.corridors?.length ?? 0;
+  addWing(): void {
+    this.form.controls.wings.push(wingGroup());
   }
 
-  removeFloor(index: number): void {
-    this.form.controls.floors.removeAt(index);
+  /** How many corridors the stored floor with this code has, so the form can say it keeps them. */
+  corridorCount(code: string): number {
+    return this.initial()?.floors.find((f) => f.code === code)?.corridors?.length ?? 0;
   }
 
   submit(): void {
@@ -198,17 +314,28 @@ export class BuildingFormComponent {
       this.form.markAllAsTouched();
       return;
     }
-    // Corridors are carried through untouched. This form edits a floor's shape; its corridors
-    // are polylines through the grid, which is a drawing job and belongs in the grid editor.
-    // Dropping them here because the form does not show them would silently erase somebody's
-    // afternoon of walking a floor.
+    // Corridors are carried through untouched, matched by floor code. This form edits a floor's
+    // shape; its corridors are drawn in the floor editor, and dropping them here because the form
+    // does not show them would silently erase somebody's afternoon of walking a floor.
     const raw = this.form.getRawValue();
     const existing = this.initial()?.floors ?? [];
     this.submitted.emit({
-      ...raw,
+      code: raw.code,
+      name: raw.name,
+      campus: raw.campus,
+      description: raw.description || undefined,
+      aliases: raw.aliases.split('\n').map((a) => a.trim()).filter(Boolean),
+      wings: raw.wings.map((w) => ({
+        code: w.code,
+        name: w.name,
+        doorSuffix: w.doorSuffix.trim() || null,
+        note: w.note.trim() || null,
+      })),
       floors: raw.floors.map((floor) => ({
         ...floor,
-        corridors: existing.find((f) => f.level === floor.level)?.corridors ?? [],
+        level: Number(floor.level),
+        note: floor.note.trim() || null,
+        corridors: existing.find((f) => f.code === floor.code)?.corridors ?? [],
       })),
     });
   }
