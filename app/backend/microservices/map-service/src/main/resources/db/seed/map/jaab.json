@@ -1,0 +1,965 @@
+{
+  "code": "JAAB",
+  "name": "Centro de Investigaciones Juan Alberto Aragón Bateman",
+  "campus": "Sede Principal",
+  "description": "Edificio de ladrillo rojo con una ventana alta en arco: laboratorios, direcciones de investigación y el archivo institucional en el sótano.",
+  "aliases": [
+    "Centro de Investigaciones",
+    "Juan Alberto Aragón Bateman"
+  ],
+  "wings": [],
+  "floors": [
+    {
+      "code": "S1",
+      "level": -1,
+      "name": "Sótano",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "note": "Se baja desde la recepción del piso 1.",
+      "gridRows": 12,
+      "gridColumns": 20,
+      "spaces": [
+        {
+          "code": "S1-ARCHIVO",
+          "name": "Archivo Institucional",
+          "typeCode": "ARCHIVE",
+          "rowSpan": 1,
+          "colSpan": 1
+        }
+      ]
+    },
+    {
+      "code": "P1",
+      "level": 1,
+      "name": "Piso 1",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "gridRows": 12,
+      "gridColumns": 20,
+      "spaces": [
+        {
+          "code": "P1-ASC",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-ENTRADA",
+          "name": "Entrada",
+          "typeCode": "ENTRANCE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-ESC",
+          "name": "Escalera",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-RECEPCION",
+          "name": "Recepción",
+          "typeCode": "RECEPTION",
+          "rowSpan": 1,
+          "colSpan": 1
+        }
+      ]
+    },
+    {
+      "code": "MEZZ",
+      "level": 1.5,
+      "name": "Mezzanine",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "note": "Por la escalera desde el piso 1. El plano de evacuación no dibuja ascensor.",
+      "gridRows": 8,
+      "gridColumns": 24,
+      "corridors": [
+        {
+          "code": "PAS-MEZZ",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 3,
+              "col": 18
+            },
+            {
+              "row": 3,
+              "col": 10
+            },
+            {
+              "row": 2,
+              "col": 10
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "MEZZ-ESC",
+          "name": "Escalera",
+          "typeCode": "STAIRS",
+          "gridRow": 0,
+          "gridColumn": 7,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "MEZZ-LABORATORIO",
+          "name": "Laboratorio de Interactividad",
+          "typeCode": "LAB",
+          "aliases": [
+            "interactividad"
+          ],
+          "gridRow": 0,
+          "gridColumn": 11,
+          "rowSpan": 3,
+          "colSpan": 7
+        },
+        {
+          "code": "MEZZ-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 18,
+          "rowSpan": 3,
+          "colSpan": 6
+        },
+        {
+          "code": "MEZZ-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 4,
+          "gridColumn": 10,
+          "rowSpan": 4,
+          "colSpan": 9
+        },
+        {
+          "code": "MEZZ-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 3,
+          "gridColumn": 19,
+          "rowSpan": 5,
+          "colSpan": 5
+        },
+        {
+          "code": "MEZZ-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 2,
+          "gridColumn": 7,
+          "rowSpan": 2,
+          "colSpan": 3
+        }
+      ]
+    },
+    {
+      "code": "P2",
+      "level": 2,
+      "name": "Piso 2",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 10,
+      "gridColumns": 24,
+      "corridors": [
+        {
+          "code": "PAS-P2",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 7,
+              "col": 0
+            },
+            {
+              "row": 7,
+              "col": 20
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "P2-ASC",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "gridRow": 8,
+          "gridColumn": 15,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P2-BANOS-1",
+          "name": "Baños (1)",
+          "typeCode": "RESTROOM",
+          "aliases": [
+            "baños"
+          ],
+          "gridRow": 8,
+          "gridColumn": 8,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P2-BANOS-2",
+          "name": "Baños (2)",
+          "typeCode": "RESTROOM",
+          "aliases": [
+            "baños"
+          ],
+          "gridRow": 8,
+          "gridColumn": 17,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P2-ESC",
+          "name": "Escalera",
+          "typeCode": "STAIRS",
+          "gridRow": 8,
+          "gridColumn": 12,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P2-LABORATORIO",
+          "name": "Laboratorio de Neurociencias Aplicadas - Neuro K",
+          "typeCode": "LAB",
+          "aliases": [
+            "Neuro K"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-LABORATORIOS",
+          "name": "Laboratorios de Conducta Animal",
+          "typeCode": "LAB",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 4,
+          "rowSpan": 6,
+          "colSpan": 6
+        },
+        {
+          "code": "P2-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 14,
+          "rowSpan": 6,
+          "colSpan": 7
+        },
+        {
+          "code": "P2-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 6,
+          "colSpan": 4
+        },
+        {
+          "code": "P2-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 8,
+          "gridColumn": 0,
+          "rowSpan": 2,
+          "colSpan": 5
+        },
+        {
+          "code": "P2-C05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 8,
+          "gridColumn": 5,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P2-C06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 4,
+          "gridColumn": 21,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P2-C07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 7,
+          "gridColumn": 21,
+          "rowSpan": 3,
+          "colSpan": 3
+        }
+      ]
+    },
+    {
+      "code": "P3",
+      "level": 3,
+      "name": "Piso 3",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "gridRows": 12,
+      "gridColumns": 20,
+      "spaces": [
+        {
+          "code": "P3-ASC",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-ESC",
+          "name": "Escalera",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-ZONA-SOCIAL",
+          "name": "Zona Social",
+          "typeCode": "SOCIAL_AREA",
+          "rowSpan": 1,
+          "colSpan": 1
+        }
+      ]
+    },
+    {
+      "code": "P4",
+      "level": 4,
+      "name": "Piso 4",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 10,
+      "gridColumns": 24,
+      "corridors": [
+        {
+          "code": "PAS-P4",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 7,
+              "col": 8
+            },
+            {
+              "row": 7,
+              "col": 19
+            },
+            {
+              "row": 3,
+              "col": 19
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "P4-ASC",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "gridRow": 8,
+          "gridColumn": 15,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P4-BANOS-1",
+          "name": "Baños (1)",
+          "typeCode": "RESTROOM",
+          "aliases": [
+            "baños"
+          ],
+          "gridRow": 8,
+          "gridColumn": 8,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-BANOS-2",
+          "name": "Baños (2)",
+          "typeCode": "RESTROOM",
+          "aliases": [
+            "baños"
+          ],
+          "gridRow": 8,
+          "gridColumn": 17,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-DIRECCION",
+          "name": "Dirección de Posgrados en Psicología del Consumidor",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-DIRECCION-GENERAL",
+          "name": "Dirección General de Investigaciones",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-ESC",
+          "name": "Escalera",
+          "typeCode": "STAIRS",
+          "gridRow": 8,
+          "gridColumn": 12,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-LABORATORIO",
+          "name": "Laboratorio de Psicología Social",
+          "typeCode": "LAB",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-SALA-ESTUDIANTES",
+          "name": "Sala de Estudiantes de Doctorado",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-SALA-FORMACION",
+          "name": "Sala de Formación Científica",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 10,
+          "colSpan": 8
+        },
+        {
+          "code": "P4-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 3,
+          "gridColumn": 10,
+          "rowSpan": 3,
+          "colSpan": 4
+        },
+        {
+          "code": "P4-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 4,
+          "gridColumn": 14,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 3,
+          "gridColumn": 17,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P4-C05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 14,
+          "rowSpan": 3,
+          "colSpan": 7
+        },
+        {
+          "code": "P4-C06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 3,
+          "gridColumn": 20,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-C07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 20,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-C08",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 8,
+          "gridColumn": 11,
+          "rowSpan": 2,
+          "colSpan": 1
+        }
+      ]
+    },
+    {
+      "code": "P5",
+      "level": 5,
+      "name": "Piso 5",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 10,
+      "gridColumns": 24,
+      "corridors": [
+        {
+          "code": "PAS-P5",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 6,
+              "col": 5
+            },
+            {
+              "row": 6,
+              "col": 19
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "P5-ASC",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "gridRow": 8,
+          "gridColumn": 15,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P5-BANOS-1",
+          "name": "Baños (1)",
+          "typeCode": "RESTROOM",
+          "aliases": [
+            "baños"
+          ],
+          "gridRow": 7,
+          "gridColumn": 7,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-BANOS-2",
+          "name": "Baños (2)",
+          "typeCode": "RESTROOM",
+          "aliases": [
+            "baños"
+          ],
+          "gridRow": 8,
+          "gridColumn": 17,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-ESC",
+          "name": "Escalera",
+          "typeCode": "STAIRS",
+          "gridRow": 8,
+          "gridColumn": 12,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-LABORATORIO",
+          "name": "Laboratorio de Psicología Clínica ClinikLab",
+          "typeCode": "LAB",
+          "aliases": [
+            "ClinikLab",
+            "Clinik - Lab"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-OFICINAS",
+          "name": "Oficinas de Investigadores",
+          "typeCode": "OFFICE",
+          "aliases": [
+            "Oficina de Investigadores"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 10,
+          "colSpan": 7
+        },
+        {
+          "code": "P5-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 10,
+          "rowSpan": 3,
+          "colSpan": 5
+        },
+        {
+          "code": "P5-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 15,
+          "rowSpan": 3,
+          "colSpan": 5
+        },
+        {
+          "code": "P5-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 20,
+          "rowSpan": 3,
+          "colSpan": 4
+        },
+        {
+          "code": "P5-C05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 3,
+          "gridColumn": 10,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P5-C06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 3,
+          "gridColumn": 12,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P5-C07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 3,
+          "gridColumn": 14,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P5-C08",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 3,
+          "gridColumn": 16,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-C09",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 4,
+          "gridColumn": 20,
+          "rowSpan": 6,
+          "colSpan": 3
+        }
+      ]
+    },
+    {
+      "code": "P6",
+      "level": 6,
+      "name": "Piso 6",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 10,
+      "gridColumns": 24,
+      "corridors": [
+        {
+          "code": "PAS-P6",
+          "name": "Pasillo en U",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 3,
+              "col": 8
+            },
+            {
+              "row": 3,
+              "col": 2
+            },
+            {
+              "row": 6,
+              "col": 2
+            },
+            {
+              "row": 6,
+              "col": 19
+            },
+            {
+              "row": 3,
+              "col": 19
+            },
+            {
+              "row": 3,
+              "col": 22
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "P6-ASC",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "gridRow": 8,
+          "gridColumn": 15,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-BANOS-1",
+          "name": "Baños (1)",
+          "typeCode": "RESTROOM",
+          "aliases": [
+            "baños"
+          ],
+          "gridRow": 7,
+          "gridColumn": 8,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-BANOS-2",
+          "name": "Baños (2)",
+          "typeCode": "RESTROOM",
+          "aliases": [
+            "baños"
+          ],
+          "gridRow": 7,
+          "gridColumn": 17,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-DIRECCION",
+          "name": "Dirección de Revistas Científicas",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P6-ESC",
+          "name": "Escalera",
+          "typeCode": "STAIRS",
+          "gridRow": 8,
+          "gridColumn": 12,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-OFICINAS",
+          "name": "Oficinas de Investigadores",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P6-SALA-JUNTAS",
+          "name": "Sala de Juntas",
+          "typeCode": "MEETING_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P6-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 4,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 4,
+          "gridColumn": 0,
+          "rowSpan": 6,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 3,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 5,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 7,
+          "rowSpan": 3,
+          "colSpan": 1
+        },
+        {
+          "code": "P6-C06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 8,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 4,
+          "gridColumn": 5,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C08",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 4,
+          "gridColumn": 7,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C09",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 4,
+          "gridColumn": 9,
+          "rowSpan": 2,
+          "colSpan": 1
+        },
+        {
+          "code": "P6-C10",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 7,
+          "gridColumn": 2,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C11",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 7,
+          "gridColumn": 4,
+          "rowSpan": 3,
+          "colSpan": 4
+        },
+        {
+          "code": "P6-C12",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 4,
+          "gridColumn": 20,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-C13",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 7,
+          "gridColumn": 20,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-C14",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 14,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C15",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 16,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C16",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 18,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C17",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 20,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C18",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 22,
+          "rowSpan": 3,
+          "colSpan": 2
+        }
+      ]
+    }
+  ]
+}

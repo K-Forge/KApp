@@ -415,6 +415,27 @@ here is everyone's afternoon.
 
 ---
 
+## Backing up the campus map
+
+The map is the one dataset the team makes by hand, drawing floors in the portal, and the M0
+cluster keeps no backups. After a session of drawing, export it and commit the result:
+
+```bash
+scripts/export-map-snapshot.py
+```
+
+It asks for a token — the one on the portal's *My token* screen — and rewrites one JSON file per
+building under `map-service/src/main/resources/db/seed/map/`. Review the diff and open a PR with
+it, like any other change.
+
+Those files are also what a fresh database starts from: `V005_SurveyedCampus` loads them in place
+of the placeholder campus, and never over a building that already exists. The first version came
+from the campus survey — every floor undrawn, every space waiting in the editor's inventory. CI
+loads whatever is committed and saves every floor back through the floor editor's endpoint, so a
+snapshot the editor would refuse fails the build rather than the next database.
+
+---
+
 ## Pointing at Atlas
 
 Every profile talks to the shared Atlas development cluster: there is no other option, and no

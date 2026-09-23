@@ -230,7 +230,8 @@ public class SpaceService {
         }
     }
 
-    static SpaceDocument toDocument(LayoutSpaceDto space, BuildingDocument building, Floor floor,
+    /** How a space is stored, from the fields a request or a snapshot carries. */
+    public static SpaceDocument toDocument(LayoutSpaceDto space, BuildingDocument building, Floor floor,
                                     String id, boolean placeholder, Instant createdAt, Instant updatedAt) {
         String doorCode = space.doorCodeOrNull();
         return new SpaceDocument(

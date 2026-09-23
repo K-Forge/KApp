@@ -1,0 +1,545 @@
+{
+  "code": "BI",
+  "name": "Bienestar Institucional",
+  "campus": "Sede Principal",
+  "description": "Dos alas unidas por el piso 1 y la terraza: la occidental es la de bienestar (juegos, música, danza, gimnasio y terraza); la oriental, de salones y laboratorios.",
+  "aliases": [
+    "Bienestar"
+  ],
+  "wings": [
+    {
+      "code": "O",
+      "name": "Ala occidental",
+      "note": "Bienestar: juegos, música, danza, gimnasio y la terraza."
+    },
+    {
+      "code": "E",
+      "name": "Ala oriental",
+      "note": "Salones y laboratorios. Se cruza desde el ala occidental por el piso 1 y por la terraza."
+    }
+  ],
+  "floors": [
+    {
+      "code": "P1",
+      "level": 1,
+      "name": "Piso 1",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 16,
+      "gridColumns": 8,
+      "corridors": [
+        {
+          "code": "PAS-P1",
+          "name": "Salida",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 9,
+              "col": 6
+            },
+            {
+              "row": 11,
+              "col": 6
+            },
+            {
+              "row": 11,
+              "col": 1
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "P1-ASC",
+          "wing": "O",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "gridRow": 13,
+          "gridColumn": 4,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P1-BANOS",
+          "wing": "O",
+          "name": "Baños",
+          "typeCode": "RESTROOM",
+          "gridRow": 15,
+          "gridColumn": 5,
+          "rowSpan": 1,
+          "colSpan": 3
+        },
+        {
+          "code": "P1-ENTRADA",
+          "wing": "O",
+          "name": "Entrada",
+          "typeCode": "ENTRANCE",
+          "gridRow": 11,
+          "gridColumn": 0,
+          "rowSpan": 1,
+          "colSpan": 1,
+          "note": "Sale al oeste, a la Calle 62."
+        },
+        {
+          "code": "P1-ESC",
+          "wing": "O",
+          "name": "Escalera",
+          "typeCode": "STAIRS",
+          "gridRow": 13,
+          "gridColumn": 0,
+          "rowSpan": 3,
+          "colSpan": 4
+        },
+        {
+          "code": "P1-JUEGOS-MESA",
+          "wing": "O",
+          "name": "Juegos de mesa",
+          "typeCode": "GAME_ROOM",
+          "aliases": [
+            "air hockey",
+            "zona de ajedrez",
+            "Dance Revolution"
+          ],
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 11,
+          "colSpan": 4
+        },
+        {
+          "code": "P1-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 4,
+          "rowSpan": 4,
+          "colSpan": 4
+        },
+        {
+          "code": "P1-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 5,
+          "gridColumn": 6,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P1-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 7,
+          "gridColumn": 6,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P1-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 4,
+          "gridColumn": 4,
+          "rowSpan": 5,
+          "colSpan": 2
+        },
+        {
+          "code": "P1-C05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 12,
+          "gridColumn": 0,
+          "rowSpan": 1,
+          "colSpan": 4
+        }
+      ]
+    },
+    {
+      "code": "P2",
+      "level": 2,
+      "name": "Piso 2",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 16,
+      "gridColumns": 8,
+      "corridors": [
+        {
+          "code": "PAS-P2",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 1,
+              "col": 4
+            },
+            {
+              "row": 11,
+              "col": 4
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "P2-ASC",
+          "wing": "O",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "gridRow": 13,
+          "gridColumn": 5,
+          "rowSpan": 2,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-BILLAR",
+          "wing": "O",
+          "name": "Billar",
+          "typeCode": "GAME_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-COORDINACION",
+          "wing": "O",
+          "name": "Coordinación de Bienestar Estudiantil",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-ESC",
+          "wing": "O",
+          "name": "Escalera",
+          "typeCode": "STAIRS",
+          "gridRow": 12,
+          "gridColumn": 0,
+          "rowSpan": 3,
+          "colSpan": 4
+        },
+        {
+          "code": "P2-FUTBOLIN",
+          "wing": "O",
+          "name": "Futbolín",
+          "typeCode": "GAME_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-PING-PONG",
+          "wing": "O",
+          "name": "Ping Pong",
+          "typeCode": "GAME_ROOM",
+          "aliases": [
+            "Ping - Pong",
+            "tenis de mesa"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-SALAS-XBOX",
+          "wing": "O",
+          "name": "Salas Xbox",
+          "typeCode": "GAME_ROOM",
+          "aliases": [
+            "xbox"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 12,
+          "gridColumn": 6,
+          "rowSpan": 4,
+          "colSpan": 2
+        },
+        {
+          "code": "P2-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 1,
+          "rowSpan": 1,
+          "colSpan": 3
+        },
+        {
+          "code": "P2-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 4,
+          "gridColumn": 5,
+          "rowSpan": 5,
+          "colSpan": 3
+        }
+      ]
+    },
+    {
+      "code": "P3",
+      "level": 3,
+      "name": "Piso 3",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 16,
+      "gridColumns": 8,
+      "spaces": [
+        {
+          "code": "P3-ASC",
+          "wing": "O",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "gridRow": 13,
+          "gridColumn": 5,
+          "rowSpan": 2,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-ESC",
+          "wing": "O",
+          "name": "Escalera",
+          "typeCode": "STAIRS",
+          "gridRow": 12,
+          "gridColumn": 0,
+          "rowSpan": 3,
+          "colSpan": 4
+        },
+        {
+          "code": "P3-PING-PONG",
+          "wing": "O",
+          "name": "Ping Pong",
+          "typeCode": "GAME_ROOM",
+          "aliases": [
+            "tenis de mesa"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-SALA-DANZA",
+          "wing": "O",
+          "name": "Sala de Danza",
+          "typeCode": "ARTS_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-SALA-MUSICA",
+          "wing": "O",
+          "name": "Sala de Música",
+          "typeCode": "ARTS_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-SALAS-KARAOKE",
+          "wing": "O",
+          "name": "Salas de Karaoke",
+          "typeCode": "ARTS_ROOM",
+          "aliases": [
+            "karaoke"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 1,
+          "gridColumn": 0,
+          "rowSpan": 5,
+          "colSpan": 4
+        },
+        {
+          "code": "P3-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 5,
+          "gridColumn": 4,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 5,
+          "gridColumn": 6,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 7,
+          "gridColumn": 4,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 7,
+          "gridColumn": 6,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 9,
+          "gridColumn": 4,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 9,
+          "gridColumn": 6,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C08",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 6,
+          "rowSpan": 5,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C09",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 1,
+          "rowSpan": 1,
+          "colSpan": 3
+        }
+      ]
+    },
+    {
+      "code": "P4",
+      "level": 4,
+      "name": "Piso 4",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 16,
+      "gridColumns": 8,
+      "spaces": [
+        {
+          "code": "P4-ASC",
+          "wing": "O",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "gridRow": 13,
+          "gridColumn": 5,
+          "rowSpan": 2,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-ESC",
+          "wing": "O",
+          "name": "Escalera",
+          "typeCode": "STAIRS",
+          "gridRow": 12,
+          "gridColumn": 0,
+          "rowSpan": 3,
+          "colSpan": 4
+        },
+        {
+          "code": "P4-GIMNASIO",
+          "wing": "O",
+          "name": "Gimnasio",
+          "typeCode": "GYM",
+          "aliases": [
+            "gym"
+          ],
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 11,
+          "colSpan": 5
+        },
+        {
+          "code": "P4-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 5,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 1,
+          "rowSpan": 1,
+          "colSpan": 3
+        }
+      ]
+    },
+    {
+      "code": "P5",
+      "level": 5,
+      "name": "Terraza",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 16,
+      "gridColumns": 8,
+      "spaces": [
+        {
+          "code": "P5-ASC",
+          "wing": "O",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "gridRow": 13,
+          "gridColumn": 5,
+          "rowSpan": 2,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-CAFE",
+          "wing": "O",
+          "name": "Café",
+          "typeCode": "CAFETERIA",
+          "aliases": [
+            "café de la terraza"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-ESC",
+          "wing": "O",
+          "name": "Escalera",
+          "typeCode": "STAIRS",
+          "gridRow": 12,
+          "gridColumn": 1,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-TERRAZA",
+          "wing": "O",
+          "name": "Terraza",
+          "typeCode": "TERRACE",
+          "aliases": [
+            "terraza café"
+          ],
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 12,
+          "colSpan": 8
+        }
+      ]
+    }
+  ]
+}

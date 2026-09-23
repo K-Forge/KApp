@@ -1,0 +1,332 @@
+{
+  "code": "MU",
+  "name": "Casa Medio Universitario",
+  "campus": "Sede Principal",
+  "description": "Casa antigua de tres niveles: el Servicio Médico a nivel de la calle y las oficinas de Medio Universitario arriba, a las que se sube por una escalera exterior.",
+  "aliases": [
+    "Medio Universitario"
+  ],
+  "wings": [],
+  "floors": [
+    {
+      "code": "P0",
+      "level": 0,
+      "name": "Piso 0",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "note": "A nivel de la calle: lo primero que se ve al entrar.",
+      "gridRows": 8,
+      "gridColumns": 28,
+      "corridors": [
+        {
+          "code": "PAS-P0",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 2,
+              "col": 8
+            },
+            {
+              "row": 2,
+              "col": 21
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "P0-BANO",
+          "name": "Baño",
+          "typeCode": "RESTROOM",
+          "gridRow": 6,
+          "gridColumn": 16,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P0-BANO-ACCESIBLE",
+          "name": "Baño accesible",
+          "typeCode": "RESTROOM",
+          "gridRow": 0,
+          "gridColumn": 6,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P0-CONSULTORIO",
+          "name": "Consultorio médico",
+          "typeCode": "MEDICAL_OFFICE",
+          "aliases": [
+            "Servicio Médico"
+          ],
+          "gridRow": 4,
+          "gridColumn": 19,
+          "rowSpan": 4,
+          "colSpan": 4
+        },
+        {
+          "code": "P0-ENFERMERIA",
+          "name": "Enfermería",
+          "typeCode": "NURSING",
+          "gridRow": 3,
+          "gridColumn": 12,
+          "rowSpan": 4,
+          "colSpan": 4
+        },
+        {
+          "code": "P0-ENTRADA",
+          "name": "Entrada",
+          "typeCode": "ENTRANCE",
+          "gridRow": 6,
+          "gridColumn": 5,
+          "rowSpan": 2,
+          "colSpan": 1
+        },
+        {
+          "code": "P0-ESC",
+          "name": "Escalera interior",
+          "typeCode": "STAIRS",
+          "gridRow": 3,
+          "gridColumn": 17,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P0-RECEPCION",
+          "name": "Recepción del Servicio Médico",
+          "typeCode": "RECEPTION",
+          "aliases": [
+            "Servicio Médico"
+          ],
+          "gridRow": 3,
+          "gridColumn": 6,
+          "rowSpan": 4,
+          "colSpan": 4
+        }
+      ]
+    },
+    {
+      "code": "P1",
+      "level": 1,
+      "name": "Piso 1",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "note": "Se sube por la escalera exterior, del lado oeste.",
+      "gridRows": 8,
+      "gridColumns": 28,
+      "corridors": [
+        {
+          "code": "PAS-P1",
+          "name": "Hall",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 4,
+              "col": 5
+            },
+            {
+              "row": 4,
+              "col": 19
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "P1-BANO",
+          "name": "Baño",
+          "typeCode": "RESTROOM",
+          "gridRow": 3,
+          "gridColumn": 16,
+          "rowSpan": 1,
+          "colSpan": 2
+        },
+        {
+          "code": "P1-CAFE",
+          "name": "Café",
+          "typeCode": "SOCIAL_AREA",
+          "gridRow": 6,
+          "gridColumn": 19,
+          "rowSpan": 2,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-ESC",
+          "name": "Escalera interior",
+          "typeCode": "STAIRS",
+          "gridRow": 5,
+          "gridColumn": 12,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P1-ESC-EXTERIOR",
+          "name": "Escalera exterior",
+          "typeCode": "STAIRS",
+          "gridRow": 1,
+          "gridColumn": 4,
+          "rowSpan": 3,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-OFICINA-1",
+          "name": "Oficina 1",
+          "typeCode": "OFFICE",
+          "gridRow": 0,
+          "gridColumn": 19,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P1-OFICINA-2",
+          "name": "Oficina 2",
+          "typeCode": "OFFICE",
+          "gridRow": 0,
+          "gridColumn": 22,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P1-OFICINA-3",
+          "name": "Oficina 3",
+          "typeCode": "OFFICE",
+          "gridRow": 5,
+          "gridColumn": 23,
+          "rowSpan": 3,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-OFICINA-4",
+          "name": "Oficina 4",
+          "typeCode": "OFFICE",
+          "gridRow": 5,
+          "gridColumn": 20,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P1-OFICINA-SIN",
+          "name": "Oficina sin nombre (1)",
+          "typeCode": "OFFICE",
+          "gridRow": 0,
+          "gridColumn": 15,
+          "rowSpan": 3,
+          "colSpan": 4
+        },
+        {
+          "code": "P1-OFICINA-SIN-2",
+          "name": "Oficina sin nombre (2)",
+          "typeCode": "OFFICE",
+          "gridRow": 4,
+          "gridColumn": 24,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P1-POCETA",
+          "name": "Poceta",
+          "typeCode": "CLEANING_ROOM",
+          "gridRow": 6,
+          "gridColumn": 17,
+          "rowSpan": 2,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-RACK",
+          "name": "Rack",
+          "typeCode": "IT_ROOM",
+          "aliases": [
+            "cuarto de TI"
+          ],
+          "gridRow": 6,
+          "gridColumn": 15,
+          "rowSpan": 2,
+          "colSpan": 1
+        }
+      ]
+    },
+    {
+      "code": "P2",
+      "level": 2,
+      "name": "Piso 2",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 9,
+      "gridColumns": 28,
+      "corridors": [
+        {
+          "code": "PAS-P2",
+          "name": "Hall",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 3,
+              "col": 7
+            },
+            {
+              "row": 6,
+              "col": 7
+            },
+            {
+              "row": 6,
+              "col": 8
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "P2-BANO",
+          "name": "Baño",
+          "typeCode": "RESTROOM",
+          "gridRow": 0,
+          "gridColumn": 7,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P2-DIRECCION",
+          "name": "Dirección",
+          "typeCode": "OFFICE",
+          "aliases": [
+            "Dirección de Medio Universitario"
+          ],
+          "gridRow": 0,
+          "gridColumn": 12,
+          "rowSpan": 5,
+          "colSpan": 4
+        },
+        {
+          "code": "P2-ESC",
+          "name": "Escalera interior",
+          "typeCode": "STAIRS",
+          "gridRow": 6,
+          "gridColumn": 9,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P2-SALA-COMPUTO-1",
+          "name": "Sala de cómputo 1",
+          "typeCode": "COMPUTER_LAB",
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 4,
+          "colSpan": 6,
+          "capacity": 5
+        },
+        {
+          "code": "P2-SALA-COMPUTO-2",
+          "name": "Sala de cómputo 2",
+          "typeCode": "COMPUTER_LAB",
+          "gridRow": 4,
+          "gridColumn": 0,
+          "rowSpan": 4,
+          "colSpan": 6,
+          "capacity": 5
+        }
+      ]
+    }
+  ]
+}

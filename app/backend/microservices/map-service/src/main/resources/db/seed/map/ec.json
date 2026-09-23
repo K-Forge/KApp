@@ -1,0 +1,2747 @@
+{
+  "code": "EC",
+  "name": "Edificio Central",
+  "campus": "Sede Principal",
+  "description": "Tres alas sobre un sótano de parqueadero. El auditorio Sonia Fajardo Forero ocupa los pisos 1 y 2 del ala sur, y el ala sur sigue encima con oficinas y aulas hasta el piso 6.",
+  "aliases": [],
+  "wings": [
+    {
+      "code": "C",
+      "name": "Ala central"
+    },
+    {
+      "code": "N",
+      "name": "Ala norte",
+      "doorSuffix": "-N",
+      "note": "Expansión de cinco pisos. Su terraza, en el piso 6, solo se alcanza por la escalera norte desde el piso 5."
+    },
+    {
+      "code": "S",
+      "name": "Ala sur",
+      "doorSuffix": "-S",
+      "note": "Construida sobre el auditorio: oficinas y aulas del piso 3 al 6."
+    }
+  ],
+  "floors": [
+    {
+      "code": "S1",
+      "level": -1,
+      "name": "Sótano",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "note": "Parqueadero. Se baja en carro por la rampa del piso 1.",
+      "gridRows": 12,
+      "gridColumns": 20,
+      "spaces": [
+        {
+          "code": "S1-PARQUEADERO",
+          "wing": "C",
+          "name": "Parqueadero",
+          "typeCode": "PARKING",
+          "aliases": [
+            "sótano",
+            "parqueadero del Edificio Central"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        }
+      ]
+    },
+    {
+      "code": "P1",
+      "level": 1,
+      "name": "Piso 1",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 15,
+      "gridColumns": 30,
+      "corridors": [
+        {
+          "code": "PAS-P1",
+          "name": "Pasillo principal",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 6,
+              "col": 18
+            },
+            {
+              "row": 6,
+              "col": 24
+            }
+          ]
+        },
+        {
+          "code": "PAS-P1-TRASERO",
+          "name": "Pasillo salida trasera",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 14,
+              "col": 2
+            },
+            {
+              "row": 14,
+              "col": 24
+            },
+            {
+              "row": 6,
+              "col": 24
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "P1-ADMISIONES",
+          "wing": "C",
+          "name": "Admisiones",
+          "typeCode": "ADMIN_OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-ASC-CENTRAL",
+          "wing": "C",
+          "name": "Ascensores centrales",
+          "typeCode": "ELEVATOR",
+          "aliases": [
+            "ascensores"
+          ],
+          "gridRow": 8,
+          "gridColumn": 25,
+          "rowSpan": 2,
+          "colSpan": 4
+        },
+        {
+          "code": "P1-AUDITORIO-SONIA",
+          "wing": "S",
+          "name": "Auditorio Sonia Fajardo Forero",
+          "typeCode": "AUDITORIUM",
+          "aliases": [
+            "auditorio",
+            "Sonia Fajardo Forero"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-BANO-H",
+          "wing": "C",
+          "name": "Baño de hombres",
+          "typeCode": "RESTROOM",
+          "gridRow": 10,
+          "gridColumn": 19,
+          "rowSpan": 4,
+          "colSpan": 2
+        },
+        {
+          "code": "P1-BANO-M",
+          "wing": "C",
+          "name": "Baño de mujeres",
+          "typeCode": "RESTROOM",
+          "gridRow": 10,
+          "gridColumn": 21,
+          "rowSpan": 4,
+          "colSpan": 2
+        },
+        {
+          "code": "P1-CAFETERIA-NO-1",
+          "wing": "C",
+          "name": "Cafetería No. 1",
+          "typeCode": "CAFETERIA",
+          "aliases": [
+            "cafetería",
+            "zona de comidas"
+          ],
+          "gridRow": 0,
+          "gridColumn": 3,
+          "rowSpan": 4,
+          "colSpan": 15
+        },
+        {
+          "code": "P1-CAFETERIA-NO-2",
+          "wing": "C",
+          "name": "Cafetería No. 2",
+          "typeCode": "CAFETERIA",
+          "aliases": [
+            "cafetería"
+          ],
+          "gridRow": 4,
+          "gridColumn": 6,
+          "rowSpan": 4,
+          "colSpan": 12
+        },
+        {
+          "code": "P1-CALL-CENTER",
+          "wing": "C",
+          "name": "Call Center",
+          "typeCode": "ADMIN_OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-ENTRADA-NORTE",
+          "wing": "C",
+          "name": "Entrada norte",
+          "typeCode": "ENTRANCE",
+          "gridRow": 4,
+          "gridColumn": 0,
+          "rowSpan": 4,
+          "colSpan": 2,
+          "note": "Da a la plazoleta frente al Edificio Central, sobre la Carrera 9 Bis."
+        },
+        {
+          "code": "P1-ENTRADA-SUR",
+          "wing": "C",
+          "name": "Entrada sur",
+          "typeCode": "ENTRANCE",
+          "rowSpan": 1,
+          "colSpan": 1,
+          "note": "Da a la Plazoleta de Bomberos."
+        },
+        {
+          "code": "P1-ESC-EMERGENCIA",
+          "wing": "C",
+          "name": "Escalera de emergencia",
+          "typeCode": "STAIRS",
+          "gridRow": 8,
+          "gridColumn": 5,
+          "rowSpan": 1,
+          "colSpan": 4
+        },
+        {
+          "code": "P1-ESC-PRINCIPAL",
+          "wing": "C",
+          "name": "Escalera principal",
+          "typeCode": "STAIRS",
+          "gridRow": 11,
+          "gridColumn": 25,
+          "rowSpan": 3,
+          "colSpan": 4
+        },
+        {
+          "code": "P1-RAMPA-VEHICULAR",
+          "wing": "C",
+          "name": "Rampa vehicular al parqueadero",
+          "typeCode": "RAMP",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-RECEPCION",
+          "wing": "C",
+          "name": "Recepción",
+          "typeCode": "RECEPTION",
+          "aliases": [
+            "recepción principal"
+          ],
+          "gridRow": 4,
+          "gridColumn": 25,
+          "rowSpan": 4,
+          "colSpan": 5
+        },
+        {
+          "code": "P1-TESORERIA",
+          "wing": "C",
+          "name": "Tesorería",
+          "typeCode": "ADMIN_OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-ZONA-ESPARCIMIENT",
+          "name": "Zona de esparcimiento",
+          "typeCode": "SOCIAL_AREA",
+          "gridRow": 9,
+          "gridColumn": 1,
+          "rowSpan": 5,
+          "colSpan": 17
+        },
+        {
+          "code": "P1-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 19,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P1-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 2,
+          "gridColumn": 19,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P1-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 22,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P1-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 25,
+          "rowSpan": 4,
+          "colSpan": 4
+        }
+      ]
+    },
+    {
+      "code": "P2",
+      "level": 2,
+      "name": "Piso 2",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 16,
+      "gridColumns": 30,
+      "corridors": [
+        {
+          "code": "PAS-P2",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 7,
+              "col": 4
+            },
+            {
+              "row": 7,
+              "col": 23
+            },
+            {
+              "row": 12,
+              "col": 23
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "201",
+          "doorCode": "201",
+          "wing": "C",
+          "name": "Aula 201",
+          "typeCode": "CLASSROOM",
+          "gridRow": 3,
+          "gridColumn": 0,
+          "rowSpan": 5,
+          "colSpan": 4
+        },
+        {
+          "code": "P2-ASC-BANOS",
+          "wing": "C",
+          "name": "Ascensor de los baños",
+          "typeCode": "ELEVATOR",
+          "gridRow": 8,
+          "gridColumn": 20,
+          "rowSpan": 1,
+          "colSpan": 2
+        },
+        {
+          "code": "P2-ASC-CENTRAL",
+          "wing": "C",
+          "name": "Ascensores centrales",
+          "typeCode": "ELEVATOR",
+          "aliases": [
+            "ascensores"
+          ],
+          "gridRow": 8,
+          "gridColumn": 24,
+          "rowSpan": 1,
+          "colSpan": 3
+        },
+        {
+          "code": "P2-BANO-H",
+          "wing": "C",
+          "name": "Baño de hombres",
+          "typeCode": "RESTROOM",
+          "gridRow": 9,
+          "gridColumn": 18,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P2-BANO-M",
+          "wing": "C",
+          "name": "Baño de mujeres",
+          "typeCode": "RESTROOM",
+          "gridRow": 9,
+          "gridColumn": 20,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P2-BIBLIOTECA-JUAN",
+          "wing": "C",
+          "name": "Biblioteca Juan Alberto Aragón Bateman",
+          "typeCode": "LIBRARY",
+          "aliases": [
+            "biblioteca"
+          ],
+          "gridRow": 0,
+          "gridColumn": 7,
+          "rowSpan": 6,
+          "colSpan": 17
+        },
+        {
+          "code": "P2-ESC-EMERGENCIA",
+          "wing": "C",
+          "name": "Escalera de emergencia",
+          "typeCode": "STAIRS",
+          "gridRow": 3,
+          "gridColumn": 4,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P2-ESC-PRINCIPAL",
+          "wing": "C",
+          "name": "Escalera principal",
+          "typeCode": "STAIRS",
+          "gridRow": 9,
+          "gridColumn": 24,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P2-FOTOCOPIADORA",
+          "wing": "C",
+          "name": "Fotocopiadora",
+          "typeCode": "PRINT_SHOP",
+          "aliases": [
+            "fotocopias"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        }
+      ]
+    },
+    {
+      "code": "P3",
+      "level": 3,
+      "name": "Piso 3",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 16,
+      "gridColumns": 30,
+      "corridors": [
+        {
+          "code": "PAS-P3",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 4,
+              "col": 4
+            },
+            {
+              "row": 4,
+              "col": 22
+            },
+            {
+              "row": 15,
+              "col": 22
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "301",
+          "doorCode": "301",
+          "wing": "C",
+          "name": "Aula 301",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "301-N",
+          "doorCode": "301-N",
+          "wing": "N",
+          "name": "Aula 301 Norte",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "N-301"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "301-S",
+          "doorCode": "301-S",
+          "wing": "S",
+          "name": "Aula 301 Sur",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "S-301"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "302",
+          "doorCode": "302",
+          "wing": "C",
+          "name": "Aula 302",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "303",
+          "doorCode": "303",
+          "wing": "C",
+          "name": "Aula 303",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "304",
+          "doorCode": "304",
+          "wing": "C",
+          "name": "Aula 304",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "304-N",
+          "doorCode": "304-N",
+          "wing": "N",
+          "name": "Aula 304 Norte",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "N-304"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "304-S",
+          "doorCode": "304-S",
+          "wing": "S",
+          "name": "Aula 304 Sur",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "S-304"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "305",
+          "doorCode": "305",
+          "wing": "C",
+          "name": "Aula 305",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "306",
+          "doorCode": "306",
+          "wing": "C",
+          "name": "Aula 306",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "307",
+          "doorCode": "307",
+          "wing": "C",
+          "name": "Aula 307",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "308",
+          "doorCode": "308",
+          "wing": "C",
+          "name": "Aula 308",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "309",
+          "doorCode": "309",
+          "wing": "C",
+          "name": "Aula 309",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-ASC-BANOS",
+          "wing": "C",
+          "name": "Ascensor de los baños",
+          "typeCode": "ELEVATOR",
+          "gridRow": 5,
+          "gridColumn": 18,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P3-ASC-CENTRAL",
+          "wing": "C",
+          "name": "Ascensores centrales",
+          "typeCode": "ELEVATOR",
+          "aliases": [
+            "ascensores"
+          ],
+          "gridRow": 5,
+          "gridColumn": 24,
+          "rowSpan": 2,
+          "colSpan": 4
+        },
+        {
+          "code": "P3-BANO-H",
+          "wing": "C",
+          "name": "Baño de hombres",
+          "typeCode": "RESTROOM",
+          "gridRow": 7,
+          "gridColumn": 18,
+          "rowSpan": 4,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-BANO-M",
+          "wing": "C",
+          "name": "Baño de mujeres",
+          "typeCode": "RESTROOM",
+          "gridRow": 7,
+          "gridColumn": 20,
+          "rowSpan": 4,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-DIRECCION",
+          "wing": "S",
+          "name": "Dirección Artística y Cultural",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-ESC-EMERGENCIA",
+          "wing": "C",
+          "name": "Escalera de emergencia",
+          "typeCode": "STAIRS",
+          "gridRow": 1,
+          "gridColumn": 4,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-ESC-PRINCIPAL",
+          "wing": "C",
+          "name": "Escalera principal",
+          "typeCode": "STAIRS",
+          "gridRow": 8,
+          "gridColumn": 24,
+          "rowSpan": 3,
+          "colSpan": 4
+        },
+        {
+          "code": "P3-REGISTRO",
+          "wing": "C",
+          "name": "Registro Académico",
+          "typeCode": "ADMIN_OFFICE",
+          "aliases": [
+            "registro"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-SEGURIDAD-SALUD",
+          "wing": "C",
+          "name": "Seguridad y Salud en el Trabajo",
+          "typeCode": "OFFICE",
+          "aliases": [
+            "SST"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-TRAMOYA-AUDITORIO",
+          "wing": "S",
+          "name": "Tramoya del auditorio",
+          "typeCode": "OTHER",
+          "aliases": [
+            "tramoya"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 1,
+          "gridColumn": 0,
+          "rowSpan": 5,
+          "colSpan": 4
+        },
+        {
+          "code": "P3-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 1,
+          "gridColumn": 6,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P3-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 1,
+          "gridColumn": 9,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P3-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 1,
+          "gridColumn": 12,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P3-C05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 3,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P3-C06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 6,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P3-C07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 9,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P3-C08",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 12,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P3-C09",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 15,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P3-C10",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 1,
+          "gridColumn": 15,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P3-C11",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 17,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P3-C12",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 2,
+          "gridColumn": 17,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P3-C13",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 24,
+          "rowSpan": 5,
+          "colSpan": 6
+        },
+        {
+          "code": "P3-C14",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 16,
+          "rowSpan": 2,
+          "colSpan": 4
+        },
+        {
+          "code": "P3-C15",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 13,
+          "gridColumn": 16,
+          "rowSpan": 3,
+          "colSpan": 4
+        },
+        {
+          "code": "P3-C16",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 23,
+          "rowSpan": 2,
+          "colSpan": 4
+        },
+        {
+          "code": "P3-C17",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 13,
+          "gridColumn": 23,
+          "rowSpan": 3,
+          "colSpan": 4
+        }
+      ]
+    },
+    {
+      "code": "P4",
+      "level": 4,
+      "name": "Piso 4",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 16,
+      "gridColumns": 30,
+      "corridors": [
+        {
+          "code": "PAS-P4",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 5,
+              "col": 1
+            },
+            {
+              "row": 5,
+              "col": 23
+            },
+            {
+              "row": 15,
+              "col": 23
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "401",
+          "doorCode": "401",
+          "wing": "C",
+          "name": "Aula 401",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "401-N",
+          "doorCode": "401-N",
+          "wing": "N",
+          "name": "Aula 401 Norte",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "N-401"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "401-S",
+          "doorCode": "401-S",
+          "wing": "S",
+          "name": "Aula 401 Sur",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "S-401"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "402",
+          "doorCode": "402",
+          "wing": "C",
+          "name": "Aula 402",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "403",
+          "doorCode": "403",
+          "wing": "C",
+          "name": "Aula 403",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "404",
+          "doorCode": "404",
+          "wing": "C",
+          "name": "Aula 404",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "404-N",
+          "doorCode": "404-N",
+          "wing": "N",
+          "name": "Aula 404 Norte",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "N-404"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "404-S",
+          "doorCode": "404-S",
+          "wing": "S",
+          "name": "Aula 404 Sur",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "S-404"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "405",
+          "doorCode": "405",
+          "wing": "C",
+          "name": "Aula 405",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "406",
+          "doorCode": "406",
+          "wing": "C",
+          "name": "Aula 406",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "407",
+          "doorCode": "407",
+          "wing": "C",
+          "name": "Aula 407",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "408",
+          "doorCode": "408",
+          "wing": "C",
+          "name": "Aula 408",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "409",
+          "doorCode": "409",
+          "wing": "C",
+          "name": "Aula 409",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "410",
+          "doorCode": "410",
+          "wing": "C",
+          "name": "Aula 410",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-ASC-BANOS",
+          "wing": "C",
+          "name": "Ascensor de los baños",
+          "typeCode": "ELEVATOR",
+          "gridRow": 6,
+          "gridColumn": 19,
+          "rowSpan": 1,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-ASC-CENTRAL",
+          "wing": "C",
+          "name": "Ascensores centrales",
+          "typeCode": "ELEVATOR",
+          "aliases": [
+            "ascensores"
+          ],
+          "gridRow": 6,
+          "gridColumn": 25,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-BANO-H",
+          "wing": "C",
+          "name": "Baño de hombres",
+          "typeCode": "RESTROOM",
+          "gridRow": 7,
+          "gridColumn": 19,
+          "rowSpan": 4,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-BANO-M",
+          "wing": "C",
+          "name": "Baño de mujeres",
+          "typeCode": "RESTROOM",
+          "gridRow": 7,
+          "gridColumn": 20,
+          "rowSpan": 4,
+          "colSpan": 2
+        },
+        {
+          "code": "P4-DECANATURA",
+          "wing": "S",
+          "name": "Decanatura de la Escuela de Negocios",
+          "typeCode": "OFFICE",
+          "aliases": [
+            "Escuela de Negocios - Decanatura"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-DECANATURA-2",
+          "wing": "S",
+          "name": "Decanatura de Matemáticas e Ingeniería",
+          "typeCode": "OFFICE",
+          "aliases": [
+            "Matemáticas e Ingeniería - Decanatura"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-ESC-EMERGENCIA",
+          "wing": "C",
+          "name": "Escalera de emergencia",
+          "typeCode": "STAIRS",
+          "gridRow": 0,
+          "gridColumn": 4,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-ESC-PRINCIPAL",
+          "wing": "C",
+          "name": "Escalera principal",
+          "typeCode": "STAIRS",
+          "gridRow": 8,
+          "gridColumn": 25,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-SALA-PROFESORES",
+          "wing": "S",
+          "name": "Sala de Profesores",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 5,
+          "colSpan": 4
+        },
+        {
+          "code": "P4-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 7,
+          "rowSpan": 4,
+          "colSpan": 4
+        },
+        {
+          "code": "P4-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 11,
+          "rowSpan": 4,
+          "colSpan": 5
+        },
+        {
+          "code": "P4-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 16,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-C05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 19,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-C06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 1,
+          "gridColumn": 26,
+          "rowSpan": 4,
+          "colSpan": 4
+        },
+        {
+          "code": "P4-C07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 3,
+          "rowSpan": 5,
+          "colSpan": 7
+        },
+        {
+          "code": "P4-C08",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 10,
+          "rowSpan": 5,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-C09",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 13,
+          "rowSpan": 5,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-C10",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 16,
+          "rowSpan": 5,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-C11",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 17,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-C12",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 13,
+          "gridColumn": 17,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-C13",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 24,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P4-C14",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 13,
+          "gridColumn": 24,
+          "rowSpan": 3,
+          "colSpan": 3
+        }
+      ]
+    },
+    {
+      "code": "P5",
+      "level": 5,
+      "name": "Piso 5",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 16,
+      "gridColumns": 30,
+      "corridors": [
+        {
+          "code": "PAS-P5",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 4,
+              "col": 1
+            },
+            {
+              "row": 4,
+              "col": 23
+            },
+            {
+              "row": 15,
+              "col": 23
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "501",
+          "doorCode": "501",
+          "wing": "C",
+          "name": "Aula 501",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "501-N",
+          "doorCode": "501-N",
+          "wing": "N",
+          "name": "Aula 501 Norte",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "N-501"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "501-S",
+          "doorCode": "501-S",
+          "wing": "S",
+          "name": "Aula 501 Sur",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "S-501"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "502",
+          "doorCode": "502",
+          "wing": "C",
+          "name": "Aula 502",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "503",
+          "doorCode": "503",
+          "wing": "C",
+          "name": "Aula 503",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "503-S",
+          "doorCode": "503-S",
+          "wing": "S",
+          "name": "Aula 503 Sur",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "S-503"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "504",
+          "doorCode": "504",
+          "wing": "C",
+          "name": "Aula 504",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "504-N",
+          "doorCode": "504-N",
+          "wing": "N",
+          "name": "Aula 504 Norte",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "N-504"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "505",
+          "doorCode": "505",
+          "wing": "C",
+          "name": "Aula 505",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "506",
+          "doorCode": "506",
+          "wing": "C",
+          "name": "Aula 506",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "507",
+          "doorCode": "507",
+          "wing": "C",
+          "name": "Aula 507",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "508",
+          "doorCode": "508",
+          "wing": "C",
+          "name": "Aula 508",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "509",
+          "doorCode": "509",
+          "wing": "C",
+          "name": "Aula 509",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "510",
+          "doorCode": "510",
+          "wing": "C",
+          "name": "Aula 510",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "511",
+          "doorCode": "511",
+          "wing": "C",
+          "name": "Aula 511",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "512",
+          "doorCode": "512",
+          "wing": "C",
+          "name": "Aula 512",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-ASC-BANOS",
+          "wing": "C",
+          "name": "Ascensor de los baños",
+          "typeCode": "ELEVATOR",
+          "gridRow": 5,
+          "gridColumn": 19,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-ASC-CENTRAL",
+          "wing": "C",
+          "name": "Ascensores centrales",
+          "typeCode": "ELEVATOR",
+          "aliases": [
+            "ascensores"
+          ],
+          "gridRow": 5,
+          "gridColumn": 24,
+          "rowSpan": 2,
+          "colSpan": 4
+        },
+        {
+          "code": "P5-BANO-H",
+          "wing": "C",
+          "name": "Baño de hombres",
+          "typeCode": "RESTROOM",
+          "gridRow": 7,
+          "gridColumn": 18,
+          "rowSpan": 4,
+          "colSpan": 2
+        },
+        {
+          "code": "P5-BANO-M",
+          "wing": "C",
+          "name": "Baño de mujeres",
+          "typeCode": "RESTROOM",
+          "gridRow": 7,
+          "gridColumn": 20,
+          "rowSpan": 4,
+          "colSpan": 2
+        },
+        {
+          "code": "P5-COORDINACION",
+          "wing": "S",
+          "name": "Coordinación de Decanaturas",
+          "typeCode": "OFFICE",
+          "aliases": [
+            "Coordinación Decanaturas"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-DECANATURA",
+          "wing": "S",
+          "name": "Decanatura de Psicología",
+          "typeCode": "OFFICE",
+          "aliases": [
+            "Psicología - Decanatura"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-DECANATURA-2",
+          "wing": "S",
+          "name": "Decanatura de Posgrados",
+          "typeCode": "OFFICE",
+          "aliases": [
+            "Posgrados - Decanatura"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-DEPARTAMENTO",
+          "wing": "C",
+          "name": "Departamento de Lenguas",
+          "typeCode": "OFFICE",
+          "gridRow": 8,
+          "gridColumn": 12,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-DIRECCION",
+          "wing": "S",
+          "name": "Dirección de Ingeniería de Sistemas",
+          "typeCode": "OFFICE",
+          "aliases": [
+            "Ingeniería de Sistemas - Dirección"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-DIRECCION-2",
+          "wing": "S",
+          "name": "Dirección de Ingeniería Industrial",
+          "typeCode": "OFFICE",
+          "aliases": [
+            "Ingeniería Industrial - Dirección"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-DIRECCION-3",
+          "wing": "S",
+          "name": "Dirección de Administración de Negocios Internacionales",
+          "typeCode": "OFFICE",
+          "aliases": [
+            "Administración de Negocios Internacionales - Dirección"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-ESC-EMERGENCIA",
+          "wing": "C",
+          "name": "Escalera de emergencia",
+          "typeCode": "STAIRS",
+          "gridRow": 0,
+          "gridColumn": 4,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-ESC-NORTE",
+          "wing": "N",
+          "name": "Escalera norte",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1,
+          "note": "La única subida a la terraza norte del piso 6."
+        },
+        {
+          "code": "P5-ESC-PRINCIPAL",
+          "wing": "C",
+          "name": "Escalera principal",
+          "typeCode": "STAIRS",
+          "gridRow": 7,
+          "gridColumn": 24,
+          "rowSpan": 4,
+          "colSpan": 4
+        },
+        {
+          "code": "P5-INSTITUTO",
+          "wing": "C",
+          "name": "Instituto de Humanidades",
+          "typeCode": "OFFICE",
+          "gridRow": 8,
+          "gridColumn": 15,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-LABORATORIOS",
+          "wing": "C",
+          "name": "Laboratorios de Percepción, Cognición y Social",
+          "typeCode": "LAB",
+          "aliases": [
+            "Laboratorio de Percepción y Cognición"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 6,
+          "colSpan": 4
+        },
+        {
+          "code": "P5-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 7,
+          "rowSpan": 4,
+          "colSpan": 4
+        },
+        {
+          "code": "P5-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 11,
+          "rowSpan": 4,
+          "colSpan": 4
+        },
+        {
+          "code": "P5-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 15,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-C05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 18,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-C06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 26,
+          "rowSpan": 5,
+          "colSpan": 4
+        },
+        {
+          "code": "P5-C07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 3,
+          "rowSpan": 5,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-C08",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 6,
+          "rowSpan": 5,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-C09",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 10,
+          "rowSpan": 5,
+          "colSpan": 2
+        },
+        {
+          "code": "P5-C10",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 12,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-C11",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 15,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P5-C12",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 17,
+          "rowSpan": 5,
+          "colSpan": 5
+        },
+        {
+          "code": "P5-C13",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 11,
+          "gridColumn": 24,
+          "rowSpan": 5,
+          "colSpan": 3
+        }
+      ]
+    },
+    {
+      "code": "P6",
+      "level": 6,
+      "name": "Piso 6",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 16,
+      "gridColumns": 30,
+      "corridors": [
+        {
+          "code": "PAS-P6",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 4,
+              "col": 4
+            },
+            {
+              "row": 4,
+              "col": 23
+            }
+          ]
+        },
+        {
+          "code": "PAS-P6-SUR",
+          "name": "Pasillo al ala sur",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 4,
+              "col": 21
+            },
+            {
+              "row": 15,
+              "col": 21
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "601",
+          "doorCode": "601",
+          "wing": "C",
+          "name": "Aula 601",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "602",
+          "doorCode": "602",
+          "wing": "C",
+          "name": "Aula 602",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "603",
+          "doorCode": "603",
+          "wing": "C",
+          "name": "Aula 603",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "604",
+          "doorCode": "604",
+          "wing": "C",
+          "name": "Aula 604",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "605",
+          "doorCode": "605",
+          "wing": "C",
+          "name": "Aula 605",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "606",
+          "doorCode": "606",
+          "wing": "C",
+          "name": "Aula 606",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "607",
+          "doorCode": "607",
+          "wing": "C",
+          "name": "Aula 607",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "608",
+          "doorCode": "608",
+          "wing": "C",
+          "name": "Aula 608",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "609",
+          "doorCode": "609",
+          "wing": "C",
+          "name": "Aula 609",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "610",
+          "doorCode": "610",
+          "wing": "C",
+          "name": "Aula 610",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "611",
+          "doorCode": "611",
+          "wing": "C",
+          "name": "Aula 611",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "612",
+          "doorCode": "612",
+          "wing": "C",
+          "name": "Aula 612",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "613",
+          "doorCode": "613",
+          "wing": "C",
+          "name": "Aula 613",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P6-ASC-BANOS",
+          "wing": "C",
+          "name": "Ascensor de los baños",
+          "typeCode": "ELEVATOR",
+          "gridRow": 5,
+          "gridColumn": 18,
+          "rowSpan": 1,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-ASC-CENTRAL",
+          "wing": "C",
+          "name": "Ascensores centrales",
+          "typeCode": "ELEVATOR",
+          "aliases": [
+            "ascensores"
+          ],
+          "gridRow": 5,
+          "gridColumn": 24,
+          "rowSpan": 1,
+          "colSpan": 4
+        },
+        {
+          "code": "P6-ASTRO-K",
+          "wing": "C",
+          "name": "Astro K",
+          "typeCode": "OTHER",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P6-BANO-H",
+          "wing": "C",
+          "name": "Baño de hombres",
+          "typeCode": "RESTROOM",
+          "gridRow": 6,
+          "gridColumn": 18,
+          "rowSpan": 4,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-BANO-M",
+          "wing": "C",
+          "name": "Baño de mujeres",
+          "typeCode": "RESTROOM",
+          "gridRow": 6,
+          "gridColumn": 20,
+          "rowSpan": 4,
+          "colSpan": 1
+        },
+        {
+          "code": "P6-CAFETERIA-TERRAZA",
+          "wing": "S",
+          "name": "Cafetería de la terraza",
+          "typeCode": "CAFETERIA",
+          "aliases": [
+            "cafetería terraza"
+          ],
+          "gridRow": 14,
+          "gridColumn": 17,
+          "rowSpan": 2,
+          "colSpan": 4
+        },
+        {
+          "code": "P6-CANCILLERIA",
+          "wing": "S",
+          "name": "Cancillería",
+          "typeCode": "OFFICE",
+          "gridRow": 11,
+          "gridColumn": 17,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-EGRESADOS",
+          "wing": "S",
+          "name": "Egresados",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P6-ESC-EMERGENCIA",
+          "wing": "C",
+          "name": "Escalera de emergencia",
+          "typeCode": "STAIRS",
+          "gridRow": 0,
+          "gridColumn": 4,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-ESC-PRINCIPAL",
+          "wing": "C",
+          "name": "Escalera principal",
+          "typeCode": "STAIRS",
+          "gridRow": 7,
+          "gridColumn": 24,
+          "rowSpan": 3,
+          "colSpan": 4
+        },
+        {
+          "code": "P6-GESTION",
+          "wing": "S",
+          "name": "Gestión y Transferencia del Conocimiento",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P6-TERRAZA-NORTE",
+          "wing": "N",
+          "name": "Terraza norte",
+          "typeCode": "TERRACE",
+          "rowSpan": 1,
+          "colSpan": 1,
+          "accessibility": "STAIRS_ONLY",
+          "note": "Desconectada del ala central: solo se llega por la escalera norte desde el piso 5."
+        },
+        {
+          "code": "P6-TERRAZA-SUR",
+          "wing": "S",
+          "name": "Terraza sur",
+          "typeCode": "TERRACE",
+          "aliases": [
+            "terraza"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1,
+          "note": "Se sale desde el ala central, pasando los baños y las oficinas del ala sur."
+        },
+        {
+          "code": "P6-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 5,
+          "colSpan": 4
+        },
+        {
+          "code": "P6-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 7,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 10,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 13,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-C05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 16,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-C06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 19,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-C07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 22,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-C08",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 26,
+          "rowSpan": 5,
+          "colSpan": 4
+        },
+        {
+          "code": "P6-C09",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 5,
+          "gridColumn": 3,
+          "rowSpan": 4,
+          "colSpan": 4
+        },
+        {
+          "code": "P6-C10",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 5,
+          "gridColumn": 7,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-C11",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 5,
+          "gridColumn": 10,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-C12",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 5,
+          "gridColumn": 13,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P6-C13",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 5,
+          "gridColumn": 16,
+          "rowSpan": 4,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C14",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 10,
+          "gridColumn": 22,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P6-C15",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 12,
+          "gridColumn": 22,
+          "rowSpan": 2,
+          "colSpan": 2
+        }
+      ]
+    },
+    {
+      "code": "P7",
+      "level": 7,
+      "name": "Piso 7",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 16,
+      "gridColumns": 30,
+      "corridors": [
+        {
+          "code": "PAS-P7",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 5,
+              "col": 1
+            },
+            {
+              "row": 5,
+              "col": 24
+            }
+          ]
+        },
+        {
+          "code": "PAS-P7-TERRAZA",
+          "name": "Salida a la terraza",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 5,
+              "col": 23
+            },
+            {
+              "row": 12,
+              "col": 23
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "701",
+          "doorCode": "701",
+          "wing": "C",
+          "name": "Aula 701",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "7-01"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "702",
+          "doorCode": "702",
+          "wing": "C",
+          "name": "Aula 702",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "7-02"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "703",
+          "doorCode": "703",
+          "wing": "C",
+          "name": "Aula 703",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "7-03"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "704",
+          "doorCode": "704",
+          "wing": "C",
+          "name": "Aula 704",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "7-04"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "705",
+          "doorCode": "705",
+          "wing": "C",
+          "name": "Aula 705",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "7-05"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "706",
+          "doorCode": "706",
+          "wing": "C",
+          "name": "Aula 706",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "7-06"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "707",
+          "doorCode": "707",
+          "wing": "C",
+          "name": "Aula 707",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "7-07"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "708",
+          "doorCode": "708",
+          "wing": "C",
+          "name": "Aula 708",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "7-08"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "709",
+          "doorCode": "709",
+          "wing": "C",
+          "name": "Aula 709",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "7-09"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "710",
+          "doorCode": "710",
+          "wing": "C",
+          "name": "Aula 710",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "7-10"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "711",
+          "doorCode": "711",
+          "wing": "C",
+          "name": "Aula 711",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "7-11"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "712",
+          "doorCode": "712",
+          "wing": "C",
+          "name": "Aula 712",
+          "typeCode": "CLASSROOM",
+          "aliases": [
+            "7-12"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "713",
+          "doorCode": "713",
+          "wing": "C",
+          "name": "Aula 713",
+          "typeCode": "CLASSROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P7-ASC-BANOS",
+          "wing": "C",
+          "name": "Ascensor de los baños",
+          "typeCode": "ELEVATOR",
+          "gridRow": 6,
+          "gridColumn": 20,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P7-ASC-CENTRAL",
+          "wing": "C",
+          "name": "Ascensores centrales",
+          "typeCode": "ELEVATOR",
+          "aliases": [
+            "ascensores"
+          ],
+          "gridRow": 6,
+          "gridColumn": 25,
+          "rowSpan": 2,
+          "colSpan": 4
+        },
+        {
+          "code": "P7-BANO-H",
+          "wing": "C",
+          "name": "Baño de hombres",
+          "typeCode": "RESTROOM",
+          "gridRow": 8,
+          "gridColumn": 19,
+          "rowSpan": 3,
+          "colSpan": 1
+        },
+        {
+          "code": "P7-BANO-M",
+          "wing": "C",
+          "name": "Baño de mujeres",
+          "typeCode": "RESTROOM",
+          "gridRow": 8,
+          "gridColumn": 20,
+          "rowSpan": 3,
+          "colSpan": 2
+        },
+        {
+          "code": "P7-CAMARA-GESELL",
+          "wing": "C",
+          "name": "Cámara de Gesell",
+          "typeCode": "GESELL_CHAMBER",
+          "aliases": [
+            "Cámara de Gessel"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P7-ESC-EMERGENCIA",
+          "wing": "C",
+          "name": "Escalera de emergencia",
+          "typeCode": "STAIRS",
+          "gridRow": 0,
+          "gridColumn": 4,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P7-ESC-PRINCIPAL",
+          "wing": "C",
+          "name": "Escalera principal",
+          "typeCode": "STAIRS",
+          "gridRow": 9,
+          "gridColumn": 25,
+          "rowSpan": 3,
+          "colSpan": 4
+        },
+        {
+          "code": "P7-TERRAZA",
+          "wing": "C",
+          "name": "Terraza",
+          "typeCode": "TERRACE",
+          "gridRow": 12,
+          "gridColumn": 18,
+          "rowSpan": 4,
+          "colSpan": 7
+        },
+        {
+          "code": "P7-C01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 0,
+          "rowSpan": 5,
+          "colSpan": 4
+        },
+        {
+          "code": "P7-C02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 7,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P7-C03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 10,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P7-C04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 13,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P7-C05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 16,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P7-C06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 19,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P7-C07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 22,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P7-C08",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 0,
+          "gridColumn": 25,
+          "rowSpan": 5,
+          "colSpan": 5
+        },
+        {
+          "code": "P7-C09",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 4,
+          "rowSpan": 5,
+          "colSpan": 3
+        },
+        {
+          "code": "P7-C10",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 7,
+          "rowSpan": 5,
+          "colSpan": 3
+        },
+        {
+          "code": "P7-C11",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 10,
+          "rowSpan": 5,
+          "colSpan": 3
+        },
+        {
+          "code": "P7-C12",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 13,
+          "rowSpan": 5,
+          "colSpan": 3
+        },
+        {
+          "code": "P7-C13",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "gridRow": 6,
+          "gridColumn": 16,
+          "rowSpan": 5,
+          "colSpan": 3
+        }
+      ]
+    },
+    {
+      "code": "P8",
+      "level": 8,
+      "name": "Piso 8",
+      "status": "DRAFT",
+      "accessibility": "UNKNOWN",
+      "gridRows": 16,
+      "gridColumns": 30,
+      "corridors": [
+        {
+          "code": "PAS-P8",
+          "name": "Pasillo",
+          "color": "#5B8DEF",
+          "path": [
+            {
+              "row": 5,
+              "col": 1
+            },
+            {
+              "row": 5,
+              "col": 24
+            }
+          ]
+        }
+      ],
+      "spaces": [
+        {
+          "code": "P8-ASC-BANOS",
+          "wing": "C",
+          "name": "Ascensor de los baños",
+          "typeCode": "ELEVATOR",
+          "gridRow": 6,
+          "gridColumn": 20,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P8-ASC-CENTRAL",
+          "wing": "C",
+          "name": "Ascensores centrales",
+          "typeCode": "ELEVATOR",
+          "aliases": [
+            "ascensores"
+          ],
+          "gridRow": 6,
+          "gridColumn": 25,
+          "rowSpan": 2,
+          "colSpan": 4
+        },
+        {
+          "code": "P8-ASESOR-RECTORIA",
+          "wing": "C",
+          "name": "Asesor de Rectoría",
+          "typeCode": "OFFICE",
+          "gridRow": 1,
+          "gridColumn": 22,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P8-BANO-H",
+          "wing": "C",
+          "name": "Baño de hombres",
+          "typeCode": "RESTROOM",
+          "gridRow": 8,
+          "gridColumn": 19,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P8-BANO-M",
+          "wing": "C",
+          "name": "Baño de mujeres",
+          "typeCode": "RESTROOM",
+          "gridRow": 10,
+          "gridColumn": 19,
+          "rowSpan": 2,
+          "colSpan": 2
+        },
+        {
+          "code": "P8-DIRECCION",
+          "wing": "C",
+          "name": "Dirección de Aseguramiento de la Calidad",
+          "typeCode": "OFFICE",
+          "gridRow": 1,
+          "gridColumn": 13,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P8-DIRECCION-2",
+          "wing": "C",
+          "name": "Dirección de Planeación",
+          "typeCode": "OFFICE",
+          "gridRow": 1,
+          "gridColumn": 16,
+          "rowSpan": 3,
+          "colSpan": 3
+        },
+        {
+          "code": "P8-ESC-EMERGENCIA",
+          "wing": "C",
+          "name": "Escalera de emergencia",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P8-ESC-PRINCIPAL",
+          "wing": "C",
+          "name": "Escalera principal",
+          "typeCode": "STAIRS",
+          "gridRow": 8,
+          "gridColumn": 25,
+          "rowSpan": 4,
+          "colSpan": 4
+        },
+        {
+          "code": "P8-PRESIDENCIA",
+          "wing": "C",
+          "name": "Presidencia",
+          "typeCode": "OFFICE",
+          "gridRow": 0,
+          "gridColumn": 1,
+          "rowSpan": 5,
+          "colSpan": 4
+        },
+        {
+          "code": "P8-RECEPCION",
+          "wing": "C",
+          "name": "Recepción",
+          "typeCode": "RECEPTION",
+          "gridRow": 8,
+          "gridColumn": 22,
+          "rowSpan": 2,
+          "colSpan": 3
+        },
+        {
+          "code": "P8-RECTORIA",
+          "wing": "C",
+          "name": "Rectoría",
+          "typeCode": "OFFICE",
+          "gridRow": 1,
+          "gridColumn": 26,
+          "rowSpan": 4,
+          "colSpan": 3
+        },
+        {
+          "code": "P8-SALA-FUNDADORES",
+          "wing": "C",
+          "name": "Sala Fundadores",
+          "typeCode": "MEETING_ROOM",
+          "aliases": [
+            "Salón de Fundadores"
+          ],
+          "gridRow": 1,
+          "gridColumn": 7,
+          "rowSpan": 3,
+          "colSpan": 6
+        },
+        {
+          "code": "P8-SALON-EVENTOS",
+          "wing": "C",
+          "name": "Salón de Eventos",
+          "typeCode": "EVENT_HALL",
+          "aliases": [
+            "auditorio del piso 8"
+          ],
+          "gridRow": 6,
+          "gridColumn": 4,
+          "rowSpan": 5,
+          "colSpan": 15
+        },
+        {
+          "code": "P8-SECRETARIA",
+          "wing": "C",
+          "name": "Secretaría General",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P8-TERRAZA-CENTRAL",
+          "wing": "C",
+          "name": "Terraza central",
+          "typeCode": "TERRACE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P8-TERRAZA-OESTE",
+          "wing": "C",
+          "name": "Terraza oeste",
+          "typeCode": "TERRACE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P8-VICERRECTORIA",
+          "wing": "C",
+          "name": "Vicerrectoría Académica",
+          "typeCode": "OFFICE",
+          "aliases": [
+            "Vice-Rectoría"
+          ],
+          "gridRow": 1,
+          "gridColumn": 19,
+          "rowSpan": 3,
+          "colSpan": 3
+        }
+      ]
+    }
+  ]
+}

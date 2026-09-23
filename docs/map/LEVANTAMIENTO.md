@@ -106,6 +106,11 @@ revisión:
 
 Por edificio. El detalle de cada punto está en su documento.
 
+**Lo que dicen las placas ya está cargado en el mapa.** Cada piso de estos seis edificios existe en
+el editor de pisos, sin dibujar, con su inventario: lo que lista la PI y la circulación y los baños
+que dibujan los PE y los RS. En sitio queda dibujar las cajas y decir cuál es cuál, borrar lo que ya
+no exista y agregar lo que falte.
+
 **EC**
 
 - [ ] Orientación con brújula.
