@@ -109,33 +109,33 @@ What that means when reading this repository:
 
 **The product's screens do not exist yet.** The Android and iOS clients are the deliverable and they
 have not been built; showing mockups here as if they were shipped would be the wrong impression to
-leave. What exists today are the two tools the team uses to build it.
+leave. What exists today is the portal the team uses to build it, floor editor included.
 
 ### The floor editor
 
-This is how a floor of the campus gets captured: walk it, count the squares, mark the lifts and
-stairs, trace the corridors in the colour they are actually painted, place the rooms. One
-self-contained HTML file — no server, no network, no build.
+This is how a floor of the campus gets drawn: from the evacuation plan and the information plaques
+photographed in the survey ([`docs/map/LEVANTAMIENTO.md`](docs/map/LEVANTAMIENTO.md)), then
+corrected standing in the floor itself. It is a screen of the admin portal, built for an iPad —
+outline the rooms the plan draws, load the rooms the plaque lists (a range like "401 a 410" at
+once), say which box each one is, trace the corridors in the colour they are painted.
 
 It matters more than a tool usually would. The map used to be modelled as a photograph of an
 architectural plan, and obtaining those plans depended on other people's calendars — it was the
 project's longest-lead item and the one most likely to slip before November. A schematic floor is
-captured in an afternoon by the people who need it.
+drawn in an afternoon by the people who need it.
 [ADR 0006](docs/adr/0006-schematic-map-not-floor-plan-images.md) records the trade.
 
 <p align="center">
-  <img src="./assets/screenshots/06-grid-editor.png" alt="The floor editor, showing floor 3 of Bloque A" width="100%"/>
+  <img src="./assets/screenshots/06-floor-editor.jpg" alt="The floor editor, showing floor 1 of Bloque A" width="100%"/>
   <br/>
-  <sub>Floor 3 of Bloque A, loaded from the seed. The three <b>301</b> rooms — north, central and
-  south — are three different rooms sharing one base code, which is the case most likely to send a
-  student to the wrong door. Corridors run in the colours the wings are painted; the auditorium
-  spans several cells. The editor refuses a room that would not fit or that would overlap another,
-  so a mistake surfaces while somebody is still standing in the building.</sub>
+  <sub>Floor 1 of Bloque A, from the placeholder campus. Boxes are coloured by category; the lifts,
+  stairs and entrance are what "reached via" points at, which is what lets the app say "sube por el
+  ascensor central". Aulas 103-N and 104-N are known to be on the floor but not drawn yet, so they
+  wait in the inventory. The whole floor is saved at once, and refused if somebody else saved it
+  first; until then the changes stay on the device.</sub>
 </p>
 
-```bash
-open app/backend/microservices/map-service/src/main/resources/static/admin/grid-editor.html
-```
+Open it at http://localhost:4300/data/floors.
 
 ### The admin and developer console
 
@@ -355,7 +355,6 @@ KApp/
 │   │   │   ├── semaphore-service/    # Catalogue, student progress, academic plans (:8083)
 │   │   │   ├── schedule-service/     # Enrolments, meetings, agenda (:8084)
 │   │   │   ├── map-service/          # Buildings, floors, spaces, search (:8085)
-│   │   │   │   └── src/main/resources/static/admin/grid-editor.html   # The floor editor
 │   │   │   ├── common/               # Error envelope, CurrentUser, role constants
 │   │   │   ├── course-service/       # FROZEN — out of the reactor, compose and CI
 │   │   │   ├── assignment-service/   # FROZEN — same

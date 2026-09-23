@@ -23,14 +23,14 @@ production deployment.
 | **User profiles** | **Merged** | **97** | Profiles, internal upsert, accent-insensitive indexed search |
 | **Catalogue and semáforo** | **Merged** | **214** | Programs and pensums with full CRUD, student progress, personal academic plans, bulk CSV import |
 | **Timetables** | **Merged** | **140** | Enrolments, meetings, overlap detection |
-| **Campus map** | **Merged** | **50** | Schematic floors on a grid, wings, corridors, a basement, and an offline grid editor. No floor plan images |
-| **Admin and developer portal** | **Merged** | **30** | Angular, from a compose `dev` profile. Full CRUD, bulk import, an API console driven by the specs, and a role inspector |
+| **Campus map** | **Merged** | **79** | Floors known by their code (S1, MEZZ, T), wings per building, a catalogue of space types editable from the portal, spaces inventoried before they are placed, and a whole-floor save refused when somebody else saved first. No floor plan images |
+| **Admin and developer portal** | **Merged** | **93** | Angular, from a compose `dev` profile. Full CRUD, bulk import, an API console driven by the specs, a role inspector, and the floor editor the campus is drawn with |
 | **Visitor day pass** | **Merged** | **23** | A one-day token that opens the map and nothing else. No account, no e-mail. Identity documents deleted after 30 days by a TTL index |
 | Android (Kotlin) | In progress | 13 | Login and Inicio, drawn against the mockups. No network layer yet |
 | iOS (Swift) | Not started | — | The product. Unblocked by the mocks |
 | Deployment | Not started | — | Runs locally; university hardware pending |
 
-**635 integration tests** in the backend and **54 in the admin portal**, from a repository that
+**635 integration tests** in the backend and **93 in the admin portal**, from a repository that
 had none in August. Every service asserts its full role-by-endpoint authorization matrix with one
 assertion per case, including every combination that must be refused — those are the ones that
 matter.
@@ -42,7 +42,7 @@ matter.
 | 1 · Per-service credentials | Each service holds its own MongoDB account with `readWrite` on one database. The separation between services is now enforced by the engine rather than respected by the code — 25 of 25 checks. Four development accounts are created by `scripts/create-dev-accounts.sh`, which generates their passwords locally. **Atlas is pending Brian creating the cluster** — see `ATLAS-SETUP.md` |
 | 2 · Admin endpoints | The eight operations the contracts already promised: program create/replace/delete, pensum delete, and invitation-code list/create/activate/delete. Deleting never cascades, and every `409` names what blocks it |
 | 3 · Plans and bulk import | Personal academic plans stored as deltas over the immutable pensum, and a CSV import that validates the whole file before writing anything |
-| 4 · Schematic map | A floor is a grid the client draws, not a photograph with pins on it. Wings as a field, corridors with the colour they are painted, a basement at level −1, and `accessVia` so the app can say "sube por el ascensor central". **This removed the longest-lead item on the project** — obtaining architectural plans was human latency, and a schematic floor is captured by walking it with `/admin/grid-editor.html` |
+| 4 · Schematic map | A floor is a grid the client draws, not a photograph with pins on it. Wings as a field, corridors with the colour they are painted, a basement at level −1, and `accessVia` so the app can say "sube por el ascensor central". **This removed the longest-lead item on the project** — obtaining architectural plans was human latency, and a schematic floor is captured by walking it with `/admin/grid-editor.html` — since replaced by the floor editor in the portal |
 | 5 · Visitor day pass | Reception issues a code; a visitor redeems it with an identity document and gets 24 hours of map-only access. No account is created. The token is an ordinary `ROLE_GUEST` one, so "map only" is the matrix every service already enforces rather than a second mechanism that could drift. Open guest registration is gone. **KApp now stores personal data under Ley 1581** — 30-day retention, enforced by MongoDB rather than by a job |
 | 6 · Admin portal | CRUD over everything administrable, with a `409` shown as its reason rather than a generic error. Fixed a regression the map change caused — the portal's models still carried `planImageUrl` and pin percentages, so editing a building or space through it would have failed. Two pages said a capability did not exist; both were true when written and had stopped being so. Also closed a real defect: `accessVia` was never validated, and a code matching nothing produces directions to a lift that is not there |
 | 7 · Documentation | `REQUIREMENTS.md` rewritten to the real MVP — every entry built or explicitly out of scope. `DESIGN.md` rewritten with current diagrams, its decision table replaced by links to `adr/`. Four new ADRs. `README.md` corrected: it claimed PostgreSQL, HS512, and that role-based authorization was not enforced |
@@ -126,8 +126,8 @@ the contracts are served as Prism mocks, so Kotlin and Swift work does not wait 
 
 **The data.** The 23 plans the university publishes are loaded (`docs/pensums/`); what the PDFs could
 not answer — mostly institutional codes, and credits or hours on some brochures — is listed there.
-The roughly 40 floors are still transcription, and the grid editor exists so the team can do it in
-parallel without touching code.
+The campus survey photos are transcribed (`docs/map/LEVANTAMIENTO.md`, with the list of what has to
+be walked); the floors are drawn in the portal's floor editor, on an iPad, standing in them.
 
 ### Blocked on somebody else
 
@@ -136,7 +136,6 @@ parallel without touching code.
 | Atlas M0 cluster and its connection strings | Brian | Shared development database. `ATLAS-SETUP.md` has the steps |
 | SMTP relay | Dirección de TI | E-mail verification. Behind a flag, so nothing else waits |
 | Entra ID application registration | Dirección de TI | Institutional sign-in |
-| A sketch or photo of one floor | Brian | Modelling the first floor; the rest are captured with the editor |
 | Institutional codes, and the credits and hours some brochures omit | Dirección de TI (a SINU export) | Brochure plans stay `DRAFT` until their course codes are real |
 | Mobile clients | Iván, Alejandro, Santiago, Brian | Unblocked — the contracts and mocks are ready |
 | Telling Dirección de TI that KApp now stores identity documents | Brian | Nothing technical. The summary shared with Gabriel says KApp stores no institutional records, and that stopped being accurate with Phase 5 |
