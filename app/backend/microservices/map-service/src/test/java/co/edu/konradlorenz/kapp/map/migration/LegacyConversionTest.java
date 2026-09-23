@@ -27,6 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Testcontainers
 @TestPropertySource(properties = {
+        // The placeholder campus is these tests' fixture; SurveyedCampusTest covers the survey.
+        "kapp.map.survey-seed=false",
         "eureka.client.enabled=false",
         "spring.cloud.discovery.enabled=false"
 })

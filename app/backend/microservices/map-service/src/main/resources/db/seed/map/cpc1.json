@@ -1,0 +1,713 @@
+{
+  "code": "CPC1",
+  "name": "Centro de Psicología Clínica 1",
+  "campus": "Sede Principal",
+  "description": "Cinco pisos de consultorios y laboratorios de psicología clínica, en un solo bloque.",
+  "aliases": [
+    "CPC 1"
+  ],
+  "wings": [],
+  "floors": [
+    {
+      "code": "P1",
+      "level": 1,
+      "name": "Piso 1",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "gridRows": 12,
+      "gridColumns": 20,
+      "spaces": [
+        {
+          "code": "101",
+          "doorCode": "101",
+          "name": "Consultorio 101",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "102",
+          "doorCode": "102",
+          "name": "Consultorio 102",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "103",
+          "doorCode": "103",
+          "name": "Consultorio 103",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "104",
+          "doorCode": "104",
+          "name": "Consultorio 104",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "105",
+          "doorCode": "105",
+          "name": "Consultorio 105",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "106",
+          "doorCode": "106",
+          "name": "Consultorio 106",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "107",
+          "doorCode": "107",
+          "name": "Consultorio 107",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "108",
+          "doorCode": "108",
+          "name": "Consultorio 108",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "109",
+          "doorCode": "109",
+          "name": "Consultorio 109",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "110",
+          "doorCode": "110",
+          "name": "Consultorio 110",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "111",
+          "doorCode": "111",
+          "name": "Consultorio 111",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "112",
+          "doorCode": "112",
+          "name": "Consultorio 112",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "113",
+          "doorCode": "113",
+          "name": "Consultorio 113",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "114",
+          "doorCode": "114",
+          "name": "Consultorio 114",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-ARCHIVO",
+          "name": "Archivo",
+          "typeCode": "ARCHIVE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-ASC",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-BANO-ACCESIBLE",
+          "name": "Baño accesible de hombres",
+          "typeCode": "RESTROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-BANO-ACCESIBLE-2",
+          "name": "Baño accesible de mujeres",
+          "typeCode": "RESTROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-CAFETERIA",
+          "name": "Cafetería",
+          "typeCode": "CAFETERIA",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-CENTRO-ACOPIO",
+          "name": "Centro de acopio de residuos",
+          "typeCode": "WASTE_ROOM",
+          "aliases": [
+            "centro de acopio"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-COFFEE-BREAK",
+          "name": "Coffee break",
+          "typeCode": "SOCIAL_AREA",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-CUARTO-ASEO",
+          "name": "Cuarto de aseo",
+          "typeCode": "CLEANING_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-ENTRADA",
+          "name": "Entrada",
+          "typeCode": "ENTRANCE",
+          "rowSpan": 1,
+          "colSpan": 1,
+          "note": "Sale al oeste."
+        },
+        {
+          "code": "P1-ESC-EMERGENCIA",
+          "name": "Escalera de emergencia",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-ESC-PRINCIPAL",
+          "name": "Escalera principal",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-PLANTA-ELECTRICA",
+          "name": "Planta eléctrica",
+          "typeCode": "ELECTRICAL_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-RECEPCION",
+          "name": "Recepción",
+          "typeCode": "RECEPTION",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-SALA-ESPERA",
+          "name": "Sala de espera",
+          "typeCode": "WAITING_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P1-SALA-ESPERA-2",
+          "name": "Sala de espera 2",
+          "typeCode": "WAITING_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        }
+      ]
+    },
+    {
+      "code": "P2",
+      "level": 2,
+      "name": "Piso 2",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "gridRows": 12,
+      "gridColumns": 20,
+      "spaces": [
+        {
+          "code": "201",
+          "doorCode": "201",
+          "name": "Docente de Apoyo",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "202",
+          "doorCode": "202",
+          "name": "Coordinación CPC",
+          "typeCode": "OFFICE",
+          "aliases": [
+            "Coordinación del CPC"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "203",
+          "doorCode": "203",
+          "name": "Consultorio 203",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "204",
+          "doorCode": "204",
+          "name": "Consultorio 204",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "205",
+          "doorCode": "205",
+          "name": "Consultorio 205",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "206",
+          "doorCode": "206",
+          "name": "Consultorio 206",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "207",
+          "doorCode": "207",
+          "name": "Consultorio 207",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "208",
+          "doorCode": "208",
+          "name": "Consultorio 208",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "209",
+          "doorCode": "209",
+          "name": "Consultorio 209",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "210",
+          "doorCode": "210",
+          "name": "Consultorio 210",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "211",
+          "doorCode": "211",
+          "name": "Consultorio 211",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-ASC",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-BANO-HOMBRES",
+          "name": "Baño de hombres",
+          "typeCode": "RESTROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-BANO-MUJERES",
+          "name": "Baño de mujeres",
+          "typeCode": "RESTROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-COFFEE-BREAK",
+          "name": "Coffee break",
+          "typeCode": "SOCIAL_AREA",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-CUARTO-ASEO",
+          "name": "Cuarto de aseo",
+          "typeCode": "CLEANING_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-ESC-EMERGENCIA",
+          "name": "Escalera de emergencia",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-ESC-PRINCIPAL",
+          "name": "Escalera principal",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-RECEPCION",
+          "name": "Recepción",
+          "typeCode": "RECEPTION",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-SALA-ESPERA",
+          "name": "Sala de espera",
+          "typeCode": "WAITING_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        }
+      ]
+    },
+    {
+      "code": "P3",
+      "level": 3,
+      "name": "Piso 3",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "gridRows": 12,
+      "gridColumns": 20,
+      "spaces": [
+        {
+          "code": "301",
+          "doorCode": "301",
+          "name": "Consultorio 301",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "302",
+          "doorCode": "302",
+          "name": "Consultorio 302",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "303",
+          "doorCode": "303",
+          "name": "Consultorio 303",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "304",
+          "doorCode": "304",
+          "name": "Consultorio 304",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "305",
+          "doorCode": "305",
+          "name": "Consultorio 305",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "306",
+          "doorCode": "306",
+          "name": "Consultorio 306",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "307",
+          "doorCode": "307",
+          "name": "Consultorio 307",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "308",
+          "doorCode": "308",
+          "name": "Consultorio 308",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "309",
+          "doorCode": "309",
+          "name": "Consultorio 309",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "310",
+          "doorCode": "310",
+          "name": "Consultorio 310",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "311",
+          "doorCode": "311",
+          "name": "Consultorio 311",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "312",
+          "doorCode": "312",
+          "name": "Consultorio 312",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "313",
+          "doorCode": "313",
+          "name": "Consultorio 313",
+          "typeCode": "CONSULTATION_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-ASC",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-COFFEE-BREAK",
+          "name": "Coffee break",
+          "typeCode": "SOCIAL_AREA",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-CONSULTORIO-1",
+          "name": "Consultorio 1 ClinikLab",
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": [
+            "Consultorio 1 Clinik Lab"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-ESC-EMERGENCIA",
+          "name": "Escalera de emergencia",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-ESC-PRINCIPAL",
+          "name": "Escalera principal",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-SALA-JUNTAS",
+          "name": "Sala de Juntas",
+          "typeCode": "MEETING_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        }
+      ]
+    },
+    {
+      "code": "P4",
+      "level": 4,
+      "name": "Piso 4",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "gridRows": 12,
+      "gridColumns": 20,
+      "spaces": [
+        {
+          "code": "P4-ASC",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-BANO-HOMBRES",
+          "name": "Baño de hombres",
+          "typeCode": "RESTROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-BANO-MUJERES",
+          "name": "Baño de mujeres",
+          "typeCode": "RESTROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-CLINIKLAB",
+          "name": "ClinikLab",
+          "typeCode": "LAB",
+          "aliases": [
+            "Clinik Lab"
+          ],
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-CUARTO-ASEO",
+          "name": "Cuarto de aseo",
+          "typeCode": "CLEANING_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-DOCENTE-APOYO",
+          "name": "Docente de Apoyo",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-ESC-EMERGENCIA",
+          "name": "Escalera de emergencia",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-ESC-PRINCIPAL",
+          "name": "Escalera principal",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-PRACTICAS-CPC",
+          "name": "Prácticas CPC",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        }
+      ]
+    },
+    {
+      "code": "P5",
+      "level": 5,
+      "name": "Piso 5",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "gridRows": 12,
+      "gridColumns": 20,
+      "spaces": [
+        {
+          "code": "P5-ASC",
+          "name": "Ascensor",
+          "typeCode": "ELEVATOR",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-CAFETERIA",
+          "name": "Cafetería",
+          "typeCode": "CAFETERIA",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-CUARTO-ASEO",
+          "name": "Cuarto de aseo",
+          "typeCode": "CLEANING_ROOM",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-ESC-EMERGENCIA",
+          "name": "Escalera de emergencia",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-ESC-PRINCIPAL",
+          "name": "Escalera principal",
+          "typeCode": "STAIRS",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-SALA-PRACTICANTES",
+          "name": "Sala de Practicantes",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-SEXLAB",
+          "name": "SexLab",
+          "typeCode": "LAB",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P5-TERRAZA",
+          "name": "Terraza",
+          "typeCode": "TERRACE",
+          "rowSpan": 1,
+          "colSpan": 1
+        }
+      ]
+    }
+  ]
+}

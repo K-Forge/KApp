@@ -1,0 +1,326 @@
+{
+  "code": "EA",
+  "name": "Edificio Administrativo",
+  "campus": "Sede Principal",
+  "description": "Oficinas administrativas: contabilidad, recursos humanos, nómina, planta física, TIC y direcciones de investigación y prácticas.",
+  "aliases": [],
+  "wings": [],
+  "floors": [
+    {
+      "code": "P1",
+      "level": 1,
+      "name": "Piso 1",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "gridRows": 12,
+      "gridColumns": 20,
+      "spaces": []
+    },
+    {
+      "code": "P2",
+      "level": 2,
+      "name": "Piso 2",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "gridRows": 12,
+      "gridColumns": 20,
+      "spaces": [
+        {
+          "code": "P2-ASESOR-JURIDICO",
+          "name": "Asesor Jurídico",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-ASISTENTE",
+          "name": "Asistente Administrativo",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-COMPRAS",
+          "name": "Compras",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-DEPARTAMENTO",
+          "name": "Departamento de Contabilidad",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-DIRECTOR",
+          "name": "Director Administrativo y Financiero",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-DIRECTORA",
+          "name": "Directora de Servicios Administrativos",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-FONDO-EMPLEADOS",
+          "name": "Fondo de Empleados",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-PLANTA-FISICA",
+          "name": "Planta Física",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P2-SECRETARIA",
+          "name": "Secretaría",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        }
+      ]
+    },
+    {
+      "code": "P3",
+      "level": 3,
+      "name": "Piso 3",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "gridRows": 12,
+      "gridColumns": 20,
+      "spaces": [
+        {
+          "code": "P3-ARCHIVO",
+          "name": "Archivo",
+          "typeCode": "ARCHIVE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-ASISTENTE",
+          "name": "Asistente de Coordinación de Prácticas",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-AUXILIAR",
+          "name": "Auxiliar Departamento de Aseguramiento de la Calidad Académica",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-COORDINADOR",
+          "name": "Coordinador de Práctica Clínica Psicología",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-COORDINADOR-2",
+          "name": "Coordinador de Prácticas Matemáticas e Ingenierías",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-COORDINADORA",
+          "name": "Coordinadora de Prácticas Electivas Psicología",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-COORDINADORA-2",
+          "name": "Coordinadora de Prácticas Escuela de Negocios",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-DIRECCION",
+          "name": "Dirección Especialización Forense",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-DIRECCION-CENTRO",
+          "name": "Dirección Centro de Medición y Evaluación",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-DIRECCION-REVISTA",
+          "name": "Dirección Revista Suma de Negocios",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-DIRECTOR-CENTRO",
+          "name": "Director Centro de Investigaciones Matemáticas e Ingenierías CIMI",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-DIRECTORA",
+          "name": "Directora Especialización Recursos Humanos",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-DIRECTORA-CENTR-2",
+          "name": "Directora Centro de Investigaciones de Psicología CIP",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-DIRECTORA-CENTRO",
+          "name": "Directora Centro de Investigaciones Escuela de Negocios CIEN",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-INVESTIGADORES",
+          "name": "Investigadores CIEN",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-INVESTIGADORES-2",
+          "name": "Investigadores CIP",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-JEFE-OFICINA",
+          "name": "Jefe Oficina de Información y Evaluación",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-JEFE-OFICINA-2",
+          "name": "Jefe de Oficina de Autoevaluación y Acreditación",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-POSGRADO",
+          "name": "Posgrado Psicología Clínica Doctorado",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-SECRETARIA-CENT-2",
+          "name": "Secretaría Centro Docente de Prácticas Psicología",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P3-SECRETARIA-CENTRO",
+          "name": "Secretaría Centro de Investigaciones",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        }
+      ]
+    },
+    {
+      "code": "P4",
+      "level": 4,
+      "name": "Piso 4",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "gridRows": 12,
+      "gridColumns": 20,
+      "spaces": [
+        {
+          "code": "P4-COMUNICACIONES",
+          "name": "Comunicaciones",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-DEPARTAMENTO",
+          "name": "Departamento Virtual y Web-Master",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-DEPARTAMENTO-2",
+          "name": "Departamento de Seguridad y Salud en el Trabajo",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-DEPARTAMENTO-3",
+          "name": "Departamento de Nómina",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-DEPARTAMENTO-TIC",
+          "name": "Departamento de TIC'S",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-DIRECCION",
+          "name": "Dirección de Recursos Humanos",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-OFICINA",
+          "name": "Oficina de Optimización y Mejoramiento",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-OFICINA-SEGURIDAD",
+          "name": "Oficina de Seguridad",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        },
+        {
+          "code": "P4-SERVICIOS",
+          "name": "Servicios Generales y Eventos",
+          "typeCode": "OFFICE",
+          "rowSpan": 1,
+          "colSpan": 1
+        }
+      ]
+    }
+  ]
+}
