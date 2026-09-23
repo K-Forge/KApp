@@ -18,7 +18,7 @@ del mapa sale de aquí, después de revisarlo juntos.
 | [EC · Edificio Central](levantamiento/ec.md) | 24 | Sótano, P1–P8 | PE, RS y PI en casi todos los pisos | Ala central completa. **Alas norte y sur, a mano** |
 | [CPC 1 · Centro de Psicología Clínica 1](levantamiento/cpc-1.md) | 15 | P1–P5 | PE, PI y RS en todos | El más completo |
 | [JAAB · Centro de Investigaciones Juan Alberto Aragón Bateman](levantamiento/jaab.md) | 12 | Sótano, P1, MEZZ, P2–P6 | PE de 5 niveles; PI de todos | **P1, P3 y sótano, a mano** |
-| [BI · Bienestar Institucional](levantamiento/bi.md) | 9 | P1–P4, terraza (P5) | PE y PI del edificio original | **La expansión con aulas y laboratorios, a mano** |
+| [BI · Bienestar Institucional](levantamiento/bi.md) | 9 | P1–P4, terraza (P5) | PE y PI del ala occidental (bienestar) | **El ala oriental, de salones y laboratorios, a mano** |
 | [MU · Casa Medio Universitario](levantamiento/mu.md) | 5 | P0, P1, P2 | PE y RS, sin PI | Se puede dibujar |
 | [EA · Edificio Administrativo](levantamiento/ea.md) | 3 | P2–P4 | Solo PI | **Todo a mano** |
 | **RH · Edificio de Recursos Humanos** | 0 | ? | — | **Sin visitar.** Casa de patrimonio, sin conexión interna con el EC |
@@ -118,9 +118,9 @@ Por edificio. El detalle de cada punto está en su documento.
 
 **BI**
 
-- [ ] **La expansión entera,** con su lado (occidente) y su nombre.
-- [ ] Las placas de la expansión.
-- [ ] Por dónde se cruza del edificio original a la expansión.
+- [ ] **El ala oriental entera,** la de salones y laboratorios.
+- [ ] Sus placas, si las tiene.
+- [ ] Por dónde se cruza de un ala a la otra.
 
 **JAAB**
 

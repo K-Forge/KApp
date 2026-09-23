@@ -7,8 +7,8 @@
 **Estado:** hay geometría del MEZZ, P2, P4, P5 y P6. El P1 y el P3 solo tienen PI, y el sótano no
 tiene ninguna foto propia.
 
-**Nombre:** la carpeta se llama "Centro de Investigaciones". No confundir con el "Centro de
-Investigaciones 2", que es el ala oriental del BI.
+**Nombre:** la carpeta de fotos se llama "Centro de Investigaciones". Es el nombre corto con que
+se conoce el edificio, y por eso va como alias.
 
 ## Lo que vale para todo el edificio
 
