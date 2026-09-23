@@ -35,6 +35,7 @@ const NAV_GROUPS: NavGroup[] = [
     links: [
       { path: '/data/buildings', label: 'Buildings', icon: 'M3 21h18M5 21V5a2 2 0 012-2h6a2 2 0 012 2v16M9 7h2M9 11h2M9 15h2M15 21v-8h4v8' },
       { path: '/data/spaces', label: 'Spaces', icon: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z' },
+      { path: '/data/space-types', label: 'Space types', icon: 'M7 7h.01M3 11l8-8h8a2 2 0 012 2v8l-8 8a2 2 0 01-2.83 0l-5.17-5.17a2 2 0 010-2.83z' },
     ],
   },
   {

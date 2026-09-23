@@ -6,7 +6,7 @@ import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.com
 import { DataTableComponent } from '../../../shared/ui/data-table/data-table.component';
 import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 import { BuildingFormComponent } from './building-form.component';
-import type { Building, BuildingRequest } from './building.model';
+import { FLOOR_STATUS_LABELS, type Building, type BuildingRequest, type FloorStatus } from './building.model';
 import { BuildingsService } from './buildings.service';
 
 /** Full CRUD over /api/map/buildings - the smaller of the two map entities, so no server paging. */
@@ -18,17 +18,23 @@ import { BuildingsService } from './buildings.service';
     <div class="stack">
       <app-page-intro
         title="Buildings"
-        what="The blocks that make up a campus, and the floors inside each one. A floor is a grid: how many rows and columns the schematic map draws for it."
-        [can]="['Create a building and describe its floors', 'Edit its name, its campus or the grid of a floor', 'Delete one that has no spaces on it']"
-        note="The basement is level −1, not level 0, and the rule that a room code starts with its floor number stops applying there. Floors are edited here; the rooms on them live in Spaces. Deleting a building that still has spaces is refused with a 409 saying how many."
+        what="The buildings of a campus, the wings they are split into and the floors inside each one - with how far each floor is from being trusted."
+        [can]="['Create a building with its wings and floors', 'Edit its names, its wings or a floor', 'Delete one that has no spaces on it', 'Find one by code, name or any other name']"
+        note="A floor is known by its code - S1, P0, P1, MEZZ, T - and its level only orders them, so a mezzanine is 1.5. A floor or a wing that still has spaces cannot be removed - the save is refused naming it - and a building that still has spaces cannot be deleted."
       >
         <button actions type="button" class="btn btn-primary" (click)="openCreate()">New building</button>
       </app-page-intro>
 
       <div class="card stack">
-        <div class="field" style="margin-bottom: 0; max-width: 20rem">
-          <label for="campus">Campus</label>
-          <input id="campus" type="text" placeholder="filter by campus" (input)="onCampusInput($event)" />
+        <div class="row spread">
+          <div class="field" style="margin-bottom: 0; flex: 1 1 14rem">
+            <label for="q">Search</label>
+            <input id="q" type="text" placeholder="code, name or other name" (input)="onQueryInput($event)" />
+          </div>
+          <div class="field" style="margin-bottom: 0; flex: 1 1 14rem">
+            <label for="campus">Campus</label>
+            <input id="campus" type="text" placeholder="filter by campus" (input)="onCampusInput($event)" />
+          </div>
         </div>
 
         <app-api-error-banner [error]="error()" />
@@ -39,6 +45,7 @@ import { BuildingsService } from './buildings.service';
               <th>Code</th>
               <th>Name</th>
               <th>Campus</th>
+              <th>Wings</th>
               <th>Floors</th>
               <th></th>
             </tr>
@@ -47,9 +54,23 @@ import { BuildingsService } from './buildings.service';
             @for (building of buildings(); track building.code) {
               <tr>
                 <td class="mono">{{ building.code }}</td>
-                <td>{{ building.name }}</td>
+                <td>
+                  {{ building.name }}
+                  @if (building.aliases.length) {
+                    <div class="text-faint">{{ building.aliases.join(' · ') }}</div>
+                  }
+                </td>
                 <td>{{ building.campus }}</td>
-                <td>{{ building.floors.length }}</td>
+                <td class="text-muted">{{ wingNames(building) }}</td>
+                <td style="min-width: 10rem">
+                  <div class="row" style="flex-wrap: wrap; gap: 0.25rem">
+                    @for (floor of building.floors; track floor.code) {
+                      <span [class]="statusBadge(floor.status)" [title]="floor.name + ': ' + statusLabels[floor.status ?? 'UNMAPPED']">
+                        {{ floor.code }}
+                      </span>
+                    }
+                  </div>
+                </td>
                 <td class="row">
                   <button type="button" class="btn btn-sm" (click)="openEdit(building)">Edit</button>
                   <button type="button" class="btn btn-sm btn-danger" [disabled]="deletingCode() === building.code" (click)="remove(building)">
@@ -86,9 +107,12 @@ export class BuildingsPage {
   readonly formError = signal<ApiError | null>(null);
   readonly deletingCode = signal<string | null>(null);
 
+  readonly statusLabels = FLOOR_STATUS_LABELS;
+
   @ViewChild('formModal') private formModal?: ModalComponent;
 
   private campus = '';
+  private query = '';
   private debounceHandle?: ReturnType<typeof setTimeout>;
 
   constructor() {
@@ -98,7 +122,7 @@ export class BuildingsPage {
   private fetch(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.buildingsService.list(this.campus || undefined).subscribe({
+    this.buildingsService.list(this.campus.trim() || undefined, this.query.trim() || undefined).subscribe({
       next: (buildings) => {
         this.buildings.set(buildings);
         this.loading.set(false);
@@ -112,8 +136,33 @@ export class BuildingsPage {
 
   onCampusInput(event: Event): void {
     this.campus = (event.target as HTMLInputElement).value;
+    this.fetchSoon();
+  }
+
+  onQueryInput(event: Event): void {
+    this.query = (event.target as HTMLInputElement).value;
+    this.fetchSoon();
+  }
+
+  private fetchSoon(): void {
     clearTimeout(this.debounceHandle);
     this.debounceHandle = setTimeout(() => this.fetch(), 300);
+  }
+
+  wingNames(building: Building): string {
+    return building.wings.length ? building.wings.map((w) => w.name).join(', ') : '—';
+  }
+
+  /** Green once walked, amber while it only comes from photos, grey while nothing is drawn. */
+  statusBadge(status: FloorStatus | undefined): string {
+    switch (status) {
+      case 'VERIFIED':
+        return 'badge badge-success';
+      case 'DRAFT':
+        return 'badge badge-warning';
+      default:
+        return 'badge badge-neutral';
+    }
   }
 
   openCreate(): void {

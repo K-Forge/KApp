@@ -35,6 +35,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/data/spaces/spaces.page').then((m) => m.SpacesPage),
       },
       {
+        path: 'data/space-types',
+        loadComponent: () => import('./features/data/spaces/space-types.page').then((m) => m.SpaceTypesPage),
+      },
+      {
         path: 'data/programs',
         loadComponent: () => import('./features/data/programs/programs.page').then((m) => m.ProgramsPage),
       },

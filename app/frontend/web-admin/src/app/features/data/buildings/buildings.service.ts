@@ -8,8 +8,9 @@ import type { Building, BuildingRequest } from './building.model';
 export class BuildingsService {
   private readonly api = inject(ApiClientService);
 
-  list(campus?: string): Observable<Building[]> {
-    return this.api.get<Building[]>('/api/map/buildings', { campus });
+  /** `q` matches the code, the name and every alias, ignoring case and accents. */
+  list(campus?: string, q?: string): Observable<Building[]> {
+    return this.api.get<Building[]>('/api/map/buildings', { campus, q });
   }
 
   create(request: BuildingRequest): Observable<Building> {

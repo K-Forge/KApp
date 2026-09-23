@@ -9,7 +9,8 @@ import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 import type { Building } from '../buildings/building.model';
 import { BuildingsService } from '../buildings/buildings.service';
 import { SpaceFormComponent } from './space-form.component';
-import { SPACE_TYPES, type Space, type SpaceRequest, type SpaceType } from './space.model';
+import { CATEGORY_LABELS, SPACE_CATEGORIES, shownCode, type Space, type SpaceCategory, type SpaceRequest, type SpaceType } from './space.model';
+import { SpaceTypesService } from './space-types.service';
 import { SpacesService } from './spaces.service';
 
 const PAGE_SIZE = 20;
@@ -24,9 +25,9 @@ const MIN_QUERY_LENGTH = 2;
     <div class="stack">
       <app-page-intro
         title="Spaces"
-        what="Every room, lab, lift, stairwell and corridor the map can point at. Each one sits in a cell of the grid of its floor."
-        [can]="['Create a space and place it on the grid', 'Edit where it sits, what it is called and what it is', 'Delete one', 'Search by code, name or alias']"
-        note="A wing is a field, not a suffix: 301-N, 301-S and 301 are three different rooms. The access route names the lift or stairs that serves the space — it is what produces &quot;take the central lift to floor 4&quot; — and it has to name a real one in the same building, or the save is refused."
+        what="Every room, office, bathroom, lift and stairwell the map can point at - placed on the grid of its floor, or only inventoried until somebody places it."
+        [can]="['Create a space, with or without a place on the grid', 'Edit what it is called, what it is and how to reach it', 'Delete one', 'Search by door number, name or other name', 'List a building, a floor or a category']"
+        note="The code shown is the one on the door, and a space whose door has no number shows a dash: its internal code is never shown, because a made-up code on screen looks exactly like a real one. Reached via has to name a lift, stairs or entrance of the same building, or the save is refused."
       >
         <button actions type="button" class="btn btn-primary" (click)="openCreate()">New space</button>
       </app-page-intro>
@@ -35,14 +36,23 @@ const MIN_QUERY_LENGTH = 2;
         <div class="row spread">
           <div class="field" style="flex: 1 1 14rem; margin-bottom: 0">
             <label for="q">Search</label>
-            <input id="q" type="text" placeholder="name, code or alias (min 2 chars)" (input)="onQueryInput($event)" />
+            <input id="q" type="text" placeholder="door number, name or other name (min 2 characters)" (input)="onQueryInput($event)" />
+          </div>
+          <div class="field" style="margin-bottom: 0">
+            <label for="category">Category</label>
+            <select id="category" (change)="onCategoryChange($event)">
+              <option value="">All categories</option>
+              @for (category of categories; track category) {
+                <option [value]="category">{{ categoryLabels[category] }}</option>
+              }
+            </select>
           </div>
           <div class="field" style="margin-bottom: 0">
             <label for="type">Type</label>
-            <select id="type" (change)="onTypeChange($event)">
+            <select id="type" [value]="type()" (change)="onTypeChange($event)">
               <option value="">All types</option>
-              @for (type of spaceTypes; track type) {
-                <option [value]="type">{{ type }}</option>
+              @for (option of typeOptions(); track option.code) {
+                <option [value]="option.code">{{ option.name }}</option>
               }
             </select>
           </div>
@@ -55,6 +65,15 @@ const MIN_QUERY_LENGTH = 2;
               }
             </select>
           </div>
+          <div class="field" style="margin-bottom: 0">
+            <label for="floor">Floor</label>
+            <select id="floor" [value]="floor()" [disabled]="!floorOptions().length" (change)="onFloorChange($event)">
+              <option value="">All floors</option>
+              @for (option of floorOptions(); track option.code) {
+                <option [value]="option.code">{{ option.code }}</option>
+              }
+            </select>
+          </div>
         </div>
 
         <app-api-error-banner [error]="error()" />
@@ -62,8 +81,8 @@ const MIN_QUERY_LENGTH = 2;
         @if (nothingAsked()) {
           <div class="empty-state">
             <p>
-              Search by code, name or alias — at least {{ minQueryLength }} characters — or pick
-              a building or a type to list what is there.
+              Search by door number, name or other name — at least {{ minQueryLength }} characters —
+              or pick a building, a category or a type to list what is there.
             </p>
           </div>
         } @else {
@@ -78,11 +97,12 @@ const MIN_QUERY_LENGTH = 2;
           >
             <thead>
               <tr>
-                <th>Code</th>
+                <th>Door</th>
                 <th>Name</th>
                 <th>Type</th>
                 <th>Building</th>
                 <th>Floor</th>
+                <th>On the grid</th>
                 <th>Capacity</th>
                 <th></th>
               </tr>
@@ -90,11 +110,23 @@ const MIN_QUERY_LENGTH = 2;
             <tbody>
               @for (space of result()?.content ?? []; track space.id) {
                 <tr>
-                  <td class="mono">{{ space.code }}</td>
+                  <td class="mono">{{ shownCode(space) ?? '—' }}</td>
                   <td>{{ space.name }}</td>
-                  <td><span class="badge badge-neutral">{{ space.type }}</span></td>
-                  <td>{{ space.buildingCode }}</td>
-                  <td>{{ space.floorLevel }}</td>
+                  <td>
+                    {{ space.typeName ?? space.typeCode }}
+                    @if (space.category; as category) {
+                      <span class="badge badge-neutral">{{ categoryLabels[category] }}</span>
+                    }
+                  </td>
+                  <td>{{ space.buildingCode }}{{ space.wing ? ' · ' + space.wing : '' }}</td>
+                  <td>{{ space.floorCode }}</td>
+                  <td>
+                    @if (space.gridRow != null && space.gridColumn != null) {
+                      <span class="text-muted">{{ space.gridRow }}, {{ space.gridColumn }}</span>
+                    } @else {
+                      <span class="badge badge-warning">Not placed</span>
+                    }
+                  </td>
                   <td class="text-muted">{{ space.capacity ?? '—' }}</td>
                   <td class="row">
                     <button type="button" class="btn btn-sm" (click)="openEdit(space)">Edit</button>
@@ -115,7 +147,7 @@ const MIN_QUERY_LENGTH = 2;
       <app-space-form
         [initial]="editingSpace()"
         [buildings]="buildings()"
-        [knownSpaces]="result()?.content ?? []"
+        [types]="types()"
         [submitting]="formSubmitting()"
         (submitted)="save($event)"
         (cancelled)="formModal.close()"
@@ -126,13 +158,18 @@ const MIN_QUERY_LENGTH = 2;
 export class SpacesPage {
   private readonly spacesService = inject(SpacesService);
   private readonly buildingsService = inject(BuildingsService);
+  private readonly spaceTypesService = inject(SpaceTypesService);
 
-  readonly spaceTypes = SPACE_TYPES;
+  readonly categories = SPACE_CATEGORIES;
+  readonly categoryLabels = CATEGORY_LABELS;
+  readonly shownCode = shownCode;
   readonly minQueryLength = MIN_QUERY_LENGTH;
 
   readonly query = signal('');
-  readonly type = signal<SpaceType | ''>('');
+  readonly category = signal<SpaceCategory | ''>('');
+  readonly type = signal('');
   readonly buildingCodeFilter = signal('');
+  readonly floor = signal('');
   readonly page = signal(0);
   /** Bumped after a save/delete to re-run the search effect without changing any real filter. */
   private readonly refreshTick = signal(0);
@@ -141,6 +178,16 @@ export class SpacesPage {
   readonly error = signal<ApiError | null>(null);
   readonly result = signal<PageResponse<Space> | null>(null);
   readonly buildings = signal<Building[]>([]);
+  readonly types = signal<SpaceType[]>([]);
+
+  /** The types of the chosen category, or all of them. */
+  readonly typeOptions = computed(() => {
+    const category = this.category();
+    return this.types().filter((t) => !category || t.category === category);
+  });
+
+  /** A floor filter only means something inside one building. */
+  readonly floorOptions = computed(() => this.buildings().find((b) => b.code === this.buildingCodeFilter())?.floors ?? []);
 
   readonly editingSpace = signal<Space | null>(null);
   readonly formSubmitting = signal(false);
@@ -159,7 +206,7 @@ export class SpacesPage {
     const q = this.query().trim();
     if (q.length >= MIN_QUERY_LENGTH) return false;
     if (q.length > 0) return true;
-    return !this.type() && !this.buildingCodeFilter();
+    return !this.category() && !this.type() && !this.buildingCodeFilter();
   });
 
   @ViewChild('formModal') private formModal?: ModalComponent;
@@ -168,8 +215,10 @@ export class SpacesPage {
 
   private readonly searchEffect = effect(() => {
     const q = this.query().trim();
+    const category = this.category();
     const type = this.type();
     const buildingCode = this.buildingCodeFilter();
+    const floor = this.floor();
     const page = this.page();
     this.refreshTick();
 
@@ -179,7 +228,7 @@ export class SpacesPage {
     // not show you the space you had just created, and the building and type dropdowns did
     // nothing on their own.
     const searching = q.length > 0;
-    const filtering = !!type || !!buildingCode;
+    const filtering = !!category || !!type || !!buildingCode;
 
     if (searching && q.length < MIN_QUERY_LENGTH) {
       this.result.set(null);
@@ -192,20 +241,31 @@ export class SpacesPage {
 
     this.loading.set(true);
     this.error.set(null);
-    this.spacesService.search({ q: searching ? q : undefined, page, size: PAGE_SIZE, type: type || undefined, buildingCode: buildingCode || undefined }).subscribe({
-      next: (page) => {
-        this.result.set(page);
-        this.loading.set(false);
-      },
-      error: (err: unknown) => {
-        this.loading.set(false);
-        this.error.set(err instanceof AppHttpError ? err.apiError : null);
-      },
-    });
+    this.spacesService
+      .search({
+        q: searching ? q : undefined,
+        page,
+        size: PAGE_SIZE,
+        category: category || undefined,
+        type: type || undefined,
+        buildingCode: buildingCode || undefined,
+        floor: floor || undefined,
+      })
+      .subscribe({
+        next: (page) => {
+          this.result.set(page);
+          this.loading.set(false);
+        },
+        error: (err: unknown) => {
+          this.loading.set(false);
+          this.error.set(err instanceof AppHttpError ? err.apiError : null);
+        },
+      });
   });
 
   constructor() {
     this.buildingsService.list().subscribe({ next: (buildings) => this.buildings.set(buildings) });
+    this.spaceTypesService.list().subscribe({ next: (types) => this.types.set(types) });
   }
 
   onQueryInput(event: Event): void {
@@ -217,14 +277,29 @@ export class SpacesPage {
     }, 300);
   }
 
+  onCategoryChange(event: Event): void {
+    this.page.set(0);
+    this.category.set((event.target as HTMLSelectElement).value as SpaceCategory | '');
+    // A type from another category would filter everything out without saying why.
+    if (this.type() && !this.typeOptions().some((t) => t.code === this.type())) {
+      this.type.set('');
+    }
+  }
+
   onTypeChange(event: Event): void {
     this.page.set(0);
-    this.type.set((event.target as HTMLSelectElement).value as SpaceType | '');
+    this.type.set((event.target as HTMLSelectElement).value);
   }
 
   onBuildingChange(event: Event): void {
     this.page.set(0);
     this.buildingCodeFilter.set((event.target as HTMLSelectElement).value);
+    this.floor.set('');
+  }
+
+  onFloorChange(event: Event): void {
+    this.page.set(0);
+    this.floor.set((event.target as HTMLSelectElement).value);
   }
 
   onPageChange(page: number): void {
@@ -263,7 +338,8 @@ export class SpacesPage {
   }
 
   remove(space: Space): void {
-    if (!window.confirm(`Delete space ${space.code} — ${space.name}? This cannot be undone.`)) {
+    const label = shownCode(space) ? `${shownCode(space)} — ${space.name}` : space.name;
+    if (!window.confirm(`Delete ${label} (${space.buildingCode} ${space.floorCode})? This cannot be undone.`)) {
       return;
     }
     this.deletingId.set(space.id);

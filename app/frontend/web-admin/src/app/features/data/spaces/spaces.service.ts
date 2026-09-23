@@ -16,7 +16,10 @@ export class SpacesService {
       size: filters.size,
       campus: filters.campus,
       type: filters.type,
+      category: filters.category,
       buildingCode: filters.buildingCode,
+      wing: filters.wing,
+      floor: filters.floor,
     });
   }
 
