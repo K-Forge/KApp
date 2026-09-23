@@ -95,7 +95,7 @@ can escalate.
 | MAP-06 | Accent-insensitive search over name, code and aliases | Built |
 | MAP-07 | One round trip from a room code to the space, its floor and its building | Built |
 | MAP-08 | Readable by a visitor holding a day pass | Built |
-| MAP-09 | An offline grid editor, so a floor is captured by walking it | Built |
+| MAP-09 | A floor editor in the admin portal, usable on an iPad standing in the floor, that keeps unsaved changes on the device | Built |
 
 ### 3.6 Platform (INFRA)
 
