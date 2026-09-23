@@ -1,0 +1,48 @@
+# The admin portal: the Angular build served by nginx. A NodePort that kind-config.yaml maps to
+# localhost:4300, where the portal is under Compose too.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-admin
+  labels: {app.kubernetes.io/name: web-admin}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app.kubernetes.io/name: web-admin}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/name: web-admin}
+    spec:
+      containers:
+        - name: web-admin
+          image: kapp/web-admin:kind
+          imagePullPolicy: IfNotPresent
+          ports:
+            - {name: http, containerPort: 80}
+          resources:
+            requests: {cpu: 10m, memory: 32Mi}
+            limits: {memory: 128Mi}
+          livenessProbe:
+            httpGet: {path: /health, port: http}
+            periodSeconds: 15
+          readinessProbe:
+            httpGet: {path: /health, port: http}
+            periodSeconds: 10
+          # nginx starts as root to switch its workers to its own user, so it keeps its
+          # capabilities; it still may not gain new ones.
+          securityContext:
+            allowPrivilegeEscalation: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-admin
+  labels: {app.kubernetes.io/name: web-admin}
+spec:
+  type: NodePort
+  selector: {app.kubernetes.io/name: web-admin}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30300

@@ -1,0 +1,24 @@
+# KApp on Kubernetes: the same containers docker-compose.yml runs, as Deployments and Services.
+#
+#   scripts/k8s-up.sh     creates the kind cluster, loads the images, creates the Secret, applies this
+#   scripts/k8s-down.sh   deletes the cluster
+#
+# Never at the same time as the Compose stack: both publish localhost:8080 and localhost:4300, and
+# the laptop has memory for one of them. docs/RUNBOOK.md has the procedure.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kapp
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: kapp
+resources:
+  - namespace.yaml
+  - config.yaml
+  - discovery-server.yaml
+  - api-gateway.yaml
+  - auth-service.yaml
+  - user-service.yaml
+  - semaphore-service.yaml
+  - schedule-service.yaml
+  - map-service.yaml
+  - web-admin.yaml

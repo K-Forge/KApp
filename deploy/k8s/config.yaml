@@ -1,0 +1,17 @@
+# What every service reads that is not a secret - the same values docker-compose.yml passes. The
+# secrets (the five MONGO_*_URI, the internal token, the signing keys) go into the kapp-secrets
+# Secret, which scripts/k8s-up.sh creates from .env and which never exists as a file.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kapp-config
+data:
+  EUREKA_URI: http://discovery-server:8761/eureka/
+  EUREKA_ENABLED: "true"
+  KAPP_JWKS_URI: http://auth-service:8081/.well-known/jwks.json
+  KAPP_LOG_LEVEL: INFO
+  KAPP_CORS_ORIGINS: http://localhost:4300,http://localhost:4200,http://localhost:5173
+  KAPP_ALLOWED_EMAIL_DOMAINS: konradlorenz.edu.co,kforge.dev
+  KAPP_REQUIRE_EMAIL_VERIFICATION: "false"
+  KAPP_VERIFICATION_LINK_BASE: http://localhost:8080/auth/verify
+  SPRING_MAIL_PORT: "587"
