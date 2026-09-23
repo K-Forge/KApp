@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, ViewChild, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
 import { ApiErrorBannerComponent } from '../../../shared/ui/api-error-banner/api-error-banner.component';
@@ -12,7 +13,7 @@ import { BuildingsService } from './buildings.service';
 /** Full CRUD over /api/map/buildings - the smaller of the two map entities, so no server paging. */
 @Component({
   selector: 'app-buildings-page',
-  imports: [DataTableComponent, ApiErrorBannerComponent, ModalComponent, BuildingFormComponent, PageIntroComponent],
+  imports: [RouterLink, DataTableComponent, ApiErrorBannerComponent, ModalComponent, BuildingFormComponent, PageIntroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
@@ -65,9 +66,13 @@ import { BuildingsService } from './buildings.service';
                 <td style="min-width: 10rem">
                   <div class="row" style="flex-wrap: wrap; gap: 0.25rem">
                     @for (floor of building.floors; track floor.code) {
-                      <span [class]="statusBadge(floor.status)" [title]="floor.name + ': ' + statusLabels[floor.status ?? 'UNMAPPED']">
+                      <a
+                        [class]="statusBadge(floor.status)"
+                        [routerLink]="['/data/floors', building.code, floor.code]"
+                        [title]="'Draw ' + floor.name + ' (' + statusLabels[floor.status ?? 'UNMAPPED'] + ')'"
+                      >
                         {{ floor.code }}
-                      </span>
+                      </a>
                     }
                   </div>
                 </td>

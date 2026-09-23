@@ -25,6 +25,20 @@ export const CATEGORY_LABELS: Record<SpaceCategory, string> = {
   OTHER: 'Not identified yet',
 };
 
+/**
+ * The fill each category is drawn with in the floor editor. Pale on purpose - a plan should not
+ * shout - and the same in both themes, so the label on top always uses a dark ink of its own.
+ */
+export const CATEGORY_COLORS: Record<SpaceCategory, string> = {
+  TEACHING: '#cfe0ff',
+  PUBLIC_SERVICE: '#f6e2c8',
+  OFFICE: '#e6dcff',
+  SOCIAL: '#d6f0d8',
+  FACILITIES: '#dfe4ea',
+  CIRCULATION: '#fff3a8',
+  OTHER: '#ffd9d4',
+};
+
 /** Mirrors SpaceType: an entry of the catalogue the Space types screen edits. */
 export interface SpaceType {
   code: string;

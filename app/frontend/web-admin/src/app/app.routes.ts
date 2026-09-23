@@ -35,6 +35,17 @@ export const routes: Routes = [
         loadComponent: () => import('./features/data/spaces/spaces.page').then((m) => m.SpacesPage),
       },
       {
+        path: 'data/floors',
+        loadComponent: () => import('./features/data/floors/floors.page').then((m) => m.FloorsPage),
+      },
+      {
+        path: 'data/floors/:building/:floor',
+        loadComponent: () => import('./features/data/floors/floor-editor.page').then((m) => m.FloorEditorPage),
+        // Unsaved changes survive leaving - they are kept on the device - but leaving without
+        // noticing them is how a floor stays unsaved for a week.
+        canDeactivate: [(page: { canLeave(): boolean }) => page.canLeave()],
+      },
+      {
         path: 'data/space-types',
         loadComponent: () => import('./features/data/spaces/space-types.page').then((m) => m.SpaceTypesPage),
       },
