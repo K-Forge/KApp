@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Map API
-  version: 2.0.0
+  version: 3.0.0
   summary: Schematic campus map and space search for Fundacion Universitaria Konrad Lorenz.
   description: |
     Digital campus map for Fundacion Universitaria Konrad Lorenz (Bogota, Colombia).
@@ -23,19 +23,44 @@ info:
     | A mezzanine between the first and second floors; an entrance at `P0`; a terrace numbered 5 | Floors addressed by an integer `level` | Floors addressed by a **`code`** (`S1`, `P0`, `P1`, `MEZZ`, `T`); `level` is a decimal that only orders them |
     | Bienestar's wings are west and east, and its doors carry no wing mark | A closed `NORTE`/`SUR`/`CENTRAL` enum, guessed from a `-N`/`-S`/`-C` suffix | **Wings declared per building**, each with the suffix its doors carry, if any |
     | Most dependencies have nothing on their door | Every space has a door code | **`doorCode`** apart from **`code`**; only `doorCode` is ever shown |
-    | Plaques list what is on a floor, not where | Every space needs a grid cell | **`gridRow` and `gridColumn` are optional**: a space may be inventoried before it is placed |
+    | Plaques list what is on a floor, not where | Every space needs a grid cell | **A space may be inventoried before it is drawn** |
     | Kinds of room nobody listed in advance | A closed `SpaceType` enum | A **type catalogue** the portal edits, each type in one of seven fixed **categories** |
 
     It also adds **accessibility** - whether a floor or a space is reachable without stairs,
     `UNKNOWN` until someone checks - and a floor **status**: `UNMAPPED`, `DRAFT` (drawn from
     photographs of posted plans) or `VERIFIED` (walked).
 
+    ## Version 3: rooms as the plans draw them
+
+    Version 2 drew each floor on a grid of cells, and the drafts drawn on it did not look like the
+    evacuation plans on the walls: a room in L, a slanted wall or a room half a cell wide cannot be
+    said in cells. Version 3 describes a floor as a drawing, traced from those plans:
+
+    | Version 2 | Version 3 |
+    | --- | --- |
+    | `gridRows` x `gridColumns` cells | A drawing **`width`** x **`height`** units, and the building's **`outline`** |
+    | A space is `gridRow`, `gridColumn`, `rowSpan`, `colSpan` | A space is a **`shape`**: the corners of its outline, in order |
+    | Corridors through cell centres (`row`, `col`) | Corridors through points (`x`, `y`) |
+    | - | Each space's **`doors`**, as stretches of its outline |
+
     ## Coordinate model
 
-    A floor is a **grid**. It declares `gridRows` and `gridColumns`; every placed space occupies a
-    rectangle of cells given by `gridRow`, `gridColumn`, `rowSpan` and `colSpan`, zero-based with
-    row 0 at the top of the floor as drawn. Corridors are polylines through the same grid,
-    carrying the colour the wing is actually painted.
+    A floor is a **drawing in its own units**, `width` by `height`, with the origin at the top-left
+    corner as the plan hangs: `x` grows to the right and `y` down. A floor traced from a photograph
+    of its evacuation plan is in that photograph's pixels; one drawn by hand in whatever the person
+    drawing chose. Units are not metres and differ from floor to floor: scale the drawing to the
+    screen, never compare two floors' numbers.
+
+    Every placed space has a **`shape`**: three or more corners, in order, on the drawing. It encloses
+    some area, never crosses itself and never overlaps another space's shape - two rooms that share
+    a wall share the edge, and that is not an overlap. `bounds`, in responses, is the rectangle
+    around the shape, for labels and hit tests. A space without `shape` is on the floor but not
+    drawn yet: list it beside the drawing rather than dropping it.
+
+    **`doors`** are the stretches of a space's outline its doors take up, jamb to jamb; both ends of
+    each lie on the space's shape. A door between two rooms is on both. Corridors are polylines
+    through points on the same drawing, carrying the colour the wing is actually painted, and the
+    floor's `outline`, when traced, is the building's walls around it.
 
     ## Codes: what identifies a space, and what is shown
 
@@ -163,8 +188,8 @@ paths:
                 - { code: OCC, name: Ala occidental, note: 'Bienestar: juegos, gimnasio, terraza.' }
                 - { code: OR, name: Ala oriental, note: Salones y laboratorios. Se cruza por el P1 o la terraza. }
               floors:
-                - { code: P1, level: 1, name: Piso 1, gridRows: 12, gridColumns: 16 }
-                - { code: T, level: 5, name: Terraza, gridRows: 12, gridColumns: 16 }
+                - { code: P1, level: 1, name: Piso 1, width: 640, height: 480 }
+                - { code: T, level: 5, name: Terraza, width: 640, height: 480 }
       responses:
         '201':
           description: The building was created.
@@ -262,9 +287,10 @@ paths:
       operationId: getFloor
       summary: Get a floor and every space on it
       description: |
-        The call that draws a floor: a `gridRows` x `gridColumns` grid, each placed space in its
-        cells, the corridors along their paths. Spaces without `gridRow` are on the floor but not
-        placed yet - list them beside the grid rather than dropping them. The building's wings
+        The call that draws a floor: a drawing `width` x `height` units, origin at the top left,
+        with the building's `outline`, each space as the polygon in its `shape` with its `doors`
+        on it, and the corridors along their paths. Spaces without `shape` are on the floor but not
+        drawn yet - list them beside the drawing rather than dropping them. The building's wings
         come along so each space's `wing` code can be shown by name.
 
         Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
@@ -296,7 +322,7 @@ paths:
         What the floor editor sends after someone walks a floor. `spaces` is the **complete**
         list: a space of this floor missing from it is deleted, a new one is created, the rest are
         replaced. **All or nothing** - if any space is wrong, nothing is written and every problem
-        is reported against its position (`spaces[3].gridRow`).
+        is reported against its position (`spaces[3].shape`).
 
         `version` is the floor's version as the editor loaded it. When someone saved the floor
         since, the save is refused with `409` rather than silently replacing their work; reload
@@ -313,8 +339,8 @@ paths:
             schema: { $ref: '#/components/schemas/FloorLayoutRequest' }
             example:
               version: 0
-              gridRows: 6
-              gridColumns: 10
+              width: 400
+              height: 240
               status: VERIFIED
               accessibility: STAIRS_ONLY
               note: Solo por la escalera, desde la recepción.
@@ -324,10 +350,8 @@ paths:
                   name: Laboratorio de Interactividad
                   typeCode: LAB
                   aliases: [interactividad]
-                  gridRow: 2
-                  gridColumn: 2
-                  rowSpan: 2
-                  colSpan: 4
+                  shape: [{ x: 80, y: 80 }, { x: 240, y: 80 }, { x: 240, y: 160 }, { x: 80, y: 160 }]
+                  doors: [{ from: { x: 140, y: 160 }, to: { x: 160, y: 160 } }]
                   accessVia: B-ESC
                 - code: B-MEZZ-02
                   name: Sala MAC
@@ -420,9 +444,9 @@ paths:
       operationId: createSpace
       summary: Create a space
       description: |
-        Adds one space to a floor. Omit `gridRow` and `gridColumn` to inventory it without placing
-        it; send both or neither. A space that lands on a cell another space holds is refused with
-        `409`; every other mistake is a `400`.
+        Adds one space to a floor. Omit `shape` to inventory it without drawing it. A space whose
+        shape covers part of another space's is refused with `409`; every other mistake - a shape
+        off the floor, with no area or crossing itself, a door off its outline - is a `400`.
 
         Allowed roles: `ROLE_ADMIN` only.
       tags: [Spaces]
@@ -439,9 +463,8 @@ paths:
               typeCode: CLASSROOM
               buildingCode: EC
               floorCode: P5
-              gridRow: 8
-              gridColumn: 3
-              colSpan: 2
+              shape: [{ x: 120, y: 320 }, { x: 200, y: 320 }, { x: 200, y: 360 }, { x: 120, y: 360 }]
+              doors: [{ from: { x: 130, y: 320 }, to: { x: 150, y: 320 } }]
               accessVia: ASC-SUR
               capacity: 40
       responses:
@@ -706,7 +729,7 @@ components:
         details:
           description: |
             Field-by-field reasons. `field` names what was wrong - in a layout save, with the
-            position of the space: `spaces[3].gridRow` - and `issue` says what about it.
+            position of the space: `spaces[3].shape` - and `issue` says what about it.
           type: array
           items:
             type: object
@@ -766,17 +789,39 @@ components:
         name: { type: string, minLength: 1, maxLength: 60, example: Sala de lactancia }
         category: { $ref: '#/components/schemas/SpaceCategory' }
 
-    GridPoint:
+    Point:
       type: object
-      description: One cell of a floor's grid, zero-based, row first.
-      required: [row, col]
+      description: |
+        A point on a floor's drawing, in the floor's own units. Origin at the top-left corner as
+        the plan hangs; `x` to the right, `y` down.
+      required: [x, y]
       properties:
-        row: { type: integer, minimum: 0, example: 5 }
-        col: { type: integer, minimum: 0, example: 3 }
+        x: { type: integer, minimum: 0, example: 120 }
+        y: { type: integer, minimum: 0, example: 48 }
+
+    Door:
+      type: object
+      description: |
+        A way into a space: the stretch of its outline the door takes up, jamb to jamb. Both ends
+        lie on the space's `shape`, along one of its edges.
+      required: [from, to]
+      properties:
+        from: { $ref: '#/components/schemas/Point' }
+        to: { $ref: '#/components/schemas/Point' }
+
+    Bounds:
+      type: object
+      description: The rectangle around a shape, in the floor's units.
+      required: [x, y, width, height]
+      properties:
+        x: { type: integer, example: 80 }
+        y: { type: integer, example: 80 }
+        width: { type: integer, example: 160 }
+        height: { type: integer, example: 80 }
 
     Corridor:
       type: object
-      description: A walkable route across a floor, drawn as a coloured line through the grid.
+      description: A walkable route across a floor, drawn as a coloured line.
       required: [code, name, color, path]
       properties:
         code: { type: string, maxLength: 30, example: PAS-CENTRAL }
@@ -788,9 +833,9 @@ components:
           example: '#5B8DEF'
         path:
           type: array
-          description: The cells the corridor runs through, in walking order. Must stay on the grid.
+          description: The points the corridor runs through, in walking order. Must stay on the floor.
           minItems: 1
-          items: { $ref: '#/components/schemas/GridPoint' }
+          items: { $ref: '#/components/schemas/Point' }
 
     Wing:
       type: object
@@ -812,8 +857,8 @@ components:
 
     Floor:
       type: object
-      description: One floor of a building, described as a grid the client draws.
-      required: [code, level, name, gridRows, gridColumns]
+      description: One floor of a building, described as a drawing the client scales and draws.
+      required: [code, level, name, width, height]
       properties:
         code:
           type: string
@@ -836,8 +881,18 @@ components:
           maxLength: 300
           description: How to get here when it is not obvious.
           example: Solo por la escalera, desde la recepción.
-        gridRows: { type: integer, minimum: 1, maximum: 60, example: 6 }
-        gridColumns: { type: integer, minimum: 1, maximum: 60, example: 10 }
+        width:
+          type: integer
+          minimum: 1
+          maximum: 20000
+          description: The drawing's width, in its own units. Every point on the floor lies within it.
+          example: 1640
+        height: { type: integer, minimum: 1, maximum: 20000, example: 590 }
+        outline:
+          type: array
+          maxItems: 400
+          description: The building's walls around this floor, corners in order. Empty until traced.
+          items: { $ref: '#/components/schemas/Point' }
         corridors:
           type: array
           items: { $ref: '#/components/schemas/Corridor' }
@@ -908,7 +963,7 @@ components:
     Space:
       type: object
       required: [id, code, name, typeCode, buildingId, buildingCode, campus, floorCode, floorLevel,
-                 aliases, rowSpan, colSpan, effectiveAccessibility]
+                 aliases, doors, effectiveAccessibility]
       properties:
         id: { type: string }
         code:
@@ -939,14 +994,19 @@ components:
         aliases:
           type: array
           items: { type: string }
-        gridRow:
-          type: integer
-          minimum: 0
-          description: Top-left cell. Absent while the space is inventoried but not placed.
-          example: 5
-        gridColumn: { type: integer, minimum: 0, example: 7 }
-        rowSpan: { type: integer, minimum: 1, example: 2 }
-        colSpan: { type: integer, minimum: 1, example: 3 }
+        shape:
+          type: array
+          minItems: 3
+          description: The room's walls, corners in order, in the floor's units. Absent while the space is inventoried but not drawn.
+          items: { $ref: '#/components/schemas/Point' }
+          example: [{ x: 280, y: 200 }, { x: 400, y: 200 }, { x: 400, y: 280 }, { x: 280, y: 280 }]
+        bounds:
+          $ref: '#/components/schemas/Bounds'
+          description: The box around `shape`, for lists and search results that only need a position. Absent with `shape`.
+        doors:
+          type: array
+          description: Openings on the room's walls. Empty when none is drawn yet.
+          items: { $ref: '#/components/schemas/Door' }
         accessVia:
           type: string
           description: Code of the lift, staircase or entrance that serves this space - "sube por el ascensor central".
@@ -976,7 +1036,7 @@ components:
     FloorDetail:
       type: object
       description: Everything needed to draw one floor in a single call.
-      required: [code, level, name, status, accessibility, gridRows, gridColumns, corridors, version,
+      required: [code, level, name, status, accessibility, width, height, outline, corridors, version,
                  buildingId, buildingCode, buildingName, campus, wings, spaces]
       properties:
         code: { type: string, example: MEZZ }
@@ -985,8 +1045,11 @@ components:
         status: { $ref: '#/components/schemas/FloorStatus' }
         accessibility: { $ref: '#/components/schemas/Accessibility' }
         note: { type: string }
-        gridRows: { type: integer }
-        gridColumns: { type: integer }
+        width: { type: integer }
+        height: { type: integer }
+        outline:
+          type: array
+          items: { $ref: '#/components/schemas/Point' }
         corridors:
           type: array
           items: { $ref: '#/components/schemas/Corridor' }
@@ -1021,10 +1084,17 @@ components:
         aliases:
           type: array
           items: { type: string, minLength: 1, maxLength: 120 }
-        gridRow: { type: integer, minimum: 0, description: Omit with gridColumn to inventory without placing. }
-        gridColumn: { type: integer, minimum: 0 }
-        rowSpan: { type: integer, minimum: 1, maximum: 60, default: 1 }
-        colSpan: { type: integer, minimum: 1, maximum: 60, default: 1 }
+        shape:
+          type: array
+          minItems: 3
+          maxItems: 200
+          description: Omit to inventory without drawing. Inside the floor, not crossing itself, not overlapping another space.
+          items: { $ref: '#/components/schemas/Point' }
+        doors:
+          type: array
+          maxItems: 12
+          description: Each on one wall of `shape`. Needs a shape.
+          items: { $ref: '#/components/schemas/Door' }
         accessVia: { type: string, maxLength: 20 }
         accessibility:
           $ref: '#/components/schemas/Accessibility'
@@ -1045,10 +1115,15 @@ components:
         aliases:
           type: array
           items: { type: string, minLength: 1, maxLength: 120 }
-        gridRow: { type: integer, minimum: 0 }
-        gridColumn: { type: integer, minimum: 0 }
-        rowSpan: { type: integer, minimum: 1, maximum: 60 }
-        colSpan: { type: integer, minimum: 1, maximum: 60 }
+        shape:
+          type: array
+          minItems: 3
+          maxItems: 200
+          items: { $ref: '#/components/schemas/Point' }
+        doors:
+          type: array
+          maxItems: 12
+          items: { $ref: '#/components/schemas/Door' }
         accessVia: { type: string, maxLength: 20 }
         accessibility: { $ref: '#/components/schemas/Accessibility' }
         note: { type: string, maxLength: 300 }
@@ -1057,15 +1132,19 @@ components:
     FloorLayoutRequest:
       type: object
       description: Everything drawn on one floor, saved at once.
-      required: [version, gridRows, gridColumns, spaces]
+      required: [version, width, height, spaces]
       properties:
         version:
           type: integer
           format: int64
           minimum: 0
           description: The floor's version as the editor loaded it.
-        gridRows: { type: integer, minimum: 1, maximum: 60 }
-        gridColumns: { type: integer, minimum: 1, maximum: 60 }
+        width: { type: integer, minimum: 1, maximum: 20000 }
+        height: { type: integer, minimum: 1, maximum: 20000 }
+        outline:
+          type: array
+          maxItems: 400
+          items: { $ref: '#/components/schemas/Point' }
         status: { $ref: '#/components/schemas/FloorStatus' }
         accessibility: { $ref: '#/components/schemas/Accessibility' }
         note: { type: string, maxLength: 300 }
@@ -1176,10 +1255,10 @@ components:
           aliases: [Bloque de psicología]
           wings: []
           floors:
-            - { code: P1, level: 1, name: Piso 1, status: DRAFT, accessibility: STEP_FREE, gridRows: 11, gridColumns: 16, corridors: [], version: 0 }
-            - { code: MEZZ, level: 1.5, name: Mezzanine, status: DRAFT, accessibility: STAIRS_ONLY, note: 'Solo por la escalera, desde la recepción.', gridRows: 6, gridColumns: 10, corridors: [], version: 0 }
-            - { code: P2, level: 2, name: Piso 2, status: DRAFT, accessibility: STEP_FREE, gridRows: 11, gridColumns: 16, corridors: [], version: 0 }
-            - { code: P3, level: 3, name: Piso 3, status: UNMAPPED, accessibility: UNKNOWN, gridRows: 11, gridColumns: 16, corridors: [], version: 0 }
+            - { code: P1, level: 1, name: Piso 1, status: DRAFT, accessibility: STEP_FREE, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+            - { code: MEZZ, level: 1.5, name: Mezzanine, status: DRAFT, accessibility: STAIRS_ONLY, note: 'Solo por la escalera, desde la recepción.', width: 400, height: 240, outline: [], corridors: [], version: 0 }
+            - { code: P2, level: 2, name: Piso 2, status: DRAFT, accessibility: STEP_FREE, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+            - { code: P3, level: 3, name: Piso 3, status: UNMAPPED, accessibility: UNKNOWN, width: 640, height: 440, outline: [], corridors: [], version: 0 }
 
     BloqueB:
       summary: A building with a mezzanine reachable only by stairs, and an alias
@@ -1192,10 +1271,10 @@ components:
         aliases: [Bloque de psicología]
         wings: []
         floors:
-          - { code: P1, level: 1, name: Piso 1, status: DRAFT, accessibility: STEP_FREE, gridRows: 11, gridColumns: 16, corridors: [], version: 0 }
-          - { code: MEZZ, level: 1.5, name: Mezzanine, status: DRAFT, accessibility: STAIRS_ONLY, note: 'Solo por la escalera, desde la recepción.', gridRows: 6, gridColumns: 10, corridors: [], version: 0 }
-          - { code: P2, level: 2, name: Piso 2, status: DRAFT, accessibility: STEP_FREE, gridRows: 11, gridColumns: 16, corridors: [], version: 0 }
-          - { code: P3, level: 3, name: Piso 3, status: UNMAPPED, accessibility: UNKNOWN, gridRows: 11, gridColumns: 16, corridors: [], version: 0 }
+          - { code: P1, level: 1, name: Piso 1, status: DRAFT, accessibility: STEP_FREE, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+          - { code: MEZZ, level: 1.5, name: Mezzanine, status: DRAFT, accessibility: STAIRS_ONLY, note: 'Solo por la escalera, desde la recepción.', width: 400, height: 240, outline: [], corridors: [], version: 0 }
+          - { code: P2, level: 2, name: Piso 2, status: DRAFT, accessibility: STEP_FREE, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+          - { code: P3, level: 3, name: Piso 3, status: UNMAPPED, accessibility: UNKNOWN, width: 640, height: 440, outline: [], corridors: [], version: 0 }
 
     MezzanineFloor:
       summary: A floor with a dependency that has nothing on its door
@@ -1206,8 +1285,9 @@ components:
         status: DRAFT
         accessibility: STAIRS_ONLY
         note: Solo por la escalera, desde la recepción.
-        gridRows: 6
-        gridColumns: 10
+        width: 400
+        height: 240
+        outline: []
         corridors: []
         version: 0
         buildingId: 7c4b0a18-5e93-4a6f-8b21-9d0c5e7f1a34
@@ -1228,10 +1308,9 @@ components:
             floorCode: MEZZ
             floorLevel: 1.5
             aliases: [interactividad]
-            gridRow: 2
-            gridColumn: 2
-            rowSpan: 2
-            colSpan: 4
+            shape: [{ x: 80, y: 80 }, { x: 240, y: 80 }, { x: 240, y: 160 }, { x: 80, y: 160 }]
+            bounds: { x: 80, y: 80, width: 160, height: 80 }
+            doors: [{ from: { x: 140, y: 160 }, to: { x: 160, y: 160 } }]
             accessVia: B-ESC
             effectiveAccessibility: STAIRS_ONLY
 
@@ -1254,10 +1333,9 @@ components:
             floorCode: P3
             floorLevel: 3
             aliases: [sala de sistemas, lab 302, laboratorio 302]
-            gridRow: 5
-            gridColumn: 7
-            rowSpan: 2
-            colSpan: 3
+            shape: [{ x: 280, y: 200 }, { x: 400, y: 200 }, { x: 400, y: 280 }, { x: 280, y: 280 }]
+            bounds: { x: 280, y: 200, width: 120, height: 80 }
+            doors: [{ from: { x: 280, y: 230 }, to: { x: 280, y: 250 } }]
             accessVia: ASC-CENTRAL
             effectiveAccessibility: STEP_FREE
             capacity: 25
