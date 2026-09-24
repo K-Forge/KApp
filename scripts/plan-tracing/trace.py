@@ -87,6 +87,15 @@ def write_bmp(path, pixels, width, height):
     open(path, "wb").write(out)
 
 
+def survey_file(spec_path, name):
+    """A photo the spec names: next to the spec, or in the survey folder - $KAPP_SURVEY, by default
+    ~/Desktop/map, where the survey photos were taken to. They stay out of the repository."""
+    beside = os.path.join(os.path.dirname(os.path.abspath(spec_path)), name)
+    if os.path.exists(beside):
+        return beside
+    return os.path.join(os.path.expanduser(os.environ.get("KAPP_SURVEY", "~/Desktop/map")), name)
+
+
 def as_bmp(photo, prefix):
     if photo.lower().endswith(".bmp"):
         return photo
@@ -817,22 +826,32 @@ def main():
     # two ("merge", a point in each part) and regions that are not rooms ("drop", a point in each).
     def region_at(x, y):
         return label[int(y) * w + int(x)]
+    merged = set()
     for group in spec.get("merge", []):
-        parts = sorted({region_at(x, y) for x, y in group} - {0})
+        found = {region_at(x, y) for x, y in group}
+        if 0 in found:
+            print(f"  merge {group}: a point is on no room", file=sys.stderr)
+        parts = sorted(found - {0})
         for other in parts[1:]:
             regions[parts[0]].extend(regions[other])
             regions[other] = []
+        if parts:
+            merged.add(parts[0])
     for x, y in spec.get("drop", []):
+        if not region_at(x, y):
+            print(f"  drop {[x, y]}: the point is on no room", file=sys.stderr)
         regions[region_at(x, y)] = []
 
     # 5. Outline each room.
     minimum = max(60, w * h // 800)
     narrowest = size("narrowest", 28)
     rooms = []
-    for region in regions[1:]:
-        if len(region) < minimum or sum(orange[p] for p in region) < 0.6 * len(region):
+    for index, region in enumerate(regions):
+        if index == 0 or len(region) < minimum or sum(orange[p] for p in region) < 0.6 * len(region):
             continue                        # a speck, or mostly a sign the fill grew into
-        traced = room_outline(region, orange, w, close=size("close", 4), smooth=size("smooth", 5),
+        # Parts the spec joins are closed across what split them - a label a line of text tall.
+        close = size("merge_close", 10) if index in merged else size("close", 4)
+        traced = room_outline(region, orange, w, close=close, smooth=size("smooth", 5),
                               eps=spec.get("eps", 2.5 * unit), shortest=size("shortest", 12),
                               diagonal=size("diagonal", DIAGONAL))
         if not traced:
@@ -852,7 +871,7 @@ def main():
     # 6. Doors, from the plan of the floor that draws them.
     doors, swings = [[] for _ in rooms], []
     if "doors" in spec:
-        source = os.path.join(os.path.dirname(os.path.abspath(spec_path)), spec["doors"]["photo"])
+        source = survey_file(spec_path, spec["doors"]["photo"])
         doors, swings = doors_from(source, prefix, spec["doors"]["pairs"], rooms, reach=size("reach", 16),
                                    smallest=spec["doors"].get("smallest", 25), largest=spec["doors"].get("largest", 140))
 
