@@ -110,6 +110,9 @@ export interface CirculationOption {
             </div>
           </div>
           <div class="row">
+            <button type="button" class="btn btn-sm" [class.btn-primary]="splitMode()" (click)="split.emit()">
+              {{ splitMode() ? 'Tap where to cut… (cancel)' : 'Split in two' }}
+            </button>
             <button type="button" class="btn btn-sm" (click)="unplace.emit()">Back to the inventory</button>
           </div>
         } @else {
@@ -245,6 +248,7 @@ export class SpaceInspectorComponent {
   readonly issues = input<string[]>([]);
   readonly placing = input(false);
   readonly doorMode = input(false);
+  readonly splitMode = input(false);
   /** How far one press of a Move button goes, in the drawing's units. */
   readonly step = input(1);
 
@@ -253,6 +257,8 @@ export class SpaceInspectorComponent {
   readonly move = output<void>();
   readonly doors = output<void>();
   readonly removeDoor = output<number>();
+  /** Where the plan drew one room and the floor has two. */
+  readonly split = output<void>();
   readonly unplace = output<void>();
   readonly remove = output<void>();
   readonly assign = output<string>();

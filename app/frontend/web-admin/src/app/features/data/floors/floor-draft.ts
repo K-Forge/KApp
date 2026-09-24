@@ -374,6 +374,62 @@ export function move(draft: FloorDraft, key: string, dx: number, dy: number): Fl
   });
 }
 
+function crossing(a: Point, b: Point, axis: 'x' | 'y', at: number): Point {
+  const t = (at - a[axis]) / (b[axis] - a[axis]);
+  const p = { x: Math.round(a.x + t * (b.x - a.x)), y: Math.round(a.y + t * (b.y - a.y)) };
+  p[axis] = at;
+  return p;
+}
+
+/** The part of an outline on one side of the line `axis` = `at`, corners in a line dropped. */
+function clipped(points: Point[], axis: 'x' | 'y', at: number, below: boolean): Point[] {
+  const keeps = (p: Point) => (below ? p[axis] <= at : p[axis] >= at);
+  const out: Point[] = [];
+  points.forEach((b, i) => {
+    const a = points[(i + points.length - 1) % points.length];
+    if (keeps(b)) {
+      if (!keeps(a)) out.push(crossing(a, b, axis, at));
+      out.push(b);
+    } else if (keeps(a)) {
+      out.push(crossing(a, b, axis, at));
+    }
+  });
+  return out.filter((p, i) => {
+    const q = out[(i + out.length - 1) % out.length];
+    const r = out[(i + 1) % out.length];
+    return !(p.x === q.x && p.y === q.y) && !(q.x === p.x && p.x === r.x) && !(q.y === p.y && p.y === r.y);
+  });
+}
+
+/**
+ * Cuts a room in two where the plan drew one but the floor has two: across its longer side, at
+ * `at`. The room keeps the larger part and its doors there; the other part becomes a box to name,
+ * with the doors on its side. Null when the cut would leave a part with nothing in it.
+ */
+export function split(
+  draft: FloorDraft,
+  key: string,
+  at: Point,
+  floorCode: string,
+  taken?: ReadonlySet<string>,
+): { draft: FloorDraft; created: DraftSpace } | null {
+  const space = draft.spaces.find((s) => s.key === key);
+  if (!space || !isPlaced(space)) return null;
+  const box = boundsOf(space.shape);
+  const axis = box.width >= box.height ? 'x' : 'y';
+  const cut = Math.round(at[axis]);
+  const low = clipped(space.shape, axis, cut, true);
+  const high = clipped(space.shape, axis, cut, false);
+  if (low.length < 3 || high.length < 3 || area(low) === 0 || area(high) === 0) return null;
+  const [kept, other] = area(low) >= area(high) ? [low, high] : [high, low];
+  const created = {
+    ...newBox(draft, floorCode, other, taken),
+    doors: space.doors.filter((d) => doorOnOutline(other, d) && !doorOnOutline(kept, d)),
+  };
+  const next = updateSpace(draft, key, { shape: kept, doors: space.doors.filter((d) => doorOnOutline(kept, d)) });
+  return { draft: addSpaces(next, [created]), created };
+}
+
 export function withVertex(shape: Point[], index: number, p: Point): Point[] {
   return shape.map((q, i) => (i === index ? { x: p.x, y: p.y } : q));
 }

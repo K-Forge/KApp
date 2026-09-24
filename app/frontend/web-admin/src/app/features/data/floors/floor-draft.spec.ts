@@ -19,6 +19,7 @@ import {
   sameFloor,
   simple,
   spaceAt,
+  split,
   toRequest,
   toggleCorridorPoint,
   updateSpace,
@@ -189,6 +190,18 @@ describe('floor draft', () => {
       expect(place(draft, 'k-401', box(0, 0, 80, 60)).spaces[0].doors).toEqual([]);
       expect(place(draft, 'k-401', box(0, 0, 120, 40)).spaces[0].doors).toEqual([door]);
     });
+  });
+
+  it('cuts a room the plan drew as one across its longer side, each part keeping its own doors', () => {
+    const left = { from: { x: 20, y: 80 }, to: { x: 40, y: 80 } };
+    const right = { from: { x: 150, y: 80 }, to: { x: 170, y: 80 } };
+    const draft = floor([space('501', { shape: box(0, 0, 200, 80), doors: [left, right] })]);
+
+    const result = split(draft, 'k-501', { x: 120, y: 30 }, 'P5');
+
+    expect(result?.draft.spaces.find((s) => s.code === '501')).toMatchObject({ shape: box(0, 0, 120, 80), doors: [left] });
+    expect(result?.created).toMatchObject({ code: 'P5-01', name: 'Sin identificar', shape: [{ x: 120, y: 0 }, { x: 200, y: 0 }, { x: 200, y: 80 }, { x: 120, y: 80 }], doors: [right] });
+    expect(split(draft, 'k-501', { x: 0, y: 30 }, 'P5')).toBeNull();
   });
 
   it('gives a box its outline and doors to an inventoried space, and the box disappears into it', () => {

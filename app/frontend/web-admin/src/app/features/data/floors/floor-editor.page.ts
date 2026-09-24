@@ -40,6 +40,7 @@ import {
   refusePlacement,
   removeDoor,
   removeSpace,
+  split,
   sameFloor,
   toRequest,
   toggleCorridorPoint,
@@ -259,12 +260,14 @@ const MAX_ZOOM = 8;
                       [issues]="selectedIssues()"
                       [placing]="placingKey() === space.key"
                       [doorMode]="mode() === 'door'"
+                      [splitMode]="mode() === 'split'"
                       [step]="step()"
                       (patch)="patchSelected($event)"
                       (nudge)="nudge($event.dx, $event.dy)"
                       (move)="togglePlacing(space.key)"
                       (doors)="toggleDoorMode()"
                       (removeDoor)="removeSelectedDoor($event)"
+                      (split)="toggleSplitMode()"
                       (unplace)="unplaceSelected()"
                       (remove)="removeSelected()"
                       (assign)="assign($event)"
@@ -677,6 +680,12 @@ export class FloorEditorPage {
     switch (this.mode()) {
       case 'box':
         return 'Drag across the plan to outline a room; a tap draws a small square to reshape by its corners.';
+      case 'split': {
+        const selected = this.selected();
+        return selected
+          ? `Tap inside ${label(selected)} where the wall between the two rooms is; it is cut across its longer side.`
+          : 'Select a room first.';
+      }
       case 'door': {
         const selected = this.selected();
         return selected
@@ -886,6 +895,10 @@ export class FloorEditorPage {
       this.doorTap(draft, point);
       return;
     }
+    if (this.mode() === 'split' && !this.placingKey()) {
+      this.splitTap(draft, point);
+      return;
+    }
     if (this.canvasMode() === 'box') {
       this.onBoxDrawn(this.squareAt(draft, point));
       return;
@@ -1052,6 +1065,29 @@ export class FloorEditorPage {
     this.placingKey.set(null);
     this.activeCorridor.set(null);
     this.notice.set('');
+  }
+
+  toggleSplitMode(): void {
+    this.mode.set(this.mode() === 'split' ? 'select' : 'split');
+    this.placingKey.set(null);
+    this.activeCorridor.set(null);
+    this.notice.set('');
+  }
+
+  private splitTap(draft: FloorDraft, point: Point): void {
+    const space = this.selected();
+    if (!space || !isPlaced(space)) {
+      this.notice.set('Select a drawn room first, then tap where to cut it.');
+      return;
+    }
+    const result = split(draft, space.key, point, this.floor(), this.takenElsewhere());
+    if (!result) {
+      this.notice.set(`Tap inside ${label(space)}, away from its edges.`);
+      return;
+    }
+    this.apply(result.draft);
+    this.mode.set('select');
+    this.notice.set(`${label(space)} cut in two. The other part is a box to name; undo puts it back.`);
   }
 
   removeSelectedDoor(index: number): void {

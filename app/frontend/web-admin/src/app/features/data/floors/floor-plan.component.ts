@@ -14,7 +14,7 @@ import {
   type DraftSpace,
 } from './floor-draft';
 
-export type EditorMode = 'select' | 'box' | 'corridor' | 'door';
+export type EditorMode = 'select' | 'box' | 'corridor' | 'door' | 'split';
 
 /** Movement under this many pixels is a tap, not a drag - a finger never lands perfectly still. */
 const TAP_SLOP = 8;
