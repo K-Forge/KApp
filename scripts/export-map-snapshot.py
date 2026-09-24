@@ -8,7 +8,7 @@ Writes the campus map, as the API serves it, into the snapshot a fresh database 
 
 One file per building under
 app/backend/microservices/map-service/src/main/resources/db/seed/map/, in the shape
-V005_SurveyedCampus reads. Commit them: the M0 cluster keeps no backups, so what is drawn in the
+V007_TracedCampus reads. Commit them: the M0 cluster keeps no backups, so what is drawn in the
 floor editor exists only in Atlas until it is exported and committed.
 
 Why the API and not mongoexport: no database credential leaves the services, which is the rule
@@ -67,13 +67,13 @@ def building_file(building, floors):
     for floor in sorted(floors, key=lambda f: f["level"]):
         f = pick(floor, ["code"])
         f["level"] = number(floor["level"])
-        f.update(pick(floor, ["name", "status", "accessibility", "note", "gridRows", "gridColumns"]))
+        f.update(pick(floor, ["name", "status", "accessibility", "note", "width", "height", "outline"]))
         if present(floor.get("corridors")):
             f["corridors"] = [pick(c, ["code", "name", "color", "path"]) for c in floor["corridors"]]
         f["spaces"] = [
-            pick(s, ["code", "doorCode", "wing", "name", "typeCode", "aliases", "gridRow", "gridColumn",
-                     "rowSpan", "colSpan", "accessVia", "accessibility", "note", "capacity"],
-                 always=["rowSpan", "colSpan"])
+            pick(s, ["code", "doorCode", "wing", "name", "typeCode", "aliases", "shape", "doors",
+                     "accessVia", "accessibility", "note", "capacity"],
+                 always=["aliases"])
             for s in sorted(floor.get("spaces", []), key=lambda s: s["code"])
         ]
         out["floors"].append(f)
@@ -104,9 +104,9 @@ def main():
             json.dump(building_file(building, floors), out, ensure_ascii=False, indent=2)
             out.write("\n")
         written.add(name)
-        placed = sum(1 for f in floors for s in f.get("spaces", []) if s.get("gridRow") is not None)
+        placed = sum(1 for f in floors for s in f.get("spaces", []) if s.get("shape"))
         total = sum(len(f.get("spaces", [])) for f in floors)
-        print(f"  {code:6} {len(floors)} floor(s), {total} space(s), {placed} placed")
+        print(f"  {code:6} {len(floors)} floor(s), {total} space(s), {placed} drawn")
 
     # A building deleted in the portal must not come back in the next fresh database.
     for stale in sorted(set(n for n in os.listdir(args.out) if n.endswith(".json")) - written):
