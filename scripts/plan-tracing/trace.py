@@ -96,12 +96,14 @@ def survey_file(spec_path, name):
     return os.path.join(os.path.expanduser(os.environ.get("KAPP_SURVEY", "~/Desktop/map")), name)
 
 
-def as_bmp(photo, prefix):
+def as_bmp(photo, prefix, width=2800):
+    """The photo as a BMP `width` pixels wide - 2800 unless the spec says "resample" - which is
+    the frame every coordinate in a spec is measured in."""
     if photo.lower().endswith(".bmp"):
         return photo
-    out = prefix + ".photo.bmp"
+    out = f"{prefix}.photo-{width}.bmp"
     if not os.path.exists(out) or os.path.getmtime(out) < os.path.getmtime(photo):
-        subprocess.run(["sips", "--resampleWidth", "2800", "-s", "format", "bmp", photo, "--out", out],
+        subprocess.run(["sips", "--resampleWidth", str(width), "-s", "format", "bmp", photo, "--out", out],
                        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return out
 
@@ -769,7 +771,7 @@ def snap_to_walls(mask, w, h, box, inward, outward):
 def main():
     photo, spec_path, prefix = sys.argv[1:4]
     spec = json.load(open(spec_path))
-    _, _, rgb = read_bmp(as_bmp(photo, prefix))
+    _, _, rgb = read_bmp(as_bmp(photo, prefix, spec.get("resample", 2800)))
 
     pw, ph = spec["plaque"]
     scale = spec["scale"]
