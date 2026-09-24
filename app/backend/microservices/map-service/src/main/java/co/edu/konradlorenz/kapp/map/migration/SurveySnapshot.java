@@ -16,9 +16,13 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
 
@@ -101,6 +105,29 @@ public final class SurveySnapshot {
                     .toList();
         } catch (IOException e) {
             throw new UncheckedIOException("Cannot list " + PATTERN, e);
+        }
+    }
+
+    /**
+     * A fingerprint of every file in the snapshot, by name and content: equal fingerprints, the
+     * same campus.
+     */
+    public static String fingerprint() {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            Resource[] files = new PathMatchingResourcePatternResolver().getResources(PATTERN);
+            Arrays.sort(files, Comparator.comparing(Resource::getFilename));
+            for (Resource file : files) {
+                digest.update(String.valueOf(file.getFilename()).getBytes(StandardCharsets.UTF_8));
+                try (InputStream in = file.getInputStream()) {
+                    digest.update(in.readAllBytes());
+                }
+            }
+            return HexFormat.of().formatHex(digest.digest());
+        } catch (IOException e) {
+            throw new UncheckedIOException("Cannot read " + PATTERN, e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
         }
     }
 

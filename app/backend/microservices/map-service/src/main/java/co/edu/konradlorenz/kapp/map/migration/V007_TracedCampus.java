@@ -7,9 +7,11 @@ import co.edu.konradlorenz.kapp.map.domain.Wing;
 import co.edu.konradlorenz.kapp.map.service.MapMapper;
 import co.edu.konradlorenz.kapp.map.service.SpaceService;
 import co.edu.konradlorenz.kapp.map.web.dto.LayoutSpaceDto;
+import com.mongodb.client.model.ReplaceOptions;
 import io.mongock.api.annotations.ChangeUnit;
 import io.mongock.api.annotations.Execution;
 import io.mongock.api.annotations.RollbackExecution;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -17,6 +19,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,15 +57,24 @@ import static org.springframework.data.mongodb.core.query.Query.query;
  * {@code updatedAt} equal to {@code createdAt}, so the next snapshot can replace them again. Run
  * twice, it writes the same thing twice.
  *
+ * <h2>It runs at every start</h2>
+ * Floors are traced one at a time, and each lands in the snapshot as a commit. Rather than a
+ * change unit per floor, this one runs whenever the service starts and loads the snapshot again
+ * if it has changed since the last load - a fingerprint of the files is kept in
+ * {@code map_snapshot_loads} - so a newly traced floor reaches every database with the next
+ * deploy, and a floor somebody has worked on is still never touched.
+ *
  * <p>Tests turn it off with {@code kapp.map.survey-seed=false}, and run against the placeholder
  * campus instead; {@code TracedCampusTest} runs it on its own.
- *
- * <p>Change units are append-only. Never edit one that has run; add a new one.
  */
-@ChangeUnit(id = "map-traced-campus-v007", order = "007", author = "kapp")
+@ChangeUnit(id = "map-traced-campus-v007", order = "007", author = "kapp", runAlways = true)
 public class V007_TracedCampus {
 
     static final String ENABLED = "kapp.map.survey-seed";
+
+    /** Where the fingerprint of the last snapshot loaded is kept. */
+    static final String LOADS = "map_snapshot_loads";
+    private static final String LOAD_ID = "traced-campus";
 
     private static final Logger log = LoggerFactory.getLogger(V007_TracedCampus.class);
 
@@ -72,7 +84,16 @@ public class V007_TracedCampus {
             log.info("Traced campus not loaded: {} is false", ENABLED);
             return;
         }
+        String fingerprint = SurveySnapshot.fingerprint();
+        Document last = mongo.getCollection(LOADS).find(new Document("_id", LOAD_ID)).first();
+        if (last != null && fingerprint.equals(last.getString("fingerprint"))) {
+            log.info("Traced campus: the snapshot has not changed since {}", last.getDate("loadedAt"));
+            return;
+        }
         Result result = apply(mongo, SurveySnapshot.load(), Instant.now());
+        mongo.getCollection(LOADS).replaceOne(new Document("_id", LOAD_ID),
+                new Document("_id", LOAD_ID).append("fingerprint", fingerprint).append("loadedAt", new Date()),
+                new ReplaceOptions().upsert(true));
         log.info("Traced campus: {} building(s) added, {} floor(s) replaced, {} space(s) written; "
                         + "{} placeholder building(s) and {} placeholder space(s) removed",
                 result.buildingsAdded(), result.floorsReplaced(), result.spacesWritten(),
