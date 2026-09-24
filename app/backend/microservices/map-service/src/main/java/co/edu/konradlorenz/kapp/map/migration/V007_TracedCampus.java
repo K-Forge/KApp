@@ -44,9 +44,10 @@ import static org.springframework.data.mongodb.core.query.Query.query;
  *       real space in it - then it stays, and the log says so.</li>
  *   <li>A building of the snapshot that does not exist yet is added whole.</li>
  *   <li>In one that does, each floor is replaced only if nobody has touched it: its
- *       {@code version} is still 0 - no layout was ever saved - and none of its spaces has been
- *       edited ({@code updatedAt} still equals {@code createdAt}). A floor somebody worked on is
- *       left exactly as it is, and named in the log.</li>
+ *       {@code version} is still 0 - no layout was ever saved - and every space on it is one a
+ *       load wrote, created with the building and never updated. A floor somebody worked on -
+ *       a space edited, or added through the spaces screen - is left exactly as it is, and named
+ *       in the log.</li>
  *   <li>A replaced space keeps its id: the snapshot's version of a room is the same room.</li>
  *   <li>The building's own name, description and other names are taken from the snapshot only
  *       if the building was never edited either. Wings the snapshot declares and the building
@@ -193,7 +194,7 @@ public class V007_TracedCampus {
         for (SurveySnapshot.SnapshotFloor floor : surveyed.floors()) {
             List<SpaceDocument> onFloor = all.stream().filter(s -> s.floorCode().equals(floor.code())).toList();
             Floor current = floors.get(floor.code());
-            if (current != null && !untouched(current, onFloor)) {
+            if (current != null && !untouched(current, onFloor, stored.createdAt())) {
                 tally.kept.add(stored.code() + " " + floor.code());
                 continue;
             }
@@ -243,7 +244,13 @@ public class V007_TracedCampus {
         }
     }
 
-    private static boolean untouched(Floor floor, List<SpaceDocument> spaces) {
-        return floor.version() == 0 && spaces.stream().allMatch(s -> s.updatedAt().equals(s.createdAt()));
+    /**
+     * Nobody has worked on the floor: no layout was ever saved on it, and every space on it is one
+     * a snapshot load wrote and nobody edited since - created with its building, never updated. A
+     * space somebody added through the spaces screen was created later, and is somebody's work.
+     */
+    private static boolean untouched(Floor floor, List<SpaceDocument> spaces, Instant loaded) {
+        return floor.version() == 0 && spaces.stream()
+                .allMatch(s -> s.createdAt().equals(loaded) && s.updatedAt().equals(loaded));
     }
 }

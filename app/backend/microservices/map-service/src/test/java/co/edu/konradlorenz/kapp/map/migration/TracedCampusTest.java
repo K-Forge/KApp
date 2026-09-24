@@ -217,6 +217,26 @@ class TracedCampusTest {
     }
 
     @Test
+    @DisplayName("a space somebody added through the spaces screen keeps its floor as it is")
+    void aSpaceAddedLaterKeepsItsFloor() {
+        MongoTemplate fresh = new MongoTemplate(client, "traced_added_" + UUID.randomUUID().toString().substring(0, 8));
+        V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.parse("2026-09-20T10:00:00Z"));
+        SurveySnapshot.Building surveyed = SNAPSHOT.getFirst();
+        BuildingDocument stored = fresh.findOne(query(where("code").is(surveyed.code())), BuildingDocument.class);
+        String floor = surveyed.floors().getFirst().code();
+        // Created and never edited, like every space a load writes - but a day after the load.
+        Instant later = Instant.parse("2026-09-21T10:00:00Z");
+        fresh.insert(new SpaceDocument(UUID.randomUUID().toString(), "ADDED-1", null, null, null, "Añadido a mano",
+                "OFFICE", stored.id(), stored.code(), stored.campus(), floor, 1, List.of(), null, List.of(),
+                null, null, null, null, false, later, later));
+
+        V007_TracedCampus.Result again = V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.now());
+
+        assertThat(again.kept()).containsExactly(surveyed.code() + " " + floor);
+        assertThat(fresh.exists(query(where("code").is("ADDED-1")), SpaceDocument.class)).isTrue();
+    }
+
+    @Test
     @DisplayName("run twice, it writes the same campus twice: what it wrote is still untouched")
     void runningTwiceChangesNothing() {
         MongoTemplate fresh = new MongoTemplate(client, "traced_twice_" + UUID.randomUUID().toString().substring(0, 8));
