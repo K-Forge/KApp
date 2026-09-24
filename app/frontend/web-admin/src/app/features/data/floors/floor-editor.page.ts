@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostListener, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 import { AppHttpError } from '../../../core/http/api-http-error';
@@ -13,39 +13,46 @@ import {
   type Building,
   type Corridor,
   type FloorStatus,
-  type GridPoint,
+  type Point,
 } from '../buildings/building.model';
 import { CATEGORY_COLORS, CATEGORY_LABELS, SPACE_CATEGORIES, type Space, type SpaceCategory, type SpaceType } from '../spaces/space.model';
 import { SpaceTypesService } from '../spaces/space-types.service';
 import { SpacesService } from '../spaces/spaces.service';
 import { CorridorsPanelComponent } from './corridors-panel.component';
 import {
+  MAX_SIZE,
+  addDoor,
   addSpaces,
   assignBox,
+  doorAt,
+  doorNear,
+  doorWidth,
   fromDetail,
   isPlaced,
   label,
+  move,
   newBox,
   newKey,
   place,
   problems,
   rangeSpaces,
-  rectOf,
+  rectangle,
   refusePlacement,
+  removeDoor,
   removeSpace,
   sameFloor,
   toRequest,
   toggleCorridorPoint,
   unplace,
   updateSpace,
+  withoutVertex,
   type DraftSpace,
   type FloorDraft,
   type PlacementRefusal,
   type RangeRequest,
-  type Rect,
 } from './floor-draft';
 import { clearDraft, loadDraft, storeDraft, type StoredDraft } from './floor-draft.store';
-import { FloorGridComponent, type EditorMode } from './floor-grid.component';
+import { FloorPlanComponent, type EditorMode } from './floor-plan.component';
 import type { FloorDetail } from './floor.model';
 import { FloorsService } from './floors.service';
 import { InventoryTrayComponent, type OneSpace } from './inventory-tray.component';
@@ -53,26 +60,19 @@ import { SpaceInspectorComponent, type CirculationOption } from './space-inspect
 
 type Tab = 'space' | 'inventory' | 'corridors' | 'floor';
 
-const CELL_KEY = 'kapp-admin:floor-editor:cell-size';
-const MIN_CELL = 20;
-const MAX_CELL = 64;
 const HISTORY = 100;
-
-function storedCellSize(): number {
-  try {
-    const value = Number(localStorage.getItem(CELL_KEY));
-    return value >= MIN_CELL && value <= MAX_CELL ? value : 40;
-  } catch {
-    return 40;
-  }
-}
+/** Each zoom step is this much closer; the plan starts fitted to the width it has. */
+const ZOOM_STEP = 1.25;
+const MIN_ZOOM = -4;
+const MAX_ZOOM = 8;
 
 /**
  * The floor editor: the one place a floor of the campus map is drawn and corrected, meant to be
  * used standing in that floor with an iPad.
  *
- * <p>The whole floor is one draft - its grid, its spaces placed or not, its corridors - saved in
- * a single request that the server refuses if somebody else saved the floor in the meantime.
+ * <p>The whole floor is one draft - its drawing, its spaces drawn or not, their doors, its
+ * corridors - saved in a single request that the server refuses if somebody else saved the floor
+ * in the meantime.
  * Between saves the draft lives on this device, so nothing drawn is lost to a dropped connection
  * or a closed tab.
  */
@@ -81,7 +81,7 @@ function storedCellSize(): number {
   imports: [
     RouterLink,
     ApiErrorBannerComponent,
-    FloorGridComponent,
+    FloorPlanComponent,
     SpaceInspectorComponent,
     InventoryTrayComponent,
     CorridorsPanelComponent,
@@ -176,20 +176,21 @@ function storedCellSize(): number {
         <div class="workspace">
           <section class="card canvas" aria-label="Floor">
             <div class="toolbar">
-              <div class="segmented" role="radiogroup" aria-label="What a touch on the grid does">
+              <div class="segmented" role="radiogroup" aria-label="What a touch on the plan does">
                 <button type="button" role="radio" [attr.aria-checked]="mode() === 'select'" [class.on]="mode() === 'select'" (click)="setMode('select')">
                   Select
                 </button>
                 <button type="button" role="radio" [attr.aria-checked]="mode() === 'box'" [class.on]="mode() === 'box'" (click)="setMode('box')">
-                  Draw boxes
+                  Draw rooms
                 </button>
                 <button type="button" role="radio" [attr.aria-checked]="mode() === 'corridor'" [class.on]="mode() === 'corridor'" (click)="setMode('corridor')">
                   Corridor
                 </button>
               </div>
               <div class="row zoom">
-                <button type="button" class="btn btn-sm" aria-label="Smaller cells" [disabled]="cellSize() <= minCell" (click)="zoom(-4)">−</button>
-                <button type="button" class="btn btn-sm" aria-label="Bigger cells" [disabled]="cellSize() >= maxCell" (click)="zoom(4)">+</button>
+                <button type="button" class="btn btn-sm" aria-label="Zoom out" [disabled]="zoomSteps() <= minZoom" (click)="zoom(-1)">−</button>
+                <button type="button" class="btn btn-sm" aria-label="Fit to the screen" (click)="zoomSteps.set(0)">Fit</button>
+                <button type="button" class="btn btn-sm" aria-label="Zoom in" [disabled]="zoomSteps() >= maxZoom" (click)="zoom(1)">+</button>
               </div>
             </div>
             <p class="hint-line" aria-live="polite">
@@ -198,23 +199,27 @@ function storedCellSize(): number {
               }
               {{ hint() }}
             </p>
-            <div class="scroller">
-              <app-floor-grid
-                [rows]="d.gridRows"
-                [columns]="d.gridColumns"
-                [cellSize]="cellSize()"
+            <div class="scroller" #scroller>
+              <app-floor-plan
+                [width]="d.width"
+                [height]="d.height"
+                [scale]="scale()"
                 [spaces]="d.spaces"
+                [outline]="d.outline"
                 [corridors]="d.corridors"
                 [categories]="categories()"
                 [selectedKey]="selectedKey()"
                 [problemKeys]="problemKeys()"
                 [activeCorridor]="activeCorridor()"
-                [mode]="mode()"
+                [mode]="canvasMode()"
                 [disabled]="!!pendingDraft() || saving()"
-                [canDraw]="canDraw"
-                (cellTap)="onCellTap($event)"
-                (boxTap)="onBoxTap($event)"
-                (rectDrawn)="onRectDrawn($event)"
+                [canPlace]="canPlace"
+                (pointTap)="onPointTap($event)"
+                (spaceTap)="onSpaceTap($event)"
+                (boxDrawn)="onBoxDrawn($event)"
+                (moved)="onMoved($event.key, $event.dx, $event.dy)"
+                (reshaped)="onReshaped($event.key, $event.shape)"
+                (vertexRemoved)="onVertexRemoved($event.key, $event.index)"
               />
             </div>
             <ul class="legend" aria-label="Colours">
@@ -253,17 +258,20 @@ function storedCellSize(): number {
                       [floorAccessibility]="d.accessibility"
                       [issues]="selectedIssues()"
                       [placing]="placingKey() === space.key"
+                      [doorMode]="mode() === 'door'"
+                      [step]="step()"
                       (patch)="patchSelected($event)"
-                      (nudge)="nudge($event.rows, $event.cols)"
-                      (resize)="resize($event.rows, $event.cols)"
+                      (nudge)="nudge($event.dx, $event.dy)"
                       (move)="togglePlacing(space.key)"
+                      (doors)="toggleDoorMode()"
+                      (removeDoor)="removeSelectedDoor($event)"
                       (unplace)="unplaceSelected()"
                       (remove)="removeSelected()"
                       (assign)="assign($event)"
                     />
                   } @else {
                     <p class="text-muted">
-                      Tap a box on the grid to edit it, or pick a space from the inventory to place it.
+                      Tap a room on the plan to edit it, or pick a space from the inventory to draw it.
                     </p>
                   }
                 }
@@ -314,17 +322,18 @@ function storedCellSize(): number {
                     </div>
                     <div class="row spread">
                       <div class="field" style="flex: 1 1 6rem">
-                        <label for="f-rows">Rows</label>
-                        <input id="f-rows" type="number" min="1" max="60" [value]="d.gridRows" (change)="setGrid('gridRows', $event)" />
+                        <label for="f-width">Drawing width</label>
+                        <input id="f-width" type="number" min="1" [max]="maxSize" [value]="d.width" (change)="setSize('width', $event)" />
                       </div>
                       <div class="field" style="flex: 1 1 6rem">
-                        <label for="f-cols">Columns</label>
-                        <input id="f-cols" type="number" min="1" max="60" [value]="d.gridColumns" (change)="setGrid('gridColumns', $event)" />
+                        <label for="f-height">Drawing height</label>
+                        <input id="f-height" type="number" min="1" [max]="maxSize" [value]="d.height" (change)="setSize('height', $event)" />
                       </div>
                     </div>
                     <p class="text-faint small">
-                      Shrinking the grid keeps every space; the ones that no longer fit are listed
-                      to fix before saving. The floor's code, name and level are edited under
+                      In the drawing's own units: a floor traced from its evacuation plan is drawn
+                      at the plan's scale. Shrinking it keeps every room; the ones left outside are
+                      listed to fix before saving. The floor's code, name and level are edited under
                       Buildings.
                     </p>
                   </div>
@@ -541,8 +550,9 @@ export class FloorEditorPage {
   private readonly spacesService = inject(SpacesService);
   private readonly router = inject(Router);
 
-  readonly minCell = MIN_CELL;
-  readonly maxCell = MAX_CELL;
+  readonly minZoom = MIN_ZOOM;
+  readonly maxZoom = MAX_ZOOM;
+  readonly maxSize = MAX_SIZE;
   readonly statuses = FLOOR_STATUSES;
   readonly statusLabels = FLOOR_STATUS_LABELS;
   readonly accessibility = ACCESSIBILITY;
@@ -574,7 +584,10 @@ export class FloorEditorPage {
   readonly placingKey = signal<string | null>(null);
   readonly activeCorridor = signal<number | null>(null);
   readonly notice = signal('');
-  readonly cellSize = signal(storedCellSize());
+  readonly zoomSteps = signal(0);
+  /** The width the plan has on screen, measured, so it starts fitted to it. */
+  private readonly available = signal(0);
+  private readonly scroller = viewChild<ElementRef<HTMLElement>>('scroller');
 
   private past: FloorDraft[] = [];
   private future: FloorDraft[] = [];
@@ -592,6 +605,19 @@ export class FloorEditorPage {
   });
 
   readonly categories = computed(() => new Map<string, SpaceCategory>(this.types().map((t) => [t.code, t.category])));
+
+  /** Screen pixels per unit: the plan fitted to the width it has, then zoomed. */
+  readonly scale = computed(() => {
+    const width = this.draft()?.width ?? 1;
+    const fit = this.available() > 0 ? (this.available() - 2) / width : 1;
+    return Math.max(0.05, fit * ZOOM_STEP ** this.zoomSteps());
+  });
+
+  /** One press of a Move button: about a finger's width at the fitted zoom, never under a unit. */
+  readonly step = computed(() => Math.max(1, Math.round(4 / this.scale())));
+
+  /** Drawing a room for an inventoried space is drawing, whatever tool was picked. */
+  readonly canvasMode = computed<EditorMode>(() => (this.placingKey() ? 'box' : this.mode()));
 
   readonly issues = computed(() => {
     const draft = this.draft();
@@ -647,29 +673,48 @@ export class FloorEditorPage {
     if (this.pendingDraft()) return 'Decide first what to do with the changes kept on this device.';
     const placing = this.placingKey();
     const space = placing ? this.draft()?.spaces.find((s) => s.key === placing) : null;
-    if (space) return `Tap the cell where ${label(space)} goes - its top-left corner.`;
+    if (space) return `Drag the outline of ${label(space)} on the plan, or tap where it is for a small square to reshape.`;
     switch (this.mode()) {
       case 'box':
-        return 'Drag across empty cells to outline a room from the evacuation plan; a single tap draws one cell.';
+        return 'Drag across the plan to outline a room; a tap draws a small square to reshape by its corners.';
+      case 'door': {
+        const selected = this.selected();
+        return selected
+          ? `Tap a wall of ${label(selected)} to put a door there; tap a door to take it out.`
+          : 'Select a room first.';
+      }
       case 'corridor': {
         const index = this.activeCorridor();
         const corridor = index !== null ? this.draft()?.corridors[index] : null;
         return corridor
-          ? `Drawing ${corridor.name}: tap the cells it runs through in walking order; tap one again to take it out.`
+          ? `Drawing ${corridor.name}: tap the points it runs through in walking order; tap one again to take it out.`
           : 'Pick or create a corridor under Corridors to draw it.';
       }
       default:
-        return 'Tap a box to edit it. Use Draw boxes to outline rooms, then say which space each one is.';
+        return 'Tap a room to edit it: drag it, or drag its corners. Use Draw rooms to outline new ones.';
     }
   });
 
-  /** Passed to the grid so a box being drawn shows red before it is let go. */
-  readonly canDraw = (rect: Rect): boolean => {
+  /** Passed to the plan so a room being drawn or reshaped shows red before it is let go. */
+  readonly canPlace = (key: string | null, shape: Point[]): boolean => {
     const draft = this.draft();
-    return !!draft && refusePlacement(draft, null, rect) === null;
+    return !!draft && refusePlacement(draft, key, shape) === null;
   };
 
   constructor() {
+    // The plan starts fitted to the width it is given, and keeps fitting when that changes -
+    // an iPad turned, a phone's address bar hiding.
+    effect((onCleanup) => {
+      const element = this.scroller()?.nativeElement;
+      if (!element) return;
+      const measure = () => this.available.set(element.clientWidth);
+      measure();
+      if (typeof ResizeObserver === 'undefined') return;
+      const observer = new ResizeObserver(measure);
+      observer.observe(element);
+      onCleanup(() => observer.disconnect());
+    });
+
     effect(() => {
       const building = this.building();
       const floor = this.floor();
@@ -819,83 +864,154 @@ export class FloorEditorPage {
     }
   }
 
-  zoom(step: number): void {
-    const size = Math.max(MIN_CELL, Math.min(MAX_CELL, this.cellSize() + step));
-    this.cellSize.set(size);
-    try {
-      localStorage.setItem(CELL_KEY, String(size));
-    } catch {
-      // A preference, not data: losing it costs a tap.
-    }
+  zoom(steps: number): void {
+    this.zoomSteps.update((z) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z + steps)));
   }
 
-  onCellTap(cell: GridPoint): void {
+  /** A tap on the plan, away from any room's click: a corridor's point, a door, a new room. */
+  onPointTap(point: Point): void {
     const draft = this.draft();
     if (!draft) return;
-    if (this.mode() === 'corridor') {
+    if (this.mode() === 'corridor' && !this.placingKey()) {
       const index = this.activeCorridor();
       if (index === null) {
         this.notice.set('Pick a corridor to draw first.');
         this.tab.set('corridors');
         return;
       }
-      this.apply(toggleCorridorPoint(draft, index, cell));
+      this.apply(toggleCorridorPoint(draft, index, point, 8 / this.scale()));
       return;
     }
-    const placing = this.placingKey();
-    if (placing) {
-      this.placeAt(placing, cell);
+    if (this.mode() === 'door' && !this.placingKey()) {
+      this.doorTap(draft, point);
+      return;
+    }
+    if (this.canvasMode() === 'box') {
+      this.onBoxDrawn(this.squareAt(draft, point));
       return;
     }
     this.selectedKey.set(null);
     this.notice.set('');
   }
 
-  onBoxTap(key: string): void {
-    const placing = this.placingKey();
-    if (placing && placing !== key) {
-      const other = this.draft()?.spaces.find((s) => s.key === key);
-      this.notice.set(`That cell is taken by ${other ? label(other) : 'another space'}.`);
-      return;
-    }
+  onSpaceTap(key: string): void {
     this.placingKey.set(null);
     this.selectSpace(key);
   }
 
-  onRectDrawn(rect: Rect): void {
+  /** A room outlined on the plan: the inventoried space being drawn, or a new box to name. */
+  onBoxDrawn(shape: Point[]): void {
     const draft = this.draft();
     if (!draft) return;
-    const box = newBox(draft, this.floor(), rect, this.takenElsewhere());
+    const placing = this.placingKey();
+    const space = placing ? draft.spaces.find((s) => s.key === placing) : null;
+    if (space) {
+      const refusal = refusePlacement(draft, space.key, shape);
+      if (refusal) {
+        this.notice.set(this.refusalText(space, refusal));
+        return;
+      }
+      this.apply(place(draft, space.key, shape));
+      this.placingKey.set(null);
+      this.selectedKey.set(space.key);
+      this.notice.set(`${label(space)} drawn. Drag its corners to match the plan.`);
+      return;
+    }
+    if (refusePlacement(draft, null, shape)) {
+      this.notice.set('That outline would overlap another room or leave the drawing.');
+      return;
+    }
+    const box = newBox(draft, this.floor(), shape, this.takenElsewhere());
     this.apply(addSpaces(draft, [box]));
     this.selectedKey.set(box.key);
     this.tab.set('space');
     this.notice.set(
       this.unplaced().length
-        ? 'Box drawn. Say which inventoried space it is, or describe it.'
-        : 'Box drawn. Describe it, or keep drawing.',
+        ? 'Room drawn. Say which inventoried space it is, or describe it.'
+        : 'Room drawn. Describe it, or keep drawing.',
     );
   }
 
-  private placeAt(key: string, cell: GridPoint): void {
+  onMoved(key: string, dx: number, dy: number): void {
     const draft = this.draft();
     const space = draft?.spaces.find((s) => s.key === key);
-    if (!draft || !space) return;
-    const rect = { row: cell.row, col: cell.col, rowSpan: space.rowSpan, colSpan: space.colSpan };
-    const refusal = refusePlacement(draft, key, rect);
+    if (!draft || !space || !isPlaced(space) || (dx === 0 && dy === 0)) return;
+    const next = move(draft, key, dx, dy);
+    const refusal = refusePlacement(draft, key, next.spaces.find((s) => s.key === key)?.shape ?? []);
     if (refusal) {
       this.notice.set(this.refusalText(space, refusal));
       return;
     }
-    this.apply(place(draft, key, rect));
-    this.placingKey.set(null);
-    this.selectedKey.set(key);
-    this.notice.set(`${label(space)} placed.`);
+    this.notice.set('');
+    this.apply(next);
+  }
+
+  onReshaped(key: string, shape: Point[]): void {
+    const draft = this.draft();
+    const space = draft?.spaces.find((s) => s.key === key);
+    if (!draft || !space) return;
+    const refusal = refusePlacement(draft, key, shape);
+    if (refusal) {
+      this.notice.set(this.refusalText(space, refusal));
+      return;
+    }
+    const doors = space.doors.length;
+    const next = place(draft, key, shape);
+    const lost = doors - (next.spaces.find((s) => s.key === key)?.doors.length ?? doors);
+    this.notice.set(lost ? `${lost} door${lost === 1 ? '' : 's'} left the outline and went; undo brings ${lost === 1 ? 'it' : 'them'} back.` : '');
+    this.apply(next);
+  }
+
+  onVertexRemoved(key: string, index: number): void {
+    const draft = this.draft();
+    const space = draft?.spaces.find((s) => s.key === key);
+    if (!draft || !space || !isPlaced(space)) return;
+    if (space.shape.length <= 3) {
+      this.notice.set('A room needs at least three corners.');
+      return;
+    }
+    this.onReshaped(key, withoutVertex(space.shape, index));
+  }
+
+  private doorTap(draft: FloorDraft, point: Point): void {
+    const space = this.selected();
+    if (!space || !isPlaced(space)) {
+      this.notice.set('Select a drawn room first, then tap its walls.');
+      return;
+    }
+    const reach = 12 / this.scale();
+    const existing = doorNear(space, point, reach);
+    if (existing !== null) {
+      this.apply(removeDoor(draft, space.key, existing));
+      this.notice.set('Door taken out.');
+      return;
+    }
+    const door = doorAt(space.shape, point, doorWidth(draft));
+    if (!door || Math.hypot(point.x - (door.from.x + door.to.x) / 2, point.y - (door.from.y + door.to.y) / 2) > doorWidth(draft) + reach) {
+      this.notice.set(`Tap on a wall of ${label(space)}.`);
+      return;
+    }
+    this.apply(addDoor(draft, space.key, door));
+    this.notice.set('Door added. Tap it again to take it out.');
+  }
+
+  /** The small square a tap draws, centred on it and kept on the drawing. */
+  private squareAt(draft: FloorDraft, point: Point): Point[] {
+    const side = Math.max(4, Math.round(Math.min(draft.width, draft.height) / 12));
+    const x = Math.max(0, Math.min(draft.width - side, Math.round(point.x - side / 2)));
+    const y = Math.max(0, Math.min(draft.height - side, Math.round(point.y - side / 2)));
+    return rectangle({ x, y, width: side, height: side });
   }
 
   private refusalText(space: DraftSpace, refusal: PlacementRefusal): string {
-    return refusal.reason === 'bounds'
-      ? `${label(space)} does not fit there - it is ${space.rowSpan} x ${space.colSpan}.`
-      : `${label(space)} would share a cell with ${label(refusal.other)}.`;
+    switch (refusal.reason) {
+      case 'bounds':
+        return `${label(space)} would reach outside the drawing.`;
+      case 'shape':
+        return `${label(space)}'s outline would cross itself.`;
+      default:
+        return `${label(space)} would overlap ${label(refusal.other)}.`;
+    }
   }
 
   /** Codes of spaces on other floors, so a new box never takes one. */
@@ -926,32 +1042,23 @@ export class FloorEditorPage {
     this.apply(next);
   }
 
-  nudge(rows: number, cols: number): void {
-    this.reshape((rect) => ({ ...rect, row: rect.row + rows, col: rect.col + cols }));
+  nudge(dx: number, dy: number): void {
+    const space = this.selected();
+    if (space) this.onMoved(space.key, dx, dy);
   }
 
-  resize(rows: number, cols: number): void {
-    this.reshape((rect) => ({
-      ...rect,
-      rowSpan: Math.max(1, rect.rowSpan + rows),
-      colSpan: Math.max(1, rect.colSpan + cols),
-    }));
+  toggleDoorMode(): void {
+    this.mode.set(this.mode() === 'door' ? 'select' : 'door');
+    this.placingKey.set(null);
+    this.activeCorridor.set(null);
+    this.notice.set('');
   }
 
-  private reshape(change: (rect: Rect) => Rect): void {
+  removeSelectedDoor(index: number): void {
     const draft = this.draft();
     const space = this.selected();
-    const rect = space ? rectOf(space) : null;
-    if (!draft || !space || !rect) return;
-    const next = change(rect);
-    if (next.rowSpan === rect.rowSpan && next.colSpan === rect.colSpan && next.row === rect.row && next.col === rect.col) return;
-    const refusal = refusePlacement(draft, space.key, next);
-    if (refusal) {
-      this.notice.set(refusal.reason === 'bounds' ? 'That would go past the edge of the grid.' : this.refusalText(space, refusal));
-      return;
-    }
-    this.notice.set('');
-    this.apply(place(draft, space.key, next));
+    if (!draft || !space) return;
+    this.apply(removeDoor(draft, space.key, index));
   }
 
   togglePlacing(key: string): void {
@@ -1013,16 +1120,14 @@ export class FloorEditorPage {
       && !draft.spaces.some((s) => s.code.toUpperCase() === door.toUpperCase()) && !taken.has(door);
     const space: DraftSpace = {
       key: newKey(),
-      code: codeFree ? door : newBox(draft, this.floor(), { row: 0, col: 0, rowSpan: 1, colSpan: 1 }, taken).code,
+      code: codeFree ? door : newBox(draft, this.floor(), null, taken).code,
       doorCode: door || null,
       wing: one.wing,
       name: one.name,
       typeCode: one.typeCode,
       aliases: [],
-      gridRow: null,
-      gridColumn: null,
-      rowSpan: 1,
-      colSpan: 1,
+      shape: null,
+      doors: [],
       accessVia: null,
       accessibility: null,
       note: null,
@@ -1092,11 +1197,11 @@ export class FloorEditorPage {
     this.apply({ ...draft, ...patch });
   }
 
-  setGrid(field: 'gridRows' | 'gridColumns', event: Event): void {
+  setSize(field: 'width' | 'height', event: Event): void {
     const draft = this.draft();
     const input = event.target as HTMLInputElement;
     if (!draft) return;
-    const value = Math.max(1, Math.min(60, Math.round(Number(input.value) || draft[field])));
+    const value = Math.max(1, Math.min(MAX_SIZE, Math.round(Number(input.value) || draft[field])));
     input.value = String(value);
     if (value !== draft[field]) this.apply({ ...draft, [field]: value });
   }

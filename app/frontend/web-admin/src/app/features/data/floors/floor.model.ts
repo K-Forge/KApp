@@ -1,5 +1,5 @@
-import type { Accessibility, Corridor, FloorStatus, Wing } from '../buildings/building.model';
-import type { Space } from '../spaces/space.model';
+import type { Accessibility, Corridor, FloorStatus, Point, Wing } from '../buildings/building.model';
+import type { Door, Space } from '../spaces/space.model';
 
 /**
  * Mirrors FloorDetail in docs/api/map.openapi.yaml: one floor with every space on it, placed or
@@ -12,8 +12,9 @@ export interface FloorDetail {
   status: FloorStatus;
   accessibility: Accessibility;
   note?: string | null;
-  gridRows: number;
-  gridColumns: number;
+  width: number;
+  height: number;
+  outline?: Point[];
   corridors?: Corridor[];
   version: number;
   buildingId: string;
@@ -32,10 +33,9 @@ export interface LayoutSpace {
   name: string;
   typeCode: string;
   aliases: string[];
-  gridRow?: number | null;
-  gridColumn?: number | null;
-  rowSpan: number;
-  colSpan: number;
+  /** Corners of its outline, in order; absent for a space known to be here but not drawn yet. */
+  shape?: Point[] | null;
+  doors: Door[];
   accessVia?: string | null;
   accessibility?: Accessibility | null;
   note?: string | null;
@@ -45,8 +45,9 @@ export interface LayoutSpace {
 /** Mirrors FloorLayoutRequest: the whole floor at once, refused with 409 if `version` is stale. */
 export interface FloorLayoutRequest {
   version: number;
-  gridRows: number;
-  gridColumns: number;
+  width: number;
+  height: number;
+  outline: Point[];
   status: FloorStatus;
   accessibility: Accessibility;
   note?: string | null;

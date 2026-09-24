@@ -316,7 +316,8 @@ pre {
   margin-bottom: 1rem;
 }
 
-.field label {
+.field label,
+.field .label {
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--text-muted);

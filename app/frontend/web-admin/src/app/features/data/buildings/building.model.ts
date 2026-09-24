@@ -1,7 +1,10 @@
-/** Mirrors GridPoint in docs/api/map.openapi.yaml. Zero-based, row 0 at the top as drawn. */
-export interface GridPoint {
-  row: number;
-  col: number;
+/**
+ * Mirrors Point in docs/api/map.openapi.yaml: a point on a floor's drawing, in the floor's own
+ * units. Origin at the top-left corner as the plan hangs; x to the right, y down.
+ */
+export interface Point {
+  x: number;
+  y: number;
 }
 
 /** Mirrors Corridor. */
@@ -9,7 +12,7 @@ export interface Corridor {
   code: string;
   name: string;
   color: string;
-  path: GridPoint[];
+  path: Point[];
 }
 
 /** Mirrors Accessibility: whether a place is reachable without stairs. UNKNOWN is never read as either. */
@@ -43,8 +46,11 @@ export interface Floor {
   status?: FloorStatus;
   accessibility?: Accessibility;
   note?: string | null;
-  gridRows: number;
-  gridColumns: number;
+  /** The drawing's size, in its own units; every point on the floor is within it. */
+  width: number;
+  height: number;
+  /** The building's walls around the floor, corners in order. Empty until traced. */
+  outline?: Point[];
   corridors?: Corridor[];
   /** Read-only: bumped by every layout save. */
   version?: number;

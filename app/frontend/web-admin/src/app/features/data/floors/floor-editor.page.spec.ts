@@ -16,7 +16,7 @@ const BUILDING: Building = {
   campus: 'Sede Principal',
   aliases: [],
   wings: [],
-  floors: [{ code: 'P1', level: 1, name: 'Piso 1', gridRows: 4, gridColumns: 8, status: 'DRAFT', accessibility: 'STEP_FREE' }],
+  floors: [{ code: 'P1', level: 1, name: 'Piso 1', width: 320, height: 160, status: 'DRAFT', accessibility: 'STEP_FREE' }],
 };
 
 const TYPES: SpaceType[] = [
@@ -31,8 +31,8 @@ function detail(version: number, names: string[] = ['101']): FloorDetail {
     name: 'Piso 1',
     status: 'DRAFT',
     accessibility: 'STEP_FREE',
-    gridRows: 4,
-    gridColumns: 8,
+    width: 320,
+    height: 160,
     version,
     buildingId: 'b-b',
     buildingCode: 'B',
@@ -51,10 +51,13 @@ function detail(version: number, names: string[] = ['101']): FloorDetail {
       floorCode: 'P1',
       floorLevel: 1,
       aliases: [],
-      gridRow: 0,
-      gridColumn: i,
-      rowSpan: 1,
-      colSpan: 1,
+      shape: [
+        { x: i * 40, y: 0 },
+        { x: i * 40 + 40, y: 0 },
+        { x: i * 40 + 40, y: 40 },
+        { x: i * 40, y: 40 },
+      ],
+      doors: [{ from: { x: i * 40 + 10, y: 40 }, to: { x: i * 40 + 30, y: 40 } }],
       effectiveAccessibility: 'STEP_FREE',
     })),
   };
@@ -167,16 +170,39 @@ describe('FloorEditorPage', () => {
     const request = expectSave();
     const body = request.request.body as FloorLayoutRequest;
     expect(body.version).toBe(4);
-    expect(body.spaces.find((s) => s.code === '102')).toMatchObject({ doorCode: '102', gridRow: null, gridColumn: null });
+    expect(body.spaces.find((s) => s.code === '102')).toMatchObject({ doorCode: '102', shape: null, doors: [] });
 
     const saved = detail(5, ['101', '102']);
-    saved.spaces[1] = { ...saved.spaces[1], gridRow: null, gridColumn: null };
+    saved.spaces[1] = { ...saved.spaces[1], shape: null, doors: [] };
     request.flush(saved);
     fixture.detectChanges();
 
     expect(page.dirty()).toBe(false);
     expect(page.detail()?.version).toBe(5);
     expect(loadDraft('B', 'P1')).toBeNull();
+  });
+
+  it('turns a room outlined on the plan into a box to name, and a drag moves it with its doors', () => {
+    open(detail(1));
+
+    page.onBoxDrawn([
+      { x: 100, y: 60 },
+      { x: 180, y: 60 },
+      { x: 180, y: 120 },
+      { x: 100, y: 120 },
+    ]);
+    const drawn = page.selected();
+    expect(drawn).toMatchObject({ code: 'P1-01', name: 'Sin identificar' });
+
+    page.onMoved('c:101', 20, 10);
+    const moved = page.draft()?.spaces.find((s) => s.code === '101');
+    expect(moved?.shape?.[0]).toEqual({ x: 20, y: 10 });
+    expect(moved?.doors[0]).toEqual({ from: { x: 30, y: 50 }, to: { x: 50, y: 50 } });
+
+    // Onto the new box: refused, and nothing changes.
+    page.onMoved('c:101', 100, 60);
+    expect(page.draft()?.spaces.find((s) => s.code === '101')?.shape?.[0]).toEqual({ x: 20, y: 10 });
+    expect(page.notice()).toContain('would overlap');
   });
 
   it('names the space a refusal is about, not its position in the request', () => {

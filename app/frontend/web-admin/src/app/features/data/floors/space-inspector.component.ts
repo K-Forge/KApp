@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { ACCESSIBILITY, ACCESSIBILITY_LABELS, type Accessibility, type Wing } from '../buildings/building.model';
-import { CATEGORY_LABELS, SPACE_CATEGORIES, type SpaceType } from '../spaces/space.model';
-import { isPlaced, isUnidentified, label, type DraftSpace } from './floor-draft';
+import { CATEGORY_LABELS, SPACE_CATEGORIES, type Door, type SpaceType } from '../spaces/space.model';
+import { boundsOf, isPlaced, isUnidentified, label, type DraftSpace } from './floor-draft';
 import type { LayoutSpace } from './floor.model';
 
 export interface CirculationOption {
@@ -14,8 +14,9 @@ export interface CirculationOption {
  * Everything about the selected space, edited in place. Each field applies when it is left, not
  * on every keystroke, so one undo takes back one edit rather than one letter.
  *
- * <p>Moving and resizing are buttons as well as gestures: on a touch screen a box one cell wide
- * is smaller than a fingertip, and a button is what lands where it was meant to.
+ * <p>Moving is buttons as well as a gesture: on a phone a small room is smaller than a fingertip,
+ * and a button is what lands where it was meant to. Its outline is reshaped on the plan itself,
+ * by its corners, and its doors are put on its walls there too.
  */
 @Component({
   selector: 'app-space-inspector',
@@ -32,7 +33,7 @@ export interface CirculationOption {
               <option [value]="option.key">{{ optionLabel(option) }}</option>
             }
           </select>
-          <span class="hint">The inventoried space takes this box's place and size, and the empty box goes.</span>
+          <span class="hint">The inventoried space takes this box's outline and doors, and the empty box goes.</span>
         </div>
       }
 
@@ -80,35 +81,41 @@ export interface CirculationOption {
 
       <div class="place">
         @if (placed()) {
-          <div class="row-between">
-            <span class="text-muted">Row {{ s.gridRow }}, column {{ s.gridColumn }} · {{ s.rowSpan }} x {{ s.colSpan }}</span>
-          </div>
+          <span class="text-muted">
+            {{ size() }} · {{ s.shape?.length }} corners · {{ s.doors.length }} door{{ s.doors.length === 1 ? '' : 's' }}
+          </span>
+          <p class="hint">
+            Drag it to move it. Drag a corner to reshape it, a dot between two corners to add one,
+            and double-tap a corner to take it out.
+          </p>
           <div class="pads">
             <div class="pad" role="group" aria-label="Move">
               <span class="pad-title">Move</span>
-              <button type="button" class="btn btn-sm up" aria-label="Move up" (click)="nudge.emit({ rows: -1, cols: 0 })">↑</button>
-              <button type="button" class="btn btn-sm left" aria-label="Move left" (click)="nudge.emit({ rows: 0, cols: -1 })">←</button>
-              <button type="button" class="btn btn-sm right" aria-label="Move right" (click)="nudge.emit({ rows: 0, cols: 1 })">→</button>
-              <button type="button" class="btn btn-sm down" aria-label="Move down" (click)="nudge.emit({ rows: 1, cols: 0 })">↓</button>
+              <button type="button" class="btn btn-sm up" aria-label="Move up" (click)="nudge.emit({ dx: 0, dy: -step() })">↑</button>
+              <button type="button" class="btn btn-sm left" aria-label="Move left" (click)="nudge.emit({ dx: -step(), dy: 0 })">←</button>
+              <button type="button" class="btn btn-sm right" aria-label="Move right" (click)="nudge.emit({ dx: step(), dy: 0 })">→</button>
+              <button type="button" class="btn btn-sm down" aria-label="Move down" (click)="nudge.emit({ dx: 0, dy: step() })">↓</button>
             </div>
-            <div class="pad" role="group" aria-label="Size">
-              <span class="pad-title">Size</span>
-              <button type="button" class="btn btn-sm up" aria-label="One row shorter" (click)="resize.emit({ rows: -1, cols: 0 })">−</button>
-              <button type="button" class="btn btn-sm left" aria-label="One column narrower" (click)="resize.emit({ rows: 0, cols: -1 })">−</button>
-              <button type="button" class="btn btn-sm right" aria-label="One column wider" (click)="resize.emit({ rows: 0, cols: 1 })">+</button>
-              <button type="button" class="btn btn-sm down" aria-label="One row taller" (click)="resize.emit({ rows: 1, cols: 0 })">+</button>
+            <div class="doors">
+              <span class="pad-title">Doors</span>
+              <button type="button" class="btn btn-sm" [class.btn-primary]="doorMode()" (click)="doors.emit()">
+                {{ doorMode() ? 'Tap a wall… (done)' : 'Put doors on its walls' }}
+              </button>
+              @for (door of s.doors; track $index) {
+                <div class="row door-row">
+                  <span class="text-muted">Door {{ $index + 1 }} · {{ doorLength(door) }} wide</span>
+                  <button type="button" class="btn btn-sm" [attr.aria-label]="'Remove door ' + ($index + 1)" (click)="removeDoor.emit($index)">✕</button>
+                </div>
+              }
             </div>
           </div>
           <div class="row">
-            <button type="button" class="btn btn-sm" [class.btn-primary]="placing()" (click)="move.emit()">
-              {{ placing() ? 'Tap a cell…' : 'Move to a cell' }}
-            </button>
             <button type="button" class="btn btn-sm" (click)="unplace.emit()">Back to the inventory</button>
           </div>
         } @else {
-          <p class="text-muted" style="margin:0">Not on the grid yet.</p>
+          <p class="text-muted" style="margin:0">Not drawn yet.</p>
           <button type="button" class="btn btn-sm" [class.btn-primary]="placing()" (click)="move.emit()">
-            {{ placing() ? 'Now tap a cell on the grid…' : 'Place it on the grid' }}
+            {{ placing() ? 'Now drag its outline on the plan, or tap where it is…' : 'Draw it on the plan' }}
           </button>
         }
       </div>
@@ -179,6 +186,21 @@ export interface CirculationOption {
       background: var(--bg-inset);
       border-radius: var(--radius-sm);
     }
+    .hint {
+      margin: 0;
+      font-size: 0.75rem;
+      color: var(--text-faint);
+    }
+    .doors {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 10rem;
+    }
+    .door-row {
+      justify-content: space-between;
+      align-items: center;
+    }
     .pads {
       display: flex;
       gap: 1rem;
@@ -222,11 +244,15 @@ export class SpaceInspectorComponent {
   readonly floorAccessibility = input<Accessibility>('UNKNOWN');
   readonly issues = input<string[]>([]);
   readonly placing = input(false);
+  readonly doorMode = input(false);
+  /** How far one press of a Move button goes, in the drawing's units. */
+  readonly step = input(1);
 
   readonly patch = output<Partial<LayoutSpace>>();
-  readonly nudge = output<{ rows: number; cols: number }>();
-  readonly resize = output<{ rows: number; cols: number }>();
+  readonly nudge = output<{ dx: number; dy: number }>();
   readonly move = output<void>();
+  readonly doors = output<void>();
+  readonly removeDoor = output<number>();
   readonly unplace = output<void>();
   readonly remove = output<void>();
   readonly assign = output<string>();
@@ -236,6 +262,12 @@ export class SpaceInspectorComponent {
 
   readonly placed = computed(() => isPlaced(this.space()));
   readonly unidentified = computed(() => this.placed() && isUnidentified(this.space()));
+  readonly size = computed(() => {
+    const shape = this.space().shape;
+    if (!shape?.length) return '';
+    const box = boundsOf(shape);
+    return `${box.width} x ${box.height}`;
+  });
   readonly floorAccessibilityLabel = computed(() => ACCESSIBILITY_LABELS[this.floorAccessibility()].toLowerCase());
 
   readonly typeGroups = computed(() =>
@@ -255,6 +287,10 @@ export class SpaceInspectorComponent {
       ? [...options, { code: current, name: `${current} - not found`, floorCode: '?' }]
       : options;
   });
+
+  doorLength(door: Door): number {
+    return Math.round(Math.hypot(door.to.x - door.from.x, door.to.y - door.from.y));
+  }
 
   optionLabel(space: DraftSpace): string {
     const door = space.doorCode?.trim();

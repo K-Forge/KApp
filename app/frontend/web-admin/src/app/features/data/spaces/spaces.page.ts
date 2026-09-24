@@ -102,7 +102,7 @@ const MIN_QUERY_LENGTH = 2;
                 <th>Type</th>
                 <th>Building</th>
                 <th>Floor</th>
-                <th>On the grid</th>
+                <th>On the plan</th>
                 <th>Capacity</th>
                 <th></th>
               </tr>
@@ -121,10 +121,10 @@ const MIN_QUERY_LENGTH = 2;
                   <td>{{ space.buildingCode }}{{ space.wing ? ' · ' + space.wing : '' }}</td>
                   <td>{{ space.floorCode }}</td>
                   <td>
-                    @if (space.gridRow != null && space.gridColumn != null) {
-                      <span class="text-muted">{{ space.gridRow }}, {{ space.gridColumn }}</span>
+                    @if (space.shape) {
+                      <span class="text-muted">Drawn{{ space.doors?.length ? ' · ' + space.doors?.length + ' door' + (space.doors?.length === 1 ? '' : 's') : '' }}</span>
                     } @else {
-                      <span class="badge badge-warning">Not placed</span>
+                      <span class="badge badge-warning">Not drawn</span>
                     }
                   </td>
                   <td class="text-muted">{{ space.capacity ?? '—' }}</td>

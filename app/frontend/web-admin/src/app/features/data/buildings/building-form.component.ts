@@ -22,8 +22,8 @@ type FloorForm = FormGroup<{
   status: FormControl<FloorStatus>;
   accessibility: FormControl<Accessibility>;
   note: FormControl<string>;
-  gridRows: FormControl<number>;
-  gridColumns: FormControl<number>;
+  width: FormControl<number>;
+  height: FormControl<number>;
 }>;
 
 type WingForm = FormGroup<{
@@ -52,8 +52,10 @@ function floorGroup(floor?: Partial<Floor>): FloorForm {
     status: new FormControl<FloorStatus>(floor?.status ?? 'UNMAPPED', { nonNullable: true }),
     accessibility: new FormControl<Accessibility>(floor?.accessibility ?? 'UNKNOWN', { nonNullable: true }),
     note: new FormControl(floor?.note ?? '', { nonNullable: true, validators: [Validators.maxLength(300)] }),
-    gridRows: new FormControl(floor?.gridRows ?? 11, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(60)] }),
-    gridColumns: new FormControl(floor?.gridColumns ?? 16, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(60)] }),
+    // The drawing's size in its own units. A floor traced from a plan comes with it; a new one
+    // starts at the size the placeholder floors had, and grows in the floor editor.
+    width: new FormControl(floor?.width ?? 640, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(20000)] }),
+    height: new FormControl(floor?.height ?? 440, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(20000)] }),
   });
 }
 
@@ -176,12 +178,12 @@ function wingGroup(wing?: Partial<Wing>): WingForm {
               <input [id]="'f-name-' + $index" type="text" formControlName="name" placeholder="Piso 1" />
             </div>
             <div class="field">
-              <label [for]="'f-rows-' + $index">Grid rows</label>
-              <input [id]="'f-rows-' + $index" type="number" formControlName="gridRows" min="1" max="60" />
+              <label [for]="'f-width-' + $index">Drawing width</label>
+              <input [id]="'f-width-' + $index" type="number" formControlName="width" min="1" max="20000" />
             </div>
             <div class="field">
-              <label [for]="'f-cols-' + $index">Grid columns</label>
-              <input [id]="'f-cols-' + $index" type="number" formControlName="gridColumns" min="1" max="60" />
+              <label [for]="'f-height-' + $index">Drawing height</label>
+              <input [id]="'f-height-' + $index" type="number" formControlName="height" min="1" max="20000" />
             </div>
             <div class="field">
               <label [for]="'f-status-' + $index">Status</label>
@@ -314,9 +316,10 @@ export class BuildingFormComponent {
       this.form.markAllAsTouched();
       return;
     }
-    // Corridors are carried through untouched, matched by floor code. This form edits a floor's
-    // shape; its corridors are drawn in the floor editor, and dropping them here because the form
-    // does not show them would silently erase somebody's afternoon of walking a floor.
+    // Corridors and the outline are carried through untouched, matched by floor code. This form
+    // edits a floor's name and size; what is drawn on it is drawn in the floor editor, and dropping
+    // it here because the form does not show it would silently erase somebody's afternoon of
+    // walking a floor.
     const raw = this.form.getRawValue();
     const existing = this.initial()?.floors ?? [];
     this.submitted.emit({
@@ -335,6 +338,7 @@ export class BuildingFormComponent {
         ...floor,
         level: Number(floor.level),
         note: floor.note.trim() || null,
+        outline: existing.find((f) => f.code === floor.code)?.outline ?? [],
         corridors: existing.find((f) => f.code === floor.code)?.corridors ?? [],
       })),
     });

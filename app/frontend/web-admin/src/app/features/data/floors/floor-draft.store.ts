@@ -17,7 +17,9 @@ export interface StoredDraft {
   draft: FloorDraft;
 }
 
-const PREFIX = 'kapp-admin:floor-draft:';
+// v3: rooms as outlines. A draft kept from the grid editor cannot be restored into this one, so
+// it is simply never found.
+const PREFIX = 'kapp-admin:floor-draft:v3:';
 
 function keyFor(buildingCode: string, floorCode: string): string {
   return `${PREFIX}${buildingCode}:${floorCode}`;

@@ -5,8 +5,6 @@ import {
   FormGroup,
   ReactiveFormsModule,
   Validators,
-  type AbstractControl,
-  type ValidationErrors,
 } from '@angular/forms';
 import { ACCESSIBILITY, ACCESSIBILITY_LABELS, type Accessibility, type Building } from '../buildings/building.model';
 import { CATEGORY_LABELS, SPACE_CATEGORIES, type Space, type SpaceRequest, type SpaceType } from './space.model';
@@ -22,10 +20,6 @@ type SpaceForm = FormGroup<{
   buildingCode: FormControl<string>;
   floorCode: FormControl<string>;
   wing: FormControl<string>;
-  gridRow: FormControl<number | null>;
-  gridColumn: FormControl<number | null>;
-  rowSpan: FormControl<number>;
-  colSpan: FormControl<number>;
   accessVia: FormControl<string>;
   accessibility: FormControl<Accessibility | ''>;
   note: FormControl<string>;
@@ -35,15 +29,6 @@ type SpaceForm = FormGroup<{
 
 function aliasControl(value = ''): FormControl<string> {
   return new FormControl(value, { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] });
-}
-
-/** A space is either placed - row and column - or only inventoried. Half a position is neither. */
-function bothOrNeither(group: AbstractControl): ValidationErrors | null {
-  const row = group.get('gridRow')?.value;
-  const column = group.get('gridColumn')?.value;
-  const hasRow = row !== null && row !== undefined && row !== '';
-  const hasColumn = column !== null && column !== undefined && column !== '';
-  return hasRow === hasColumn ? null : { halfPlaced: true };
 }
 
 /**
@@ -142,39 +127,20 @@ function bothOrNeither(group: AbstractControl): ValidationErrors | null {
       </div>
 
       <div class="row spread">
-        <div class="field" style="margin-bottom:0; flex: 1 1 6rem">
-          <label for="s-row">Grid row</label>
-          <input id="s-row" type="number" formControlName="gridRow" min="0" [max]="maxRow()" />
+        <div class="field" style="flex: 2 1 12rem">
+          <span class="label">On the floor plan</span>
+          @if (keepsShape()) {
+            <span class="text-muted">Drawn{{ doorCount() ? ' · ' + doorCount() + (doorCount() === 1 ? ' door' : ' doors') : '' }}. Its outline and doors are edited in the floor editor.</span>
+          } @else if (initial()?.shape) {
+            <span class="text-muted">Moving it to another floor takes it off the plan; draw it there in the floor editor.</span>
+          } @else {
+            <span class="text-muted">Not drawn yet. Draw it, or match it with a traced room, in the floor editor.</span>
+          }
         </div>
-        <div class="field" style="margin-bottom:0; flex: 1 1 6rem">
-          <label for="s-col">Grid column</label>
-          <input id="s-col" type="number" formControlName="gridColumn" min="0" [max]="maxColumn()" />
-        </div>
-        <div class="field" style="margin-bottom:0; flex: 1 1 5rem">
-          <label for="s-rowspan">Rows</label>
-          <input id="s-rowspan" type="number" formControlName="rowSpan" min="1" max="60" />
-        </div>
-        <div class="field" style="margin-bottom:0; flex: 1 1 5rem">
-          <label for="s-colspan">Columns</label>
-          <input id="s-colspan" type="number" formControlName="colSpan" min="1" max="60" />
-        </div>
-        <div class="field" style="margin-bottom:0; flex: 1 1 6rem">
+        <div class="field" style="flex: 1 1 6rem">
           <label for="s-capacity">Capacity</label>
           <input id="s-capacity" type="number" formControlName="capacity" min="0" />
         </div>
-      </div>
-      <div class="field">
-        @if (form.hasError('halfPlaced') && (form.controls.gridRow.touched || form.controls.gridColumn.touched)) {
-          <span class="error">Give both a row and a column, or leave both empty.</span>
-        }
-        @if (floor(); as selected) {
-          <span class="hint">
-            {{ selected.name }} is {{ selected.gridRows }} x {{ selected.gridColumns }}. Leave row and
-            column empty for a space you know is on this floor but have not placed yet.
-          </span>
-        } @else {
-          <span class="hint">Leave row and column empty for a space you know exists but have not placed yet.</span>
-        }
       </div>
 
       <div class="row spread">
@@ -257,8 +223,12 @@ export class SpaceFormComponent {
   readonly wings = computed(() => this.building()?.wings ?? []);
   readonly floor = computed(() => this.floors().find((f) => f.code === this.floorCode()) ?? null);
 
-  readonly maxRow = computed(() => Math.max(0, (this.floor()?.gridRows ?? 60) - 1));
-  readonly maxColumn = computed(() => Math.max(0, (this.floor()?.gridColumns ?? 60) - 1));
+  /** The outline and doors stay with the space while it stays on the floor they were drawn on. */
+  readonly keepsShape = computed(() => {
+    const space = this.initial();
+    return !!space?.shape && this.buildingCode() === space.buildingCode && this.floorCode() === space.floorCode;
+  });
+  readonly doorCount = computed(() => this.initial()?.doors?.length ?? 0);
 
   readonly floorAccessibility = computed(() => ACCESSIBILITY_LABELS[this.floor()?.accessibility ?? 'UNKNOWN'].toLowerCase());
 
@@ -308,17 +278,12 @@ export class SpaceFormComponent {
         buildingCode: new FormControl(space?.buildingCode ?? '', { nonNullable: true, validators: [Validators.required] }),
         floorCode: new FormControl(space?.floorCode ?? '', { nonNullable: true, validators: [Validators.required] }),
         wing: new FormControl(space?.wing ?? '', { nonNullable: true }),
-        gridRow: new FormControl<number | null>(space?.gridRow ?? null, { validators: [Validators.min(0)] }),
-        gridColumn: new FormControl<number | null>(space?.gridColumn ?? null, { validators: [Validators.min(0)] }),
-        rowSpan: new FormControl(space?.rowSpan ?? 1, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(60)] }),
-        colSpan: new FormControl(space?.colSpan ?? 1, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(60)] }),
         accessVia: new FormControl(space?.accessVia ?? '', { nonNullable: true }),
         accessibility: new FormControl<Accessibility | ''>(space?.accessibility ?? '', { nonNullable: true }),
         note: new FormControl(space?.note ?? '', { nonNullable: true, validators: [Validators.maxLength(300)] }),
         capacity: new FormControl<number | null>(space?.capacity ?? null, { validators: [Validators.min(0)] }),
         aliases: new FormArray((space?.aliases ?? []).map((a) => aliasControl(a))),
       },
-      { validators: bothOrNeither },
     );
   }
 
@@ -376,7 +341,7 @@ export class SpaceFormComponent {
       return;
     }
     const raw = this.form.getRawValue();
-    const placed = raw.gridRow !== null && raw.gridColumn !== null;
+    const keep = this.keepsShape();
     // An empty field means "not set", never "set to empty": the server reads an absent door code
     // as "nothing printed on the door" and an absent accessibility as "the floor's", and an
     // empty string would be stored as a value on both.
@@ -389,10 +354,8 @@ export class SpaceFormComponent {
       buildingCode: raw.buildingCode,
       floorCode: raw.floorCode,
       aliases: raw.aliases.map((a) => a.trim()).filter(Boolean),
-      gridRow: placed ? Number(raw.gridRow) : null,
-      gridColumn: placed ? Number(raw.gridColumn) : null,
-      rowSpan: raw.rowSpan,
-      colSpan: raw.colSpan,
+      shape: keep ? this.initial()?.shape ?? null : null,
+      doors: keep ? this.initial()?.doors ?? [] : [],
       accessVia: raw.accessVia || null,
       accessibility: raw.accessibility || null,
       note: raw.note.trim() || null,
