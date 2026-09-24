@@ -116,7 +116,10 @@ def main():
     path = os.path.join(SEED, spec["building"].lower() + ".json")
     building = json.load(open(path, encoding="utf-8"))
     floor = next(f for f in building["floors"] if f["code"] == spec["code"])
-    inventory = {s["code"]: s for s in floor.get("spaces", [])}
+    # The boxes an earlier run could not name are that run's, not the inventory's: they go, and
+    # whatever is still unnamed now comes back under the same codes.
+    inventory = {s["code"]: s for s in floor.get("spaces", [])
+                 if not (s.get("typeCode") == "OTHER" and s.get("name") == "Sin identificar" and not s.get("doorCode"))}
 
     named = {}
     for code, (x, y) in spec.get("spaces", {}).items():
@@ -140,9 +143,14 @@ def main():
         inventory[code]["shape"] = points(outline)
 
     # The rooms nobody could name yet, numbered after the floor like the editor numbers them.
-    taken = {c.upper() for b in os.listdir(SEED) if b.endswith(".json")
-             for f in json.load(open(os.path.join(SEED, b), encoding="utf-8"))["floors"]
-             for c in (s["code"] for s in f.get("spaces", []))}
+    taken = {code.upper() for code in inventory}
+    for name in os.listdir(SEED):
+        if not name.endswith(".json"):
+            continue
+        other = json.load(open(os.path.join(SEED, name), encoding="utf-8"))
+        for f in other["floors"]:
+            if not (other["code"] == spec["building"] and f["code"] == spec["code"]):
+                taken.update(s["code"].upper() for s in f.get("spaces", []))
     n = 0
     unnamed = [s for s in shapes if id(s) not in named]
     unnamed.sort(key=lambda s: (min(p[1] for p in s["shape"]), min(p[0] for p in s["shape"])))

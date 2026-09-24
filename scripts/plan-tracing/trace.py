@@ -479,10 +479,12 @@ def inside(poly, x, y):
     return hit
 
 
-def teal(r, g, b):
-    """The door swings of the sanitary route plans (RS): (90-110, 150-160, 140-150). Not the
-    green of the organic waste route, nor the blue of windows and the recycling route."""
-    return g > r + 35 and b > r + 25 and abs(g - b) < 25
+def teal(r, g, b, tint=(35, 25)):
+    """The door swings of the sanitary route plans (RS): (90-110, 150-160, 140-150) in good light,
+    where `tint` - how much greener and bluer than red - is (35, 25); (60-80, 100-110, 90-110) in
+    a dimmer photo, where (20, 15) finds them. Not the green of the organic waste route, nor the
+    blue of windows and the recycling route, nor the grey of walls."""
+    return g > r + tint[0] and b > r + tint[1] and abs(g - b) < 25
 
 
 def on_outline(wall, poly, reach):
@@ -511,7 +513,7 @@ def on_outline(wall, poly, reach):
     return best
 
 
-def doors_from(source, prefix, pairs, rooms, reach, smallest, largest):
+def doors_from(source, prefix, pairs, rooms, reach, smallest, largest, tint=(35, 25)):
     """Doors, from a plan that draws them. The evacuation plans do not - their light blue is glass
     - but the sanitary route plan of the same floor draws every door as its swing, in teal.
     `pairs` are the same four points on both plans (in that photo's pixels, and in this plan's),
@@ -530,7 +532,7 @@ def doors_from(source, prefix, pairs, rooms, reach, smallest, largest):
     margin = 20
     x0, y0, x1, y1 = lo_x - margin, lo_y - margin, sw + margin, sh + margin
     bw, bh = x1 - x0, y1 - y0
-    mask = bytearray(1 if teal(*rgb(x0 + i, y0 + j)) else 0 for j in range(bh) for i in range(bw))
+    mask = bytearray(1 if teal(*rgb(x0 + i, y0 + j), tint) else 0 for j in range(bh) for i in range(bw))
     joined = dilate(mask, bw, bh, 2)
     pieces = []
     for piece in components(joined, bw, bh, 1, eight=True):
@@ -873,7 +875,8 @@ def main():
     if "doors" in spec:
         source = survey_file(spec_path, spec["doors"]["photo"])
         doors, swings = doors_from(source, prefix, spec["doors"]["pairs"], rooms, reach=size("reach", 16),
-                                   smallest=spec["doors"].get("smallest", 25), largest=spec["doors"].get("largest", 140))
+                                   smallest=spec["doors"].get("smallest", 25), largest=spec["doors"].get("largest", 140),
+                                   tint=tuple(spec["doors"].get("tint", (35, 25))))
 
     json.dump({"width": w, "height": h,
                "rooms": [{"shape": [list(q) for q in poly], "doors": doors[k]} for k, poly in enumerate(rooms)],
