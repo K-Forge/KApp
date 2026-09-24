@@ -19,8 +19,8 @@ Puts a traced floor into the map snapshot, with every room it can name.
                                            an outline for a space the plan does not paint
     }
 
-Every traced room nobody named is added as "Sin identificar", for the floor editor to match with
-the inventory on site. Every space of the inventory the spec does not place is kept, undrawn.
+Every traced room nobody named is added as "Sin identificar", and every staircase as "Escalera
+por identificar", for the floor editor to match with the inventory on site. Every space of the inventory the spec does not place is kept, undrawn.
 The floor's size becomes the trace's, and corridors drawn on the old drawing - in other units -
 go. The floor stays DRAFT: drawn from photos, not yet walked.
 
@@ -29,6 +29,9 @@ Standard library only.
 import json
 import os
 import sys
+
+UNNAMED = "Sin identificar"
+UNNAMED_STAIRS = "Escalera por identificar"
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SEED = os.path.join(REPO, "app", "backend", "microservices", "map-service", "src", "main", "resources",
@@ -98,7 +101,7 @@ def main():
 
     # Every outline the plan gives, with its doors; stairs have none drawn.
     shapes = [{"shape": r["shape"], "doors": r["doors"]} for r in trace["rooms"]]
-    shapes += [{"shape": s["shape"], "doors": []} for s in trace.get("stairs", [])]
+    shapes += [{"shape": s["shape"], "doors": [], "stairs": True} for s in trace.get("stairs", [])]
 
     for cut in spec.get("split", []):
         x, y = cut["at"]
@@ -110,7 +113,7 @@ def main():
         for below in (True, False):
             part = clip(room["shape"], axis, cut[axis], below)
             if len(part) >= 3:
-                shapes.append({"shape": part, "doors": [d for d in room["doors"]
+                shapes.append({"shape": part, "stairs": room.get("stairs", False), "doors": [d for d in room["doors"]
                                                           if on_outline(part, d[0]) and on_outline(part, d[1])]})
 
     path = os.path.join(SEED, spec["building"].lower() + ".json")
@@ -119,7 +122,7 @@ def main():
     # The boxes an earlier run could not name are that run's, not the inventory's: they go, and
     # whatever is still unnamed now comes back under the same codes.
     inventory = {s["code"]: s for s in floor.get("spaces", [])
-                 if not (s.get("typeCode") == "OTHER" and s.get("name") == "Sin identificar" and not s.get("doorCode"))}
+                 if not (s.get("name") in (UNNAMED, UNNAMED_STAIRS) and not s.get("doorCode"))}
 
     named = {}
     for code, (x, y) in spec.get("spaces", {}).items():
@@ -161,8 +164,10 @@ def main():
             if code.upper() not in taken:
                 break
         taken.add(code.upper())
-        space = {"code": code, "name": "Sin identificar", "typeCode": "OTHER", "aliases": [],
-                 "shape": points(room["shape"])}
+        # Stairs are drawn as stairs even before anyone knows which ones they are.
+        stairs = room.get("stairs", False)
+        space = {"code": code, "name": UNNAMED_STAIRS if stairs else UNNAMED,
+                 "typeCode": "STAIRS" if stairs else "OTHER", "aliases": [], "shape": points(room["shape"])}
         if room["doors"]:
             space["doors"] = [{"from": points([d[0]])[0], "to": points([d[1]])[0]} for d in room["doors"]]
         inventory[code] = space
