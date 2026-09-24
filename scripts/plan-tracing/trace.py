@@ -147,7 +147,7 @@ def balanced(img):
     return [tuple(min(255, int(v * k)) for v, k in zip(p, gains)) for p in img]
 
 
-def klass(r, g, b, proportional=False):
+def klass(r, g, b, proportional=False, bounds=((0.52, 0.76), 0.40)):
     """Colours measured on the CPC 1 plans: orange (190, 130, 82), red (147, 0, 34), green
     (0, 112, 58), walls (49, 37, 64), glass (104, 138, 129) to (152, 177, 171). In a balanced
     dim photo orange is told by its proportions instead: green a bit over half the red, blue well
@@ -155,7 +155,8 @@ def klass(r, g, b, proportional=False):
     if proportional:
         # The thin lines between classrooms are only a little lighter - green 0.8 of the red
         # where the orange has 0.64 to 0.73 - so the bounds are tight.
-        if r > 110 and 0.52 * r <= g <= 0.76 * r and b <= 0.40 * r:
+        (g_low, g_high), b_high = bounds
+        if r > 110 and g_low * r <= g <= g_high * r and b <= b_high * r:
             return FILL
     elif r > 140 and g > 80 and r - b > 60 and 15 < r - g < 72:
         return FILL                                 # past 72 it is the rim of a red line
@@ -800,7 +801,9 @@ def main():
     dim = spec.get("light") == "balanced"
     if dim:
         img = balanced(img)
-    mask = bytearray(klass(*c, proportional=dim) for c in img)
+    # A washed-out photo - glare over the glass - may need looser bounds: "fill": [[g low, g high], b high].
+    bounds = tuple(spec.get("fill", ((0.52, 0.76), 0.40)))
+    mask = bytearray(klass(*c, proportional=dim, bounds=bounds) for c in img)
 
     # 7 first, while the treads are still walls: stairs.
     stairs = ladders(mask, w, h, tread=size("tread", 18), pitch=(size("pitch_min", 5), size("pitch_max", 22)),
@@ -889,7 +892,10 @@ def main():
             rooms.append(poly)
     rooms.extend([tuple(q) for q in r["shape"]] for r in spec.get("rooms", []))
     rooms.sort(key=lambda p: (min(q[1] for q in p) // (4 * narrowest), min(q[0] for q in p)))
-    stairs = [s for s in stairs if not any(overlap_box(s, r) for r in rooms)]
+    # A staircase narrower than a flight is a label's letters, not stairs.
+    flight = size("flight", 30)
+    stairs = [s for s in stairs if not any(overlap_box(s, r) for r in rooms)
+              and min(s[2][0] - s[0][0], s[2][1] - s[0][1]) >= flight]
     for drawn in spec.get("stairs", []):
         shape = [tuple(q) for q in drawn]
         stairs = [s for s in stairs if not overlap_box(s, shape)] + [shape]
