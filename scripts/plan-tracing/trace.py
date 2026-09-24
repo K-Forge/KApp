@@ -920,6 +920,15 @@ def main():
         doors, swings = doors_from(source, prefix, spec["doors"]["pairs"], rooms, reach=size("reach", 16),
                                    smallest=spec["doors"].get("smallest", 25), largest=spec["doors"].get("largest", 140),
                                    tint=tuple(spec["doors"].get("tint", (35, 25))))
+    # A room the spec draws may bring its doors: the line plans of the Casa Medio Universitario
+    # draw every swing, but in black, where no colour tells them from the walls.
+    for r in spec.get("rooms", []):
+        shape = [tuple(q) for q in r["shape"]]
+        for door in r.get("doors", []):
+            if not all(on_edge(shape, q) for q in door):
+                print(f"  door {door}: not on the outline of the room it is drawn with", file=sys.stderr)
+                continue
+            doors[rooms.index(shape)].append([list(q) for q in door])
 
     json.dump({"width": w, "height": h,
                "rooms": [{"shape": [list(q) for q in poly], "doors": doors[k]} for k, poly in enumerate(rooms)],
@@ -928,6 +937,11 @@ def main():
     preview(prefix, w, h, rooms, doors, stairs, swings)
     print(f"{w}x{h}: {len(rooms)} rooms, {sum(len(d) for d in doors)} doors, {len(stairs)} stairs; "
           f"corners {[len(p) for p in rooms]}")
+
+
+def on_edge(poly, point):
+    """Whether a point lies on the outline of a polygon, within one unit."""
+    return any(segment_distance(point, poly[i - 1], poly[i])[0] <= 1 for i in range(len(poly)))
 
 
 def overlap_box(box, poly):
