@@ -134,10 +134,28 @@ def homography(src, dst):
 
 # ── Pixels ───────────────────────────────────────────────────────────────────────────────────
 
-def klass(r, g, b):
+def balanced(img):
+    """The photo with its paper made white: each channel scaled so its bright end - the paper,
+    most of any plan - sits at 225. A dim or yellowish photo then reads like a bright one."""
+    gains = []
+    for channel in range(3):
+        values = sorted(p[channel] for p in img[::7])
+        bright = max(1, values[int(len(values) * 0.9)])
+        gains.append(min(3.0, 225 / bright))
+    return [tuple(min(255, int(v * k)) for v, k in zip(p, gains)) for p in img]
+
+
+def klass(r, g, b, proportional=False):
     """Colours measured on the CPC 1 plans: orange (190, 130, 82), red (147, 0, 34), green
-    (0, 112, 58), walls (49, 37, 64), doors (104, 138, 129) to (152, 177, 171)."""
-    if r > 140 and g > 80 and r - b > 60 and 15 < r - g < 72:
+    (0, 112, 58), walls (49, 37, 64), glass (104, 138, 129) to (152, 177, 171). In a balanced
+    dim photo orange is told by its proportions instead: green a bit over half the red, blue well
+    under it - the Edificio Central's plans, orange (130, 80, 15) before balancing."""
+    if proportional:
+        # The thin lines between classrooms are only a little lighter - green 0.8 of the red
+        # where the orange has 0.64 to 0.73 - so the bounds are tight.
+        if r > 110 and 0.52 * r <= g <= 0.76 * r and b <= 0.40 * r:
+            return FILL
+    elif r > 140 and g > 80 and r - b > 60 and 15 < r - g < 72:
         return FILL                                 # past 72 it is the rim of a red line
     if r > 100 and r - g > 70 and r - b > 40:
         return MARK                                 # red: routes, "usted está aquí", fire gear
@@ -775,8 +793,12 @@ def main():
             img.append(rgb(x / z, y / z))
     write_bmp(prefix + ".rect.bmp", img, w, h)
 
-    # 2. Classify.
-    mask = bytearray(klass(*c) for c in img)
+    # 2. Classify. A plan photographed in a dim corridor ("light": "balanced") has its light
+    #    evened out first, and its orange told by proportion rather than by brightness.
+    dim = spec.get("light") == "balanced"
+    if dim:
+        img = balanced(img)
+    mask = bytearray(klass(*c, proportional=dim) for c in img)
 
     # 7 first, while the treads are still walls: stairs.
     stairs = ladders(mask, w, h, tread=size("tread", 18), pitch=(size("pitch_min", 5), size("pitch_max", 22)),
