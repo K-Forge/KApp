@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 /**
- * Everything a client needs to draw one floor in a single call: the grid, the corridors that
- * cross it, the building's wings, and every space on it - placed or not.
+ * Everything a client needs to draw one floor in a single call: its size and outline, the
+ * corridors that cross it, the building's wings, and every space on it - placed or not.
  */
 @Schema(name = "FloorDetail")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -20,8 +20,9 @@ public record FloorDetailResponse(
         FloorStatus status,
         Accessibility accessibility,
         String note,
-        int gridRows,
-        int gridColumns,
+        int width,
+        int height,
+        List<PointDto> outline,
         List<CorridorDto> corridors,
         long version,
         String buildingId,

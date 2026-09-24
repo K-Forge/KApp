@@ -7,6 +7,7 @@ import co.edu.konradlorenz.kapp.map.domain.FloorStatus;
 import co.edu.konradlorenz.kapp.map.service.MapMapper;
 import co.edu.konradlorenz.kapp.map.web.dto.CorridorDto;
 import co.edu.konradlorenz.kapp.map.web.dto.LayoutSpaceDto;
+import co.edu.konradlorenz.kapp.map.web.dto.PointDto;
 import co.edu.konradlorenz.kapp.map.web.dto.WingDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.Resource;
@@ -25,9 +26,9 @@ import java.util.UUID;
  * The campus as the snapshot under {@code db/seed/map/} describes it: one file per building, in
  * the shape of the API - a building request whose floors carry their spaces.
  *
- * <p>The first snapshot was transcribed from the campus survey ({@code docs/map/LEVANTAMIENTO.md}):
- * every floor not drawn yet and every space in the inventory, waiting to be placed. From then on
- * {@code scripts/export-map-snapshot.sh} rewrites it from what has been drawn in the portal, so a
+ * <p>The first snapshot was transcribed from the campus survey ({@code docs/map/LEVANTAMIENTO.md}),
+ * with each room's shape traced from the floor's evacuation plan where there is one. From then on
+ * {@code scripts/export-map-snapshot.py} rewrites it from what has been drawn in the portal, so a
  * fresh database starts from the campus as it was last exported rather than from photos.
  */
 public final class SurveySnapshot {
@@ -69,12 +70,14 @@ public final class SurveySnapshot {
             FloorStatus status,
             Accessibility accessibility,
             String note,
-            int gridRows,
-            int gridColumns,
+            int width,
+            int height,
+            List<PointDto> outline,
             List<CorridorDto> corridors,
             List<LayoutSpaceDto> spaces
     ) {
         public SnapshotFloor {
+            outline = outline == null ? List.of() : List.copyOf(outline);
             corridors = corridors == null ? List.of() : List.copyOf(corridors);
             spaces = spaces == null ? List.of() : List.copyOf(spaces);
         }
@@ -83,7 +86,7 @@ public final class SurveySnapshot {
             return new Floor(code, level, name,
                     status == null ? FloorStatus.UNMAPPED : status,
                     accessibility == null ? Accessibility.UNKNOWN : accessibility,
-                    note, gridRows, gridColumns,
+                    note, width, height, MapMapper.toPoints(outline),
                     corridors.stream().map(MapMapper::toCorridor).toList(), 0);
         }
     }

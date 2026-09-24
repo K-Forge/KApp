@@ -30,8 +30,8 @@
       "status": "UNMAPPED",
       "accessibility": "UNKNOWN",
       "note": "Parqueadero. Se baja en carro por la rampa del piso 1.",
-      "gridRows": 12,
-      "gridColumns": 20,
+      "width": 800,
+      "height": 480,
       "spaces": [
         {
           "code": "S1-PARQUEADERO",
@@ -41,9 +41,7 @@
           "aliases": [
             "sótano",
             "parqueadero del Edificio Central"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         }
       ]
     },
@@ -53,8 +51,8 @@
       "name": "Piso 1",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 15,
-      "gridColumns": 30,
+      "width": 1200,
+      "height": 600,
       "corridors": [
         {
           "code": "PAS-P1",
@@ -62,12 +60,12 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 6,
-              "col": 18
+              "x": 740,
+              "y": 260
             },
             {
-              "row": 6,
-              "col": 24
+              "x": 980,
+              "y": 260
             }
           ]
         },
@@ -77,16 +75,16 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 14,
-              "col": 2
+              "x": 100,
+              "y": 580
             },
             {
-              "row": 14,
-              "col": 24
+              "x": 980,
+              "y": 580
             },
             {
-              "row": 6,
-              "col": 24
+              "x": 980,
+              "y": 260
             }
           ]
         }
@@ -96,9 +94,7 @@
           "code": "P1-ADMISIONES",
           "wing": "C",
           "name": "Admisiones",
-          "typeCode": "ADMIN_OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "ADMIN_OFFICE"
         },
         {
           "code": "P1-ASC-CENTRAL",
@@ -108,10 +104,24 @@
           "aliases": [
             "ascensores"
           ],
-          "gridRow": 8,
-          "gridColumn": 25,
-          "rowSpan": 2,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 1000,
+              "y": 320
+            },
+            {
+              "x": 1160,
+              "y": 320
+            },
+            {
+              "x": 1160,
+              "y": 400
+            },
+            {
+              "x": 1000,
+              "y": 400
+            }
+          ]
         },
         {
           "code": "P1-AUDITORIO-SONIA",
@@ -121,29 +131,55 @@
           "aliases": [
             "auditorio",
             "Sonia Fajardo Forero"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P1-BANO-H",
           "wing": "C",
           "name": "Baño de hombres",
           "typeCode": "RESTROOM",
-          "gridRow": 10,
-          "gridColumn": 19,
-          "rowSpan": 4,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 760,
+              "y": 400
+            },
+            {
+              "x": 840,
+              "y": 400
+            },
+            {
+              "x": 840,
+              "y": 560
+            },
+            {
+              "x": 760,
+              "y": 560
+            }
+          ]
         },
         {
           "code": "P1-BANO-M",
           "wing": "C",
           "name": "Baño de mujeres",
           "typeCode": "RESTROOM",
-          "gridRow": 10,
-          "gridColumn": 21,
-          "rowSpan": 4,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 840,
+              "y": 400
+            },
+            {
+              "x": 920,
+              "y": 400
+            },
+            {
+              "x": 920,
+              "y": 560
+            },
+            {
+              "x": 840,
+              "y": 560
+            }
+          ]
         },
         {
           "code": "P1-CAFETERIA-NO-1",
@@ -154,10 +190,24 @@
             "cafetería",
             "zona de comidas"
           ],
-          "gridRow": 0,
-          "gridColumn": 3,
-          "rowSpan": 4,
-          "colSpan": 15
+          "shape": [
+            {
+              "x": 120,
+              "y": 0
+            },
+            {
+              "x": 720,
+              "y": 0
+            },
+            {
+              "x": 720,
+              "y": 160
+            },
+            {
+              "x": 120,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P1-CAFETERIA-NO-2",
@@ -167,28 +217,54 @@
           "aliases": [
             "cafetería"
           ],
-          "gridRow": 4,
-          "gridColumn": 6,
-          "rowSpan": 4,
-          "colSpan": 12
+          "shape": [
+            {
+              "x": 240,
+              "y": 160
+            },
+            {
+              "x": 720,
+              "y": 160
+            },
+            {
+              "x": 720,
+              "y": 320
+            },
+            {
+              "x": 240,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P1-CALL-CENTER",
           "wing": "C",
           "name": "Call Center",
-          "typeCode": "ADMIN_OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "ADMIN_OFFICE"
         },
         {
           "code": "P1-ENTRADA-NORTE",
           "wing": "C",
           "name": "Entrada norte",
           "typeCode": "ENTRANCE",
-          "gridRow": 4,
-          "gridColumn": 0,
-          "rowSpan": 4,
-          "colSpan": 2,
+          "shape": [
+            {
+              "x": 0,
+              "y": 160
+            },
+            {
+              "x": 80,
+              "y": 160
+            },
+            {
+              "x": 80,
+              "y": 320
+            },
+            {
+              "x": 0,
+              "y": 320
+            }
+          ],
           "note": "Da a la plazoleta frente al Edificio Central, sobre la Carrera 9 Bis."
         },
         {
@@ -196,8 +272,6 @@
           "wing": "C",
           "name": "Entrada sur",
           "typeCode": "ENTRANCE",
-          "rowSpan": 1,
-          "colSpan": 1,
           "note": "Da a la Plazoleta de Bomberos."
         },
         {
@@ -205,28 +279,54 @@
           "wing": "C",
           "name": "Escalera de emergencia",
           "typeCode": "STAIRS",
-          "gridRow": 8,
-          "gridColumn": 5,
-          "rowSpan": 1,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 200,
+              "y": 320
+            },
+            {
+              "x": 360,
+              "y": 320
+            },
+            {
+              "x": 360,
+              "y": 360
+            },
+            {
+              "x": 200,
+              "y": 360
+            }
+          ]
         },
         {
           "code": "P1-ESC-PRINCIPAL",
           "wing": "C",
           "name": "Escalera principal",
           "typeCode": "STAIRS",
-          "gridRow": 11,
-          "gridColumn": 25,
-          "rowSpan": 3,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 1000,
+              "y": 440
+            },
+            {
+              "x": 1160,
+              "y": 440
+            },
+            {
+              "x": 1160,
+              "y": 560
+            },
+            {
+              "x": 1000,
+              "y": 560
+            }
+          ]
         },
         {
           "code": "P1-RAMPA-VEHICULAR",
           "wing": "C",
           "name": "Rampa vehicular al parqueadero",
-          "typeCode": "RAMP",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "RAMP"
         },
         {
           "code": "P1-RECEPCION",
@@ -236,63 +336,145 @@
           "aliases": [
             "recepción principal"
           ],
-          "gridRow": 4,
-          "gridColumn": 25,
-          "rowSpan": 4,
-          "colSpan": 5
+          "shape": [
+            {
+              "x": 1000,
+              "y": 160
+            },
+            {
+              "x": 1200,
+              "y": 160
+            },
+            {
+              "x": 1200,
+              "y": 320
+            },
+            {
+              "x": 1000,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P1-TESORERIA",
           "wing": "C",
           "name": "Tesorería",
-          "typeCode": "ADMIN_OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "ADMIN_OFFICE"
         },
         {
           "code": "P1-ZONA-ESPARCIMIENT",
           "name": "Zona de esparcimiento",
           "typeCode": "SOCIAL_AREA",
-          "gridRow": 9,
-          "gridColumn": 1,
-          "rowSpan": 5,
-          "colSpan": 17
+          "shape": [
+            {
+              "x": 40,
+              "y": 360
+            },
+            {
+              "x": 720,
+              "y": 360
+            },
+            {
+              "x": 720,
+              "y": 560
+            },
+            {
+              "x": 40,
+              "y": 560
+            }
+          ]
         },
         {
           "code": "P1-C01",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 19,
-          "rowSpan": 2,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 760,
+              "y": 0
+            },
+            {
+              "x": 880,
+              "y": 0
+            },
+            {
+              "x": 880,
+              "y": 80
+            },
+            {
+              "x": 760,
+              "y": 80
+            }
+          ]
         },
         {
           "code": "P1-C02",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 2,
-          "gridColumn": 19,
-          "rowSpan": 2,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 760,
+              "y": 80
+            },
+            {
+              "x": 880,
+              "y": 80
+            },
+            {
+              "x": 880,
+              "y": 160
+            },
+            {
+              "x": 760,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P1-C03",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 22,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 880,
+              "y": 0
+            },
+            {
+              "x": 1000,
+              "y": 0
+            },
+            {
+              "x": 1000,
+              "y": 160
+            },
+            {
+              "x": 880,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P1-C04",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 25,
-          "rowSpan": 4,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 1000,
+              "y": 0
+            },
+            {
+              "x": 1160,
+              "y": 0
+            },
+            {
+              "x": 1160,
+              "y": 160
+            },
+            {
+              "x": 1000,
+              "y": 160
+            }
+          ]
         }
       ]
     },
@@ -302,8 +484,8 @@
       "name": "Piso 2",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 16,
-      "gridColumns": 30,
+      "width": 1200,
+      "height": 640,
       "corridors": [
         {
           "code": "PAS-P2",
@@ -311,16 +493,16 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 7,
-              "col": 4
+              "x": 180,
+              "y": 300
             },
             {
-              "row": 7,
-              "col": 23
+              "x": 940,
+              "y": 300
             },
             {
-              "row": 12,
-              "col": 23
+              "x": 940,
+              "y": 500
             }
           ]
         }
@@ -332,20 +514,48 @@
           "wing": "C",
           "name": "Aula 201",
           "typeCode": "CLASSROOM",
-          "gridRow": 3,
-          "gridColumn": 0,
-          "rowSpan": 5,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 0,
+              "y": 120
+            },
+            {
+              "x": 160,
+              "y": 120
+            },
+            {
+              "x": 160,
+              "y": 320
+            },
+            {
+              "x": 0,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P2-ASC-BANOS",
           "wing": "C",
           "name": "Ascensor de los baños",
           "typeCode": "ELEVATOR",
-          "gridRow": 8,
-          "gridColumn": 20,
-          "rowSpan": 1,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 800,
+              "y": 320
+            },
+            {
+              "x": 880,
+              "y": 320
+            },
+            {
+              "x": 880,
+              "y": 360
+            },
+            {
+              "x": 800,
+              "y": 360
+            }
+          ]
         },
         {
           "code": "P2-ASC-CENTRAL",
@@ -355,30 +565,72 @@
           "aliases": [
             "ascensores"
           ],
-          "gridRow": 8,
-          "gridColumn": 24,
-          "rowSpan": 1,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 960,
+              "y": 320
+            },
+            {
+              "x": 1080,
+              "y": 320
+            },
+            {
+              "x": 1080,
+              "y": 360
+            },
+            {
+              "x": 960,
+              "y": 360
+            }
+          ]
         },
         {
           "code": "P2-BANO-H",
           "wing": "C",
           "name": "Baño de hombres",
           "typeCode": "RESTROOM",
-          "gridRow": 9,
-          "gridColumn": 18,
-          "rowSpan": 3,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 720,
+              "y": 360
+            },
+            {
+              "x": 800,
+              "y": 360
+            },
+            {
+              "x": 800,
+              "y": 480
+            },
+            {
+              "x": 720,
+              "y": 480
+            }
+          ]
         },
         {
           "code": "P2-BANO-M",
           "wing": "C",
           "name": "Baño de mujeres",
           "typeCode": "RESTROOM",
-          "gridRow": 9,
-          "gridColumn": 20,
-          "rowSpan": 3,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 800,
+              "y": 360
+            },
+            {
+              "x": 880,
+              "y": 360
+            },
+            {
+              "x": 880,
+              "y": 480
+            },
+            {
+              "x": 800,
+              "y": 480
+            }
+          ]
         },
         {
           "code": "P2-BIBLIOTECA-JUAN",
@@ -388,30 +640,72 @@
           "aliases": [
             "biblioteca"
           ],
-          "gridRow": 0,
-          "gridColumn": 7,
-          "rowSpan": 6,
-          "colSpan": 17
+          "shape": [
+            {
+              "x": 280,
+              "y": 0
+            },
+            {
+              "x": 960,
+              "y": 0
+            },
+            {
+              "x": 960,
+              "y": 240
+            },
+            {
+              "x": 280,
+              "y": 240
+            }
+          ]
         },
         {
           "code": "P2-ESC-EMERGENCIA",
           "wing": "C",
           "name": "Escalera de emergencia",
           "typeCode": "STAIRS",
-          "gridRow": 3,
-          "gridColumn": 4,
-          "rowSpan": 2,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 160,
+              "y": 120
+            },
+            {
+              "x": 280,
+              "y": 120
+            },
+            {
+              "x": 280,
+              "y": 200
+            },
+            {
+              "x": 160,
+              "y": 200
+            }
+          ]
         },
         {
           "code": "P2-ESC-PRINCIPAL",
           "wing": "C",
           "name": "Escalera principal",
           "typeCode": "STAIRS",
-          "gridRow": 9,
-          "gridColumn": 24,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 960,
+              "y": 360
+            },
+            {
+              "x": 1080,
+              "y": 360
+            },
+            {
+              "x": 1080,
+              "y": 480
+            },
+            {
+              "x": 960,
+              "y": 480
+            }
+          ]
         },
         {
           "code": "P2-FOTOCOPIADORA",
@@ -420,9 +714,7 @@
           "typeCode": "PRINT_SHOP",
           "aliases": [
             "fotocopias"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         }
       ]
     },
@@ -432,8 +724,8 @@
       "name": "Piso 3",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 16,
-      "gridColumns": 30,
+      "width": 1200,
+      "height": 640,
       "corridors": [
         {
           "code": "PAS-P3",
@@ -441,16 +733,16 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 4,
-              "col": 4
+              "x": 180,
+              "y": 180
             },
             {
-              "row": 4,
-              "col": 22
+              "x": 900,
+              "y": 180
             },
             {
-              "row": 15,
-              "col": 22
+              "x": 900,
+              "y": 620
             }
           ]
         }
@@ -461,9 +753,7 @@
           "doorCode": "301",
           "wing": "C",
           "name": "Aula 301",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "301-N",
@@ -473,9 +763,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "N-301"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "301-S",
@@ -485,36 +773,28 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "S-301"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "302",
           "doorCode": "302",
           "wing": "C",
           "name": "Aula 302",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "303",
           "doorCode": "303",
           "wing": "C",
           "name": "Aula 303",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "304",
           "doorCode": "304",
           "wing": "C",
           "name": "Aula 304",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "304-N",
@@ -524,9 +804,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "N-304"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "304-S",
@@ -536,64 +814,66 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "S-304"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "305",
           "doorCode": "305",
           "wing": "C",
           "name": "Aula 305",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "306",
           "doorCode": "306",
           "wing": "C",
           "name": "Aula 306",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "307",
           "doorCode": "307",
           "wing": "C",
           "name": "Aula 307",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "308",
           "doorCode": "308",
           "wing": "C",
           "name": "Aula 308",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "309",
           "doorCode": "309",
           "wing": "C",
           "name": "Aula 309",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "P3-ASC-BANOS",
           "wing": "C",
           "name": "Ascensor de los baños",
           "typeCode": "ELEVATOR",
-          "gridRow": 5,
-          "gridColumn": 18,
-          "rowSpan": 2,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 720,
+              "y": 200
+            },
+            {
+              "x": 840,
+              "y": 200
+            },
+            {
+              "x": 840,
+              "y": 280
+            },
+            {
+              "x": 720,
+              "y": 280
+            }
+          ]
         },
         {
           "code": "P3-ASC-CENTRAL",
@@ -603,58 +883,126 @@
           "aliases": [
             "ascensores"
           ],
-          "gridRow": 5,
-          "gridColumn": 24,
-          "rowSpan": 2,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 960,
+              "y": 200
+            },
+            {
+              "x": 1120,
+              "y": 200
+            },
+            {
+              "x": 1120,
+              "y": 280
+            },
+            {
+              "x": 960,
+              "y": 280
+            }
+          ]
         },
         {
           "code": "P3-BANO-H",
           "wing": "C",
           "name": "Baño de hombres",
           "typeCode": "RESTROOM",
-          "gridRow": 7,
-          "gridColumn": 18,
-          "rowSpan": 4,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 720,
+              "y": 280
+            },
+            {
+              "x": 800,
+              "y": 280
+            },
+            {
+              "x": 800,
+              "y": 440
+            },
+            {
+              "x": 720,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P3-BANO-M",
           "wing": "C",
           "name": "Baño de mujeres",
           "typeCode": "RESTROOM",
-          "gridRow": 7,
-          "gridColumn": 20,
-          "rowSpan": 4,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 800,
+              "y": 280
+            },
+            {
+              "x": 880,
+              "y": 280
+            },
+            {
+              "x": 880,
+              "y": 440
+            },
+            {
+              "x": 800,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P3-DIRECCION",
           "wing": "S",
           "name": "Dirección Artística y Cultural",
-          "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "OFFICE"
         },
         {
           "code": "P3-ESC-EMERGENCIA",
           "wing": "C",
           "name": "Escalera de emergencia",
           "typeCode": "STAIRS",
-          "gridRow": 1,
-          "gridColumn": 4,
-          "rowSpan": 3,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 160,
+              "y": 40
+            },
+            {
+              "x": 240,
+              "y": 40
+            },
+            {
+              "x": 240,
+              "y": 160
+            },
+            {
+              "x": 160,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P3-ESC-PRINCIPAL",
           "wing": "C",
           "name": "Escalera principal",
           "typeCode": "STAIRS",
-          "gridRow": 8,
-          "gridColumn": 24,
-          "rowSpan": 3,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 960,
+              "y": 320
+            },
+            {
+              "x": 1120,
+              "y": 320
+            },
+            {
+              "x": 1120,
+              "y": 440
+            },
+            {
+              "x": 960,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P3-REGISTRO",
@@ -663,9 +1011,7 @@
           "typeCode": "ADMIN_OFFICE",
           "aliases": [
             "registro"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P3-SEGURIDAD-SALUD",
@@ -674,9 +1020,7 @@
           "typeCode": "OFFICE",
           "aliases": [
             "SST"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P3-TRAMOYA-AUDITORIO",
@@ -685,162 +1029,398 @@
           "typeCode": "OTHER",
           "aliases": [
             "tramoya"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P3-C01",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 1,
-          "gridColumn": 0,
-          "rowSpan": 5,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 0,
+              "y": 40
+            },
+            {
+              "x": 160,
+              "y": 40
+            },
+            {
+              "x": 160,
+              "y": 240
+            },
+            {
+              "x": 0,
+              "y": 240
+            }
+          ]
         },
         {
           "code": "P3-C02",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 1,
-          "gridColumn": 6,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 240,
+              "y": 40
+            },
+            {
+              "x": 360,
+              "y": 40
+            },
+            {
+              "x": 360,
+              "y": 160
+            },
+            {
+              "x": 240,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P3-C03",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 1,
-          "gridColumn": 9,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 360,
+              "y": 40
+            },
+            {
+              "x": 480,
+              "y": 40
+            },
+            {
+              "x": 480,
+              "y": 160
+            },
+            {
+              "x": 360,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P3-C04",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 1,
-          "gridColumn": 12,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 480,
+              "y": 40
+            },
+            {
+              "x": 600,
+              "y": 40
+            },
+            {
+              "x": 600,
+              "y": 160
+            },
+            {
+              "x": 480,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P3-C05",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 3,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 120,
+              "y": 240
+            },
+            {
+              "x": 240,
+              "y": 240
+            },
+            {
+              "x": 240,
+              "y": 400
+            },
+            {
+              "x": 120,
+              "y": 400
+            }
+          ]
         },
         {
           "code": "P3-C06",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 6,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 240,
+              "y": 240
+            },
+            {
+              "x": 360,
+              "y": 240
+            },
+            {
+              "x": 360,
+              "y": 400
+            },
+            {
+              "x": 240,
+              "y": 400
+            }
+          ]
         },
         {
           "code": "P3-C07",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 9,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 360,
+              "y": 240
+            },
+            {
+              "x": 480,
+              "y": 240
+            },
+            {
+              "x": 480,
+              "y": 400
+            },
+            {
+              "x": 360,
+              "y": 400
+            }
+          ]
         },
         {
           "code": "P3-C08",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 12,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 480,
+              "y": 240
+            },
+            {
+              "x": 600,
+              "y": 240
+            },
+            {
+              "x": 600,
+              "y": 400
+            },
+            {
+              "x": 480,
+              "y": 400
+            }
+          ]
         },
         {
           "code": "P3-C09",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 15,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 600,
+              "y": 240
+            },
+            {
+              "x": 720,
+              "y": 240
+            },
+            {
+              "x": 720,
+              "y": 400
+            },
+            {
+              "x": 600,
+              "y": 400
+            }
+          ]
         },
         {
           "code": "P3-C10",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 1,
-          "gridColumn": 15,
-          "rowSpan": 3,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 600,
+              "y": 40
+            },
+            {
+              "x": 680,
+              "y": 40
+            },
+            {
+              "x": 680,
+              "y": 160
+            },
+            {
+              "x": 600,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P3-C11",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 17,
-          "rowSpan": 2,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 680,
+              "y": 0
+            },
+            {
+              "x": 800,
+              "y": 0
+            },
+            {
+              "x": 800,
+              "y": 80
+            },
+            {
+              "x": 680,
+              "y": 80
+            }
+          ]
         },
         {
           "code": "P3-C12",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 2,
-          "gridColumn": 17,
-          "rowSpan": 2,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 680,
+              "y": 80
+            },
+            {
+              "x": 800,
+              "y": 80
+            },
+            {
+              "x": 800,
+              "y": 160
+            },
+            {
+              "x": 680,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P3-C13",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 24,
-          "rowSpan": 5,
-          "colSpan": 6
+          "shape": [
+            {
+              "x": 960,
+              "y": 0
+            },
+            {
+              "x": 1200,
+              "y": 0
+            },
+            {
+              "x": 1200,
+              "y": 200
+            },
+            {
+              "x": 960,
+              "y": 200
+            }
+          ]
         },
         {
           "code": "P3-C14",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 11,
-          "gridColumn": 16,
-          "rowSpan": 2,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 640,
+              "y": 440
+            },
+            {
+              "x": 800,
+              "y": 440
+            },
+            {
+              "x": 800,
+              "y": 520
+            },
+            {
+              "x": 640,
+              "y": 520
+            }
+          ]
         },
         {
           "code": "P3-C15",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 13,
-          "gridColumn": 16,
-          "rowSpan": 3,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 640,
+              "y": 520
+            },
+            {
+              "x": 800,
+              "y": 520
+            },
+            {
+              "x": 800,
+              "y": 640
+            },
+            {
+              "x": 640,
+              "y": 640
+            }
+          ]
         },
         {
           "code": "P3-C16",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 11,
-          "gridColumn": 23,
-          "rowSpan": 2,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 920,
+              "y": 440
+            },
+            {
+              "x": 1080,
+              "y": 440
+            },
+            {
+              "x": 1080,
+              "y": 520
+            },
+            {
+              "x": 920,
+              "y": 520
+            }
+          ]
         },
         {
           "code": "P3-C17",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 13,
-          "gridColumn": 23,
-          "rowSpan": 3,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 920,
+              "y": 520
+            },
+            {
+              "x": 1080,
+              "y": 520
+            },
+            {
+              "x": 1080,
+              "y": 640
+            },
+            {
+              "x": 920,
+              "y": 640
+            }
+          ]
         }
       ]
     },
@@ -850,8 +1430,8 @@
       "name": "Piso 4",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 16,
-      "gridColumns": 30,
+      "width": 1200,
+      "height": 640,
       "corridors": [
         {
           "code": "PAS-P4",
@@ -859,16 +1439,16 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 5,
-              "col": 1
+              "x": 60,
+              "y": 220
             },
             {
-              "row": 5,
-              "col": 23
+              "x": 940,
+              "y": 220
             },
             {
-              "row": 15,
-              "col": 23
+              "x": 940,
+              "y": 620
             }
           ]
         }
@@ -879,9 +1459,7 @@
           "doorCode": "401",
           "wing": "C",
           "name": "Aula 401",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "401-N",
@@ -891,9 +1469,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "N-401"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "401-S",
@@ -903,36 +1479,28 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "S-401"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "402",
           "doorCode": "402",
           "wing": "C",
           "name": "Aula 402",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "403",
           "doorCode": "403",
           "wing": "C",
           "name": "Aula 403",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "404",
           "doorCode": "404",
           "wing": "C",
           "name": "Aula 404",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "404-N",
@@ -942,9 +1510,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "N-404"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "404-S",
@@ -954,73 +1520,73 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "S-404"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "405",
           "doorCode": "405",
           "wing": "C",
           "name": "Aula 405",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "406",
           "doorCode": "406",
           "wing": "C",
           "name": "Aula 406",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "407",
           "doorCode": "407",
           "wing": "C",
           "name": "Aula 407",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "408",
           "doorCode": "408",
           "wing": "C",
           "name": "Aula 408",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "409",
           "doorCode": "409",
           "wing": "C",
           "name": "Aula 409",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "410",
           "doorCode": "410",
           "wing": "C",
           "name": "Aula 410",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "P4-ASC-BANOS",
           "wing": "C",
           "name": "Ascensor de los baños",
           "typeCode": "ELEVATOR",
-          "gridRow": 6,
-          "gridColumn": 19,
-          "rowSpan": 1,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 760,
+              "y": 240
+            },
+            {
+              "x": 880,
+              "y": 240
+            },
+            {
+              "x": 880,
+              "y": 280
+            },
+            {
+              "x": 760,
+              "y": 280
+            }
+          ]
         },
         {
           "code": "P4-ASC-CENTRAL",
@@ -1030,30 +1596,72 @@
           "aliases": [
             "ascensores"
           ],
-          "gridRow": 6,
-          "gridColumn": 25,
-          "rowSpan": 2,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 1000,
+              "y": 240
+            },
+            {
+              "x": 1120,
+              "y": 240
+            },
+            {
+              "x": 1120,
+              "y": 320
+            },
+            {
+              "x": 1000,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P4-BANO-H",
           "wing": "C",
           "name": "Baño de hombres",
           "typeCode": "RESTROOM",
-          "gridRow": 7,
-          "gridColumn": 19,
-          "rowSpan": 4,
-          "colSpan": 1
+          "shape": [
+            {
+              "x": 760,
+              "y": 280
+            },
+            {
+              "x": 800,
+              "y": 280
+            },
+            {
+              "x": 800,
+              "y": 440
+            },
+            {
+              "x": 760,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P4-BANO-M",
           "wing": "C",
           "name": "Baño de mujeres",
           "typeCode": "RESTROOM",
-          "gridRow": 7,
-          "gridColumn": 20,
-          "rowSpan": 4,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 800,
+              "y": 280
+            },
+            {
+              "x": 880,
+              "y": 280
+            },
+            {
+              "x": 880,
+              "y": 440
+            },
+            {
+              "x": 800,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P4-DECANATURA",
@@ -1062,9 +1670,7 @@
           "typeCode": "OFFICE",
           "aliases": [
             "Escuela de Negocios - Decanatura"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P4-DECANATURA-2",
@@ -1073,163 +1679,383 @@
           "typeCode": "OFFICE",
           "aliases": [
             "Matemáticas e Ingeniería - Decanatura"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P4-ESC-EMERGENCIA",
           "wing": "C",
           "name": "Escalera de emergencia",
           "typeCode": "STAIRS",
-          "gridRow": 0,
-          "gridColumn": 4,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 160,
+              "y": 0
+            },
+            {
+              "x": 280,
+              "y": 0
+            },
+            {
+              "x": 280,
+              "y": 160
+            },
+            {
+              "x": 160,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P4-ESC-PRINCIPAL",
           "wing": "C",
           "name": "Escalera principal",
           "typeCode": "STAIRS",
-          "gridRow": 8,
-          "gridColumn": 25,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 1000,
+              "y": 320
+            },
+            {
+              "x": 1120,
+              "y": 320
+            },
+            {
+              "x": 1120,
+              "y": 440
+            },
+            {
+              "x": 1000,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P4-SALA-PROFESORES",
           "wing": "S",
           "name": "Sala de Profesores",
-          "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "OFFICE"
         },
         {
           "code": "P4-C01",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 0,
-          "rowSpan": 5,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 160,
+              "y": 0
+            },
+            {
+              "x": 160,
+              "y": 200
+            },
+            {
+              "x": 0,
+              "y": 200
+            }
+          ]
         },
         {
           "code": "P4-C02",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 7,
-          "rowSpan": 4,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 280,
+              "y": 0
+            },
+            {
+              "x": 440,
+              "y": 0
+            },
+            {
+              "x": 440,
+              "y": 160
+            },
+            {
+              "x": 280,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P4-C03",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 11,
-          "rowSpan": 4,
-          "colSpan": 5
+          "shape": [
+            {
+              "x": 440,
+              "y": 0
+            },
+            {
+              "x": 640,
+              "y": 0
+            },
+            {
+              "x": 640,
+              "y": 160
+            },
+            {
+              "x": 440,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P4-C04",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 16,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 640,
+              "y": 0
+            },
+            {
+              "x": 760,
+              "y": 0
+            },
+            {
+              "x": 760,
+              "y": 160
+            },
+            {
+              "x": 640,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P4-C05",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 19,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 760,
+              "y": 0
+            },
+            {
+              "x": 880,
+              "y": 0
+            },
+            {
+              "x": 880,
+              "y": 160
+            },
+            {
+              "x": 760,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P4-C06",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 1,
-          "gridColumn": 26,
-          "rowSpan": 4,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 1040,
+              "y": 40
+            },
+            {
+              "x": 1200,
+              "y": 40
+            },
+            {
+              "x": 1200,
+              "y": 200
+            },
+            {
+              "x": 1040,
+              "y": 200
+            }
+          ]
         },
         {
           "code": "P4-C07",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 3,
-          "rowSpan": 5,
-          "colSpan": 7
+          "shape": [
+            {
+              "x": 120,
+              "y": 240
+            },
+            {
+              "x": 400,
+              "y": 240
+            },
+            {
+              "x": 400,
+              "y": 440
+            },
+            {
+              "x": 120,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P4-C08",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 10,
-          "rowSpan": 5,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 400,
+              "y": 240
+            },
+            {
+              "x": 520,
+              "y": 240
+            },
+            {
+              "x": 520,
+              "y": 440
+            },
+            {
+              "x": 400,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P4-C09",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 13,
-          "rowSpan": 5,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 520,
+              "y": 240
+            },
+            {
+              "x": 640,
+              "y": 240
+            },
+            {
+              "x": 640,
+              "y": 440
+            },
+            {
+              "x": 520,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P4-C10",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 16,
-          "rowSpan": 5,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 640,
+              "y": 240
+            },
+            {
+              "x": 760,
+              "y": 240
+            },
+            {
+              "x": 760,
+              "y": 440
+            },
+            {
+              "x": 640,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P4-C11",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 11,
-          "gridColumn": 17,
-          "rowSpan": 2,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 680,
+              "y": 440
+            },
+            {
+              "x": 800,
+              "y": 440
+            },
+            {
+              "x": 800,
+              "y": 520
+            },
+            {
+              "x": 680,
+              "y": 520
+            }
+          ]
         },
         {
           "code": "P4-C12",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 13,
-          "gridColumn": 17,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 680,
+              "y": 520
+            },
+            {
+              "x": 800,
+              "y": 520
+            },
+            {
+              "x": 800,
+              "y": 640
+            },
+            {
+              "x": 680,
+              "y": 640
+            }
+          ]
         },
         {
           "code": "P4-C13",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 11,
-          "gridColumn": 24,
-          "rowSpan": 2,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 960,
+              "y": 440
+            },
+            {
+              "x": 1080,
+              "y": 440
+            },
+            {
+              "x": 1080,
+              "y": 520
+            },
+            {
+              "x": 960,
+              "y": 520
+            }
+          ]
         },
         {
           "code": "P4-C14",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 13,
-          "gridColumn": 24,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 960,
+              "y": 520
+            },
+            {
+              "x": 1080,
+              "y": 520
+            },
+            {
+              "x": 1080,
+              "y": 640
+            },
+            {
+              "x": 960,
+              "y": 640
+            }
+          ]
         }
       ]
     },
@@ -1239,8 +2065,8 @@
       "name": "Piso 5",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 16,
-      "gridColumns": 30,
+      "width": 1200,
+      "height": 640,
       "corridors": [
         {
           "code": "PAS-P5",
@@ -1248,16 +2074,16 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 4,
-              "col": 1
+              "x": 60,
+              "y": 180
             },
             {
-              "row": 4,
-              "col": 23
+              "x": 940,
+              "y": 180
             },
             {
-              "row": 15,
-              "col": 23
+              "x": 940,
+              "y": 620
             }
           ]
         }
@@ -1268,9 +2094,7 @@
           "doorCode": "501",
           "wing": "C",
           "name": "Aula 501",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "501-N",
@@ -1280,9 +2104,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "N-501"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "501-S",
@@ -1292,27 +2114,21 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "S-501"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "502",
           "doorCode": "502",
           "wing": "C",
           "name": "Aula 502",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "503",
           "doorCode": "503",
           "wing": "C",
           "name": "Aula 503",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "503-S",
@@ -1322,18 +2138,14 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "S-503"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "504",
           "doorCode": "504",
           "wing": "C",
           "name": "Aula 504",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "504-N",
@@ -1343,91 +2155,87 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "N-504"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "505",
           "doorCode": "505",
           "wing": "C",
           "name": "Aula 505",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "506",
           "doorCode": "506",
           "wing": "C",
           "name": "Aula 506",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "507",
           "doorCode": "507",
           "wing": "C",
           "name": "Aula 507",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "508",
           "doorCode": "508",
           "wing": "C",
           "name": "Aula 508",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "509",
           "doorCode": "509",
           "wing": "C",
           "name": "Aula 509",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "510",
           "doorCode": "510",
           "wing": "C",
           "name": "Aula 510",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "511",
           "doorCode": "511",
           "wing": "C",
           "name": "Aula 511",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "512",
           "doorCode": "512",
           "wing": "C",
           "name": "Aula 512",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "P5-ASC-BANOS",
           "wing": "C",
           "name": "Ascensor de los baños",
           "typeCode": "ELEVATOR",
-          "gridRow": 5,
-          "gridColumn": 19,
-          "rowSpan": 2,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 760,
+              "y": 200
+            },
+            {
+              "x": 880,
+              "y": 200
+            },
+            {
+              "x": 880,
+              "y": 280
+            },
+            {
+              "x": 760,
+              "y": 280
+            }
+          ]
         },
         {
           "code": "P5-ASC-CENTRAL",
@@ -1437,30 +2245,72 @@
           "aliases": [
             "ascensores"
           ],
-          "gridRow": 5,
-          "gridColumn": 24,
-          "rowSpan": 2,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 960,
+              "y": 200
+            },
+            {
+              "x": 1120,
+              "y": 200
+            },
+            {
+              "x": 1120,
+              "y": 280
+            },
+            {
+              "x": 960,
+              "y": 280
+            }
+          ]
         },
         {
           "code": "P5-BANO-H",
           "wing": "C",
           "name": "Baño de hombres",
           "typeCode": "RESTROOM",
-          "gridRow": 7,
-          "gridColumn": 18,
-          "rowSpan": 4,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 720,
+              "y": 280
+            },
+            {
+              "x": 800,
+              "y": 280
+            },
+            {
+              "x": 800,
+              "y": 440
+            },
+            {
+              "x": 720,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P5-BANO-M",
           "wing": "C",
           "name": "Baño de mujeres",
           "typeCode": "RESTROOM",
-          "gridRow": 7,
-          "gridColumn": 20,
-          "rowSpan": 4,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 800,
+              "y": 280
+            },
+            {
+              "x": 880,
+              "y": 280
+            },
+            {
+              "x": 880,
+              "y": 440
+            },
+            {
+              "x": 800,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P5-COORDINACION",
@@ -1469,9 +2319,7 @@
           "typeCode": "OFFICE",
           "aliases": [
             "Coordinación Decanaturas"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P5-DECANATURA",
@@ -1480,9 +2328,7 @@
           "typeCode": "OFFICE",
           "aliases": [
             "Psicología - Decanatura"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P5-DECANATURA-2",
@@ -1491,19 +2337,31 @@
           "typeCode": "OFFICE",
           "aliases": [
             "Posgrados - Decanatura"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P5-DEPARTAMENTO",
           "wing": "C",
           "name": "Departamento de Lenguas",
           "typeCode": "OFFICE",
-          "gridRow": 8,
-          "gridColumn": 12,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 480,
+              "y": 320
+            },
+            {
+              "x": 600,
+              "y": 320
+            },
+            {
+              "x": 600,
+              "y": 440
+            },
+            {
+              "x": 480,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P5-DIRECCION",
@@ -1512,9 +2370,7 @@
           "typeCode": "OFFICE",
           "aliases": [
             "Ingeniería de Sistemas - Dirección"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P5-DIRECCION-2",
@@ -1523,9 +2379,7 @@
           "typeCode": "OFFICE",
           "aliases": [
             "Ingeniería Industrial - Dirección"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P5-DIRECCION-3",
@@ -1534,27 +2388,37 @@
           "typeCode": "OFFICE",
           "aliases": [
             "Administración de Negocios Internacionales - Dirección"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P5-ESC-EMERGENCIA",
           "wing": "C",
           "name": "Escalera de emergencia",
           "typeCode": "STAIRS",
-          "gridRow": 0,
-          "gridColumn": 4,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 160,
+              "y": 0
+            },
+            {
+              "x": 280,
+              "y": 0
+            },
+            {
+              "x": 280,
+              "y": 160
+            },
+            {
+              "x": 160,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P5-ESC-NORTE",
           "wing": "N",
           "name": "Escalera norte",
           "typeCode": "STAIRS",
-          "rowSpan": 1,
-          "colSpan": 1,
           "note": "La única subida a la terraza norte del piso 6."
         },
         {
@@ -1562,20 +2426,48 @@
           "wing": "C",
           "name": "Escalera principal",
           "typeCode": "STAIRS",
-          "gridRow": 7,
-          "gridColumn": 24,
-          "rowSpan": 4,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 960,
+              "y": 280
+            },
+            {
+              "x": 1120,
+              "y": 280
+            },
+            {
+              "x": 1120,
+              "y": 440
+            },
+            {
+              "x": 960,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P5-INSTITUTO",
           "wing": "C",
           "name": "Instituto de Humanidades",
           "typeCode": "OFFICE",
-          "gridRow": 8,
-          "gridColumn": 15,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 600,
+              "y": 320
+            },
+            {
+              "x": 720,
+              "y": 320
+            },
+            {
+              "x": 720,
+              "y": 440
+            },
+            {
+              "x": 600,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P5-LABORATORIOS",
@@ -1584,126 +2476,306 @@
           "typeCode": "LAB",
           "aliases": [
             "Laboratorio de Percepción y Cognición"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P5-C01",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 0,
-          "rowSpan": 6,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 160,
+              "y": 0
+            },
+            {
+              "x": 160,
+              "y": 240
+            },
+            {
+              "x": 0,
+              "y": 240
+            }
+          ]
         },
         {
           "code": "P5-C02",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 7,
-          "rowSpan": 4,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 280,
+              "y": 0
+            },
+            {
+              "x": 440,
+              "y": 0
+            },
+            {
+              "x": 440,
+              "y": 160
+            },
+            {
+              "x": 280,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P5-C03",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 11,
-          "rowSpan": 4,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 440,
+              "y": 0
+            },
+            {
+              "x": 600,
+              "y": 0
+            },
+            {
+              "x": 600,
+              "y": 160
+            },
+            {
+              "x": 440,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P5-C04",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 15,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 600,
+              "y": 0
+            },
+            {
+              "x": 720,
+              "y": 0
+            },
+            {
+              "x": 720,
+              "y": 160
+            },
+            {
+              "x": 600,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P5-C05",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 18,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 720,
+              "y": 0
+            },
+            {
+              "x": 840,
+              "y": 0
+            },
+            {
+              "x": 840,
+              "y": 160
+            },
+            {
+              "x": 720,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P5-C06",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 26,
-          "rowSpan": 5,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 1040,
+              "y": 0
+            },
+            {
+              "x": 1200,
+              "y": 0
+            },
+            {
+              "x": 1200,
+              "y": 200
+            },
+            {
+              "x": 1040,
+              "y": 200
+            }
+          ]
         },
         {
           "code": "P5-C07",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 3,
-          "rowSpan": 5,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 120,
+              "y": 240
+            },
+            {
+              "x": 240,
+              "y": 240
+            },
+            {
+              "x": 240,
+              "y": 440
+            },
+            {
+              "x": 120,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P5-C08",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 6,
-          "rowSpan": 5,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 240,
+              "y": 240
+            },
+            {
+              "x": 360,
+              "y": 240
+            },
+            {
+              "x": 360,
+              "y": 440
+            },
+            {
+              "x": 240,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P5-C09",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 10,
-          "rowSpan": 5,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 400,
+              "y": 240
+            },
+            {
+              "x": 480,
+              "y": 240
+            },
+            {
+              "x": 480,
+              "y": 440
+            },
+            {
+              "x": 400,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P5-C10",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 12,
-          "rowSpan": 2,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 480,
+              "y": 240
+            },
+            {
+              "x": 600,
+              "y": 240
+            },
+            {
+              "x": 600,
+              "y": 320
+            },
+            {
+              "x": 480,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P5-C11",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 15,
-          "rowSpan": 2,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 600,
+              "y": 240
+            },
+            {
+              "x": 720,
+              "y": 240
+            },
+            {
+              "x": 720,
+              "y": 320
+            },
+            {
+              "x": 600,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P5-C12",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 11,
-          "gridColumn": 17,
-          "rowSpan": 5,
-          "colSpan": 5
+          "shape": [
+            {
+              "x": 680,
+              "y": 440
+            },
+            {
+              "x": 880,
+              "y": 440
+            },
+            {
+              "x": 880,
+              "y": 640
+            },
+            {
+              "x": 680,
+              "y": 640
+            }
+          ]
         },
         {
           "code": "P5-C13",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 11,
-          "gridColumn": 24,
-          "rowSpan": 5,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 960,
+              "y": 440
+            },
+            {
+              "x": 1080,
+              "y": 440
+            },
+            {
+              "x": 1080,
+              "y": 640
+            },
+            {
+              "x": 960,
+              "y": 640
+            }
+          ]
         }
       ]
     },
@@ -1713,8 +2785,8 @@
       "name": "Piso 6",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 16,
-      "gridColumns": 30,
+      "width": 1200,
+      "height": 640,
       "corridors": [
         {
           "code": "PAS-P6",
@@ -1722,12 +2794,12 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 4,
-              "col": 4
+              "x": 180,
+              "y": 180
             },
             {
-              "row": 4,
-              "col": 23
+              "x": 940,
+              "y": 180
             }
           ]
         },
@@ -1737,12 +2809,12 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 4,
-              "col": 21
+              "x": 860,
+              "y": 180
             },
             {
-              "row": 15,
-              "col": 21
+              "x": 860,
+              "y": 620
             }
           ]
         }
@@ -1753,127 +2825,115 @@
           "doorCode": "601",
           "wing": "C",
           "name": "Aula 601",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "602",
           "doorCode": "602",
           "wing": "C",
           "name": "Aula 602",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "603",
           "doorCode": "603",
           "wing": "C",
           "name": "Aula 603",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "604",
           "doorCode": "604",
           "wing": "C",
           "name": "Aula 604",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "605",
           "doorCode": "605",
           "wing": "C",
           "name": "Aula 605",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "606",
           "doorCode": "606",
           "wing": "C",
           "name": "Aula 606",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "607",
           "doorCode": "607",
           "wing": "C",
           "name": "Aula 607",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "608",
           "doorCode": "608",
           "wing": "C",
           "name": "Aula 608",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "609",
           "doorCode": "609",
           "wing": "C",
           "name": "Aula 609",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "610",
           "doorCode": "610",
           "wing": "C",
           "name": "Aula 610",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "611",
           "doorCode": "611",
           "wing": "C",
           "name": "Aula 611",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "612",
           "doorCode": "612",
           "wing": "C",
           "name": "Aula 612",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "613",
           "doorCode": "613",
           "wing": "C",
           "name": "Aula 613",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "P6-ASC-BANOS",
           "wing": "C",
           "name": "Ascensor de los baños",
           "typeCode": "ELEVATOR",
-          "gridRow": 5,
-          "gridColumn": 18,
-          "rowSpan": 1,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 720,
+              "y": 200
+            },
+            {
+              "x": 840,
+              "y": 200
+            },
+            {
+              "x": 840,
+              "y": 240
+            },
+            {
+              "x": 720,
+              "y": 240
+            }
+          ]
         },
         {
           "code": "P6-ASC-CENTRAL",
@@ -1883,38 +2943,78 @@
           "aliases": [
             "ascensores"
           ],
-          "gridRow": 5,
-          "gridColumn": 24,
-          "rowSpan": 1,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 960,
+              "y": 200
+            },
+            {
+              "x": 1120,
+              "y": 200
+            },
+            {
+              "x": 1120,
+              "y": 240
+            },
+            {
+              "x": 960,
+              "y": 240
+            }
+          ]
         },
         {
           "code": "P6-ASTRO-K",
           "wing": "C",
           "name": "Astro K",
-          "typeCode": "OTHER",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "OTHER"
         },
         {
           "code": "P6-BANO-H",
           "wing": "C",
           "name": "Baño de hombres",
           "typeCode": "RESTROOM",
-          "gridRow": 6,
-          "gridColumn": 18,
-          "rowSpan": 4,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 720,
+              "y": 240
+            },
+            {
+              "x": 800,
+              "y": 240
+            },
+            {
+              "x": 800,
+              "y": 400
+            },
+            {
+              "x": 720,
+              "y": 400
+            }
+          ]
         },
         {
           "code": "P6-BANO-M",
           "wing": "C",
           "name": "Baño de mujeres",
           "typeCode": "RESTROOM",
-          "gridRow": 6,
-          "gridColumn": 20,
-          "rowSpan": 4,
-          "colSpan": 1
+          "shape": [
+            {
+              "x": 800,
+              "y": 240
+            },
+            {
+              "x": 840,
+              "y": 240
+            },
+            {
+              "x": 840,
+              "y": 400
+            },
+            {
+              "x": 800,
+              "y": 400
+            }
+          ]
         },
         {
           "code": "P6-CAFETERIA-TERRAZA",
@@ -1924,64 +3024,114 @@
           "aliases": [
             "cafetería terraza"
           ],
-          "gridRow": 14,
-          "gridColumn": 17,
-          "rowSpan": 2,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 680,
+              "y": 560
+            },
+            {
+              "x": 840,
+              "y": 560
+            },
+            {
+              "x": 840,
+              "y": 640
+            },
+            {
+              "x": 680,
+              "y": 640
+            }
+          ]
         },
         {
           "code": "P6-CANCILLERIA",
           "wing": "S",
           "name": "Cancillería",
           "typeCode": "OFFICE",
-          "gridRow": 11,
-          "gridColumn": 17,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 680,
+              "y": 440
+            },
+            {
+              "x": 800,
+              "y": 440
+            },
+            {
+              "x": 800,
+              "y": 560
+            },
+            {
+              "x": 680,
+              "y": 560
+            }
+          ]
         },
         {
           "code": "P6-EGRESADOS",
           "wing": "S",
           "name": "Egresados",
-          "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "OFFICE"
         },
         {
           "code": "P6-ESC-EMERGENCIA",
           "wing": "C",
           "name": "Escalera de emergencia",
           "typeCode": "STAIRS",
-          "gridRow": 0,
-          "gridColumn": 4,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 160,
+              "y": 0
+            },
+            {
+              "x": 280,
+              "y": 0
+            },
+            {
+              "x": 280,
+              "y": 120
+            },
+            {
+              "x": 160,
+              "y": 120
+            }
+          ]
         },
         {
           "code": "P6-ESC-PRINCIPAL",
           "wing": "C",
           "name": "Escalera principal",
           "typeCode": "STAIRS",
-          "gridRow": 7,
-          "gridColumn": 24,
-          "rowSpan": 3,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 960,
+              "y": 280
+            },
+            {
+              "x": 1120,
+              "y": 280
+            },
+            {
+              "x": 1120,
+              "y": 400
+            },
+            {
+              "x": 960,
+              "y": 400
+            }
+          ]
         },
         {
           "code": "P6-GESTION",
           "wing": "S",
           "name": "Gestión y Transferencia del Conocimiento",
-          "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "OFFICE"
         },
         {
           "code": "P6-TERRAZA-NORTE",
           "wing": "N",
           "name": "Terraza norte",
           "typeCode": "TERRACE",
-          "rowSpan": 1,
-          "colSpan": 1,
           "accessibility": "STAIRS_ONLY",
           "note": "Desconectada del ala central: solo se llega por la escalera norte desde el piso 5."
         },
@@ -1993,144 +3143,352 @@
           "aliases": [
             "terraza"
           ],
-          "rowSpan": 1,
-          "colSpan": 1,
           "note": "Se sale desde el ala central, pasando los baños y las oficinas del ala sur."
         },
         {
           "code": "P6-C01",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 0,
-          "rowSpan": 5,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 160,
+              "y": 0
+            },
+            {
+              "x": 160,
+              "y": 200
+            },
+            {
+              "x": 0,
+              "y": 200
+            }
+          ]
         },
         {
           "code": "P6-C02",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 7,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 280,
+              "y": 0
+            },
+            {
+              "x": 400,
+              "y": 0
+            },
+            {
+              "x": 400,
+              "y": 120
+            },
+            {
+              "x": 280,
+              "y": 120
+            }
+          ]
         },
         {
           "code": "P6-C03",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 10,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 400,
+              "y": 0
+            },
+            {
+              "x": 520,
+              "y": 0
+            },
+            {
+              "x": 520,
+              "y": 120
+            },
+            {
+              "x": 400,
+              "y": 120
+            }
+          ]
         },
         {
           "code": "P6-C04",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 13,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 520,
+              "y": 0
+            },
+            {
+              "x": 640,
+              "y": 0
+            },
+            {
+              "x": 640,
+              "y": 120
+            },
+            {
+              "x": 520,
+              "y": 120
+            }
+          ]
         },
         {
           "code": "P6-C05",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 16,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 640,
+              "y": 0
+            },
+            {
+              "x": 760,
+              "y": 0
+            },
+            {
+              "x": 760,
+              "y": 120
+            },
+            {
+              "x": 640,
+              "y": 120
+            }
+          ]
         },
         {
           "code": "P6-C06",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 19,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 760,
+              "y": 0
+            },
+            {
+              "x": 880,
+              "y": 0
+            },
+            {
+              "x": 880,
+              "y": 120
+            },
+            {
+              "x": 760,
+              "y": 120
+            }
+          ]
         },
         {
           "code": "P6-C07",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 22,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 880,
+              "y": 0
+            },
+            {
+              "x": 1000,
+              "y": 0
+            },
+            {
+              "x": 1000,
+              "y": 120
+            },
+            {
+              "x": 880,
+              "y": 120
+            }
+          ]
         },
         {
           "code": "P6-C08",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 26,
-          "rowSpan": 5,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 1040,
+              "y": 0
+            },
+            {
+              "x": 1200,
+              "y": 0
+            },
+            {
+              "x": 1200,
+              "y": 200
+            },
+            {
+              "x": 1040,
+              "y": 200
+            }
+          ]
         },
         {
           "code": "P6-C09",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 5,
-          "gridColumn": 3,
-          "rowSpan": 4,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 120,
+              "y": 200
+            },
+            {
+              "x": 280,
+              "y": 200
+            },
+            {
+              "x": 280,
+              "y": 360
+            },
+            {
+              "x": 120,
+              "y": 360
+            }
+          ]
         },
         {
           "code": "P6-C10",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 5,
-          "gridColumn": 7,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 280,
+              "y": 200
+            },
+            {
+              "x": 400,
+              "y": 200
+            },
+            {
+              "x": 400,
+              "y": 360
+            },
+            {
+              "x": 280,
+              "y": 360
+            }
+          ]
         },
         {
           "code": "P6-C11",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 5,
-          "gridColumn": 10,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 400,
+              "y": 200
+            },
+            {
+              "x": 520,
+              "y": 200
+            },
+            {
+              "x": 520,
+              "y": 360
+            },
+            {
+              "x": 400,
+              "y": 360
+            }
+          ]
         },
         {
           "code": "P6-C12",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 5,
-          "gridColumn": 13,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 520,
+              "y": 200
+            },
+            {
+              "x": 640,
+              "y": 200
+            },
+            {
+              "x": 640,
+              "y": 360
+            },
+            {
+              "x": 520,
+              "y": 360
+            }
+          ]
         },
         {
           "code": "P6-C13",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 5,
-          "gridColumn": 16,
-          "rowSpan": 4,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 640,
+              "y": 200
+            },
+            {
+              "x": 720,
+              "y": 200
+            },
+            {
+              "x": 720,
+              "y": 360
+            },
+            {
+              "x": 640,
+              "y": 360
+            }
+          ]
         },
         {
           "code": "P6-C14",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 10,
-          "gridColumn": 22,
-          "rowSpan": 2,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 880,
+              "y": 400
+            },
+            {
+              "x": 960,
+              "y": 400
+            },
+            {
+              "x": 960,
+              "y": 480
+            },
+            {
+              "x": 880,
+              "y": 480
+            }
+          ]
         },
         {
           "code": "P6-C15",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 12,
-          "gridColumn": 22,
-          "rowSpan": 2,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 880,
+              "y": 480
+            },
+            {
+              "x": 960,
+              "y": 480
+            },
+            {
+              "x": 960,
+              "y": 560
+            },
+            {
+              "x": 880,
+              "y": 560
+            }
+          ]
         }
       ]
     },
@@ -2140,8 +3498,8 @@
       "name": "Piso 7",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 16,
-      "gridColumns": 30,
+      "width": 1200,
+      "height": 640,
       "corridors": [
         {
           "code": "PAS-P7",
@@ -2149,12 +3507,12 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 5,
-              "col": 1
+              "x": 60,
+              "y": 220
             },
             {
-              "row": 5,
-              "col": 24
+              "x": 980,
+              "y": 220
             }
           ]
         },
@@ -2164,12 +3522,12 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 5,
-              "col": 23
+              "x": 940,
+              "y": 220
             },
             {
-              "row": 12,
-              "col": 23
+              "x": 940,
+              "y": 500
             }
           ]
         }
@@ -2183,9 +3541,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "7-01"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "702",
@@ -2195,9 +3551,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "7-02"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "703",
@@ -2207,9 +3561,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "7-03"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "704",
@@ -2219,9 +3571,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "7-04"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "705",
@@ -2231,9 +3581,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "7-05"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "706",
@@ -2243,9 +3591,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "7-06"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "707",
@@ -2255,9 +3601,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "7-07"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "708",
@@ -2267,9 +3611,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "7-08"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "709",
@@ -2279,9 +3621,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "7-09"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "710",
@@ -2291,9 +3631,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "7-10"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "711",
@@ -2303,9 +3641,7 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "7-11"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "712",
@@ -2315,28 +3651,38 @@
           "typeCode": "CLASSROOM",
           "aliases": [
             "7-12"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "713",
           "doorCode": "713",
           "wing": "C",
           "name": "Aula 713",
-          "typeCode": "CLASSROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "CLASSROOM"
         },
         {
           "code": "P7-ASC-BANOS",
           "wing": "C",
           "name": "Ascensor de los baños",
           "typeCode": "ELEVATOR",
-          "gridRow": 6,
-          "gridColumn": 20,
-          "rowSpan": 2,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 800,
+              "y": 240
+            },
+            {
+              "x": 880,
+              "y": 240
+            },
+            {
+              "x": 880,
+              "y": 320
+            },
+            {
+              "x": 800,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P7-ASC-CENTRAL",
@@ -2346,30 +3692,72 @@
           "aliases": [
             "ascensores"
           ],
-          "gridRow": 6,
-          "gridColumn": 25,
-          "rowSpan": 2,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 1000,
+              "y": 240
+            },
+            {
+              "x": 1160,
+              "y": 240
+            },
+            {
+              "x": 1160,
+              "y": 320
+            },
+            {
+              "x": 1000,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P7-BANO-H",
           "wing": "C",
           "name": "Baño de hombres",
           "typeCode": "RESTROOM",
-          "gridRow": 8,
-          "gridColumn": 19,
-          "rowSpan": 3,
-          "colSpan": 1
+          "shape": [
+            {
+              "x": 760,
+              "y": 320
+            },
+            {
+              "x": 800,
+              "y": 320
+            },
+            {
+              "x": 800,
+              "y": 440
+            },
+            {
+              "x": 760,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P7-BANO-M",
           "wing": "C",
           "name": "Baño de mujeres",
           "typeCode": "RESTROOM",
-          "gridRow": 8,
-          "gridColumn": 20,
-          "rowSpan": 3,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 800,
+              "y": 320
+            },
+            {
+              "x": 880,
+              "y": 320
+            },
+            {
+              "x": 880,
+              "y": 440
+            },
+            {
+              "x": 800,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P7-CAMARA-GESELL",
@@ -2378,156 +3766,378 @@
           "typeCode": "GESELL_CHAMBER",
           "aliases": [
             "Cámara de Gessel"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P7-ESC-EMERGENCIA",
           "wing": "C",
           "name": "Escalera de emergencia",
           "typeCode": "STAIRS",
-          "gridRow": 0,
-          "gridColumn": 4,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 160,
+              "y": 0
+            },
+            {
+              "x": 280,
+              "y": 0
+            },
+            {
+              "x": 280,
+              "y": 120
+            },
+            {
+              "x": 160,
+              "y": 120
+            }
+          ]
         },
         {
           "code": "P7-ESC-PRINCIPAL",
           "wing": "C",
           "name": "Escalera principal",
           "typeCode": "STAIRS",
-          "gridRow": 9,
-          "gridColumn": 25,
-          "rowSpan": 3,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 1000,
+              "y": 360
+            },
+            {
+              "x": 1160,
+              "y": 360
+            },
+            {
+              "x": 1160,
+              "y": 480
+            },
+            {
+              "x": 1000,
+              "y": 480
+            }
+          ]
         },
         {
           "code": "P7-TERRAZA",
           "wing": "C",
           "name": "Terraza",
           "typeCode": "TERRACE",
-          "gridRow": 12,
-          "gridColumn": 18,
-          "rowSpan": 4,
-          "colSpan": 7
+          "shape": [
+            {
+              "x": 720,
+              "y": 480
+            },
+            {
+              "x": 1000,
+              "y": 480
+            },
+            {
+              "x": 1000,
+              "y": 640
+            },
+            {
+              "x": 720,
+              "y": 640
+            }
+          ]
         },
         {
           "code": "P7-C01",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 0,
-          "rowSpan": 5,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 160,
+              "y": 0
+            },
+            {
+              "x": 160,
+              "y": 200
+            },
+            {
+              "x": 0,
+              "y": 200
+            }
+          ]
         },
         {
           "code": "P7-C02",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 7,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 280,
+              "y": 0
+            },
+            {
+              "x": 400,
+              "y": 0
+            },
+            {
+              "x": 400,
+              "y": 160
+            },
+            {
+              "x": 280,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P7-C03",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 10,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 400,
+              "y": 0
+            },
+            {
+              "x": 520,
+              "y": 0
+            },
+            {
+              "x": 520,
+              "y": 160
+            },
+            {
+              "x": 400,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P7-C04",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 13,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 520,
+              "y": 0
+            },
+            {
+              "x": 640,
+              "y": 0
+            },
+            {
+              "x": 640,
+              "y": 160
+            },
+            {
+              "x": 520,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P7-C05",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 16,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 640,
+              "y": 0
+            },
+            {
+              "x": 760,
+              "y": 0
+            },
+            {
+              "x": 760,
+              "y": 160
+            },
+            {
+              "x": 640,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P7-C06",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 19,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 760,
+              "y": 0
+            },
+            {
+              "x": 880,
+              "y": 0
+            },
+            {
+              "x": 880,
+              "y": 160
+            },
+            {
+              "x": 760,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P7-C07",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 22,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 880,
+              "y": 0
+            },
+            {
+              "x": 1000,
+              "y": 0
+            },
+            {
+              "x": 1000,
+              "y": 160
+            },
+            {
+              "x": 880,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P7-C08",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 25,
-          "rowSpan": 5,
-          "colSpan": 5
+          "shape": [
+            {
+              "x": 1000,
+              "y": 0
+            },
+            {
+              "x": 1200,
+              "y": 0
+            },
+            {
+              "x": 1200,
+              "y": 200
+            },
+            {
+              "x": 1000,
+              "y": 200
+            }
+          ]
         },
         {
           "code": "P7-C09",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 4,
-          "rowSpan": 5,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 160,
+              "y": 240
+            },
+            {
+              "x": 280,
+              "y": 240
+            },
+            {
+              "x": 280,
+              "y": 440
+            },
+            {
+              "x": 160,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P7-C10",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 7,
-          "rowSpan": 5,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 280,
+              "y": 240
+            },
+            {
+              "x": 400,
+              "y": 240
+            },
+            {
+              "x": 400,
+              "y": 440
+            },
+            {
+              "x": 280,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P7-C11",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 10,
-          "rowSpan": 5,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 400,
+              "y": 240
+            },
+            {
+              "x": 520,
+              "y": 240
+            },
+            {
+              "x": 520,
+              "y": 440
+            },
+            {
+              "x": 400,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P7-C12",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 13,
-          "rowSpan": 5,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 520,
+              "y": 240
+            },
+            {
+              "x": 640,
+              "y": 240
+            },
+            {
+              "x": 640,
+              "y": 440
+            },
+            {
+              "x": 520,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P7-C13",
           "name": "Sin identificar",
           "typeCode": "OTHER",
-          "gridRow": 6,
-          "gridColumn": 16,
-          "rowSpan": 5,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 640,
+              "y": 240
+            },
+            {
+              "x": 760,
+              "y": 240
+            },
+            {
+              "x": 760,
+              "y": 440
+            },
+            {
+              "x": 640,
+              "y": 440
+            }
+          ]
         }
       ]
     },
@@ -2537,8 +4147,8 @@
       "name": "Piso 8",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 16,
-      "gridColumns": 30,
+      "width": 1200,
+      "height": 640,
       "corridors": [
         {
           "code": "PAS-P8",
@@ -2546,12 +4156,12 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 5,
-              "col": 1
+              "x": 60,
+              "y": 220
             },
             {
-              "row": 5,
-              "col": 24
+              "x": 980,
+              "y": 220
             }
           ]
         }
@@ -2562,10 +4172,24 @@
           "wing": "C",
           "name": "Ascensor de los baños",
           "typeCode": "ELEVATOR",
-          "gridRow": 6,
-          "gridColumn": 20,
-          "rowSpan": 2,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 800,
+              "y": 240
+            },
+            {
+              "x": 880,
+              "y": 240
+            },
+            {
+              "x": 880,
+              "y": 320
+            },
+            {
+              "x": 800,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P8-ASC-CENTRAL",
@@ -2575,108 +4199,246 @@
           "aliases": [
             "ascensores"
           ],
-          "gridRow": 6,
-          "gridColumn": 25,
-          "rowSpan": 2,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 1000,
+              "y": 240
+            },
+            {
+              "x": 1160,
+              "y": 240
+            },
+            {
+              "x": 1160,
+              "y": 320
+            },
+            {
+              "x": 1000,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P8-ASESOR-RECTORIA",
           "wing": "C",
           "name": "Asesor de Rectoría",
           "typeCode": "OFFICE",
-          "gridRow": 1,
-          "gridColumn": 22,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 880,
+              "y": 40
+            },
+            {
+              "x": 1000,
+              "y": 40
+            },
+            {
+              "x": 1000,
+              "y": 160
+            },
+            {
+              "x": 880,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P8-BANO-H",
           "wing": "C",
           "name": "Baño de hombres",
           "typeCode": "RESTROOM",
-          "gridRow": 8,
-          "gridColumn": 19,
-          "rowSpan": 2,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 760,
+              "y": 320
+            },
+            {
+              "x": 840,
+              "y": 320
+            },
+            {
+              "x": 840,
+              "y": 400
+            },
+            {
+              "x": 760,
+              "y": 400
+            }
+          ]
         },
         {
           "code": "P8-BANO-M",
           "wing": "C",
           "name": "Baño de mujeres",
           "typeCode": "RESTROOM",
-          "gridRow": 10,
-          "gridColumn": 19,
-          "rowSpan": 2,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 760,
+              "y": 400
+            },
+            {
+              "x": 840,
+              "y": 400
+            },
+            {
+              "x": 840,
+              "y": 480
+            },
+            {
+              "x": 760,
+              "y": 480
+            }
+          ]
         },
         {
           "code": "P8-DIRECCION",
           "wing": "C",
           "name": "Dirección de Aseguramiento de la Calidad",
           "typeCode": "OFFICE",
-          "gridRow": 1,
-          "gridColumn": 13,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 520,
+              "y": 40
+            },
+            {
+              "x": 640,
+              "y": 40
+            },
+            {
+              "x": 640,
+              "y": 160
+            },
+            {
+              "x": 520,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P8-DIRECCION-2",
           "wing": "C",
           "name": "Dirección de Planeación",
           "typeCode": "OFFICE",
-          "gridRow": 1,
-          "gridColumn": 16,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 640,
+              "y": 40
+            },
+            {
+              "x": 760,
+              "y": 40
+            },
+            {
+              "x": 760,
+              "y": 160
+            },
+            {
+              "x": 640,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P8-ESC-EMERGENCIA",
           "wing": "C",
           "name": "Escalera de emergencia",
-          "typeCode": "STAIRS",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "STAIRS"
         },
         {
           "code": "P8-ESC-PRINCIPAL",
           "wing": "C",
           "name": "Escalera principal",
           "typeCode": "STAIRS",
-          "gridRow": 8,
-          "gridColumn": 25,
-          "rowSpan": 4,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 1000,
+              "y": 320
+            },
+            {
+              "x": 1160,
+              "y": 320
+            },
+            {
+              "x": 1160,
+              "y": 480
+            },
+            {
+              "x": 1000,
+              "y": 480
+            }
+          ]
         },
         {
           "code": "P8-PRESIDENCIA",
           "wing": "C",
           "name": "Presidencia",
           "typeCode": "OFFICE",
-          "gridRow": 0,
-          "gridColumn": 1,
-          "rowSpan": 5,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 40,
+              "y": 0
+            },
+            {
+              "x": 200,
+              "y": 0
+            },
+            {
+              "x": 200,
+              "y": 200
+            },
+            {
+              "x": 40,
+              "y": 200
+            }
+          ]
         },
         {
           "code": "P8-RECEPCION",
           "wing": "C",
           "name": "Recepción",
           "typeCode": "RECEPTION",
-          "gridRow": 8,
-          "gridColumn": 22,
-          "rowSpan": 2,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 880,
+              "y": 320
+            },
+            {
+              "x": 1000,
+              "y": 320
+            },
+            {
+              "x": 1000,
+              "y": 400
+            },
+            {
+              "x": 880,
+              "y": 400
+            }
+          ]
         },
         {
           "code": "P8-RECTORIA",
           "wing": "C",
           "name": "Rectoría",
           "typeCode": "OFFICE",
-          "gridRow": 1,
-          "gridColumn": 26,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 1040,
+              "y": 40
+            },
+            {
+              "x": 1160,
+              "y": 40
+            },
+            {
+              "x": 1160,
+              "y": 200
+            },
+            {
+              "x": 1040,
+              "y": 200
+            }
+          ]
         },
         {
           "code": "P8-SALA-FUNDADORES",
@@ -2686,10 +4448,24 @@
           "aliases": [
             "Salón de Fundadores"
           ],
-          "gridRow": 1,
-          "gridColumn": 7,
-          "rowSpan": 3,
-          "colSpan": 6
+          "shape": [
+            {
+              "x": 280,
+              "y": 40
+            },
+            {
+              "x": 520,
+              "y": 40
+            },
+            {
+              "x": 520,
+              "y": 160
+            },
+            {
+              "x": 280,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P8-SALON-EVENTOS",
@@ -2699,34 +4475,42 @@
           "aliases": [
             "auditorio del piso 8"
           ],
-          "gridRow": 6,
-          "gridColumn": 4,
-          "rowSpan": 5,
-          "colSpan": 15
+          "shape": [
+            {
+              "x": 160,
+              "y": 240
+            },
+            {
+              "x": 760,
+              "y": 240
+            },
+            {
+              "x": 760,
+              "y": 440
+            },
+            {
+              "x": 160,
+              "y": 440
+            }
+          ]
         },
         {
           "code": "P8-SECRETARIA",
           "wing": "C",
           "name": "Secretaría General",
-          "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "OFFICE"
         },
         {
           "code": "P8-TERRAZA-CENTRAL",
           "wing": "C",
           "name": "Terraza central",
-          "typeCode": "TERRACE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "TERRACE"
         },
         {
           "code": "P8-TERRAZA-OESTE",
           "wing": "C",
           "name": "Terraza oeste",
-          "typeCode": "TERRACE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "typeCode": "TERRACE"
         },
         {
           "code": "P8-VICERRECTORIA",
@@ -2736,10 +4520,24 @@
           "aliases": [
             "Vice-Rectoría"
           ],
-          "gridRow": 1,
-          "gridColumn": 19,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 760,
+              "y": 40
+            },
+            {
+              "x": 880,
+              "y": 40
+            },
+            {
+              "x": 880,
+              "y": 160
+            },
+            {
+              "x": 760,
+              "y": 160
+            }
+          ]
         }
       ]
     }

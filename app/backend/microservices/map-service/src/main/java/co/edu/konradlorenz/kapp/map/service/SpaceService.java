@@ -118,7 +118,7 @@ public class SpaceService {
 
     /**
      * Replaces a space. Moving a room happens here too, by sending a new building, floor or
-     * grid cell.
+     * shape.
      */
     public SpaceResponse update(String code, String buildingCode, SpaceRequest request) {
         SpaceDocument current = resolve(code, buildingCode);
@@ -248,10 +248,8 @@ public class SpaceService {
                 floor.code(),
                 floor.level(),
                 space.aliasesOrEmpty().stream().map(String::trim).filter(a -> !a.isEmpty()).distinct().toList(),
-                space.gridRow(),
-                space.gridColumn(),
-                space.rowSpanOrOne(),
-                space.colSpanOrOne(),
+                MapMapper.toPoints(space.shape()),
+                MapMapper.toDoors(space.doorsOrEmpty()),
                 space.accessViaOrNull(),
                 space.accessibility(),
                 MapMapper.blankToNull(space.note()),

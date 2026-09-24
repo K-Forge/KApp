@@ -4,7 +4,9 @@ import co.edu.konradlorenz.kapp.map.domain.Accessibility;
 import co.edu.konradlorenz.kapp.map.domain.BuildingDocument;
 import co.edu.konradlorenz.kapp.map.domain.Floor;
 import co.edu.konradlorenz.kapp.map.domain.FloorStatus;
+import co.edu.konradlorenz.kapp.map.domain.Point;
 import co.edu.konradlorenz.kapp.map.domain.SpaceDocument;
+import co.edu.konradlorenz.kapp.map.service.MapMapper;
 import co.edu.konradlorenz.kapp.map.web.dto.FloorLayoutRequest;
 import co.edu.konradlorenz.kapp.map.web.dto.LayoutSpaceDto;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.TestPropertySource;
@@ -39,13 +42,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * The surveyed campus, loaded the way a real database gets it: every change unit in order, with
- * {@link V005_SurveyedCampus} switched on.
+ * The traced campus, loaded the way a real database gets it: every change unit in order, with
+ * {@link V007_TracedCampus} switched on.
  *
- * <p>Nothing here names a room. The snapshot is rewritten every time the campus is exported
- * from the portal, so what is asserted is what must hold for any snapshot: that it loads whole,
- * that the placeholders are gone, that every floor would be accepted by the floor editor, and
- * that a building somebody already made is never overwritten.
+ * <p>Nothing here names a room. The snapshot is rewritten every time a floor is traced or the
+ * campus is exported from the portal, so what is asserted is what must hold for any snapshot:
+ * that it loads whole, that the placeholders are gone, that every floor would be accepted by the
+ * floor editor, and that a floor somebody worked on is never overwritten.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -54,7 +57,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "eureka.client.enabled=false",
         "spring.cloud.discovery.enabled=false"
 })
-class SurveyedCampusTest {
+class TracedCampusTest {
 
     @Container
     @ServiceConnection
@@ -94,7 +97,7 @@ class SurveyedCampusTest {
     }
 
     @Test
-    @DisplayName("every surveyed building is stored whole: its floors, and each floor's spaces where the snapshot puts them")
+    @DisplayName("every surveyed building is stored whole: its floors, and each space with the shape and doors the snapshot draws")
     void everyBuildingIsLoadedWhole() {
         for (SurveySnapshot.Building surveyed : SNAPSHOT) {
             BuildingDocument stored = mongo.findOne(query(where("code").is(surveyed.code())), BuildingDocument.class);
@@ -105,6 +108,10 @@ class SurveyedCampusTest {
                     .containsExactlyInAnyOrderElementsOf(surveyed.floors().stream().map(SurveySnapshot.SnapshotFloor::code).toList());
 
             for (SurveySnapshot.SnapshotFloor floor : surveyed.floors()) {
+                Floor storedFloor = stored.floor(floor.code()).orElseThrow();
+                assertThat(storedFloor.width()).as(surveyed.code() + " " + floor.code()).isEqualTo(floor.width());
+                assertThat(storedFloor.version()).as("loading is not an edit").isZero();
+
                 List<SpaceDocument> spaces = mongo.find(query(where("buildingId").is(stored.id())
                         .and("floorCode").is(floor.code())), SpaceDocument.class);
                 assertThat(spaces).as(surveyed.code() + " " + floor.code())
@@ -112,8 +119,8 @@ class SurveyedCampusTest {
                         .containsExactlyInAnyOrderElementsOf(floor.spaces().stream().map(LayoutSpaceDto::code).toList());
                 for (LayoutSpaceDto space : floor.spaces()) {
                     SpaceDocument match = spaces.stream().filter(s -> s.code().equals(space.code())).findFirst().orElseThrow();
-                    assertThat(match.gridRow()).as(space.code()).isEqualTo(space.gridRow());
-                    assertThat(match.gridColumn()).as(space.code()).isEqualTo(space.gridColumn());
+                    assertThat(match.shape()).as(space.code()).isEqualTo(MapMapper.toPoints(space.shape()));
+                    assertThat(match.doors()).as(space.code()).isEqualTo(MapMapper.toDoors(space.doorsOrEmpty()));
                 }
             }
         }
@@ -131,7 +138,7 @@ class SurveyedCampusTest {
                         .andExpect(status().isOk())
                         .andReturn().getResponse().getContentAsString());
                 FloorLayoutRequest request = new FloorLayoutRequest(detail.get("version").asLong(),
-                        floor.gridRows(), floor.gridColumns(), floor.status(), floor.accessibility(),
+                        floor.width(), floor.height(), floor.outline(), floor.status(), floor.accessibility(),
                         floor.note(), floor.corridors(), floor.spaces());
 
                 mockMvc.perform(put(path + "/layout").with(admin())
@@ -163,60 +170,80 @@ class SurveyedCampusTest {
     }
 
     @Test
-    @DisplayName("a building somebody already made is left alone, and so is a placeholder that holds real spaces")
+    @DisplayName("a floor somebody worked on is kept, an untouched one is redrawn keeping its spaces' ids, and a placeholder holding real spaces stays")
     void somebodysWorkIsKept() {
-        MongoTemplate fresh = new MongoTemplate(client, "survey_rerun_" + UUID.randomUUID().toString().substring(0, 8));
-        Instant now = Instant.now();
-        SurveySnapshot.Building first = SNAPSHOT.getFirst();
-        fresh.insert(building(first.code(), "Hecho a mano", false, now));
-        BuildingDocument inUse = fresh.insert(building("A", "Bloque A", true, now));
-        BuildingDocument empty = fresh.insert(building("B", "Bloque B", true, now));
-        fresh.insert(space(inUse, "301", false, now));
-        fresh.insert(space(empty, "101", true, now));
+        MongoTemplate fresh = new MongoTemplate(client, "traced_rerun_" + UUID.randomUUID().toString().substring(0, 8));
+        Instant then = Instant.parse("2026-09-20T10:00:00Z");
+        SurveySnapshot.Building worked = SNAPSHOT.stream()
+                .filter(b -> !b.floors().isEmpty()).findFirst().orElseThrow();
+        SurveySnapshot.Building untouched = SNAPSHOT.stream()
+                .filter(b -> b != worked && b.floors().stream().anyMatch(f -> !f.spaces().isEmpty()))
+                .findFirst().orElseThrow();
+        SurveySnapshot.SnapshotFloor workedFloor = worked.floors().getFirst();
+        SurveySnapshot.SnapshotFloor redrawn = untouched.floors().stream()
+                .filter(f -> !f.spaces().isEmpty()).findFirst().orElseThrow();
+        String kept = redrawn.spaces().getFirst().code();
 
-        V005_SurveyedCampus.Result result = V005_SurveyedCampus.apply(fresh, SNAPSHOT, now);
+        // Somebody saved a layout on this floor: version 3.
+        fresh.insert(building(worked.code(), workedFloor.code(), 3, false, then));
+        // Nobody touched this one, and one of its spaces is already there under its code.
+        BuildingDocument drafted = fresh.insert(building(untouched.code(), redrawn.code(), 0, false, then));
+        SpaceDocument before = fresh.insert(space(drafted, kept, redrawn.code(), false, then));
+        BuildingDocument inUse = fresh.insert(building("A", "P1", 0, true, then));
+        BuildingDocument empty = fresh.insert(building("B", "P1", 0, true, then));
+        fresh.insert(space(inUse, "301", "P1", false, then));
+        fresh.insert(space(empty, "101", "P1", true, then));
 
-        assertThat(result.kept()).containsExactly(first.code());
-        assertThat(fresh.findOne(query(where("code").is(first.code())), BuildingDocument.class).name())
-                .isEqualTo("Hecho a mano");
+        V007_TracedCampus.Result result = V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.now());
+
+        assertThat(result.kept()).containsExactly(worked.code() + " " + workedFloor.code());
+        Floor workedStored = fresh.findOne(query(where("code").is(worked.code())), BuildingDocument.class)
+                .floor(workedFloor.code()).orElseThrow();
+        assertThat(workedStored.width()).as("the worked-on floor keeps its own drawing").isEqualTo(400);
+        assertThat(workedStored.version()).isEqualTo(3);
+
+        Floor redrawnStored = fresh.findOne(query(where("code").is(untouched.code())), BuildingDocument.class)
+                .floor(redrawn.code()).orElseThrow();
+        assertThat(redrawnStored.width()).isEqualTo(redrawn.width());
+        SpaceDocument after = fresh.findOne(query(where("buildingId").is(drafted.id()).and("code").is(kept)),
+                SpaceDocument.class);
+        assertThat(after.id()).as("the snapshot's version of a room is the same room").isEqualTo(before.id());
+        assertThat(after.updatedAt()).as("redrawing is not an edit").isEqualTo(after.createdAt());
+
         assertThat(result.placeholdersInUse()).containsExactly("A");
-        assertThat(fresh.exists(query(where("code").is("A")), BuildingDocument.class)).isTrue();
         assertThat(fresh.exists(query(where("code").is("B")), BuildingDocument.class)).isFalse();
         assertThat(result.placeholderSpacesRemoved()).isEqualTo(1);
-        assertThat(result.buildingsAdded()).isEqualTo(SNAPSHOT.size() - 1);
+        assertThat(result.buildingsAdded()).isEqualTo(SNAPSHOT.size() - 2);
     }
 
     @Test
-    @DisplayName("the rollback takes back only the surveyed buildings nobody has worked on since")
-    void rollbackKeepsWorkedOnBuildings() {
-        MongoTemplate fresh = new MongoTemplate(client, "survey_rollback_" + UUID.randomUUID().toString().substring(0, 8));
-        V005_SurveyedCampus.apply(fresh, SNAPSHOT, Instant.now());
-        SurveySnapshot.Building worked = SNAPSHOT.stream()
-                .filter(b -> b.floors().stream().anyMatch(f -> !f.spaces().isEmpty())).findFirst().orElseThrow();
-        BuildingDocument stored = fresh.findOne(query(where("code").is(worked.code())), BuildingDocument.class);
-        SpaceDocument edited = fresh.findOne(query(where("buildingId").is(stored.id())), SpaceDocument.class);
-        fresh.save(new SpaceDocument(edited.id(), edited.code(), edited.doorCode(), edited.baseCode(), edited.wing(),
-                edited.name(), edited.typeCode(), edited.buildingId(), edited.buildingCode(), edited.campus(),
-                edited.floorCode(), edited.floorLevel(), edited.aliases(), 0, 0, 1, 1, edited.accessVia(),
-                edited.accessibility(), edited.note(), edited.capacity(), false, edited.createdAt(),
-                edited.createdAt().plusSeconds(60)));
+    @DisplayName("run twice, it writes the same campus twice: what it wrote is still untouched")
+    void runningTwiceChangesNothing() {
+        MongoTemplate fresh = new MongoTemplate(client, "traced_twice_" + UUID.randomUUID().toString().substring(0, 8));
+        V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.now());
+        long spaces = fresh.count(new Query(), SpaceDocument.class);
 
-        new V005_SurveyedCampus().rollback(fresh);
+        V007_TracedCampus.Result again = V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.now());
 
-        assertThat(fresh.findAll(BuildingDocument.class)).extracting(BuildingDocument::code)
-                .containsExactly(worked.code());
+        assertThat(again.kept()).as("nothing it wrote counts as somebody's work").isEmpty();
+        assertThat(again.buildingsAdded()).isZero();
+        assertThat(fresh.count(new Query(), SpaceDocument.class)).isEqualTo(spaces);
     }
 
-    private static BuildingDocument building(String code, String name, boolean placeholder, Instant now) {
-        return new BuildingDocument(UUID.randomUUID().toString(), code, name, "Sede Principal", null,
+    private static BuildingDocument building(String code, String floor, long version, boolean placeholder,
+                                             Instant then) {
+        return new BuildingDocument(UUID.randomUUID().toString(), code, "Hecho a mano", "Sede Principal", null,
                 List.of(), List.of(),
-                List.of(new Floor("P1", 1, "Piso 1", FloorStatus.DRAFT, Accessibility.UNKNOWN, null, 6, 10, List.of(), 0)),
-                placeholder, now, now);
+                List.of(new Floor(floor, 1, "Piso", FloorStatus.DRAFT, Accessibility.UNKNOWN, null, 400, 240,
+                        List.of(), List.of(), version)),
+                placeholder, then, then);
     }
 
-    private static SpaceDocument space(BuildingDocument building, String code, boolean placeholder, Instant now) {
+    private static SpaceDocument space(BuildingDocument building, String code, String floor, boolean placeholder,
+                                       Instant then) {
         return new SpaceDocument(UUID.randomUUID().toString(), code, code, code, null, "Aula " + code,
-                "CLASSROOM", building.id(), building.code(), building.campus(), "P1", 1, List.of(),
-                null, null, 1, 1, null, null, null, null, placeholder, now, now);
+                "CLASSROOM", building.id(), building.code(), building.campus(), floor, 1, List.of(),
+                List.of(new Point(0, 0), new Point(40, 0), new Point(40, 40), new Point(0, 40)), List.of(),
+                null, null, null, null, placeholder, then, then);
     }
 }

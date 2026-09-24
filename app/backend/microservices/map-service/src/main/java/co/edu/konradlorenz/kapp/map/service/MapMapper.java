@@ -3,17 +3,21 @@ package co.edu.konradlorenz.kapp.map.service;
 import co.edu.konradlorenz.kapp.map.domain.Accessibility;
 import co.edu.konradlorenz.kapp.map.domain.BuildingDocument;
 import co.edu.konradlorenz.kapp.map.domain.Corridor;
+import co.edu.konradlorenz.kapp.map.domain.Door;
 import co.edu.konradlorenz.kapp.map.domain.Floor;
-import co.edu.konradlorenz.kapp.map.domain.GridPoint;
+import co.edu.konradlorenz.kapp.map.domain.Point;
+import co.edu.konradlorenz.kapp.map.domain.Shape;
 import co.edu.konradlorenz.kapp.map.domain.SpaceDocument;
 import co.edu.konradlorenz.kapp.map.domain.SpaceTypeDocument;
 import co.edu.konradlorenz.kapp.map.domain.Wing;
+import co.edu.konradlorenz.kapp.map.web.dto.BoundsDto;
 import co.edu.konradlorenz.kapp.map.web.dto.BuildingResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.BuildingSummaryResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.CorridorDto;
+import co.edu.konradlorenz.kapp.map.web.dto.DoorDto;
 import co.edu.konradlorenz.kapp.map.web.dto.FloorDetailResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.FloorDto;
-import co.edu.konradlorenz.kapp.map.web.dto.GridPointDto;
+import co.edu.konradlorenz.kapp.map.web.dto.PointDto;
 import co.edu.konradlorenz.kapp.map.web.dto.SpaceDetailResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.SpaceResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.SpaceTypeResponse;
@@ -34,7 +38,8 @@ public final class MapMapper {
 
     public static FloorDto toFloorDto(Floor floor) {
         return new FloorDto(floor.code(), floor.level(), floor.name(), floor.status(),
-                floor.accessibility(), floor.note(), floor.gridRows(), floor.gridColumns(),
+                floor.accessibility(), floor.note(), floor.width(), floor.height(),
+                toPointDtos(floor.outline()),
                 floor.corridors().stream().map(MapMapper::toCorridorDto).toList(),
                 floor.version());
     }
@@ -42,7 +47,7 @@ public final class MapMapper {
     /** @param version carried over from the stored floor: a floor's version is the layout's */
     public static Floor toFloor(FloorDto dto, long version) {
         return new Floor(dto.code(), dto.level(), dto.name(), dto.status(), dto.accessibility(),
-                blankToNull(dto.note()), dto.gridRows(), dto.gridColumns(),
+                blankToNull(dto.note()), dto.width(), dto.height(), toPoints(dto.outlineOrEmpty()),
                 dto.corridorsOrEmpty().stream().map(MapMapper::toCorridor).toList(), version);
     }
 
@@ -56,16 +61,12 @@ public final class MapMapper {
 
     public static CorridorDto toCorridorDto(Corridor corridor) {
         return new CorridorDto(corridor.code(), corridor.name(), corridor.color(),
-                corridor.path().stream()
-                        .map(point -> new GridPointDto(point.row(), point.col()))
-                        .toList());
+                toPointDtos(corridor.path()));
     }
 
     public static Corridor toCorridor(CorridorDto dto) {
         return new Corridor(dto.code(), dto.name(), dto.color(),
-                dto.path().stream()
-                        .map(point -> new GridPoint(point.row(), point.col()))
-                        .toList());
+                toPoints(dto.path()));
     }
 
     public static BuildingResponse toBuildingResponse(BuildingDocument building) {
@@ -118,10 +119,9 @@ public final class MapMapper {
                 space.floorCode(),
                 space.floorLevel(),
                 space.aliases(),
-                space.gridRow(),
-                space.gridColumn(),
-                space.rowSpan(),
-                space.colSpan(),
+                toPointDtos(space.shape()),
+                bounds(space.shape()),
+                toDoorDtos(space.doors()),
                 space.accessVia(),
                 space.accessibility(),
                 effective(space, floor),
@@ -147,10 +147,9 @@ public final class MapMapper {
                 space.floorCode(),
                 space.floorLevel(),
                 space.aliases(),
-                space.gridRow(),
-                space.gridColumn(),
-                space.rowSpan(),
-                space.colSpan(),
+                toPointDtos(space.shape()),
+                bounds(space.shape()),
+                toDoorDtos(space.doors()),
                 space.accessVia(),
                 space.accessibility(),
                 effective(space, floor),
@@ -169,8 +168,9 @@ public final class MapMapper {
                 floor.status(),
                 floor.accessibility(),
                 floor.note(),
-                floor.gridRows(),
-                floor.gridColumns(),
+                floor.width(),
+                floor.height(),
+                toPointDtos(floor.outline()),
                 floor.corridors().stream().map(MapMapper::toCorridorDto).toList(),
                 floor.version(),
                 building.id(),
@@ -186,6 +186,34 @@ public final class MapMapper {
             return space.accessibility();
         }
         return floor == null ? Accessibility.UNKNOWN : floor.accessibility();
+    }
+
+    /** @return the points as the API writes them, or null for no shape at all */
+    public static List<PointDto> toPointDtos(List<Point> points) {
+        return points == null ? null : points.stream().map(p -> new PointDto(p.x(), p.y())).toList();
+    }
+
+    public static List<DoorDto> toDoorDtos(List<Door> doors) {
+        return doors.stream().map(d -> new DoorDto(new PointDto(d.from().x(), d.from().y()),
+                new PointDto(d.to().x(), d.to().y()))).toList();
+    }
+
+    public static List<Door> toDoors(List<DoorDto> doors) {
+        return doors.stream().map(d -> new Door(new Point(d.from().x(), d.from().y()),
+                new Point(d.to().x(), d.to().y()))).toList();
+    }
+
+    /** @return the points as stored, or null for no shape at all */
+    public static List<Point> toPoints(List<PointDto> points) {
+        return points == null ? null : points.stream().map(p -> new Point(p.x(), p.y())).toList();
+    }
+
+    static BoundsDto bounds(List<Point> shape) {
+        if (shape == null || shape.isEmpty()) {
+            return null;
+        }
+        var box = Shape.bounds(shape);
+        return new BoundsDto((int) box.getX(), (int) box.getY(), (int) box.getWidth(), (int) box.getHeight());
     }
 
     static String blankToNull(String value) {

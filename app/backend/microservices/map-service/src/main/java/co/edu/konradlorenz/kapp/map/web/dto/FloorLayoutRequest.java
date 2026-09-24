@@ -26,11 +26,15 @@ public record FloorLayoutRequest(
         @NotNull @Min(0)
         Long version,
 
-        @NotNull @Min(1) @Max(60)
-        Integer gridRows,
+        @NotNull @Min(1) @Max(20000)
+        Integer width,
 
-        @NotNull @Min(1) @Max(60)
-        Integer gridColumns,
+        @NotNull @Min(1) @Max(20000)
+        Integer height,
+
+        @Schema(description = "The building's walls around this floor, corners in order.")
+        @Size(max = 400)
+        List<@NotNull @Valid PointDto> outline,
 
         FloorStatus status,
 
@@ -48,5 +52,9 @@ public record FloorLayoutRequest(
 
     public List<CorridorDto> corridorsOrEmpty() {
         return corridors == null ? List.of() : corridors;
+    }
+
+    public List<PointDto> outlineOrEmpty() {
+        return outline == null ? List.of() : outline;
     }
 }

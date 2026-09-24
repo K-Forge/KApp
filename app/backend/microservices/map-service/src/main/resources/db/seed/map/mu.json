@@ -15,8 +15,8 @@
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
       "note": "A nivel de la calle: lo primero que se ve al entrar.",
-      "gridRows": 8,
-      "gridColumns": 28,
+      "width": 1120,
+      "height": 320,
       "corridors": [
         {
           "code": "PAS-P0",
@@ -24,12 +24,12 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 2,
-              "col": 8
+              "x": 340,
+              "y": 100
             },
             {
-              "row": 2,
-              "col": 21
+              "x": 860,
+              "y": 100
             }
           ]
         }
@@ -39,19 +39,47 @@
           "code": "P0-BANO",
           "name": "Baño",
           "typeCode": "RESTROOM",
-          "gridRow": 6,
-          "gridColumn": 16,
-          "rowSpan": 2,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 640,
+              "y": 240
+            },
+            {
+              "x": 720,
+              "y": 240
+            },
+            {
+              "x": 720,
+              "y": 320
+            },
+            {
+              "x": 640,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P0-BANO-ACCESIBLE",
           "name": "Baño accesible",
           "typeCode": "RESTROOM",
-          "gridRow": 0,
-          "gridColumn": 6,
-          "rowSpan": 3,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 240,
+              "y": 0
+            },
+            {
+              "x": 320,
+              "y": 0
+            },
+            {
+              "x": 320,
+              "y": 120
+            },
+            {
+              "x": 240,
+              "y": 120
+            }
+          ]
         },
         {
           "code": "P0-CONSULTORIO",
@@ -60,37 +88,93 @@
           "aliases": [
             "Servicio Médico"
           ],
-          "gridRow": 4,
-          "gridColumn": 19,
-          "rowSpan": 4,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 760,
+              "y": 160
+            },
+            {
+              "x": 920,
+              "y": 160
+            },
+            {
+              "x": 920,
+              "y": 320
+            },
+            {
+              "x": 760,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P0-ENFERMERIA",
           "name": "Enfermería",
           "typeCode": "NURSING",
-          "gridRow": 3,
-          "gridColumn": 12,
-          "rowSpan": 4,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 480,
+              "y": 120
+            },
+            {
+              "x": 640,
+              "y": 120
+            },
+            {
+              "x": 640,
+              "y": 280
+            },
+            {
+              "x": 480,
+              "y": 280
+            }
+          ]
         },
         {
           "code": "P0-ENTRADA",
           "name": "Entrada",
           "typeCode": "ENTRANCE",
-          "gridRow": 6,
-          "gridColumn": 5,
-          "rowSpan": 2,
-          "colSpan": 1
+          "shape": [
+            {
+              "x": 200,
+              "y": 240
+            },
+            {
+              "x": 240,
+              "y": 240
+            },
+            {
+              "x": 240,
+              "y": 320
+            },
+            {
+              "x": 200,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P0-ESC",
           "name": "Escalera interior",
           "typeCode": "STAIRS",
-          "gridRow": 3,
-          "gridColumn": 17,
-          "rowSpan": 2,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 680,
+              "y": 120
+            },
+            {
+              "x": 760,
+              "y": 120
+            },
+            {
+              "x": 760,
+              "y": 200
+            },
+            {
+              "x": 680,
+              "y": 200
+            }
+          ]
         },
         {
           "code": "P0-RECEPCION",
@@ -99,10 +183,24 @@
           "aliases": [
             "Servicio Médico"
           ],
-          "gridRow": 3,
-          "gridColumn": 6,
-          "rowSpan": 4,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 240,
+              "y": 120
+            },
+            {
+              "x": 400,
+              "y": 120
+            },
+            {
+              "x": 400,
+              "y": 280
+            },
+            {
+              "x": 240,
+              "y": 280
+            }
+          ]
         }
       ]
     },
@@ -113,8 +211,8 @@
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
       "note": "Se sube por la escalera exterior, del lado oeste.",
-      "gridRows": 8,
-      "gridColumns": 28,
+      "width": 1120,
+      "height": 320,
       "corridors": [
         {
           "code": "PAS-P1",
@@ -122,12 +220,12 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 4,
-              "col": 5
+              "x": 220,
+              "y": 180
             },
             {
-              "row": 4,
-              "col": 19
+              "x": 780,
+              "y": 180
             }
           ]
         }
@@ -137,100 +235,254 @@
           "code": "P1-BANO",
           "name": "Baño",
           "typeCode": "RESTROOM",
-          "gridRow": 3,
-          "gridColumn": 16,
-          "rowSpan": 1,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 640,
+              "y": 120
+            },
+            {
+              "x": 720,
+              "y": 120
+            },
+            {
+              "x": 720,
+              "y": 160
+            },
+            {
+              "x": 640,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P1-CAFE",
           "name": "Café",
           "typeCode": "SOCIAL_AREA",
-          "gridRow": 6,
-          "gridColumn": 19,
-          "rowSpan": 2,
-          "colSpan": 1
+          "shape": [
+            {
+              "x": 760,
+              "y": 240
+            },
+            {
+              "x": 800,
+              "y": 240
+            },
+            {
+              "x": 800,
+              "y": 320
+            },
+            {
+              "x": 760,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P1-ESC",
           "name": "Escalera interior",
           "typeCode": "STAIRS",
-          "gridRow": 5,
-          "gridColumn": 12,
-          "rowSpan": 2,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 480,
+              "y": 200
+            },
+            {
+              "x": 560,
+              "y": 200
+            },
+            {
+              "x": 560,
+              "y": 280
+            },
+            {
+              "x": 480,
+              "y": 280
+            }
+          ]
         },
         {
           "code": "P1-ESC-EXTERIOR",
           "name": "Escalera exterior",
           "typeCode": "STAIRS",
-          "gridRow": 1,
-          "gridColumn": 4,
-          "rowSpan": 3,
-          "colSpan": 1
+          "shape": [
+            {
+              "x": 160,
+              "y": 40
+            },
+            {
+              "x": 200,
+              "y": 40
+            },
+            {
+              "x": 200,
+              "y": 160
+            },
+            {
+              "x": 160,
+              "y": 160
+            }
+          ]
         },
         {
           "code": "P1-OFICINA-1",
           "name": "Oficina 1",
           "typeCode": "OFFICE",
-          "gridRow": 0,
-          "gridColumn": 19,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 760,
+              "y": 0
+            },
+            {
+              "x": 880,
+              "y": 0
+            },
+            {
+              "x": 880,
+              "y": 120
+            },
+            {
+              "x": 760,
+              "y": 120
+            }
+          ]
         },
         {
           "code": "P1-OFICINA-2",
           "name": "Oficina 2",
           "typeCode": "OFFICE",
-          "gridRow": 0,
-          "gridColumn": 22,
-          "rowSpan": 3,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 880,
+              "y": 0
+            },
+            {
+              "x": 960,
+              "y": 0
+            },
+            {
+              "x": 960,
+              "y": 120
+            },
+            {
+              "x": 880,
+              "y": 120
+            }
+          ]
         },
         {
           "code": "P1-OFICINA-3",
           "name": "Oficina 3",
           "typeCode": "OFFICE",
-          "gridRow": 5,
-          "gridColumn": 23,
-          "rowSpan": 3,
-          "colSpan": 1
+          "shape": [
+            {
+              "x": 920,
+              "y": 200
+            },
+            {
+              "x": 960,
+              "y": 200
+            },
+            {
+              "x": 960,
+              "y": 320
+            },
+            {
+              "x": 920,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P1-OFICINA-4",
           "name": "Oficina 4",
           "typeCode": "OFFICE",
-          "gridRow": 5,
-          "gridColumn": 20,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 800,
+              "y": 200
+            },
+            {
+              "x": 920,
+              "y": 200
+            },
+            {
+              "x": 920,
+              "y": 320
+            },
+            {
+              "x": 800,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P1-OFICINA-SIN",
           "name": "Oficina sin nombre (1)",
           "typeCode": "OFFICE",
-          "gridRow": 0,
-          "gridColumn": 15,
-          "rowSpan": 3,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 600,
+              "y": 0
+            },
+            {
+              "x": 760,
+              "y": 0
+            },
+            {
+              "x": 760,
+              "y": 120
+            },
+            {
+              "x": 600,
+              "y": 120
+            }
+          ]
         },
         {
           "code": "P1-OFICINA-SIN-2",
           "name": "Oficina sin nombre (2)",
           "typeCode": "OFFICE",
-          "gridRow": 4,
-          "gridColumn": 24,
-          "rowSpan": 4,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 960,
+              "y": 160
+            },
+            {
+              "x": 1080,
+              "y": 160
+            },
+            {
+              "x": 1080,
+              "y": 320
+            },
+            {
+              "x": 960,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P1-POCETA",
           "name": "Poceta",
           "typeCode": "CLEANING_ROOM",
-          "gridRow": 6,
-          "gridColumn": 17,
-          "rowSpan": 2,
-          "colSpan": 1
+          "shape": [
+            {
+              "x": 680,
+              "y": 240
+            },
+            {
+              "x": 720,
+              "y": 240
+            },
+            {
+              "x": 720,
+              "y": 320
+            },
+            {
+              "x": 680,
+              "y": 320
+            }
+          ]
         },
         {
           "code": "P1-RACK",
@@ -239,10 +491,24 @@
           "aliases": [
             "cuarto de TI"
           ],
-          "gridRow": 6,
-          "gridColumn": 15,
-          "rowSpan": 2,
-          "colSpan": 1
+          "shape": [
+            {
+              "x": 600,
+              "y": 240
+            },
+            {
+              "x": 640,
+              "y": 240
+            },
+            {
+              "x": 640,
+              "y": 320
+            },
+            {
+              "x": 600,
+              "y": 320
+            }
+          ]
         }
       ]
     },
@@ -252,8 +518,8 @@
       "name": "Piso 2",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 9,
-      "gridColumns": 28,
+      "width": 1120,
+      "height": 360,
       "corridors": [
         {
           "code": "PAS-P2",
@@ -261,16 +527,16 @@
           "color": "#5B8DEF",
           "path": [
             {
-              "row": 3,
-              "col": 7
+              "x": 300,
+              "y": 140
             },
             {
-              "row": 6,
-              "col": 7
+              "x": 300,
+              "y": 260
             },
             {
-              "row": 6,
-              "col": 8
+              "x": 340,
+              "y": 260
             }
           ]
         }
@@ -280,10 +546,24 @@
           "code": "P2-BANO",
           "name": "Baño",
           "typeCode": "RESTROOM",
-          "gridRow": 0,
-          "gridColumn": 7,
-          "rowSpan": 3,
-          "colSpan": 2
+          "shape": [
+            {
+              "x": 280,
+              "y": 0
+            },
+            {
+              "x": 360,
+              "y": 0
+            },
+            {
+              "x": 360,
+              "y": 120
+            },
+            {
+              "x": 280,
+              "y": 120
+            }
+          ]
         },
         {
           "code": "P2-DIRECCION",
@@ -292,38 +572,94 @@
           "aliases": [
             "Dirección de Medio Universitario"
           ],
-          "gridRow": 0,
-          "gridColumn": 12,
-          "rowSpan": 5,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 480,
+              "y": 0
+            },
+            {
+              "x": 640,
+              "y": 0
+            },
+            {
+              "x": 640,
+              "y": 200
+            },
+            {
+              "x": 480,
+              "y": 200
+            }
+          ]
         },
         {
           "code": "P2-ESC",
           "name": "Escalera interior",
           "typeCode": "STAIRS",
-          "gridRow": 6,
-          "gridColumn": 9,
-          "rowSpan": 3,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 360,
+              "y": 240
+            },
+            {
+              "x": 480,
+              "y": 240
+            },
+            {
+              "x": 480,
+              "y": 360
+            },
+            {
+              "x": 360,
+              "y": 360
+            }
+          ]
         },
         {
           "code": "P2-SALA-COMPUTO-1",
           "name": "Sala de cómputo 1",
           "typeCode": "COMPUTER_LAB",
-          "gridRow": 0,
-          "gridColumn": 0,
-          "rowSpan": 4,
-          "colSpan": 6,
+          "shape": [
+            {
+              "x": 0,
+              "y": 0
+            },
+            {
+              "x": 240,
+              "y": 0
+            },
+            {
+              "x": 240,
+              "y": 160
+            },
+            {
+              "x": 0,
+              "y": 160
+            }
+          ],
           "capacity": 5
         },
         {
           "code": "P2-SALA-COMPUTO-2",
           "name": "Sala de cómputo 2",
           "typeCode": "COMPUTER_LAB",
-          "gridRow": 4,
-          "gridColumn": 0,
-          "rowSpan": 4,
-          "colSpan": 6,
+          "shape": [
+            {
+              "x": 0,
+              "y": 160
+            },
+            {
+              "x": 240,
+              "y": 160
+            },
+            {
+              "x": 240,
+              "y": 320
+            },
+            {
+              "x": 0,
+              "y": 320
+            }
+          ],
           "capacity": 5
         }
       ]

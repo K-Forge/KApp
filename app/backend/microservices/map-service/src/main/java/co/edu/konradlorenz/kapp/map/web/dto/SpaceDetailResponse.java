@@ -36,10 +36,13 @@ public record SpaceDetailResponse(
         String floorCode,
         double floorLevel,
         List<String> aliases,
-        Integer gridRow,
-        Integer gridColumn,
-        int rowSpan,
-        int colSpan,
+        @Schema(description = "Corners of the space's outline on its floor, in order. Absent while "
+                + "the space is only inventoried.")
+        List<PointDto> shape,
+        @Schema(description = "The rectangle around the shape. Absent with it.", accessMode = Schema.AccessMode.READ_ONLY)
+        BoundsDto bounds,
+        @Schema(description = "Its ways in, each on the shape's outline. Empty until marked.")
+        List<DoorDto> doors,
         String accessVia,
         Accessibility accessibility,
         Accessibility effectiveAccessibility,

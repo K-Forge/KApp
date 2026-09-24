@@ -75,7 +75,7 @@ public class FloorLayoutService {
                 request.status() == null ? current.status() : request.status(),
                 request.accessibility() == null ? current.accessibility() : request.accessibility(),
                 MapMapper.blankToNull(request.note()),
-                request.gridRows(), request.gridColumns(),
+                request.width(), request.height(), MapMapper.toPoints(request.outlineOrEmpty()),
                 request.corridorsOrEmpty().stream().map(MapMapper::toCorridor).toList(),
                 current.version() + 1);
 
@@ -132,7 +132,8 @@ public class FloorLayoutService {
         // In a layout the overlapping rooms are both in the drawing being saved, so it is the
         // drawing that is wrong: a 400, not a conflict with anything stored.
         issues.addAll(findings.overlaps());
-        issues.addAll(SpaceRules.checkCorridors(floor.gridRows(), floor.gridColumns(), request.corridorsOrEmpty()));
+        issues.addAll(SpaceRules.checkFloorDrawing(floor.width(), floor.height(), request.outlineOrEmpty(),
+                request.corridorsOrEmpty()));
 
         if (!issues.isEmpty()) {
             throw new BusinessRuleException("The floor was not saved: %d problem(s). Nothing was changed."
@@ -172,8 +173,9 @@ public class FloorLayoutService {
                 .set("floors.$.status", next.status())
                 .set("floors.$.accessibility", next.accessibility())
                 .set("floors.$.note", next.note())
-                .set("floors.$.gridRows", next.gridRows())
-                .set("floors.$.gridColumns", next.gridColumns())
+                .set("floors.$.width", next.width())
+                .set("floors.$.height", next.height())
+                .set("floors.$.outline", next.outline())
                 .set("floors.$.corridors", next.corridors())
                 .set("floors.$.version", next.version())
                 .set("updatedAt", Instant.now());

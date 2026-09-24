@@ -224,8 +224,8 @@ public class BuildingService {
             if (!levels.add(floor.level())) {
                 issues.add(new ApiError.FieldIssue("floors", "Two floors at level " + floor.level()));
             }
-            issues.addAll(SpaceRules.checkCorridors(floor.gridRows(), floor.gridColumns(),
-                    floor.corridorsOrEmpty()).stream()
+            issues.addAll(SpaceRules.checkFloorDrawing(floor.width(), floor.height(),
+                    floor.outlineOrEmpty(), floor.corridorsOrEmpty()).stream()
                     .map(i -> new ApiError.FieldIssue("floors[" + floor.code() + "]." + i.field(), i.issue()))
                     .toList());
         }
@@ -287,8 +287,7 @@ public class BuildingService {
                         space.wing(), space.name(), space.typeCode(), space.buildingId(),
                         building.code(), building.campus(), space.floorCode(),
                         levels.getOrDefault(space.floorCode(), space.floorLevel()),
-                        space.aliases(), space.gridRow(), space.gridColumn(), space.rowSpan(),
-                        space.colSpan(), space.accessVia(), space.accessibility(), space.note(),
+                        space.aliases(), space.shape(), space.doors(), space.accessVia(), space.accessibility(), space.note(),
                         space.capacity(), space.placeholder(), space.createdAt(), Instant.now()))
                 .toList();
 
