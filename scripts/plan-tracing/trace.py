@@ -147,11 +147,12 @@ def balanced(img):
     return [tuple(min(255, int(v * k)) for v, k in zip(p, gains)) for p in img]
 
 
-def klass(r, g, b, proportional=False, bounds=((0.52, 0.76), 0.40)):
+def klass(r, g, b, proportional=False, bounds=((0.52, 0.76), 0.40), red=MARK):
     """Colours measured on the CPC 1 plans: orange (190, 130, 82), red (147, 0, 34), green
     (0, 112, 58), walls (49, 37, 64), glass (104, 138, 129) to (152, 177, 171). In a balanced
     dim photo orange is told by its proportions instead: green a bit over half the red, blue well
-    under it - the Edificio Central's plans, orange (130, 80, 15) before balancing."""
+    under it - the Edificio Central's plans, orange (130, 80, 15) before balancing. Red is drawn
+    over the plan, except where a plan draws its partitions in red: then `red` is WALL."""
     if proportional:
         # The thin lines between classrooms are only a little lighter - green 0.8 of the red
         # where the orange has 0.64 to 0.73 - so the bounds are tight.
@@ -161,7 +162,7 @@ def klass(r, g, b, proportional=False, bounds=((0.52, 0.76), 0.40)):
     elif r > 140 and g > 80 and r - b > 60 and 15 < r - g < 72:
         return FILL                                 # past 72 it is the rim of a red line
     if r > 100 and r - g > 70 and r - b > 40:
-        return MARK                                 # red: routes, "usted está aquí", fire gear
+        return red                                  # red: routes, "usted está aquí", fire gear
     if g > r + 40 and g > b + 20:
         return MARK                                 # green: exit arrows, first aid
     if g > r + 12 and b > r + 8 and r + g + b < 560:
@@ -803,7 +804,10 @@ def main():
         img = balanced(img)
     # A washed-out photo - glare over the glass - may need looser bounds: "fill": [[g low, g high], b high].
     bounds = tuple(spec.get("fill", ((0.52, 0.76), 0.40)))
-    mask = bytearray(klass(*c, proportional=dim, bounds=bounds) for c in img)
+    # The Centro de Investigaciones draws the partitions between its offices in red ("red": "wall");
+    # the red line of "usted está aquí" then cuts the room it crosses, and "merge" joins it again.
+    red = WALL if spec.get("red") == "wall" else MARK
+    mask = bytearray(klass(*c, proportional=dim, bounds=bounds, red=red) for c in img)
 
     # 7 first, while the treads are still walls: stairs.
     stairs = ladders(mask, w, h, tread=size("tread", 18), pitch=(size("pitch_min", 5), size("pitch_max", 22)),
@@ -890,6 +894,15 @@ def main():
         xs = [p[0] for p in poly]; ys = [p[1] for p in poly]
         if min(max(xs) - min(xs), max(ys) - min(ys)) >= narrowest:
             rooms.append(poly)
+    # Rooms the spec says are rectangles ("box", a point in each): the door swings a plan draws
+    # inside them cut their corners, and the box around what was traced is the room.
+    for x, y in spec.get("box", []):
+        k = next((k for k, poly in enumerate(rooms) if inside(poly, x, y)), None)
+        if k is None:
+            print(f"  box {[x, y]}: the point is on no room", file=sys.stderr)
+            continue
+        xs = [q[0] for q in rooms[k]]; ys = [q[1] for q in rooms[k]]
+        rooms[k] = [(min(xs), min(ys)), (max(xs), min(ys)), (max(xs), max(ys)), (min(xs), max(ys))]
     rooms.extend([tuple(q) for q in r["shape"]] for r in spec.get("rooms", []))
     rooms.sort(key=lambda p: (min(q[1] for q in p) // (4 * narrowest), min(q[0] for q in p)))
     # A staircase narrower than a flight is a label's letters, not stairs.
