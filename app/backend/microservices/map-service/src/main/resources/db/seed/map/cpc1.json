@@ -1439,260 +1439,63 @@
       "name": "Piso 3",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "width": 960,
-      "height": 400,
-      "corridors": [
-        {
-          "code": "PAS-P3",
-          "name": "Pasillo principal",
-          "color": "#5B8DEF",
-          "path": [
-            {
-              "x": 60,
-              "y": 140
-            },
-            {
-              "x": 700,
-              "y": 140
-            },
-            {
-              "x": 700,
-              "y": 300
-            }
-          ]
-        },
-        {
-          "code": "PAS-P3-SUR",
-          "name": "Pasillo de las escaleras",
-          "color": "#5B8DEF",
-          "path": [
-            {
-              "x": 20,
-              "y": 300
-            },
-            {
-              "x": 780,
-              "y": 300
-            }
-          ]
-        }
-      ],
+      "width": 1575,
+      "height": 530,
+      "outline": [],
       "spaces": [
         {
           "code": "301",
           "doorCode": "301",
           "name": "Consultorio 301",
-          "typeCode": "CONSULTATION_ROOM",
-          "shape": [
-            {
-              "x": 0,
-              "y": 160
-            },
-            {
-              "x": 80,
-              "y": 160
-            },
-            {
-              "x": 80,
-              "y": 240
-            },
-            {
-              "x": 0,
-              "y": 240
-            }
-          ]
+          "typeCode": "CONSULTATION_ROOM"
         },
         {
           "code": "302",
           "doorCode": "302",
           "name": "Consultorio 302",
-          "typeCode": "CONSULTATION_ROOM",
-          "shape": [
-            {
-              "x": 0,
-              "y": 0
-            },
-            {
-              "x": 120,
-              "y": 0
-            },
-            {
-              "x": 120,
-              "y": 120
-            },
-            {
-              "x": 0,
-              "y": 120
-            }
-          ]
+          "typeCode": "CONSULTATION_ROOM"
         },
         {
           "code": "303",
           "doorCode": "303",
           "name": "Consultorio 303",
-          "typeCode": "CONSULTATION_ROOM",
-          "shape": [
-            {
-              "x": 120,
-              "y": 0
-            },
-            {
-              "x": 240,
-              "y": 0
-            },
-            {
-              "x": 240,
-              "y": 120
-            },
-            {
-              "x": 120,
-              "y": 120
-            }
-          ]
+          "typeCode": "CONSULTATION_ROOM"
         },
         {
           "code": "304",
           "doorCode": "304",
           "name": "Consultorio 304",
-          "typeCode": "CONSULTATION_ROOM",
-          "shape": [
-            {
-              "x": 240,
-              "y": 0
-            },
-            {
-              "x": 360,
-              "y": 0
-            },
-            {
-              "x": 360,
-              "y": 120
-            },
-            {
-              "x": 240,
-              "y": 120
-            }
-          ]
+          "typeCode": "CONSULTATION_ROOM"
         },
         {
           "code": "305",
           "doorCode": "305",
           "name": "Consultorio 305",
-          "typeCode": "CONSULTATION_ROOM",
-          "shape": [
-            {
-              "x": 560,
-              "y": 0
-            },
-            {
-              "x": 680,
-              "y": 0
-            },
-            {
-              "x": 680,
-              "y": 120
-            },
-            {
-              "x": 560,
-              "y": 120
-            }
-          ]
+          "typeCode": "CONSULTATION_ROOM"
         },
         {
           "code": "306",
           "doorCode": "306",
           "name": "Consultorio 306",
-          "typeCode": "CONSULTATION_ROOM",
-          "shape": [
-            {
-              "x": 680,
-              "y": 0
-            },
-            {
-              "x": 800,
-              "y": 0
-            },
-            {
-              "x": 800,
-              "y": 120
-            },
-            {
-              "x": 680,
-              "y": 120
-            }
-          ]
+          "typeCode": "CONSULTATION_ROOM"
         },
         {
           "code": "307",
           "doorCode": "307",
           "name": "Consultorio 307",
-          "typeCode": "CONSULTATION_ROOM",
-          "shape": [
-            {
-              "x": 720,
-              "y": 160
-            },
-            {
-              "x": 800,
-              "y": 160
-            },
-            {
-              "x": 800,
-              "y": 240
-            },
-            {
-              "x": 720,
-              "y": 240
-            }
-          ]
+          "typeCode": "CONSULTATION_ROOM"
         },
         {
           "code": "308",
           "doorCode": "308",
           "name": "Consultorio 308",
-          "typeCode": "CONSULTATION_ROOM",
-          "shape": [
-            {
-              "x": 560,
-              "y": 160
-            },
-            {
-              "x": 680,
-              "y": 160
-            },
-            {
-              "x": 680,
-              "y": 240
-            },
-            {
-              "x": 560,
-              "y": 240
-            }
-          ]
+          "typeCode": "CONSULTATION_ROOM"
         },
         {
           "code": "309",
           "doorCode": "309",
           "name": "Consultorio 309",
-          "typeCode": "CONSULTATION_ROOM",
-          "shape": [
-            {
-              "x": 240,
-              "y": 160
-            },
-            {
-              "x": 320,
-              "y": 160
-            },
-            {
-              "x": 320,
-              "y": 240
-            },
-            {
-              "x": 240,
-              "y": 240
-            }
-          ]
+          "typeCode": "CONSULTATION_ROOM"
         },
         {
           "code": "310",
@@ -1719,50 +1522,380 @@
           "typeCode": "CONSULTATION_ROOM"
         },
         {
+          "code": "P3-01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 117,
+              "y": 27
+            },
+            {
+              "x": 138,
+              "y": 34
+            },
+            {
+              "x": 138,
+              "y": 138
+            },
+            {
+              "x": 34,
+              "y": 138
+            },
+            {
+              "x": 34,
+              "y": 53
+            },
+            {
+              "x": 53,
+              "y": 53
+            },
+            {
+              "x": 59,
+              "y": 27
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 84,
+                "y": 138
+              },
+              "to": {
+                "x": 107,
+                "y": 138
+              }
+            }
+          ]
+        },
+        {
+          "code": "P3-02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 152,
+              "y": 32
+            },
+            {
+              "x": 256,
+              "y": 32
+            },
+            {
+              "x": 256,
+              "y": 140
+            },
+            {
+              "x": 152,
+              "y": 140
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 256,
+                "y": 81
+              },
+              "to": {
+                "x": 256,
+                "y": 140
+              }
+            }
+          ]
+        },
+        {
+          "code": "P3-03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 267,
+              "y": 35
+            },
+            {
+              "x": 374,
+              "y": 35
+            },
+            {
+              "x": 374,
+              "y": 140
+            },
+            {
+              "x": 267,
+              "y": 140
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 267,
+                "y": 81
+              },
+              "to": {
+                "x": 267,
+                "y": 140
+              }
+            }
+          ]
+        },
+        {
+          "code": "P3-04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 634,
+              "y": 35
+            },
+            {
+              "x": 634,
+              "y": 295
+            },
+            {
+              "x": 614,
+              "y": 295
+            },
+            {
+              "x": 614,
+              "y": 317
+            },
+            {
+              "x": 424,
+              "y": 317
+            },
+            {
+              "x": 424,
+              "y": 293
+            },
+            {
+              "x": 377,
+              "y": 293
+            },
+            {
+              "x": 377,
+              "y": 35
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 424,
+                "y": 293
+              },
+              "to": {
+                "x": 424,
+                "y": 312
+              }
+            }
+          ]
+        },
+        {
+          "code": "P3-05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 647,
+              "y": 43
+            },
+            {
+              "x": 754,
+              "y": 43
+            },
+            {
+              "x": 754,
+              "y": 138
+            },
+            {
+              "x": 647,
+              "y": 138
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 708,
+                "y": 138
+              },
+              "to": {
+                "x": 745,
+                "y": 138
+              }
+            }
+          ]
+        },
+        {
+          "code": "P3-06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 892,
+              "y": 48
+            },
+            {
+              "x": 892,
+              "y": 130
+            },
+            {
+              "x": 794,
+              "y": 130
+            },
+            {
+              "x": 794,
+              "y": 142
+            },
+            {
+              "x": 765,
+              "y": 142
+            },
+            {
+              "x": 765,
+              "y": 48
+            }
+          ]
+        },
+        {
+          "code": "P3-07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 927,
+              "y": 193
+            },
+            {
+              "x": 927,
+              "y": 301
+            },
+            {
+              "x": 833,
+              "y": 301
+            },
+            {
+              "x": 833,
+              "y": 193
+            }
+          ]
+        },
+        {
+          "code": "P3-08",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 120,
+              "y": 200
+            },
+            {
+              "x": 120,
+              "y": 312
+            },
+            {
+              "x": 21,
+              "y": 312
+            },
+            {
+              "x": 21,
+              "y": 200
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 70,
+                "y": 200
+              },
+              "to": {
+                "x": 106,
+                "y": 200
+              }
+            }
+          ]
+        },
+        {
+          "code": "P3-09",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 756,
+              "y": 202
+            },
+            {
+              "x": 756,
+              "y": 320
+            },
+            {
+              "x": 642,
+              "y": 320
+            },
+            {
+              "x": 642,
+              "y": 202
+            }
+          ]
+        },
+        {
+          "code": "P3-10",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 369,
+              "y": 207
+            },
+            {
+              "x": 369,
+              "y": 311
+            },
+            {
+              "x": 281,
+              "y": 311
+            },
+            {
+              "x": 281,
+              "y": 207
+            }
+          ]
+        },
+        {
           "code": "P3-ASC",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
           "shape": [
             {
-              "x": 80,
-              "y": 160
+              "x": 125,
+              "y": 218
             },
             {
-              "x": 160,
-              "y": 160
+              "x": 199,
+              "y": 218
             },
             {
-              "x": 160,
-              "y": 240
+              "x": 199,
+              "y": 287
             },
             {
-              "x": 80,
-              "y": 240
+              "x": 125,
+              "y": 287
             }
           ]
         },
         {
           "code": "P3-COFFEE-BREAK",
           "name": "Coffee break",
-          "typeCode": "SOCIAL_AREA",
-          "shape": [
-            {
-              "x": 0,
-              "y": 120
-            },
-            {
-              "x": 40,
-              "y": 120
-            },
-            {
-              "x": 40,
-              "y": 160
-            },
-            {
-              "x": 0,
-              "y": 160
-            }
-          ]
+          "typeCode": "SOCIAL_AREA"
         },
         {
           "code": "P3-CONSULTORIO-1",
@@ -1778,20 +1911,20 @@
           "typeCode": "STAIRS",
           "shape": [
             {
-              "x": 80,
-              "y": 320
+              "x": 884,
+              "y": 307
             },
             {
-              "x": 360,
-              "y": 320
+              "x": 1002,
+              "y": 307
             },
             {
-              "x": 360,
-              "y": 400
+              "x": 1002,
+              "y": 421
             },
             {
-              "x": 80,
-              "y": 400
+              "x": 884,
+              "y": 421
             }
           ]
         },
@@ -1801,45 +1934,27 @@
           "typeCode": "STAIRS",
           "shape": [
             {
-              "x": 800,
-              "y": 240
+              "x": 107,
+              "y": 398
             },
             {
-              "x": 920,
-              "y": 240
+              "x": 389,
+              "y": 398
             },
             {
-              "x": 920,
-              "y": 320
+              "x": 389,
+              "y": 472
             },
             {
-              "x": 800,
-              "y": 320
+              "x": 107,
+              "y": 472
             }
           ]
         },
         {
           "code": "P3-SALA-JUNTAS",
           "name": "Sala de Juntas",
-          "typeCode": "MEETING_ROOM",
-          "shape": [
-            {
-              "x": 800,
-              "y": 120
-            },
-            {
-              "x": 920,
-              "y": 120
-            },
-            {
-              "x": 920,
-              "y": 240
-            },
-            {
-              "x": 800,
-              "y": 240
-            }
-          ]
+          "typeCode": "MEETING_ROOM"
         }
       ]
     },
@@ -1849,50 +1964,150 @@
       "name": "Piso 4",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "width": 880,
-      "height": 400,
-      "corridors": [
+      "width": 1570,
+      "height": 510,
+      "outline": [],
+      "spaces": [
         {
-          "code": "PAS-P4",
-          "name": "Pasillo principal",
-          "color": "#5B8DEF",
-          "path": [
+          "code": "P4-01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
             {
-              "x": 20,
-              "y": 260
+              "x": 982,
+              "y": 172
             },
             {
-              "x": 700,
-              "y": 260
+              "x": 982,
+              "y": 246
             },
             {
-              "x": 700,
-              "y": 300
+              "x": 858,
+              "y": 246
+            },
+            {
+              "x": 858,
+              "y": 172
             }
           ]
-        }
-      ],
-      "spaces": [
+        },
+        {
+          "code": "P4-02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1201,
+              "y": 173
+            },
+            {
+              "x": 1201,
+              "y": 261
+            },
+            {
+              "x": 1080,
+              "y": 261
+            },
+            {
+              "x": 1080,
+              "y": 173
+            }
+          ]
+        },
+        {
+          "code": "P4-03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 974,
+              "y": 257
+            },
+            {
+              "x": 974,
+              "y": 360
+            },
+            {
+              "x": 853,
+              "y": 360
+            },
+            {
+              "x": 853,
+              "y": 257
+            }
+          ]
+        },
+        {
+          "code": "P4-04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1199,
+              "y": 270
+            },
+            {
+              "x": 1199,
+              "y": 359
+            },
+            {
+              "x": 1076,
+              "y": 359
+            },
+            {
+              "x": 1076,
+              "y": 270
+            }
+          ]
+        },
+        {
+          "code": "P4-05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 977,
+              "y": 369
+            },
+            {
+              "x": 977,
+              "y": 431
+            },
+            {
+              "x": 851,
+              "y": 431
+            },
+            {
+              "x": 851,
+              "y": 369
+            }
+          ]
+        },
         {
           "code": "P4-ASC",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
           "shape": [
             {
-              "x": 80,
-              "y": 160
+              "x": 1373,
+              "y": 173
             },
             {
-              "x": 160,
-              "y": 160
+              "x": 1460,
+              "y": 173
             },
             {
-              "x": 160,
-              "y": 240
+              "x": 1460,
+              "y": 266
             },
             {
-              "x": 80,
-              "y": 240
+              "x": 1373,
+              "y": 266
             }
           ]
         },
@@ -1902,20 +2117,20 @@
           "typeCode": "RESTROOM",
           "shape": [
             {
-              "x": 640,
-              "y": 0
+              "x": 841,
+              "y": 308
             },
             {
-              "x": 760,
-              "y": 0
+              "x": 841,
+              "y": 429
             },
             {
-              "x": 760,
-              "y": 120
+              "x": 719,
+              "y": 429
             },
             {
-              "x": 640,
-              "y": 120
+              "x": 719,
+              "y": 308
             }
           ]
         },
@@ -1925,20 +2140,28 @@
           "typeCode": "RESTROOM",
           "shape": [
             {
-              "x": 760,
-              "y": 80
+              "x": 560,
+              "y": 190
             },
             {
-              "x": 880,
-              "y": 80
+              "x": 803,
+              "y": 190
             },
             {
-              "x": 880,
-              "y": 200
+              "x": 803,
+              "y": 243
             },
             {
-              "x": 760,
-              "y": 200
+              "x": 707,
+              "y": 243
+            },
+            {
+              "x": 707,
+              "y": 337
+            },
+            {
+              "x": 560,
+              "y": 337
             }
           ]
         },
@@ -1948,24 +2171,6 @@
           "typeCode": "LAB",
           "aliases": [
             "Clinik Lab"
-          ],
-          "shape": [
-            {
-              "x": 320,
-              "y": 0
-            },
-            {
-              "x": 640,
-              "y": 0
-            },
-            {
-              "x": 640,
-              "y": 240
-            },
-            {
-              "x": 320,
-              "y": 240
-            }
           ]
         },
         {
@@ -1974,20 +2179,24 @@
           "typeCode": "CLEANING_ROOM",
           "shape": [
             {
-              "x": 640,
-              "y": 120
+              "x": 742,
+              "y": 255
             },
             {
-              "x": 720,
-              "y": 120
+              "x": 790,
+              "y": 255
             },
             {
-              "x": 720,
-              "y": 200
+              "x": 800,
+              "y": 296
             },
             {
-              "x": 640,
-              "y": 200
+              "x": 723,
+              "y": 296
+            },
+            {
+              "x": 723,
+              "y": 262
             }
           ]
         },
@@ -2002,20 +2211,20 @@
           "typeCode": "STAIRS",
           "shape": [
             {
-              "x": 40,
-              "y": 320
+              "x": 562,
+              "y": 75
             },
             {
-              "x": 360,
-              "y": 320
+              "x": 726,
+              "y": 75
             },
             {
-              "x": 360,
-              "y": 400
+              "x": 726,
+              "y": 190
             },
             {
-              "x": 40,
-              "y": 400
+              "x": 562,
+              "y": 190
             }
           ]
         },
@@ -2025,20 +2234,20 @@
           "typeCode": "STAIRS",
           "shape": [
             {
-              "x": 720,
-              "y": 240
+              "x": 1200,
+              "y": 14
             },
             {
-              "x": 840,
-              "y": 240
+              "x": 1461,
+              "y": 14
             },
             {
-              "x": 840,
-              "y": 320
+              "x": 1461,
+              "y": 90
             },
             {
-              "x": 720,
-              "y": 320
+              "x": 1200,
+              "y": 90
             }
           ]
         },
@@ -2048,20 +2257,52 @@
           "typeCode": "OFFICE",
           "shape": [
             {
-              "x": 0,
-              "y": 0
+              "x": 1541,
+              "y": 171
             },
             {
-              "x": 320,
-              "y": 0
+              "x": 1541,
+              "y": 406
             },
             {
-              "x": 320,
-              "y": 160
+              "x": 1520,
+              "y": 406
             },
             {
-              "x": 0,
-              "y": 160
+              "x": 1520,
+              "y": 429
+            },
+            {
+              "x": 1210,
+              "y": 429
+            },
+            {
+              "x": 1210,
+              "y": 192
+            },
+            {
+              "x": 1254,
+              "y": 192
+            },
+            {
+              "x": 1254,
+              "y": 173
+            },
+            {
+              "x": 1373,
+              "y": 173
+            },
+            {
+              "x": 1373,
+              "y": 266
+            },
+            {
+              "x": 1460,
+              "y": 266
+            },
+            {
+              "x": 1460,
+              "y": 171
             }
           ]
         }
@@ -2073,50 +2314,126 @@
       "name": "Piso 5",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "width": 880,
-      "height": 400,
-      "corridors": [
+      "width": 1680,
+      "height": 520,
+      "outline": [],
+      "spaces": [
         {
-          "code": "PAS-P5",
-          "name": "Pasillo principal",
-          "color": "#5B8DEF",
-          "path": [
+          "code": "P5-01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
             {
-              "x": 20,
-              "y": 260
+              "x": 1069,
+              "y": 199
             },
             {
-              "x": 700,
-              "y": 260
+              "x": 1231,
+              "y": 199
             },
             {
-              "x": 700,
-              "y": 300
+              "x": 1231,
+              "y": 470
+            },
+            {
+              "x": 1069,
+              "y": 470
             }
           ]
-        }
-      ],
-      "spaces": [
+        },
+        {
+          "code": "P5-02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1241,
+              "y": 202
+            },
+            {
+              "x": 1409,
+              "y": 202
+            },
+            {
+              "x": 1409,
+              "y": 266
+            },
+            {
+              "x": 1241,
+              "y": 266
+            }
+          ]
+        },
+        {
+          "code": "P5-03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1650,
+              "y": 206
+            },
+            {
+              "x": 1650,
+              "y": 337
+            },
+            {
+              "x": 1564,
+              "y": 337
+            },
+            {
+              "x": 1564,
+              "y": 206
+            }
+          ]
+        },
+        {
+          "code": "P5-04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1241,
+              "y": 274
+            },
+            {
+              "x": 1407,
+              "y": 274
+            },
+            {
+              "x": 1407,
+              "y": 474
+            },
+            {
+              "x": 1241,
+              "y": 474
+            }
+          ]
+        },
         {
           "code": "P5-ASC",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
           "shape": [
             {
-              "x": 80,
-              "y": 160
+              "x": 1482,
+              "y": 222
             },
             {
-              "x": 160,
-              "y": 160
+              "x": 1556,
+              "y": 222
             },
             {
-              "x": 160,
-              "y": 240
+              "x": 1556,
+              "y": 296
             },
             {
-              "x": 80,
-              "y": 240
+              "x": 1482,
+              "y": 296
             }
           ]
         },
@@ -2126,45 +2443,51 @@
           "typeCode": "CAFETERIA",
           "shape": [
             {
-              "x": 480,
-              "y": 0
+              "x": 916,
+              "y": 210
             },
             {
-              "x": 560,
-              "y": 0
+              "x": 916,
+              "y": 232
             },
             {
-              "x": 560,
-              "y": 240
+              "x": 942,
+              "y": 232
             },
             {
-              "x": 480,
-              "y": 240
+              "x": 942,
+              "y": 208
+            },
+            {
+              "x": 1059,
+              "y": 208
+            },
+            {
+              "x": 1059,
+              "y": 466
+            },
+            {
+              "x": 797,
+              "y": 466
+            },
+            {
+              "x": 797,
+              "y": 373
+            },
+            {
+              "x": 626,
+              "y": 373
+            },
+            {
+              "x": 626,
+              "y": 210
             }
           ]
         },
         {
           "code": "P5-CUARTO-ASEO",
           "name": "Cuarto de aseo",
-          "typeCode": "CLEANING_ROOM",
-          "shape": [
-            {
-              "x": 280,
-              "y": 160
-            },
-            {
-              "x": 360,
-              "y": 160
-            },
-            {
-              "x": 360,
-              "y": 240
-            },
-            {
-              "x": 280,
-              "y": 240
-            }
-          ]
+          "typeCode": "CLEANING_ROOM"
         },
         {
           "code": "P5-ESC-EMERGENCIA",
@@ -2172,20 +2495,20 @@
           "typeCode": "STAIRS",
           "shape": [
             {
-              "x": 40,
-              "y": 320
+              "x": 677,
+              "y": 89
             },
             {
-              "x": 360,
-              "y": 320
+              "x": 795,
+              "y": 89
             },
             {
-              "x": 360,
-              "y": 400
+              "x": 795,
+              "y": 203
             },
             {
-              "x": 40,
-              "y": 400
+              "x": 677,
+              "y": 203
             }
           ]
         },
@@ -2195,20 +2518,20 @@
           "typeCode": "STAIRS",
           "shape": [
             {
-              "x": 720,
-              "y": 240
+              "x": 1290,
+              "y": 30
             },
             {
-              "x": 840,
-              "y": 240
+              "x": 1566,
+              "y": 30
             },
             {
-              "x": 840,
-              "y": 320
+              "x": 1566,
+              "y": 109
             },
             {
-              "x": 720,
-              "y": 320
+              "x": 1290,
+              "y": 109
             }
           ]
         },
@@ -2223,45 +2546,27 @@
           "typeCode": "LAB",
           "shape": [
             {
-              "x": 0,
-              "y": 0
+              "x": 1416,
+              "y": 346
             },
             {
-              "x": 360,
-              "y": 0
+              "x": 1649,
+              "y": 346
             },
             {
-              "x": 360,
-              "y": 160
+              "x": 1649,
+              "y": 479
             },
             {
-              "x": 0,
-              "y": 160
+              "x": 1416,
+              "y": 479
             }
           ]
         },
         {
           "code": "P5-TERRAZA",
           "name": "Terraza",
-          "typeCode": "TERRACE",
-          "shape": [
-            {
-              "x": 560,
-              "y": 0
-            },
-            {
-              "x": 880,
-              "y": 0
-            },
-            {
-              "x": 880,
-              "y": 240
-            },
-            {
-              "x": 560,
-              "y": 240
-            }
-          ]
+          "typeCode": "TERRACE"
         }
       ]
     }
