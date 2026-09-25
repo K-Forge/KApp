@@ -485,6 +485,10 @@ const MAX_ZOOM = 8;
       max-height: 70vh;
       border-radius: var(--radius-sm);
       -webkit-overflow-scrolling: touch;
+      /* The plan is fitted to this width. Were the scrollbar to take its room only when the plan
+         outgrows 70vh, a plan just that tall would shrink, lose the scrollbar, grow back and gain
+         it again, every frame: the plan shook. */
+      scrollbar-gutter: stable;
     }
     .legend {
       list-style: none;
