@@ -215,7 +215,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenResponse'
               example:
-                accessToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImthcHAtYXV0aC0yMDI2LTA4In0.eyJzdWIiOiIzZjhhMWMyZS03YjRkLTRlNWEtOWM2Zi0yZDFiOGUwYTRjNzMiLCJlbWFpbCI6InBlcGl0by5wZXJlekBrb25yYWRsb3JlbnouZWR1LmNvIiwicm9sZXMiOlsiUk9MRV9TVFVERU5UIl0sImlzcyI6Imh0dHBzOi8vYXV0aC5rYXBwLmtvbnJhZGxvcmVuei5lZHUuY28iLCJpYXQiOjE3ODc2NTQ0MDAsImV4cCI6MTc4NzY1ODAwMH0.Yx3nQK1pV9sM0bZrT8uLf2Hc7EjWd5AoXgN4iRySlPvCmUt6BqDkJhZ0wF3xO9aInGe1rMcT7yUvKpL5dQsRb2WjXhA8fZoNmE4gCtIuYlBvPkSxDqMrH6JaWnTcOe0
+                accessToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImV4YW1wbGUta2V5In0.eyJzdWIiOiIzZjhhMWMyZS03YjRkLTRlNWEtOWM2Zi0yZDFiOGUwYTRjNzMiLCJpc3MiOiJodHRwczovL2thcHAua29ucmFkbG9yZW56LmVkdS5jbyIsImlhdCI6MTc2ODQ4OTIwMCwiZXhwIjoxNzY4NDkyODAwLCJlbWFpbCI6InBlcGl0by5wZXJlekBrb25yYWRsb3JlbnouZWR1LmNvIiwicm9sZXMiOlsiUk9MRV9TVFVERU5UIl19.DbIGwPyHTgR3wlzHHuAzgqSYybOA41FW7IkUBCjv5M4ndXLPkbr3OIwe604vUmkvr48ixeunege-L9ypBJJ5s1dig1NlMyDs0c3fxV75cwCoTCcdJiWBS7gmln9oMl1VITiPXg6T7-IJ8I5QD2Y6k6n3dhD8fkY59mdNAYXclVDOCQnyyDqKY9xkWjKWVo19i4wdVJMfai0KVST5ccGj0SmXnDNbgzgT0kLb7lxjS71_XUJsTZ_9TXiIvuWvQ7Ikoo4wnropg7EHtLb7dLBjY6Fo2Tab3alCP86aT10x5w6BgaSTT1LB3mVCc8o1IC3mY3CHqPk9iuaoMSWU7zsEPg
                 tokenType: Bearer
                 expiresIn: 3600
                 userId: 3f8a1c2e-7b4d-4e5a-9c6f-2d1b8e0a4c73
@@ -703,7 +703,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenResponse'
               example:
-                accessToken: eyJhbGciOiJSUzI1NiIsImtpZCI6ImthcHAtMjAyNjA5In0...
+                accessToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImV4YW1wbGUta2V5In0.eyJzdWIiOiJ2aXNpdG9yOjljMWYwYTcyLTRiM2UtNGQ1MS04YTIwLTc3ZTFiMmM5ZDY0MCIsImlzcyI6Imh0dHBzOi8va2FwcC5rb25yYWRsb3JlbnouZWR1LmNvIiwiaWF0IjoxNzY4NDg5MjAwLCJleHAiOjE3Njg1NzU2MDAsInJvbGVzIjpbIlJPTEVfR1VFU1QiXX0.LCpNu8-8A1jPqadvGGmjx_vjwLppk8ghjCZUQMfBRaT5x8DQEgcpZyYBWwKRcS2eFTWCPUXh1HC9lIEf6TAtOxl4KqjDHIu4ZKmPBqS8S8UnAOKE3X6z-vufmKMJ3yaNa_ij7l0ewsJU2DqN2KUwIGI0Qj6ksjnV_4aAnTpNUPOoF1G7oFg6-Z-Of3-W6KG0JEHpA2WJOd-eQKURUSu3FuQbabE77F_UgUvwaN_Tv0HRlfODzT-WbowcFjh4xAoXnMPpLkJ1MhrTI1GyLdri6FStUPdSoLj85dQSSjOINaRoAsJKrk-Y62jaGkZXOuNmRG4NnDreMKCYiZef8zYTPw
                 tokenType: Bearer
                 expiresIn: 86400
                 userId: visitor:9c1f0a72-4b3e-4d51-8a20-77e1b2c9d640
@@ -1416,7 +1416,7 @@ components:
           description: |
             RS256 JWT. Send it as `Authorization: Bearer <accessToken>`. Validate
             it against `/.well-known/jwks.json` using the `kid` in its header.
-          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImthcHAtYXV0aC0yMDI2LTA4In0.eyJzdWIiOiIzZjhhMWMyZS03YjRkLTRlNWEtOWM2Zi0yZDFiOGUwYTRjNzMiLCJlbWFpbCI6InBlcGl0by5wZXJlekBrb25yYWRsb3JlbnouZWR1LmNvIiwicm9sZXMiOlsiUk9MRV9TVFVERU5UIl0sImlzcyI6Imh0dHBzOi8vYXV0aC5rYXBwLmtvbnJhZGxvcmVuei5lZHUuY28iLCJpYXQiOjE3ODc2NTQ0MDAsImV4cCI6MTc4NzY1ODAwMH0.Yx3nQK1pV9sM0bZrT8uLf2Hc7EjWd5AoXgN4iRySlPvCmUt6BqDkJhZ0wF3xO9aInGe1rMcT7yUvKpL5dQsRb2WjXhA8fZoNmE4gCtIuYlBvPkSxDqMrH6JaWnTcOe0
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImV4YW1wbGUta2V5In0.eyJzdWIiOiIzZjhhMWMyZS03YjRkLTRlNWEtOWM2Zi0yZDFiOGUwYTRjNzMiLCJpc3MiOiJodHRwczovL2thcHAua29ucmFkbG9yZW56LmVkdS5jbyIsImlhdCI6MTc2ODQ4OTIwMCwiZXhwIjoxNzY4NDkyODAwLCJlbWFpbCI6InBlcGl0by5wZXJlekBrb25yYWRsb3JlbnouZWR1LmNvIiwicm9sZXMiOlsiUk9MRV9TVFVERU5UIl19.DbIGwPyHTgR3wlzHHuAzgqSYybOA41FW7IkUBCjv5M4ndXLPkbr3OIwe604vUmkvr48ixeunege-L9ypBJJ5s1dig1NlMyDs0c3fxV75cwCoTCcdJiWBS7gmln9oMl1VITiPXg6T7-IJ8I5QD2Y6k6n3dhD8fkY59mdNAYXclVDOCQnyyDqKY9xkWjKWVo19i4wdVJMfai0KVST5ccGj0SmXnDNbgzgT0kLb7lxjS71_XUJsTZ_9TXiIvuWvQ7Ikoo4wnropg7EHtLb7dLBjY6Fo2Tab3alCP86aT10x5w6BgaSTT1LB3mVCc8o1IC3mY3CHqPk9iuaoMSWU7zsEPg
         tokenType:
           type: string
           enum: [Bearer]
