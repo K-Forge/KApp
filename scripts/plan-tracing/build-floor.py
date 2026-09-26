@@ -17,6 +17,7 @@ Puts a traced floor into the map snapshot, with every room it can name.
                                            under "at", cut along x = 646 (or "y")
       "extra": {"P1-COFFEE-BREAK": [[x, y], ...]}
                                            an outline for a space the plan does not paint
+      "top": "EAST"                        which way the drawing's top edge faces, when known
     }
 
 Every traced room nobody named is added as "Sin identificar", and every staircase as "Escalera
@@ -173,6 +174,8 @@ def main():
         inventory[code] = space
 
     floor["width"], floor["height"] = trace["width"], trace["height"]
+    if spec.get("top"):
+        floor["top"] = spec["top"]
     floor["outline"] = []
     floor.pop("corridors", None)
     floor["status"] = "DRAFT"
@@ -180,7 +183,7 @@ def main():
              "accessibility", "note", "capacity"]
     floor["spaces"] = [dict(sorted(s.items(), key=lambda kv: order.index(kv[0]) if kv[0] in order else 99))
                        for s in sorted(inventory.values(), key=lambda s: s["code"])]
-    keys = ["code", "level", "name", "status", "accessibility", "note", "width", "height", "outline",
+    keys = ["code", "level", "name", "status", "accessibility", "note", "width", "height", "top", "outline",
             "corridors", "spaces"]
     floor_items = sorted(floor.items(), key=lambda kv: keys.index(kv[0]) if kv[0] in keys else 99)
     floor.clear()

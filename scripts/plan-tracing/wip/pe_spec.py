@@ -13,7 +13,12 @@ CROP = (150, 350, 2250, 2620)          # the part kept: the building, with room 
 
 floor = sys.argv[1]
 lot = json.loads(sys.argv[2])
-photo = sys.argv[3] if len(sys.argv) > 3 else None
+photo = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else None
+# A plan that leaves out the lot's west line is laid by the building's west facade instead:
+# frame x of that line given as the fourth argument, where it meets the top line and the bottom.
+if len(sys.argv) > 4:
+    X = float(sys.argv[4])
+    LOT = dict(LOT, tl=(X, 110 + (X - 100) * 711 / 2090), bl=(X, 2700))
 names = ['tl', 'tr', 'br', 'bl']
 hm = T.homography([LOT[n] for n in names], [lot[n] for n in names])
 

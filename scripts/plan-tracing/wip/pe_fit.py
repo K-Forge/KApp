@@ -13,6 +13,10 @@ s = json.load(open(spec_path))
 if not os.path.exists(prefix + '.raw.json') or os.path.getmtime(prefix + '.raw.json') < os.path.getmtime(prefix + '.json'):
     shutil.copy(prefix + '.json', prefix + '.raw.json')
 data = json.load(open(prefix + '.raw.json'))
+# "only": the rooms the spec draws are the floor's; what the tracer found besides is left out.
+if s.get('only'):
+    data['rooms'] = [{'shape': [list(p) for p in r['shape']], 'doors': []} for r in s['rooms']]
+    data['stairs'] = [{'shape': [list(p) for p in st]} for st in s.get('stairs', [])]
 W, H, rgb = T.read_bmp(prefix + '.rect.bmp')
 img = [rgb(x, y) for y in range(H) for x in range(W)]
 dim = s.get('light') == 'balanced'
