@@ -11,6 +11,7 @@ import {
   FLOOR_STATUS_LABELS,
   type Accessibility,
   type Building,
+  type Compass,
   type Corridor,
   type FloorStatus,
   type Point,
@@ -20,6 +21,7 @@ import { SpaceTypesService } from '../spaces/space-types.service';
 import { SpacesService } from '../spaces/spaces.service';
 import { CorridorsPanelComponent } from './corridors-panel.component';
 import {
+  COMPASS,
   MAX_SIZE,
   addDoor,
   addSpaces,
@@ -33,6 +35,7 @@ import {
   move,
   newBox,
   newKey,
+  northAngle,
   place,
   problems,
   rangeSpaces,
@@ -44,6 +47,8 @@ import {
   sameFloor,
   toRequest,
   toggleCorridorPoint,
+  turn,
+  turnUp,
   unplace,
   updateSpace,
   withoutVertex,
@@ -189,6 +194,14 @@ const MAX_ZOOM = 8;
                 </button>
               </div>
               <div class="row zoom">
+                @if (d.top) {
+                  <span class="compass" role="img" [attr.aria-label]="'North is ' + northWords(d.top)" [title]="'North is ' + northWords(d.top)">
+                    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" [style.transform]="'rotate(' + northAngle(d.top) + 'deg)'">
+                      <path d="M12 2 L17 15 L12 12 L7 15 Z" fill="currentColor" />
+                      <text x="12" y="23" text-anchor="middle" font-size="8" font-weight="700" fill="currentColor">N</text>
+                    </svg>
+                  </span>
+                }
                 <button type="button" class="btn btn-sm" aria-label="Zoom out" [disabled]="zoomSteps() <= minZoom" (click)="zoom(-1)">−</button>
                 <button type="button" class="btn btn-sm" aria-label="Fit to the screen" (click)="zoomSteps.set(0)">Fit</button>
                 <button type="button" class="btn btn-sm" aria-label="Zoom in" [disabled]="zoomSteps() >= maxZoom" (click)="zoom(1)">+</button>
@@ -333,6 +346,34 @@ const MAX_ZOOM = 8;
                         <input id="f-height" type="number" min="1" [max]="maxSize" [value]="d.height" (change)="setSize('height', $event)" />
                       </div>
                     </div>
+                    <div class="field">
+                      <span class="label" id="f-top-label">The top of the drawing faces</span>
+                      <div class="segmented" role="radiogroup" aria-labelledby="f-top-label">
+                        @for (direction of compass; track direction) {
+                          <button type="button" role="radio" [attr.aria-checked]="d.top === direction" [class.on]="d.top === direction" (click)="setTop(direction)">
+                            {{ compassLabels[direction] }}
+                          </button>
+                        }
+                      </div>
+                    </div>
+                    <div class="field">
+                      <span class="label" id="f-turn-label">Turn the drawing</span>
+                      <div class="row" style="flex-wrap: wrap" role="group" aria-labelledby="f-turn-label">
+                        <button type="button" class="btn btn-sm" aria-label="A quarter turn to the left" (click)="turnDrawing(-1)">⟲</button>
+                        <button type="button" class="btn btn-sm" aria-label="A quarter turn to the right" (click)="turnDrawing(1)">⟳</button>
+                        @for (direction of compass; track direction) {
+                          <button type="button" class="btn btn-sm" [disabled]="!d.top || d.top === direction" (click)="putUp(direction)">
+                            {{ compassLabels[direction] }} up
+                          </button>
+                        }
+                      </div>
+                    </div>
+                    <p class="text-faint small">
+                      Say first which way the top of the plan on the wall faces - a compass on the
+                      spot settles it. Turning moves every room, door and corridor with the
+                      drawing, and keeps that direction right; the "up" buttons turn it until the
+                      one you pick is at the top.
+                    </p>
                     <p class="text-faint small">
                       In the drawing's own units: a floor traced from its evacuation plan is drawn
                       at the plan's scale. Shrinking it keeps every room; the ones left outside are
@@ -469,6 +510,14 @@ const MAX_ZOOM = 8;
       background: var(--primary);
       color: var(--text-on-accent);
     }
+    .compass {
+      display: inline-flex;
+      color: var(--primary);
+      margin-right: 0.25rem;
+    }
+    .compass svg {
+      transition: transform 0.2s ease;
+    }
     .zoom .btn {
       min-width: 2.5rem;
       min-height: 2.5rem;
@@ -560,6 +609,9 @@ export class FloorEditorPage {
   readonly minZoom = MIN_ZOOM;
   readonly maxZoom = MAX_ZOOM;
   readonly maxSize = MAX_SIZE;
+  readonly compass = COMPASS;
+  readonly compassLabels: Record<Compass, string> = { NORTH: 'North', EAST: 'East', SOUTH: 'South', WEST: 'West' };
+  readonly northAngle = northAngle;
   readonly statuses = FLOOR_STATUSES;
   readonly statusLabels = FLOOR_STATUS_LABELS;
   readonly accessibility = ACCESSIBILITY;
@@ -1235,6 +1287,29 @@ export class FloorEditorPage {
     const draft = this.draft();
     if (!draft) return;
     this.apply({ ...draft, ...patch });
+  }
+
+  /** Where north is, in words, for whoever cannot see the compass. */
+  northWords(top: Compass | null): string {
+    return ({ NORTH: 'up', EAST: 'to the left', SOUTH: 'down', WEST: 'to the right' } as const)[top ?? 'NORTH'];
+  }
+
+  setTop(top: Compass): void {
+    const draft = this.draft();
+    if (!draft || draft.top === top) return;
+    this.apply({ ...draft, top });
+  }
+
+  turnDrawing(quarters: number): void {
+    const draft = this.draft();
+    if (!draft) return;
+    this.apply(turn(draft, quarters));
+  }
+
+  putUp(direction: Compass): void {
+    const draft = this.draft();
+    if (!draft?.top || draft.top === direction) return;
+    this.apply(turnUp(draft, direction));
   }
 
   setSize(field: 'width' | 'height', event: Event): void {

@@ -1,4 +1,4 @@
-import type { Accessibility, Corridor, FloorStatus, Point } from '../buildings/building.model';
+import type { Accessibility, Compass, Corridor, FloorStatus, Point } from '../buildings/building.model';
 import type { Door, SpaceCategory } from '../spaces/space.model';
 import type { FloorDetail, FloorLayoutRequest, LayoutSpace } from './floor.model';
 
@@ -19,6 +19,8 @@ export interface DraftSpace extends LayoutSpace {
 export interface FloorDraft {
   width: number;
   height: number;
+  /** The direction on the ground the drawing's top edge faces; null until somebody says. */
+  top: Compass | null;
   outline: Point[];
   status: FloorStatus;
   accessibility: Accessibility;
@@ -62,6 +64,7 @@ export function fromDetail(detail: FloorDetail): FloorDraft {
   return {
     width: detail.width,
     height: detail.height,
+    top: detail.top ?? null,
     outline: copy(detail.outline ?? []),
     status: detail.status,
     accessibility: detail.accessibility,
@@ -92,6 +95,7 @@ export function toRequest(draft: FloorDraft, version: number): FloorLayoutReques
     version,
     width: draft.width,
     height: draft.height,
+    top: draft.top ?? null,
     outline: draft.outline,
     status: draft.status,
     accessibility: draft.accessibility,
@@ -124,6 +128,52 @@ export function sameFloor(a: FloorDraft, b: FloorDraft): boolean {
 
 export function isPlaced(space: LayoutSpace): space is LayoutSpace & { shape: Point[] } {
   return !!space.shape && space.shape.length >= 3;
+}
+
+// ── Which way the drawing faces ───────────────────────────────────────────────────────────
+
+/** The directions in clockwise order, as a compass reads. */
+export const COMPASS: readonly Compass[] = ['NORTH', 'EAST', 'SOUTH', 'WEST'];
+
+/**
+ * The drawing turned a quarter at a time - clockwise for a positive count - with everything on
+ * it: rooms, doors, corridors, the outline, and the direction its top faces, since turning it
+ * clockwise brings what was on its left to the top.
+ */
+export function turn(draft: FloorDraft, quarters: number): FloorDraft {
+  let next = draft;
+  for (let i = 0; i < ((quarters % 4) + 4) % 4; i++) next = quarterTurn(next);
+  return next;
+}
+
+function quarterTurn(draft: FloorDraft): FloorDraft {
+  // Clockwise: the left edge becomes the top, the top edge the right.
+  const point = (p: Point): Point => ({ x: draft.height - p.y, y: p.x });
+  const facing = draft.top ? COMPASS.indexOf(draft.top) : -1;
+  return {
+    ...draft,
+    width: draft.height,
+    height: draft.width,
+    top: facing < 0 ? null : COMPASS[(facing + 3) % 4],
+    outline: draft.outline.map(point),
+    corridors: draft.corridors.map((c) => ({ ...c, path: c.path.map(point) })),
+    spaces: draft.spaces.map((s) => ({
+      ...s,
+      shape: s.shape ? s.shape.map(point) : s.shape,
+      doors: s.doors.map((d) => ({ from: point(d.from), to: point(d.to) })),
+    })),
+  };
+}
+
+/** The drawing turned so `direction` is at the top. Unchanged while nobody has said which way it faces. */
+export function turnUp(draft: FloorDraft, direction: Compass): FloorDraft {
+  if (!draft.top) return draft;
+  return turn(draft, COMPASS.indexOf(draft.top) - COMPASS.indexOf(direction));
+}
+
+/** Where north lies on the drawing, in degrees clockwise from its top; null while it is not known. */
+export function northAngle(top: Compass | null | undefined): number | null {
+  return top ? (360 - COMPASS.indexOf(top) * 90) % 360 : null;
 }
 
 // ── Geometry ──────────────────────────────────────────────────────────────────────────────

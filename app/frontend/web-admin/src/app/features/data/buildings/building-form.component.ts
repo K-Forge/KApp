@@ -338,6 +338,7 @@ export class BuildingFormComponent {
         ...floor,
         level: Number(floor.level),
         note: floor.note.trim() || null,
+        top: existing.find((f) => f.code === floor.code)?.top ?? null,
         outline: existing.find((f) => f.code === floor.code)?.outline ?? [],
         corridors: existing.find((f) => f.code === floor.code)?.corridors ?? [],
       })),

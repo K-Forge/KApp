@@ -1,4 +1,4 @@
-import type { Accessibility, Corridor, FloorStatus, Point, Wing } from '../buildings/building.model';
+import type { Accessibility, Compass, Corridor, FloorStatus, Point, Wing } from '../buildings/building.model';
 import type { Door, Space } from '../spaces/space.model';
 
 /**
@@ -14,6 +14,7 @@ export interface FloorDetail {
   note?: string | null;
   width: number;
   height: number;
+  top?: Compass | null;
   outline?: Point[];
   corridors?: Corridor[];
   version: number;
@@ -47,6 +48,8 @@ export interface FloorLayoutRequest {
   version: number;
   width: number;
   height: number;
+  /** Null keeps the floor's. */
+  top: Compass | null;
   outline: Point[];
   status: FloorStatus;
   accessibility: Accessibility;

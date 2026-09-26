@@ -39,6 +39,9 @@ export const FLOOR_STATUS_LABELS: Record<FloorStatus, string> = {
  * Mirrors Floor. Identified by `code` - S1, P0, P1, MEZZ, T - because a mezzanine has no integer
  * level; `level` only orders the floors, so the mezzanine is 1.5.
  */
+/** Mirrors Compass: a direction on the ground. */
+export type Compass = 'NORTH' | 'EAST' | 'SOUTH' | 'WEST';
+
 export interface Floor {
   code: string;
   level: number;
@@ -49,6 +52,8 @@ export interface Floor {
   /** The drawing's size, in its own units; every point on the floor is within it. */
   width: number;
   height: number;
+  /** The direction on the ground the drawing's top edge faces; absent until somebody says. */
+  top?: Compass | null;
   /** The building's walls around the floor, corners in order. Empty until traced. */
   outline?: Point[];
   corridors?: Corridor[];

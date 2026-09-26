@@ -22,6 +22,9 @@ import {
   split,
   toRequest,
   toggleCorridorPoint,
+  northAngle,
+  turn,
+  turnUp,
   updateSpace,
   type DraftSpace,
   type FloorDraft,
@@ -64,6 +67,7 @@ function floor(spaces: DraftSpace[], overrides: Partial<FloorDraft> = {}): Floor
   return {
     width: 400,
     height: 240,
+    top: null,
     outline: [],
     status: 'DRAFT',
     accessibility: 'STEP_FREE',
@@ -301,6 +305,51 @@ describe('floor draft', () => {
 
       expect(found).toContain("401: wing C is not one of this building's.");
       expect(found).toContain('Pasillo: has no points yet - draw it or delete it.');
+    });
+  });
+
+  describe('which way the drawing faces', () => {
+    const door = { from: { x: 40, y: 40 }, to: { x: 60, y: 40 } };
+    const drawn = () =>
+      floor([space('101', { shape: box(40, 40, 80, 40), doors: [door] })], {
+        top: 'EAST',
+        outline: box(0, 0, 400, 240),
+        corridors: [{ code: 'PAS', name: 'Pasillo', color: '#5B8DEF', path: [{ x: 0, y: 120 }, { x: 400, y: 120 }] }],
+      });
+
+    it('a quarter turn clockwise moves everything, swaps the size, and brings the left to the top', () => {
+      const turned = turn(drawn(), 1);
+      expect([turned.width, turned.height]).toEqual([240, 400]);
+      // The left side faced north, and a clockwise turn brings it to the top.
+      expect(turned.top).toBe('NORTH');
+      expect(turned.spaces[0].shape).toEqual([
+        { x: 200, y: 40 },
+        { x: 200, y: 120 },
+        { x: 160, y: 120 },
+        { x: 160, y: 40 },
+      ]);
+      expect(turned.spaces[0].doors).toEqual([{ from: { x: 200, y: 40 }, to: { x: 200, y: 60 } }]);
+      expect(turned.corridors[0].path).toEqual([{ x: 120, y: 0 }, { x: 120, y: 400 }]);
+    });
+
+    it('four quarter turns, or one each way, give the same floor back', () => {
+      expect(sameFloor(turn(drawn(), 4), drawn())).toBe(true);
+      expect(sameFloor(turn(turn(drawn(), 1), -1), drawn())).toBe(true);
+    });
+
+    it('turns until the direction asked for is at the top, and not at all while nobody said which way it faces', () => {
+      expect(turnUp(drawn(), 'NORTH').top).toBe('NORTH');
+      expect(turnUp(drawn(), 'WEST').top).toBe('WEST');
+      expect(turnUp(drawn(), 'EAST')).toEqual(drawn());
+      expect(turnUp({ ...drawn(), top: null }, 'NORTH')).toEqual({ ...drawn(), top: null });
+    });
+
+    it('says where north lies on the drawing', () => {
+      expect(northAngle('NORTH')).toBe(0);
+      expect(northAngle('EAST')).toBe(270);
+      expect(northAngle('SOUTH')).toBe(180);
+      expect(northAngle('WEST')).toBe(90);
+      expect(northAngle(null)).toBeNull();
     });
   });
 });
