@@ -194,14 +194,31 @@ const MAX_ZOOM = 8;
                 </button>
               </div>
               <div class="row zoom">
+                <button type="button" class="btn btn-sm turn" aria-label="Turn the plan a quarter to the left" title="Turn the plan a quarter to the left" (click)="turnDrawing(-1)">
+                  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                    <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M3.5 3.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
                 @if (d.top) {
-                  <span class="compass" role="img" [attr.aria-label]="'North is ' + northWords(d.top)" [title]="'North is ' + northWords(d.top)">
-                    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" [style.transform]="'rotate(' + northAngle(d.top) + 'deg)'">
-                      <path d="M12 2 L17 15 L12 12 L7 15 Z" fill="currentColor" />
-                      <text x="12" y="23" text-anchor="middle" font-size="8" font-weight="700" fill="currentColor">N</text>
+                  <button type="button" class="compass" [disabled]="d.top === 'NORTH'" (click)="putUp('NORTH')"
+                          [attr.aria-label]="'North is ' + northWords(d.top) + (d.top === 'NORTH' ? '' : ' - turn the plan north up')"
+                          [title]="'North is ' + northWords(d.top) + (d.top === 'NORTH' ? '' : ' - tap to turn the plan north up')">
+                    <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true">
+                      <g [attr.transform]="'rotate(' + northAngle(d.top) + ' 16 16)'">
+                        <path d="M16 9 L20.5 21 L16 18 L11.5 21 Z" fill="currentColor" />
+                      </g>
+                      <!-- The letter stays upright, beyond the needle's tip. -->
+                      <text [attr.x]="northLetter(d.top).x" [attr.y]="northLetter(d.top).y" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="currentColor">N</text>
                     </svg>
-                  </span>
+                  </button>
                 }
+                <button type="button" class="btn btn-sm turn" aria-label="Turn the plan a quarter to the right" title="Turn the plan a quarter to the right" (click)="turnDrawing(1)">
+                  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                    <path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M20.5 3.5v4.5h-4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
                 <button type="button" class="btn btn-sm" aria-label="Zoom out" [disabled]="zoomSteps() <= minZoom" (click)="zoom(-1)">−</button>
                 <button type="button" class="btn btn-sm" aria-label="Fit to the screen" (click)="zoomSteps.set(0)">Fit</button>
                 <button type="button" class="btn btn-sm" aria-label="Zoom in" [disabled]="zoomSteps() >= maxZoom" (click)="zoom(1)">+</button>
@@ -356,23 +373,11 @@ const MAX_ZOOM = 8;
                         }
                       </div>
                     </div>
-                    <div class="field">
-                      <span class="label" id="f-turn-label">Turn the drawing</span>
-                      <div class="row" style="flex-wrap: wrap" role="group" aria-labelledby="f-turn-label">
-                        <button type="button" class="btn btn-sm" aria-label="A quarter turn to the left" (click)="turnDrawing(-1)">⟲</button>
-                        <button type="button" class="btn btn-sm" aria-label="A quarter turn to the right" (click)="turnDrawing(1)">⟳</button>
-                        @for (direction of compass; track direction) {
-                          <button type="button" class="btn btn-sm" [disabled]="!d.top || d.top === direction" (click)="putUp(direction)">
-                            {{ compassLabels[direction] }} up
-                          </button>
-                        }
-                      </div>
-                    </div>
                     <p class="text-faint small">
-                      Say first which way the top of the plan on the wall faces - a compass on the
-                      spot settles it. Turning moves every room, door and corridor with the
-                      drawing, and keeps that direction right; the "up" buttons turn it until the
-                      one you pick is at the top.
+                      Which way the top of the plan on the wall faces - a compass on the spot
+                      settles it. The round arrows next to Fit turn the plan a quarter at a time,
+                      moving every room, door and corridor with it and keeping this right; the
+                      compass there turns it north up.
                     </p>
                     <p class="text-faint small">
                       In the drawing's own units: a floor traced from its evacuation plan is drawn
@@ -512,11 +517,18 @@ const MAX_ZOOM = 8;
     }
     .compass {
       display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.5rem;
+      min-height: 2.5rem;
+      padding: 0;
+      border: 0;
+      background: none;
       color: var(--primary);
-      margin-right: 0.25rem;
+      cursor: pointer;
     }
-    .compass svg {
-      transition: transform 0.2s ease;
+    .compass:disabled {
+      cursor: default;
     }
     .zoom .btn {
       min-width: 2.5rem;
@@ -1292,6 +1304,12 @@ export class FloorEditorPage {
   /** Where north is, in words, for whoever cannot see the compass. */
   northWords(top: Compass | null): string {
     return ({ NORTH: 'up', EAST: 'to the left', SOUTH: 'down', WEST: 'to the right' } as const)[top ?? 'NORTH'];
+  }
+
+  /** Where the compass's N goes: past the needle's tip, whichever way it points. */
+  northLetter(top: Compass | null): { x: number; y: number } {
+    const radians = ((northAngle(top) ?? 0) * Math.PI) / 180;
+    return { x: 16 + 12.5 * Math.sin(radians), y: 16 - 12.5 * Math.cos(radians) };
   }
 
   setTop(top: Compass): void {
