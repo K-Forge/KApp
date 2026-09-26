@@ -97,7 +97,7 @@ public class BuildingService {
                 request.description(),
                 cleanAliases(request.aliasesOrEmpty()),
                 request.wingsOrEmpty().stream().map(MapMapper::toWing).toList(),
-                request.floors().stream().map(floor -> MapMapper.toFloor(floor, 0)).toList(),
+                request.floors().stream().map(floor -> MapMapper.toFloor(floor, null)).toList(),
                 false,
                 now,
                 now));
@@ -129,8 +129,7 @@ public class BuildingService {
         }
 
         List<Floor> floors = request.floors().stream()
-                .map(dto -> MapMapper.toFloor(dto,
-                        existing.floor(dto.code()).map(Floor::version).orElse(0L)))
+                .map(dto -> MapMapper.toFloor(dto, existing.floor(dto.code()).orElse(null)))
                 .toList();
         List<Wing> wings = request.wingsOrEmpty().stream().map(MapMapper::toWing).toList();
         rejectRemovingOccupied(existing, floors, wings);

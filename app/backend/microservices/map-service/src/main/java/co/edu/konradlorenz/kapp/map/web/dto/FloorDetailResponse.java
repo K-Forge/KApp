@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.map.web.dto;
 
 import co.edu.konradlorenz.kapp.map.domain.Accessibility;
+import co.edu.konradlorenz.kapp.map.domain.Compass;
 import co.edu.konradlorenz.kapp.map.domain.FloorStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,6 +23,7 @@ public record FloorDetailResponse(
         String note,
         int width,
         int height,
+        Compass top,
         List<PointDto> outline,
         List<CorridorDto> corridors,
         long version,

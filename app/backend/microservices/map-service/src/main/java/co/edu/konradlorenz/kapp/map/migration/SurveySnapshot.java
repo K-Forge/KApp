@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.map.migration;
 
 import co.edu.konradlorenz.kapp.map.domain.Accessibility;
+import co.edu.konradlorenz.kapp.map.domain.Compass;
 import co.edu.konradlorenz.kapp.map.domain.BuildingDocument;
 import co.edu.konradlorenz.kapp.map.domain.Floor;
 import co.edu.konradlorenz.kapp.map.domain.FloorStatus;
@@ -76,6 +77,7 @@ public final class SurveySnapshot {
             String note,
             int width,
             int height,
+            Compass top,
             List<PointDto> outline,
             List<CorridorDto> corridors,
             List<LayoutSpaceDto> spaces
@@ -90,7 +92,7 @@ public final class SurveySnapshot {
             return new Floor(code, level, name,
                     status == null ? FloorStatus.UNMAPPED : status,
                     accessibility == null ? Accessibility.UNKNOWN : accessibility,
-                    note, width, height, MapMapper.toPoints(outline),
+                    note, width, height, top, MapMapper.toPoints(outline),
                     corridors.stream().map(MapMapper::toCorridor).toList(), 0);
         }
     }

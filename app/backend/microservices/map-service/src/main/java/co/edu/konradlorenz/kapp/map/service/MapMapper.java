@@ -38,17 +38,24 @@ public final class MapMapper {
 
     public static FloorDto toFloorDto(Floor floor) {
         return new FloorDto(floor.code(), floor.level(), floor.name(), floor.status(),
-                floor.accessibility(), floor.note(), floor.width(), floor.height(),
+                floor.accessibility(), floor.note(), floor.width(), floor.height(), floor.top(),
                 toPointDtos(floor.outline()),
                 floor.corridors().stream().map(MapMapper::toCorridorDto).toList(),
                 floor.version());
     }
 
-    /** @param version carried over from the stored floor: a floor's version is the layout's */
-    public static Floor toFloor(FloorDto dto, long version) {
+    /**
+     * @param stored the floor as it is stored, or null for a new one. Its version is carried over -
+     *               a floor's version is the layout's - and so is the direction its drawing faces,
+     *               when the request leaves it out
+     */
+    public static Floor toFloor(FloorDto dto, Floor stored) {
         return new Floor(dto.code(), dto.level(), dto.name(), dto.status(), dto.accessibility(),
-                blankToNull(dto.note()), dto.width(), dto.height(), toPoints(dto.outlineOrEmpty()),
-                dto.corridorsOrEmpty().stream().map(MapMapper::toCorridor).toList(), version);
+                blankToNull(dto.note()), dto.width(), dto.height(),
+                dto.top() != null || stored == null ? dto.top() : stored.top(),
+                toPoints(dto.outlineOrEmpty()),
+                dto.corridorsOrEmpty().stream().map(MapMapper::toCorridor).toList(),
+                stored == null ? 0 : stored.version());
     }
 
     public static WingDto toWingDto(Wing wing) {
@@ -170,6 +177,7 @@ public final class MapMapper {
                 floor.note(),
                 floor.width(),
                 floor.height(),
+                floor.top(),
                 toPointDtos(floor.outline()),
                 floor.corridors().stream().map(MapMapper::toCorridorDto).toList(),
                 floor.version(),

@@ -99,6 +99,33 @@ class FloorLayoutTest {
     }
 
     @Test
+    @DisplayName("the direction a floor's drawing faces is saved with its layout, and a save that leaves it out keeps it")
+    void theDrawingsDirectionIsKept() throws Exception {
+        buildings.save(MapFixtures.building("LAY9"));
+
+        save("LAY9", """
+                {"version": 0, "width": 400, "height": 400, "top": "EAST", "spaces": []}
+                """, status().isOk());
+        save("LAY9", """
+                {"version": 1, "width": 400, "height": 400, "spaces": []}
+                """, status().isOk());
+        // Renaming the building, from a form that does not show the direction.
+        mockMvc.perform(put("/api/map/buildings/LAY9").with(admin())
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"code": "LAY9", "name": "Renamed", "campus": "Sede Test",
+                                 "floors": [{"code": "P1", "level": 1, "name": "Piso 1", "width": 400, "height": 400}]}
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/map/buildings/LAY9/floors/P1").with(admin()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.top").value("EAST"));
+        mockMvc.perform(get("/api/map/buildings/LAY9").with(admin()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.floors[0].top").value("EAST"));
+    }
+
+    @Test
     @DisplayName("a save against an old version is refused with 409 and changes nothing")
     void staleVersionIsRefused() throws Exception {
         buildings.save(MapFixtures.building("LAY2"));

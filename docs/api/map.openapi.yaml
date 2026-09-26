@@ -809,6 +809,15 @@ components:
         from: { $ref: '#/components/schemas/Point' }
         to: { $ref: '#/components/schemas/Point' }
 
+    Compass:
+      type: string
+      enum: [NORTH, EAST, SOUTH, WEST]
+      description: |
+        A direction on the ground. A floor's `top` says which one its drawing's top edge faces, so a
+        client can turn the floor north up or draw a compass that points the right way. Turning a
+        drawing a quarter turn clockwise brings what was on its left to the top.
+      example: EAST
+
     Bounds:
       type: object
       description: The rectangle around a shape, in the floor's units.
@@ -888,6 +897,9 @@ components:
           description: The drawing's width, in its own units. Every point on the floor lies within it.
           example: 1640
         height: { type: integer, minimum: 1, maximum: 20000, example: 590 }
+        top:
+          $ref: '#/components/schemas/Compass'
+          description: The direction on the ground the drawing's top edge faces. Absent until somebody says - the posted plans are not drawn north up.
         outline:
           type: array
           maxItems: 400
@@ -1047,6 +1059,7 @@ components:
         note: { type: string }
         width: { type: integer }
         height: { type: integer }
+        top: { $ref: '#/components/schemas/Compass' }
         outline:
           type: array
           items: { $ref: '#/components/schemas/Point' }
@@ -1141,6 +1154,9 @@ components:
           description: The floor's version as the editor loaded it.
         width: { type: integer, minimum: 1, maximum: 20000 }
         height: { type: integer, minimum: 1, maximum: 20000 }
+        top:
+          $ref: '#/components/schemas/Compass'
+          description: Omit to keep the floor's.
         outline:
           type: array
           maxItems: 400

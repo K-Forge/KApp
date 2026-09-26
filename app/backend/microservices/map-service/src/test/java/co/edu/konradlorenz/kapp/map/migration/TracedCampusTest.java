@@ -139,7 +139,7 @@ class TracedCampusTest {
                         .andExpect(status().isOk())
                         .andReturn().getResponse().getContentAsString());
                 FloorLayoutRequest request = new FloorLayoutRequest(detail.get("version").asLong(),
-                        floor.width(), floor.height(), floor.outline(), floor.status(), floor.accessibility(),
+                        floor.width(), floor.height(), floor.top(), floor.outline(), floor.status(), floor.accessibility(),
                         floor.note(), floor.corridors(), floor.spaces());
 
                 mockMvc.perform(put(path + "/layout").with(admin())

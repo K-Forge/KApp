@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.map.web.dto;
 
 import co.edu.konradlorenz.kapp.map.domain.Accessibility;
+import co.edu.konradlorenz.kapp.map.domain.Compass;
 import co.edu.konradlorenz.kapp.map.domain.FloorStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -31,6 +32,10 @@ public record FloorLayoutRequest(
 
         @NotNull @Min(1) @Max(20000)
         Integer height,
+
+        @Schema(description = "The direction on the ground the drawing's top edge faces. Omit to keep "
+                + "the floor's.")
+        Compass top,
 
         @Schema(description = "The building's walls around this floor, corners in order.")
         @Size(max = 400)

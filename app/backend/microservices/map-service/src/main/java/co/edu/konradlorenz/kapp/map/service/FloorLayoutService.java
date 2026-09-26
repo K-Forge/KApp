@@ -75,7 +75,8 @@ public class FloorLayoutService {
                 request.status() == null ? current.status() : request.status(),
                 request.accessibility() == null ? current.accessibility() : request.accessibility(),
                 MapMapper.blankToNull(request.note()),
-                request.width(), request.height(), MapMapper.toPoints(request.outlineOrEmpty()),
+                request.width(), request.height(), request.top() == null ? current.top() : request.top(),
+                MapMapper.toPoints(request.outlineOrEmpty()),
                 request.corridorsOrEmpty().stream().map(MapMapper::toCorridor).toList(),
                 current.version() + 1);
 
@@ -175,6 +176,7 @@ public class FloorLayoutService {
                 .set("floors.$.note", next.note())
                 .set("floors.$.width", next.width())
                 .set("floors.$.height", next.height())
+                .set("floors.$.top", next.top())
                 .set("floors.$.outline", next.outline())
                 .set("floors.$.corridors", next.corridors())
                 .set("floors.$.version", next.version())

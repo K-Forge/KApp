@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.map.web.dto;
 
 import co.edu.konradlorenz.kapp.map.domain.Accessibility;
+import co.edu.konradlorenz.kapp.map.domain.Compass;
 import co.edu.konradlorenz.kapp.map.domain.FloorStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -63,6 +64,10 @@ public record FloorDto(
         @Schema(description = "Height of the floor's drawing, in its own units.", example = "590")
         @NotNull @Min(1) @Max(20000)
         Integer height,
+
+        @Schema(description = "The direction on the ground the drawing's top edge faces. Absent until "
+                + "somebody says: the posted plans are not drawn north up.", example = "EAST")
+        Compass top,
 
         @Schema(description = "The building's walls around this floor, corners in order. Empty until "
                 + "traced.")

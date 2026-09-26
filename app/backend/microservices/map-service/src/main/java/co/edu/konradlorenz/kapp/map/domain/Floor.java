@@ -1,5 +1,7 @@
 package co.edu.konradlorenz.kapp.map.domain;
 
+import org.springframework.data.annotation.PersistenceCreator;
+
 import java.util.List;
 
 /**
@@ -30,6 +32,8 @@ import java.util.List;
  * @param note          how to get here when it is not obvious - "se sube por la escalera exterior"
  * @param width         the drawing's width in units; every point on the floor is within it
  * @param height        the drawing's height in units
+ * @param top           the direction on the ground the drawing's top edge faces; absent until
+ *                      somebody says - the plans are not drawn north up
  * @param outline       the building's walls around the floor, when traced; absent until then
  * @param version       bumped by every layout save, so two people editing the same floor cannot
  *                      silently overwrite each other; the second save is refused instead
@@ -43,15 +47,24 @@ public record Floor(
         String note,
         int width,
         int height,
+        Compass top,
         List<Point> outline,
         List<Corridor> corridors,
         long version
 ) {
 
+    /** The one the database reads through: the other leaves the direction out. */
+    @PersistenceCreator
     public Floor {
         outline = outline == null ? List.of() : List.copyOf(outline);
         corridors = corridors == null ? List.of() : List.copyOf(corridors);
         status = status == null ? FloorStatus.UNMAPPED : status;
         accessibility = accessibility == null ? Accessibility.UNKNOWN : accessibility;
+    }
+
+    /** A floor whose drawing's direction nobody has given yet. */
+    public Floor(String code, double level, String name, FloorStatus status, Accessibility accessibility,
+                 String note, int width, int height, List<Point> outline, List<Corridor> corridors, long version) {
+        this(code, level, name, status, accessibility, note, width, height, null, outline, corridors, version);
     }
 }
