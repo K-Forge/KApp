@@ -35,6 +35,17 @@ def fit(p0, p1, out, colour=None):
     pts = []
     for k in range(0, int(L), 3):
         cx, cy = x0 + ux * k, y0 + uy * k
+        if colour in ('rel', 'relgrey'):          # the first pixel from outside much darker than the paper
+            cs = [(rgb(round(cx + nx * d), round(cy + ny * d)), d) for d in range(band, -band - 1, -1)]
+            prof = [(sum(c) / 3, d, c) for c, d in cs]
+            paper = sorted(v for v, _, _ in prof)[int(len(prof) * 0.8)]
+            for v, d, c in prof:
+                if colour == 'relgrey' and c[0] > c[1] + 30:
+                    continue                     # the red lot line drawn beside the wall
+                if v < paper * 0.78:
+                    pts.append((cx + nx * d, cy + ny * d))
+                    break
+            continue
         if colour == 'darkest':                  # the darkest pixel across, as lot.py
             prof = [(sum(rgb(round(cx + nx * d), round(cy + ny * d))) / 3, d) for d in range(-band, band + 1)]
             paper = sorted(v for v, _ in prof)[int(len(prof) * 0.8)]
