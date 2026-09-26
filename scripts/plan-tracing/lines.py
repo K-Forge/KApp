@@ -14,6 +14,7 @@ The spec is trace.py's - "photo", "resample", and "corners" with "plaque" (or "p
     "reach":  how far an edge may move to find its wall (default 14)
     "door":   [narrowest, widest] opening that is a door (default [22, 70])
     "place":  [dx, dy, width, height]: where the plan's frame lies on a bigger floor, for the output
+    "ink":    how dark, against its paper, a line must be to count (default 0.72)
 
 A room may say "fixed" (drawn as given, not snapped) or "closed" (no doors looked for), and brings
 the doors a plan draws as a leaf in the wall line rather than as a gap.
@@ -102,23 +103,29 @@ def ink(img, w, h, block=24, dark=0.72):
         row = (y // block) * bw
         for x in range(w):
             r, g, b = img[y * w + x]
-            if (r + g + b) / 3 < around[row + x // block] * dark and \
-                    (max(r, g, b) - min(r, g, b) < 70 or (r > g + 40 and r > b + 40)):
-                mask[y * w + x] = 1
+            if (r + g + b) / 3 < around[row + x // block] * dark:
+                if r > g + 30 and r > b + 30:       # a dim red is still red, not grey
+                    mask[y * w + x] = RED
+                elif max(r, g, b) - min(r, g, b) < 70:
+                    mask[y * w + x] = 1
     return mask
+
+
+RED = 2                                         # ink that is red: door swings, labels, some new walls
 
 
 # ── Snapping ─────────────────────────────────────────────────────────────────────────────────
 
-def covered(mask, w, h, axis, at, lo, hi, width=1):
+def covered(mask, w, h, axis, at, lo, hi, width=1, grey=False):
     """For each step along a level (axis 'y') or plumb (axis 'x') line from lo to hi: is there ink
-    within `width` of it."""
+    within `width` of it - only black or grey ink, with `grey`."""
     out = []
     for t in range(int(lo), int(hi) + 1):
         hit = 0
         for d in range(-width, width + 1):
             x, y = (t, at + d) if axis == "y" else (at + d, t)
-            if 0 <= x < w and 0 <= y < h and mask[int(y) * w + int(x)]:
+            if 0 <= x < w and 0 <= y < h and mask[int(y) * w + int(x)] and \
+                    not (grey and mask[int(y) * w + int(x)] == RED):
                 hit = 1
                 break
         out.append(hit)
@@ -200,11 +207,12 @@ def doors_on(mask, w, h, poly, narrowest, widest):
 def boxed(mask, w, h, poly, axis, at, a, b, depth=22):
     """Whether a gap in a wall is the inside of a column or a duct drawn in the wall - closed, a
     wall's thickness beyond the room, by a line as long as the gap - rather than a way through. An
-    open door's leaf beside the gap runs across it, not along it, and does not close it."""
+    open door's leaf beside the gap runs across it, not along it, and its swing is red: neither
+    closes it."""
     probe = ((a + b) / 2, at + 1.5) if axis == "y" else (at + 1.5, (a + b) / 2)
     out = -1 if trace.inside(poly, *probe) else 1
     for d in range(4, depth + 1):
-        line = covered(mask, w, h, axis, at + out * d, a + 2, b - 2, width=0)
+        line = covered(mask, w, h, axis, at + out * d, a + 2, b - 2, width=0, grey=True)
         if sum(line) >= 0.8 * len(line):
             return True
     return False
@@ -400,7 +408,9 @@ def main():
     spec_path, prefix = sys.argv[1:3]
     spec = json.load(open(spec_path))
     img, w, h = rectify(spec, spec_path, prefix)
-    mask = ink(img, w, h)
+    # A plan printed in pale grey - floor 6 of the Edificio Central - has walls only a fifth darker
+    # than its paper: "ink" sets how much darker a line must be (0.72 of the paper by default).
+    mask = ink(img, w, h, dark=spec.get("ink", 0.72))
 
     if len(sys.argv) > 3 and sys.argv[3] == "level":
         level(spec, mask, w, h)
