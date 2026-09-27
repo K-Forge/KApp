@@ -23,6 +23,36 @@ del mapa sale de aquí, después de revisarlo juntos.
 | [EA · Edificio Administrativo](levantamiento/ea.md) | 3 | P2–P4 | Solo PI | **Todo a mano** |
 | **RH · Edificio de Recursos Humanos** | 0 | ? | — | **Sin visitar.** Casa de patrimonio, sin conexión interna con el EC |
 | **CPC 2** | 0 | ? | — | **Sin visitar** |
+| **TK · Tienda K** | 0 | ? | — | **Sin visitar.** La tienda de uniformes, en la esquina junto al RH |
+
+## Dónde queda cada edificio
+
+Todos sobre el catastro de Bogotá (Mapa de Referencia de IDECA): la dirección da el predio, y el
+predio, las partes del edificio con cuántos pisos tiene cada una. Así quedan en el mapa del campus,
+con su forma real, aunque nadie haya dibujado sus pisos.
+
+| Edificio | Dirección | Predio | Pisos según el catastro | Cómo se ubicó |
+|---|---|---|---|---|
+| EC | Cra. 9 Bis # 62-43 | 008213024019 | 8 y 2 sótanos | La dirección de la universidad |
+| RH | Cra. 9A # 62-12 | 008213024004 | 1 | Talento Humano, según la web; en Google Maps, "Casa de Francisco de Paula Vélez" |
+| TK | Cra. 9A # 62-02 | 008213024015 | 2 | Google Maps, en la esquina con la Calle 62 |
+| EA | Cra. 9A # 62-27 | 008213015038 | 4 | Brian: al frente del RH |
+| BI | Cl. 62 # 9-23 a 9-43 | 008213025011 | 4, y la terraza | Google Maps y la fachada en Street View: vecinos y alas |
+| MU | Cl. 62 # 9-65 | 008213025008 | 3 | La página del Medio Universitario |
+| CPC 1 | Cra. 9 # 61-38 | 008213027011 | 5 | La página del CPC. El catastro no trae aún la cafetería del P1 |
+| CPC 2 | Cra. 8 # 64-42, piso 4 | 008214027016 | 7 y 2 sótanos | La página del CPC: el piso 4 del Edificio Corpocentro |
+| JAAB | Cra. 10 # 64-65 | 008214013017 | 6 | Brian, y Google Maps |
+
+- **Los alrededores de un edificio:** el bloque, los andenes y las calles vienen del mismo mapa de
+  referencia, en `db/ground/`. `scripts/map-ground.py` los vuelve a cortar.
+- **Cada edificio en su sitio:** `scripts/plan-tracing/place.py` ajusta el dibujo de sus planos a
+  las partes del catastro. Al que no tiene dibujo le pone un marco sobre su predio.
+- **Las alas del EC**, según su fachada: el ala norte son los cinco pisos sobre la Calle 63; el ala
+  central, el núcleo de ocho pisos y su base; el ala sur, las partes de seis y cuatro pisos sobre
+  el auditorio.
+- **Las del BI** no se pueden separar en el catastro, que lo registra de una sola pieza. En Street
+  View, desde la Calle 62, el ala oriental (Centro de Investigaciones 2) queda a la izquierda y la
+  occidental (bienestar), a la derecha.
 
 ## Lo que vale para todo el campus
 
@@ -148,9 +178,23 @@ no exista y agregar lo que falte.
 
 - [ ] **Todo, a mano.** P1 incluido, y si hay más pisos.
 
-**RH y CPC 2**
+**RH, CPC 2 y Tienda K**
 
-- [ ] **Primera visita.**
+- [ ] **Primera visita.** En el RH, confirmar qué hay: la web ubica ahí a Talento Humano, pero
+  las placas del EA también listan dependencias de Recursos Humanos.
+
+**Antes de caminar**
+
+- [ ] El recorrido 360° de la universidad (`webapps.konradlorenz.edu.co/tour/`) tiene escenas
+  con nombre que sirven para reconocer espacios sin identificar:
+  - **EC:** cafetería, biblioteca, piso STEM, Laboratorio de Redes Cisco, salas de cómputo,
+    Servicios Tecnológicos, laboratorios de Workstation, de Desarrollo de Software, de Software y
+    de Simulación y Videojuegos, Business Training Center, Cancillería, Oficina de Graduados,
+    Cámara de Gesell, el museo de los pisos 3 a 5, el auditorio con su tramoya, y las terrazas
+    norte, sur, del 7.º y del 8.º piso.
+  - **JAAB:** el Laboratorio de Interactividad.
+  - **BI:** la entrada al Centro de Bienestar y Deportes.
+  - **CPC:** la terraza del último piso.
 
 ## Decisiones tomadas con Brian
 
