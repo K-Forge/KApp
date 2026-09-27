@@ -22,6 +22,14 @@
       "note": "Construida sobre el auditorio: oficinas y aulas del piso 3 al 6."
     }
   ],
+  "placement": {
+    "origin": {
+      "lat": 4.6485371,
+      "lon": -74.0611566
+    },
+    "bearing": 127.0,
+    "metresPerUnit": 0.02927
+  },
   "floors": [
     {
       "code": "S1",

@@ -91,6 +91,17 @@ class TracedCampusTest {
     }
 
     @Test
+    @DisplayName("the Edificio Central is laid on the ground: its drawing's top faces the Carrera 9 Bis")
+    void theCentralBuildingIsOnTheGround() {
+        BuildingDocument central = mongo.findOne(query(where("code").is("EC")), BuildingDocument.class);
+        assertThat(central.placement()).isNotNull();
+        // South-east, between the quarter the floors' top records (EAST) and the next one.
+        assertThat(central.placement().bearing()).isBetween(90.0, 180.0);
+        assertThat(central.placement().origin().lat()).isBetween(4.64, 4.66);
+        assertThat(central.placement().origin().lon()).isBetween(-74.07, -74.05);
+    }
+
+    @Test
     @DisplayName("the placeholder campus is gone: no placeholder building, no placeholder space")
     void placeholdersAreGone() {
         assertThat(mongo.count(query(where("placeholder").is(true)), BuildingDocument.class)).isZero();
