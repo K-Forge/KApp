@@ -35,6 +35,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: 'Campus',
     links: [
+      { path: '/data/campus', label: 'Campus map', icon: 'M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14' },
       { path: '/data/buildings', label: 'Buildings', icon: 'M3 21h18M5 21V5a2 2 0 012-2h6a2 2 0 012 2v16M9 7h2M9 11h2M9 15h2M15 21v-8h4v8' },
       { path: '/data/floors', label: 'Floor editor', icon: 'M3 3h18v18H3zM3 9h18M9 9v12M15 15h6' },
       { path: '/data/spaces', label: 'Spaces', icon: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z' },

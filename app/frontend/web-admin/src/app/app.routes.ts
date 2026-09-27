@@ -27,6 +27,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/data/users/users.page').then((m) => m.UsersPage),
       },
       {
+        path: 'data/campus',
+        loadComponent: () => import('./features/data/campus/campus-map.page').then((m) => m.CampusMapPage),
+      },
+      {
         path: 'data/buildings',
         loadComponent: () => import('./features/data/buildings/buildings.page').then((m) => m.BuildingsPage),
       },
