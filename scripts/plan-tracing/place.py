@@ -121,11 +121,13 @@ def hull_area(points):
     return 0.5 * abs(sum(hull[i][0] * hull[i - 1][1] - hull[i - 1][0] * hull[i][1] for i in range(len(hull))))
 
 
-def fit(floors, use, lot_m, parts_m, bearing, whole_lot=False):
-    xs = [p[0] for p in lot_m]
-    ys = [p[1] for p in lot_m]
+def fit(floors, use, lots_m, parts_m, bearing, whole_lot=False):
+    """lots_m: each lot's outline, in metres - a building may stand on more than one."""
+    lot_points = [p for ring in lots_m for p in ring]
+    xs = [p[0] for p in lot_points]
+    ys = [p[1] for p in lot_points]
     grid = Grid(min(xs) - 25, min(ys) - 25, max(xs) + 25, max(ys) + 25)
-    inside = grid.fill([lot_m])
+    inside = grid.fill(lots_m)
     targets = {code: inside if whole_lot else grid.fill([r for n, r in parts_m if n >= reach]) for code, reach in use}
     rooms = {code: [[(p['x'], p['y']) for p in s['shape']] for s in floors[code]['spaces'] if s.get('shape')]
              for code, _ in use}
@@ -145,11 +147,11 @@ def fit(floors, use, lot_m, parts_m, bearing, whole_lot=False):
     # should cover. Hulls, not areas: corridors are seldom drawn as rooms, so the rooms' own area
     # falls short of the building's by as much as half, and the fit starts twice too big.
     code, reach = use[0]
-    target_points = lot_m if whole_lot else [p for n, r in parts_m if n >= reach for p in r]
+    target_points = lot_points if whole_lot else [p for n, r in parts_m if n >= reach for p in r]
     s0 = math.sqrt(hull_area(target_points) / hull_area([p for r in rooms[code] for p in r]))
     cx = sum(p[0] for r in rooms[code] for p in r) / sum(len(r) for r in rooms[code])
     cy = sum(p[1] for r in rooms[code] for p in r) / sum(len(r) for r in rooms[code])
-    reaching = [lot_m] if whole_lot else [r for n, r in parts_m if n >= reach]
+    reaching = lots_m if whole_lot else [r for n, r in parts_m if n >= reach]
     mx = sum(p[0] for r in reaching for p in r) / sum(len(r) for r in reaching)
     my = sum(p[1] for r in reaching for p in r) / sum(len(r) for r in reaching)
 
@@ -176,8 +178,9 @@ def fit(floors, use, lot_m, parts_m, bearing, whole_lot=False):
     return best[1]
 
 
-def frame(lot_m, parts_m):
-    """A frame squared to the lot, the side nearest north at the top, round the building's parts."""
+def frame(lots_m, parts_m):
+    """A frame squared to the lots, the side nearest north at the top, round the building's parts."""
+    lot_m = [p for ring in lots_m for p in ring]
     best = None
     for tenth in range(0, 900):
         a = math.radians(tenth / 10)
@@ -233,15 +236,15 @@ def main():
         parts += [(code, p) for p in query(39, f"LOTECODIGO='{code}'")]
     ring = lots[0]
     plane = Plane(sum(c[1] for c in ring) / len(ring), sum(c[0] for c in ring) / len(ring))
-    lot_m = [plane.to(c) for r in lots for c in r]
+    lots_m = [[plane.to(c) for c in r] for r in lots]
     parts_m = [((p['properties'].get('CONNPISOS') or 0), [plane.to(c) for c in outer(p)]) for _, p in parts]
 
     drawn = [f for f in seed['floors'] if any(s.get('shape') for s in f['spaces'])]
     if args.frame:
-        v, width, height = frame([plane.to(c) for c in lots[0]], parts_m)
+        v, width, height = frame(lots_m, parts_m)
     else:
         use = [(code, int(reach)) for code, reach in (pair.split(':') for pair in args.floors.split(','))]
-        v = fit(floors, use, lot_m, parts_m, args.bearing, args.whole_lot)
+        v = fit(floors, use, lots_m, parts_m, args.bearing, args.whole_lot)
         width, height = collections.Counter((f['width'], f['height']) for f in drawn).most_common(1)[0][0]
 
     th, s, tx, ty = v

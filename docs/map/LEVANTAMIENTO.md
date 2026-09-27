@@ -37,7 +37,7 @@ con su forma real, aunque nadie haya dibujado sus pisos.
 | RH | Cra. 9A # 62-12 | 008213024004 | 1 | Talento Humano, según la web; en Google Maps, "Casa de Francisco de Paula Vélez" |
 | TK | Cra. 9A # 62-02 | 008213024015 | 2 | Google Maps, en la esquina con la Calle 62 |
 | EA | Cra. 9A # 62-27 | 008213015038 | 4 | Brian: al frente del RH |
-| BI | Cl. 62 # 9-23 a 9-43 | 008213025011 | 4, y la terraza | Google Maps y la fachada en Street View: vecinos y alas |
+| BI | Cl. 62 # 9-81 a 9-93 | 008213025004, 005 y 006 | 4, y la terraza | Brian: al frente de la Tienda K. Al oriente, el lote de un piso con el seto de la foto de Street View |
 | MU | Cl. 62 # 9-65 | 008213025008 | 3 | La página del Medio Universitario |
 | CPC 1 | Cra. 9 # 61-38 | 008213027011 | 5 | La página del CPC. El catastro no trae aún la cafetería del P1 |
 | CPC 2 | Cra. 8 # 64-42, piso 4 | 008214027016 | 7 y 2 sótanos | La página del CPC: el piso 4 del Edificio Corpocentro |
@@ -50,9 +50,9 @@ con su forma real, aunque nadie haya dibujado sus pisos.
 - **Las alas del EC**, según su fachada: el ala norte son los cinco pisos sobre la Calle 63; el ala
   central, el núcleo de ocho pisos y su base; el ala sur, las partes de seis y cuatro pisos sobre
   el auditorio.
-- **Las del BI** no se pueden separar en el catastro, que lo registra de una sola pieza. En Street
-  View, desde la Calle 62, el ala oriental (Centro de Investigaciones 2) queda a la izquierda y la
-  occidental (bienestar), a la derecha.
+- **Las del BI**, según su fachada: el ala occidental (bienestar) ocupa los predios 004 y 005, y
+  la oriental (Centro de Investigaciones 2), el 006. Desde la Calle 62, la oriental queda a la
+  izquierda. El pin de Google Maps lo pone 60 m más al oriente, en el 9-43, y está mal.
 
 ## Lo que vale para todo el campus
 
