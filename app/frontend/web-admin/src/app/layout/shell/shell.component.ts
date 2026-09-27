@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 import { TokenStore } from '../../core/auth/token.store';
 import { ApiConfigService } from '../../core/config/api-config.service';
@@ -60,10 +62,11 @@ const NAV_GROUPS: NavGroup[] = [
 /** Nav + header shared by every authenticated screen. Login stays outside so it renders alone. */
 @Component({
   selector: 'app-shell',
+  host: { '(document:keydown.escape)': 'onEscape()' },
   imports: [RouterOutlet, RouterLink, RouterLinkActive, TokenCountdownComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="shell">
+    <div class="shell" [class.nav-hidden]="navHidden()" [class.drawer-open]="drawerOpen()">
       <!--
         First stop in the tab order, invisible until it is focused. Without it a keyboard user
         walks the whole sidebar - fourteen stops - before reaching the page's own first control,
@@ -77,15 +80,31 @@ const NAV_GROUPS: NavGroup[] = [
       <a class="skip-link" href="#shell-content" (click)="skipToContent($event)">Skip to content</a>
 
       <header class="shell-header">
-        <!-- The API console, not the token screen: the console is where somebody spends the
-             session, and the token is one click away from it anyway. -->
-        <a class="brand" routerLink="/api-console">
-          <img src="/konrad-logo.png" alt="Fundación Universitaria Konrad Lorenz" width="34" height="34" />
-          <span class="brand-text">
-            <strong>KApp</strong>
-            <span class="brand-sub">Admin Portal</span>
-          </span>
-        </a>
+        <div class="header-start">
+          <!-- Hides the sidebar on a tablet, where the plan wants the width, and opens it as a
+               drawer on a phone, where it has no room to stay open at all. -->
+          <button
+            type="button"
+            class="icon-btn nav-toggle"
+            (click)="toggleNav()"
+            aria-controls="shell-nav"
+            [attr.aria-expanded]="navShown()"
+            [title]="navShown() ? 'Hide the menu' : 'Show the menu'"
+            [attr.aria-label]="navShown() ? 'Hide the menu' : 'Show the menu'"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
+
+          <!-- The API console, not the token screen: the console is where somebody spends the
+               session, and the token is one click away from it anyway. -->
+          <a class="brand" routerLink="/api-console">
+            <img src="/konrad-logo.png" alt="Fundación Universitaria Konrad Lorenz" width="34" height="34" />
+            <span class="brand-text">
+              <strong>KApp</strong>
+              <span class="brand-sub">Admin Portal</span>
+            </span>
+          </a>
+        </div>
 
         <div class="header-actions">
           <app-token-countdown />
@@ -136,7 +155,10 @@ const NAV_GROUPS: NavGroup[] = [
       </header>
 
       <div class="shell-body">
-        <nav class="shell-nav" aria-label="Sections">
+        @if (drawerOpen()) {
+          <div class="nav-backdrop" (click)="closeDrawer()" aria-hidden="true"></div>
+        }
+        <nav id="shell-nav" class="shell-nav" aria-label="Sections">
           @for (group of groups; track group.title) {
             <p class="nav-group-title">{{ group.title }}</p>
             @for (link of group.links; track link.path) {
@@ -207,7 +229,11 @@ const NAV_GROUPS: NavGroup[] = [
       padding: 0.6rem 1.25rem;
       background: var(--header-bg);
       border-bottom: 1px solid var(--border);
-      position: relative;
+      /* Pinned, so the menu button is within reach from the bottom of a long page too. Sticky
+         also positions it, which the strip drawn under it needs. */
+      position: sticky;
+      top: 0;
+      z-index: 40;
     }
     .shell-header::after {
       content: '';
@@ -246,6 +272,19 @@ const NAV_GROUPS: NavGroup[] = [
     .brand img {
       flex: 0 0 auto;
       display: block;
+    }
+    .header-start {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      min-width: 0;
+    }
+    .nav-toggle {
+      padding: 0.45rem;
+    }
+    .icon-btn.nav-toggle svg {
+      width: 20px;
+      height: 20px;
     }
     .brand-text {
       display: flex;
@@ -423,60 +462,149 @@ const NAV_GROUPS: NavGroup[] = [
 
     .shell-content {
       flex: 1;
+      min-width: 0;
       overflow-y: auto;
       padding: 1.5rem;
     }
 
-    @media (max-width: 720px) {
-      .shell-body {
-        flex-direction: column;
+    /*
+     * Hidden, the sidebar slides out past the left edge instead of vanishing, and the page
+     * takes its width back. On an iPad drawing a floor, that width is the plan's.
+     */
+    @media (min-width: 721px) {
+      .shell.nav-hidden .shell-nav {
+        margin-left: -15rem;
+        visibility: hidden;
       }
-      /* One scrolling strip rather than a wrapped block. Wrapped, eleven links
-         took four rows and a third of a phone screen before any content. */
+    }
+    @media (min-width: 721px) and (prefers-reduced-motion: no-preference) {
       .shell-nav {
-        width: 100%;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        gap: 0.25rem;
-        padding: 0.5rem;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-        scrollbar-width: none;
+        transition: margin-left 180ms ease, visibility 180ms;
       }
-      .shell-nav::-webkit-scrollbar {
-        display: none;
+    }
+
+    /*
+     * A phone has no room for a sidebar, and the strip of links that stood in for one ate a row
+     * of the screen while showing three of its eleven entries. The menu is a drawer there: out
+     * of the way until the button in the header asks for it, and gone again once a section is
+     * picked.
+     */
+    @media (max-width: 720px) {
+      .shell-nav {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 60;
+        width: min(18rem, 86vw);
+        padding: 1rem 0.75rem calc(1rem + env(safe-area-inset-bottom));
+        background-color: var(--bg-elevated);
+        transform: translateX(-100%);
+        visibility: hidden;
       }
-      /* Group headings are a vertical device; in a horizontal strip they would
-         be eleven more things to scroll past. */
-      .nav-group-title {
-        display: none;
+      .shell.drawer-open .shell-nav {
+        transform: none;
+        visibility: visible;
+        box-shadow: var(--shadow-md);
       }
-      .nav-link {
-        white-space: nowrap;
-        flex: 0 0 auto;
-        border-left: none;
-        border-bottom: 3px solid transparent;
-      }
-      .nav-link.active {
-        border-left-color: transparent;
-        border-bottom-color: var(--brand-teal);
+      .nav-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 55;
+        background: rgb(10 15 14 / 0.45);
       }
       .shell-content {
         padding: 1rem;
       }
       .shell-header {
-        flex-wrap: wrap;
         gap: 0.5rem;
-        padding: 0.6rem 1rem;
+        padding: 0.5rem 0.75rem;
+      }
+      .header-actions {
+        gap: 0.15rem;
+      }
+      .icon-btn:not(.nav-toggle) {
+        padding: 0.4rem;
       }
       /* The labels are the first thing to go; the icons still say what each does. */
-      .icon-btn-label {
+      .icon-btn-label,
+      .brand-sub {
+        display: none;
+      }
+    }
+    @media (max-width: 720px) and (prefers-reduced-motion: no-preference) {
+      .shell-nav {
+        transition: transform 200ms ease, visibility 200ms;
+      }
+    }
+    /* The mark alone says whose portal this is; the name gives its room to the countdown. */
+    @media (max-width: 400px) {
+      .brand-text {
         display: none;
       }
     }
   `})
 export class ShellComponent {
+  private readonly router = inject(Router);
+
+  /** Below this width the sidebar is a drawer, the same breakpoint the styles switch on. */
+  private readonly narrowQuery = matchNarrow();
+  readonly narrow = signal(this.narrowQuery?.matches ?? false);
+
+  /** On a wide screen: whether the sidebar has been put away. Remembered on this device. */
+  readonly navHidden = signal(readNavHidden());
+
+  /** On a phone: whether the drawer is out. Never remembered - it opens only when asked. */
+  readonly drawerOpen = signal(false);
+
+  readonly navShown = computed(() => (this.narrow() ? this.drawerOpen() : !this.navHidden()));
+
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    const query = this.narrowQuery;
+    if (query) {
+      const onChange = (event: MediaQueryListEvent) => {
+        this.narrow.set(event.matches);
+        this.drawerOpen.set(false);
+      };
+      query.addEventListener('change', onChange);
+      destroyRef.onDestroy(() => query.removeEventListener('change', onChange));
+    }
+    // Picking a section is what the drawer was opened for; leaving it over the page after
+    // that would make every visit two taps.
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(destroyRef),
+      )
+      .subscribe(() => this.drawerOpen.set(false));
+  }
+
+  toggleNav(): void {
+    if (this.narrow()) {
+      this.drawerOpen.update((open) => !open);
+      return;
+    }
+    const hidden = !this.navHidden();
+    this.navHidden.set(hidden);
+    try {
+      localStorage.setItem(NAV_HIDDEN_KEY, hidden ? 'true' : 'false');
+    } catch {
+      // Non-fatal: the sidebar just comes back on the next visit.
+    }
+  }
+
+  closeDrawer(): void {
+    this.drawerOpen.set(false);
+  }
+
+  /** Escape puts the drawer away and hands focus back to the button that opened it. */
+  onEscape(): void {
+    if (this.drawerOpen()) {
+      this.drawerOpen.set(false);
+      document.querySelector<HTMLElement>('.nav-toggle')?.focus();
+    }
+  }
 
   /**
    * Moves focus into the page body without navigating.
@@ -528,4 +656,20 @@ export class ShellComponent {
   logout(): void {
     this.auth.logout();
   }
+}
+
+const NAV_HIDDEN_KEY = 'kapp-admin:nav-hidden';
+
+function readNavHidden(): boolean {
+  try {
+    return localStorage.getItem(NAV_HIDDEN_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function matchNarrow(): MediaQueryList | null {
+  return typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+    ? window.matchMedia('(max-width: 720px)')
+    : null;
 }

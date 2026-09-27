@@ -56,4 +56,44 @@ describe('ShellComponent', () => {
       expect(link.getAttribute('ariaCurrentWhenActive')).toBe('page');
     }
   });
+
+  // On an iPad the plan wants the sidebar's width. The button puts it away, says so to
+  // assistive technology, and brings it back.
+  it('puts the sidebar away and brings it back', () => {
+    const shell = fixture.nativeElement.querySelector('.shell') as HTMLElement;
+    const toggle = fixture.nativeElement.querySelector('.nav-toggle') as HTMLButtonElement;
+    expect(shell.classList).not.toContain('nav-hidden');
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+
+    toggle.click();
+    fixture.detectChanges();
+    expect(shell.classList).toContain('nav-hidden');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle.getAttribute('aria-controls')).toBe('shell-nav');
+
+    toggle.click();
+    fixture.detectChanges();
+    expect(shell.classList).not.toContain('nav-hidden');
+  });
+
+  // On a phone the same button opens a drawer, which picking a section or Escape closes.
+  it('opens the menu as a drawer on a phone and closes it with Escape', () => {
+    const shell = fixture.componentInstance;
+    shell.narrow.set(true);
+    fixture.detectChanges();
+    const toggle = fixture.nativeElement.querySelector('.nav-toggle') as HTMLButtonElement;
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+
+    toggle.click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.shell').classList).toContain('drawer-open');
+    expect(fixture.nativeElement.querySelector('.nav-backdrop')).toBeTruthy();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.shell').classList).not.toContain('drawer-open');
+    expect(fixture.nativeElement.querySelector('.nav-backdrop')).toBeNull();
+    // The wide screen's choice is its own: opening a drawer never hid the sidebar.
+    expect(shell.navHidden()).toBe(false);
+  });
 });
