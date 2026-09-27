@@ -11,38 +11,41 @@
 :root {
   color-scheme: light;
 
-  /* Paper, but not a blank sheet: a rose drawn from the institutional pink of the K. It was a
-     teal-grey, and next to the teal buttons the whole portal read as green. The pink carries
-     the ground now and the teal the actions, which is how the two sit in the K itself. */
-  --bg: #f3e3ea;
+  /* Paper, but not a blank sheet: a mauve drawn from the institutional pink of the K, taken
+     toward purple and down a shade. It was a teal-grey, and next to the teal buttons the whole
+     portal read as green; a plain rose read as pink everywhere. The ground carries the K's
+     warmth now and the teal the actions, which is how the two sit in the K itself. */
+  --bg: #e0d3e2;
   --bg-elevated: #ffffff;
-  --bg-inset: #f6ebf0;
-  --bg-hover: #efdde5;
-  --border: #e3cbd6;
-  --border-strong: #bf9fae;
+  --bg-inset: #eee5ef;
+  --bg-hover: #dccde0;
+  --border: #cdbbd1;
+  --border-strong: #ad97b2;
 
-  --text: #241820;
-  --text-muted: #65505b;
-  /* 5.94:1 on a card and 4.81 on the ground - over the 4.5 minimum for body text, and still
-     clearly softer than --text-muted (7.36), so the hierarchy survives. */
-  --text-faint: #735e69;
+  --text: #20172a;
+  --text-muted: #584a60;
+  /* 7.08:1 on a card and 4.92 on the ground - over the 4.5 minimum for body text, and still
+     clearly softer than --text-muted (8.19), so the hierarchy survives. */
+  --text-faint: #62536a;
   --text-on-accent: #ffffff;
 
-  --primary: #3a6f6e;
-  --primary-strong: #285352;
+  /* A shade deeper than the brand teal's own text tone, so a link still clears 4.5:1 on the
+     darker ground (4.64). */
+  --primary: #336463;
+  --primary-strong: #244847;
   --primary-bg: #e2efee;
   --primary-brand: #539392;
 
-  --danger: #b8115a;
-  --danger-strong: #8f0d46;
+  --danger: #a30f50;
+  --danger-strong: #800c3f;
   --danger-bg: #fbe7ee;
 
-  --success: #2f6f5e;
+  --success: #2a6254;
   --success-strong: #1f5044;
   --success-bg: #dcefe8;
 
-  /* A shade darker than it was: on the rose ground #92620a measured 4.27:1. */
-  --warning: #835808;
+  /* Darker than it was: on the mauve ground #92620a measured under 4.5:1. */
+  --warning: #744d06;
   --warning-bg: #faedd3;
 
   --focus-ring: #539392;
@@ -56,27 +59,27 @@
   --brand-green: #C9D329;
 
   /* The header and sidebar are tinted rather than white. Three stacked white
-     planes read as flat; a faint wash of the ground's rose separates the chrome
+     planes read as flat; a faint wash of the ground's mauve separates the chrome
      from the content without drawing attention to itself. */
-  --header-bg: #f5e5ec;
-  --nav-bg: #f8eef2;
+  --header-bg: #e5d9e7;
+  --nav-bg: #ece3ed;
 
   /* The selected section: a real step, not a slab. A solid fill is the loudest thing on the
-     screen and the eye goes there instead of to the content; a deeper rose, a full-strength
-     pink edge and bold text carry it without shouting. 9.4:1. */
-  --nav-active-bg: #f3cfdd;
-  --nav-active-text: #5a1233;
+     screen and the eye goes there instead of to the content; a deeper mauve, a full-strength
+     pink edge and bold text carry it without shouting. 8.3:1. */
+  --nav-active-bg: #d9c1e0;
+  --nav-active-text: #471a4d;
   --nav-active-edge: #D51A65;
 
   /* Behind a drawer or a dialog: the plum of the dark theme, not a neutral grey. */
-  --scrim: rgb(31 11 22 / 0.45);
+  --scrim: rgb(26 16 32 / 0.45);
 
   /* How much of each hue reaches the page ground.
      The green was off in this theme for a while, because at sixteen percent spread thin over
      a grey base it read as a stain rather than as a colour. The fix was not less of it but
      more: a wash that faint is dirt, and a wash this strong is a light. Mixed in oklab rather
      than srgb, which is what keeps a teal from going grey on its way to transparent. */
-  /* The teal and the green were set against a teal-grey ground. Over the rose they mix
+  /* The teal and the green were set against a teal-grey ground. Over the mauve they mix
      toward a grey, so they come down to where they still read as light of their own colour;
      the pink, now the ground's own hue, goes up. */
   --wash-strength: 34%;
@@ -146,18 +149,18 @@
   :root:not([data-theme='light']) {
     color-scheme: dark;
 
-    /* Plum, the institutional pink at night. It was a green so deep it read as black with a
-       cast, and the cast was the wrong colour. */
-    --bg: #1f0b16;
-    --bg-elevated: #2a1420;
-    --bg-inset: #321a27;
-    --bg-hover: #3c2130;
-    --border: #4a303d;
-    --border-strong: #654a57;
+    /* A deep purple, the institutional pink at night. It was a green so deep it read as black
+       with a cast, and the cast was the wrong colour. */
+    --bg: #1a1020;
+    --bg-elevated: #251a2c;
+    --bg-inset: #2d2135;
+    --bg-hover: #372a40;
+    --border: #45374f;
+    --border-strong: #5f4f69;
 
-    --text: #f7ebf1;
-    --text-muted: #c9b0bc;
-    --text-faint: #ab929e;
+    --text: #f3edf6;
+    --text-muted: #c4b6cb;
+    --text-faint: #a898b0;
     /* Dark ink, not white: the accent is a LIGHT teal in this theme, so white on
        it measured 2.02:1 - the most prominent button in the portal, well under
        the 4.5 minimum. Against #7fc2c0 this is about 9:1. */
@@ -185,10 +188,10 @@
     --brand-pink: #e8578f;
     --brand-green: #c9d329;
 
-    --header-bg: #240e1a;
-    --nav-bg: #1c0a14;
-    --nav-active-bg: #4d1a33;
-    --nav-active-text: #ffd3e4;
+    --header-bg: #1e1325;
+    --nav-bg: #170d1c;
+    --nav-active-bg: #452252;
+    --nav-active-text: #f2d9fa;
     --nav-active-edge: #e8578f;
     --scrim: rgb(8 2 6 / 0.6);
     --wash-strength: 54%;
@@ -206,18 +209,18 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  /* Plum, the institutional pink at night. It was a green so deep it read as black with a
-     cast, and the cast was the wrong colour. */
-  --bg: #1f0b16;
-  --bg-elevated: #2a1420;
-  --bg-inset: #321a27;
-  --bg-hover: #3c2130;
-  --border: #4a303d;
-  --border-strong: #654a57;
+  /* A deep purple, the institutional pink at night. It was a green so deep it read as black
+     with a cast, and the cast was the wrong colour. */
+  --bg: #1a1020;
+  --bg-elevated: #251a2c;
+  --bg-inset: #2d2135;
+  --bg-hover: #372a40;
+  --border: #45374f;
+  --border-strong: #5f4f69;
 
-  --text: #f7ebf1;
-  --text-muted: #c9b0bc;
-  --text-faint: #ab929e;
+  --text: #f3edf6;
+  --text-muted: #c4b6cb;
+  --text-faint: #a898b0;
   /* Dark ink, not white: the accent is a LIGHT teal in this theme, so white on
      it measured 2.02:1 - the most prominent button in the portal, well under
      the 4.5 minimum. Against #7fc2c0 this is about 9:1. */
@@ -245,10 +248,10 @@
   --brand-pink: #e8578f;
   --brand-green: #c9d329;
 
-  --header-bg: #240e1a;
-  --nav-bg: #1c0a14;
-  --nav-active-bg: #4d1a33;
-  --nav-active-text: #ffd3e4;
+  --header-bg: #1e1325;
+  --nav-bg: #170d1c;
+  --nav-active-bg: #452252;
+  --nav-active-text: #f2d9fa;
   --nav-active-edge: #e8578f;
   --scrim: rgb(8 2 6 / 0.6);
   --wash-strength: 54%;
