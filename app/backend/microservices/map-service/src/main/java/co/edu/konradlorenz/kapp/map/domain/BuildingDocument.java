@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.map.domain;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
@@ -27,6 +28,7 @@ import java.util.Optional;
  *                with one
  * @param floors  ordered by ascending level by the constructor, so readers never have to
  *                sort and the API's "ordered by ascending level" promise cannot drift
+ * @param placement where the building's drawing lies on the ground; null until somebody lays it
  */
 @Document(collection = "buildings")
 public record BuildingDocument(
@@ -40,15 +42,24 @@ public record BuildingDocument(
         List<Floor> floors,
         boolean placeholder,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        Placement placement
 ) {
 
+    @PersistenceCreator
     public BuildingDocument {
         aliases = aliases == null ? List.of() : List.copyOf(aliases);
         wings = wings == null ? List.of() : List.copyOf(wings);
         floors = floors == null
                 ? List.of()
                 : floors.stream().sorted(Comparator.comparingDouble(Floor::level)).toList();
+    }
+
+    /** A building nobody has laid on the ground yet. */
+    public BuildingDocument(String id, String code, String name, String campus, String description,
+                            List<String> aliases, List<Wing> wings, List<Floor> floors, boolean placeholder,
+                            Instant createdAt, Instant updatedAt) {
+        this(id, code, name, campus, description, aliases, wings, floors, placeholder, createdAt, updatedAt, null);
     }
 
     public Optional<Floor> floor(String code) {

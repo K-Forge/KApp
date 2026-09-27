@@ -5,6 +5,8 @@ import co.edu.konradlorenz.kapp.map.domain.BuildingDocument;
 import co.edu.konradlorenz.kapp.map.domain.Corridor;
 import co.edu.konradlorenz.kapp.map.domain.Door;
 import co.edu.konradlorenz.kapp.map.domain.Floor;
+import co.edu.konradlorenz.kapp.map.domain.GeoPoint;
+import co.edu.konradlorenz.kapp.map.domain.Placement;
 import co.edu.konradlorenz.kapp.map.domain.Point;
 import co.edu.konradlorenz.kapp.map.domain.Shape;
 import co.edu.konradlorenz.kapp.map.domain.SpaceDocument;
@@ -12,6 +14,8 @@ import co.edu.konradlorenz.kapp.map.domain.SpaceTypeDocument;
 import co.edu.konradlorenz.kapp.map.domain.Wing;
 import co.edu.konradlorenz.kapp.map.web.dto.BoundsDto;
 import co.edu.konradlorenz.kapp.map.web.dto.BuildingResponse;
+import co.edu.konradlorenz.kapp.map.web.dto.GeoPointDto;
+import co.edu.konradlorenz.kapp.map.web.dto.PlacementDto;
 import co.edu.konradlorenz.kapp.map.web.dto.BuildingSummaryResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.CorridorDto;
 import co.edu.konradlorenz.kapp.map.web.dto.DoorDto;
@@ -85,7 +89,20 @@ public final class MapMapper {
                 building.description(),
                 building.aliases(),
                 building.wings().stream().map(MapMapper::toWingDto).toList(),
-                building.floors().stream().map(MapMapper::toFloorDto).toList());
+                building.floors().stream().map(MapMapper::toFloorDto).toList(),
+                toPlacementDto(building.placement()));
+    }
+
+    public static PlacementDto toPlacementDto(Placement placement) {
+        return placement == null ? null : new PlacementDto(
+                new GeoPointDto(placement.origin().lat(), placement.origin().lon()),
+                placement.bearing(), placement.metresPerUnit());
+    }
+
+    /** The placement a request asks for, or the stored one when it names none. */
+    public static Placement toPlacement(PlacementDto dto, Placement stored) {
+        return dto == null ? stored : new Placement(
+                new GeoPoint(dto.origin().lat(), dto.origin().lon()), dto.bearing(), dto.metresPerUnit());
     }
 
     public static BuildingSummaryResponse toBuildingSummary(BuildingDocument building) {

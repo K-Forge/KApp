@@ -51,7 +51,8 @@ import static org.springframework.data.mongodb.core.query.Query.query;
  *   <li>A replaced space keeps its id: the snapshot's version of a room is the same room.</li>
  *   <li>The building's own name, description and other names are taken from the snapshot only
  *       if the building was never edited either. Wings the snapshot declares and the building
- *       lacks are always added, since the snapshot's spaces may be in them.</li>
+ *       lacks are always added, since the snapshot's spaces may be in them. Its placement on the
+ *       ground is taken from the snapshot too when it was never edited, or never laid.</li>
  * </ul>
  *
  * <p>Nothing it writes counts as an edit: floors stay at version 0 and spaces keep
@@ -225,7 +226,8 @@ public class V007_TracedCampus {
                 buildingUntouched ? surveyed.description() : stored.description(),
                 buildingUntouched ? surveyed.aliases() : stored.aliases(),
                 List.copyOf(wings.values()), List.copyOf(floors.values()),
-                false, stored.createdAt(), stored.updatedAt());
+                false, stored.createdAt(), stored.updatedAt(),
+                buildingUntouched || stored.placement() == null ? surveyed.toPlacement() : stored.placement());
         mongo.save(merged);
         removals.forEach(mongo::remove);
         // Written after the building, so a space's wing is always one its building declares.
@@ -239,7 +241,7 @@ public class V007_TracedCampus {
         SpaceDocument document(BuildingDocument stored, Map<String, Wing> wings) {
             BuildingDocument withWings = new BuildingDocument(stored.id(), stored.code(), stored.name(),
                     stored.campus(), stored.description(), stored.aliases(), List.copyOf(wings.values()),
-                    stored.floors(), false, stored.createdAt(), stored.updatedAt());
+                    stored.floors(), false, stored.createdAt(), stored.updatedAt(), stored.placement());
             return SpaceService.toDocument(space, withWings, floor, id, false, created, created);
         }
     }

@@ -44,8 +44,17 @@ public record BuildingRequest(
 
         @Schema(description = "The complete list of floors. At least one.")
         @NotNull @NotEmpty
-        List<@NotNull @Valid FloorDto> floors
+        List<@NotNull @Valid FloorDto> floors,
+        @Schema(description = "Where the building's drawing lies on the ground. Omitted on PUT, the stored "
+                + "one is kept.")
+        @Valid PlacementDto placement
 ) {
+    /** A request that leaves the building's placement as it is. */
+    public BuildingRequest(String code, String name, String campus, String description, List<String> aliases,
+                           List<WingDto> wings, List<FloorDto> floors) {
+        this(code, name, campus, description, aliases, wings, floors, null);
+    }
+
 
     public List<String> aliasesOrEmpty() {
         return aliases == null ? List.of() : aliases;

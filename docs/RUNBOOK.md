@@ -434,6 +434,16 @@ from the campus survey — every floor undrawn, every space waiting in the edito
 loads whatever is committed and saves every floor back through the floor editor's endpoint, so a
 snapshot the editor would refuse fails the build rather than the next database.
 
+The streets around the campus are not drawn by hand: they are the city's. To refresh them, or to
+take in a building further out, cut them again from Bogotá's reference map (IDECA, CC BY 4.0):
+
+```bash
+scripts/map-ground.py --radius 350
+```
+
+It rewrites `map-service/src/main/resources/db/ground/sede-principal.json`, which the service
+serves as `GET /api/map/campuses/{campus}/ground`.
+
 ---
 
 ## Pointing at Atlas

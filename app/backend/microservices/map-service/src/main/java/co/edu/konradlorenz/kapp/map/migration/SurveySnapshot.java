@@ -5,9 +5,11 @@ import co.edu.konradlorenz.kapp.map.domain.Compass;
 import co.edu.konradlorenz.kapp.map.domain.BuildingDocument;
 import co.edu.konradlorenz.kapp.map.domain.Floor;
 import co.edu.konradlorenz.kapp.map.domain.FloorStatus;
+import co.edu.konradlorenz.kapp.map.domain.Placement;
 import co.edu.konradlorenz.kapp.map.service.MapMapper;
 import co.edu.konradlorenz.kapp.map.web.dto.CorridorDto;
 import co.edu.konradlorenz.kapp.map.web.dto.LayoutSpaceDto;
+import co.edu.konradlorenz.kapp.map.web.dto.PlacementDto;
 import co.edu.konradlorenz.kapp.map.web.dto.PointDto;
 import co.edu.konradlorenz.kapp.map.web.dto.WingDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,7 +54,8 @@ public final class SurveySnapshot {
             String description,
             List<String> aliases,
             List<WingDto> wings,
-            List<SnapshotFloor> floors
+            List<SnapshotFloor> floors,
+            PlacementDto placement
     ) {
         public Building {
             aliases = aliases == null ? List.of() : List.copyOf(aliases);
@@ -64,7 +67,12 @@ public final class SurveySnapshot {
         public BuildingDocument toDocument(Instant now) {
             return new BuildingDocument(UUID.randomUUID().toString(), code, name, campus, description,
                     aliases, wings.stream().map(MapMapper::toWing).toList(),
-                    floors.stream().map(SnapshotFloor::toFloor).toList(), false, now, now);
+                    floors.stream().map(SnapshotFloor::toFloor).toList(), false, now, now, toPlacement());
+        }
+
+        /** Where the snapshot lays the building on the ground, or null. */
+        public Placement toPlacement() {
+            return MapMapper.toPlacement(placement, null);
         }
     }
 

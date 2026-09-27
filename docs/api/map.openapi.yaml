@@ -2,16 +2,17 @@ openapi: 3.1.0
 
 info:
   title: KApp Map API
-  version: 3.0.0
+  version: 3.1.0
   summary: Schematic campus map and space search for Fundacion Universitaria Konrad Lorenz.
   description: |
     Digital campus map for Fundacion Universitaria Konrad Lorenz (Bogota, Colombia).
 
     ## What this service is (and is not)
 
-    This map is deliberately **not** geospatial. There is no basemap, no GPS, no external map
-    provider and no latitude/longitude anywhere in this contract. It is not a set of floor plan
-    images either: a floor is described as data and drawn by the client.
+    This map is **not** a geospatial service. There is no basemap, no GPS and no external map
+    provider, and a floor is never positioned by coordinates: it is a drawing, described as data
+    and drawn by the client, not a set of floor plan images either. What version 3.1 adds is the
+    ground a campus stands on - see below.
 
     ## Version 2: what the campus survey changed
 
@@ -42,6 +43,26 @@ info:
     | A space is `gridRow`, `gridColumn`, `rowSpan`, `colSpan` | A space is a **`shape`**: the corners of its outline, in order |
     | Corridors through cell centres (`row`, `col`) | Corridors through points (`x`, `y`) |
     | - | Each space's **`doors`**, as stretches of its outline |
+
+    ## Version 3.1: the ground under the buildings
+
+    The plans on the walls draw each building's streets, but not to scale, and a campus spread
+    over several blocks had no map at all. Version 3.1 lays the drawings on the ground, without
+    changing them:
+
+    - A building may carry a **`placement`**: where its drawing's top-left corner is, the
+      **`bearing`** its top edge faces and how many **`metresPerUnit`** one unit of it is. Every
+      floor of a building shares one drawing, so one placement lays them all.
+    - **`GET /api/map/campuses/{campus}/ground`** returns the city around a campus - its
+      **blocks**, **sidewalks**, **roadways**, **medians** and named **streets** - cut from the
+      city's own reference map and shipped with the service. It is reference data, credited in
+      its `source`, and read-only.
+
+    With both, a client draws the block, the sidewalk and the streets a building meets under any
+    of its floors, or every placed building of a campus on one aerial map. For a point `(x, y)`
+    of a drawing, the offset from `origin` is `east = m (x cos b - y sin b)` and
+    `north = -m (x sin b + y cos b)`, with `m = metresPerUnit` and `b = bearing`; a campus is
+    small enough for the plane through its middle to stand in for the earth.
 
     ## Coordinate model
 
@@ -127,7 +148,7 @@ tags:
   - name: Space types
     description: The catalogue of kinds of space, each in a fixed category.
   - name: Campuses
-    description: The list of campuses (Sedes) known to the map.
+    description: The list of campuses (Sedes) known to the map, and the ground around each.
 
 paths:
   /api/map/buildings:
@@ -696,6 +717,47 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
+  /api/map/campuses/{campus}/ground:
+
+    get:
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      operationId: getCampusGround
+      summary: The ground around a campus
+      description: |
+        The city around a campus - its blocks, sidewalks, roadways, medians and named streets -
+        from the city's reference map, for drawing under the buildings. Coordinates are
+        `[lon, lat]` in WGS 84; lay a building's drawing on them with its `placement`. The campus
+        name matches ignoring case and accents. `404` for a campus with no ground yet.
+
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+      tags: [Campuses]
+      parameters:
+        - name: campus
+          in: path
+          required: true
+          schema: { type: string, maxLength: 120 }
+          example: Sede Principal
+      responses:
+        '200':
+          description: The ground.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ground' }
+              example:
+                campus: Sede Principal
+                source: 'Mapa de Referencia para Bogotá D.C., IDECA - UAECD, IDU y otras entidades. CC BY 4.0.'
+                retrieved: '2026-09-27'
+                blocks:
+                  - [[-74.0612, 4.6485], [-74.0616, 4.6489], [-74.0619, 4.6486], [-74.0612, 4.6485]]
+                sidewalks: []
+                roadways: []
+                medians: []
+                streets:
+                  - { name: Calle 63, label: CL 63, path: [[-74.0617, 4.6491], [-74.0611, 4.6486]] }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -818,6 +880,89 @@ components:
         drawing a quarter turn clockwise brings what was on its left to the top.
       example: EAST
 
+    GeoPoint:
+      type: object
+      description: A point on the earth, in degrees of WGS 84.
+      required: [lat, lon]
+      properties:
+        lat: { type: number, minimum: -90, maximum: 90, example: 4.6485322 }
+        lon: { type: number, minimum: -180, maximum: 180, example: -74.0611553 }
+
+    Placement:
+      type: object
+      description: |
+        Where a building's drawing lies on the ground: its top-left corner, the bearing its top
+        edge faces and how long one unit of it is. Its floors' `top` is the same bearing to the
+        nearest quarter turn.
+      required: [origin, bearing, metresPerUnit]
+      properties:
+        origin: { $ref: '#/components/schemas/GeoPoint' }
+        bearing:
+          type: number
+          minimum: 0
+          exclusiveMaximum: 360
+          description: Degrees clockwise from true north that the drawing's top edge faces.
+          example: 127.8
+        metresPerUnit:
+          type: number
+          exclusiveMinimum: 0
+          description: How long one unit of the drawing is on the ground, in metres.
+          example: 0.02951
+
+    Coordinate:
+      type: array
+      description: A point as GeoJSON writes it, `[lon, lat]`.
+      minItems: 2
+      maxItems: 2
+      items: { type: number }
+      example: [-74.0615, 4.6486]
+
+    Ring:
+      type: array
+      description: The outline of an area, closed - its first point repeated at the end.
+      minItems: 4
+      items: { $ref: '#/components/schemas/Coordinate' }
+
+    Street:
+      type: object
+      required: [name, label, path]
+      properties:
+        name: { type: string, example: Carrera 9 Bis }
+        label: { type: string, description: The name as the street signs abbreviate it., example: KR 9BIS }
+        path:
+          type: array
+          description: The street's axis.
+          minItems: 2
+          items: { $ref: '#/components/schemas/Coordinate' }
+
+    Ground:
+      type: object
+      description: The city around a campus, from the city's reference map.
+      required: [campus, source, retrieved, blocks, sidewalks, roadways, medians, streets]
+      properties:
+        campus: { type: string, example: Sede Principal }
+        source: { type: string, description: Where the data comes from, to credit wherever it is shown. }
+        retrieved: { type: string, format: date, description: The day it was taken from the source. }
+        blocks:
+          type: array
+          description: The city blocks (manzanas) - where private land meets the sidewalk.
+          items: { $ref: '#/components/schemas/Ring' }
+        sidewalks:
+          type: array
+          description: The sidewalks (andenes).
+          items: { $ref: '#/components/schemas/Ring' }
+        roadways:
+          type: array
+          description: The roadways (calzadas), where cars go.
+          items: { $ref: '#/components/schemas/Ring' }
+        medians:
+          type: array
+          description: The medians (separadores) between roadways.
+          items: { $ref: '#/components/schemas/Ring' }
+        streets:
+          type: array
+          items: { $ref: '#/components/schemas/Street' }
+
     Bounds:
       type: object
       description: The rectangle around a shape, in the floor's units.
@@ -935,6 +1080,9 @@ components:
           type: array
           description: Ordered by ascending level.
           items: { $ref: '#/components/schemas/Floor' }
+        placement:
+          $ref: '#/components/schemas/Placement'
+          description: Where the building's drawing lies on the ground. Absent until somebody lays it.
 
     BuildingSummary:
       type: object
@@ -971,6 +1119,9 @@ components:
           type: array
           minItems: 1
           items: { $ref: '#/components/schemas/Floor' }
+        placement:
+          $ref: '#/components/schemas/Placement'
+          description: Where the building's drawing lies on the ground. Omitted on `PUT`, the stored one is kept.
 
     Space:
       type: object

@@ -100,7 +100,8 @@ public class BuildingService {
                 request.floors().stream().map(floor -> MapMapper.toFloor(floor, null)).toList(),
                 false,
                 now,
-                now));
+                now,
+                MapMapper.toPlacement(request.placement(), null)));
 
         log.info("Created building {} on campus {} with {} floors",
                 saved.code(), saved.campus(), saved.floors().size());
@@ -145,7 +146,8 @@ public class BuildingService {
                 floors,
                 existing.placeholder(),
                 existing.createdAt(),
-                Instant.now()));
+                Instant.now(),
+                MapMapper.toPlacement(request.placement(), existing.placement())));
 
         propagateToSpaces(saved);
         return MapMapper.toBuildingResponse(saved);
