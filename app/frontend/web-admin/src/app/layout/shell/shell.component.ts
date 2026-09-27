@@ -195,33 +195,6 @@ const NAV_GROUPS: NavGroup[] = [
        A tinted band rather than another white strip. The three institutional
        hues run along the bottom edge as a hairline, which is where the brand
        belongs in a tool: present, not shouting. */
-    /*
-     * Off-screen until focused, then pinned over the header. Not display:none - that would
-     * take it out of the tab order, which is the one thing it exists for.
-     */
-    .skip-link {
-      /* fixed, not absolute: it must sit over the header wherever the shell is scrolled to,
-         and it does not depend on an ancestor happening to be positioned. */
-      position: fixed;
-      left: 0.5rem;
-      top: -3rem;
-      z-index: 100;
-      padding: 0.5rem 0.85rem;
-      background: var(--bg-elevated);
-      color: var(--text);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-sm);
-      font-size: 0.8125rem;
-      text-decoration: none;
-      transition: top var(--transition-fast);
-    }
-    /* :focus, not :focus-visible. A skip link is only ever reached by keyboard, and
-       :focus-visible is a heuristic that does not fire when focus is moved by script - which
-       would leave the element focused and invisible, the worst of both. */
-    .skip-link:focus {
-      top: 0.5rem;
-    }
-
     .shell-header {
       display: flex;
       align-items: center;
@@ -478,9 +451,10 @@ const NAV_GROUPS: NavGroup[] = [
         visibility: hidden;
       }
     }
-    @media (min-width: 721px) and (prefers-reduced-motion: no-preference) {
+    /* One transition for both: the wide screen slides the margin, the phone the drawer. */
+    @media (prefers-reduced-motion: no-preference) {
       .shell-nav {
-        transition: margin-left 180ms ease, visibility 180ms;
+        transition: margin-left 180ms ease, transform 200ms ease, visibility 200ms;
       }
     }
 
@@ -531,11 +505,6 @@ const NAV_GROUPS: NavGroup[] = [
       .icon-btn-label,
       .brand-sub {
         display: none;
-      }
-    }
-    @media (max-width: 720px) and (prefers-reduced-motion: no-preference) {
-      .shell-nav {
-        transition: transform 200ms ease, visibility 200ms;
       }
     }
     /* The mark alone says whose portal this is; the name gives its room to the countdown. */

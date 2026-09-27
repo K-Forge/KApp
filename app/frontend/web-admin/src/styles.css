@@ -585,6 +585,35 @@ dialog::backdrop {
 /* ---------------------------------------------------------------------------------------------
  * Utility
  * ------------------------------------------------------------------------------------------- */
+
+/*
+ * The shell's first stop in the tab order: off-screen until focused, then pinned over the header.
+ * Not display:none - that would take it out of the tab order, which is the one thing it exists
+ * for. Here rather than in the shell's own styles, which it pushed over their budget.
+ */
+.skip-link {
+  /* fixed, not absolute: it must sit over the header wherever the shell is scrolled to,
+     and it does not depend on an ancestor happening to be positioned. */
+  position: fixed;
+  left: 0.5rem;
+  top: -3rem;
+  z-index: 100;
+  padding: 0.5rem 0.85rem;
+  background: var(--bg-elevated);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  text-decoration: none;
+  transition: top var(--transition-fast);
+}
+/* :focus, not :focus-visible. A skip link is only ever reached by keyboard, and
+   :focus-visible is a heuristic that does not fire when focus is moved by script - which
+   would leave the element focused and invisible, the worst of both. */
+.skip-link:focus {
+  top: 0.5rem;
+}
+
 .text-muted {
   color: var(--text-muted);
 }
