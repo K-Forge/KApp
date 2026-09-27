@@ -85,6 +85,9 @@ let uid = 0;
             @for (d of g.sidewalks; track $index) {
               <path class="sidewalk" [attr.d]="d" />
             }
+            @for (part of g.footprint; track $index) {
+              <path class="footprint" [class.reaches]="part.reaches" [attr.d]="part.d" />
+            }
             @for (street of g.labels; track $index) {
               <text
                 class="street"
@@ -221,6 +224,20 @@ let uid = 0;
       stroke: color-mix(in srgb, var(--text) 22%, transparent);
       stroke-width: 0.75;
       vector-effect: non-scaling-stroke;
+    }
+    /* The building as the cadastre has it: solid where it rises to this floor, dashed where it
+       does not, so a drawing that strays from the real walls shows it. */
+    .footprint {
+      fill: none;
+      stroke: color-mix(in srgb, var(--nav-active-edge) 50%, transparent);
+      stroke-width: 1.5;
+      stroke-dasharray: 5 4;
+      vector-effect: non-scaling-stroke;
+    }
+    .footprint.reaches {
+      fill: color-mix(in srgb, var(--nav-active-edge) 7%, transparent);
+      stroke: var(--nav-active-edge);
+      stroke-dasharray: none;
     }
     .street {
       fill: color-mix(in srgb, var(--text) 72%, transparent);
@@ -387,6 +404,7 @@ export class FloorPlanComponent {
       sidewalks: around.sidewalks.map(areaPath),
       roadways: around.roadways.map(areaPath),
       medians: around.medians.map(areaPath),
+      footprint: around.footprint.map((part) => ({ d: areaPath(part.outline), reaches: part.reaches })),
       labels,
     };
   });

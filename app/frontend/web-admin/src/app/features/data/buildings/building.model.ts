@@ -87,6 +87,18 @@ export interface Placement {
   metresPerUnit: number;
 }
 
+/**
+ * Mirrors FootprintPart: one part of a building as the city's cadastre records it from above - its
+ * outline as `[lon, lat]` points, how many floors it rises and, when known, its wing.
+ */
+export interface FootprintPart {
+  lot?: string | null;
+  floors: number;
+  basements: number;
+  wing?: string | null;
+  ring: [number, number][];
+}
+
 /** Mirrors Building in docs/api/map.openapi.yaml. */
 export interface Building {
   id: string;
@@ -99,6 +111,8 @@ export interface Building {
   floors: Floor[];
   /** Absent until somebody lays the building on the ground. */
   placement?: Placement | null;
+  /** The building from above, part by part; empty until taken from the cadastre. */
+  footprint?: FootprintPart[];
 }
 
 /** Mirrors BuildingRequest - the create/update payload. `id` is server-generated. */

@@ -1,5 +1,5 @@
 import type { Placement } from '../buildings/building.model';
-import { drawingToGround, groundToDrawing, nearestQuarter, placementForFloor, streetLabel, toMetres } from './ground';
+import { drawingToGround, groundToDrawing, nearestQuarter, placementForFloor, reaches, streetLabel, toMetres } from './ground';
 
 // The Edificio Central as its seed lays it: top toward the Carrera 9 Bis, 34 units a metre.
 const EC: Placement = { origin: { lat: 4.6485371, lon: -74.0611566 }, bearing: 127, metresPerUnit: 0.02927 };
@@ -57,5 +57,16 @@ describe('ground', () => {
     const at = streetLabel([{ x: 100, y: 10 }, { x: 0, y: 10 }, { x: -500, y: 10 }], { x: 0, y: 0, width: 200, height: 100 }, 20);
     expect(at).toEqual({ x: 50, y: 10, angle: 0 });
     expect(streetLabel([{ x: 0, y: 0 }, { x: 5, y: 0 }], { x: 0, y: 0, width: 200, height: 100 }, 20)).toBeNull();
+  });
+
+  // A part of the building from above is drawn solid on the floors it rises to, and dashed on the
+  // ones above it: an eight-floor core reaches P8, a two-floor base does not reach P3, and only a
+  // part with basements reaches below the street.
+  it('knows which floors a part of the building reaches', () => {
+    expect(reaches({ floors: 8, basements: 2 }, 8)).toBe(true);
+    expect(reaches({ floors: 2, basements: 0 }, 3)).toBe(false);
+    expect(reaches({ floors: 2, basements: 0 }, 1.5)).toBe(true);
+    expect(reaches({ floors: 5, basements: 0 }, -1)).toBe(false);
+    expect(reaches({ floors: 0, basements: 2 }, -2)).toBe(true);
   });
 });

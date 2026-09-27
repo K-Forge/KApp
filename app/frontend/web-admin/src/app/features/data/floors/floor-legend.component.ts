@@ -99,6 +99,18 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
               </svg>
               Street
             </li>
+            <li>
+              <svg viewBox="0 0 28 18" aria-hidden="true">
+                <rect class="cadastre reaches" x="2" y="2" width="24" height="14" />
+              </svg>
+              The building on this floor, per the cadastre
+            </li>
+            <li>
+              <svg viewBox="0 0 28 18" aria-hidden="true">
+                <rect class="cadastre" x="2" y="2" width="24" height="14" />
+              </svg>
+              Parts of it that stop below this floor
+            </li>
           }
         </ul>
         @if (groundSource(); as source) {
@@ -246,6 +258,17 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
     }
     .roadway {
       fill: color-mix(in srgb, var(--text) 16%, var(--bg-elevated));
+    }
+    .cadastre {
+      fill: none;
+      stroke: color-mix(in srgb, var(--nav-active-edge) 50%, transparent);
+      stroke-width: 1.5;
+      stroke-dasharray: 3 2;
+    }
+    .cadastre.reaches {
+      fill: color-mix(in srgb, var(--nav-active-edge) 7%, transparent);
+      stroke: var(--nav-active-edge);
+      stroke-dasharray: none;
     }
     .credit {
       margin: 0.5rem 0 0;

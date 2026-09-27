@@ -765,7 +765,9 @@ export class FloorEditorPage {
     const view = this.view();
     const ground = this.groundData();
     const placement = this.floorPlacement();
-    return view && ground && placement ? surroundings(ground, placement, view) : null;
+    return view && ground && placement
+      ? surroundings(ground, placement, view, this.buildingDoc()?.footprint ?? [], this.detail()?.level ?? 1)
+      : null;
   });
 
   /** Screen pixels per unit: the plan fitted to the width it has, then zoomed. */

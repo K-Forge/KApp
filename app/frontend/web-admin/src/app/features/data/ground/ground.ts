@@ -1,4 +1,4 @@
-import type { Compass, GeoPoint, Placement, Point } from '../buildings/building.model';
+import type { Compass, FootprintPart, GeoPoint, Placement, Point } from '../buildings/building.model';
 import type { Coordinate, Ground } from './ground.model';
 
 /**
@@ -31,6 +31,13 @@ export interface Surroundings {
   roadways: Point[][];
   medians: Point[][];
   streets: { name: string; label: string; path: Point[] }[];
+  /** The building's own parts from above; `reaches` when the part rises to the floor drawn. */
+  footprint: { outline: Point[]; reaches: boolean }[];
+}
+
+/** Whether a part of `floors` floors and `basements` basements reaches the floor at `level`. */
+export function reaches(part: Pick<FootprintPart, 'floors' | 'basements'>, level: number): boolean {
+  return level >= 0 ? part.floors >= Math.max(1, Math.ceil(level)) : part.basements >= -Math.floor(level);
 }
 
 /** Metres east and north of `origin`. */
@@ -97,8 +104,14 @@ export function placementForFloor(building: Placement, top: Compass | null | und
   return placement;
 }
 
-/** The part of the ground within `view`, in the drawing's units. */
-export function surroundings(ground: Ground, placement: Placement, view: Box): Surroundings {
+/** The part of the ground within `view`, in the drawing's units, and the building's own parts. */
+export function surroundings(
+  ground: Ground,
+  placement: Placement,
+  view: Box,
+  footprint: readonly FootprintPart[] = [],
+  level = 1,
+): Surroundings {
   const toDrawing = (ring: Coordinate[]) => ring.map((c) => groundToDrawing(placement, c));
   const within = (points: Point[]) => {
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -116,6 +129,7 @@ export function surroundings(ground: Ground, placement: Placement, view: Box): S
     streets: ground.streets
       .map((s) => ({ name: s.name, label: s.label, path: toDrawing(s.path) }))
       .filter((s) => within(s.path)),
+    footprint: footprint.map((part) => ({ outline: toDrawing(part.ring), reaches: reaches(part, level) })),
   };
 }
 
