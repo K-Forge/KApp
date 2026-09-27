@@ -449,7 +449,7 @@ const NAV_GROUPS: NavGroup[] = [
     .nav-link.active {
       background: var(--nav-active-bg);
       color: var(--nav-active-text);
-      border-left-color: var(--brand-teal);
+      border-left-color: var(--nav-active-edge);
       font-weight: 600;
     }
     .nav-link.active:hover {
@@ -511,7 +511,7 @@ const NAV_GROUPS: NavGroup[] = [
         position: fixed;
         inset: 0;
         z-index: 55;
-        background: rgb(10 15 14 / 0.45);
+        background: var(--scrim);
       }
       .shell-content {
         padding: 1rem;
