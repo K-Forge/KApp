@@ -7,6 +7,44 @@
     "Medio Universitario"
   ],
   "wings": [],
+  "placement": {
+    "origin": {
+      "lat": 4.6479425,
+      "lon": -74.061666
+    },
+    "bearing": 76.0,
+    "metresPerUnit": 0.01118
+  },
+  "footprint": [
+    {
+      "lot": "008213025008",
+      "floors": 3,
+      "basements": 0,
+      "ring": [
+        [-74.0616302, 4.6478217],
+        [-74.0616316, 4.6478275],
+        [-74.0616584, 4.6479366],
+        [-74.0617139, 4.6479225],
+        [-74.0617118, 4.6479138],
+        [-74.0616854, 4.6478076],
+        [-74.0616302, 4.6478217]
+      ]
+    },
+    {
+      "lot": "008213025008",
+      "floors": 1,
+      "basements": 0,
+      "ring": [
+        [-74.06165, 4.6477735],
+        [-74.0616247, 4.6477993],
+        [-74.0616302, 4.6478217],
+        [-74.0616854, 4.6478076],
+        [-74.061678, 4.6477779],
+        [-74.0616715, 4.6477516],
+        [-74.06165, 4.6477735]
+      ]
+    }
+  ],
   "floors": [
     {
       "code": "P0",
@@ -17,6 +55,7 @@
       "note": "A nivel de la calle: lo primero que se ve al entrar.",
       "width": 1830,
       "height": 500,
+      "top": "EAST",
       "outline": [],
       "spaces": [
         {
@@ -625,6 +664,7 @@
       "note": "Se sube por la escalera exterior, del lado oeste.",
       "width": 1830,
       "height": 500,
+      "top": "EAST",
       "outline": [],
       "spaces": [
         {
@@ -1260,6 +1300,7 @@
       "accessibility": "UNKNOWN",
       "width": 1830,
       "height": 500,
+      "top": "EAST",
       "outline": [],
       "spaces": [
         {

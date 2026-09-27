@@ -1,0 +1,71 @@
+{
+  "code": "RH",
+  "name": "Edificio de Recursos Humanos",
+  "campus": "Sede Principal",
+  "description": "Casa de patrimonio sobre la Carrera 9A, junto al Edificio Central y sin conexión interna con él. La web de la universidad ubica ahí al Departamento de Talento Humano (Cra. 9A # 62-12), aunque las placas del Edificio Administrativo también listan dependencias de Recursos Humanos. Sin visitar.",
+  "aliases": [
+    "Casa de Francisco de Paula Vélez",
+    "Talento Humano",
+    "Recursos Humanos"
+  ],
+  "wings": [],
+  "placement": {
+    "origin": {
+      "lat": 4.648591,
+      "lon": -74.0618616
+    },
+    "bearing": 37.6,
+    "metresPerUnit": 0.03333
+  },
+  "footprint": [
+    {
+      "lot": "008213024004",
+      "floors": 1,
+      "basements": 0,
+      "ring": [
+        [-74.0619278, 4.6484731],
+        [-74.0619771, 4.6484108],
+        [-74.0619588, 4.6483962],
+        [-74.0619498, 4.6484075],
+        [-74.0618002, 4.6482883],
+        [-74.0618097, 4.6482774],
+        [-74.0617927, 4.6482656],
+        [-74.0617927, 4.6482655],
+        [-74.0617845, 4.6482598],
+        [-74.0617656, 4.6482751],
+        [-74.0617726, 4.6482808],
+        [-74.0617705, 4.6482834],
+        [-74.0617704, 4.6482836],
+        [-74.0617048, 4.6483664],
+        [-74.0616879, 4.6483529],
+        [-74.0617062, 4.6483369],
+        [-74.0617053, 4.648336],
+        [-74.0617053, 4.648336],
+        [-74.0616982, 4.6483296],
+        [-74.0616455, 4.648372],
+        [-74.061628, 4.6483862],
+        [-74.0616353, 4.648392],
+        [-74.0616354, 4.648392],
+        [-74.0617329, 4.6484687],
+        [-74.0617483, 4.6484499],
+        [-74.0617249, 4.6484315],
+        [-74.0617832, 4.6483578],
+        [-74.0619278, 4.6484731]
+      ]
+    }
+  ],
+  "floors": [
+    {
+      "code": "P1",
+      "level": 1,
+      "name": "Piso 1",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "width": 1091,
+      "height": 779,
+      "top": "NORTH",
+      "outline": [],
+      "spaces": []
+    }
+  ]
+}

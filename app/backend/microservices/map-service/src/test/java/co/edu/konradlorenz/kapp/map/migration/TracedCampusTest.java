@@ -99,6 +99,21 @@ class TracedCampusTest {
         assertThat(central.placement().bearing()).isBetween(90.0, 180.0);
         assertThat(central.placement().origin().lat()).isBetween(4.64, 4.66);
         assertThat(central.placement().origin().lon()).isBetween(-74.07, -74.05);
+        // Its three wings, told apart from above: the five floors along the Calle 63 are the north
+        // wing, the eight-floor core the central one.
+        assertThat(central.footprint()).anyMatch(p -> p.floors() == 5 && "N".equals(p.wing()));
+        assertThat(central.footprint()).anyMatch(p -> p.floors() == 8 && "C".equals(p.wing()));
+        assertThat(central.footprint()).anyMatch(p -> "S".equals(p.wing()));
+    }
+
+    @Test
+    @DisplayName("every building of the campus is on the ground, the ones nobody has drawn yet included")
+    void everyBuildingIsOnTheGround() {
+        for (SurveySnapshot.Building surveyed : SNAPSHOT) {
+            BuildingDocument stored = mongo.findOne(query(where("code").is(surveyed.code())), BuildingDocument.class);
+            assertThat(stored.placement()).as(surveyed.code()).isNotNull();
+            assertThat(stored.footprint()).as(surveyed.code()).isNotEmpty();
+        }
     }
 
     @Test
