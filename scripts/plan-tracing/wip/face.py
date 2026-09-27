@@ -16,6 +16,8 @@ def hit(x, y, colour=None):
     colour = colour or COLOUR
     if colour == 'green':
         return g > r + 30 and g > b + 20
+    if colour == 'red':
+        return r > g + 60 and r > b + 40 and r > 110
     if colour == 'blueline':
         return b >= r + 10 and g > r + 15 and r < 125
     if colour == 'lightblue':
