@@ -67,7 +67,7 @@ def building_file(building, floors):
     for floor in sorted(floors, key=lambda f: f["level"]):
         f = pick(floor, ["code"])
         f["level"] = number(floor["level"])
-        f.update(pick(floor, ["name", "status", "accessibility", "note", "width", "height", "outline"]))
+        f.update(pick(floor, ["name", "status", "accessibility", "note", "width", "height", "top", "outline"]))
         if present(floor.get("corridors")):
             f["corridors"] = [pick(c, ["code", "name", "color", "path"]) for c in floor["corridors"]]
         f["spaces"] = [
