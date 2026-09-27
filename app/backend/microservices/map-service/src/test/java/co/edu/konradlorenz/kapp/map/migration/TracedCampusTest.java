@@ -117,6 +117,7 @@ class TracedCampusTest {
             assertThat(stored.placeholder()).isFalse();
             assertThat(stored.aliases()).containsExactlyElementsOf(surveyed.aliases());
             assertThat(stored.placement()).as(surveyed.code() + " on the ground").isEqualTo(surveyed.toPlacement());
+            assertThat(stored.footprint()).as(surveyed.code() + " from above").isEqualTo(surveyed.toFootprint());
             assertThat(stored.floors()).extracting(Floor::code)
                     .containsExactlyInAnyOrderElementsOf(surveyed.floors().stream().map(SurveySnapshot.SnapshotFloor::code).toList());
 

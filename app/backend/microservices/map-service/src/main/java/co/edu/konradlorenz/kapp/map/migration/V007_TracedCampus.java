@@ -52,7 +52,8 @@ import static org.springframework.data.mongodb.core.query.Query.query;
  *   <li>The building's own name, description and other names are taken from the snapshot only
  *       if the building was never edited either. Wings the snapshot declares and the building
  *       lacks are always added, since the snapshot's spaces may be in them. Its placement on the
- *       ground is taken from the snapshot too when it was never edited, or never laid.</li>
+ *       ground and its footprint are taken from the snapshot too when it was never edited, or
+ *       never had them.</li>
  * </ul>
  *
  * <p>Nothing it writes counts as an edit: floors stay at version 0 and spaces keep
@@ -227,7 +228,8 @@ public class V007_TracedCampus {
                 buildingUntouched ? surveyed.aliases() : stored.aliases(),
                 List.copyOf(wings.values()), List.copyOf(floors.values()),
                 false, stored.createdAt(), stored.updatedAt(),
-                buildingUntouched || stored.placement() == null ? surveyed.toPlacement() : stored.placement());
+                buildingUntouched || stored.placement() == null ? surveyed.toPlacement() : stored.placement(),
+                buildingUntouched || stored.footprint().isEmpty() ? surveyed.toFootprint() : stored.footprint());
         mongo.save(merged);
         removals.forEach(mongo::remove);
         // Written after the building, so a space's wing is always one its building declares.
@@ -241,7 +243,8 @@ public class V007_TracedCampus {
         SpaceDocument document(BuildingDocument stored, Map<String, Wing> wings) {
             BuildingDocument withWings = new BuildingDocument(stored.id(), stored.code(), stored.name(),
                     stored.campus(), stored.description(), stored.aliases(), List.copyOf(wings.values()),
-                    stored.floors(), false, stored.createdAt(), stored.updatedAt(), stored.placement());
+                    stored.floors(), false, stored.createdAt(), stored.updatedAt(), stored.placement(),
+                    stored.footprint());
             return SpaceService.toDocument(space, withWings, floor, id, false, created, created);
         }
     }

@@ -23,6 +23,7 @@ import argparse
 import getpass
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.parse
@@ -60,11 +61,20 @@ def number(value):
     return int(value) if float(value).is_integer() else value
 
 
+def snapshot_json(data):
+    """Two spaces of indent, as every snapshot file is, but a [lon, lat] pair on one line: an
+    outline of forty corners is forty lines to review, not a hundred and sixty."""
+    text = json.dumps(data, ensure_ascii=False, indent=2)
+    return re.sub(r"\[\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)\s*\]", r"[\1, \2]", text) + "\n"
+
+
 def building_file(building, floors):
     out = pick(building, ["code", "name", "campus", "description", "aliases"], always=["aliases"])
     out["wings"] = [pick(w, ["code", "name", "doorSuffix", "note"]) for w in building.get("wings", [])]
     if present(building.get("placement")):
         out["placement"] = building["placement"]
+    if present(building.get("footprint")):
+        out["footprint"] = [pick(p, ["lot", "floors", "basements", "wing", "ring"]) for p in building["footprint"]]
     out["floors"] = []
     for floor in sorted(floors, key=lambda f: f["level"]):
         f = pick(floor, ["code"])
@@ -103,8 +113,7 @@ def main():
                   for f in building.get("floors", [])]
         name = code.lower() + ".json"
         with open(os.path.join(args.out, name), "w", encoding="utf-8") as out:
-            json.dump(building_file(building, floors), out, ensure_ascii=False, indent=2)
-            out.write("\n")
+            out.write(snapshot_json(building_file(building, floors)))
         written.add(name)
         placed = sum(1 for f in floors for s in f.get("spaces", []) if s.get("shape"))
         total = sum(len(f.get("spaces", [])) for f in floors)

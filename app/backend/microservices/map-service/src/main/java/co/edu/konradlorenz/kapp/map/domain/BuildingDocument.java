@@ -29,6 +29,8 @@ import java.util.Optional;
  * @param floors  ordered by ascending level by the constructor, so readers never have to
  *                sort and the API's "ordered by ascending level" promise cannot drift
  * @param placement where the building's drawing lies on the ground; null until somebody lays it
+ * @param footprint the building from above, part by part, as the city's cadastre records it;
+ *                  empty until somebody takes it from there
  */
 @Document(collection = "buildings")
 public record BuildingDocument(
@@ -43,7 +45,8 @@ public record BuildingDocument(
         boolean placeholder,
         Instant createdAt,
         Instant updatedAt,
-        Placement placement
+        Placement placement,
+        List<FootprintPart> footprint
 ) {
 
     @PersistenceCreator
@@ -53,13 +56,15 @@ public record BuildingDocument(
         floors = floors == null
                 ? List.of()
                 : floors.stream().sorted(Comparator.comparingDouble(Floor::level)).toList();
+        footprint = footprint == null ? List.of() : List.copyOf(footprint);
     }
 
     /** A building nobody has laid on the ground yet. */
     public BuildingDocument(String id, String code, String name, String campus, String description,
                             List<String> aliases, List<Wing> wings, List<Floor> floors, boolean placeholder,
                             Instant createdAt, Instant updatedAt) {
-        this(id, code, name, campus, description, aliases, wings, floors, placeholder, createdAt, updatedAt, null);
+        this(id, code, name, campus, description, aliases, wings, floors, placeholder, createdAt, updatedAt, null,
+                List.of());
     }
 
     public Optional<Floor> floor(String code) {

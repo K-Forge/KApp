@@ -23,6 +23,7 @@ public record BuildingResponse(
         List<String> aliases,
         List<WingDto> wings,
         List<FloorDto> floors,
-        PlacementDto placement
+        PlacementDto placement,
+        List<FootprintPartDto> footprint
 ) {
 }

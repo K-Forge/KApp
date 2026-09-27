@@ -15,6 +15,7 @@ import co.edu.konradlorenz.kapp.map.web.dto.BuildingResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.CampusSummaryResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.FloorDetailResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.FloorDto;
+import co.edu.konradlorenz.kapp.map.web.dto.FootprintPartDto;
 import co.edu.konradlorenz.kapp.map.web.dto.WingDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +102,8 @@ public class BuildingService {
                 false,
                 now,
                 now,
-                MapMapper.toPlacement(request.placement(), null)));
+                MapMapper.toPlacement(request.placement(), null),
+                MapMapper.toFootprint(request.footprint(), null)));
 
         log.info("Created building {} on campus {} with {} floors",
                 saved.code(), saved.campus(), saved.floors().size());
@@ -147,7 +149,8 @@ public class BuildingService {
                 existing.placeholder(),
                 existing.createdAt(),
                 Instant.now(),
-                MapMapper.toPlacement(request.placement(), existing.placement())));
+                MapMapper.toPlacement(request.placement(), existing.placement()),
+                MapMapper.toFootprint(request.footprint(), existing.footprint())));
 
         propagateToSpaces(saved);
         return MapMapper.toBuildingResponse(saved);
@@ -236,9 +239,28 @@ public class BuildingService {
                 issues.add(new ApiError.FieldIssue("wings", "Duplicate wing code: " + wing.code()));
             }
         }
+        if (request.footprint() != null) {
+            for (int i = 0; i < request.footprint().size(); i++) {
+                FootprintPartDto part = request.footprint().get(i);
+                if (part.wing() != null && !part.wing().isBlank() && !wingCodes.contains(part.wing().trim())) {
+                    issues.add(new ApiError.FieldIssue("footprint[" + i + "].wing",
+                            "No wing " + part.wing() + " in this building"));
+                }
+                if (!closedRingOnEarth(part.ring())) {
+                    issues.add(new ApiError.FieldIssue("footprint[" + i + "].ring",
+                            "An outline is [lon, lat] points on the earth, the first repeated at the end"));
+                }
+            }
+        }
         if (!issues.isEmpty()) {
             throw new BusinessRuleException("The building's floors or wings are inconsistent", issues);
         }
+    }
+
+    private static boolean closedRingOnEarth(List<List<Double>> ring) {
+        boolean onEarth = ring.stream().allMatch(p -> p.get(0) >= -180 && p.get(0) <= 180
+                && p.get(1) >= -90 && p.get(1) <= 90);
+        return onEarth && ring.size() >= 4 && ring.get(0).equals(ring.get(ring.size() - 1));
     }
 
     private void rejectRemovingOccupied(BuildingDocument existing, List<Floor> floors, List<Wing> wings) {

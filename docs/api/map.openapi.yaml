@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Map API
-  version: 3.1.0
+  version: 3.2.0
   summary: Schematic campus map and space search for Fundacion Universitaria Konrad Lorenz.
   description: |
     Digital campus map for Fundacion Universitaria Konrad Lorenz (Bogota, Colombia).
@@ -58,8 +58,12 @@ info:
       city's own reference map and shipped with the service. It is reference data, credited in
       its `source`, and read-only.
 
-    With both, a client draws the block, the sidewalk and the streets a building meets under any
-    of its floors, or every placed building of a campus on one aerial map. For a point `(x, y)`
+    - A building may also carry its **`footprint`**: the building from above, part by part, as the
+      city's cadastre records it - each part's outline, how many floors it rises and, when known,
+      the wing it belongs to. A building nobody has drawn yet still has its true shape on a map.
+
+    With these, a client draws the block, the sidewalk and the streets a building meets under any
+    of its floors, or every building of a campus on one aerial map. For a point `(x, y)`
     of a drawing, the offset from `origin` is `east = m (x cos b - y sin b)` and
     `north = -m (x sin b + y cos b)`, with `m = metresPerUnit` and `b = bearing`; a campus is
     small enough for the plane through its middle to stand in for the earth.
@@ -909,6 +913,20 @@ components:
           description: How long one unit of the drawing is on the ground, in metres.
           example: 0.02951
 
+    FootprintPart:
+      type: object
+      description: |
+        One part of a building as the city's cadastre records it from above. A building is seldom
+        one block - the Edificio Central is a strip of five floors along the Calle 63, a core of
+        eight and a south wing over its auditorium - and each part rises its own number of floors.
+      required: [floors, basements, ring]
+      properties:
+        lot: { type: string, maxLength: 30, description: The cadastral lot the part stands on., example: '008213024019' }
+        floors: { type: integer, minimum: 0, maximum: 200, description: How many floors it rises above the street., example: 8 }
+        basements: { type: integer, minimum: 0, maximum: 20, description: How many it goes below., example: 2 }
+        wing: { type: string, maxLength: 10, description: The code of the building's wing it belongs to, when known., example: C }
+        ring: { $ref: '#/components/schemas/Ring' }
+
     Coordinate:
       type: array
       description: A point as GeoJSON writes it, `[lon, lat]`.
@@ -1083,6 +1101,10 @@ components:
         placement:
           $ref: '#/components/schemas/Placement'
           description: Where the building's drawing lies on the ground. Absent until somebody lays it.
+        footprint:
+          type: array
+          description: The building from above, part by part, as the cadastre records it. Empty until somebody takes it from there.
+          items: { $ref: '#/components/schemas/FootprintPart' }
 
     BuildingSummary:
       type: object
@@ -1122,6 +1144,10 @@ components:
         placement:
           $ref: '#/components/schemas/Placement'
           description: Where the building's drawing lies on the ground. Omitted on `PUT`, the stored one is kept.
+        footprint:
+          type: array
+          description: The building from above, part by part. Omitted on `PUT`, the stored one is kept; a part's `wing` must be one of the building's.
+          items: { $ref: '#/components/schemas/FootprintPart' }
 
     Space:
       type: object

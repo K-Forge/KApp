@@ -99,7 +99,7 @@ public class V008_RedrawnCentralGroundFloor {
 
         SurveySnapshot.Building justThisFloor = new SurveySnapshot.Building(surveyed.code(), surveyed.name(),
                 surveyed.campus(), surveyed.description(), surveyed.aliases(), surveyed.wings(), List.of(floor),
-                surveyed.placement());
+                surveyed.placement(), surveyed.footprint());
         V007_TracedCampus.apply(mongo, List.of(justThisFloor), now);
         return oldSpaces.size();
     }

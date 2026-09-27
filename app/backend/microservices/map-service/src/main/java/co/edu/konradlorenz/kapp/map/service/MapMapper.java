@@ -5,6 +5,7 @@ import co.edu.konradlorenz.kapp.map.domain.BuildingDocument;
 import co.edu.konradlorenz.kapp.map.domain.Corridor;
 import co.edu.konradlorenz.kapp.map.domain.Door;
 import co.edu.konradlorenz.kapp.map.domain.Floor;
+import co.edu.konradlorenz.kapp.map.domain.FootprintPart;
 import co.edu.konradlorenz.kapp.map.domain.GeoPoint;
 import co.edu.konradlorenz.kapp.map.domain.Placement;
 import co.edu.konradlorenz.kapp.map.domain.Point;
@@ -14,6 +15,7 @@ import co.edu.konradlorenz.kapp.map.domain.SpaceTypeDocument;
 import co.edu.konradlorenz.kapp.map.domain.Wing;
 import co.edu.konradlorenz.kapp.map.web.dto.BoundsDto;
 import co.edu.konradlorenz.kapp.map.web.dto.BuildingResponse;
+import co.edu.konradlorenz.kapp.map.web.dto.FootprintPartDto;
 import co.edu.konradlorenz.kapp.map.web.dto.GeoPointDto;
 import co.edu.konradlorenz.kapp.map.web.dto.PlacementDto;
 import co.edu.konradlorenz.kapp.map.web.dto.BuildingSummaryResponse;
@@ -90,7 +92,23 @@ public final class MapMapper {
                 building.aliases(),
                 building.wings().stream().map(MapMapper::toWingDto).toList(),
                 building.floors().stream().map(MapMapper::toFloorDto).toList(),
-                toPlacementDto(building.placement()));
+                toPlacementDto(building.placement()),
+                building.footprint().stream().map(MapMapper::toFootprintPartDto).toList());
+    }
+
+    public static FootprintPartDto toFootprintPartDto(FootprintPart part) {
+        return new FootprintPartDto(part.lot(), part.floors(), part.basements(), part.wing(), part.ring());
+    }
+
+    /** The footprint a request asks for, or the stored one when it names none. */
+    public static List<FootprintPart> toFootprint(List<FootprintPartDto> dtos, List<FootprintPart> stored) {
+        if (dtos == null) {
+            return stored == null ? List.of() : stored;
+        }
+        return dtos.stream()
+                .map(dto -> new FootprintPart(dto.lot(), dto.floors(), dto.basements(),
+                        dto.wing() == null || dto.wing().isBlank() ? null : dto.wing().trim(), dto.ring()))
+                .toList();
     }
 
     public static PlacementDto toPlacementDto(Placement placement) {

@@ -47,12 +47,15 @@ public record BuildingRequest(
         List<@NotNull @Valid FloorDto> floors,
         @Schema(description = "Where the building's drawing lies on the ground. Omitted on PUT, the stored "
                 + "one is kept.")
-        @Valid PlacementDto placement
+        @Valid PlacementDto placement,
+        @Schema(description = "The building from above, part by part, as the city's cadastre records it. "
+                + "Omitted on PUT, the stored one is kept.")
+        List<@NotNull @Valid FootprintPartDto> footprint
 ) {
-    /** A request that leaves the building's placement as it is. */
+    /** A request that leaves the building's placement and footprint as they are. */
     public BuildingRequest(String code, String name, String campus, String description, List<String> aliases,
                            List<WingDto> wings, List<FloorDto> floors) {
-        this(code, name, campus, description, aliases, wings, floors, null);
+        this(code, name, campus, description, aliases, wings, floors, null, null);
     }
 
 

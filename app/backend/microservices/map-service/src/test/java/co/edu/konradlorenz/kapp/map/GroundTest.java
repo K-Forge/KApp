@@ -81,6 +81,50 @@ class GroundTest {
     }
 
     @Test
+    @DisplayName("a building keeps its footprint, and a form that leaves it out keeps it too")
+    void footprintIsKept() throws Exception {
+        buildings.save(MapFixtures.building("GRD3", List.of(new co.edu.konradlorenz.kapp.map.domain.Wing("N", "Ala norte", null, null)),
+                MapFixtures.floor("P1", 1)));
+        String ring = "[[-74.0613, 4.6485], [-74.0612, 4.6486], [-74.0611, 4.6485], [-74.0613, 4.6485]]";
+        mockMvc.perform(put("/api/map/buildings/GRD3").with(as("ROLE_ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"code": "GRD3", "name": "Parts", "campus": "Sede Test",
+                                 "wings": [{"code": "N", "name": "Ala norte"}],
+                                 "floors": [{"code": "P1", "level": 1, "name": "Piso 1", "width": 400, "height": 400}],
+                                 "footprint": [{"lot": "008213024019", "floors": 5, "basements": 0, "wing": "N", "ring": %s}]}
+                                """.formatted(ring)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.footprint[0].wing").value("N"));
+        mockMvc.perform(put("/api/map/buildings/GRD3").with(as("ROLE_ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"code": "GRD3", "name": "Renamed", "campus": "Sede Test",
+                                 "wings": [{"code": "N", "name": "Ala norte"}],
+                                 "floors": [{"code": "P1", "level": 1, "name": "Piso 1", "width": 400, "height": 400}]}
+                                """))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/map/buildings/GRD3").with(as("ROLE_GUEST")))
+                .andExpect(jsonPath("$.footprint[0].floors").value(5))
+                .andExpect(jsonPath("$.footprint[0].ring[0][0]").value(-74.0613));
+    }
+
+    @Test
+    @DisplayName("a part in a wing the building does not have, or an outline that does not close, is refused")
+    void impossibleFootprintIsRefused() throws Exception {
+        buildings.save(MapFixtures.building("GRD4"));
+        for (String part : List.of(
+                "{\"floors\": 3, \"basements\": 0, \"wing\": \"X\", \"ring\": [[-74.0613, 4.6485], [-74.0612, 4.6486], [-74.0611, 4.6485], [-74.0613, 4.6485]]}",
+                "{\"floors\": 3, \"basements\": 0, \"ring\": [[-74.0613, 4.6485], [-74.0612, 4.6486], [-74.0611, 4.6485], [-74.0610, 4.6484]]}")) {
+            mockMvc.perform(put("/api/map/buildings/GRD4").with(as("ROLE_ADMIN"))
+                            .contentType(MediaType.APPLICATION_JSON).content("""
+                                    {"code": "GRD4", "name": "Wrong", "campus": "Sede Test",
+                                     "floors": [{"code": "P1", "level": 1, "name": "Piso 1", "width": 400, "height": 400}],
+                                     "footprint": [%s]}
+                                    """.formatted(part)))
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Test
     @DisplayName("a bearing of a full turn or a drawing without a scale is refused")
     void impossiblePlacementIsRefused() throws Exception {
         buildings.save(MapFixtures.building("GRD2"));
