@@ -16,7 +16,7 @@ import {
   type FloorStatus,
   type Point,
 } from '../buildings/building.model';
-import { CATEGORY_COLORS, CATEGORY_LABELS, SPACE_CATEGORIES, type Space, type SpaceCategory, type SpaceType } from '../spaces/space.model';
+import { type Space, type SpaceCategory, type SpaceType } from '../spaces/space.model';
 import { SpaceTypesService } from '../spaces/space-types.service';
 import { SpacesService } from '../spaces/spaces.service';
 import { CorridorsPanelComponent } from './corridors-panel.component';
@@ -59,6 +59,7 @@ import {
   type RangeRequest,
 } from './floor-draft';
 import { clearDraft, loadDraft, storeDraft, type StoredDraft } from './floor-draft.store';
+import { FloorLegendComponent } from './floor-legend.component';
 import { FloorPlanComponent, type EditorMode } from './floor-plan.component';
 import type { FloorDetail } from './floor.model';
 import { FloorsService } from './floors.service';
@@ -92,6 +93,7 @@ const MAX_ZOOM = 8;
     SpaceInspectorComponent,
     InventoryTrayComponent,
     CorridorsPanelComponent,
+    FloorLegendComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -270,11 +272,7 @@ const MAX_ZOOM = 8;
                 (vertexRemoved)="onVertexRemoved($event.key, $event.index)"
               />
             </div>
-            <ul class="legend" aria-label="Colours">
-              @for (category of legend; track category) {
-                <li><span class="swatch" [style.background]="colors[category]"></span>{{ categoryLabels[category] }}</li>
-              }
-            </ul>
+            <app-floor-legend [spaces]="d.spaces" [categories]="categories()" />
           </section>
 
           <aside class="card side" [class.locked]="!!pendingDraft()">
@@ -605,25 +603,6 @@ const MAX_ZOOM = 8;
          it again, every frame: the plan shook. */
       scrollbar-gutter: stable;
     }
-    .legend {
-      list-style: none;
-      margin: 0.5rem 0 0;
-      padding: 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.25rem 0.75rem;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-    .legend .swatch {
-      display: inline-block;
-      width: 0.75rem;
-      height: 0.75rem;
-      border-radius: 2px;
-      margin-right: 0.25rem;
-      vertical-align: -1px;
-      border: 1px solid rgb(28 33 40 / 30%);
-    }
     .side.locked {
       pointer-events: none;
       opacity: 0.5;
@@ -682,9 +661,6 @@ export class FloorEditorPage {
   readonly statusLabels = FLOOR_STATUS_LABELS;
   readonly accessibility = ACCESSIBILITY;
   readonly accessibilityLabels = ACCESSIBILITY_LABELS;
-  readonly legend = SPACE_CATEGORIES;
-  readonly colors = CATEGORY_COLORS;
-  readonly categoryLabels = CATEGORY_LABELS;
 
   readonly loading = signal(true);
   readonly loadError = signal<ApiError | null>(null);
