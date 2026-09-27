@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 
 /**
  * The heading of a screen, plus a straight answer to "what is this for and what can I do here".
@@ -26,16 +26,31 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
       <p class="page-intro-what">{{ what() }}</p>
 
-      @if (can().length) {
-        <ul class="page-intro-can">
-          @for (item of can(); track item) {
-            <li>{{ item }}</li>
+      @if (can().length || note()) {
+        <button
+          type="button"
+          class="page-intro-toggle"
+          (click)="expanded.set(!expanded())"
+          [attr.aria-expanded]="expanded()"
+        >
+          {{ expanded() ? 'Hide what you can do here' : 'What you can do here' }}
+          <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+            <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <div class="page-intro-extra" [class.expanded]="expanded()">
+          @if (can().length) {
+            <ul class="page-intro-can">
+              @for (item of can(); track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
           }
-        </ul>
-      }
 
-      @if (note()) {
-        <p class="page-intro-note">{{ note() }}</p>
+          @if (note()) {
+            <p class="page-intro-note">{{ note() }}</p>
+          }
+        </div>
       }
     </div>
   `,
@@ -104,6 +119,40 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       background: var(--bg-inset);
       border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
     }
+
+    .page-intro-toggle {
+      display: none;
+    }
+    /*
+     * On a phone the list and the note fold away behind one line. Open, the intro filled the
+     * whole first screen of every page, so what the page was for came before any of the page.
+     * The sentence saying what it is for stays; the rest is a tap away.
+     */
+    @media (max-width: 640px) {
+      .page-intro-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-top: 0.5rem;
+        padding: 0.35rem 0;
+        border: 0;
+        background: none;
+        /* Body colour: it sits on the lit ground, where the teal of a link measured 2.4:1 over
+           the centre of the pink light. */
+        color: var(--text);
+        font-size: 0.8125rem;
+        font-weight: 600;
+      }
+      .page-intro-toggle[aria-expanded='true'] svg {
+        transform: rotate(180deg);
+      }
+      .page-intro-extra:not(.expanded) {
+        display: none;
+      }
+      .page-intro-can {
+        margin-top: 0.25rem;
+      }
+    }
   `,
 })
 export class PageIntroComponent {
@@ -111,4 +160,7 @@ export class PageIntroComponent {
   readonly what = input.required<string>();
   readonly can = input<string[]>([]);
   readonly note = input<string>('');
+
+  /** Whether a phone shows the list and the note. Wider screens always do. */
+  readonly expanded = signal(false);
 }

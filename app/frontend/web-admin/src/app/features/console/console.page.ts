@@ -55,7 +55,11 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
 
           @if (selectedOperation(); as op) {
             @if (op.description) {
-              <p class="text-muted op-description">{{ op.description }}</p>
+              <div class="text-muted op-description">
+                @for (paragraph of descriptionParagraphs(); track $index) {
+                  <p>{{ paragraph }}</p>
+                }
+              </div>
             }
 
             @if (op.pathParams.length) {
@@ -290,6 +294,9 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
     }
     .op-description {
       margin: -0.5rem 0 0.5rem;
+    }
+    .op-description p {
+      margin: 0 0 0.5rem;
       white-space: pre-line;
     }
     h3 {
@@ -363,6 +370,9 @@ export class ConsolePage {
   readonly selectedOpKey = signal<string | null>(null);
   readonly selectedOperation = computed(
     () => this.operations().find((op) => operationKey(op) === this.selectedOpKey()) ?? null,
+  );
+  readonly descriptionParagraphs = computed(() =>
+    descriptionParagraphs(this.selectedOperation()?.description ?? ''),
   );
 
   readonly pathValues = signal<Record<string, string>>({});
@@ -531,6 +541,31 @@ export class ConsolePage {
       result,
     });
   }
+}
+
+/**
+ * A contract's description as paragraphs to reflow.
+ *
+ * <p>The YAML wraps its prose at a hundred columns, and shown with its line breaks kept that
+ * wrapping came through as ragged half-lines on anything narrower than the file - a phone cut
+ * every sentence twice. A blank line still ends a paragraph, and a line that opens a list or a
+ * table row keeps its own line.
+ */
+export function descriptionParagraphs(text: string): string[] {
+  return text
+    .trim()
+    .split(/\n\s*\n/)
+    .map((block) =>
+      block.split('\n').reduce((out, line) => {
+        const trimmed = line.trim();
+        if (!out) {
+          return trimmed;
+        }
+        const ownLine = /^([-*>]|\d+\.)\s/.test(trimmed) || trimmed.startsWith('|');
+        return ownLine ? `${out}\n${trimmed}` : `${out} ${trimmed}`;
+      }, ''),
+    )
+    .filter((paragraph) => paragraph.length > 0);
 }
 
 function headersOf(headers: HttpHeaders): string[] {

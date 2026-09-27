@@ -632,7 +632,11 @@ dialog::backdrop {
    DataTableComponent rather than written by hand on every page.
    ───────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .scroll-x {
+  /* Only a data table's scroller stands down, because its rows become cards that fit. The
+     other grids - a pensum's semesters, the paste example, the console's fields - stay grids
+     and keep scrolling inside their card. Released as well, they pushed the whole page six
+     hundred pixels wider than the phone. */
+  .data-table .scroll-x {
     overflow-x: visible;
     padding: 0;
     margin: 0;
@@ -662,11 +666,11 @@ dialog::backdrop {
     border-radius: 8px;
     padding: 0.5rem 0.25rem;
     margin-bottom: 0.75rem;
-    background: var(--panel);
+    background: var(--bg-elevated);
   }
 
   .data-table tbody tr:hover {
-    background: var(--panel);
+    background: var(--bg-elevated);
   }
 
   .data-table td {
@@ -733,6 +737,12 @@ dialog::backdrop {
 
   h1 {
     font-size: 1.375rem;
+  }
+
+  /* A card inside a card, a row card inside that: at 1.25rem a side each, a phone lost a
+     quarter of its width to padding before any value was drawn. */
+  .card {
+    padding: 1rem;
   }
 
   .row-between {

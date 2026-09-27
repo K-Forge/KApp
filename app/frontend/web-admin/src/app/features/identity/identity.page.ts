@@ -95,6 +95,21 @@ import { TokenCountdownComponent } from '../../shared/ui/token-countdown/token-c
     }
     .claims-grid dd {
       margin: 0;
+      /* A subject id, an issuer URL and an institutional e-mail have no spaces to break at;
+         without this they ran past the card's edge on a phone. */
+      overflow-wrap: anywhere;
+      min-width: 0;
+    }
+    /* Ten rems of label beside the value left a phone with a column narrower than any of the
+       values in it. There each claim reads as a label over its value. */
+    @media (max-width: 640px) {
+      .claims-grid {
+        grid-template-columns: 1fr;
+        row-gap: 0.2rem;
+      }
+      .claims-grid dd + dt {
+        margin-top: 0.6rem;
+      }
     }
   `,
 })
