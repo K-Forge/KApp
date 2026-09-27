@@ -22,6 +22,7 @@ import {
   split,
   toRequest,
   toggleCorridorPoint,
+  fingerprint,
   northAngle,
   turn,
   turnUp,
@@ -351,5 +352,12 @@ describe('floor draft', () => {
       expect(northAngle('WEST')).toBe(90);
       expect(northAngle(null)).toBeNull();
     });
+  });
+
+  it('fingerprints what a draft would save: the same floor alike, any change apart', () => {
+    const a = floor([space('101', { shape: box(0, 0, 80, 40) })]);
+    expect(fingerprint(a)).toBe(fingerprint(floor([space('101', { shape: box(0, 0, 80, 40) })])));
+    expect(fingerprint(a)).not.toBe(fingerprint(floor([space('101', { shape: box(0, 0, 80, 41) })])));
+    expect(fingerprint(a)).toMatch(/^[0-9a-f]{8}$/);
   });
 });

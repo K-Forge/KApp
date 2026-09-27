@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting, type TestRequest } fro
 import { provideRouter } from '@angular/router';
 import type { Building } from '../buildings/building.model';
 import type { SpaceType } from '../spaces/space.model';
-import { fromDetail, updateSpace } from './floor-draft';
+import { fingerprint, fromDetail, updateSpace } from './floor-draft';
 import { loadDraft, storeDraft } from './floor-draft.store';
 import { FloorEditorPage } from './floor-editor.page';
 import type { FloorDetail, FloorLayoutRequest } from './floor.model';
@@ -113,11 +113,12 @@ describe('FloorEditorPage', () => {
 
   it('offers back the changes this device kept, instead of dropping or applying them silently', () => {
     const server = detail(1);
-    storeDraft('B', 'P1', 1, updateSpace(fromDetail(server), 'c:101', { name: 'Biblioteca' }));
+    storeDraft('B', 'P1', 1, updateSpace(fromDetail(server), 'c:101', { name: 'Biblioteca' }), fingerprint(fromDetail(server)));
 
     open(server);
 
     expect(page.pendingDraft()).not.toBeNull();
+    expect(page.pendingOutdated()).toBe(false);
     expect(page.dirty()).toBe(false);
 
     page.restorePending();
@@ -125,6 +126,18 @@ describe('FloorEditorPage', () => {
 
     expect(page.dirty()).toBe(true);
     expect(page.draft()?.spaces[0].name).toBe('Biblioteca');
+  });
+
+  it('says so when the kept changes were made on an older drawing, even at the same version', () => {
+    const older = detail(1);
+    storeDraft('B', 'P1', 1, updateSpace(fromDetail(older), 'c:101', { name: 'Biblioteca' }), fingerprint(fromDetail(older)));
+    // Redrawn from the survey since: same version, another drawing.
+    const redrawn: FloorDetail = { ...older, width: older.width + 40 };
+
+    open(redrawn);
+
+    expect(page.pendingDraft()).not.toBeNull();
+    expect(page.pendingOutdated()).toBe(true);
   });
 
   it('keeps every change on the device as it is made', () => {

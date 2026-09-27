@@ -121,6 +121,20 @@ export function toRequest(draft: FloorDraft, version: number): FloorLayoutReques
   };
 }
 
+/**
+ * A short fingerprint of what a draft would save - FNV-1a over the request - so a draft kept on
+ * the device can tell whether the drawing it started from is still the one on the server.
+ */
+export function fingerprint(draft: FloorDraft): string {
+  const text = JSON.stringify(toRequest(draft, 0));
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(16).padStart(8, '0');
+}
+
 /** True when the two drafts would save the same floor. */
 export function sameFloor(a: FloorDraft, b: FloorDraft): boolean {
   return JSON.stringify(toRequest(a, 0)) === JSON.stringify(toRequest(b, 0));

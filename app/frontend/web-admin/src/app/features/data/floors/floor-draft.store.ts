@@ -13,6 +13,12 @@ import type { FloorDraft } from './floor-draft';
 export interface StoredDraft {
   /** The floor version the draft started from. Saving it means sending this back. */
   baseVersion: number;
+  /**
+   * A fingerprint of the drawing the draft started from. The version alone cannot tell: a floor
+   * redrawn from the survey snapshot keeps version 0, so a draft made on the old drawing would look
+   * like work on the new one. Absent on drafts kept before it existed.
+   */
+  base?: string;
   savedAt: string;
   draft: FloorDraft;
 }
@@ -37,9 +43,15 @@ export function loadDraft(buildingCode: string, floorCode: string): StoredDraft 
 }
 
 /** @return false when the draft could not be kept on this device */
-export function storeDraft(buildingCode: string, floorCode: string, baseVersion: number, draft: FloorDraft): boolean {
+export function storeDraft(
+  buildingCode: string,
+  floorCode: string,
+  baseVersion: number,
+  draft: FloorDraft,
+  base?: string,
+): boolean {
   try {
-    const stored: StoredDraft = { baseVersion, savedAt: new Date().toISOString(), draft };
+    const stored: StoredDraft = { baseVersion, base, savedAt: new Date().toISOString(), draft };
     localStorage.setItem(keyFor(buildingCode, floorCode), JSON.stringify(stored));
     return true;
   } catch {

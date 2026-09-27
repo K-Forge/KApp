@@ -29,6 +29,7 @@ import {
   doorAt,
   doorNear,
   doorWidth,
+  fingerprint,
   fromDetail,
   isPlaced,
   label,
@@ -108,11 +109,16 @@ const MAX_ZOOM = 8;
         <div class="row head-actions">
           @if (buildingDoc(); as b) {
             <label class="sr-only" for="floor-switch">Floor</label>
-            <select id="floor-switch" class="floor-switch" [value]="floor()" (change)="switchFloor($event)">
-              @for (f of b.floors; track f.code) {
-                <option [value]="f.code" [selected]="f.code === floor()">{{ f.code }} — {{ f.name }}</option>
-              }
-            </select>
+            <span class="floor-switch">
+              <select id="floor-switch" [value]="floor()" (change)="switchFloor($event)">
+                @for (f of b.floors; track f.code) {
+                  <option [value]="f.code" [selected]="f.code === floor()">{{ f.code }} — {{ f.name }}</option>
+                }
+              </select>
+              <svg class="chevron" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+                <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
           }
           <button type="button" class="btn btn-sm" [disabled]="!canUndo()" (click)="undo()" aria-label="Undo" title="Undo">↶</button>
           <button type="button" class="btn btn-sm" [disabled]="!canRedo()" (click)="redo()" aria-label="Redo" title="Redo">↷</button>
@@ -129,16 +135,27 @@ const MAX_ZOOM = 8;
       @if (pendingDraft(); as pending) {
         <div class="card banner warn" role="alert">
           <p><strong>This device has changes to this floor that were never saved</strong>, from {{ time(pending.savedAt) }}.</p>
-          @if (pending.baseVersion !== detail()?.version) {
+          @if (pendingOutdated()) {
             <p>
-              Somebody has saved the floor since they were made. Restoring them and saving will
-              replace what that person saved.
+              <strong>They were made on an older drawing of this floor.</strong> The floor has been
+              redrawn since; restoring them brings the old drawing back over the new one.
             </p>
+            <div class="row">
+              <button type="button" class="btn btn-sm btn-primary" (click)="discardPending()">Discard them</button>
+              <button type="button" class="btn btn-sm btn-danger" (click)="restorePending()">Restore the old drawing</button>
+            </div>
+          } @else {
+            @if (pending.baseVersion !== detail()?.version) {
+              <p>
+                Somebody has saved the floor since they were made. Restoring them and saving will
+                replace what that person saved.
+              </p>
+            }
+            <div class="row">
+              <button type="button" class="btn btn-sm btn-primary" (click)="restorePending()">Restore my changes</button>
+              <button type="button" class="btn btn-sm btn-danger" (click)="discardPending()">Discard them</button>
+            </div>
           }
-          <div class="row">
-            <button type="button" class="btn btn-sm btn-primary" (click)="restorePending()">Restore my changes</button>
-            <button type="button" class="btn btn-sm btn-danger" (click)="discardPending()">Discard them</button>
-          </div>
         </div>
       }
 
@@ -429,9 +446,46 @@ const MAX_ZOOM = 8;
       min-height: 2.5rem;
       min-width: 2.5rem;
     }
+    /* The floor switch is a button of the header row, not a form field: each browser drew its own
+       arrow at its own height and size - on the iPhone a tall pill unlike every button beside it. */
     .floor-switch {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+    .floor-switch select {
+      appearance: none;
+      -webkit-appearance: none;
       width: auto;
       min-height: 2.5rem;
+      padding: 0 2rem 0 0.75rem;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      background: var(--bg-inset);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.8125rem;
+      line-height: 1.2;
+      cursor: pointer;
+    }
+    .floor-switch select:hover {
+      background: var(--bg-hover);
+    }
+    .floor-switch select:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 1px;
+    }
+    .floor-switch .chevron {
+      position: absolute;
+      right: 0.625rem;
+      pointer-events: none;
+      color: var(--text-muted);
+    }
+    /* Under 16px iOS zooms the whole page when the list opens. */
+    @media (max-width: 640px) {
+      .floor-switch select {
+        font-size: 16px;
+      }
     }
     .save-state {
       margin: 0;
@@ -645,6 +699,12 @@ export class FloorEditorPage {
   readonly saveError = signal<ApiError | null>(null);
   readonly conflict = signal(false);
   readonly pendingDraft = signal<StoredDraft | null>(null);
+  /** The kept changes started from another drawing than the server's now - or cannot tell. */
+  readonly pendingOutdated = computed(() => {
+    const pending = this.pendingDraft();
+    const server = this.serverDraft();
+    return !!pending && !!server && pending.base !== fingerprint(server);
+  });
   readonly keptAt = signal<string | null>(null);
   readonly keepFailed = signal(false);
   readonly savedAt = signal<string | null>(null);
@@ -807,7 +867,8 @@ export class FloorEditorPage {
       if (!draft || !detail || this.pendingDraft()) return;
       untracked(() => {
         if (dirty) {
-          const kept = storeDraft(this.building(), this.floor(), detail.version, draft);
+          const server = this.serverDraft();
+          const kept = storeDraft(this.building(), this.floor(), detail.version, draft, server ? fingerprint(server) : undefined);
           this.keepFailed.set(!kept);
           this.keptAt.set(kept ? new Date().toISOString() : null);
         } else {
