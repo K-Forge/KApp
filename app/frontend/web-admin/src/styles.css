@@ -11,41 +11,42 @@
 :root {
   color-scheme: light;
 
-  /* Paper, but not a blank sheet: a mauve drawn from the institutional pink of the K, taken
-     toward purple and down a shade. It was a teal-grey, and next to the teal buttons the whole
-     portal read as green; a plain rose read as pink everywhere. The ground carries the K's
-     warmth now and the teal the actions, which is how the two sit in the K itself. */
-  --bg: #e0d3e2;
+  /* Paper, but not a blank sheet: an orchid drawn from the institutional pink of the K, halfway
+     to purple. It was a teal-grey, and next to the teal buttons the whole portal read as green;
+     then a greyed mauve, which read as washed out. Chosen in OKLCH - lightness 0.875, chroma
+     0.062, hue 338 - so it is as light as a light theme needs and still reads as a colour. The
+     ground carries the K's warmth and the teal the actions, as the two sit in the K itself. */
+  --bg: #f2c7e4;
   --bg-elevated: #ffffff;
-  --bg-inset: #eee5ef;
-  --bg-hover: #dccde0;
-  --border: #cdbbd1;
-  --border-strong: #ad97b2;
+  --bg-inset: #fae6f3;
+  --bg-hover: #efc1e0;
+  --border: #ddb7d1;
+  --border-strong: #b285a4;
 
-  --text: #20172a;
-  --text-muted: #584a60;
-  /* 7.08:1 on a card and 4.92 on the ground - over the 4.5 minimum for body text, and still
-     clearly softer than --text-muted (8.19), so the hierarchy survives. */
-  --text-faint: #62536a;
+  --text: #251420;
+  --text-muted: #5e4456;
+  /* 7.0:1 on a card and 4.69 on the ground - over the 4.5 minimum for body text, and still
+     clearly softer than --text-muted (8.62), so the hierarchy survives. */
+  --text-faint: #6c5164;
   --text-on-accent: #ffffff;
 
   /* A shade deeper than the brand teal's own text tone, so a link still clears 4.5:1 on the
-     darker ground (4.64). */
-  --primary: #336463;
+     orchid ground (4.88). */
+  --primary: #2f5e5d;
   --primary-strong: #244847;
   --primary-bg: #e2efee;
   --primary-brand: #539392;
 
-  --danger: #a30f50;
+  --danger: #9e0e4d;
   --danger-strong: #800c3f;
   --danger-bg: #fbe7ee;
 
-  --success: #2a6254;
+  --success: #285e51;
   --success-strong: #1f5044;
   --success-bg: #dcefe8;
 
-  /* Darker than it was: on the mauve ground #92620a measured under 4.5:1. */
-  --warning: #744d06;
+  /* Darker than it was: on the orchid ground #92620a measured under 4.5:1. */
+  --warning: #704a06;
   --warning-bg: #faedd3;
 
   --focus-ring: #539392;
@@ -59,27 +60,27 @@
   --brand-green: #C9D329;
 
   /* The header and sidebar are tinted rather than white. Three stacked white
-     planes read as flat; a faint wash of the ground's mauve separates the chrome
+     planes read as flat; a lighter wash of the ground's orchid separates the chrome
      from the content without drawing attention to itself. */
-  --header-bg: #e5d9e7;
-  --nav-bg: #ece3ed;
+  --header-bg: #f6d1ea;
+  --nav-bg: #fbdef1;
 
   /* The selected section: a real step, not a slab. A solid fill is the loudest thing on the
-     screen and the eye goes there instead of to the content; a deeper mauve, a full-strength
-     pink edge and bold text carry it without shouting. 8.3:1. */
-  --nav-active-bg: #d9c1e0;
-  --nav-active-text: #471a4d;
+     screen and the eye goes there instead of to the content; a deeper orchid, a full-strength
+     pink edge and bold text carry it without shouting. 6.7:1. */
+  --nav-active-bg: #e8a5d4;
+  --nav-active-text: #59134a;
   --nav-active-edge: #D51A65;
 
   /* Behind a drawer or a dialog: the plum of the dark theme, not a neutral grey. */
-  --scrim: rgb(26 16 32 / 0.45);
+  --scrim: rgb(37 20 32 / 0.45);
 
   /* How much of each hue reaches the page ground.
      The green was off in this theme for a while, because at sixteen percent spread thin over
      a grey base it read as a stain rather than as a colour. The fix was not less of it but
      more: a wash that faint is dirt, and a wash this strong is a light. Mixed in oklab rather
      than srgb, which is what keeps a teal from going grey on its way to transparent. */
-  /* The teal and the green were set against a teal-grey ground. Over the mauve they mix
+  /* The teal and the green were set against a teal-grey ground. Over the orchid they mix
      toward a grey, so they come down to where they still read as light of their own colour;
      the pink, now the ground's own hue, goes up. */
   --wash-strength: 34%;
