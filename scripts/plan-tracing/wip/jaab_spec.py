@@ -1,4 +1,4 @@
-# bi_spec.py <floor> <photo> '<corners json: tl tr br bl of the building's outer faces, as the floor
+# jaab_spec.py <floor> <photo> '<corners json: tl tr br bl of the building's outer faces, as the floor
 # is drawn: west wall left, the top of the north block up>' : a trace.py spec in Bienestar's frame.
 import json, sys
 floor, photo, c = sys.argv[1], sys.argv[2], json.loads(sys.argv[3])

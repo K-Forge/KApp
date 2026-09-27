@@ -2,8 +2,8 @@
 # straight walls fitted to its orange: a level top, a slanted top, a plumb right side and a slanted
 # bottom, with the block in its corner left out. Each wall is fitted to the edge of the orange column
 # by column, the columns that stray (a label, the yellow street line) dropped.
-import importlib.util, json, sys
-spec = importlib.util.spec_from_file_location('t', '/Users/13rian/Development/3-K-Forge/KApp-worktrees/backend/scripts/plan-tracing/trace.py')
+import os, importlib.util, json, sys
+spec = importlib.util.spec_from_file_location('t', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trace.py'))
 T = importlib.util.module_from_spec(spec); spec.loader.exec_module(T)
 prefix, spec_path = sys.argv[1:3]
 x0, x1, y0, y1 = map(int, sys.argv[3:7])

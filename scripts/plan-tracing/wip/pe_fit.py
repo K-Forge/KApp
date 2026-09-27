@@ -5,7 +5,7 @@
 # edge goes where the orange stops, the change nearest where it was. Rooms with a slanted edge are
 # the tracer's own outline and stay. Writes <prefix>.json back, keeping the tracer's as .raw.json.
 import importlib.util, json, shutil, sys, os
-spec = importlib.util.spec_from_file_location('t', '/Users/13rian/Development/3-K-Forge/KApp-worktrees/backend/scripts/plan-tracing/trace.py')
+spec = importlib.util.spec_from_file_location('t', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trace.py'))
 T = importlib.util.module_from_spec(spec); spec.loader.exec_module(T)
 
 prefix, spec_path = sys.argv[1:3]

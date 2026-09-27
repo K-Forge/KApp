@@ -2,8 +2,8 @@
 # lines: {"left": [[x0,y0],[x1,y1]], "top": ..., "right": ..., "bottom": ...} rough endpoints in
 # the bmp's pixels. Each is refined: along the rough line, the darkest pixel within `band` across it
 # (darker than the paper around it) is taken, a line is fitted, strays dropped, fitted again.
-import importlib.util, json, math, sys
-spec = importlib.util.spec_from_file_location('t', '/Users/13rian/Development/3-K-Forge/KApp-worktrees/backend/scripts/plan-tracing/trace.py')
+import os, importlib.util, json, math, sys
+spec = importlib.util.spec_from_file_location('t', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trace.py'))
 T = importlib.util.module_from_spec(spec); spec.loader.exec_module(T)
 
 W, H, rgb = T.read_bmp(sys.argv[1])

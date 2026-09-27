@@ -1,8 +1,8 @@
 # profile.py <rect.bmp> <axis x|y> <across0> <across1> <along0> <along1> [thresh]
 # Orange runs along a strip: for axis y, rows from along0 to along1 averaged over x across0..across1;
 # prints the orange stretches (where r - b is over half its highest) and the dips inside them.
-import importlib.util, sys
-spec = importlib.util.spec_from_file_location('t', '/Users/13rian/Development/3-K-Forge/KApp-worktrees/backend/scripts/plan-tracing/trace.py')
+import os, importlib.util, sys
+spec = importlib.util.spec_from_file_location('t', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trace.py'))
 T = importlib.util.module_from_spec(spec); spec.loader.exec_module(T)
 W, H, rgb = T.read_bmp(sys.argv[1])
 axis = sys.argv[2]

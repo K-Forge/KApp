@@ -1,6 +1,6 @@
 # obox.py <prefix> <spec> x0 y0 x1 y1 : the connected pieces of the plan's orange inside a box, as boxes.
-import importlib.util, json, sys
-spec = importlib.util.spec_from_file_location('t', '/Users/13rian/Development/3-K-Forge/KApp-worktrees/backend/scripts/plan-tracing/trace.py')
+import os, importlib.util, json, sys
+spec = importlib.util.spec_from_file_location('t', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trace.py'))
 T = importlib.util.module_from_spec(spec); spec.loader.exec_module(T)
 prefix, sp = sys.argv[1:3]
 x0, y0, x1, y1 = map(int, sys.argv[3:7])

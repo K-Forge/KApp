@@ -1,8 +1,8 @@
 # mag.py <rect.bmp> <axis x|y> <a0> <a1> <b0> <b1> [colour]: where walls of a colour cross a strip.
 # axis y: rows b0..b1, each counted over x a0..a1 -> the y ranges where most of the strip is wall
 # (a level wall); axis x: the x ranges of plumb walls.
-import importlib.util, sys
-spec = importlib.util.spec_from_file_location('t', '/Users/13rian/Development/3-K-Forge/KApp-worktrees/backend/scripts/plan-tracing/trace.py')
+import os, importlib.util, sys
+spec = importlib.util.spec_from_file_location('t', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trace.py'))
 T = importlib.util.module_from_spec(spec); spec.loader.exec_module(T)
 W, H, rgb = T.read_bmp(sys.argv[1])
 axis = sys.argv[2]; a0, a1, b0, b1 = map(int, sys.argv[3:7])

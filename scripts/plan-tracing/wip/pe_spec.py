@@ -2,8 +2,8 @@
 # Writes ec-pe-<floor>.spec.json for trace.py: the floor's PE photo laid into the Edificio Central's
 # frame by the four corners of the lot its streets draw - Calle 63 and Calle 62 plumb, Carrera 9A
 # level, sized as the P3 plan draws them - so every floor traced lands in the same place.
-import importlib.util, json, sys
-spec = importlib.util.spec_from_file_location('t', '/Users/13rian/Development/3-K-Forge/KApp-worktrees/backend/scripts/plan-tracing/trace.py')
+import os, importlib.util, json, sys
+spec = importlib.util.spec_from_file_location('t', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trace.py'))
 T = importlib.util.module_from_spec(spec); spec.loader.exec_module(T)
 
 # The lot in the frame, from P3's photo: bottom 2090 wide, left side 2590 tall, right side 1879.

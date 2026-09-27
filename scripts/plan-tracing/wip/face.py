@@ -2,8 +2,8 @@
 # Like lot.py, but fits the OUTER face of a coloured wall: along each rough line, scanning from
 # outside inward ("out": which side is outside, as a point), the first pixel of the colour.
 # colour: "magenta" (the Bienestar plans' walls) or "dark".
-import importlib.util, json, math, sys
-spec = importlib.util.spec_from_file_location('t', '/Users/13rian/Development/3-K-Forge/KApp-worktrees/backend/scripts/plan-tracing/trace.py')
+import os, importlib.util, json, math, sys
+spec = importlib.util.spec_from_file_location('t', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trace.py'))
 T = importlib.util.module_from_spec(spec); spec.loader.exec_module(T)
 W, H, rgb = T.read_bmp(sys.argv[1])
 lines = json.loads(sys.argv[2])

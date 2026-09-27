@@ -1,8 +1,8 @@
 # migrate.py <old spec> <new spec>: carries every point an old trace.py spec gives in its plan's
 # frame - rooms, stairs, merge, drop, box, the floor's names and splits, the door pairs' plan side -
 # into the new spec's frame, through the photo both are laid on. Writes the new spec back.
-import importlib.util, json, sys
-spec = importlib.util.spec_from_file_location('t', '/Users/13rian/Development/3-K-Forge/KApp-worktrees/backend/scripts/plan-tracing/trace.py')
+import os, importlib.util, json, sys
+spec = importlib.util.spec_from_file_location('t', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trace.py'))
 T = importlib.util.module_from_spec(spec); spec.loader.exec_module(T)
 old = json.load(open(sys.argv[1])); new = json.load(open(sys.argv[2]))
 if old.get('resample', 2800) != new.get('resample', 2800):

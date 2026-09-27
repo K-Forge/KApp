@@ -3,8 +3,8 @@
 #        "bottom": [x0, x1, y_out, y_in]} - for each, along the stretch, from the outside coordinate
 # toward the inside one, the first pixel darker than 0.8 of the paper where the scan starts. A line
 # is fitted to those points, the strays (a jog, a door) dropped; the four lines' crossings print.
-import importlib.util, json, sys
-spec = importlib.util.spec_from_file_location('t', '/Users/13rian/Development/3-K-Forge/KApp-worktrees/backend/scripts/plan-tracing/trace.py')
+import os, importlib.util, json, sys
+spec = importlib.util.spec_from_file_location('t', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trace.py'))
 T = importlib.util.module_from_spec(spec); spec.loader.exec_module(T)
 W, H, rgb = T.read_bmp(sys.argv[1])
 cfg = json.loads(sys.argv[2])

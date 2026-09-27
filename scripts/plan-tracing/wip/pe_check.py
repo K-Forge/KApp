@@ -6,9 +6,9 @@
 # With out.jpg, a tile of the rectified plan with every outline drawn: green where it follows the
 # orange's edge, red where it does not; orange nobody covers is tinted magenta; rooms numbered.
 import importlib.util, json, math, subprocess, sys, os
-spec = importlib.util.spec_from_file_location('t', '/Users/13rian/Development/3-K-Forge/KApp-worktrees/backend/scripts/plan-tracing/trace.py')
+spec = importlib.util.spec_from_file_location('t', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trace.py'))
 T = importlib.util.module_from_spec(spec); spec.loader.exec_module(T)
-lspec = importlib.util.spec_from_file_location('L', '/Users/13rian/Development/3-K-Forge/KApp-worktrees/backend/scripts/plan-tracing/lines.py')
+lspec = importlib.util.spec_from_file_location('L', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lines.py'))
 L = importlib.util.module_from_spec(lspec); lspec.loader.exec_module(L)
 
 prefix, spec_path = sys.argv[1:3]

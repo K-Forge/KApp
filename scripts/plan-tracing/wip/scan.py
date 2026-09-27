@@ -1,8 +1,8 @@
 # scan.py <prefix> <spec> x0 x1 y0 y1 [eps] : the outline of the orange in a box, scanned column by
 # column (top and bottom of the orange in each), simplified - for rooms convex up and down, like
 # the auditorium, whose slanted walls the tracer steps.
-import importlib.util, json, sys
-spec = importlib.util.spec_from_file_location('t', '/Users/13rian/Development/3-K-Forge/KApp-worktrees/backend/scripts/plan-tracing/trace.py')
+import os, importlib.util, json, sys
+spec = importlib.util.spec_from_file_location('t', os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'trace.py'))
 T = importlib.util.module_from_spec(spec); spec.loader.exec_module(T)
 prefix, spec_path = sys.argv[1:3]
 x0, x1, y0, y1 = map(int, sys.argv[3:7])
