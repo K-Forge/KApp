@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, input, output, signal, viewChild } from '@angular/core';
 import type { Corridor, Point } from '../buildings/building.model';
 import { CATEGORY_COLORS, type SpaceCategory } from '../spaces/space.model';
+import { areaPath, streetLabel, type Box, type Surroundings } from '../ground/ground';
 import {
   boundsOf,
   isPlaced,
@@ -55,9 +56,9 @@ let uid = 0;
         #svg
         role="application"
         [attr.aria-label]="'Floor plan, ' + width() + ' by ' + height() + ' units'"
-        [attr.viewBox]="'0 0 ' + width() + ' ' + height()"
-        [attr.width]="width() * scale()"
-        [attr.height]="height() * scale()"
+        [attr.viewBox]="box().x + ' ' + box().y + ' ' + box().width + ' ' + box().height"
+        [attr.width]="box().width * scale()"
+        [attr.height]="box().height * scale()"
         (pointerdown)="onDown($event)"
         (pointermove)="onMove($event)"
         (pointerup)="onUp($event)"
@@ -70,7 +71,31 @@ let uid = 0;
           </pattern>
         </defs>
 
-        <rect class="paper" [attr.width]="width()" [attr.height]="height()" />
+        @if (ground(); as g) {
+          <g class="ground" aria-hidden="true">
+            @for (d of g.blocks; track $index) {
+              <path class="block" [attr.d]="d" />
+            }
+            @for (d of g.roadways; track $index) {
+              <path class="roadway" [attr.d]="d" />
+            }
+            @for (d of g.medians; track $index) {
+              <path class="median" [attr.d]="d" />
+            }
+            @for (d of g.sidewalks; track $index) {
+              <path class="sidewalk" [attr.d]="d" />
+            }
+            @for (street of g.labels; track $index) {
+              <text
+                class="street"
+                [attr.transform]="'translate(' + street.x + ' ' + street.y + ') rotate(' + street.angle + ')'"
+                [attr.font-size]="11 / scale()"
+              >{{ street.name }}</text>
+            }
+          </g>
+        }
+
+        <rect class="paper" [class.over-ground]="!!ground()" [attr.width]="width()" [attr.height]="height()" />
 
         @if (outline().length > 2) {
           <polygon class="outline" [attr.points]="points(outline())" />
@@ -170,6 +195,42 @@ let uid = 0;
     .paper {
       fill: var(--bg-elevated);
       stroke: color-mix(in srgb, var(--text) 14%, transparent);
+      vector-effect: non-scaling-stroke;
+    }
+    /* Over the ground the frame is only where the plan was traced: the block shows through it. */
+    .paper.over-ground {
+      fill: none;
+      stroke-dasharray: 6 4;
+    }
+    /* The city's layers, quiet enough that the floor stays what the eye goes to. The same in
+       both themes but for the block, which takes the page's own paper. */
+    .block {
+      fill: var(--bg-elevated);
+      stroke: color-mix(in srgb, var(--text) 45%, transparent);
+      stroke-width: 1.5;
+      vector-effect: non-scaling-stroke;
+    }
+    .roadway {
+      fill: color-mix(in srgb, var(--text) 16%, var(--bg-elevated));
+    }
+    .median {
+      fill: #b9d7a6;
+    }
+    .sidewalk {
+      fill: color-mix(in srgb, #d8c9ad 70%, var(--bg-elevated));
+      stroke: color-mix(in srgb, var(--text) 22%, transparent);
+      stroke-width: 0.75;
+      vector-effect: non-scaling-stroke;
+    }
+    .street {
+      fill: color-mix(in srgb, var(--text) 72%, transparent);
+      font-weight: 600;
+      text-anchor: middle;
+      dominant-baseline: central;
+      letter-spacing: 0.02em;
+      paint-order: stroke;
+      stroke: color-mix(in srgb, var(--text) 16%, var(--bg-elevated));
+      stroke-width: 3;
       vector-effect: non-scaling-stroke;
     }
     .outline {
@@ -293,6 +354,42 @@ export class FloorPlanComponent {
   readonly disabled = input(false);
   /** Asked while a room is being drawn or reshaped: whether that outline can be `key`'s. */
   readonly canPlace = input<(key: string | null, shape: Point[]) => boolean>(() => true);
+  /**
+   * The part of the plane shown, in the floor's units. The drawing by default; wider when the
+   * streets around the building are drawn too, since the frame the plans were traced in stops at
+   * the lot.
+   */
+  readonly view = input<Box | null>(null);
+  /** The block, sidewalks and streets around the building, in the floor's units. */
+  readonly surroundings = input<Surroundings | null>(null);
+
+  readonly box = computed<Box>(() => this.view() ?? { x: 0, y: 0, width: this.width(), height: this.height() });
+
+  /** The surroundings as paths, and where each street's name goes at this zoom. */
+  readonly ground = computed(() => {
+    const around = this.surroundings();
+    if (!around) return null;
+    const box = this.box();
+    const minLength = 90 / this.scale();
+    const seen = new Set<string>();
+    const labels: { name: string; x: number; y: number; angle: number }[] = [];
+    for (const street of around.streets) {
+      const at = streetLabel(street.path, box, minLength);
+      // One name per street and stretch: a street cut into pieces by the service would say it twice.
+      const key = `${street.name}@${at ? Math.round(at.x / (200 / this.scale())) + ',' + Math.round(at.y / (200 / this.scale())) : ''}`;
+      if (at && !seen.has(key)) {
+        seen.add(key);
+        labels.push({ name: street.name, ...at });
+      }
+    }
+    return {
+      blocks: around.blocks.map(areaPath),
+      sidewalks: around.sidewalks.map(areaPath),
+      roadways: around.roadways.map(areaPath),
+      medians: around.medians.map(areaPath),
+      labels,
+    };
+  });
 
   /** A tap on the plan that is not a room's: where, in the drawing's units. */
   readonly pointTap = output<Point>();
@@ -503,8 +600,9 @@ export class FloorPlanComponent {
   private pointAt(event: PointerEvent, clamp = false): Point {
     const bounds = this.svg().nativeElement.getBoundingClientRect();
     const scale = this.scale();
-    let x = (event.clientX - bounds.left) / scale;
-    let y = (event.clientY - bounds.top) / scale;
+    const box = this.box();
+    let x = (event.clientX - bounds.left) / scale + box.x;
+    let y = (event.clientY - bounds.top) / scale + box.y;
     if (clamp) {
       x = Math.max(0, Math.min(this.width(), x));
       y = Math.max(0, Math.min(this.height(), y));

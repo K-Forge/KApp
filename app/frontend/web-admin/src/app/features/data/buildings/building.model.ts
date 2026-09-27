@@ -70,6 +70,23 @@ export interface Wing {
   note?: string | null;
 }
 
+/** Mirrors GeoPoint: a point on the earth, in degrees of WGS 84. */
+export interface GeoPoint {
+  lat: number;
+  lon: number;
+}
+
+/**
+ * Mirrors Placement: where a building's drawing lies on the ground - its top-left corner, the
+ * bearing its top edge faces and how long one unit of it is. One per building: every floor shares
+ * the building's drawing.
+ */
+export interface Placement {
+  origin: GeoPoint;
+  bearing: number;
+  metresPerUnit: number;
+}
+
 /** Mirrors Building in docs/api/map.openapi.yaml. */
 export interface Building {
   id: string;
@@ -80,6 +97,8 @@ export interface Building {
   aliases: string[];
   wings: Wing[];
   floors: Floor[];
+  /** Absent until somebody lays the building on the ground. */
+  placement?: Placement | null;
 }
 
 /** Mirrors BuildingRequest - the create/update payload. `id` is server-generated. */

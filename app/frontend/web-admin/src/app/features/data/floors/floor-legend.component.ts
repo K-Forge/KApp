@@ -80,7 +80,30 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
             </svg>
             Needs a look
           </li>
+          @if (groundSource()) {
+            <li>
+              <svg viewBox="0 0 28 18" aria-hidden="true">
+                <rect class="block" x="2" y="2" width="24" height="14" />
+              </svg>
+              City block
+            </li>
+            <li>
+              <svg viewBox="0 0 28 18" aria-hidden="true">
+                <rect class="sidewalk" x="1" y="5" width="26" height="8" />
+              </svg>
+              Sidewalk
+            </li>
+            <li>
+              <svg viewBox="0 0 28 18" aria-hidden="true">
+                <rect class="roadway" x="1" y="4" width="26" height="10" />
+              </svg>
+              Street
+            </li>
+          }
         </ul>
+        @if (groundSource(); as source) {
+          <p class="credit">Streets and blocks: {{ source }}</p>
+        }
       </div>
     </section>
   `,
@@ -210,6 +233,25 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
       stroke: var(--danger);
       stroke-width: 2;
     }
+    /* The ground's layers, as floor-plan.component.ts draws them. */
+    .block {
+      fill: var(--bg-elevated);
+      stroke: color-mix(in srgb, var(--text) 45%, transparent);
+      stroke-width: 1.5;
+    }
+    .sidewalk {
+      fill: color-mix(in srgb, #d8c9ad 70%, var(--bg-elevated));
+      stroke: color-mix(in srgb, var(--text) 22%, transparent);
+      stroke-width: 0.75;
+    }
+    .roadway {
+      fill: color-mix(in srgb, var(--text) 16%, var(--bg-elevated));
+    }
+    .credit {
+      margin: 0.5rem 0 0;
+      font-size: 0.6875rem;
+      color: var(--text-faint);
+    }
 
     @media (min-width: 900px) {
       .legend {
@@ -223,6 +265,8 @@ export class FloorLegendComponent {
   readonly spaces = input.required<readonly DraftSpace[]>();
   /** Type code to category, as the plan colours them. */
   readonly categories = input.required<ReadonlyMap<string, SpaceCategory>>();
+  /** Where the streets under the plan come from, while they are drawn; null when they are not. */
+  readonly groundSource = input<string | null>(null);
 
   readonly stairsFill = CATEGORY_COLORS.CIRCULATION;
   readonly unidentifiedFill = CATEGORY_COLORS.OTHER;

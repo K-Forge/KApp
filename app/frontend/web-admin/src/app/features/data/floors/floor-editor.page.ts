@@ -59,6 +59,9 @@ import {
   type RangeRequest,
 } from './floor-draft';
 import { clearDraft, loadDraft, storeDraft, type StoredDraft } from './floor-draft.store';
+import type { Ground } from '../ground/ground.model';
+import { GroundService } from '../ground/ground.service';
+import { placementForFloor, surroundings, type Box } from '../ground/ground';
 import { FloorLegendComponent } from './floor-legend.component';
 import { FloorPlanComponent, type EditorMode } from './floor-plan.component';
 import type { FloorDetail } from './floor.model';
@@ -224,11 +227,11 @@ const MAX_ZOOM = 8;
                           [attr.aria-label]="'North is ' + northWords(d.top) + (d.top === 'NORTH' ? '' : ' - turn the plan north up')"
                           [title]="'North is ' + northWords(d.top) + (d.top === 'NORTH' ? '' : ' - tap to turn the plan north up')">
                     <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true">
-                      <g [attr.transform]="'rotate(' + northAngle(d.top) + ' 16 16)'">
+                      <g [attr.transform]="'rotate(' + north() + ' 16 16)'">
                         <path d="M16 9 L20.5 21 L16 18 L11.5 21 Z" fill="currentColor" />
                       </g>
                       <!-- The letter stays upright, beyond the needle's tip. -->
-                      <text [attr.x]="northLetter(d.top).x" [attr.y]="northLetter(d.top).y" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="currentColor">N</text>
+                      <text [attr.x]="northLetter(north()).x" [attr.y]="northLetter(north()).y" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="currentColor">N</text>
                     </svg>
                   </button>
                 }
@@ -241,6 +244,15 @@ const MAX_ZOOM = 8;
                 <button type="button" class="btn btn-sm" aria-label="Zoom out" [disabled]="zoomSteps() <= minZoom" (click)="zoom(-1)">−</button>
                 <button type="button" class="btn btn-sm" aria-label="Fit to the screen" (click)="zoomSteps.set(0)">Fit</button>
                 <button type="button" class="btn btn-sm" aria-label="Zoom in" [disabled]="zoomSteps() >= maxZoom" (click)="zoom(1)">+</button>
+                @if (groundData() && floorPlacement()) {
+                  <button type="button" class="btn btn-sm streets" [class.on]="showGround()" [attr.aria-pressed]="showGround()"
+                          title="The block, the sidewalks and the streets around the building" (click)="toggleGround()">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                      <path d="M4 21 9 3M20 21 15 3M12 5v2M12 11v2M12 17v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    Streets
+                  </button>
+                }
               </div>
             </div>
             <p class="hint-line" aria-live="polite">
@@ -264,6 +276,8 @@ const MAX_ZOOM = 8;
                 [mode]="canvasMode()"
                 [disabled]="!!pendingDraft() || saving()"
                 [canPlace]="canPlace"
+                [view]="view()"
+                [surroundings]="around()"
                 (pointTap)="onPointTap($event)"
                 (spaceTap)="onSpaceTap($event)"
                 (boxDrawn)="onBoxDrawn($event)"
@@ -272,7 +286,7 @@ const MAX_ZOOM = 8;
                 (vertexRemoved)="onVertexRemoved($event.key, $event.index)"
               />
             </div>
-            <app-floor-legend [spaces]="d.spaces" [categories]="categories()" />
+            <app-floor-legend [spaces]="d.spaces" [categories]="categories()" [groundSource]="around() ? groundData()?.source ?? null : null" />
           </section>
 
           <aside class="card side" [class.locked]="!!pendingDraft()">
@@ -567,6 +581,14 @@ const MAX_ZOOM = 8;
       background: var(--primary);
       color: var(--text-on-accent);
     }
+    .streets {
+      gap: 0.35rem;
+    }
+    .streets.on {
+      background: var(--primary-bg);
+      color: var(--primary);
+      border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+    }
     .compass {
       display: inline-flex;
       align-items: center;
@@ -650,13 +672,13 @@ export class FloorEditorPage {
   private readonly spaceTypes = inject(SpaceTypesService);
   private readonly spacesService = inject(SpacesService);
   private readonly router = inject(Router);
+  private readonly ground = inject(GroundService);
 
   readonly minZoom = MIN_ZOOM;
   readonly maxZoom = MAX_ZOOM;
   readonly maxSize = MAX_SIZE;
   readonly compass = COMPASS;
   readonly compassLabels: Record<Compass, string> = { NORTH: 'North', EAST: 'East', SOUTH: 'South', WEST: 'West' };
-  readonly northAngle = northAngle;
   readonly statuses = FLOOR_STATUSES;
   readonly statusLabels = FLOOR_STATUS_LABELS;
   readonly accessibility = ACCESSIBILITY;
@@ -665,6 +687,9 @@ export class FloorEditorPage {
   readonly loading = signal(true);
   readonly loadError = signal<ApiError | null>(null);
   readonly buildingDoc = signal<Building | null>(null);
+  /** The city around the building's campus, when the building is laid on the ground. */
+  readonly groundData = signal<Ground | null>(null);
+  readonly showGround = signal(readShowGround());
   /** The floor as the server last returned it. */
   readonly detail = signal<FloorDetail | null>(null);
   readonly draft = signal<FloorDraft | null>(null);
@@ -713,9 +738,39 @@ export class FloorEditorPage {
 
   readonly categories = computed(() => new Map<string, SpaceCategory>(this.types().map((t) => [t.code, t.category])));
 
+  /** Where this floor's drawing lies on the ground, if the building is laid on it. */
+  readonly floorPlacement = computed(() => {
+    const placement = this.buildingDoc()?.placement;
+    const draft = this.draft();
+    return placement && draft ? placementForFloor(placement, draft.top, draft.width, draft.height) : null;
+  });
+
+  /** North, in degrees clockwise from the drawing's top: exact when the building is on the ground. */
+  readonly north = computed(() => {
+    const placement = this.floorPlacement();
+    return placement ? (360 - placement.bearing) % 360 : (northAngle(this.draft()?.top) ?? 0);
+  });
+
+  /** The plane shown: the drawing, and around it enough ground to take in its streets. */
+  readonly view = computed<Box | null>(() => {
+    const draft = this.draft();
+    const placement = this.floorPlacement();
+    if (!draft || !placement || !this.groundData() || !this.showGround()) return null;
+    const margin = Math.min(Math.max(draft.width, draft.height) * 0.5, GROUND_MARGIN_METRES / placement.metresPerUnit);
+    return { x: -margin, y: -margin, width: draft.width + 2 * margin, height: draft.height + 2 * margin };
+  });
+
+  /** The block, sidewalks and streets within the view, in the drawing's units. */
+  readonly around = computed(() => {
+    const view = this.view();
+    const ground = this.groundData();
+    const placement = this.floorPlacement();
+    return view && ground && placement ? surroundings(ground, placement, view) : null;
+  });
+
   /** Screen pixels per unit: the plan fitted to the width it has, then zoomed. */
   readonly scale = computed(() => {
-    const width = this.draft()?.width ?? 1;
+    const width = this.view()?.width ?? this.draft()?.width ?? 1;
     const fit = this.available() > 0 ? (this.available() - 2) / width : 1;
     return Math.max(0.05, fit * ZOOM_STEP ** this.zoomSteps());
   });
@@ -887,6 +942,12 @@ export class FloorEditorPage {
     }).subscribe({
       next: ({ building, detail, types, circulation }) => {
         this.buildingDoc.set(building);
+        this.groundData.set(null);
+        if (building.placement) {
+          this.ground.forCampus(building.campus).subscribe((ground) => {
+            if (this.buildingDoc() === building) this.groundData.set(ground);
+          });
+        }
         this.types.set(types);
         this.circulationElsewhere.set(circulation.content);
         this.detail.set(detail);
@@ -1344,8 +1405,18 @@ export class FloorEditorPage {
   }
 
   /** Where the compass's N goes: past the needle's tip, whichever way it points. */
-  northLetter(top: Compass | null): { x: number; y: number } {
-    const radians = ((northAngle(top) ?? 0) * Math.PI) / 180;
+  toggleGround(): void {
+    const shown = !this.showGround();
+    this.showGround.set(shown);
+    try {
+      localStorage.setItem(SHOW_GROUND_KEY, shown ? 'true' : 'false');
+    } catch {
+      // Non-fatal: the streets just come back on the next visit.
+    }
+  }
+
+  northLetter(degrees: number): { x: number; y: number } {
+    const radians = (degrees * Math.PI) / 180;
     return { x: 16 + 12.5 * Math.sin(radians), y: 16 - 12.5 * Math.cos(radians) };
   }
 
@@ -1498,5 +1569,17 @@ export class FloorEditorPage {
 
   time(iso: string): string {
     return new Date(iso).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+}
+
+/** Ground drawn around the plan, in metres: a sidewalk and the roadway beyond it, at least. */
+const GROUND_MARGIN_METRES = 16;
+const SHOW_GROUND_KEY = 'kapp-admin:floor-ground';
+
+function readShowGround(): boolean {
+  try {
+    return localStorage.getItem(SHOW_GROUND_KEY) !== 'false';
+  } catch {
+    return true;
   }
 }
