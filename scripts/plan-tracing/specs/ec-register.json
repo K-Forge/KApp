@@ -1,22 +1,35 @@
 {
   "building": "ec",
-  "why": "The PE draw the tower 17% and the south wing 15% narrower than the cadastre measures them; the north wing and the gaps between are right. Each pair is one wall, drawing x then true x: the Calle 63 facade (P2's library), the tower's west face (P3-P5), its east face (P1-P5), the south wing's west face (P3-P5 above the auditorium) and the Calle 62 facade (P5-P8). Mapped so, P1's Calle 63 facade lands on the inner edge of the sidewalk that runs under the north wing.",
-  "x": [[64, 53], [638, 625], [1150, 1243], [1437, 1521], [2144, 2355]],
+  "why": "The PE draw the tower 17% and the south wing 15% narrower than the cadastre measures them; the north wing and the gaps between are right. Each pair is one wall: where the plans put the rooms against it, then where the rooms go, a wall's thickness (10 units, 0.3 m) inside the cadastre's face. The walls are the Calle 63 facade (P2's library), the tower's west face (P3-P5), its east face (P1-P5), the south wing's west face (P3-P5, above the auditorium) and the Calle 62 facade (P5-P8). Mapped so, P1's rooms along the Calle 63 stand a wall inside the sidewalk that runs under the north wing.",
+  "x": [[64, 63], [638, 635], [1150, 1232], [1437, 1530], [2144, 2346]],
   "floors": {
     "P1": {
       "width": 2400,
       "groups": [
         {
           "spaces": ["P1-AUD*", "P1-20", "P1-23"],
-          "y": [[723, 590], [1273, 1281]],
-          "why": "The PE draw the auditorium's front 4 m short of the south wing's, which the auditorium's own plan and P3-P5 above it reach; its back, on the lot next door, is right."
+          "y": [[723, 650], [1273, 1271]],
+          "why": "The PE draw the auditorium shallower than the south wing it fills. Its back, on the lot next door, goes a wall inside the wing's; its front stops short of the wing's stepped front on the Carrera 9 Bis, leaving the foyer its own plan draws there."
         }
       ],
       "limits": [
-        {"space": "P1-24", "below": 2120, "why": "The hall stops where the tower does: past it the cadastre records no roof, and P2 above stops there too."},
-        {"space": "P1-24", "notch": [986, 1911], "why": "The tower's seven-floor part ends at y 1911; beside its eight-floor part, below that, is the open patio over the parking."},
-        {"space": "P1-RAMPA-VEHICULAR", "below": 2214, "why": "The ramp runs out to the lot's edge on Carrera 9A, not onto the sidewalk."},
-        {"space": "P1-AUD-VESTIBULO", "below": 1029, "why": "The lobby ends where the part it is in does; past it is the patio."}
+        {"space": "P1-24", "below": 2205, "why": "Brian: the central wing is roofed out to the Carrera 9A, though the cadastre records no part there. The hall runs to a wall inside the lot's edge."},
+        {"space": "P1-24", "left of": 1230, "why": "Its east wall is the tower's: past it is the open passage beside the Casa de Francisco de Paula Velez."},
+        {"space": "P1-RAMPA-VEHICULAR", "below": 2205, "why": "The ramp stays inside the lot, a wall short of the Carrera 9A sidewalk."},
+        {"space": "P1-AUD-VESTIBULO", "below": 1019, "why": "The lobby ends a wall short of the open passage."},
+        {"space": "P1-AUD-SALIDA-SUR", "left of": 2346, "why": "A wall inside the Calle 62 facade."},
+        {"space": "P1-AUD-ESCALERA", "left of": 2346, "why": "A wall inside the Calle 62 facade."},
+        {"space": "P1-20", "right of": 1616, "why": "Past the auditorium's west wall the cadastre leaves a gap between the south wing's parts, open to the passage."}
+      ],
+      "corridors": [
+        {"code": "PAS-CENTRAL", "name": "Eje central", "color": "#5B8DEF", "path": [[660, 540], [660, 1870]],
+         "why": "The PE's green route from the entrance on the Carrera 9 Bis, by the reception, down the food court to the ramp."},
+        {"code": "PAS-TRANSVERSAL", "name": "Pasillo transversal", "color": "#5B8DEF", "path": [[110, 858], [1300, 858]],
+         "why": "The PE's route from the exit on the Calle 63, under the north stair and the central lifts and stairs, to the auditorium's lobby."},
+        {"code": "PAS-SALIDA-9A", "name": "Paso a la salida de la Carrera 9A", "color": "#5B8DEF", "path": [[1224, 858], [1224, 2200]],
+         "why": "The PE's route down the open passage beside the Casa de Francisco de Paula Velez to the exit on the Carrera 9A."},
+        {"code": "PAS-SALON", "name": "Paso por el salon central", "color": "#5B8DEF", "path": [[966, 2086], [966, 1310], [1224, 1310]],
+         "why": "The PE's route across the central hall, out to the passage."}
       ]
     }
   }
