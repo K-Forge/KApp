@@ -84,8 +84,8 @@ Brian lo estableció en sitio, y las fotos lo confirman:
   - **Ala norte:** aulas hasta el P5; el P6 es terraza.
   - **Ala sur:** el auditorio ocupa P1–P2, hay aulas y oficinas de P3 a P5, y en el P6 está la
     terraza sur.
-  - **Ala central:** los ocho pisos. En el P6, el pasillo de oficinas que lleva a la terraza sur;
-    en el P7, una terraza pequeña encima de ese pasillo.
+  - **Ala central:** los ocho pisos. En el P6, el pasillo de oficinas que lleva a la terraza sur, y
+    en el P7 una terraza pequeña encima de él, están en la conexión sur (ver más abajo).
 - **Los PE de P6 a P8 dibujan la torre donde abajo está el ala norte.** Se movieron para que sus
   escaleras y ascensores queden encima de los de P3–P5. La silueta del ala sur que pintan en el
   P7 y el P8 se quitó, porque el ala termina en el P6.
@@ -109,12 +109,34 @@ Brian lo estableció en sitio, y las fotos lo confirman:
     7,7 m de ancho junto al ala norte, hasta cero en el ala sur. En la ortofoto es una plaza con
     gente y árboles, la aleta. La huella la tomó como ala central, y de P2 a P6 hay unos 22 m² de
     aulas encima de ella por piso.
-  - La fachada que queda al quitarla es ortogonal, con dos retrocesos de 2 m y 3 m hacia el sur.
-  - El lindero con la casa (lote 004) sí es diagonal. Una parte de un piso del EC lo sigue, y por
-    eso el escenario y el fondo del auditorio tienen muros diagonales en P1 y P2. La casa misma es
-    ortogonal.
+  - La huella deja la cuña con 0 pisos; así `place.py` no la vuelve a subir. La fachada que queda
+    es ortogonal, con retrocesos: el ala norte llega a la esquina y la torre queda atrás, con la
+    plaza enfrente (las fotos de dron y el render lo muestran).
   - RH es la casa de Francisco de Paula Vélez: lote 004, placas Carrera 9A # 62-12 a 62-22. El
-    vecino que no es de la universidad es el lote 001, Calle 62 # 9-46 a 9-60, de 5 pisos.
+    vecino que no es de la universidad es el lote 001, Calle 62 # 9-46 a 9-60, de 5 pisos, más bajo
+    que el ala sur. El ala sur llega hasta él, como dice el catastro.
+- **Las alas y sus conexiones, según Brian** (fotos de dron, 28 de septiembre de 2026). Primero fue
+  el ala central; después vinieron las alas y las conexiones, y cada conexión es de su ala.
+  - **Ala central:** los salones sin sufijo, la recepción de dos pisos (en el P2 no hay nada encima),
+    los ascensores, la mitad de la biblioteca, la cafetería 1 y la presidencia en el P8.
+  - **Ala norte:** las aulas con sufijo N, la cafetería 2, parte de la biblioteca del P2 y la terraza
+    norte del P6, sobre toda el ala.
+  - **Conexión norte**, del ala norte: la franja de dos pisos entre el ala norte y la torre. Tiene
+    la cocina en el P1 y el resto de la biblioteca en el P2. Desde el P3 es un jardín a cielo
+    abierto, con un pasillo en cada extremo (Carrera 9 Bis y Carrera 9A) y unas oficinas. Los
+    pasillos van en la huella sin predio, de 2,6 m de fondo; eso se supuso.
+  - **Conexión sur**, del ala sur: el bloque entre la torre y el auditorio. En el P1 es la entrada
+    del público al auditorio y en el P2 un pasillo; de P3 a P6 tiene aulas y oficinas, y en el P7 la
+    terraza pequeña. El catastro deja 0,5 m entre ella y el ala sur; esa ranura se llenó.
+  - **Ala sur:** en P1 y P2, el auditorio, con la forma de su PE. De P3 a P6 sobresale un poco de
+    él, con aulas con sufijo S, oficinas y parte de la terraza sur.
+  - **Detrás del auditorio**, entre él y la casa, hay un patio cubierto con techo corredizo y mesas
+    que va de la torre al edificio del vecino. Es de un piso y del EC. Se dibujó rectangular, de
+    2,7 m, aunque el catastro sigue el lindero diagonal con la casa y le daba al auditorio muros
+    diagonales.
+- **Los salones son rectangulares.** `register.py` cuadra toda pared que el ajuste corta. Las
+  esquinas en chaflán que dejó el trazado se completan si hay espacio, o se escalonan hacia
+  adentro. Solo el auditorio conserva la forma de su PE.
 
 ### Cómo se identifica un espacio
 
@@ -210,16 +232,13 @@ no exista y agregar lo que falte.
   encima de ellos, y el mapa quitó las cajas que los PE dibujan ahí.
 - [ ] **El extremo de la torre sobre la Carrera 9A:** si de P2 a P7 llega hasta la fachada, como
   dibujan los PE, o termina 3 m antes, como registra el catastro.
-- [ ] **P6:** dónde quedan las oficinas del ala sur dentro de la terraza sur, y la forma de la
-  terraza norte.
+- [ ] **P6:** dónde quedan las oficinas del ala sur dentro de la terraza sur, y si la terraza norte
+  ocupa toda el ala, como se dibujó.
 - [ ] El sótano: si lo usan peatones.
-- [ ] **La franja entre la casa (RH) y el auditorio:** si es del EC, un piso como dice el catastro,
-  o del vecino, como la dibuja Brian.
-- [ ] **Dónde termina el EC hacia la Calle 62.** El catastro lo lleva hasta el lindero del lote
-  001; los dos dibujos de Brian, unos 6 m antes. En esos 6 m hay aulas de P2 a P6.
-- [ ] **El bloque entre la torre y el auditorio** (4 pisos y 2 sótanos, según el catastro): si es
-  ala central o ala sur.
-- [ ] **La sala del auditorio:** si es en abanico, como la dibuja su PE, o rectangular.
+- [ ] **Los pasillos de la conexión norte**, de P3 a P5: su fondo (se supusieron 2,6 m) y dónde
+  quedan las oficinas.
+- [ ] **El patio cubierto detrás del auditorio:** su ancho (se supusieron 2,7 m) y por dónde se
+  entra.
 
 **BI**
 
