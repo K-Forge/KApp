@@ -80,14 +80,15 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
             </svg>
             Needs a look
           </li>
-          @if (margin()) {
+          @for (wing of marginWings(); track wing.code) {
             <li>
               <svg viewBox="0 0 28 18" aria-hidden="true">
-                <rect class="margin" x="2" y="2" width="11" height="14" />
-                <rect class="margin other" x="13" y="5" width="13" height="11" />
+                <rect [attr.class]="'margin wing-' + wing.code" x="2" y="2" width="24" height="14" />
               </svg>
-              Where this floor's rooms go, a shade per wing
+              {{ wing.name }}: where its rooms go on this floor
             </li>
+          }
+          @if (marginWings().length) {
             <li>
               <svg viewBox="0 0 28 18" aria-hidden="true">
                 <rect class="margin below" x="2" y="2" width="24" height="14" />
@@ -292,13 +293,20 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
       stroke-linecap: round;
     }
     .margin {
-      fill: color-mix(in srgb, var(--margin-c) 11%, transparent);
-      stroke: var(--margin-c);
+      --wing: var(--margin-other);
+      fill: color-mix(in srgb, var(--wing) 11%, transparent);
+      stroke: var(--wing);
       stroke-width: 1.5;
     }
-    .margin.other {
-      fill: color-mix(in srgb, var(--margin-n) 11%, transparent);
-      stroke: var(--margin-n);
+    .margin.wing-N {
+      --wing: var(--margin-n);
+    }
+    .margin.wing-C,
+    .margin.wing-none {
+      --wing: var(--margin-c);
+    }
+    .margin.wing-S {
+      --wing: var(--margin-s);
     }
     .neighbour {
       fill: color-mix(in srgb, var(--text) 7%, transparent);
@@ -307,6 +315,7 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
       stroke-dasharray: 4 3;
     }
     .margin.below {
+      --wing: var(--margin-c);
       fill: none;
       stroke-width: 2;
       stroke-dasharray: 0 4;
@@ -339,8 +348,8 @@ export class FloorLegendComponent {
   readonly groundSource = input<string | null>(null);
   /** Whether the building's cadastral outline is drawn with them. It has its own switch. */
   readonly cadastre = input(false);
-  /** Whether the building's margin is drawn. */
-  readonly margin = input(false);
+  /** The wings whose margin is drawn, each by the name its building gives it. */
+  readonly marginWings = input<readonly { code: string; name: string }[]>([]);
   /** Whether the buildings next door are drawn. */
   readonly neighbours = input(false);
 

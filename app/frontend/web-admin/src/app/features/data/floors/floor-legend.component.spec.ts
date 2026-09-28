@@ -81,4 +81,27 @@ describe('FloorLegendComponent', () => {
     fixture.detectChanges();
     expect(text()).toContain('per the cadastre');
   });
+
+  // Each wing's margin is its own colour on the plan, so the key says which wing is which.
+  it('names each wing whose margin shows, and the buildings next door', () => {
+    const fixture = TestBed.createComponent(FloorLegendComponent);
+    fixture.componentRef.setInput('spaces', []);
+    fixture.componentRef.setInput('categories', new Map());
+    fixture.componentRef.setInput('marginWings', [
+      { code: 'N', name: 'Ala norte' },
+      { code: 'C', name: 'Ala central' },
+      { code: 'S', name: 'Ala sur' },
+    ]);
+    fixture.componentRef.setInput('neighbours', true);
+    fixture.detectChanges();
+    const items = Array.from(fixture.nativeElement.querySelectorAll('li') as NodeListOf<HTMLElement>);
+    const text = items.map((li) => li.textContent?.trim() ?? '');
+    expect(text.filter((t) => t.startsWith('Ala '))).toEqual([
+      'Ala norte: where its rooms go on this floor',
+      'Ala central: where its rooms go on this floor',
+      'Ala sur: where its rooms go on this floor',
+    ]);
+    expect(fixture.nativeElement.querySelector('rect.margin.wing-S')).not.toBeNull();
+    expect(text).toContain('A building next door');
+  });
 });

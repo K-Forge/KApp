@@ -351,7 +351,7 @@ const MAX_ZOOM = 8;
               />
             </div>
             <app-floor-legend [spaces]="d.spaces" [categories]="categories()" [groundSource]="around() ? groundData()?.source ?? null : null"
-                              [cadastre]="!!around()?.footprint?.length" [margin]="!!marginsShown()"
+                              [cadastre]="!!around()?.footprint?.length" [marginWings]="marginWings()"
                               [neighbours]="neighbours().length > 0" />
           </section>
 
@@ -914,6 +914,16 @@ export class FloorEditorPage {
     const footprint = this.footprint();
     if (!placement || !footprint.length || !this.showMargin()) return null;
     return { current: margins(footprint, placement, this.level()), below: margins(footprint, placement, this.levelBelow()) };
+  });
+
+  /** The wings whose margin shows, named as the building names them, in its order. */
+  readonly marginWings = computed(() => {
+    const shown = this.marginsShown();
+    if (!shown) return [];
+    const codes = new Set([...shown.current, ...shown.below].map((m) => m.wing ?? 'none'));
+    const wings = this.buildingDoc()?.wings ?? [];
+    const named = wings.filter((w) => codes.has(w.code)).map((w) => ({ code: w.code, name: w.name }));
+    return codes.has('none') ? [...named, { code: 'none', name: this.buildingDoc()?.name ?? 'The building' }] : named;
   });
 
   /**
