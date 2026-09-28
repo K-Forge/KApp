@@ -2,6 +2,74 @@
   "building": "ec",
   "why": "The PE draw the tower 17% and the south wing 15% narrower than the cadastre measures them; the north wing and the gaps between are right. Each pair is one wall: where the plans put the rooms against it, then where the rooms go, a wall's thickness (10 units, 0.3 m) inside the cadastre's face. The walls are the Calle 63 facade (P2's library), the tower's west face (P3-P5), its east face (P1-P5), the south wing's west face (P3-P5, above the auditorium) and the Calle 62 facade (P5-P8). Mapped so, P1's rooms along the Calle 63 stand a wall inside the sidewalk that runs under the north wing.",
   "x": [[64, 63], [638, 635], [1150, 1232], [1437, 1530], [2144, 2346]],
+  "fit": true,
+  "fit why": "Until the architectural plans arrive, the drawings follow the building: every room a wall (0.3 m) inside the floor's margin, terraces on the roof of the floor below.",
+  "stack": {
+    "central lifts": {
+      "shape": [[929, 406], [1009, 406], [1009, 648], [929, 648]],
+      "spaces": {
+        "P1": "P1-ASC-CENTRAL",
+        "P2": "P2-ASC-CENTRAL",
+        "P3": "P3-ASC-CENTRAL",
+        "P4": "P4-ASC-CENTRAL",
+        "P5": "P5-ASC-CENTRAL",
+        "P6": "P6-ASC-CENTRAL",
+        "P7": "P7-ASC-CENTRAL",
+        "P8": "P8-ASC-CENTRAL"
+      },
+      "why": "Lifts stack. Where P3-P5 put them, the average of the three; P1 and P2 drew them 3 m nearer the Calle 63, and P1 5 m further from the Carrera 9 Bis, where Brian puts them beside the reception."
+    },
+    "main stair": {
+      "shape": [[1095, 406], [1251, 406], [1251, 743], [1095, 743]],
+      "spaces": {
+        "P1": "P1-ESC-PRINCIPAL",
+        "P2": "P2-ESC-PRINCIPAL",
+        "P3": "P3-ESC-PRINCIPAL",
+        "P4": "P4-ESC-PRINCIPAL",
+        "P5": "P5-ESC-PRINCIPAL",
+        "P6": "P6-ESC-PRINCIPAL",
+        "P7": "P7-ESC-PRINCIPAL",
+        "P8": "P8-ESC-PRINCIPAL"
+      },
+      "why": "Beside the central lifts, as on every plan; where P3-P5 put it."
+    },
+    "lifts by the toilets": {
+      "shape": [[911, 826], [1014, 826], [1014, 1019], [911, 1019]],
+      "spaces": {
+        "P2": "P2-ASC-BANOS",
+        "P3": "P3-ASC-BANOS",
+        "P4": "P4-ASC-BANOS",
+        "P5": "P5-ASC-BANOS",
+        "P6": "P6-ASC-BANOS",
+        "P7": "P7-ASC-BANOS",
+        "P8": "P8-ASC-BANOS"
+      },
+      "why": "Where P3-P5 put them; P1's plan draws none."
+    },
+    "emergency stair": {
+      "shape": [[647, 1773], [783, 1773], [783, 1943], [647, 1943]],
+      "spaces": {
+        "P2": "P2-ESC-EMERGENCIA",
+        "P3": "P3-ESC-EMERGENCIA",
+        "P4": "P4-ESC-EMERGENCIA",
+        "P5": "P5-ESC-EMERGENCIA",
+        "P6": "P6-ESC-EMERGENCIA",
+        "P7": "P7-ESC-EMERGENCIA"
+      },
+      "why": "Where P3-P5 put it, in the tower's west side. P1's plan draws its own stair elsewhere, by the ramp, and P8 none."
+    },
+    "north stair": {
+      "shape": [[89, 336], [259, 336], [259, 609], [89, 609]],
+      "spaces": {
+        "P1": "P1-12",
+        "P2": "P2-14",
+        "P3": "P3-12",
+        "P4": "P4-07",
+        "P5": "P5-07"
+      },
+      "why": "Where P2 puts it, in the north wing by the Carrera 9 Bis. P3-P5 put it over the gap the cadastre leaves in the wing, P1 3 m further back."
+    }
+  },
   "floors": {
     "P1": {
       "width": 2400,
@@ -84,13 +152,28 @@
       "width": 2400
     },
     "P3": {
-      "width": 2400
+      "width": 2400,
+      "unname": {
+        "P3-TRAMOYA-AUDITORIO": "Brian: that part of P3 has classrooms; there is no stage machinery on P3."
+      },
+      "extend": {
+        "left": ["P3-21", "P3-28", "P3-32", "P3-49"],
+        "why": "The plan draws the north wing's rooms 6 m short of the Calle 63 facade, which the wing reaches on every floor to P5."
+      }
     },
     "P4": {
-      "width": 2400
+      "width": 2400,
+      "extend": {
+        "left": ["P4-15", "P4-20", "P4-24", "P4-38", "P4-40"],
+        "why": "The plan draws the north wing's rooms 6 m short of the Calle 63 facade, which the wing reaches on every floor to P5."
+      }
     },
     "P5": {
-      "width": 2400
+      "width": 2400,
+      "extend": {
+        "left": ["P5-17", "P5-24", "P5-46", "P5-48"],
+        "why": "The plan draws the north wing's rooms 6 m short of the Calle 63 facade, which the wing reaches on every floor to P5."
+      }
     },
     "P6": {
       "place": {
