@@ -45,6 +45,11 @@ The spec:
                        "path": [[660, 540], [660, 1870]]}]
                                            walkable routes to add, in the drawing's units - the
                                            evacuation plans paint them as green arrows
+        "add": [{"code": "P3-JARDIN-INTERNO", "name": "...", "typeCode": "TERRACE", "wing": "N",
+                 "shape": [[458, 474], ...], "why": "..."}]
+                                           a space the plan does not draw and somebody saw on
+                                           site, where the spec puts it; for an inventoried space
+                                           the plan leaves unplaced, its code and shape only
      }}}
 
 Coordinates in "groups" and "limits" are the true ones except the pairs' first halves, which are
@@ -388,6 +393,19 @@ def main():
             moved.append(f"  corridor {c['code']:<15} {len(c['path'])} points")
     if corridors:
         floor["corridors"] = corridors
+    # Spaces the plan does not draw and somebody saw on site, where the spec puts them.
+    for added in rules.get("add", []):
+        shape = [{"x": x, "y": y} for x, y in added["shape"]]
+        known = next((sp for sp in floor["spaces"] if sp["code"] == added["code"]), None)
+        if known and known.get("shape"):
+            sys.exit(f"{args.floor} has {added['code']} drawn already")
+        if known:
+            known["shape"], known["doors"] = shape, []
+            moved.append(f"  {added['code']} placed")
+            continue
+        floor["spaces"].append({"code": added["code"], "wing": added["wing"], "name": added["name"],
+                                "typeCode": added["typeCode"], "aliases": [], "shape": shape, "doors": []})
+        moved.append(f"  added {added['code']}")
     # In the order scripts/export-map-snapshot.py writes a floor, so an export changes nothing.
     order = ["code", "level", "name", "status", "accessibility", "note", "width", "height", "top",
              "outline", "corridors", "spaces"]
