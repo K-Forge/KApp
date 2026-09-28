@@ -61,7 +61,8 @@ import {
 import { clearDraft, loadDraft, storeDraft, type StoredDraft } from './floor-draft.store';
 import type { Ground } from '../ground/ground.model';
 import { GroundService } from '../ground/ground.service';
-import { groundToDrawing, margins, placementForFloor, surroundings, type Box } from '../ground/ground';
+import { BuildingsService } from '../buildings/buildings.service';
+import { groundToDrawing, margins, outlineOf, placementForFloor, reaches, surroundings, type Box } from '../ground/ground';
 import { FloorLegendComponent } from './floor-legend.component';
 import { FloorPlanComponent, type EditorMode } from './floor-plan.component';
 import type { FloorDetail } from './floor.model';
@@ -266,33 +267,42 @@ const MAX_ZOOM = 8;
                   </svg>
                   Corridors
                 </button>
-                  @if (floorPlacement() && hasFootprint()) {
-                    <button type="button" class="btn btn-sm layer" [class.on]="showMargin()" [attr.aria-pressed]="showMargin()"
-                            title="Where this floor's rooms go, wing by wing, and the floor below's, dotted" (click)="toggleMargin()">
-                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                        <path d="M3 5h8v14H3zM11 8h10v11H11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
-                      </svg>
-                      Margin
-                    </button>
-                  }
-                  @if (floorPlacement() && groundData()) {
-                    <button type="button" class="btn btn-sm layer" [class.on]="showGround()" [attr.aria-pressed]="showGround()"
-                            title="The block, the sidewalks and the streets around the building" (click)="toggleGround()">
-                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                        <path d="M4 21 9 3M20 21 15 3M12 5v2M12 11v2M12 17v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                      </svg>
-                      Streets
-                    </button>
-                  }
-                  @if (floorPlacement() && groundData() && showGround() && hasFootprint()) {
-                    <button type="button" class="btn btn-sm layer" [class.on]="showCadastre()" [attr.aria-pressed]="showCadastre()"
-                            title="The building's outline as the cadastre records it, the pink lines" (click)="toggleCadastre()">
-                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                        <path d="M4 4h10v6h6v10H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-dasharray="3 2.5" />
-                      </svg>
-                      Cadastre
-                    </button>
-                  }
+                @if (floorPlacement() && hasFootprint()) {
+                  <button type="button" class="btn btn-sm layer" [class.on]="showMargin()" [attr.aria-pressed]="showMargin()"
+                          title="Where this floor's rooms go, wing by wing, and the floor below's, dotted" (click)="toggleMargin()">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                      <path d="M3 5h8v14H3zM11 8h10v11H11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                    </svg>
+                    Margin
+                  </button>
+                }
+                @if (floorPlacement() && groundData()) {
+                  <button type="button" class="btn btn-sm layer" [class.on]="showGround()" [attr.aria-pressed]="showGround()"
+                          title="The block, the sidewalks and the streets around the building" (click)="toggleGround()">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                      <path d="M4 21 9 3M20 21 15 3M12 5v2M12 11v2M12 17v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    Streets
+                  </button>
+                }
+                @if (floorPlacement() && groundData() && showGround() && hasFootprint()) {
+                  <button type="button" class="btn btn-sm layer" [class.on]="showCadastre()" [attr.aria-pressed]="showCadastre()"
+                          title="The building's outline as the cadastre records it, the pink lines" (click)="toggleCadastre()">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                      <path d="M4 4h10v6h6v10H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-dasharray="3 2.5" />
+                    </svg>
+                    Cadastre
+                  </button>
+                }
+                @if (floorPlacement() && neighbourBuildings().length) {
+                  <button type="button" class="btn btn-sm layer" [class.on]="showNeighbours()" [attr.aria-pressed]="showNeighbours()"
+                          title="The buildings next door, to see and not to edit" (click)="toggleNeighbours()">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                      <path d="M3 21V10l5-4 5 4v11M13 21v-8h8v8M3 21h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-dasharray="3 2" />
+                    </svg>
+                    Neighbours
+                  </button>
+                }
               </div>
               @if (showCorridors() || mode() === 'corridor') {
                 <label class="thickness text-muted">
@@ -326,6 +336,7 @@ const MAX_ZOOM = 8;
                 [showRooms]="showRooms()"
                 [showCorridors]="showCorridors() || mode() === 'corridor'"
                 [corridorWidth]="corridorWidth()"
+                [neighbours]="neighbours()"
                 [canPlace]="canPlace"
                 [view]="view()"
                 [surroundings]="around()"
@@ -340,7 +351,8 @@ const MAX_ZOOM = 8;
               />
             </div>
             <app-floor-legend [spaces]="d.spaces" [categories]="categories()" [groundSource]="around() ? groundData()?.source ?? null : null"
-                              [cadastre]="!!around()?.footprint?.length" [margin]="!!marginsShown()" />
+                              [cadastre]="!!around()?.footprint?.length" [margin]="!!marginsShown()"
+                              [neighbours]="neighbours().length > 0" />
           </section>
 
           <aside class="card side" [class.locked]="!!pendingDraft()">
@@ -772,6 +784,7 @@ export class FloorEditorPage {
   private readonly spacesService = inject(SpacesService);
   private readonly router = inject(Router);
   private readonly ground = inject(GroundService);
+  private readonly buildingsService = inject(BuildingsService);
 
   readonly minZoom = MIN_ZOOM;
   readonly maxZoom = MAX_ZOOM;
@@ -802,6 +815,10 @@ export class FloorEditorPage {
   readonly showCorridors = signal(readShown(SHOW_CORRIDORS_KEY));
   /** How thick the corridors are drawn, in screen pixels: thin, unless this device chose thicker. */
   readonly corridorWidth = signal(readNumber(CORRIDOR_WIDTH_KEY, 3, 1, 8));
+  /** Whether the buildings next door are drawn. */
+  readonly showNeighbours = signal(readShown(SHOW_NEIGHBOURS_KEY));
+  /** The other buildings of the campus, for the ones next door. */
+  readonly neighbourBuildings = signal<Building[]>([]);
   /** The floor as the server last returned it. */
   readonly detail = signal<FloorDetail | null>(null);
   readonly draft = signal<FloorDraft | null>(null);
@@ -913,6 +930,27 @@ export class FloorEditorPage {
     return ground.sidewalks
       .map((ring) => ring.map((c) => groundToDrawing(placement, c)))
       .filter((ring) => ring.some((p) => p.x > -reach && p.y > -reach && p.x < draft.width + reach && p.y < draft.height + reach));
+  });
+
+  /** The buildings next door as outlines on this floor's drawing: each one's parts taken as one. */
+  readonly neighbours = computed(() => {
+    const placement = this.floorPlacement();
+    const draft = this.draft();
+    const own = this.buildingDoc()?.code;
+    const level = this.level();
+    if (!placement || !draft || !this.showNeighbours()) return [];
+    const reach = GROUND_MARGIN_METRES / placement.metresPerUnit;
+    const near = (ring: Point[]) =>
+      ring.some((p) => p.x > -reach && p.y > -reach && p.x < draft.width + reach && p.y < draft.height + reach);
+    return this.neighbourBuildings()
+      .filter((b) => b.code !== own && b.footprint?.length)
+      .map((b) => ({
+        code: b.code,
+        name: b.name,
+        outlines: outlineOf(b.footprint!.map((part) => part.ring)).map((ring) => ring.map((c) => groundToDrawing(placement, c))),
+        below: !b.footprint!.some((part) => reaches(part, level)),
+      }))
+      .filter((n) => n.outlines.some(near));
   });
 
   private readonly footprint = computed(() => this.buildingDoc()?.footprint ?? []);
@@ -1094,10 +1132,18 @@ export class FloorEditorPage {
       next: ({ building, detail, types, circulation }) => {
         this.buildingDoc.set(building);
         this.groundData.set(null);
+        this.neighbourBuildings.set([]);
         if (building.placement) {
           this.ground.forCampus(building.campus).subscribe((ground) => {
             if (this.buildingDoc() === building) this.groundData.set(ground);
           });
+          // Only for the buildings next door: the floor is editable without them.
+          this.buildingsService
+            .list(building.campus)
+            .pipe(catchError(() => of([] as Building[])))
+            .subscribe((all) => {
+              if (this.buildingDoc() === building) this.neighbourBuildings.set(all);
+            });
         }
         this.types.set(types);
         this.circulationElsewhere.set(circulation.content);
@@ -1566,6 +1612,11 @@ export class FloorEditorPage {
     if (!this.showRooms()) this.selectedKey.set(null);
   }
 
+  toggleNeighbours(): void {
+    this.showNeighbours.update((shown) => !shown);
+    remember(SHOW_NEIGHBOURS_KEY, this.showNeighbours());
+  }
+
   setCorridorWidth(event: Event): void {
     const width = Math.min(8, Math.max(1, Number((event.target as HTMLInputElement).value) || 3));
     this.corridorWidth.set(width);
@@ -1756,6 +1807,7 @@ const SHOW_CADASTRE_KEY = 'kapp-admin:floor-cadastre';
 const SHOW_MARGIN_KEY = 'kapp-admin:floor-margin';
 const SHOW_ROOMS_KEY = 'kapp-admin:floor-rooms';
 const SHOW_CORRIDORS_KEY = 'kapp-admin:floor-corridors';
+const SHOW_NEIGHBOURS_KEY = 'kapp-admin:floor-neighbours';
 const CORRIDOR_WIDTH_KEY = 'kapp-admin:floor-corridor-width';
 
 /** A number this device keeps, within bounds, or `fallback`. */

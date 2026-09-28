@@ -108,6 +108,22 @@ let uid = 0;
         <!-- The drawing's own paper: under everything drawn on the floor, the margins included. -->
         <rect class="paper" [class.over-ground]="!!ground()" [attr.width]="width()" [attr.height]="height()" />
 
+        <!-- The buildings next door, from above: there to see, not to edit. -->
+        @if (neighbourPaths().length) {
+          <g class="neighbours" aria-hidden="true" [attr.mask]="walkPaths().length ? 'url(#' + walkMaskId + ')' : null">
+            @for (n of neighbourPaths(); track n.code) {
+              @for (d of n.paths; track $index) {
+                <path class="neighbour" [class.below]="n.below" [attr.d]="d" />
+              }
+            }
+          </g>
+          @for (n of neighbourPaths(); track n.code) {
+            <text class="neighbour-label" [attr.x]="n.at.x" [attr.y]="n.at.y" [attr.font-size]="12 / scale()">
+              <title>{{ n.name }}</title>{{ n.code }}
+            </text>
+          }
+        }
+
         <!-- Where this floor's rooms go, wing by wing, over the floor below's, dotted. -->
         @if (marginPaths(); as mp) {
           <g class="margins" aria-hidden="true">
@@ -297,6 +313,24 @@ let uid = 0;
       stroke: var(--nav-active-edge);
       stroke-dasharray: none;
     }
+    .neighbour {
+      fill: color-mix(in srgb, var(--text) 7%, transparent);
+      stroke: color-mix(in srgb, var(--text) 45%, transparent);
+      stroke-width: 1.5;
+      stroke-dasharray: 6 4;
+    }
+    .neighbour.below {
+      fill: none;
+      stroke-dasharray: 0 6;
+      stroke-linecap: round;
+    }
+    .neighbour-label {
+      fill: color-mix(in srgb, var(--text) 60%, transparent);
+      font-weight: 700;
+      text-anchor: middle;
+      dominant-baseline: central;
+      letter-spacing: 0.04em;
+    }
     /* The building's margin, wing by wing: close colours, so the wings read as one building. */
     .margin {
       --wing: var(--margin-other);
@@ -473,6 +507,18 @@ export class FloorPlanComponent {
   readonly corridorWidth = input(3);
   /** Off, the plan takes no touches - there is nothing on it to edit - without being greyed out. */
   readonly interactive = input(true);
+  /** The buildings next door, to see and not to edit: dotted where this floor is above their roof. */
+  readonly neighbours = input<{ code: string; name: string; outlines: Point[][]; below: boolean }[]>([]);
+
+  readonly neighbourPaths = computed(() =>
+    this.neighbours().map((n) => {
+      const points = n.outlines.flat();
+      const at = points.length
+        ? { x: points.reduce((sum, p) => sum + p.x, 0) / points.length, y: points.reduce((sum, p) => sum + p.y, 0) / points.length }
+        : { x: 0, y: 0 };
+      return { code: n.code, name: n.name, below: n.below, paths: n.outlines.map(areaPath), at };
+    }),
+  );
 
   readonly walkPaths = computed(() => this.sidewalks().map(areaPath));
   readonly marginPaths = computed(() => {

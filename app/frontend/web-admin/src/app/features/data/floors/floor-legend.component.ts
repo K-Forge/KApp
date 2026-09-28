@@ -95,6 +95,14 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
               Where the floor below's went
             </li>
           }
+          @if (neighbours()) {
+            <li>
+              <svg viewBox="0 0 28 18" aria-hidden="true">
+                <rect class="neighbour" x="2" y="2" width="24" height="14" />
+              </svg>
+              A building next door
+            </li>
+          }
           @if (groundSource()) {
             <li>
               <svg viewBox="0 0 28 18" aria-hidden="true">
@@ -292,6 +300,12 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
       fill: color-mix(in srgb, var(--margin-n) 11%, transparent);
       stroke: var(--margin-n);
     }
+    .neighbour {
+      fill: color-mix(in srgb, var(--text) 7%, transparent);
+      stroke: color-mix(in srgb, var(--text) 45%, transparent);
+      stroke-width: 1.5;
+      stroke-dasharray: 4 3;
+    }
     .margin.below {
       fill: none;
       stroke-width: 2;
@@ -327,6 +341,8 @@ export class FloorLegendComponent {
   readonly cadastre = input(false);
   /** Whether the building's margin is drawn. */
   readonly margin = input(false);
+  /** Whether the buildings next door are drawn. */
+  readonly neighbours = input(false);
 
   readonly stairsFill = CATEGORY_COLORS.CIRCULATION;
   readonly unidentifiedFill = CATEGORY_COLORS.OTHER;
