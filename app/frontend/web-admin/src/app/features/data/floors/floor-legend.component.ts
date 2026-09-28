@@ -99,18 +99,20 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
               </svg>
               Street
             </li>
-            <li>
-              <svg viewBox="0 0 28 18" aria-hidden="true">
-                <rect class="cadastre reaches" x="2" y="2" width="24" height="14" />
-              </svg>
-              The building on this floor, per the cadastre
-            </li>
-            <li>
-              <svg viewBox="0 0 28 18" aria-hidden="true">
-                <rect class="cadastre" x="2" y="2" width="24" height="14" />
-              </svg>
-              Parts of it that stop below this floor
-            </li>
+            @if (cadastre()) {
+              <li>
+                <svg viewBox="0 0 28 18" aria-hidden="true">
+                  <rect class="cadastre reaches" x="2" y="2" width="24" height="14" />
+                </svg>
+                The building on this floor, per the cadastre
+              </li>
+              <li>
+                <svg viewBox="0 0 28 18" aria-hidden="true">
+                  <rect class="cadastre" x="2" y="2" width="24" height="14" />
+                </svg>
+                Parts of it that stop below this floor
+              </li>
+            }
           }
         </ul>
         @if (groundSource(); as source) {
@@ -290,6 +292,8 @@ export class FloorLegendComponent {
   readonly categories = input.required<ReadonlyMap<string, SpaceCategory>>();
   /** Where the streets under the plan come from, while they are drawn; null when they are not. */
   readonly groundSource = input<string | null>(null);
+  /** Whether the building's cadastral outline is drawn with them. It has its own switch. */
+  readonly cadastre = input(false);
 
   readonly stairsFill = CATEGORY_COLORS.CIRCULATION;
   readonly unidentifiedFill = CATEGORY_COLORS.OTHER;

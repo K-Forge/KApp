@@ -66,4 +66,19 @@ describe('FloorLegendComponent', () => {
     expect(chips.length).toBe(7);
     expect(chips.filter((chip) => chip.classList.contains('empty')).length).toBe(6);
   });
+
+  // The cadastral outline has its own switch; with it off, the key must not explain lines the
+  // plan no longer draws.
+  it('explains the cadastre only while it is drawn', () => {
+    const fixture = render([space('301')]);
+    fixture.componentRef.setInput('groundSource', 'IDECA');
+    fixture.detectChanges();
+    const text = () => fixture.nativeElement.textContent as string;
+    expect(text()).toContain('Sidewalk');
+    expect(text()).not.toContain('per the cadastre');
+
+    fixture.componentRef.setInput('cadastre', true);
+    fixture.detectChanges();
+    expect(text()).toContain('per the cadastre');
+  });
 });

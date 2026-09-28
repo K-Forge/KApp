@@ -244,16 +244,29 @@ const MAX_ZOOM = 8;
                 <button type="button" class="btn btn-sm" aria-label="Zoom out" [disabled]="zoomSteps() <= minZoom" (click)="zoom(-1)">−</button>
                 <button type="button" class="btn btn-sm" aria-label="Fit to the screen" (click)="zoomSteps.set(0)">Fit</button>
                 <button type="button" class="btn btn-sm" aria-label="Zoom in" [disabled]="zoomSteps() >= maxZoom" (click)="zoom(1)">+</button>
-                @if (groundData() && floorPlacement()) {
-                  <button type="button" class="btn btn-sm streets" [class.on]="showGround()" [attr.aria-pressed]="showGround()"
+              </div>
+              <!-- Their own group, so on a phone they wrap onto a line together instead of one of
+                   them running off the edge of the card. -->
+              @if (groundData() && floorPlacement()) {
+                <div class="row layers">
+                  <button type="button" class="btn btn-sm layer" [class.on]="showGround()" [attr.aria-pressed]="showGround()"
                           title="The block, the sidewalks and the streets around the building" (click)="toggleGround()">
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
                       <path d="M4 21 9 3M20 21 15 3M12 5v2M12 11v2M12 17v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                     </svg>
                     Streets
                   </button>
-                }
-              </div>
+                  @if (showGround() && hasFootprint()) {
+                    <button type="button" class="btn btn-sm layer" [class.on]="showCadastre()" [attr.aria-pressed]="showCadastre()"
+                            title="The building's outline as the cadastre records it, the pink lines" (click)="toggleCadastre()">
+                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path d="M4 4h10v6h6v10H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-dasharray="3 2.5" />
+                      </svg>
+                      Cadastre
+                    </button>
+                  }
+                </div>
+              }
             </div>
             <p class="hint-line" aria-live="polite">
               @if (notice()) {
@@ -286,7 +299,8 @@ const MAX_ZOOM = 8;
                 (vertexRemoved)="onVertexRemoved($event.key, $event.index)"
               />
             </div>
-            <app-floor-legend [spaces]="d.spaces" [categories]="categories()" [groundSource]="around() ? groundData()?.source ?? null : null" />
+            <app-floor-legend [spaces]="d.spaces" [categories]="categories()" [groundSource]="around() ? groundData()?.source ?? null : null"
+                              [cadastre]="!!around()?.footprint?.length" />
           </section>
 
           <aside class="card side" [class.locked]="!!pendingDraft()">
@@ -581,10 +595,14 @@ const MAX_ZOOM = 8;
       background: var(--primary);
       color: var(--text-on-accent);
     }
-    .streets {
+    .zoom,
+    .layers {
+      flex-wrap: wrap;
+    }
+    .layer {
       gap: 0.35rem;
     }
-    .streets.on {
+    .layer.on {
       background: var(--primary-bg);
       color: var(--primary);
       border-color: color-mix(in srgb, var(--primary) 35%, transparent);
@@ -604,7 +622,8 @@ const MAX_ZOOM = 8;
     .compass:disabled {
       cursor: default;
     }
-    .zoom .btn {
+    .zoom .btn,
+    .layers .btn {
       min-width: 2.5rem;
       min-height: 2.5rem;
       font-size: 1.125rem;
@@ -689,7 +708,9 @@ export class FloorEditorPage {
   readonly buildingDoc = signal<Building | null>(null);
   /** The city around the building's campus, when the building is laid on the ground. */
   readonly groundData = signal<Ground | null>(null);
-  readonly showGround = signal(readShowGround());
+  readonly showGround = signal(readShown(SHOW_GROUND_KEY));
+  /** Whether the building's cadastral outline is drawn over the streets. Off lets the rooms be read alone. */
+  readonly showCadastre = signal(readShown(SHOW_CADASTRE_KEY));
   /** The floor as the server last returned it. */
   readonly detail = signal<FloorDetail | null>(null);
   readonly draft = signal<FloorDraft | null>(null);
@@ -766,9 +787,12 @@ export class FloorEditorPage {
     const ground = this.groundData();
     const placement = this.floorPlacement();
     return view && ground && placement
-      ? surroundings(ground, placement, view, this.buildingDoc()?.footprint ?? [], this.detail()?.level ?? 1)
+      ? surroundings(ground, placement, view, this.showCadastre() ? this.footprint() : [], this.detail()?.level ?? 1)
       : null;
   });
+
+  private readonly footprint = computed(() => this.buildingDoc()?.footprint ?? []);
+  readonly hasFootprint = computed(() => this.footprint().length > 0);
 
   /** Screen pixels per unit: the plan fitted to the width it has, then zoomed. */
   readonly scale = computed(() => {
@@ -1406,17 +1430,17 @@ export class FloorEditorPage {
     return ({ NORTH: 'up', EAST: 'to the left', SOUTH: 'down', WEST: 'to the right' } as const)[top ?? 'NORTH'];
   }
 
-  /** Where the compass's N goes: past the needle's tip, whichever way it points. */
   toggleGround(): void {
-    const shown = !this.showGround();
-    this.showGround.set(shown);
-    try {
-      localStorage.setItem(SHOW_GROUND_KEY, shown ? 'true' : 'false');
-    } catch {
-      // Non-fatal: the streets just come back on the next visit.
-    }
+    this.showGround.update((shown) => !shown);
+    remember(SHOW_GROUND_KEY, this.showGround());
   }
 
+  toggleCadastre(): void {
+    this.showCadastre.update((shown) => !shown);
+    remember(SHOW_CADASTRE_KEY, this.showCadastre());
+  }
+
+  /** Where the compass's N goes: past the needle's tip, whichever way it points. */
   northLetter(degrees: number): { x: number; y: number } {
     const radians = (degrees * Math.PI) / 180;
     return { x: 16 + 12.5 * Math.sin(radians), y: 16 - 12.5 * Math.cos(radians) };
@@ -1577,11 +1601,21 @@ export class FloorEditorPage {
 /** Ground drawn around the plan, in metres: a sidewalk and the roadway beyond it, at least. */
 const GROUND_MARGIN_METRES = 16;
 const SHOW_GROUND_KEY = 'kapp-admin:floor-ground';
+const SHOW_CADASTRE_KEY = 'kapp-admin:floor-cadastre';
 
-function readShowGround(): boolean {
+/** A layer is shown unless this device put it away. */
+function readShown(key: string): boolean {
   try {
-    return localStorage.getItem(SHOW_GROUND_KEY) !== 'false';
+    return localStorage.getItem(key) !== 'false';
   } catch {
     return true;
+  }
+}
+
+function remember(key: string, shown: boolean): void {
+  try {
+    localStorage.setItem(key, shown ? 'true' : 'false');
+  } catch {
+    // Non-fatal: the layer just comes back on the next visit.
   }
 }
