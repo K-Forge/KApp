@@ -100,13 +100,14 @@ const BUILDING_COLOR = '#c2185b';
                 @for (d of m.medians; track $index) {
                   <path class="median" [attr.d]="d" />
                 }
-                @for (d of m.sidewalks; track $index) {
-                  <path class="sidewalk" [attr.d]="d" />
-                }
-                <!-- The blocks last: where the IDU's sidewalks and the cadastre's blocks disagree,
-                     the cadastre's property line wins, as the buildings are laid on it. -->
                 @for (d of m.blocks; track $index) {
                   <path class="block" [attr.d]="d" />
+                }
+                <!-- The sidewalks over the blocks, which reach the curb in places; the buildings,
+                     seen from above as the cadastre maps them, over both: a floor that hangs over
+                     a sidewalk hides it here as it does from the air. -->
+                @for (d of m.sidewalks; track $index) {
+                  <path class="sidewalk" [attr.d]="d" />
                 }
                 @for (s of m.labels; track $index) {
                   <text class="street" [attr.transform]="'translate(' + s.x + ' ' + s.y + ') rotate(' + s.angle + ')'" [attr.font-size]="11 / zooms[zoom()]">{{ s.name }}</text>

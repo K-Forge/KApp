@@ -79,18 +79,31 @@ let uid = 0;
             @for (d of g.medians; track $index) {
               <path class="median" [attr.d]="d" />
             }
-            @for (d of g.sidewalks; track $index) {
-              <path class="sidewalk" [attr.d]="d" />
-            }
-            <!-- The blocks last. The sidewalks are the IDU's and the blocks the cadastre's, and the
-                 two disagree by a metre in places - along the Calle 63 the sidewalk runs a metre into
-                 the block. The buildings are laid on the cadastre, so its property line wins. -->
             @for (d of g.blocks; track $index) {
               <path class="block" [attr.d]="d" />
             }
-            @for (part of g.footprint; track $index) {
-              <path class="footprint" [class.reaches]="part.reaches" [attr.d]="part.d" />
+            <!-- The sidewalks over the blocks. The blocks are the cadastre's and reach the curb in
+                 places - along the Calle 63 the sidewalk runs under the Edificio Central's north
+                 wing, inside its block - and a sidewalk hidden under a block reads as none. -->
+            @for (d of g.sidewalks; track $index) {
+              <path class="sidewalk" [attr.d]="d" />
             }
+            <!-- The cadastre maps the building from above. At the street it ends where the
+                 sidewalk starts; above, a floor may hang over it. -->
+            @if (g.atStreet) {
+              <mask [attr.id]="walkMaskId" maskUnits="userSpaceOnUse" [attr.x]="box().x" [attr.y]="box().y"
+                    [attr.width]="box().width" [attr.height]="box().height">
+                <rect [attr.x]="box().x" [attr.y]="box().y" [attr.width]="box().width" [attr.height]="box().height" fill="#fff" />
+                @for (d of g.sidewalks; track $index) {
+                  <path [attr.d]="d" fill="#000" />
+                }
+              </mask>
+            }
+            <g [attr.mask]="g.atStreet ? 'url(#' + walkMaskId + ')' : null">
+              @for (part of g.footprint; track $index) {
+                <path class="footprint" [class.reaches]="part.reaches" [attr.d]="part.d" />
+              }
+            </g>
             @for (street of g.labels; track $index) {
               <text
                 class="street"
@@ -408,6 +421,7 @@ export class FloorPlanComponent {
       roadways: around.roadways.map(areaPath),
       medians: around.medians.map(areaPath),
       footprint: around.footprint.map((part) => ({ d: areaPath(part.outline), reaches: part.reaches })),
+      atStreet: around.atStreet,
       labels,
     };
   });
@@ -424,6 +438,7 @@ export class FloorPlanComponent {
 
   readonly colors = CATEGORY_COLORS;
   readonly treadsId = `treads-${++uid}`;
+  readonly walkMaskId = `walks-${uid}`;
 
   /** A room being dragged or reshaped, drawn where the finger has it until it is let go. */
   private readonly dragged = signal<{ key: string; shape: Point[] } | null>(null);

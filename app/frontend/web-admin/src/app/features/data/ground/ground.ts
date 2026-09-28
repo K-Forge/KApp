@@ -33,6 +33,13 @@ export interface Surroundings {
   streets: { name: string; label: string; path: Point[] }[];
   /** The building's own parts from above; `reaches` when the part rises to the floor drawn. */
   footprint: { outline: Point[]; reaches: boolean }[];
+  /**
+   * Whether the floor drawn is at the street, or under it. The cadastre maps a building from
+   * above, so a part includes the floors that overhang the sidewalk - along the Calle 63 the
+   * Edificio Central's north wing does, on columns. At the street the building stops where the
+   * sidewalk starts.
+   */
+  atStreet: boolean;
 }
 
 /** Whether a part of `floors` floors and `basements` basements reaches the floor at `level`. */
@@ -130,6 +137,7 @@ export function surroundings(
       .map((s) => ({ name: s.name, label: s.label, path: toDrawing(s.path) }))
       .filter((s) => within(s.path)),
     footprint: footprint.map((part) => ({ outline: toDrawing(part.ring), reaches: reaches(part, level) })),
+    atStreet: level <= 1,
   };
 }
 
