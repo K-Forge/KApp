@@ -402,7 +402,9 @@ export class CampusMapPage {
     const out: MappedBuilding[] = [];
     for (const building of this.all()) {
       const wingColor = wingColors(building);
-      const parts = (building.footprint ?? []).map((part) => {
+      // A part with no floor and no basement is ground the cadastre drew as built and is not, like
+      // the plaza in front of the Edificio Central: it is kept in the footprint, not drawn.
+      const parts = (building.footprint ?? []).filter((part) => part.floors > 0 || part.basements > 0).map((part) => {
         const points = part.ring.map((c) => this.toMap(c));
         return {
           points,
