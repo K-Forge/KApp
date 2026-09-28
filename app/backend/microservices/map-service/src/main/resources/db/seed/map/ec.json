@@ -24,11 +24,11 @@
   ],
   "placement": {
     "origin": {
-      "lat": 4.6485385,
-      "lon": -74.0611587
+      "lat": 4.6485245,
+      "lon": -74.0611566
     },
-    "bearing": 127.0,
-    "metresPerUnit": 0.02929
+    "bearing": 128.13,
+    "metresPerUnit": 0.02911
   },
   "footprint": [
     {
@@ -4079,30 +4079,6 @@
           "wing": "C",
           "name": "Aula 512",
           "typeCode": "CLASSROOM"
-        },
-        {
-          "code": "P5-05",
-          "name": "Escalera por identificar",
-          "typeCode": "STAIRS",
-          "aliases": [],
-          "shape": [
-            {
-              "x": 0,
-              "y": 30
-            },
-            {
-              "x": 40,
-              "y": 30
-            },
-            {
-              "x": 40,
-              "y": 100
-            },
-            {
-              "x": 0,
-              "y": 100
-            }
-          ]
         },
         {
           "code": "P5-06",

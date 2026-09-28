@@ -909,6 +909,8 @@ def main():
     flight = size("flight", 30)
     stairs = [s for s in stairs if not any(overlap_box(s, r) for r in rooms)
               and min(s[2][0] - s[0][0], s[2][1] - s[0][1]) >= flight]
+    # A "drop" point takes out a staircase the strokes of a sign or the plaque's edge made, too.
+    stairs = [s for s in stairs if not any(inside(s, x, y) for x, y in spec.get("drop", []))]
     for drawn in spec.get("stairs", []):
         shape = [tuple(q) for q in drawn]
         stairs = [s for s in stairs if not overlap_box(s, shape)] + [shape]
