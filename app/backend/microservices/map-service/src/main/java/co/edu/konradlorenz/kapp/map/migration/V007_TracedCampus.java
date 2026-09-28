@@ -20,9 +20,12 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -48,12 +51,19 @@ import static org.springframework.data.mongodb.core.query.Query.query;
  *       load wrote, created with the building and never updated. A floor somebody worked on -
  *       a space edited, or added through the spaces screen - is left exactly as it is, and named
  *       in the log.</li>
+ *   <li>A floor somebody worked on is redrawn too when the last load's version of it is known:
+ *       what they changed since is carried onto the new drawing ({@link FloorMerge}), and the floor
+ *       as it was is kept whole in {@code map_replaced_floors} first. It stays somebody's work, so
+ *       the next load merges again. When the two do not fit together - two rooms sharing floor -
+ *       it is left as it is.</li>
  *   <li>A replaced space keeps its id: the snapshot's version of a room is the same room.</li>
  *   <li>The building's own name, description and other names are taken from the snapshot only
  *       if the building was never edited either. Wings the snapshot declares and the building
  *       lacks are always added, since the snapshot's spaces may be in them. Its placement on the
  *       ground and its footprint are taken from the snapshot too when it was never edited, or
- *       never had them.</li>
+ *       never had them. Once a load has recorded what it wrote ({@link SnapshotBases}), each of
+ *       these is compared with that instead: saving a floor touches the building too, and is not
+ *       an edit of its name or its footprint.</li>
  * </ul>
  *
  * <p>Nothing it writes counts as an edit: floors stay at version 0 and spaces keep
@@ -101,6 +111,9 @@ public class V007_TracedCampus {
                         + "{} placeholder building(s) and {} placeholder space(s) removed",
                 result.buildingsAdded(), result.floorsReplaced(), result.spacesWritten(),
                 result.placeholderBuildingsRemoved(), result.placeholderSpacesRemoved());
+        if (!result.merged().isEmpty()) {
+            log.info("Floors somebody worked on, redrawn with their changes: {}", result.merged());
+        }
         if (!result.kept().isEmpty()) {
             log.warn("Floors somebody worked on, left as they are: {}", result.kept());
         }
@@ -127,7 +140,7 @@ public class V007_TracedCampus {
      */
     record Result(int buildingsAdded, int floorsReplaced, int spacesWritten, long placeholderSpacesRemoved,
                   int placeholderBuildingsRemoved, List<String> kept, List<String> skipped,
-                  List<String> placeholdersInUse) {
+                  List<String> placeholdersInUse, List<String> merged) {
     }
 
     static Result apply(MongoTemplate mongo, List<SurveySnapshot.Building> snapshot, Instant now) {
@@ -155,7 +168,7 @@ public class V007_TracedCampus {
             }
         }
         return new Result(tally.buildings, tally.floors, tally.spaces, placeholderSpaces, placeholderBuildings,
-                tally.kept, tally.skipped, inUse);
+                tally.kept, tally.skipped, inUse, tally.merged);
     }
 
     private static final class Tally {
@@ -164,6 +177,7 @@ public class V007_TracedCampus {
         int spaces;
         final List<String> kept = new ArrayList<>();
         final List<String> skipped = new ArrayList<>();
+        final List<String> merged = new ArrayList<>();
     }
 
     private static void add(MongoTemplate mongo, SurveySnapshot.Building surveyed, Instant now, Tally tally) {
@@ -175,6 +189,7 @@ public class V007_TracedCampus {
                     space, building, stored, UUID.randomUUID().toString(), false, now, now)));
         }
         mongo.insertAll(documents);
+        SnapshotBases.record(mongo, surveyed, SnapshotBases.allFloors(surveyed));
         tally.buildings++;
         tally.floors += surveyed.floors().size();
         tally.spaces += documents.size();
@@ -183,6 +198,7 @@ public class V007_TracedCampus {
     private static void merge(MongoTemplate mongo, SurveySnapshot.Building surveyed, BuildingDocument stored,
                               Tally tally) {
         boolean buildingUntouched = stored.updatedAt().equals(stored.createdAt());
+        Optional<SurveySnapshot.Building> base = SnapshotBases.find(mongo, stored.code());
         Map<String, Wing> wings = new LinkedHashMap<>();
         stored.wings().forEach(w -> wings.put(w.code(), w));
         surveyed.wings().stream().map(MapMapper::toWing).forEach(w -> wings.putIfAbsent(w.code(), w));
@@ -193,59 +209,98 @@ public class V007_TracedCampus {
 
         List<SpaceDocument> writes = new ArrayList<>();
         List<SpaceDocument> removals = new ArrayList<>();
+        Set<String> written = new HashSet<>();
         for (SurveySnapshot.SnapshotFloor floor : surveyed.floors()) {
             List<SpaceDocument> onFloor = all.stream().filter(s -> s.floorCode().equals(floor.code())).toList();
             Floor current = floors.get(floor.code());
-            if (current != null && !untouched(current, onFloor, stored.createdAt())) {
-                tally.kept.add(stored.code() + " " + floor.code());
-                continue;
-            }
+            List<LayoutSpaceDto> spaces = floor.spaces();
             Floor next = floor.toFloor();
+            boolean merge = current != null && !untouched(current, onFloor, stored.createdAt());
+            if (merge) {
+                FloorMerge.Result merged = SnapshotBases.floor(base, floor.code())
+                        .map(was -> FloorMerge.merge(was, current, onFloor, floor)).orElse(null);
+                if (merged == null) {
+                    tally.kept.add(stored.code() + " " + floor.code());
+                    continue;
+                }
+                archive(mongo, stored, floor.code());
+                next = merged.floor();
+                spaces = merged.spaces();
+                tally.merged.add(stored.code() + " " + floor.code() + ": " + String.join("; ", merged.carried()));
+            }
             floors.put(next.code(), next);
+            written.add(floor.code());
             tally.floors++;
 
             Set<String> elsewhere = all.stream().filter(s -> !s.floorCode().equals(floor.code()))
                     .map(SpaceDocument::code).collect(Collectors.toSet());
             Map<String, SpaceDocument> previous = new LinkedHashMap<>();
             onFloor.forEach(s -> previous.put(s.code(), s));
-            for (LayoutSpaceDto space : floor.spaces()) {
+            for (LayoutSpaceDto space : spaces) {
                 if (elsewhere.contains(space.code())) {
                     tally.skipped.add(stored.code() + " " + floor.code() + " " + space.code());
                     continue;
                 }
                 SpaceDocument before = previous.remove(space.code());
                 Instant created = before == null ? stored.createdAt() : before.createdAt();
+                // A merged floor stays somebody's work; a redrawn one is as a load leaves it.
+                Instant updated = merge && before != null ? before.updatedAt() : created;
                 writes.add(new PendingSpace(space, next, before == null ? UUID.randomUUID().toString() : before.id(),
-                        created).document(stored, wings));
+                        created, updated).document(stored, wings));
             }
             removals.addAll(previous.values());
         }
 
+        // Each of the building's own fields is the snapshot's unless somebody changed it since the
+        // last load: against what that load wrote, when it is known, or by the building never
+        // having been edited at all.
+        SurveySnapshot.Building was = base.orElse(null);
         BuildingDocument merged = new BuildingDocument(stored.id(), stored.code(),
-                buildingUntouched ? surveyed.name() : stored.name(),
+                unedited(buildingUntouched, was == null ? null : was.name(), stored.name()) ? surveyed.name() : stored.name(),
                 stored.campus(),
-                buildingUntouched ? surveyed.description() : stored.description(),
-                buildingUntouched ? surveyed.aliases() : stored.aliases(),
+                unedited(buildingUntouched, was == null ? null : was.description(), stored.description())
+                        ? surveyed.description() : stored.description(),
+                unedited(buildingUntouched, was == null ? null : was.aliases(), stored.aliases())
+                        ? surveyed.aliases() : stored.aliases(),
                 List.copyOf(wings.values()), List.copyOf(floors.values()),
                 false, stored.createdAt(), stored.updatedAt(),
-                buildingUntouched || stored.placement() == null ? surveyed.toPlacement() : stored.placement(),
-                buildingUntouched || stored.footprint().isEmpty() ? surveyed.toFootprint() : stored.footprint());
+                stored.placement() == null || unedited(buildingUntouched, was == null ? null : was.toPlacement(),
+                        stored.placement()) ? surveyed.toPlacement() : stored.placement(),
+                stored.footprint().isEmpty() || unedited(buildingUntouched, was == null ? null : was.toFootprint(),
+                        stored.footprint()) ? surveyed.toFootprint() : stored.footprint());
         mongo.save(merged);
         removals.forEach(mongo::remove);
         // Written after the building, so a space's wing is always one its building declares.
         writes.forEach(mongo::save);
         tally.spaces += writes.size();
+        SnapshotBases.record(mongo, surveyed, written);
+    }
+
+    /** Nobody changed the field since the last load: the building was never edited, or it is still what that load wrote. */
+    private static boolean unedited(boolean buildingUntouched, Object base, Object stored) {
+        return buildingUntouched || (base != null && Objects.equals(base, stored));
+    }
+
+    /** The floor as it is, with every space on it, kept in {@code map_replaced_floors} before it is redrawn. */
+    private static void archive(MongoTemplate mongo, BuildingDocument stored, String floorCode) {
+        Document raw = mongo.getCollection("buildings").find(new Document("_id", stored.id())).first();
+        Document oldFloor = raw.getList("floors", Document.class).stream()
+                .filter(f -> floorCode.equals(f.getString("code"))).findFirst().orElseThrow();
+        List<Document> oldSpaces = mongo.getCollection("spaces")
+                .find(new Document("buildingId", stored.id()).append("floorCode", floorCode)).into(new ArrayList<>());
+        mongo.getCollection(V008_RedrawnCentralGroundFloor.REPLACED).insertOne(new Document("building", stored.code())
+                .append("floor", oldFloor).append("spaces", oldSpaces).append("replacedAt", new Date()));
     }
 
     /** A space of the snapshot, waiting for the building its wings and base code come from. */
-    private record PendingSpace(LayoutSpaceDto space, Floor floor, String id, Instant created) {
+    private record PendingSpace(LayoutSpaceDto space, Floor floor, String id, Instant created, Instant updated) {
 
         SpaceDocument document(BuildingDocument stored, Map<String, Wing> wings) {
             BuildingDocument withWings = new BuildingDocument(stored.id(), stored.code(), stored.name(),
                     stored.campus(), stored.description(), stored.aliases(), List.copyOf(wings.values()),
                     stored.floors(), false, stored.createdAt(), stored.updatedAt(), stored.placement(),
                     stored.footprint());
-            return SpaceService.toDocument(space, withWings, floor, id, false, created, created);
+            return SpaceService.toDocument(space, withWings, floor, id, false, created, updated);
         }
     }
 

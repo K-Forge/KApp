@@ -9,6 +9,7 @@ import co.edu.konradlorenz.kapp.map.domain.SpaceDocument;
 import co.edu.konradlorenz.kapp.map.service.MapMapper;
 import co.edu.konradlorenz.kapp.map.web.dto.FloorLayoutRequest;
 import co.edu.konradlorenz.kapp.map.web.dto.LayoutSpaceDto;
+import co.edu.konradlorenz.kapp.map.web.dto.PointDto;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoClient;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.TestPropertySource;
@@ -31,6 +33,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -246,7 +249,7 @@ class TracedCampusTest {
     }
 
     @Test
-    @DisplayName("a space somebody added through the spaces screen keeps its floor as it is")
+    @DisplayName("a space somebody added through the spaces screen stays when its floor is loaded again")
     void aSpaceAddedLaterKeepsItsFloor() {
         MongoTemplate fresh = new MongoTemplate(client, "traced_added_" + UUID.randomUUID().toString().substring(0, 8));
         V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.parse("2026-09-20T10:00:00Z"));
@@ -261,7 +264,9 @@ class TracedCampusTest {
 
         V007_TracedCampus.Result again = V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.now());
 
-        assertThat(again.kept()).containsExactly(surveyed.code() + " " + floor);
+        // The load knows what it wrote, so it redraws the floor and carries the space over.
+        assertThat(again.kept()).isEmpty();
+        assertThat(again.merged()).singleElement().satisfies(m -> assertThat(m).startsWith(surveyed.code() + " " + floor));
         assertThat(fresh.exists(query(where("code").is("ADDED-1")), SpaceDocument.class)).isTrue();
     }
 
@@ -316,6 +321,95 @@ class TracedCampusTest {
                 .anyMatch(s -> "MINE-1".equals(s.getString("code")));
         assertThat(V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.now()).kept())
                 .as("the redrawn floor is one a load wrote").isEmpty();
+    }
+
+    @Test
+    @DisplayName("a floor somebody named is redrawn with their names on the new drawing, and kept aside whole first")
+    void namesGoOntoTheRedrawnFloor() {
+        MongoTemplate fresh = new MongoTemplate(client, "traced_merge_" + UUID.randomUUID().toString().substring(0, 8));
+        V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.parse("2026-09-20T10:00:00Z"));
+        SurveySnapshot.Building ec = SNAPSHOT.stream().filter(b -> b.code().equals("EC")).findFirst().orElseThrow();
+        SurveySnapshot.SnapshotFloor p1 = ec.floors().stream().filter(f -> f.code().equals("P1")).findFirst().orElseThrow();
+        LayoutSpaceDto box = p1.spaces().stream()
+                .filter(sp -> "OTHER".equals(sp.typeCode()) && sp.shape() != null && sp.shape().size() == 4)
+                .findFirst().orElseThrow();
+        LayoutSpaceDto cafeteria = p1.spaces().stream().filter(sp -> sp.shape() == null).findFirst().orElseThrow();
+        BuildingDocument central = fresh.findOne(query(where("code").is("EC")), BuildingDocument.class);
+
+        // In the editor: the box given to the inventoried space, and the floor saved.
+        Query onP1 = query(where("buildingId").is(central.id()).and("floorCode").is("P1"));
+        SpaceDocument given = fresh.findOne(query(where("buildingId").is(central.id()).and("code").is(box.code())),
+                SpaceDocument.class);
+        fresh.updateFirst(query(where("buildingId").is(central.id()).and("code").is(cafeteria.code())),
+                new Update().set("shape", given.shape())
+                        .set("updatedAt", Instant.parse("2026-09-21T10:00:00Z")),
+                SpaceDocument.class);
+        fresh.remove(given);
+        fresh.getCollection("buildings").updateOne(
+                new Document("_id", central.id()).append("floors.code", "P1"),
+                new Document("$set", new Document("floors.$.version", 2L).append("updatedAt", new Date())));
+        long before = fresh.count(onP1, SpaceDocument.class);
+
+        // The snapshot then draws that box 4 units in from each side.
+        List<PointDto> shrunk = inset(box.shape(), 4);
+        SurveySnapshot.Building redrawn = withFloor(ec, new SurveySnapshot.SnapshotFloor(p1.code(), p1.level(), p1.name(),
+                p1.status(), p1.accessibility(), p1.note(), p1.width(), p1.height(), p1.top(), p1.outline(),
+                p1.corridors(), p1.spaces().stream().map(sp -> sp.code().equals(box.code()) ? new LayoutSpaceDto(
+                        sp.code(), sp.doorCode(), sp.wing(), sp.name(), sp.typeCode(), sp.aliases(), shrunk, List.of(),
+                        sp.accessVia(), sp.accessibility(), sp.note(), sp.capacity()) : sp).toList()));
+
+        V007_TracedCampus.Result result = V007_TracedCampus.apply(fresh, List.of(redrawn), Instant.now());
+
+        assertThat(result.kept()).isEmpty();
+        assertThat(result.merged()).singleElement().satisfies(m -> assertThat(m).startsWith("EC P1"));
+        SpaceDocument named = fresh.findOne(query(where("buildingId").is(central.id()).and("code").is(cafeteria.code())),
+                SpaceDocument.class);
+        assertThat(named.shape()).isEqualTo(MapMapper.toPoints(shrunk));
+        assertThat(fresh.exists(query(where("buildingId").is(central.id()).and("code").is(box.code())),
+                SpaceDocument.class)).isFalse();
+        assertThat(fresh.count(onP1, SpaceDocument.class)).isEqualTo(before);
+        Floor p1Stored = fresh.findOne(query(where("code").is("EC")), BuildingDocument.class).floor("P1").orElseThrow();
+        assertThat(p1Stored.version()).as("still somebody's work, so the next load merges again").isEqualTo(3);
+        assertThat(fresh.getCollection(V008_RedrawnCentralGroundFloor.REPLACED).countDocuments()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("saving a floor does not stop the building's footprint from being redrawn")
+    void aSavedFloorDoesNotKeepTheOldFootprint() {
+        MongoTemplate fresh = new MongoTemplate(client, "traced_base_" + UUID.randomUUID().toString().substring(0, 8));
+        V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.parse("2026-09-20T10:00:00Z"));
+        SurveySnapshot.Building ec = SNAPSHOT.stream().filter(b -> b.code().equals("EC")).findFirst().orElseThrow();
+        // A layout saved: the building's updatedAt moves, as the floor editor's save does.
+        fresh.getCollection("buildings").updateOne(new Document("code", "EC"),
+                new Document("$set", new Document("updatedAt", new Date())));
+        SurveySnapshot.Building fewerParts = new SurveySnapshot.Building(ec.code(), ec.name(), ec.campus(),
+                ec.description(), ec.aliases(), ec.wings(), ec.floors(), ec.placement(),
+                ec.footprint().subList(0, ec.footprint().size() - 1));
+
+        V007_TracedCampus.apply(fresh, List.of(fewerParts), Instant.now());
+
+        assertThat(fresh.findOne(query(where("code").is("EC")), BuildingDocument.class).footprint())
+                .isEqualTo(fewerParts.toFootprint());
+    }
+
+    private static SurveySnapshot.Building withFloor(SurveySnapshot.Building building, SurveySnapshot.SnapshotFloor floor) {
+        return new SurveySnapshot.Building(building.code(), building.name(), building.campus(), building.description(),
+                building.aliases(), building.wings(),
+                building.floors().stream().map(f -> f.code().equals(floor.code()) ? floor : f).toList(),
+                building.placement(), building.footprint());
+    }
+
+    /** A four-cornered outline pulled in by `by` on every side. */
+    private static List<PointDto> inset(
+            List<PointDto> shape, int by) {
+        int x0 = shape.stream().mapToInt(PointDto::x).min().orElseThrow() + by;
+        int x1 = shape.stream().mapToInt(PointDto::x).max().orElseThrow() - by;
+        int y0 = shape.stream().mapToInt(PointDto::y).min().orElseThrow() + by;
+        int y1 = shape.stream().mapToInt(PointDto::y).max().orElseThrow() - by;
+        return List.of(new PointDto(x0, y0),
+                new PointDto(x1, y0),
+                new PointDto(x1, y1),
+                new PointDto(x0, y1));
     }
 
     private static BuildingDocument building(String code, String floor, long version, boolean placeholder,

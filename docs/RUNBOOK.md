@@ -428,11 +428,20 @@ It asks for a token — the one on the portal's *My token* screen — and rewrit
 building under `map-service/src/main/resources/db/seed/map/`. Review the diff and open a PR with
 it, like any other change.
 
-Those files are also what a fresh database starts from: `V005_SurveyedCampus` loads them in place
-of the placeholder campus, and never over a building that already exists. The first version came
-from the campus survey — every floor undrawn, every space waiting in the editor's inventory. CI
-loads whatever is committed and saves every floor back through the floor editor's endpoint, so a
-snapshot the editor would refuse fails the build rather than the next database.
+Those files are also what every database is drawn from. `V007_TracedCampus` loads them again at
+the first start after they change:
+
+- A floor nobody has touched is replaced.
+- A floor somebody saved in the portal keeps their work. The names they gave, what they typed and
+  the rooms they redrew are carried onto the new drawing, and the floor as it was is kept whole in
+  `map_replaced_floors` first.
+- If the two do not fit together, for example two rooms sharing floor, the floor is left as it is
+  and the log says so.
+
+It can tell what somebody changed because each load records what it wrote, in
+`map_snapshot_bases`. CI loads whatever is committed and saves every floor back through the floor
+editor's endpoint, so a snapshot the editor would refuse fails the build rather than the next
+database.
 
 The streets around the campus are not drawn by hand: they are the city's. To refresh them, or to
 take in a building further out, cut them again from Bogotá's reference map (IDECA, CC BY 4.0):
