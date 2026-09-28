@@ -9,13 +9,19 @@ import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
-/** The {@code FootprintPart} schema: one part of a building as the cadastre records it from above. */
-@Schema(name = "FootprintPart", description = "One part of a building as the city's cadastre records it from "
-        + "above: its outline on the ground and how many floors it rises.")
+/**
+ * The {@code FootprintPart} schema: one part of a building from above, as the cadastre records it
+ * or as it was found on site where the cadastre falls short.
+ */
+@Schema(name = "FootprintPart", description = "One part of a building from above, as the city's cadastre "
+        + "records it or, where the cadastre falls short, as it was found on site: its outline on the ground "
+        + "and how many floors it rises.")
 public record FootprintPartDto(
-        @Schema(description = "The cadastral lot the part stands on.", example = "008213024019")
+        @Schema(description = "The cadastral lot the part stands on. Absent for a part the cadastre does not "
+                + "record, found on site.", example = "008213024019")
         @Size(max = 30) String lot,
-        @Schema(description = "How many floors it rises above the street.", example = "8")
+        @Schema(description = "How many floors it rises above the street: the cadastre's count, unless checked "
+                + "on site.", example = "8")
         @NotNull @Min(0) @Max(200) Integer floors,
         @Schema(description = "How many floors it goes below the street.", example = "2")
         @NotNull @Min(0) @Max(20) Integer basements,

@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Map API
-  version: 3.2.0
+  version: 3.2.1
   summary: Schematic campus map and space search for Fundacion Universitaria Konrad Lorenz.
   description: |
     Digital campus map for Fundacion Universitaria Konrad Lorenz (Bogota, Colombia).
@@ -916,13 +916,14 @@ components:
     FootprintPart:
       type: object
       description: |
-        One part of a building as the city's cadastre records it from above. A building is seldom
-        one block - the Edificio Central is a strip of five floors along the Calle 63, a core of
-        eight and a south wing over its auditorium - and each part rises its own number of floors.
+        One part of a building from above, as the city's cadastre records it or, where the
+        cadastre falls short, as it was found on site. A building is seldom one block - the
+        Edificio Central is a strip of five floors along the Calle 63, a core of eight and a south
+        wing over its auditorium - and each part rises its own number of floors.
       required: [floors, basements, ring]
       properties:
-        lot: { type: string, maxLength: 30, description: The cadastral lot the part stands on., example: '008213024019' }
-        floors: { type: integer, minimum: 0, maximum: 200, description: How many floors it rises above the street., example: 8 }
+        lot: { type: string, maxLength: 30, description: "The cadastral lot the part stands on. Absent for a part the cadastre does not record, found on site.", example: '008213024019' }
+        floors: { type: integer, minimum: 0, maximum: 200, description: "How many floors it rises above the street: the cadastre's count, unless checked on site.", example: 8 }
         basements: { type: integer, minimum: 0, maximum: 20, description: How many it goes below., example: 2 }
         wing: { type: string, maxLength: 10, description: "The code of the building's wing it belongs to, when known.", example: C }
         ring: { $ref: '#/components/schemas/Ring' }

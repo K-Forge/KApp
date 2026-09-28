@@ -11,8 +11,10 @@ import java.util.List;
  * cadastre keeps each as a part of its own - which is what lets a map draw the building with its
  * true shape and tell its wings apart.
  *
- * @param lot       the cadastral lot the part stands on, as the cadastre codes it
- * @param floors    how many floors it rises above the street
+ * @param lot       the cadastral lot the part stands on, as the cadastre codes it; null for a part
+ *                  the cadastre does not record, found on site - a roofed stretch it missed
+ * @param floors    how many floors it rises above the street: the cadastre's count, unless
+ *                  checked on site
  * @param basements how many it goes below
  * @param wing      the code of the building's wing it belongs to, when somebody has said; null
  *                  otherwise

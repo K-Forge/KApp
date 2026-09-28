@@ -24,8 +24,10 @@ the top, 30 units a metre, with two metres round the building. Every floor with 
 it takes that frame, so whoever draws it later draws it in place.
 
 Either way every floor's `top` becomes the quarter the bearing is nearest, and the floors nobody
-has drawn take the drawn floors' frame. `--footprint` writes the parts as the building's footprint;
-a part keeps the wing somebody gave it, matched by where it stands. Standard library only.
+has drawn take the drawn floors' frame. `--footprint` writes the parts as the building's footprint.
+A part keeps what somebody gave it or checked on site - its wing, and its floors and basements where
+the cadastre's count is out of date - matched by where it stands; the differences are printed. A
+part with no lot, found on site where the cadastre has none, is kept as it is. Standard library only.
 """
 import argparse
 import collections
@@ -280,12 +282,20 @@ def main():
             part = {'lot': lot, 'floors': p['properties'].get('CONNPISOS') or 0,
                     'basements': p['properties'].get('CONNSOTANO') or 0}
             here = plane.to(centroid(ring))
-            kept = [b for b in before if b.get('wing') and math.dist(plane.to(centroid(b['ring'])), here) < 1.5]
-            if kept:
-                part['wing'] = kept[0]['wing']
+            was = next((b for b in before if b.get('lot') and math.dist(plane.to(centroid(b['ring'])), here) < 1.5), None)
+            if was:
+                # What somebody checked on site outlives the cadastre's count; say where they differ.
+                for key in ('floors', 'basements'):
+                    if was[key] != part[key]:
+                        print(f"  {lot} at {here[0]:.0f}, {here[1]:.0f} m: kept {was[key]} {key}, the cadastre says {part[key]}")
+                        part[key] = was[key]
+                if was.get('wing'):
+                    part['wing'] = was['wing']
             part['ring'] = ring
             footprint.append(part)
-        footprint.sort(key=lambda part: (-part['floors'], part['lot']))
+        # Parts the cadastre does not record were found on site; they stay.
+        footprint += [b for b in before if not b.get('lot')]
+        footprint.sort(key=lambda part: (-part['floors'], part.get('lot') or ''))
         ordered = {}
         for key, value in laid.items():
             ordered[key] = value
