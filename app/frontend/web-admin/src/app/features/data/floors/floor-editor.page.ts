@@ -294,6 +294,13 @@ const MAX_ZOOM = 8;
                     </button>
                   }
               </div>
+              @if (showCorridors() || mode() === 'corridor') {
+                <label class="thickness text-muted">
+                  <span>Corridor width</span>
+                  <input type="range" min="1" max="8" step="1" [value]="corridorWidth()" (input)="setCorridorWidth($event)" />
+                  <output>{{ corridorWidth() }} px</output>
+                </label>
+              }
             </div>
             <p class="hint-line" aria-live="polite">
               @if (notice()) {
@@ -318,6 +325,7 @@ const MAX_ZOOM = 8;
                 [interactive]="showRooms()"
                 [showRooms]="showRooms()"
                 [showCorridors]="showCorridors() || mode() === 'corridor'"
+                [corridorWidth]="corridorWidth()"
                 [canPlace]="canPlace"
                 [view]="view()"
                 [surroundings]="around()"
@@ -500,9 +508,11 @@ const MAX_ZOOM = 8;
       gap: 0.5rem;
       flex-wrap: wrap;
     }
-    .head-actions .btn {
-      min-height: 2.5rem;
+    .head-actions .btn,
+    .group .btn,
+    .layer {
       min-width: 2.5rem;
+      min-height: 2.5rem;
     }
     /* The floor switch is a button of the header row, not a form field: each browser drew its own
        arrow at its own height and size - on the iPhone a tall pill unlike every button beside it. */
@@ -683,13 +693,20 @@ const MAX_ZOOM = 8;
     .compass:disabled {
       cursor: default;
     }
-    .group .btn {
-      min-width: 2.5rem;
-      min-height: 2.5rem;
-      font-size: 1.125rem;
+    .thickness {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      font-size: 0.875rem;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
-    .layers .btn {
-      min-height: 2.5rem;
+    .thickness input {
+      flex: 0 1 14rem;
+    }
+    .group .btn {
+      font-size: 1.125rem;
     }
     .hint-line {
       margin: 0.5rem 0;
@@ -783,6 +800,8 @@ export class FloorEditorPage {
   readonly showRooms = signal(readShown(SHOW_ROOMS_KEY));
   /** Whether the corridors are drawn; always, while they are being drawn. */
   readonly showCorridors = signal(readShown(SHOW_CORRIDORS_KEY));
+  /** How thick the corridors are drawn, in screen pixels: thin, unless this device chose thicker. */
+  readonly corridorWidth = signal(readNumber(CORRIDOR_WIDTH_KEY, 3, 1, 8));
   /** The floor as the server last returned it. */
   readonly detail = signal<FloorDetail | null>(null);
   readonly draft = signal<FloorDraft | null>(null);
@@ -1547,6 +1566,16 @@ export class FloorEditorPage {
     if (!this.showRooms()) this.selectedKey.set(null);
   }
 
+  setCorridorWidth(event: Event): void {
+    const width = Math.min(8, Math.max(1, Number((event.target as HTMLInputElement).value) || 3));
+    this.corridorWidth.set(width);
+    try {
+      localStorage.setItem(CORRIDOR_WIDTH_KEY, String(width));
+    } catch {
+      // Non-fatal: the width is just forgotten.
+    }
+  }
+
   toggleCorridors(): void {
     this.showCorridors.update((shown) => !shown);
     remember(SHOW_CORRIDORS_KEY, this.showCorridors());
@@ -1727,6 +1756,17 @@ const SHOW_CADASTRE_KEY = 'kapp-admin:floor-cadastre';
 const SHOW_MARGIN_KEY = 'kapp-admin:floor-margin';
 const SHOW_ROOMS_KEY = 'kapp-admin:floor-rooms';
 const SHOW_CORRIDORS_KEY = 'kapp-admin:floor-corridors';
+const CORRIDOR_WIDTH_KEY = 'kapp-admin:floor-corridor-width';
+
+/** A number this device keeps, within bounds, or `fallback`. */
+function readNumber(key: string, fallback: number, min: number, max: number): number {
+  try {
+    const kept = Number(localStorage.getItem(key));
+    return Number.isFinite(kept) && kept >= min && kept <= max ? kept : fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 /** Whether this device shows a layer, or `shown` when it never said. */
 function readShown(key: string, shown = true): boolean {

@@ -383,6 +383,14 @@ textarea {
   width: 100%;
 }
 
+/* A slider is not a text box: no frame around its track, and the portal's colour on it. */
+input[type='range'] {
+  padding: 0;
+  border: 0;
+  background: none;
+  accent-color: var(--primary);
+}
+
 textarea {
   font-family: var(--font-mono);
   font-size: 0.8125rem;

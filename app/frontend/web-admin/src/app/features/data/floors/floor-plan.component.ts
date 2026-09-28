@@ -191,7 +191,7 @@ let uid = 0;
             class="corridor"
             [attr.points]="points(corridor.path)"
             [attr.stroke]="corridor.color"
-            [attr.stroke-width]="i === activeCorridor() ? 8 : 6"
+            [attr.stroke-width]="i === activeCorridor() ? corridorWidth() + 2 : corridorWidth()"
             [attr.opacity]="activeCorridor() === null || i === activeCorridor() ? 0.85 : 0.3"
           />
         }
@@ -469,6 +469,8 @@ export class FloorPlanComponent {
   readonly showRooms = input(true);
   /** Whether the corridors are drawn. */
   readonly showCorridors = input(true);
+  /** How thick a corridor is drawn, in screen pixels. */
+  readonly corridorWidth = input(3);
   /** Off, the plan takes no touches - there is nothing on it to edit - without being greyed out. */
   readonly interactive = input(true);
 
