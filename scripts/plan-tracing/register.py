@@ -28,9 +28,14 @@ The spec:
                                            with the rest: its own y (or x) pairs
         "limits": [{"space": "P1-24", "below": 2120, "why": "..."},
                    {"space": "P1-24", "notch": [986, 1911], "why": "..."}]
-                                           after moving: a room cut off past y = 2120 ("below"),
-                                           x ("left of"), or a rectangle with its corner beyond
-                                           (986, 1911) taken out ("notch")
+                                           after moving: a room cut off past y = 2120 ("below", or
+                                           "above"), x ("left of", "right of"), or a rectangle with
+                                           its corner beyond (986, 1911) taken out ("notch"); a
+                                           door on a wall that moves in goes with it
+        "corridors": [{"code": "PAS-CENTRAL", "name": "...", "color": "#5B8DEF",
+                       "path": [[660, 540], [660, 1870]]}]
+                                           walkable routes to add, in the drawing's units - the
+                                           evacuation plans paint them as green arrows
      }}}
 
 Coordinates in "groups" and "limits" are the true ones except the pairs' first halves, which are
@@ -196,12 +201,23 @@ def main():
         shape = [move(p) for p in split(before, [a for a, _ in fx], [a for a, _ in fy])]
         doors = [(move((d["from"]["x"], d["from"]["y"])), move((d["to"]["x"], d["to"]["y"]))) for d in space.get("doors") or []]
         for limit in (lm for lm in rules.get("limits", []) if lm["space"] == space["code"]):
+            # A wall moved in takes its doors with it.
             if "below" in limit:
-                shape = clip(shape, lambda p, v=limit["below"]: v - p[1])
+                v = limit["below"]
+                shape = clip(shape, lambda p: v - p[1])
+                doors = [tuple((x, min(y, v)) for x, y in d) for d in doors]
             if "above" in limit:
-                shape = clip(shape, lambda p, v=limit["above"]: p[1] - v)
+                v = limit["above"]
+                shape = clip(shape, lambda p: p[1] - v)
+                doors = [tuple((x, max(y, v)) for x, y in d) for d in doors]
             if "left of" in limit:
-                shape = clip(shape, lambda p, v=limit["left of"]: v - p[0])
+                v = limit["left of"]
+                shape = clip(shape, lambda p: v - p[0])
+                doors = [tuple((min(x, v), y) for x, y in d) for d in doors]
+            if "right of" in limit:
+                v = limit["right of"]
+                shape = clip(shape, lambda p: p[0] - v)
+                doors = [tuple((max(x, v), y) for x, y in d) for d in doors]
             if "notch" in limit:
                 shape = notch(tidy(shape), limit["notch"])
         shape = tidy(shape)
@@ -214,17 +230,40 @@ def main():
         moved.append(f"  {space['code']:<24} x {min(p[0] for p in before):>5}-{max(p[0] for p in before):<5} -> {min(xs):>5}-{max(xs):<5}"
                      f" y {min(p[1] for p in before):>5}-{max(p[1] for p in before):<5} -> {min(ys):>5}-{max(ys):<5}"
                      + (f"  ({len(doors) - len(kept)} door(s) dropped)" if len(kept) < len(doors) else ""))
+    # The floor's corridors move with it, and the spec's are added, drawn on the plan as they are.
+    def carry(path):
+        pts = [move(p) for p in path]
+        return [{"x": round(x), "y": round(y)} for x, y in pts]
+    fx, fy = spec.get("x", []), spec.get("y", [])
+    move = lambda p: (stretch(fx, p[0]), stretch(fy, p[1]))
+    corridors = [dict(c, path=carry([(p["x"], p["y"]) for p in c["path"]])) for c in floor.get("corridors") or []]
+    have = {c["code"] for c in corridors}
+    for c in rules.get("corridors", []):
+        if c["code"] not in have:
+            corridors.append({"code": c["code"], "name": c["name"], "color": c.get("color", "#5B8DEF"),
+                              "path": carry([tuple(p) for p in c["path"]])})
+            moved.append(f"  corridor {c['code']:<15} {len(c['path'])} points")
+    if corridors:
+        floor["corridors"] = corridors
+    # In the order scripts/export-map-snapshot.py writes a floor, so an export changes nothing.
+    order = ["code", "level", "name", "status", "accessibility", "note", "width", "height", "top",
+             "outline", "corridors", "spaces"]
+    laid = {k: floor[k] for k in order if k in floor} | {k: v for k, v in floor.items() if k not in order}
+    floor.clear()
+    floor.update(laid)
+
     drawn = [s for s in floor["spaces"] if s.get("shape")]
     settled = settle([[(p["x"], p["y"]) for p in s["shape"]] for s in drawn])
     for space, shape in zip(drawn, settled):
         space["shape"] = [{"x": x, "y": y} for x, y in shape]
     if width:
         floor["width"] = width
-    widest = max((p["x"] for s in floor["spaces"] for p in s.get("shape") or []), default=0)
-    tallest = max((p["y"] for s in floor["spaces"] for p in s.get("shape") or []), default=0)
+    everything = [p for s in floor["spaces"] for p in s.get("shape") or []] + [p for c in corridors for p in c["path"]]
+    widest = max((p["x"] for p in everything), default=0)
+    tallest = max((p["y"] for p in everything), default=0)
     if widest > floor["width"] or tallest > floor["height"]:
         sys.exit(f"{args.floor} reaches ({widest}, {tallest}), past its {floor['width']} x {floor['height']} frame: give it a width")
-    if min((p[c] for s in floor["spaces"] for p in s.get("shape") or [] for c in ("x", "y")), default=0) < 0:
+    if min((p[c] for p in everything for c in ("x", "y")), default=0) < 0:
         sys.exit(f"{args.floor} moves past the frame's top or left edge")
     print(f"{spec['building']} {args.floor}: {len(moved)} space(s) moved, frame {floor['width']} x {floor['height']}")
     print("\n".join(moved))
