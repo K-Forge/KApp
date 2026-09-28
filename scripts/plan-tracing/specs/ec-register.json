@@ -4,6 +4,8 @@
   "x": [[64, 63], [638, 635], [1150, 1232], [1437, 1530], [2144, 2346]],
   "fit": true,
   "fit why": "Until the architectural plans arrive, the drawings follow the building: every room a wall (0.3 m) inside the floor's margin - the building's parts on that floor, inside the block and never over a sidewalk - and terraces inside the floor below's.",
+  "keep slanted": ["P1-AUD*", "P1-20", "P1-23"],
+  "keep slanted why": "Brian: the auditorium's two floors keep the shape its own plan draws; every other room is square, as the building is.",
   "stack": {
     "central lifts": {
       "shape": [[929, 479], [1009, 479], [1009, 721], [929, 721]],
@@ -76,8 +78,8 @@
       "groups": [
         {
           "spaces": ["P1-AUD*", "P1-20", "P1-23"],
-          "y": [[723, 650], [1273, 1271]],
-          "why": "The PE draw the auditorium shallower than the south wing it fills. Its back, on the lot next door, goes a wall inside the wing's; its front stops short of the wing's stepped front on the Carrera 9 Bis, leaving the foyer its own plan draws there."
+          "y": [[723, 650], [881, 829], [1273, 1020]],
+          "why": "The auditorium keeps its plan's shape (Brian): its slanted front stays where it was, inside the south wing's stepped front on the Carrera 9 Bis, which the floors above push out past it. The plan draws it deeper than the wing: from the front's far end back, it is pressed into the wing, its back a wall inside the wing's, where the covered patio behind it starts."
         }
       ],
       "limits": [
@@ -146,10 +148,27 @@
           "path": [[966, 2086], [966, 1310], [1224, 1310]],
           "why": "The PE's route across the central hall, out to the passage."
         }
+      ],
+      "add": [
+        {
+          "code": "P1-PATIO-CUBIERTO",
+          "name": "Patio cubierto",
+          "typeCode": "SOCIAL_AREA",
+          "wing": "S",
+          "shape": [[1506, 1032], [2353, 1032], [2353, 1125], [1506, 1125]],
+          "why": "Brian: behind the auditorium, between it and the Casa de Francisco de Paula Velez, a patio with a sliding roof and tables runs from the tower to the neighbours' building. One floor."
+        }
       ]
     },
     "P2": {
-      "width": 2400
+      "width": 2400,
+      "limits": [
+        {
+          "space": "P2-15",
+          "left of": 617,
+          "why": "Brian: the reception rises through P1 and P2. P2 has no room over it, the tower's front; the box keeps the north connection's part."
+        }
+      ]
     },
     "P3": {
       "width": 2400,
@@ -159,7 +178,17 @@
       "extend": {
         "left": ["P3-21", "P3-28", "P3-32", "P3-49"],
         "why": "The plan draws the north wing's rooms 6 m short of the Calle 63 sidewalk, which the wing reaches on every floor to P5."
-      }
+      },
+      "add": [
+        {
+          "code": "P3-JARDIN-INTERNO",
+          "name": "Jardín interno",
+          "typeCode": "TERRACE",
+          "wing": "N",
+          "shape": [[458, 474], [617, 474], [617, 2030], [458, 2030]],
+          "why": "Brian: between the north wing and the tower the north connection rises two floors; from P3 up it is open to the sky over a garden, with a passage at each end, on the Carrera 9 Bis and on the Carrera 9A."
+        }
+      ]
     },
     "P4": {
       "width": 2400,
@@ -185,7 +214,14 @@
       "becomes": {
         "P6-26": "P6-TERRAZA-SUR"
       },
-      "why": "Brian: on P6 the south wing is the south terrace and a couple of offices; the plan paints the whole wing, and that shape is the terrace."
+      "why": "Brian: on P6 the south wing is the south terrace and a couple of offices; the plan paints the whole wing, and that shape is the terrace.",
+      "add": [
+        {
+          "code": "P6-TERRAZA-NORTE",
+          "shape": [[42, 144], [458, 144], [458, 2225], [42, 2225]],
+          "why": "Brian: the north wing's roof is the north terrace, a garden with tables along the wing, reached by the north stair from P5."
+        }
+      ]
     },
     "P7": {
       "place": {
