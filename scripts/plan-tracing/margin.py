@@ -1,7 +1,8 @@
 """A building's margin on one of its floors, and the rooms fitted inside it.
 
 Used by register.py. The margin is what the portal's Margin layer draws: the parts of the building
-that rise to the floor (its footprint), less the sidewalks on a floor at the street. The rooms go a
+that rise to the floor (its footprint), less the sidewalks - a building stands inside its block,
+never over a sidewalk, although the cadastre's parts reach the curb in places. The rooms go a
 wall's thickness inside it. Everything is worked on a raster of GRID units a cell, in the floor's
 drawing units, and a room that has to change is traced back into straight edges with trace.py's
 fitting, so a wall along a slanted facade comes out slanted and straight.
@@ -121,7 +122,7 @@ def floor_margin(building, width, height, level, ground=None):
     for part in building.get("footprint") or []:
         if reaches(part, level):
             r.paint([convert(c) for c in part["ring"][:-1]])
-    if ground and level <= 1:
+    if ground:
         for walk in ground.get("sidewalks", []):
             r.paint([convert(c) for c in walk], 0)
     steps = round(WALL / GRID)

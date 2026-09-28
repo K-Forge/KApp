@@ -69,17 +69,16 @@ Brian lo estableció en sitio, y las fotos lo confirman:
 
 ### Los PE, el catastro y los andenes
 
-- **El catastro mapea cada edificio desde arriba.** Donde los pisos altos vuelan sobre la acera,
-  la parte llega hasta el sardinel y el andén pasa por debajo. Es el caso del ala norte del EC
-  sobre la Calle 63, que va en columnas. En la calle, el edificio termina donde empieza el andén;
-  arriba, puede volar. Por eso el editor corta las líneas rosadas por los andenes solo en los
-  pisos de la calle.
+- **Ningún edificio pisa el andén.** El margen de cada piso, y los salones dentro de él, quedan
+  dentro de la manzana o en su borde. El catastro mapea desde arriba, y su parte del ala norte del
+  EC llega hasta el sardinel de la Calle 63; el andén pasa por debajo. Por eso el portal corta el
+  margen y las partes del catastro donde pasa un andén, en todos los pisos.
 - **Los PE no están a escala.** En el EC dibujan la torre un 17 % más angosta y el ala sur un 15 %.
   El ala norte y los espacios entre las alas salen bien.
   - `scripts/plan-tracing/register.py` estira cada tramo a su medida, con paredes que los planos
     y el catastro comparten.
   - `specs/ec-register.json` dice cuáles son esas paredes y por qué se eligieron.
-  - El P1 ya está corregido; los demás pisos se corrigen uno a uno.
+  - Los ocho pisos del EC ya están corregidos.
 - **Los pisos altos del EC, según Brian.** El catastro se quedaba corto y ya está corregido en la
   huella:
   - **Ala norte:** aulas hasta el P5; el P6 es terraza.
@@ -92,9 +91,10 @@ Brian lo estableció en sitio, y las fotos lo confirman:
   P7 y el P8 se quitó, porque el ala termina en el P6.
 - **Mientras no lleguen los planos de CAD, los dibujos siguen al edificio.** Cada salón queda a un
   muro (0,3 m) dentro del margen de su piso, y cada terraza dentro del margen del piso de abajo.
-  - Los ascensores, la escalera principal y la de emergencia quedan donde las ponen P3–P5.
+  - Los ascensores, la escalera principal y la de emergencia quedan donde las ponen P3–P5, un
+    poco más adentro para caber en la torre en P7 y P8, donde sube sola.
   - La escalera norte queda donde la pone el P2.
-  - Las aulas del ala norte de P3–P5 llegan a la fachada de la Calle 63.
+  - Las aulas del ala norte de P3–P5 llegan hasta el andén de la Calle 63.
 - **En el P3 no hay tramoya**, según Brian. Esa zona del ala sur tiene salones: el bloque quedó
   "Sin identificar".
 - **El P1 no es a cielo abierto donde el catastro no registra partes.** El ala central tiene techo
