@@ -215,7 +215,9 @@ const MAX_ZOOM = 8;
                   Corridor
                 </button>
               </div>
-              <div class="row zoom">
+              <!-- Two groups that wrap whole: turning the plan, and zooming it. -->
+              <div class="controls">
+              <div class="group">
                 <button type="button" class="btn btn-sm turn" aria-label="Turn the plan a quarter to the left" title="Turn the plan a quarter to the left" (click)="turnDrawing(-1)">
                   <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
                     <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
@@ -241,15 +243,23 @@ const MAX_ZOOM = 8;
                     <path d="M20.5 3.5v4.5h-4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                 </button>
+              </div>
+              <div class="group">
                 <button type="button" class="btn btn-sm" aria-label="Zoom out" [disabled]="zoomSteps() <= minZoom" (click)="zoom(-1)">−</button>
                 <button type="button" class="btn btn-sm" aria-label="Fit to the screen" (click)="zoomSteps.set(0)">Fit</button>
                 <button type="button" class="btn btn-sm" aria-label="Zoom in" [disabled]="zoomSteps() >= maxZoom" (click)="zoom(1)">+</button>
               </div>
-              <!-- Their own group, so on a phone they wrap onto a line together instead of one of
-                   them running off the edge of the card. -->
-              @if (floorPlacement() && (groundData() || hasFootprint())) {
-                <div class="row layers">
-                  @if (hasFootprint()) {
+              </div>
+              <!-- What is drawn, each on its own switch; on a phone, two to a row. -->
+              <div class="layers">
+                <button type="button" class="btn btn-sm layer" [class.on]="showRooms()" [attr.aria-pressed]="showRooms()"
+                        title="The rooms drawn on this floor" (click)="toggleRooms()">
+                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path d="M3 4h8v7H3zM13 4h8v7h-8zM3 13h18v7H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                  </svg>
+                  Rooms
+                </button>
+                  @if (floorPlacement() && hasFootprint()) {
                     <button type="button" class="btn btn-sm layer" [class.on]="showMargin()" [attr.aria-pressed]="showMargin()"
                             title="Where this floor's rooms go, wing by wing, and the floor below's, dotted" (click)="toggleMargin()">
                       <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -258,7 +268,7 @@ const MAX_ZOOM = 8;
                       Margin
                     </button>
                   }
-                  @if (groundData()) {
+                  @if (floorPlacement() && groundData()) {
                     <button type="button" class="btn btn-sm layer" [class.on]="showGround()" [attr.aria-pressed]="showGround()"
                             title="The block, the sidewalks and the streets around the building" (click)="toggleGround()">
                       <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -267,7 +277,7 @@ const MAX_ZOOM = 8;
                       Streets
                     </button>
                   }
-                  @if (groundData() && showGround() && hasFootprint()) {
+                  @if (floorPlacement() && groundData() && showGround() && hasFootprint()) {
                     <button type="button" class="btn btn-sm layer" [class.on]="showCadastre()" [attr.aria-pressed]="showCadastre()"
                             title="The building's outline as the cadastre records it, the pink lines" (click)="toggleCadastre()">
                       <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -276,8 +286,7 @@ const MAX_ZOOM = 8;
                       Cadastre
                     </button>
                   }
-                </div>
-              }
+              </div>
             </div>
             <p class="hint-line" aria-live="polite">
               @if (notice()) {
@@ -298,7 +307,8 @@ const MAX_ZOOM = 8;
                 [problemKeys]="problemKeys()"
                 [activeCorridor]="activeCorridor()"
                 [mode]="canvasMode()"
-                [disabled]="!!pendingDraft() || saving()"
+                [disabled]="!!pendingDraft() || saving() || !showRooms()"
+                [showRooms]="showRooms()"
                 [canPlace]="canPlace"
                 [view]="view()"
                 [surroundings]="around()"
@@ -608,12 +618,37 @@ const MAX_ZOOM = 8;
       background: var(--primary);
       color: var(--text-on-accent);
     }
-    .zoom,
-    .layers {
+    .controls {
+      display: flex;
       flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex: 1 1 auto;
+    }
+    .group {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .layers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      width: 100%;
     }
     .layer {
       gap: 0.35rem;
+      font-size: 0.875rem;
+    }
+    /* On a phone the switches sit two to a row, the same width, rather than three and one. */
+    @media (max-width: 560px) {
+      .layers {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .layer {
+        justify-content: center;
+      }
     }
     .layer.on {
       background: var(--primary-bg);
@@ -635,11 +670,13 @@ const MAX_ZOOM = 8;
     .compass:disabled {
       cursor: default;
     }
-    .zoom .btn,
-    .layers .btn {
+    .group .btn {
       min-width: 2.5rem;
       min-height: 2.5rem;
       font-size: 1.125rem;
+    }
+    .layers .btn {
+      min-height: 2.5rem;
     }
     .hint-line {
       margin: 0.5rem 0;
@@ -729,6 +766,8 @@ export class FloorEditorPage {
   readonly showCadastre = signal(readShown(SHOW_CADASTRE_KEY, false));
   /** Whether the building's margin is drawn: where this floor's rooms go, wing by wing. */
   readonly showMargin = signal(readShown(SHOW_MARGIN_KEY));
+  /** Whether the rooms are drawn. Off, the margin and the streets can be read alone. */
+  readonly showRooms = signal(readShown(SHOW_ROOMS_KEY));
   /** The floor as the server last returned it. */
   readonly detail = signal<FloorDetail | null>(null);
   readonly draft = signal<FloorDraft | null>(null);
@@ -906,6 +945,7 @@ export class FloorEditorPage {
 
   readonly hint = computed(() => {
     if (this.pendingDraft()) return 'Decide first what to do with the changes kept on this device.';
+    if (!this.showRooms()) return 'The rooms are hidden. Show them again with Rooms to edit the floor.';
     const placing = this.placingKey();
     const space = placing ? this.draft()?.spaces.find((s) => s.key === placing) : null;
     if (space) return `Drag the outline of ${label(space)} on the plan, or tap where it is for a small square to reshape.`;
@@ -1482,6 +1522,12 @@ export class FloorEditorPage {
     remember(SHOW_GROUND_KEY, this.showGround());
   }
 
+  toggleRooms(): void {
+    this.showRooms.update((shown) => !shown);
+    remember(SHOW_ROOMS_KEY, this.showRooms());
+    if (!this.showRooms()) this.selectedKey.set(null);
+  }
+
   toggleMargin(): void {
     this.showMargin.update((shown) => !shown);
     remember(SHOW_MARGIN_KEY, this.showMargin());
@@ -1655,6 +1701,7 @@ const GROUND_MARGIN_METRES = 16;
 const SHOW_GROUND_KEY = 'kapp-admin:floor-ground';
 const SHOW_CADASTRE_KEY = 'kapp-admin:floor-cadastre';
 const SHOW_MARGIN_KEY = 'kapp-admin:floor-margin';
+const SHOW_ROOMS_KEY = 'kapp-admin:floor-rooms';
 
 /** Whether this device shows a layer, or `shown` when it never said. */
 function readShown(key: string, shown = true): boolean {

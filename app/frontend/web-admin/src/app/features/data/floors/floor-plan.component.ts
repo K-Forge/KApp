@@ -470,6 +470,8 @@ export class FloorPlanComponent {
   readonly margins = input<{ current: Margin[]; below: Margin[] } | null>(null);
   /** The sidewalks along the building, on a floor at the street: what it stops at. */
   readonly streetWalks = input<Point[][]>([]);
+  /** Whether the rooms are drawn; off, only what is under them shows. */
+  readonly showRooms = input(true);
 
   readonly walkPaths = computed(() => this.streetWalks().map(areaPath));
   readonly marginPaths = computed(() => {
@@ -538,6 +540,7 @@ export class FloorPlanComponent {
   readonly rooms = computed(() => {
     const dragged = this.dragged();
     const scale = this.scale();
+    if (!this.showRooms()) return [];
     return this.spaces()
       .filter(isPlaced)
       .map((space) => {
