@@ -19,6 +19,9 @@ The spec:
                                            x is stretched evenly; beyond the last, as the last
                                            stretch was.
      "y": [[...]],                         the same for y, when the plans need it
+     "fit": true,                          every room a wall inside the floor's margin (margin.py),
+                                           and square
+     "keep slanted": ["P1-AUD*"],          rooms that keep the slanted walls their plan draws
      "floors": {"P1": {
         "place": {"x": [0.76, 480], "y": [0.91, 211], "why": "..."},
                                            a floor whose plan was laid into the frame out of place:
@@ -208,13 +211,16 @@ def fit(spec, rules, building, floor, code):
         stacked.add(target)
         notes.append(f"  {target} stacked as {role}")
 
+    keep = spec.get("keep slanted", [])
+    slanted = lambda code: any(fnmatch.fnmatch(code, k) for k in keep)
     unplaced, gone = [], []
     for sp in list(floor["spaces"]):
         if not sp.get("shape") or sp["code"] in stacked:
             continue
         poly = [(p["x"], p["y"]) for p in sp["shape"]]
         terrace = sp.get("typeCode") == "TERRACE"
-        cut = margin.clip(poly, loose_below if terrace else loose, tight_below if terrace else tight, cores)
+        cut = margin.clip(poly, loose_below if terrace else loose, tight_below if terrace else tight, cores,
+                          square=not slanted(sp["code"]))
         if cut is poly:
             continue
         if cut is None:
@@ -233,6 +239,25 @@ def fit(spec, rules, building, floor, code):
     if unplaced:
         notes.append(f"  outside the building, left to place: {', '.join(unplaced)}")
     clipped = [sp["code"] for sp in floor["spaces"] if sp.get("shape")]
+
+    # Corners the tracing cut at a slant, squared; the rooms the spec keeps as their plan draws them stay.
+    placed = [sp for sp in floor["spaces"] if sp.get("shape")]
+    for sp in placed:
+        poly = [(p["x"], p["y"]) for p in sp["shape"]]
+        if slanted(sp["code"]) or all(
+                a[0] == b[0] or a[1] == b[1] for a, b in zip(poly, poly[1:] + poly[:1])):
+            continue
+        others = margin.blank(tight)
+        for other in placed:
+            if other is not sp:
+                others.paint([(p["x"], p["y"]) for p in other["shape"]])
+        terrace = sp.get("typeCode") == "TERRACE"
+        squared = margin.square(poly, loose_below if terrace else loose, others)
+        if squared is not poly:
+            shape = tidy(squared)
+            sp["shape"] = [{"x": round(x), "y": round(y)} for x, y in shape]
+            sp["doors"] = [d for d in sp.get("doors") or [] if on_edge(shape, (d["from"]["x"], d["from"]["y"]), (d["to"]["x"], d["to"]["y"]))]
+            notes.append(f"  {sp['code']} squared")
 
     for target in rules.get("extend", {}).get("left", []):
         sp = spaces.get(target)

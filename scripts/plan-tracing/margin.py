@@ -149,15 +149,18 @@ def blank(like):
     return out
 
 
-def clip(poly, loose, tight, blocked):
+def clip(poly, loose, tight, blocked, square=True):
     """The room cut to the margin, a wall inside, and off the cells set in `blocked`.
 
     Returns the polygon unchanged when it already fits (to within a cell), a new one fitted with
-    straight edges when it had to be cut, or None when little of it is left inside."""
+    straight edges when it had to be cut - all level or plumb unless `square` is off - or None when
+    little of it is left inside."""
     cells = cells_of(poly, tight)
     if not cells:
         return None
-    if all(loose.get(i, j) and not blocked.get(i, j) for i, j in cells):
+    # A room that strays a cell or two - a corner rounding over a step of the facade, far less
+    # than a wall - fits: fitting it again would redraw its whole outline for a few centimetres.
+    if sum(1 for i, j in cells if not loose.get(i, j) or blocked.get(i, j)) <= 2:
         return poly
     kept = {(i, j) for i, j in cells if tight.get(i, j) and not blocked.get(i, j)}
     if len(kept) < 0.2 * len(cells):
@@ -178,10 +181,46 @@ def clip(poly, loose, tight, blocked):
                     stack.append(q)
         pieces.append(piece)
     best = max(pieces, key=len)
-    fitted = trace.fit_polygon(trace.outline(best), 1.0, 3, 8)
+    # Every edge level or plumb: the building has no slanted wall, so a slant here is only the
+    # margin's staircase of cells, or the cadastre's own drawing a few degrees off.
+    fitted = trace.fit_polygon(trace.outline(best), 1.0, 3, math.inf if square else 8)
     if not fitted or len(fitted) < 3 or not trace.simple(fitted):
         return None
     return [(tight.ox + x * GRID, tight.oy + y * GRID) for x, y in fitted]
+
+
+def square(poly, inside, others, longest=100):
+    """The room's slanted corners and steps, squared: the plans' tracing leaves short slanted edges,
+    and the building has none. Each becomes two square edges round one of its two corners: the one
+    that adds to the room when that is inside the margin and in no other room, else the one that
+    takes from it, which puts the room nowhere it was not. Edges longer than `longest` are walls,
+    not cut corners, and stay."""
+    pts = list(poly)
+    for _ in range(4 * len(pts)):
+        n = len(pts)
+        k = next((k for k in range(n) if pts[k][0] != pts[(k + 1) % n][0] and pts[k][1] != pts[(k + 1) % n][1]
+                  and math.dist(pts[k], pts[(k + 1) % n]) <= longest), None)
+        if k is None:
+            break
+        a, b = pts[k], pts[(k + 1) % n]
+        corners = [(a[0], b[1]), (b[0], a[1])]
+        mid = lambda c: ((a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3)
+        out = next(c for c in corners if not _inside(pts, mid(c)))
+        into = next(c for c in corners if c != out)
+        added = cells_of([a, out, b], inside)
+        corner = out if all(inside.get(i, j) and not others.get(i, j) for i, j in added) else into
+        pts.insert(k + 1, corner)
+    return pts if pts != list(poly) else poly
+
+
+def _inside(poly, pt):
+    x, y = pt
+    hit = False
+    for i in range(len(poly)):
+        (ax, ay), (bx, by) = poly[i - 1], poly[i]
+        if (ay > y) != (by > y) and x < ax + (y - ay) * (bx - ax) / (by - ay):
+            hit = not hit
+    return hit
 
 
 def extend_left(poly, tight, blocked):
