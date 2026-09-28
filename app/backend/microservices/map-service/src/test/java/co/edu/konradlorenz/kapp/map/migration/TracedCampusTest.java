@@ -112,13 +112,20 @@ class TracedCampusTest {
     }
 
     @Test
-    @DisplayName("every building of the campus is on the ground, the ones nobody has drawn yet included")
+    @DisplayName("every building the survey placed is on the ground, the ones nobody has drawn yet included, and one it has no place for is not")
     void everyBuildingIsOnTheGround() {
         for (SurveySnapshot.Building surveyed : SNAPSHOT) {
             BuildingDocument stored = mongo.findOne(query(where("code").is(surveyed.code())), BuildingDocument.class);
+            if (surveyed.toPlacement() == null) {
+                // RH: the heritage house it stood on is no office, and where it is is still asked.
+                assertThat(stored.placement()).as(surveyed.code()).isNull();
+                assertThat(stored.footprint()).as(surveyed.code()).isEmpty();
+                continue;
+            }
             assertThat(stored.placement()).as(surveyed.code()).isNotNull();
             assertThat(stored.footprint()).as(surveyed.code()).isNotEmpty();
         }
+        assertThat(SNAPSHOT).filteredOn(b -> b.toPlacement() != null).hasSizeGreaterThanOrEqualTo(8);
     }
 
     @Test
