@@ -51,7 +51,7 @@ let uid = 0;
   selector: 'app-floor-plan',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="surface" [class.drawing]="mode() !== 'select'" [class.disabled]="disabled()">
+    <div class="surface" [class.drawing]="mode() !== 'select'" [class.disabled]="disabled()" [class.still]="!interactive()">
       <svg
         #svg
         role="application"
@@ -105,6 +105,9 @@ let uid = 0;
           </g>
         }
 
+        <!-- The drawing's own paper: under everything drawn on the floor, the margins included. -->
+        <rect class="paper" [class.over-ground]="!!ground()" [attr.width]="width()" [attr.height]="height()" />
+
         <!-- Where this floor's rooms go, wing by wing, over the floor below's, dotted. -->
         @if (marginPaths(); as mp) {
           <g class="margins" aria-hidden="true">
@@ -146,8 +149,6 @@ let uid = 0;
             }
           </g>
         }
-
-        <rect class="paper" [class.over-ground]="!!ground()" [attr.width]="width()" [attr.height]="height()" />
 
         @if (outline().length > 2) {
           <polygon class="outline" [attr.points]="points(outline())" />
@@ -243,6 +244,10 @@ let uid = 0;
     .surface.disabled {
       pointer-events: none;
       opacity: 0.5;
+    }
+    /* Nothing to touch - the rooms are hidden - but nothing greyed out either. */
+    .surface.still {
+      pointer-events: none;
     }
     svg {
       display: block;
@@ -477,6 +482,8 @@ export class FloorPlanComponent {
   readonly showRooms = input(true);
   /** Whether the corridors are drawn. */
   readonly showCorridors = input(true);
+  /** Off, the plan takes no touches - there is nothing on it to edit - without being greyed out. */
+  readonly interactive = input(true);
 
   readonly walkPaths = computed(() => this.sidewalks().map(areaPath));
   readonly marginPaths = computed(() => {
