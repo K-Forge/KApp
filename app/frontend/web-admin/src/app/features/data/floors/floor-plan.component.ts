@@ -73,9 +73,6 @@ let uid = 0;
 
         @if (ground(); as g) {
           <g class="ground" aria-hidden="true">
-            @for (d of g.blocks; track $index) {
-              <path class="block" [attr.d]="d" />
-            }
             @for (d of g.roadways; track $index) {
               <path class="roadway" [attr.d]="d" />
             }
@@ -84,6 +81,12 @@ let uid = 0;
             }
             @for (d of g.sidewalks; track $index) {
               <path class="sidewalk" [attr.d]="d" />
+            }
+            <!-- The blocks last. The sidewalks are the IDU's and the blocks the cadastre's, and the
+                 two disagree by a metre in places - along the Calle 63 the sidewalk runs a metre into
+                 the block. The buildings are laid on the cadastre, so its property line wins. -->
+            @for (d of g.blocks; track $index) {
+              <path class="block" [attr.d]="d" />
             }
             @for (part of g.footprint; track $index) {
               <path class="footprint" [class.reaches]="part.reaches" [attr.d]="part.d" />

@@ -94,9 +94,6 @@ const BUILDING_COLOR = '#c2185b';
                 [attr.width]="m.box.width * zooms[zoom()]"
                 [attr.height]="m.box.height * zooms[zoom()]"
               >
-                @for (d of m.blocks; track $index) {
-                  <path class="block" [attr.d]="d" />
-                }
                 @for (d of m.roadways; track $index) {
                   <path class="roadway" [attr.d]="d" />
                 }
@@ -105,6 +102,11 @@ const BUILDING_COLOR = '#c2185b';
                 }
                 @for (d of m.sidewalks; track $index) {
                   <path class="sidewalk" [attr.d]="d" />
+                }
+                <!-- The blocks last: where the IDU's sidewalks and the cadastre's blocks disagree,
+                     the cadastre's property line wins, as the buildings are laid on it. -->
+                @for (d of m.blocks; track $index) {
+                  <path class="block" [attr.d]="d" />
                 }
                 @for (s of m.labels; track $index) {
                   <text class="street" [attr.transform]="'translate(' + s.x + ' ' + s.y + ') rotate(' + s.angle + ')'" [attr.font-size]="11 / zooms[zoom()]">{{ s.name }}</text>
