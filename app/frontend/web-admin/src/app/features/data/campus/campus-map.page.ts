@@ -103,15 +103,23 @@ const BUILDING_COLOR = '#c2185b';
                 @for (d of m.blocks; track $index) {
                   <path class="block" [attr.d]="d" />
                 }
-                <!-- The sidewalks over the blocks, which reach the curb in places; the buildings,
-                     seen from above as the cadastre maps them, over both: a floor that hangs over
-                     a sidewalk hides it here as it does from the air. -->
+                <!-- The sidewalks over the blocks, which reach the curb in places, and the buildings
+                     cut where a sidewalk passes: a building stands inside its block, never on a
+                     sidewalk. -->
                 @for (d of m.sidewalks; track $index) {
                   <path class="sidewalk" [attr.d]="d" />
                 }
+                <mask id="campus-walks" maskUnits="userSpaceOnUse" [attr.x]="m.box.x" [attr.y]="m.box.y"
+                      [attr.width]="m.box.width" [attr.height]="m.box.height">
+                  <rect [attr.x]="m.box.x" [attr.y]="m.box.y" [attr.width]="m.box.width" [attr.height]="m.box.height" fill="#fff" />
+                  @for (d of m.sidewalks; track $index) {
+                    <path [attr.d]="d" fill="#000" />
+                  }
+                </mask>
                 @for (s of m.labels; track $index) {
                   <text class="street" [attr.transform]="'translate(' + s.x + ' ' + s.y + ') rotate(' + s.angle + ')'" [attr.font-size]="11 / zooms[zoom()]">{{ s.name }}</text>
                 }
+                <g mask="url(#campus-walks)">
                 @for (b of mapped(); track b.code) {
                   <a [routerLink]="b.floor ? ['/data/floors', b.code, b.floor] : ['/data/buildings']" class="building" [attr.aria-label]="b.name + ' - open its floors'">
                     <title>{{ b.name }} · {{ b.floors }} {{ b.floors === 1 ? 'floor' : 'floors' }}</title>
@@ -126,6 +134,7 @@ const BUILDING_COLOR = '#c2185b';
                     <text class="code" [attr.x]="b.label.x" [attr.y]="b.label.y" [attr.font-size]="13 / zooms[zoom()]">{{ b.code }}</text>
                   </a>
                 }
+                </g>
                 <g class="north" [attr.transform]="'translate(' + (m.box.x + 26 / zooms[zoom()]) + ' ' + (m.box.y + 30 / zooms[zoom()]) + ') scale(' + 1 / zooms[zoom()] + ')'">
                   <circle r="16" />
                   <path d="M0 -11 L5 5 L0 2 L-5 5 Z" />

@@ -61,7 +61,7 @@ import {
 import { clearDraft, loadDraft, storeDraft, type StoredDraft } from './floor-draft.store';
 import type { Ground } from '../ground/ground.model';
 import { GroundService } from '../ground/ground.service';
-import { atStreet, groundToDrawing, margins, placementForFloor, surroundings, type Box } from '../ground/ground';
+import { groundToDrawing, margins, placementForFloor, surroundings, type Box } from '../ground/ground';
 import { FloorLegendComponent } from './floor-legend.component';
 import { FloorPlanComponent, type EditorMode } from './floor-plan.component';
 import type { FloorDetail } from './floor.model';
@@ -313,7 +313,7 @@ const MAX_ZOOM = 8;
                 [view]="view()"
                 [surroundings]="around()"
                 [margins]="marginsShown()"
-                [streetWalks]="streetWalks()"
+                [sidewalks]="sidewalks()"
                 (pointTap)="onPointTap($event)"
                 (spaceTap)="onSpaceTap($event)"
                 (boxDrawn)="onBoxDrawn($event)"
@@ -865,12 +865,16 @@ export class FloorEditorPage {
     return { current: margins(footprint, placement, this.level()), below: margins(footprint, placement, this.levelBelow()) };
   });
 
-  /** On a floor at the street, the sidewalks along the building: where it stops. */
-  readonly streetWalks = computed(() => {
+  /**
+   * The sidewalks along the building: where it stops, on every floor. The cadastre's blocks and
+   * parts reach the curb in places - along the Calle 63 - and a building is drawn inside its block,
+   * never over a sidewalk.
+   */
+  readonly sidewalks = computed(() => {
     const ground = this.groundData();
     const placement = this.floorPlacement();
     const draft = this.draft();
-    if (!ground || !placement || !draft || !atStreet(this.level())) return [];
+    if (!ground || !placement || !draft) return [];
     const reach = GROUND_MARGIN_METRES / placement.metresPerUnit;
     return ground.sidewalks
       .map((ring) => ring.map((c) => groundToDrawing(placement, c)))

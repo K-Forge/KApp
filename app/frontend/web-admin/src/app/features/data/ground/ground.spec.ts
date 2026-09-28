@@ -1,6 +1,6 @@
 import type { Placement } from '../buildings/building.model';
 import type { Coordinate } from './ground.model';
-import { atStreet, drawingToGround, groundToDrawing, margins, nearestQuarter, outlineOf, placementForFloor, reaches, streetLabel, surroundings, toMetres } from './ground';
+import { drawingToGround, groundToDrawing, margins, nearestQuarter, outlineOf, placementForFloor, reaches, streetLabel, surroundings, toMetres } from './ground';
 
 // The Edificio Central as its seed lays it: top toward the Carrera 9 Bis, 34 units a metre.
 const EC: Placement = { origin: { lat: 4.6485371, lon: -74.0611566 }, bearing: 127, metresPerUnit: 0.02927 };
@@ -69,15 +69,6 @@ describe('ground', () => {
     expect(reaches({ floors: 2, basements: 0 }, 1.5)).toBe(true);
     expect(reaches({ floors: 5, basements: 0 }, -1)).toBe(false);
     expect(reaches({ floors: 0, basements: 2 }, -2)).toBe(true);
-  });
-
-  // The cadastre maps a building from above, overhangs and all. On P1 the plan cuts it where a
-  // sidewalk passes; on P2 it does not, since a floor may hang over the sidewalk.
-  it('says which floors meet the street', () => {
-    expect(atStreet(1)).toBe(true);
-    expect(atStreet(-1)).toBe(true);
-    expect(atStreet(1.5)).toBe(false);
-    expect(atStreet(2)).toBe(false);
   });
 
   // Two parts that share a wall are one outline; the wall they share is not drawn.

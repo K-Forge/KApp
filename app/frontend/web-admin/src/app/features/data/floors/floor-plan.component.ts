@@ -69,8 +69,8 @@ let uid = 0;
             <rect [attr.width]="tread()" [attr.height]="tread()" [attr.fill]="colors.CIRCULATION" />
             <line x1="0" y1="0" x2="0" [attr.y2]="tread()" stroke="#1c2128" stroke-opacity="0.45" vector-effect="non-scaling-stroke" />
           </pattern>
-          <!-- At the street the building ends where the sidewalk starts: what is drawn from above
-               is cut where a sidewalk passes. -->
+          <!-- The building ends where the sidewalk starts, on every floor: the margin and the
+               cadastre's parts are cut where a sidewalk passes. -->
           @if (walkPaths().length) {
             <mask [attr.id]="walkMaskId" maskUnits="userSpaceOnUse" [attr.x]="box().x" [attr.y]="box().y"
                   [attr.width]="box().width" [attr.height]="box().height">
@@ -468,12 +468,12 @@ export class FloorPlanComponent {
   readonly surroundings = input<Surroundings | null>(null);
   /** Where this floor's rooms go, by wing, and where the floor below's went. */
   readonly margins = input<{ current: Margin[]; below: Margin[] } | null>(null);
-  /** The sidewalks along the building, on a floor at the street: what it stops at. */
-  readonly streetWalks = input<Point[][]>([]);
+  /** The sidewalks along the building: nothing of it is drawn over them. */
+  readonly sidewalks = input<Point[][]>([]);
   /** Whether the rooms are drawn; off, only what is under them shows. */
   readonly showRooms = input(true);
 
-  readonly walkPaths = computed(() => this.streetWalks().map(areaPath));
+  readonly walkPaths = computed(() => this.sidewalks().map(areaPath));
   readonly marginPaths = computed(() => {
     const margins = this.margins();
     if (!margins) return null;

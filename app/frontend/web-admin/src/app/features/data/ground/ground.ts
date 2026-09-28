@@ -46,16 +46,6 @@ export interface Margin {
   outline: Point[];
 }
 
-/**
- * Whether the floor at `level` is at the street, or under it. The cadastre maps a building from
- * above, so a part includes the floors that overhang the sidewalk - along the Calle 63 the
- * Edificio Central's north wing does, on columns. At the street the building stops where the
- * sidewalk starts.
- */
-export function atStreet(level: number): boolean {
-  return level <= 1;
-}
-
 /** Whether a part of `floors` floors and `basements` basements reaches the floor at `level`. */
 export function reaches(part: Pick<FootprintPart, 'floors' | 'basements'>, level: number): boolean {
   return level >= 0 ? part.floors >= Math.max(1, Math.ceil(level)) : part.basements >= -Math.floor(level);
