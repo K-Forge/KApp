@@ -61,7 +61,7 @@ import {
 import { clearDraft, loadDraft, storeDraft, type StoredDraft } from './floor-draft.store';
 import type { Ground } from '../ground/ground.model';
 import { GroundService } from '../ground/ground.service';
-import { placementForFloor, surroundings, type Box } from '../ground/ground';
+import { atStreet, groundToDrawing, margins, placementForFloor, surroundings, type Box } from '../ground/ground';
 import { FloorLegendComponent } from './floor-legend.component';
 import { FloorPlanComponent, type EditorMode } from './floor-plan.component';
 import type { FloorDetail } from './floor.model';
@@ -247,16 +247,27 @@ const MAX_ZOOM = 8;
               </div>
               <!-- Their own group, so on a phone they wrap onto a line together instead of one of
                    them running off the edge of the card. -->
-              @if (groundData() && floorPlacement()) {
+              @if (floorPlacement() && (groundData() || hasFootprint())) {
                 <div class="row layers">
-                  <button type="button" class="btn btn-sm layer" [class.on]="showGround()" [attr.aria-pressed]="showGround()"
-                          title="The block, the sidewalks and the streets around the building" (click)="toggleGround()">
-                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                      <path d="M4 21 9 3M20 21 15 3M12 5v2M12 11v2M12 17v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                    </svg>
-                    Streets
-                  </button>
-                  @if (showGround() && hasFootprint()) {
+                  @if (hasFootprint()) {
+                    <button type="button" class="btn btn-sm layer" [class.on]="showMargin()" [attr.aria-pressed]="showMargin()"
+                            title="Where this floor's rooms go, wing by wing, and the floor below's, dotted" (click)="toggleMargin()">
+                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path d="M3 5h8v14H3zM11 8h10v11H11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                      </svg>
+                      Margin
+                    </button>
+                  }
+                  @if (groundData()) {
+                    <button type="button" class="btn btn-sm layer" [class.on]="showGround()" [attr.aria-pressed]="showGround()"
+                            title="The block, the sidewalks and the streets around the building" (click)="toggleGround()">
+                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path d="M4 21 9 3M20 21 15 3M12 5v2M12 11v2M12 17v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                      </svg>
+                      Streets
+                    </button>
+                  }
+                  @if (groundData() && showGround() && hasFootprint()) {
                     <button type="button" class="btn btn-sm layer" [class.on]="showCadastre()" [attr.aria-pressed]="showCadastre()"
                             title="The building's outline as the cadastre records it, the pink lines" (click)="toggleCadastre()">
                       <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -291,6 +302,8 @@ const MAX_ZOOM = 8;
                 [canPlace]="canPlace"
                 [view]="view()"
                 [surroundings]="around()"
+                [margins]="marginsShown()"
+                [streetWalks]="streetWalks()"
                 (pointTap)="onPointTap($event)"
                 (spaceTap)="onSpaceTap($event)"
                 (boxDrawn)="onBoxDrawn($event)"
@@ -300,7 +313,7 @@ const MAX_ZOOM = 8;
               />
             </div>
             <app-floor-legend [spaces]="d.spaces" [categories]="categories()" [groundSource]="around() ? groundData()?.source ?? null : null"
-                              [cadastre]="!!around()?.footprint?.length" />
+                              [cadastre]="!!around()?.footprint?.length" [margin]="!!marginsShown()" />
           </section>
 
           <aside class="card side" [class.locked]="!!pendingDraft()">
@@ -709,8 +722,13 @@ export class FloorEditorPage {
   /** The city around the building's campus, when the building is laid on the ground. */
   readonly groundData = signal<Ground | null>(null);
   readonly showGround = signal(readShown(SHOW_GROUND_KEY));
-  /** Whether the building's cadastral outline is drawn over the streets. Off lets the rooms be read alone. */
-  readonly showCadastre = signal(readShown(SHOW_CADASTRE_KEY));
+  /**
+   * Whether the cadastre's parts are drawn over the streets. Off unless asked for: they are what
+   * the map is fitted to, and the margin says what they mean for the floor.
+   */
+  readonly showCadastre = signal(readShown(SHOW_CADASTRE_KEY, false));
+  /** Whether the building's margin is drawn: where this floor's rooms go, wing by wing. */
+  readonly showMargin = signal(readShown(SHOW_MARGIN_KEY));
   /** The floor as the server last returned it. */
   readonly detail = signal<FloorDetail | null>(null);
   readonly draft = signal<FloorDraft | null>(null);
@@ -787,8 +805,37 @@ export class FloorEditorPage {
     const ground = this.groundData();
     const placement = this.floorPlacement();
     return view && ground && placement
-      ? surroundings(ground, placement, view, this.showCadastre() ? this.footprint() : [], this.detail()?.level ?? 1)
+      ? surroundings(ground, placement, view, this.showCadastre() ? this.footprint() : [], this.level(), this.levelBelow())
       : null;
+  });
+
+  private readonly level = computed(() => this.detail()?.level ?? 1);
+
+  /** The level of the floor under this one: the building's, or one down when it has none listed. */
+  private readonly levelBelow = computed(() => {
+    const level = this.level();
+    const lower = (this.buildingDoc()?.floors ?? []).map((f) => f.level).filter((l) => l < level);
+    return lower.length ? Math.max(...lower) : level - 1;
+  });
+
+  /** Where the rooms go on this floor, wing by wing, and where they went on the one below. */
+  readonly marginsShown = computed(() => {
+    const placement = this.floorPlacement();
+    const footprint = this.footprint();
+    if (!placement || !footprint.length || !this.showMargin()) return null;
+    return { current: margins(footprint, placement, this.level()), below: margins(footprint, placement, this.levelBelow()) };
+  });
+
+  /** On a floor at the street, the sidewalks along the building: where it stops. */
+  readonly streetWalks = computed(() => {
+    const ground = this.groundData();
+    const placement = this.floorPlacement();
+    const draft = this.draft();
+    if (!ground || !placement || !draft || !atStreet(this.level())) return [];
+    const reach = GROUND_MARGIN_METRES / placement.metresPerUnit;
+    return ground.sidewalks
+      .map((ring) => ring.map((c) => groundToDrawing(placement, c)))
+      .filter((ring) => ring.some((p) => p.x > -reach && p.y > -reach && p.x < draft.width + reach && p.y < draft.height + reach));
   });
 
   private readonly footprint = computed(() => this.buildingDoc()?.footprint ?? []);
@@ -1435,6 +1482,11 @@ export class FloorEditorPage {
     remember(SHOW_GROUND_KEY, this.showGround());
   }
 
+  toggleMargin(): void {
+    this.showMargin.update((shown) => !shown);
+    remember(SHOW_MARGIN_KEY, this.showMargin());
+  }
+
   toggleCadastre(): void {
     this.showCadastre.update((shown) => !shown);
     remember(SHOW_CADASTRE_KEY, this.showCadastre());
@@ -1602,13 +1654,15 @@ export class FloorEditorPage {
 const GROUND_MARGIN_METRES = 16;
 const SHOW_GROUND_KEY = 'kapp-admin:floor-ground';
 const SHOW_CADASTRE_KEY = 'kapp-admin:floor-cadastre';
+const SHOW_MARGIN_KEY = 'kapp-admin:floor-margin';
 
-/** A layer is shown unless this device put it away. */
-function readShown(key: string): boolean {
+/** Whether this device shows a layer, or `shown` when it never said. */
+function readShown(key: string, shown = true): boolean {
   try {
-    return localStorage.getItem(key) !== 'false';
+    const kept = localStorage.getItem(key);
+    return kept === null ? shown : kept === 'true';
   } catch {
-    return true;
+    return shown;
   }
 }
 

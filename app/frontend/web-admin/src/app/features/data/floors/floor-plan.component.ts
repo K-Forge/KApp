@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, input, output, signal, viewChild } from '@angular/core';
 import type { Corridor, Point } from '../buildings/building.model';
 import { CATEGORY_COLORS, type SpaceCategory } from '../spaces/space.model';
-import { areaPath, streetLabel, type Box, type Surroundings } from '../ground/ground';
+import { areaPath, streetLabel, type Box, type Margin, type Surroundings } from '../ground/ground';
 import {
   boundsOf,
   isPlaced,
@@ -69,6 +69,20 @@ let uid = 0;
             <rect [attr.width]="tread()" [attr.height]="tread()" [attr.fill]="colors.CIRCULATION" />
             <line x1="0" y1="0" x2="0" [attr.y2]="tread()" stroke="#1c2128" stroke-opacity="0.45" vector-effect="non-scaling-stroke" />
           </pattern>
+          <!-- At the street the building ends where the sidewalk starts: what is drawn from above
+               is cut where a sidewalk passes. -->
+          @if (walkPaths().length) {
+            <mask [attr.id]="walkMaskId" maskUnits="userSpaceOnUse" [attr.x]="box().x" [attr.y]="box().y"
+                  [attr.width]="box().width" [attr.height]="box().height">
+              <rect [attr.x]="box().x" [attr.y]="box().y" [attr.width]="box().width" [attr.height]="box().height" fill="#fff" />
+              @for (d of walkPaths(); track $index) {
+                <path [attr.d]="d" fill="#000" />
+              }
+            </mask>
+          }
+          @for (m of marginPaths()?.current ?? []; track $index) {
+            <clipPath [attr.id]="marginClipId + '-' + $index"><path [attr.d]="m.d" /></clipPath>
+          }
         </defs>
 
         @if (ground(); as g) {
@@ -88,18 +102,37 @@ let uid = 0;
             @for (d of g.sidewalks; track $index) {
               <path class="sidewalk" [attr.d]="d" />
             }
-            <!-- The cadastre maps the building from above. At the street it ends where the
-                 sidewalk starts; above, a floor may hang over it. -->
-            @if (g.atStreet) {
-              <mask [attr.id]="walkMaskId" maskUnits="userSpaceOnUse" [attr.x]="box().x" [attr.y]="box().y"
-                    [attr.width]="box().width" [attr.height]="box().height">
-                <rect [attr.x]="box().x" [attr.y]="box().y" [attr.width]="box().width" [attr.height]="box().height" fill="#fff" />
-                @for (d of g.sidewalks; track $index) {
-                  <path [attr.d]="d" fill="#000" />
-                }
-              </mask>
+          </g>
+        }
+
+        <!-- Where this floor's rooms go, wing by wing, over the floor below's, dotted. -->
+        @if (marginPaths(); as mp) {
+          <g class="margins" aria-hidden="true">
+            @for (m of mp.below; track $index) {
+              <path [attr.class]="'margin below ' + m.wing" [attr.d]="m.d" />
             }
-            <g [attr.mask]="g.atStreet ? 'url(#' + walkMaskId + ')' : null">
+            <g [attr.mask]="walkPaths().length ? 'url(#' + walkMaskId + ')' : null">
+              @for (m of mp.current; track $index) {
+                <path [attr.class]="'margin ' + m.wing" [attr.d]="m.d" />
+              }
+            </g>
+            <!-- Where the building meets a sidewalk its edge is the sidewalk's: the sidewalks'
+                 outlines within the wing, half hidden under the sidewalk itself. -->
+            @if (walkPaths().length) {
+              @for (m of mp.current; track $index; let i = $index) {
+                <g [attr.clip-path]="'url(#' + marginClipId + '-' + i + ')'" [attr.mask]="'url(#' + walkMaskId + ')'">
+                  @for (d of walkPaths(); track $index) {
+                    <path [attr.class]="'margin-edge ' + m.wing" [attr.d]="d" />
+                  }
+                </g>
+              }
+            }
+          </g>
+        }
+
+        @if (ground(); as g) {
+          <g class="ground" aria-hidden="true">
+            <g [attr.mask]="walkPaths().length ? 'url(#' + walkMaskId + ')' : null">
               @for (part of g.footprint; track $index) {
                 <path class="footprint" [class.reaches]="part.reaches" [attr.d]="part.d" />
               }
@@ -241,19 +274,57 @@ let uid = 0;
       stroke-width: 0.75;
       vector-effect: non-scaling-stroke;
     }
-    /* The building as the cadastre has it: solid where it rises to this floor, dashed where it
-       does not, so a drawing that strays from the real walls shows it. */
+    /* The building as the cadastre has it: solid where it rises to this floor, dotted where it
+       stops at the floor below, so a drawing that strays from the real walls shows it. */
     .footprint {
       fill: none;
-      stroke: color-mix(in srgb, var(--nav-active-edge) 50%, transparent);
-      stroke-width: 1.5;
-      stroke-dasharray: 5 4;
+      stroke: color-mix(in srgb, var(--nav-active-edge) 60%, transparent);
+      stroke-width: 2;
+      stroke-dasharray: 0 5;
+      stroke-linecap: round;
       vector-effect: non-scaling-stroke;
     }
     .footprint.reaches {
       fill: color-mix(in srgb, var(--nav-active-edge) 7%, transparent);
       stroke: var(--nav-active-edge);
       stroke-dasharray: none;
+    }
+    /* The building's margin, wing by wing: close colours, so the wings read as one building. */
+    .margin {
+      --wing: var(--margin-other);
+      fill: color-mix(in srgb, var(--wing) 11%, transparent);
+      stroke: var(--wing);
+      stroke-width: 2;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+    .margin.wing-N,
+    .margin-edge.wing-N {
+      --wing: var(--margin-n);
+    }
+    .margin.wing-C,
+    .margin.wing-none,
+    .margin-edge.wing-C,
+    .margin-edge.wing-none {
+      --wing: var(--margin-c);
+    }
+    .margin.wing-S,
+    .margin-edge.wing-S {
+      --wing: var(--margin-s);
+    }
+    .margin.below {
+      fill: none;
+      stroke-width: 2.25;
+      stroke-dasharray: 0 6;
+      stroke-linecap: round;
+      opacity: 0.85;
+    }
+    .margin-edge {
+      --wing: var(--margin-other);
+      fill: none;
+      stroke: var(--wing);
+      stroke-width: 4;
+      vector-effect: non-scaling-stroke;
     }
     .street {
       fill: color-mix(in srgb, var(--text) 72%, transparent);
@@ -395,6 +466,18 @@ export class FloorPlanComponent {
   readonly view = input<Box | null>(null);
   /** The block, sidewalks and streets around the building, in the floor's units. */
   readonly surroundings = input<Surroundings | null>(null);
+  /** Where this floor's rooms go, by wing, and where the floor below's went. */
+  readonly margins = input<{ current: Margin[]; below: Margin[] } | null>(null);
+  /** The sidewalks along the building, on a floor at the street: what it stops at. */
+  readonly streetWalks = input<Point[][]>([]);
+
+  readonly walkPaths = computed(() => this.streetWalks().map(areaPath));
+  readonly marginPaths = computed(() => {
+    const margins = this.margins();
+    if (!margins) return null;
+    const path = (m: Margin) => ({ d: areaPath(m.outline), wing: `wing-${m.wing ?? 'none'}` });
+    return { current: margins.current.map(path), below: margins.below.map(path) };
+  });
 
   readonly box = computed<Box>(() => this.view() ?? { x: 0, y: 0, width: this.width(), height: this.height() });
 
@@ -421,7 +504,6 @@ export class FloorPlanComponent {
       roadways: around.roadways.map(areaPath),
       medians: around.medians.map(areaPath),
       footprint: around.footprint.map((part) => ({ d: areaPath(part.outline), reaches: part.reaches })),
-      atStreet: around.atStreet,
       labels,
     };
   });
@@ -439,6 +521,7 @@ export class FloorPlanComponent {
   readonly colors = CATEGORY_COLORS;
   readonly treadsId = `treads-${++uid}`;
   readonly walkMaskId = `walks-${uid}`;
+  readonly marginClipId = `margin-${uid}`;
 
   /** A room being dragged or reshaped, drawn where the finger has it until it is let go. */
   private readonly dragged = signal<{ key: string; shape: Point[] } | null>(null);

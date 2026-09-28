@@ -80,6 +80,21 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
             </svg>
             Needs a look
           </li>
+          @if (margin()) {
+            <li>
+              <svg viewBox="0 0 28 18" aria-hidden="true">
+                <rect class="margin" x="2" y="2" width="11" height="14" />
+                <rect class="margin other" x="13" y="5" width="13" height="11" />
+              </svg>
+              Where this floor's rooms go, a shade per wing
+            </li>
+            <li>
+              <svg viewBox="0 0 28 18" aria-hidden="true">
+                <rect class="margin below" x="2" y="2" width="24" height="14" />
+              </svg>
+              Where the floor below's went
+            </li>
+          }
           @if (groundSource()) {
             <li>
               <svg viewBox="0 0 28 18" aria-hidden="true">
@@ -110,7 +125,7 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
                 <svg viewBox="0 0 28 18" aria-hidden="true">
                   <rect class="cadastre" x="2" y="2" width="24" height="14" />
                 </svg>
-                Parts of it that stop below this floor
+                On the floor below, per the cadastre
               </li>
             }
           }
@@ -263,9 +278,25 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
     }
     .cadastre {
       fill: none;
-      stroke: color-mix(in srgb, var(--nav-active-edge) 50%, transparent);
+      stroke: color-mix(in srgb, var(--nav-active-edge) 60%, transparent);
+      stroke-width: 2;
+      stroke-dasharray: 0 4;
+      stroke-linecap: round;
+    }
+    .margin {
+      fill: color-mix(in srgb, var(--margin-c) 11%, transparent);
+      stroke: var(--margin-c);
       stroke-width: 1.5;
-      stroke-dasharray: 3 2;
+    }
+    .margin.other {
+      fill: color-mix(in srgb, var(--margin-n) 11%, transparent);
+      stroke: var(--margin-n);
+    }
+    .margin.below {
+      fill: none;
+      stroke-width: 2;
+      stroke-dasharray: 0 4;
+      stroke-linecap: round;
     }
     .cadastre.reaches {
       fill: color-mix(in srgb, var(--nav-active-edge) 7%, transparent);
@@ -294,6 +325,8 @@ export class FloorLegendComponent {
   readonly groundSource = input<string | null>(null);
   /** Whether the building's cadastral outline is drawn with them. It has its own switch. */
   readonly cadastre = input(false);
+  /** Whether the building's margin is drawn. */
+  readonly margin = input(false);
 
   readonly stairsFill = CATEGORY_COLORS.CIRCULATION;
   readonly unidentifiedFill = CATEGORY_COLORS.OTHER;

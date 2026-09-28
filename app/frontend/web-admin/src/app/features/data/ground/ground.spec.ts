@@ -1,5 +1,6 @@
 import type { Placement } from '../buildings/building.model';
-import { drawingToGround, groundToDrawing, nearestQuarter, placementForFloor, reaches, streetLabel, surroundings, toMetres } from './ground';
+import type { Coordinate } from './ground.model';
+import { atStreet, drawingToGround, groundToDrawing, margins, nearestQuarter, outlineOf, placementForFloor, reaches, streetLabel, surroundings, toMetres } from './ground';
 
 // The Edificio Central as its seed lays it: top toward the Carrera 9 Bis, 34 units a metre.
 const EC: Placement = { origin: { lat: 4.6485371, lon: -74.0611566 }, bearing: 127, metresPerUnit: 0.02927 };
@@ -73,10 +74,67 @@ describe('ground', () => {
   // The cadastre maps a building from above, overhangs and all. On P1 the plan cuts it where a
   // sidewalk passes; on P2 it does not, since a floor may hang over the sidewalk.
   it('says which floors meet the street', () => {
+    expect(atStreet(1)).toBe(true);
+    expect(atStreet(-1)).toBe(true);
+    expect(atStreet(1.5)).toBe(false);
+    expect(atStreet(2)).toBe(false);
+  });
+
+  // Two parts that share a wall are one outline; the wall they share is not drawn.
+  it('outlines neighbouring parts as one', () => {
+    const [outline, ...rest] = outlineOf([square(0, 0, 2, 2), square(2, 0, 2, 2)]);
+    expect(rest).toEqual([]);
+    expect(corners(outline)).toEqual(['0,0', '0,2', '4,0', '4,2']);
+  });
+
+  // A part beside two others shares its wall with each in pieces: a corner of theirs lies on it.
+  it('outlines a part beside two others', () => {
+    const [outline, ...rest] = outlineOf([square(0, 0, 2, 4), square(2, 0, 2, 2), square(2, 2, 2, 2)]);
+    expect(rest).toEqual([]);
+    expect(corners(outline)).toEqual(['0,0', '0,4', '4,0', '4,4']);
+  });
+
+  it('keeps parts that do not touch apart', () => {
+    expect(outlineOf([square(0, 0, 1, 1), square(5, 5, 1, 1)]).length).toBe(2);
+  });
+
+  // The margin groups by wing: the Edificio Central's north wing stays apart from its centre.
+  it('draws a margin for each wing, from the parts that reach the floor', () => {
+    const base = { lat: EC.origin.lat, lon: EC.origin.lon };
+    const at = (x: number, y: number): Coordinate => [base.lon + x * 1e-5, base.lat + y * 1e-5];
+    const part = (x: number, wing: string, floors: number) => ({
+      lot: '1', floors, basements: 0, wing,
+      ring: [at(x, 0), at(x + 1, 0), at(x + 1, 1), at(x, 1), at(x, 0)],
+    });
+    const footprint = [part(0, 'N', 5), part(1, 'C', 8), part(2, 'C', 8)];
+    expect(margins(footprint, EC, 3).map((m) => m.wing)).toEqual(['N', 'C']);
+    expect(margins(footprint, EC, 6).map((m) => m.wing)).toEqual(['C']);
+  });
+
+  // A part is drawn on the floors it rises to and, dotted, on the one above its top; higher up,
+  // and for a part the cadastre does not record, not at all.
+  it("shows the cadastre's parts on their floors and the one above", () => {
     const ground = { campus: 'Sede Principal', source: 'IDECA', retrieved: '2026-09-27', blocks: [], sidewalks: [], roadways: [], medians: [], streets: [] };
     const view = { x: 0, y: 0, width: 100, height: 100 };
-    expect(surroundings(ground, EC, view, [], 1).atStreet).toBe(true);
-    expect(surroundings(ground, EC, view, [], -1).atStreet).toBe(true);
-    expect(surroundings(ground, EC, view, [], 2).atStreet).toBe(false);
+    const ring = square(0, 0, 1e-4, 1e-4).map(([x, y]) => [EC.origin.lon + x, EC.origin.lat + y] as Coordinate);
+    const parts = [{ lot: '1', floors: 5, basements: 0, ring }, { floors: 1, basements: 0, ring }];
+    expect(surroundings(ground, EC, view, parts, 5, 4).footprint.map((p) => p.reaches)).toEqual([true]);
+    expect(surroundings(ground, EC, view, parts, 6, 5).footprint.map((p) => p.reaches)).toEqual([false]);
+    expect(surroundings(ground, EC, view, parts, 7, 6).footprint).toEqual([]);
+    expect(surroundings(ground, EC, view, parts, -1, -2).footprint).toEqual([]);
   });
 });
+
+function square(x: number, y: number, w: number, h: number): Coordinate[] {
+  return [[x, y], [x + w, y], [x + w, y + h], [x, y + h], [x, y]];
+}
+
+/** A ring's corners, in a fixed order, with the ones in the middle of a straight side dropped. */
+function corners(ring: Coordinate[]): string[] {
+  const kept = ring.filter((p, i) => {
+    const a = ring[(i + ring.length - 1) % ring.length];
+    const b = ring[(i + 1) % ring.length];
+    return (p[0] - a[0]) * (b[1] - a[1]) !== (p[1] - a[1]) * (b[0] - a[0]);
+  });
+  return kept.map((p) => `${p[0]},${p[1]}`).sort();
+}

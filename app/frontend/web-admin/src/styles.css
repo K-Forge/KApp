@@ -74,6 +74,11 @@
 
   /* Behind a drawer or a dialog: the plum of the dark theme, not a neutral grey. */
   --scrim: rgb(37 20 32 / 0.45);
+  /* A building's margin on the floor plans: one family of greens and blues, a shade per wing. */
+  --margin-n: #0e7490;
+  --margin-c: #0f766e;
+  --margin-s: #047857;
+  --margin-other: #0369a1;
 
   /* How much of each hue reaches the page ground.
      The green was off in this theme for a while, because at sixteen percent spread thin over
@@ -195,6 +200,10 @@
     --nav-active-text: #f2d9fa;
     --nav-active-edge: #e8578f;
     --scrim: rgb(8 2 6 / 0.6);
+    --margin-n: #22d3ee;
+    --margin-c: #2dd4bf;
+    --margin-s: #34d399;
+    --margin-other: #38bdf8;
     --wash-strength: 54%;
     /* 40, not 46. The contrast sweep reads text against --bg, which is the ground BEFORE the
        glows are composited over it - so it cannot see this case. Worked out by hand: body text
@@ -255,6 +264,10 @@
   --nav-active-text: #f2d9fa;
   --nav-active-edge: #e8578f;
   --scrim: rgb(8 2 6 / 0.6);
+  --margin-n: #22d3ee;
+  --margin-c: #2dd4bf;
+  --margin-s: #34d399;
+  --margin-other: #38bdf8;
   --wash-strength: 54%;
   --wash-green: 40%;
   --wash-accent: 48%;

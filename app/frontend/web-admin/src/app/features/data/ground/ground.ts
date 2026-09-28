@@ -31,15 +31,29 @@ export interface Surroundings {
   roadways: Point[][];
   medians: Point[][];
   streets: { name: string; label: string; path: Point[] }[];
-  /** The building's own parts from above; `reaches` when the part rises to the floor drawn. */
-  footprint: { outline: Point[]; reaches: boolean }[];
   /**
-   * Whether the floor drawn is at the street, or under it. The cadastre maps a building from
-   * above, so a part includes the floors that overhang the sidewalk - along the Calle 63 the
-   * Edificio Central's north wing does, on columns. At the street the building stops where the
-   * sidewalk starts.
+   * The building's parts as the cadastre records them from above: those that rise to the floor
+   * drawn (`reaches`), and those that stop at the floor below it. The rest are not this floor's
+   * business, and a part the cadastre does not record is not the cadastre's.
    */
-  atStreet: boolean;
+  footprint: { outline: Point[]; reaches: boolean }[];
+}
+
+/** One wing's outline on a floor, in the floor's units. */
+export interface Margin {
+  /** The wing's code; null for the parts of a building that has no wings. */
+  wing: string | null;
+  outline: Point[];
+}
+
+/**
+ * Whether the floor at `level` is at the street, or under it. The cadastre maps a building from
+ * above, so a part includes the floors that overhang the sidewalk - along the Calle 63 the
+ * Edificio Central's north wing does, on columns. At the street the building stops where the
+ * sidewalk starts.
+ */
+export function atStreet(level: number): boolean {
+  return level <= 1;
 }
 
 /** Whether a part of `floors` floors and `basements` basements reaches the floor at `level`. */
@@ -118,6 +132,7 @@ export function surroundings(
   view: Box,
   footprint: readonly FootprintPart[] = [],
   level = 1,
+  below = level - 1,
 ): Surroundings {
   const toDrawing = (ring: Coordinate[]) => ring.map((c) => groundToDrawing(placement, c));
   const within = (points: Point[]) => {
@@ -136,9 +151,110 @@ export function surroundings(
     streets: ground.streets
       .map((s) => ({ name: s.name, label: s.label, path: toDrawing(s.path) }))
       .filter((s) => within(s.path)),
-    footprint: footprint.map((part) => ({ outline: toDrawing(part.ring), reaches: reaches(part, level) })),
-    atStreet: level <= 1,
+    footprint: footprint
+      .filter((part) => part.lot && (reaches(part, level) || (level > 0 && reaches(part, below))))
+      .map((part) => ({ outline: toDrawing(part.ring), reaches: reaches(part, level) })),
   };
+}
+
+/**
+ * Where a floor's rooms go: for each wing, the outline of its parts that rise to the floor, the
+ * cadastre's and those surveyed on site alike.
+ */
+export function margins(footprint: readonly FootprintPart[], placement: Placement, level: number): Margin[] {
+  const wings = new Map<string | null, Coordinate[][]>();
+  for (const part of footprint) {
+    if (!reaches(part, level)) continue;
+    const wing = part.wing ?? null;
+    wings.set(wing, [...(wings.get(wing) ?? []), part.ring]);
+  }
+  return [...wings].flatMap(([wing, rings]) =>
+    outlineOf(rings).map((ring) => ({ wing, outline: ring.map((c) => groundToDrawing(placement, c)) })),
+  );
+}
+
+/**
+ * The outline of several parts taken as one. The cadastre draws the parts of a lot as a
+ * partition - neighbours share their corners - so every edge two parts share cancels out and the
+ * edges left are the outside. A corner of one part that lies on another's edge is put on that
+ * edge first, or a part beside two others would not cancel.
+ */
+export function outlineOf(rings: readonly Coordinate[][]): Coordinate[][] {
+  const polygons = rings.map(openRing).filter((r) => r.length >= 3).map(counterClockwise);
+  const corners = polygons.flat();
+  const key = (a: Coordinate, b: Coordinate) => `${a[0]},${a[1]}>${b[0]},${b[1]}`;
+  const edges = new Map<string, { from: Coordinate; to: Coordinate; count: number }>();
+  for (const polygon of polygons) {
+    polygon.forEach((a, i) => {
+      const b = polygon[(i + 1) % polygon.length];
+      const stops = [a, ...onSegment(a, b, corners), b];
+      for (let j = 1; j < stops.length; j++) {
+        const [p, q] = [stops[j - 1], stops[j]];
+        const back = edges.get(key(q, p));
+        if (back) {
+          if (--back.count === 0) edges.delete(key(q, p));
+          continue;
+        }
+        const same = edges.get(key(p, q));
+        if (same) same.count++;
+        else edges.set(key(p, q), { from: p, to: q, count: 1 });
+      }
+    });
+  }
+  const leaving = new Map<string, Coordinate[]>();
+  for (const { from, to } of edges.values()) {
+    const at = `${from[0]},${from[1]}`;
+    leaving.set(at, [...(leaving.get(at) ?? []), to]);
+  }
+  const outlines: Coordinate[][] = [];
+  for (const [start, next] of leaving) {
+    while (next.length) {
+      const first = next.pop()!;
+      const ring: Coordinate[] = [start.split(',').map(Number) as Coordinate];
+      let at = first;
+      for (let guard = 0; `${at[0]},${at[1]}` !== start && guard < 100000; guard++) {
+        ring.push(at);
+        const onward = leaving.get(`${at[0]},${at[1]}`);
+        const step = onward?.pop();
+        if (!step) break;
+        at = step;
+      }
+      if (ring.length >= 3) outlines.push(ring);
+    }
+  }
+  return outlines;
+}
+
+/** A ring without the corner that closes it. */
+function openRing(ring: Coordinate[]): Coordinate[] {
+  const [first, last] = [ring[0], ring[ring.length - 1]];
+  return ring.length > 1 && first[0] === last[0] && first[1] === last[1] ? ring.slice(0, -1) : [...ring];
+}
+
+function counterClockwise(ring: Coordinate[]): Coordinate[] {
+  let twice = 0;
+  ring.forEach((a, i) => {
+    const b = ring[(i + 1) % ring.length];
+    twice += a[0] * b[1] - b[0] * a[1];
+  });
+  return twice < 0 ? [...ring].reverse() : ring;
+}
+
+/** The corners lying on segment a-b, strictly between its ends, in order from a. */
+function onSegment(a: Coordinate, b: Coordinate, corners: readonly Coordinate[]): Coordinate[] {
+  const [dx, dy] = [b[0] - a[0], b[1] - a[1]];
+  const length2 = dx * dx + dy * dy;
+  if (!length2) return [];
+  // A centimetre, in degrees: the cadastre's corners are given to a tenth of a millimetre.
+  const tolerance = 1e-7;
+  const found: { t: number; c: Coordinate }[] = [];
+  for (const c of corners) {
+    const t = ((c[0] - a[0]) * dx + (c[1] - a[1]) * dy) / length2;
+    if (t <= 1e-9 || t >= 1 - 1e-9) continue;
+    const off = Math.abs((c[0] - a[0]) * dy - (c[1] - a[1]) * dx) / Math.sqrt(length2);
+    if (off <= tolerance && !found.some((f) => f.c[0] === c[0] && f.c[1] === c[1])) found.push({ t, c });
+  }
+  return found.sort((p, q) => p.t - q.t).map((f) => f.c);
 }
 
 /**
