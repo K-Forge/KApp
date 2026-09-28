@@ -56,9 +56,13 @@ import re
 import sys
 from bisect import bisect_right
 
+import margin
+
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SEED = os.path.join(REPO, "app", "backend", "microservices", "map-service", "src", "main", "resources",
-                    "db", "seed", "map")
+RESOURCES = os.path.join(REPO, "app", "backend", "microservices", "map-service", "src", "main", "resources")
+SEED = os.path.join(RESOURCES, "db", "seed", "map")
+GROUND = os.path.join(RESOURCES, "db", "ground")
+UNNAMED = ("Sin identificar", "Escalera por identificar")
 
 
 def stretch(pairs, v):
@@ -175,6 +179,78 @@ def settle(shapes):
     return shapes
 
 
+def fit(spec, rules, building, floor, code):
+    """The floor fitted to the building's margin: the stairs and lifts that climb the building put
+    where they are on every floor, each room a wall inside the margin and clear of them, terraces
+    on the roof of the floor below, and the rooms a spec names stretched out to the facade."""
+    notes = []
+    width, height, level = floor["width"], floor["height"], floor["level"]
+    levels = sorted(f["level"] for f in building["floors"])
+    below = max((lv for lv in levels if lv < level), default=level - 1)
+    ground = margin.ground_for(building.get("campus", ""), GROUND)
+    _, loose, tight = margin.floor_margin(building, width, height, level, ground)
+    _, loose_below, tight_below = margin.floor_margin(building, width, height, below, ground)
+
+    spaces = {sp["code"]: sp for sp in floor["spaces"]}
+    cores = margin.blank(tight)
+    stacked = set()
+    for role, stack in spec.get("stack", {}).items():
+        target = stack["spaces"].get(code)
+        if not target:
+            continue
+        if target not in spaces:
+            sys.exit(f"{code} has no space {target} to stack as {role}")
+        shape = [(round(x), round(y)) for x, y in stack["shape"]]
+        sp = spaces[target]
+        sp["shape"] = [{"x": x, "y": y} for x, y in shape]
+        sp["doors"] = [d for d in sp.get("doors") or [] if on_edge(shape, (d["from"]["x"], d["from"]["y"]), (d["to"]["x"], d["to"]["y"]))]
+        cores.paint(shape)
+        stacked.add(target)
+        notes.append(f"  {target} stacked as {role}")
+
+    unplaced, gone = [], []
+    for sp in list(floor["spaces"]):
+        if not sp.get("shape") or sp["code"] in stacked:
+            continue
+        poly = [(p["x"], p["y"]) for p in sp["shape"]]
+        terrace = sp.get("typeCode") == "TERRACE"
+        cut = margin.clip(poly, loose_below if terrace else loose, tight_below if terrace else tight, cores)
+        if cut is poly:
+            continue
+        if cut is None:
+            if sp.get("name") in UNNAMED and not sp.get("doorCode"):
+                floor["spaces"].remove(sp)
+                gone.append(sp["code"])
+            else:
+                sp["shape"], sp["doors"] = None, []
+                unplaced.append(sp["code"])
+            continue
+        shape = tidy(cut)
+        sp["shape"] = [{"x": x, "y": y} for x, y in shape]
+        sp["doors"] = [d for d in sp.get("doors") or [] if on_edge(shape, (d["from"]["x"], d["from"]["y"]), (d["to"]["x"], d["to"]["y"]))]
+    if gone:
+        notes.append(f"  outside the building, dropped: {', '.join(gone)}")
+    if unplaced:
+        notes.append(f"  outside the building, left to place: {', '.join(unplaced)}")
+    clipped = [sp["code"] for sp in floor["spaces"] if sp.get("shape")]
+
+    for target in rules.get("extend", {}).get("left", []):
+        sp = spaces.get(target)
+        if not sp or not sp.get("shape"):
+            sys.exit(f"{code} has no drawn space {target} to extend")
+        others = margin.blank(tight)
+        for other in floor["spaces"]:
+            if other is not sp and other.get("shape"):
+                others.paint([(p["x"], p["y"]) for p in other["shape"]])
+        poly = [(p["x"], p["y"]) for p in sp["shape"]]
+        grown = margin.extend_left(poly, tight, others)
+        if grown is not poly:
+            sp["shape"] = [{"x": round(x), "y": round(y)} for x, y in grown]
+            notes.append(f"  {target} out to the facade: x {min(p[0] for p in poly):.0f} -> {min(p[0] for p in grown):.0f}")
+    notes.append(f"  fitted to the margin: {len(clipped)} room(s) drawn")
+    return notes
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("spec", help="the building's registration spec")
@@ -215,7 +291,22 @@ def main():
         b["shape"], b["doors"] = a["shape"], a.get("doors") or []
         floor["spaces"].remove(a)
 
+    # A name the plan's tracing gave a shape that is not that space: the shape goes back to being a box.
+    for code, why in rules.get("unname", {}).items():
+        sp = next((x for x in floor["spaces"] if x["code"] == code), None)
+        if not sp:
+            sys.exit(f"{args.floor} has no space {code} to unname")
+        taken = {x["code"] for x in floor["spaces"]}
+        n = 1
+        while f"{args.floor}-{n:02d}" in taken:
+            n += 1
+        sp.update({"code": f"{args.floor}-{n:02d}", "doorCode": None, "wing": None, "name": UNNAMED[0],
+                   "typeCode": "OTHER", "aliases": []})
+        for k in ("doorCode", "wing"):
+            sp.pop(k, None)
+
     moved = [f"  dropped {code}" for code in sorted(dropped)]
+    moved += [f"  {code} is a box again" for code in rules.get("unname", {})]
     moved += [f"  {traced} is {named}" for traced, named in rules.get("becomes", {}).items()]
     for space in floor["spaces"]:
         g = group(space["code"])
@@ -279,12 +370,15 @@ def main():
     floor.clear()
     floor.update(laid)
 
+    if width:
+        floor["width"] = width
+    if spec.get("fit"):
+        moved += fit(spec, rules, building, floor, args.floor)
+
     drawn = [s for s in floor["spaces"] if s.get("shape")]
     settled = settle([[(p["x"], p["y"]) for p in s["shape"]] for s in drawn])
     for space, shape in zip(drawn, settled):
         space["shape"] = [{"x": x, "y": y} for x, y in shape]
-    if width:
-        floor["width"] = width
     everything = [p for s in floor["spaces"] for p in s.get("shape") or []] + [p for c in corridors for p in c["path"]]
     widest = max((p["x"] for p in everything), default=0)
     tallest = max((p["y"] for p in everything), default=0)
