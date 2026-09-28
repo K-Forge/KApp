@@ -39,17 +39,36 @@ export class AuthService {
    */
   logout(): void {
     this.tokenStore.clear();
-    this.router
-      .navigateByUrl('/login')
-      .then((navigated) => {
-        if (!navigated) {
-          this.hardRedirectToLogin();
-        }
-      })
-      .catch(() => this.hardRedirectToLogin());
+    this.leaveFor({});
   }
 
-  private hardRedirectToLogin(): void {
-    window.location.assign('/login');
+  /**
+   * Ends a session whose token has run out, the moment it does, and says so on the sign-in
+   * page - which then brings the person back to the page they were on.
+   *
+   * <p>Waiting for the next call to come back `401` left the portal showing everything the dead
+   * token had read, for as long as nobody clicked anything: a list of users on an unattended
+   * screen, with a red "expired" badge over it.
+   */
+  expire(): void {
+    const returnUrl = this.router.url;
+    this.tokenStore.clear();
+    this.leaveFor(returnUrl.startsWith('/login') ? { reason: 'expired' } : { reason: 'expired', returnUrl });
+  }
+
+  private leaveFor(queryParams: Record<string, string>): void {
+    this.router
+      .navigate(['/login'], { queryParams })
+      .then((navigated) => {
+        if (!navigated) {
+          this.hardRedirectToLogin(queryParams);
+        }
+      })
+      .catch(() => this.hardRedirectToLogin(queryParams));
+  }
+
+  private hardRedirectToLogin(queryParams: Record<string, string>): void {
+    const query = new URLSearchParams(queryParams).toString();
+    window.location.assign(query ? `/login?${query}` : '/login');
   }
 }

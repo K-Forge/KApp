@@ -23,6 +23,11 @@ export class TokenStore {
 
   readonly isAuthenticated = computed(() => this.rawSignal() !== null);
 
+  /**
+   * Whether the token had expired when it was stored or last changed. It does not tick: a
+   * computed re-runs only when the token does. Code that must notice the deadline pass reads
+   * `isTokenExpired` against a clock instead.
+   */
   readonly isExpired = computed(() => {
     const decoded = this.decoded();
     return decoded ? isTokenExpired(decoded.claims) : true;

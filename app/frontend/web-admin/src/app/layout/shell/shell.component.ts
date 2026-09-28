@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
+import { isTokenExpired } from '../../core/auth/jwt.util';
 import { TokenStore } from '../../core/auth/token.store';
+import { ClockService } from '../../core/clock/clock.service';
 import { ApiConfigService } from '../../core/config/api-config.service';
 import { ThemeService } from '../../core/theme/theme.service';
 import { TokenCountdownComponent } from '../../shared/ui/token-countdown/token-countdown.component';
@@ -550,6 +552,16 @@ export class ShellComponent {
         takeUntilDestroyed(destroyRef),
       )
       .subscribe(() => this.drawerOpen.set(false));
+
+    // The token's deadline is the session's. The shell is on screen exactly while somebody is
+    // signed in, so it watches the clock and signs out the second the token runs out.
+    const clock = inject(ClockService);
+    effect(() => {
+      const claims = this.tokenStore.decoded()?.claims;
+      if (claims && isTokenExpired(claims, clock.now())) {
+        untracked(() => this.auth.expire());
+      }
+    });
   }
 
   toggleNav(): void {

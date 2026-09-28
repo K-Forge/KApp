@@ -32,6 +32,13 @@ interface LoginForm {
           </div>
         </div>
 
+        @if (sessionExpired()) {
+          <div class="card expired" role="alert">
+            <strong>Your session expired.</strong>
+            <p>The portal signs out as soon as the token runs out. Sign in again to go back to where you were.</p>
+          </div>
+        }
+
         @if (refusedAsNonAdmin()) {
           <div class="card api-error" role="alert">
             <strong>That account is not an administrator.</strong>
@@ -125,6 +132,18 @@ interface LoginForm {
       text-transform: uppercase;
       color: var(--text-muted);
     }
+    .expired {
+      margin-bottom: 1rem;
+      padding: 0.75rem 0.9rem;
+      background: var(--warning-bg);
+      color: var(--warning);
+      border-color: color-mix(in srgb, var(--warning) 35%, transparent);
+      box-shadow: none;
+    }
+    .expired p {
+      margin: 0.35rem 0 0;
+      color: var(--text);
+    }
     .settings {
       margin-top: 1.5rem;
       font-size: 0.8125rem;
@@ -155,6 +174,12 @@ export class LoginPage {
    */
   protected readonly refusedAsNonAdmin = toSignal(
     this.route.queryParamMap.pipe(map((params) => params.get('reason') === 'admin-only')),
+    { initialValue: false },
+  );
+
+  /** Set when the session ended because its token ran out, rather than by signing out. */
+  protected readonly sessionExpired = toSignal(
+    this.route.queryParamMap.pipe(map((params) => params.get('reason') === 'expired')),
     { initialValue: false },
   );
 

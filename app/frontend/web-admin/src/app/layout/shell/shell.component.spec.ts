@@ -1,6 +1,10 @@
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
+import { TokenStore } from '../../core/auth/token.store';
+import { ClockService } from '../../core/clock/clock.service';
 import { ShellComponent } from './shell.component';
 
 describe('ShellComponent', () => {
@@ -97,3 +101,49 @@ describe('ShellComponent', () => {
     expect(shell.navHidden()).toBe(false);
   });
 });
+
+describe('ShellComponent session', () => {
+  const now = Date.now();
+  const clock = signal(now);
+  const expire = vi.fn();
+
+  beforeEach(async () => {
+    expire.mockReset();
+    clock.set(now);
+    await TestBed.configureTestingModule({
+      imports: [ShellComponent],
+      providers: [
+        provideHttpClient(),
+        provideRouter([]),
+        { provide: ClockService, useValue: { now: clock.asReadonly() } },
+      ],
+    }).compileComponents();
+    TestBed.inject(TokenStore).set(tokenExpiringAt(now + 60_000));
+    vi.spyOn(TestBed.inject(AuthService), 'expire').mockImplementation(expire);
+  });
+
+  afterEach(() => TestBed.inject(TokenStore).clear());
+
+  // Waiting for a 401 left everything the token had read on screen until somebody clicked.
+  it('signs out the moment the token runs out, not at the next call', () => {
+    const fixture = TestBed.createComponent(ShellComponent);
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(expire).not.toHaveBeenCalled();
+
+    clock.set(now + 59_000);
+    TestBed.tick();
+    expect(expire).not.toHaveBeenCalled();
+
+    clock.set(now + 60_000);
+    TestBed.tick();
+    expect(expire).toHaveBeenCalledTimes(1);
+  });
+});
+
+/** A token decodeJwt reads; nothing here checks its signature. */
+function tokenExpiringAt(ms: number): string {
+  const encode = (value: unknown) => btoa(JSON.stringify(value)).replace(/=+$/, '');
+  const claims = { sub: 'x', roles: ['ROLE_ADMIN'], iat: Math.floor(Date.now() / 1000), exp: Math.floor(ms / 1000) };
+  return `${encode({ alg: 'RS256', typ: 'JWT' })}.${encode(claims)}.signature`;
+}

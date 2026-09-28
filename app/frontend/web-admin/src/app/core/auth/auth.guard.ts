@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { isTokenExpired } from './jwt.util';
 import { TokenStore } from './token.store';
 
 /**
@@ -25,8 +26,18 @@ export const authGuard: CanActivateFn = (_route, state) => {
   const tokenStore = inject(TokenStore);
   const router = inject(Router);
 
-  if (!tokenStore.isAuthenticated() || tokenStore.isExpired()) {
+  if (!tokenStore.isAuthenticated()) {
     return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
+  }
+
+  // A token past its deadline is a session that ended while the tab was closed or asleep; the
+  // sign-in page says so rather than just asking for a password again. Read against the clock
+  // now, not through `tokenStore.isExpired`: that is computed once per token and never
+  // notices the deadline pass.
+  const claims = tokenStore.decoded()?.claims;
+  if (!claims || isTokenExpired(claims)) {
+    tokenStore.clear();
+    return router.createUrlTree(['/login'], { queryParams: { reason: 'expired', returnUrl: state.url } });
   }
 
   if (!tokenStore.roles().includes('ROLE_ADMIN')) {
