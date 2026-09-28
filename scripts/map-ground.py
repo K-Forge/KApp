@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
-"""The ground around a campus - city blocks, sidewalks, roadways, medians and named streets - cut
-from Bogota's reference map and written where map-service serves it from.
+"""The ground around a campus - city blocks, sidewalks, roadways, medians and named streets, and the
+lots of the blocks the campus's buildings stand on - cut from Bogota's reference map and written
+where map-service serves it from.
 
     scripts/map-ground.py [--campus "Sede Principal"] [--around 4.6486,-74.0615] [--radius 350]
+    scripts/map-ground.py --lots-only      # the lots again, the rest of the file as it is
 
 The source is the Mapa de Referencia para Bogota D.C. that IDECA publishes (UAECD, IDU and others),
-under CC BY 4.0: its ArcGIS REST service, layers Manzana, Anden, Calzada, Separador and Malla Vial.
+under CC BY 4.0: its ArcGIS REST service, layers Manzana, Anden, Calzada, Separador, Malla Vial and
+Lote. The lots are the blocks' whose codes the campus's buildings carry in their footprints, in the
+map seed: whose land is whose, for surveying a block.
 Everything within `radius` metres of `around` is kept, each outline simplified to a quarter of a
 metre - finer than any plan on a wall is drawn - and the street axes of one name joined into as
 few lines as they make. Standard library only.
@@ -20,21 +24,25 @@ import urllib.parse
 import urllib.request
 
 SERVICE = 'https://serviciosgis.catastrobogota.gov.co/arcgis/rest/services/Mapa_Referencia/Mapa_Referencia/MapServer'
-LAYERS = {'blocks': 40, 'sidewalks': 16, 'roadways': 15, 'medians': 17, 'streets': 13}
+LAYERS = {'blocks': 40, 'sidewalks': 16, 'roadways': 15, 'medians': 17, 'streets': 13, 'lots': 38}
 SOURCE = ('Mapa de Referencia para Bogotá D.C., Infraestructura de Datos Espaciales para el Distrito '
           'Capital (IDECA) - UAECD, IDU y otras entidades. CC BY 4.0.')
-OUT = os.path.join(os.path.dirname(__file__), '..', 'app', 'backend', 'microservices', 'map-service',
-                   'src', 'main', 'resources', 'db', 'ground')
+RESOURCES = os.path.join(os.path.dirname(__file__), '..', 'app', 'backend', 'microservices', 'map-service',
+                         'src', 'main', 'resources')
+OUT = os.path.join(RESOURCES, 'db', 'ground')
+SEED = os.path.join(RESOURCES, 'db', 'seed', 'map')
 KINDS = {'CL': 'Calle', 'KR': 'Carrera', 'AK': 'Avenida Carrera', 'AC': 'Avenida Calle', 'DG': 'Diagonal',
          'TV': 'Transversal', 'AV': 'Avenida'}
 TOLERANCE = 0.25   # metres
 
 
-def fetch(layer, box):
-    params = urllib.parse.urlencode({
-        'geometry': ','.join(str(v) for v in box), 'geometryType': 'esriGeometryEnvelope', 'inSR': 4326,
-        'spatialRel': 'esriSpatialRelIntersects', 'outFields': '*', 'outSR': 4326, 'f': 'geojson',
-        'resultRecordCount': 2000})
+def fetch(layer, box=None, where=None):
+    query = {'outFields': '*', 'outSR': 4326, 'f': 'geojson', 'resultRecordCount': 2000}
+    if box:
+        query.update({'geometry': ','.join(str(v) for v in box), 'geometryType': 'esriGeometryEnvelope',
+                      'inSR': 4326, 'spatialRel': 'esriSpatialRelIntersects'})
+    query['where'] = where or '1=1'
+    params = urllib.parse.urlencode(query)
     request = urllib.request.Request(f'{SERVICE}/{layer}/query?{params}',
                                      headers={'User-Agent': 'KApp map-ground script'})
     with urllib.request.urlopen(request, timeout=120) as answer:
@@ -138,14 +146,62 @@ def join(segments, snap=0.5):
     return pieces
 
 
+def campus_blocks(campus):
+    """The codes of the blocks the campus's buildings stand on: the first nine digits of their lots."""
+    blocks = set()
+    for name in sorted(os.listdir(SEED)):
+        if not name.endswith('.json'):
+            continue
+        with open(os.path.join(SEED, name), encoding='utf-8') as f:
+            building = json.load(f)
+        if building.get('campus') == campus:
+            blocks.update(part['lot'][:9] for part in building.get('footprint') or [] if part.get('lot'))
+    return sorted(blocks)
+
+
+def lots(campus, plane):
+    """The lots of the campus's blocks, each with its code, outlines simplified like the rest."""
+    blocks = campus_blocks(campus)
+    if not blocks:
+        return []
+    out = []
+    where = 'MANZCODIGO IN (' + ','.join(f"'{b}'" for b in blocks) + ')'
+    for feature in sorted(fetch(LAYERS['lots'], where=where), key=lambda f: f['properties']['LOTCODIGO']):
+        for coordinates in rings(feature):
+            kept = ring([plane.to(c) for c in coordinates], TOLERANCE)
+            if kept:
+                out.append({'code': feature['properties']['LOTCODIGO'], 'ring': [plane.back(p) for p in kept]})
+    print(f'lots: {len(out)} in {len(blocks)} block(s)')
+    return out
+
+
+def write(campus, ground):
+    os.makedirs(OUT, exist_ok=True)
+    slug = re.sub(r'[^a-z0-9]+', '-', campus.lower()).strip('-')
+    path = os.path.normpath(os.path.join(OUT, f'{slug}.json'))
+    with open(path, 'w', encoding='utf-8') as out:
+        json.dump(ground, out, ensure_ascii=False, separators=(',', ':'))
+        out.write('\n')
+    print(f'wrote {path} ({os.path.getsize(path) // 1024} KB)')
+    return path
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--campus', default='Sede Principal')
     parser.add_argument('--around', default='4.6486,-74.0615', help='lat,lon of the middle of the campus')
     parser.add_argument('--radius', type=float, default=350, help='metres around it to keep')
+    parser.add_argument('--lots-only', action='store_true', help="take the lots again, and keep the rest of the file")
     args = parser.parse_args()
     lat, lon = (float(v) for v in args.around.split(','))
     plane = Plane(lat, lon)
+    slug = re.sub(r'[^a-z0-9]+', '-', args.campus.lower()).strip('-')
+    if args.lots_only:
+        with open(os.path.join(OUT, f'{slug}.json'), encoding='utf-8') as f:
+            ground = json.load(f)
+        ground['lots'] = lots(args.campus, plane)
+        write(args.campus, ground)
+        return
     dlat, dlon = args.radius / plane.ky, args.radius / plane.kx
     box = (lon - dlon, lat - dlat, lon + dlon, lat + dlat)
 
@@ -174,14 +230,8 @@ def main():
                             'path': [plane.back(p) for p in simplify(line, TOLERANCE)]})
     ground['streets'] = streets
     print(f'streets: {len(streets)} lines of {len(by_label)} names')
-
-    os.makedirs(OUT, exist_ok=True)
-    slug = re.sub(r'[^a-z0-9]+', '-', args.campus.lower()).strip('-')
-    path = os.path.normpath(os.path.join(OUT, f'{slug}.json'))
-    with open(path, 'w', encoding='utf-8') as out:
-        json.dump(ground, out, ensure_ascii=False, separators=(',', ':'))
-        out.write('\n')
-    print(f'wrote {path} ({os.path.getsize(path) // 1024} KB)')
+    ground['lots'] = lots(args.campus, plane)
+    write(args.campus, ground)
 
 
 if __name__ == '__main__':

@@ -67,7 +67,7 @@ public class GroundService {
     }
 
     /** Campus names match ignoring case and accents, as the building search does. */
-    private static String key(String campus) {
+    public static String key(String campus) {
         return Normalizer.normalize(campus.trim(), Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "")
                 .toLowerCase(Locale.ROOT);

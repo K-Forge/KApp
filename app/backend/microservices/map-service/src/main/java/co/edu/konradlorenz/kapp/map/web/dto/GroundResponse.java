@@ -7,7 +7,8 @@ import java.util.List;
 
 /**
  * The {@code Ground} schema: the city around a campus - its blocks, sidewalks, roadways and
- * streets - taken from the city's own reference map.
+ * streets, and the lots of the blocks the university stands on - taken from the city's own
+ * reference map.
  *
  * <p>Coordinates are GeoJSON's: {@code [lon, lat]} in degrees of WGS 84. An area is one ring,
  * its first point repeated at the end.
@@ -26,8 +27,24 @@ public record GroundResponse(
         List<double[][]> roadways,
         @ArraySchema(arraySchema = @Schema(description = "The medians (separadores) between roadways."))
         List<double[][]> medians,
-        List<StreetDto> streets
+        List<StreetDto> streets,
+        @ArraySchema(arraySchema = @Schema(description = "The cadastral lots of the blocks the university's buildings "
+                + "stand on: whose land is whose, for surveying a block."))
+        List<LotDto> lots
 ) {
+
+    public GroundResponse {
+        lots = lots == null ? List.of() : lots;
+    }
+
+    /** A cadastral lot: its code and its outline. */
+    @Schema(name = "Lot")
+    public record LotDto(
+            @Schema(description = "The cadastre's code: the block's nine digits, then the lot's three.",
+                    example = "008213024019") String code,
+            @Schema(description = "Its outline, [lon, lat] points, the first repeated at the end.") double[][] ring
+    ) {
+    }
 
     /** A street's name and the line it is labelled along. */
     @Schema(name = "Street")

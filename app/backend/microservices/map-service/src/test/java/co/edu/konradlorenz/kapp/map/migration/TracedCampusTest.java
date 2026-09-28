@@ -2,10 +2,12 @@ package co.edu.konradlorenz.kapp.map.migration;
 
 import co.edu.konradlorenz.kapp.map.domain.Accessibility;
 import co.edu.konradlorenz.kapp.map.domain.BuildingDocument;
+import co.edu.konradlorenz.kapp.map.domain.CampusStructuresDocument;
 import co.edu.konradlorenz.kapp.map.domain.Floor;
 import co.edu.konradlorenz.kapp.map.domain.FloorStatus;
 import co.edu.konradlorenz.kapp.map.domain.Point;
 import co.edu.konradlorenz.kapp.map.domain.SpaceDocument;
+import co.edu.konradlorenz.kapp.map.domain.Structure;
 import co.edu.konradlorenz.kapp.map.service.MapMapper;
 import co.edu.konradlorenz.kapp.map.web.dto.FloorLayoutRequest;
 import co.edu.konradlorenz.kapp.map.web.dto.LayoutSpaceDto;
@@ -423,6 +425,23 @@ class TracedCampusTest {
                 building.aliases(), building.wings(),
                 building.floors().stream().map(f -> f.code().equals(floor.code()) ? floor : f).toList(),
                 building.placement(), building.footprint());
+    }
+
+    @Test
+    @DisplayName("the campus's structures are put on once, and a list somebody saved since is kept")
+    void structuresAreSeededOnce() {
+        CampusStructuresDocument seeded = mongo.findById("sede principal", CampusStructuresDocument.class);
+        assertThat(seeded).as("the change units have run").isNotNull();
+        assertThat(seeded.structures()).extracting(Structure::name)
+                .contains("Casa de Francisco de Paula Vélez", "Vecino, Calle 62 # 9-46 a 9-60");
+        assertThat(seeded.structures()).allSatisfy(s -> assertThat(s.ring().getFirst()).isEqualTo(s.ring().getLast()));
+
+        mongo.save(new CampusStructuresDocument(seeded.id(), seeded.campus(),
+                List.of(seeded.structures().getFirst()), seeded.version() + 1, Instant.now()));
+        assertThat(V010_CampusStructures.seed(mongo, V010_CampusStructures.load(), Instant.now())).isEmpty();
+        assertThat(mongo.findById("sede principal", CampusStructuresDocument.class).structures()).hasSize(1);
+
+        mongo.save(seeded);
     }
 
     /** A four-cornered outline pulled in by `by` on every side. */

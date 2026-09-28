@@ -151,6 +151,8 @@ class GroundTest {
                 .andExpect(jsonPath("$.sidewalks.length()").value(greaterThan(0)))
                 .andExpect(jsonPath("$.roadways.length()").value(greaterThan(0)))
                 .andExpect(jsonPath("$.streets[?(@.name == 'Carrera 9 Bis')]").exists())
+                // The lots of the blocks the buildings stand on: the Edificio Central's among them.
+                .andExpect(jsonPath("$.lots[?(@.code == '008213024019')]").exists())
                 // GeoJSON order: longitude first. Bogota is west of Greenwich and just north of the equator.
                 .andExpect(jsonPath("$.blocks[0][0][0]").value(org.hamcrest.Matchers.lessThan(-74.0)))
                 .andExpect(jsonPath("$.blocks[0][0][1]").value(greaterThan(4.6)));

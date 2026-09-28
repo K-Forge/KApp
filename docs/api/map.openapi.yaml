@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Map API
-  version: 3.2.1
+  version: 3.3.0
   summary: Schematic campus map and space search for Fundacion Universitaria Konrad Lorenz.
   description: |
     Digital campus map for Fundacion Universitaria Konrad Lorenz (Bogota, Colombia).
@@ -67,6 +67,18 @@ info:
     of a drawing, the offset from `origin` is `east = m (x cos b - y sin b)` and
     `north = -m (x sin b + y cos b)`, with `m = metresPerUnit` and `b = bearing`; a campus is
     small enough for the plane through its middle to stand in for the earth.
+
+    ## Version 3.3: the rest of the block
+
+    A building stands among others that are not the university's, and a block is surveyed whole.
+    Version 3.3 adds, without changing anything else:
+
+    - **`lots`** in the ground: the cadastral lots of the blocks the university's buildings
+      stand on, each with its code - whose land is whose. Read-only, like the rest of the ground.
+    - **`GET /api/map/campuses/{campus}/structures`**: everything on a campus's blocks that is
+      not the university's - a neighbour's building, a heritage house with its garden - each with
+      its outline and floors, for drawing around the buildings. **`PUT`** saves the list whole,
+      with the `version` it was read at, and is refused with `409` when somebody saved it since.
 
     ## Coordinate model
 
@@ -152,7 +164,7 @@ tags:
   - name: Space types
     description: The catalogue of kinds of space, each in a fixed category.
   - name: Campuses
-    description: The list of campuses (Sedes) known to the map, and the ground around each.
+    description: The list of campuses (Sedes) known to the map, the ground around each, and what else stands on its blocks.
 
 paths:
   /api/map/buildings:
@@ -728,8 +740,9 @@ paths:
       operationId: getCampusGround
       summary: The ground around a campus
       description: |
-        The city around a campus - its blocks, sidewalks, roadways, medians and named streets -
-        from the city's reference map, for drawing under the buildings. Coordinates are
+        The city around a campus - its blocks, sidewalks, roadways, medians and named streets, and
+        the lots of the blocks the university's buildings stand on - from the city's reference
+        map, for drawing under the buildings. Coordinates are
         `[lon, lat]` in WGS 84; lay a building's drawing on them with its `placement`. The campus
         name matches ignoring case and accents. `404` for a campus with no ground yet.
 
@@ -761,6 +774,82 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/map/campuses/{campus}/structures:
+
+    parameters:
+      - name: campus
+        in: path
+        required: true
+        schema: { type: string, maxLength: 120 }
+        example: Sede Principal
+
+    get:
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      operationId: getCampusStructures
+      summary: What else stands on a campus's blocks
+      description: |
+        Everything on the campus's blocks that is not the university's - a neighbour's building,
+        a heritage house with its garden - for drawing around the buildings. An empty list, at
+        version `0`, while nothing has been saved. The campus name matches ignoring case and
+        accents.
+
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+      tags: [Campuses]
+      responses:
+        '200':
+          description: The campus's structures.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Structures' }
+              example:
+                campus: Sede Principal
+                version: 1
+                updatedAt: '2026-09-28T20:00:00Z'
+                structures:
+                  - name: Vecino, Calle 62 # 9-46 a 9-60
+                    floors: 5
+                    basements: 0
+                    lot: '008213024001'
+                    ring: [[-74.0618, 4.6481], [-74.0617, 4.6483], [-74.0615, 4.6482], [-74.0618, 4.6481]]
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+    put:
+      x-roles: [ROLE_ADMIN]
+      operationId: saveCampusStructures
+      summary: Replace what else stands on a campus's blocks
+      description: |
+        The **complete** list, as the portal's block editor saves it: a structure missing from it
+        is gone. `version` is the list's version as it was read, `0` while nothing has been saved;
+        when somebody saved it since, the save is refused with `409` and nothing changes - reload
+        and reapply. Every outline must close, `400` otherwise.
+
+        Allowed roles: `ROLE_ADMIN` only.
+      tags: [Campuses]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StructuresRequest' }
+            example:
+              version: 1
+              structures:
+                - name: Casa de Francisco de Paula Vélez
+                  floors: 1
+                  basements: 0
+                  lot: '008213024004'
+                  ring: [[-74.0620, 4.6484], [-74.0619, 4.6486], [-74.0617, 4.6485], [-74.0620, 4.6484]]
+      responses:
+        '200':
+          description: The list as saved, with its next version.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Structures' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
 
 components:
   securitySchemes:
@@ -981,6 +1070,54 @@ components:
         streets:
           type: array
           items: { $ref: '#/components/schemas/Street' }
+        lots:
+          type: array
+          description: The cadastral lots of the blocks the university's buildings stand on - whose land is whose, for surveying a block.
+          items: { $ref: '#/components/schemas/Lot' }
+
+    Lot:
+      type: object
+      description: A cadastral lot.
+      required: [code, ring]
+      properties:
+        code: { type: string, description: "The cadastre's code: the block's nine digits, then the lot's three.", example: '008213024019' }
+        ring: { $ref: '#/components/schemas/Ring' }
+
+    Structure:
+      type: object
+      description: |
+        Something on a campus's blocks that is not the university's - a neighbour's building, a
+        heritage house with its garden - drawn around the buildings so they read in their place.
+      required: [name, floors, basements, ring]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120, description: "What it is called, or what it is.", example: Casa de Francisco de Paula Vélez }
+        floors: { type: integer, minimum: 0, maximum: 200, description: "How many floors it rises above the street; 0 for ground, like a garden.", example: 1 }
+        basements: { type: integer, minimum: 0, maximum: 20, description: How many it goes below., example: 0 }
+        lot: { type: string, maxLength: 30, description: "The cadastral lot it stands on, when known.", example: '008213024004' }
+        ring: { $ref: '#/components/schemas/Ring' }
+
+    Structures:
+      type: object
+      description: Everything on a campus's blocks that is not the university's.
+      required: [campus, structures, version]
+      properties:
+        campus: { type: string, example: Sede Principal }
+        structures:
+          type: array
+          items: { $ref: '#/components/schemas/Structure' }
+        version: { type: integer, format: int64, description: Bumped by every save. Send it back with the next one., example: 1 }
+        updatedAt: { type: string, format: date-time, description: "When it was last saved; absent while nothing has been." }
+
+    StructuresRequest:
+      type: object
+      description: The whole list, with the version it was read at.
+      required: [version, structures]
+      properties:
+        version: { type: integer, format: int64, minimum: 0, description: "The version the list was read at; 0 while nothing has been saved.", example: 1 }
+        structures:
+          type: array
+          maxItems: 500
+          items: { $ref: '#/components/schemas/Structure' }
 
     Bounds:
       type: object

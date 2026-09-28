@@ -257,7 +257,8 @@ public class BuildingService {
         }
     }
 
-    private static boolean closedRingOnEarth(List<List<Double>> ring) {
+    /** An outline of [lon, lat] points on the earth, the first repeated at the end. */
+    static boolean closedRingOnEarth(List<List<Double>> ring) {
         boolean onEarth = ring.stream().allMatch(p -> p.get(0) >= -180 && p.get(0) <= 180
                 && p.get(1) >= -90 && p.get(1) <= 90);
         return onEarth && ring.size() >= 4 && ring.get(0).equals(ring.get(ring.size() - 1));
