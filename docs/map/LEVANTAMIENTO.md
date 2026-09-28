@@ -100,6 +100,21 @@ Brian lo estableció en sitio, y las fotos lo confirman:
 - **El P1 no es a cielo abierto donde el catastro no registra partes.** El ala central tiene techo
   hasta la Carrera 9A; es a cielo abierto el paso junto a la casa de Francisco de Paula Vélez.
   Esas partes van en la huella sin predio.
+- **El EC es rectangular; lo diagonal es la aleta de la Carrera 9 Bis.** Brian lo dibujó sobre
+  Google Maps, Apple Maps y en un esquema (28 de septiembre de 2026). Se cruzó con el catastro y la
+  ortofoto de 2014 de IDECA, que está nítida; la de 2017 inclina los techos altos varios metros.
+  - La retícula del dibujo (128,13°) es la misma del catastro. Todas las construcciones del EC son
+    ortogonales, menos una.
+  - Esa una es una cuña de "6 pisos" frente a la Carrera 9 Bis: 105 m², 31,6 m de lado diagonal y
+    7,7 m de ancho junto al ala norte, hasta cero en el ala sur. En la ortofoto es una plaza con
+    gente y árboles, la aleta. La huella la tomó como ala central, y de P2 a P6 hay unos 22 m² de
+    aulas encima de ella por piso.
+  - La fachada que queda al quitarla es ortogonal, con dos retrocesos de 2 m y 3 m hacia el sur.
+  - El lindero con la casa (lote 004) sí es diagonal. Una parte de un piso del EC lo sigue, y por
+    eso el escenario y el fondo del auditorio tienen muros diagonales en P1 y P2. La casa misma es
+    ortogonal.
+  - RH es la casa de Francisco de Paula Vélez: lote 004, placas Carrera 9A # 62-12 a 62-22. El
+    vecino que no es de la universidad es el lote 001, Calle 62 # 9-46 a 9-60, de 5 pisos.
 
 ### Cómo se identifica un espacio
 
@@ -198,6 +213,13 @@ no exista y agregar lo que falte.
 - [ ] **P6:** dónde quedan las oficinas del ala sur dentro de la terraza sur, y la forma de la
   terraza norte.
 - [ ] El sótano: si lo usan peatones.
+- [ ] **La franja entre la casa (RH) y el auditorio:** si es del EC, un piso como dice el catastro,
+  o del vecino, como la dibuja Brian.
+- [ ] **Dónde termina el EC hacia la Calle 62.** El catastro lo lleva hasta el lindero del lote
+  001; los dos dibujos de Brian, unos 6 m antes. En esos 6 m hay aulas de P2 a P6.
+- [ ] **El bloque entre la torre y el auditorio** (4 pisos y 2 sótanos, según el catastro): si es
+  ala central o ala sur.
+- [ ] **La sala del auditorio:** si es en abanico, como la dibuja su PE, o rectangular.
 
 **BI**
 
