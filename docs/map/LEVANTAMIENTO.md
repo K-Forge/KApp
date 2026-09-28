@@ -90,6 +90,13 @@ Brian lo estableció en sitio, y las fotos lo confirman:
 - **Los PE de P6 a P8 dibujan la torre donde abajo está el ala norte.** Se movieron para que sus
   escaleras y ascensores queden encima de los de P3–P5. La silueta del ala sur que pintan en el
   P7 y el P8 se quitó, porque el ala termina en el P6.
+- **Mientras no lleguen los planos de CAD, los dibujos siguen al edificio.** Cada salón queda a un
+  muro (0,3 m) dentro del margen de su piso, y cada terraza dentro del margen del piso de abajo.
+  - Los ascensores, la escalera principal y la de emergencia quedan donde las ponen P3–P5.
+  - La escalera norte queda donde la pone el P2.
+  - Las aulas del ala norte de P3–P5 llegan a la fachada de la Calle 63.
+- **En el P3 no hay tramoya**, según Brian. Esa zona del ala sur tiene salones: el bloque quedó
+  "Sin identificar".
 - **El P1 no es a cielo abierto donde el catastro no registra partes.** El ala central tiene techo
   hasta la Carrera 9A; es a cielo abierto el paso junto a la casa de Francisco de Paula Vélez.
   Esas partes van en la huella sin predio.
@@ -176,15 +183,16 @@ no exista y agregar lo que falte.
 - [ ] El formato de los números de puerta. Si "S-301 / S-304" es un rango.
 - [ ] El P7: si la puerta dice `7-01` o `701`. Ya se sabe que son 13 aulas.
 - [ ] El P1: dónde quedan Admisiones, Tesorería y el Call Center.
-- [ ] **Si las escaleras y los ascensores quedan uno encima del otro.** Los PE no concuerdan:
-  - El P1 y el P2 ponen el núcleo central 3 m más cerca de la Calle 63 que P3–P5.
-  - El P1 lo pone además 5 m más atrás de la Carrera 9 Bis.
-  - Medir la distancia de la fachada de la Calle 63 a la puerta de los ascensores centrales en el
+- [ ] **Dónde están el núcleo y las escaleras.** Los PE no concuerdan, y el mapa usa la posición
+  de P3–P5.
+  - El P1 y el P2 ponen el núcleo central 3 m más cerca de la Calle 63; el P1, además, 5 m más atrás
+    de la Carrera 9 Bis.
+  - Medir la distancia de la fachada de la Calle 63 a la puerta de los ascensores centrales, en el
     P1 y en el P3.
-- [ ] **P3–P5, ala norte:** si las aulas llegan a la fachada de la Calle 63. Los PE las dejan 6 m
-  adentro.
 - [ ] **La escalera norte:** si pasa junto al hueco que el catastro deja en el ala norte, cerca de
   la Carrera 9 Bis, o si ese hueco es parte de ella.
+- [ ] **Los huecos del ala norte sobre el P1:** si son patios de luz. El catastro no registra piso
+  encima de ellos, y el mapa quitó las cajas que los PE dibujan ahí.
 - [ ] **El extremo de la torre sobre la Carrera 9A:** si de P2 a P7 llega hasta la fachada, como
   dibujan los PE, o termina 3 m antes, como registra el catastro.
 - [ ] **P6:** dónde quedan las oficinas del ala sur dentro de la terraza sur, y la forma de la
