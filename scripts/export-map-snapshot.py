@@ -8,7 +8,8 @@ Writes the campus map, as the API serves it, into the snapshot a fresh database 
 
 One file per building under
 app/backend/microservices/map-service/src/main/resources/db/seed/map/, in the shape
-V007_TracedCampus reads. Commit them: the M0 cluster keeps no backups, so what is drawn in the
+V007_TracedCampus reads, and one per campus with what else stands on its blocks under
+db/seed/structures/, in the shape V010_CampusStructures reads. Commit them: the M0 cluster keeps no backups, so what is drawn in the
 floor editor exists only in Atlas until it is exported and committed.
 
 Why the API and not mongoexport: no database credential leaves the services, which is the rule
@@ -32,6 +33,7 @@ import urllib.request
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_OUT = os.path.join(REPO, "app", "backend", "microservices", "map-service", "src", "main",
                            "resources", "db", "seed", "map")
+STRUCTURES_OUT = os.path.join(os.path.dirname(DEFAULT_OUT), "structures")
 
 
 def fetch(gateway, token, path):
@@ -95,6 +97,8 @@ def building_file(building, floors):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[1].strip())
     parser.add_argument("--out", default=DEFAULT_OUT, help="directory to write into (default: the seed)")
+    parser.add_argument("--structures-out", default=STRUCTURES_OUT,
+                        help="directory to write each campus's structures into (default: the seed's)")
     args = parser.parse_args()
 
     gateway = os.environ.get("KAPP_GATEWAY", "http://localhost:8080")
@@ -123,6 +127,19 @@ def main():
     for stale in sorted(set(n for n in os.listdir(args.out) if n.endswith(".json")) - written):
         os.remove(os.path.join(args.out, stale))
         print(f"  removed {stale}: the building no longer exists")
+
+    # What else stands on each campus's blocks, as the block editor left it.
+    os.makedirs(args.structures_out, exist_ok=True)
+    for campus in sorted({b["campus"] for b in buildings}):
+        listed = fetch(gateway, token, "/api/map/campuses/{}/structures".format(urllib.parse.quote(campus, safe="")))
+        if not listed.get("structures"):
+            continue
+        slug = re.sub(r"[^a-z0-9]+", "-", campus.lower()).strip("-")
+        with open(os.path.join(args.structures_out, slug + ".json"), "w", encoding="utf-8") as out:
+            out.write(snapshot_json({"campus": listed["campus"],
+                                     "structures": [pick(x, ["name", "floors", "basements", "lot", "ring"], always=["floors", "basements"])
+                                                    for x in listed["structures"]]}))
+        print(f"  {campus}: {len(listed['structures'])} structure(s)")
 
     where = os.path.relpath(args.out, REPO) if os.path.abspath(args.out).startswith(REPO + os.sep) else args.out
     print(f"\n{len(written)} building(s) written to {where}")
