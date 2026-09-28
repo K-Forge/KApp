@@ -425,8 +425,16 @@ scripts/export-map-snapshot.py
 ```
 
 It asks for a token — the one on the portal's *My token* screen — and rewrites one JSON file per
-building under `map-service/src/main/resources/db/seed/map/`. Review the diff and open a PR with
-it, like any other change.
+building under `map-service/src/main/resources/db/seed/map/`, and one per campus under
+`db/seed/structures/` with what else stands on its blocks. Review the diff and open a PR with it,
+like any other change.
+
+The portal's *Block editor* (`/data/blocks`) reshapes a city block: the parts of the university's
+buildings on it, which it saves into each building's `footprint`, and what else stands there, a
+neighbour's building or a heritage house and its garden, which it saves into the campus's
+structures. The floor editor draws its margins from those footprints. A load keeps a footprint
+somebody changed in the portal, and `V010_CampusStructures` only seeds a campus that has no
+structures yet, so after surveying a block, export and commit as above.
 
 Those files are also what every database is drawn from. `V007_TracedCampus` loads them again at
 the first start after they change:
@@ -451,7 +459,9 @@ scripts/map-ground.py --radius 350
 ```
 
 It rewrites `map-service/src/main/resources/db/ground/sede-principal.json`, which the service
-serves as `GET /api/map/campuses/{campus}/ground`.
+serves as `GET /api/map/campuses/{campus}/ground`. It also takes the cadastre's lots of every block
+a building of the campus stands on, read from the buildings' footprints in the seed.
+`--lots-only` takes them again and leaves the rest of the file as it is.
 
 ---
 

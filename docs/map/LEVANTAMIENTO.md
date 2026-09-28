@@ -21,9 +21,9 @@ del mapa sale de aquí, después de revisarlo juntos.
 | [BI · Bienestar Institucional](levantamiento/bi.md) | 9 | P1–P4, terraza (P5) | PE y PI del ala occidental (bienestar) | **El ala oriental, de salones y laboratorios, a mano** |
 | [MU · Casa Medio Universitario](levantamiento/mu.md) | 5 | P0, P1, P2 | PE y RS, sin PI | Se puede dibujar |
 | [EA · Edificio Administrativo](levantamiento/ea.md) | 3 | P2–P4 | Solo PI | **Todo a mano** |
-| **RH · Edificio de Recursos Humanos** | 0 | ? | — | **Sin visitar.** Casa de patrimonio, sin conexión interna con el EC |
+| **RH · Edificio de Recursos Humanos** | 0 | ? | — | **Sin ubicar.** Quizá en las oficinas de la Tienda K |
 | **CPC 2** | 0 | ? | — | **Sin visitar** |
-| **TK · Tienda K** | 0 | ? | — | **Sin visitar.** La tienda de uniformes, en la esquina junto al RH |
+| **TK · Tienda K** | 0 | ? | — | **Sin visitar.** La tienda de uniformes, en la esquina junto a la casa de Francisco de Paula Vélez, con oficinas al lado y en su segundo piso |
 
 ## Dónde queda cada edificio
 
@@ -34,9 +34,9 @@ con su forma real, aunque nadie haya dibujado sus pisos.
 | Edificio | Dirección | Predio | Pisos según el catastro | Cómo se ubicó |
 |---|---|---|---|---|
 | EC | Cra. 9 Bis # 62-43 | 008213024019 | 8 y 2 sótanos | La dirección de la universidad |
-| RH | Cra. 9A # 62-12 | 008213024004 | 1 | Talento Humano, según la web; en Google Maps, "Casa de Francisco de Paula Vélez" |
+| RH | — | — | — | Sin ubicar. La web pone a Talento Humano en la Cra. 9A # 62-12, que es la casa de Francisco de Paula Vélez (lote 004), patrimonio y no una oficina |
 | TK | Cra. 9A # 62-02 | 008213024015 | 2 | Google Maps, en la esquina con la Calle 62 |
-| EA | Cra. 9A # 62-27 | 008213015038 | 4 | Brian: al frente del RH |
+| EA | Cra. 9A # 62-27 | 008213015038 | 4 | Brian: al frente de la casa de Francisco de Paula Vélez |
 | BI | Cl. 62 # 9-81 a 9-93 | 008213025004, 005 y 006 | 4, y la terraza | Brian: al frente de la Tienda K. Al oriente, el lote de un piso con el seto de la foto de Street View |
 | MU | Cl. 62 # 9-65 | 008213025008 | 3 | La página del Medio Universitario |
 | CPC 1 | Cra. 9 # 61-38 | 008213027011 | 5 | La página del CPC. El catastro no trae aún la cafetería del P1 |
@@ -112,9 +112,18 @@ Brian lo estableció en sitio, y las fotos lo confirman:
   - La huella deja la cuña con 0 pisos; así `place.py` no la vuelve a subir. La fachada que queda
     es ortogonal, con retrocesos: el ala norte llega a la esquina y la torre queda atrás, con la
     plaza enfrente (las fotos de dron y el render lo muestran).
-  - RH es la casa de Francisco de Paula Vélez: lote 004, placas Carrera 9A # 62-12 a 62-22. El
-    vecino que no es de la universidad es el lote 001, Calle 62 # 9-46 a 9-60, de 5 pisos, más bajo
-    que el ala sur. El ala sur llega hasta él, como dice el catastro.
+  - La casa de Francisco de Paula Vélez (lote 004, placas Carrera 9A # 62-12 a 62-22) es
+    patrimonio. La universidad le puso un techo blanco y una placa con su logo; el cuadrado que se
+    ve en las fotos es la casa con su jardín cerrado. No es una oficina, así que el RH no está ahí:
+    queda sin ubicar. Brian cree que Talento Humano puede estar en las oficinas de la Tienda K, al
+    lado o en su segundo piso. El lote de la esquina es solo de la Tienda K.
+  - El vecino que no es de la universidad es el lote 001, Calle 62 # 9-46 a 9-60, de 5 pisos, más
+    bajo que el ala sur. El ala sur llega hasta él, como dice el catastro.
+  - La casa, su jardín y el vecino son las estructuras del campus (lo que hay en la manzana y no es
+    de la universidad), y se corrigen en el editor de manzanas del portal.
+  - El catastro dibuja el ala norte hasta el sardinel de la Calle 63, porque arriba vuela sobre el
+    andén. La huella la corta en el borde interior del andén (x = 103 del dibujo), recta con la
+    retícula, para que ningún dibujo de la manzana la muestre sobre el andén.
 - **Las alas y sus conexiones, según Brian** (fotos de dron, 28 de septiembre de 2026). Primero fue
   el ala central; después vinieron las alas y las conexiones, y cada conexión es de su ala.
   - **Ala central:** los salones sin sufijo, la recepción de dos pisos (en el P2 no hay nada encima),
@@ -127,13 +136,16 @@ Brian lo estableció en sitio, y las fotos lo confirman:
     pasillos van en la huella sin predio, de 2,6 m de fondo; eso se supuso.
   - **Conexión sur**, del ala sur: el bloque entre la torre y el auditorio. En el P1 es la entrada
     del público al auditorio y en el P2 un pasillo; de P3 a P6 tiene aulas y oficinas, y en el P7 la
-    terraza pequeña. El catastro deja 0,5 m entre ella y el ala sur; esa ranura se llenó.
+    terraza pequeña. El catastro deja 0,5 m entre ella y el ala sur; esa ranura se llenó. También
+    es suyo el pasillo largo de salida a la Carrera 9A, entre la torre y la casa, a cielo abierto
+    sobre el sótano.
   - **Ala sur:** en P1 y P2, el auditorio, con la forma de su PE. De P3 a P6 sobresale un poco de
     él, con aulas con sufijo S, oficinas y parte de la terraza sur.
   - **Detrás del auditorio**, entre él y la casa, hay un patio cubierto con techo corredizo y mesas
-    que va de la torre al edificio del vecino. Es de un piso y del EC. Se dibujó rectangular, de
-    2,7 m, aunque el catastro sigue el lindero diagonal con la casa y le daba al auditorio muros
-    diagonales.
+    que va de la torre al edificio del vecino. Es de un piso y del EC, y va de pared a pared: del
+    auditorio a la casa. Se dibujó rectangular, de 2,7 m, aunque el catastro sigue el lindero
+    diagonal con la casa y le daba al auditorio muros diagonales. Su ancho y la pared de la casa se
+    ajustan en el editor de manzanas.
 - **Los salones son rectangulares.** `register.py` cuadra toda pared que el ajuste corta. Las
   esquinas en chaflán que dejó el trazado se completan si hay espacio, o se escalonan hacia
   adentro. Solo el auditorio conserva la forma de su PE.
@@ -237,8 +249,8 @@ no exista y agregar lo que falte.
 - [ ] El sótano: si lo usan peatones.
 - [ ] **Los pasillos de la conexión norte**, de P3 a P5: su fondo (se supusieron 2,6 m) y dónde
   quedan las oficinas.
-- [ ] **El patio cubierto detrás del auditorio:** su ancho (se supusieron 2,7 m) y por dónde se
-  entra.
+- [ ] **El patio cubierto detrás del auditorio:** su ancho hasta la pared de la casa (se supusieron
+  2,7 m) y por dónde se entra.
 
 **BI**
 
@@ -269,8 +281,8 @@ no exista y agregar lo que falte.
 
 **RH, CPC 2 y Tienda K**
 
-- [ ] **Primera visita.** En el RH, confirmar qué hay: la web ubica ahí a Talento Humano, pero
-  las placas del EA también listan dependencias de Recursos Humanos.
+- [ ] **Primera visita.** Dónde está Talento Humano (el RH): quizá en las oficinas de la Tienda K,
+  al lado o en su segundo piso; las placas del EA también listan dependencias de Recursos Humanos.
 
 **Antes de caminar**
 
