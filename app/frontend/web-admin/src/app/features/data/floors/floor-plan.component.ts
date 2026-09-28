@@ -252,10 +252,13 @@ let uid = 0;
     svg {
       display: block;
     }
+    /* Every line on the plan keeps its width at any zoom. */
+    svg * {
+      vector-effect: non-scaling-stroke;
+    }
     .paper {
       fill: var(--bg-elevated);
       stroke: color-mix(in srgb, var(--text) 14%, transparent);
-      vector-effect: non-scaling-stroke;
     }
     /* Over the ground the frame is only where the plan was traced: the block shows through it. */
     .paper.over-ground {
@@ -268,7 +271,6 @@ let uid = 0;
       fill: var(--bg-elevated);
       stroke: color-mix(in srgb, var(--text) 45%, transparent);
       stroke-width: 1.5;
-      vector-effect: non-scaling-stroke;
     }
     .roadway {
       fill: color-mix(in srgb, var(--text) 16%, var(--bg-elevated));
@@ -280,7 +282,6 @@ let uid = 0;
       fill: color-mix(in srgb, #d8c9ad 70%, var(--bg-elevated));
       stroke: color-mix(in srgb, var(--text) 22%, transparent);
       stroke-width: 0.75;
-      vector-effect: non-scaling-stroke;
     }
     /* The building as the cadastre has it: solid where it rises to this floor, dotted where it
        stops at the floor below, so a drawing that strays from the real walls shows it. */
@@ -290,7 +291,6 @@ let uid = 0;
       stroke-width: 2;
       stroke-dasharray: 0 5;
       stroke-linecap: round;
-      vector-effect: non-scaling-stroke;
     }
     .footprint.reaches {
       fill: color-mix(in srgb, var(--nav-active-edge) 7%, transparent);
@@ -304,7 +304,6 @@ let uid = 0;
       stroke: var(--wing);
       stroke-width: 2;
       stroke-linejoin: round;
-      vector-effect: non-scaling-stroke;
     }
     .margin.wing-N,
     .margin-edge.wing-N {
@@ -332,7 +331,6 @@ let uid = 0;
       fill: none;
       stroke: var(--wing);
       stroke-width: 4;
-      vector-effect: non-scaling-stroke;
     }
     .street {
       fill: color-mix(in srgb, var(--text) 72%, transparent);
@@ -343,27 +341,23 @@ let uid = 0;
       paint-order: stroke;
       stroke: color-mix(in srgb, var(--text) 16%, var(--bg-elevated));
       stroke-width: 3;
-      vector-effect: non-scaling-stroke;
     }
     .outline {
       fill: color-mix(in srgb, var(--text) 4%, transparent);
       stroke: color-mix(in srgb, var(--text) 70%, transparent);
       stroke-width: 2;
-      vector-effect: non-scaling-stroke;
       pointer-events: none;
     }
     .corridor {
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
-      vector-effect: non-scaling-stroke;
       pointer-events: none;
     }
     .room {
       stroke: rgb(28 33 40 / 55%);
       stroke-width: 1;
       stroke-linejoin: round;
-      vector-effect: non-scaling-stroke;
       cursor: pointer;
     }
     .room.unidentified {
@@ -392,13 +386,11 @@ let uid = 0;
     .door-casing {
       stroke: #fff;
       stroke-width: 7;
-      vector-effect: non-scaling-stroke;
       pointer-events: none;
     }
     .door {
       stroke: #0f766e;
       stroke-width: 4;
-      vector-effect: non-scaling-stroke;
       pointer-events: none;
     }
     .room-label {
@@ -410,20 +402,17 @@ let uid = 0;
       paint-order: stroke;
       stroke: rgb(255 255 255 / 70%);
       stroke-width: 3;
-      vector-effect: non-scaling-stroke;
       pointer-events: none;
     }
     .corner {
       stroke: #fff;
       stroke-width: 1.5;
-      vector-effect: non-scaling-stroke;
       pointer-events: none;
     }
     .handle {
       fill: #fff;
       stroke: var(--primary);
       stroke-width: 2.5;
-      vector-effect: non-scaling-stroke;
       touch-action: none;
       cursor: grab;
     }
@@ -432,7 +421,6 @@ let uid = 0;
       fill-opacity: 0.55;
       stroke: #fff;
       stroke-width: 1.5;
-      vector-effect: non-scaling-stroke;
       touch-action: none;
       cursor: copy;
     }
@@ -441,7 +429,6 @@ let uid = 0;
       stroke: var(--primary);
       stroke-width: 2;
       stroke-dasharray: 6 4;
-      vector-effect: non-scaling-stroke;
       pointer-events: none;
     }
     .preview.refused {
