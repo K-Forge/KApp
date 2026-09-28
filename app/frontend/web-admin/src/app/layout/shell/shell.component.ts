@@ -276,11 +276,13 @@ const NAV_GROUPS: NavGroup[] = [
       letter-spacing: 0.08em;
     }
 
+    /* One row, always: wrapping dropped the sign-out button under the rest on a phone. The
+       brand gives way instead, since the actions are what the header is for. */
     .header-actions {
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      flex-wrap: wrap;
+      flex-shrink: 0;
     }
 
     /* An icon with its label beside it: recognisable at a glance, unambiguous

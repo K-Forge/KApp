@@ -10,14 +10,27 @@ import { secondsUntilExpiry } from '../../../core/auth/jwt.util';
   template: `
     @if (claims(); as claims) {
       @if (remaining() > 0) {
-        <span class="badge" [class.badge-warning]="remaining() < 300" [class.badge-primary]="remaining() >= 300">
-          expires in {{ formatted() }}
+        <span class="badge" [class.badge-warning]="remaining() < 300" [class.badge-primary]="remaining() >= 300"
+              [title]="'The session ends in ' + formatted()">
+          <span class="label">expires in </span>{{ formatted() }}
         </span>
       } @else {
-        <span class="badge badge-danger">token expired</span>
+        <span class="badge badge-danger">expired</span>
       }
     } @else {
       <span class="badge badge-neutral">no token</span>
+    }
+  `,
+  // On a phone the words go and the time stays: the header has one row, and the sign-out
+  // button was the one pushed off it.
+  styles: `
+    .badge {
+      white-space: nowrap;
+    }
+    @media (max-width: 480px) {
+      .label {
+        display: none;
+      }
     }
   `,
 })
@@ -41,8 +54,9 @@ export class TokenCountdownComponent {
 
   readonly formatted = computed(() => {
     const total = this.remaining();
-    const minutes = Math.floor(total / 60);
-    const seconds = total % 60;
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const seconds = (total % 60).toString().padStart(2, '0');
+    return hours > 0 ? `${hours}:${minutes.toString().padStart(2, '0')}:${seconds}` : `${minutes}:${seconds}`;
   });
 }

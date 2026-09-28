@@ -880,6 +880,14 @@ body::after {
     var(--brand-green) 66%
   );
 }
+/* Not on a phone. Safari there pins "the bottom of the viewport" above its own toolbar, which
+   slides in and out as the page scrolls, so the strip hung in mid-air over the content instead
+   of sitting on the edge of anything. Landscape phones included, by their height. */
+@media (max-width: 720px), (max-height: 500px) {
+  body::after {
+    display: none;
+  }
+}
 
 /* A card has to lift off that ground rather than blend into it. */
 .card {
