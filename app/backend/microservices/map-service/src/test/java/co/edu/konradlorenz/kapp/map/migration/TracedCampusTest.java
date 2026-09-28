@@ -392,6 +392,32 @@ class TracedCampusTest {
                 .isEqualTo(fewerParts.toFootprint());
     }
 
+    @Test
+    @DisplayName("the Edificio Central is refitted once: its first and third floors redrawn over the names, kept aside, and its footprint taken")
+    void theCentralBuildingIsRefitted() {
+        MongoTemplate fresh = new MongoTemplate(client, "traced_v009_" + UUID.randomUUID().toString().substring(0, 8));
+        V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.parse("2026-09-20T10:00:00Z"));
+        BuildingDocument central = fresh.findOne(query(where("code").is("EC")), BuildingDocument.class);
+        for (String floor : V009_FittedCentralBuilding.FLOORS) {
+            fresh.getCollection("buildings").updateOne(new Document("_id", central.id()).append("floors.code", floor),
+                    new Document("$set", new Document("floors.$.version", 5L)));
+        }
+        fresh.getCollection("buildings").updateOne(new Document("_id", central.id()),
+                new Document("$set", new Document("footprint", List.of()).append("updatedAt", new Date())));
+        fresh.getCollection(SnapshotBases.COLLECTION).deleteMany(new Document());
+
+        V009_FittedCentralBuilding.apply(fresh, SNAPSHOT, Instant.now());
+
+        SurveySnapshot.Building ec = SNAPSHOT.stream().filter(b -> b.code().equals("EC")).findFirst().orElseThrow();
+        BuildingDocument after = fresh.findOne(query(where("code").is("EC")), BuildingDocument.class);
+        assertThat(after.footprint()).isEqualTo(ec.toFootprint());
+        for (String floor : V009_FittedCentralBuilding.FLOORS) {
+            assertThat(after.floor(floor).orElseThrow().version()).as(floor + ", as a load leaves it").isZero();
+        }
+        assertThat(fresh.getCollection(V008_RedrawnCentralGroundFloor.REPLACED).countDocuments()).isEqualTo(2);
+        assertThat(SnapshotBases.find(fresh, "EC").orElseThrow().floors()).hasSize(ec.floors().size());
+    }
+
     private static SurveySnapshot.Building withFloor(SurveySnapshot.Building building, SurveySnapshot.SnapshotFloor floor) {
         return new SurveySnapshot.Building(building.code(), building.name(), building.campus(), building.description(),
                 building.aliases(), building.wings(),
