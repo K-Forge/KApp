@@ -58,6 +58,14 @@
   --brand-teal: #539392;
   --brand-pink: #D51A65;
   --brand-green: #C9D329;
+  /* The institutional three in equal thirds: every strip in the portal is this one, so the
+     ceiling, the header and the sign-in card line up. */
+  --brand-strip: linear-gradient(
+    90deg,
+    var(--brand-teal) 0 33.333%,
+    var(--brand-pink) 33.333% 66.667%,
+    var(--brand-green) 66.667% 100%
+  );
 
   /* The header and sidebar are tinted rather than white. Three stacked white
      planes read as flat; a lighter wash of the ground's orchid separates the chrome
@@ -860,14 +868,7 @@ body::before {
   height: 2px;
   z-index: 0;
   pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    var(--brand-teal) 0%,
-    var(--brand-teal) 33%,
-    var(--brand-pink) 33%,
-    var(--brand-pink) 66%,
-    var(--brand-green) 66%
-  );
+  background: var(--brand-strip);
 }
 
 /*
@@ -884,14 +885,7 @@ body::after {
   height: 2px;
   z-index: 5;
   pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    var(--brand-teal) 0%,
-    var(--brand-teal) 33%,
-    var(--brand-pink) 33%,
-    var(--brand-pink) 66%,
-    var(--brand-green) 66%
-  );
+  background: var(--brand-strip);
 }
 /* Not on a phone. Safari there pins "the bottom of the viewport" above its own toolbar, which
    slides in and out as the page scrolls, so the strip hung in mid-air over the content instead

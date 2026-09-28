@@ -97,18 +97,22 @@ interface LoginForm {
       overflow: hidden;
       box-shadow: var(--shadow-md);
     }
-    /* The institutional three, along the top edge - the same signature the header carries. */
+    /* The institutional three, along the top edge - the same signature the header carries, in
+       the same equal thirds. */
     .login-card::before {
       content: '';
       position: absolute;
       inset: 0 0 auto 0;
       height: 3px;
-      background: linear-gradient(
-        90deg,
-        var(--brand-teal) 0 38%,
-        var(--brand-pink) 38% 72%,
-        var(--brand-green) 72% 100%
-      );
+      background: var(--brand-strip);
+    }
+    /* Where the card fills the screen, its bands line up with the strip at the top of the screen:
+       the same gradient, the screen's width, shifted by the card's margin. */
+    @media (max-width: 27rem) {
+      .login-card::before {
+        background-size: 100vw 100%;
+        background-position: -1.5rem 0;
+      }
     }
     .login-brand {
       display: flex;

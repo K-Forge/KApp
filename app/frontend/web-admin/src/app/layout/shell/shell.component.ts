@@ -218,14 +218,7 @@ const NAV_GROUPS: NavGroup[] = [
       right: 0;
       bottom: -1px;
       height: 2px;
-      background: linear-gradient(
-        90deg,
-        var(--brand-teal) 0%,
-        var(--brand-teal) 33%,
-        var(--brand-pink) 33%,
-        var(--brand-pink) 66%,
-        var(--brand-green) 66%
-      );
+      background: var(--brand-strip);
     }
 
     .brand {
