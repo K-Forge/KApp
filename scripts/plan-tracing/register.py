@@ -20,6 +20,12 @@ The spec:
                                            stretch was.
      "y": [[...]],                         the same for y, when the plans need it
      "floors": {"P1": {
+        "place": {"x": [0.76, 480], "y": [0.91, 211], "why": "..."},
+                                           a floor whose plan was laid into the frame out of place:
+                                           x -> 0.76 x + 480 before anything else, and y likewise
+        "drop": {"P7-02": "..."},          traced shapes that are not this floor's, with why
+        "becomes": {"P6-26": "P6-TERRAZA-SUR"},
+                                           a traced shape that is an inventoried space
         "width": 2400,                     the floor's new width, when the stretched floor needs
                                            more room; a floor already this wide is taken as
                                            registered, and refused
@@ -190,7 +196,27 @@ def main():
     def group(code):
         return next((g for g in rules.get("groups", []) if any(fnmatch.fnmatch(code, s) for s in g["spaces"])), {})
 
-    moved = []
+    # A floor whose plan was laid into the building's frame out of place moves as a whole first.
+    (sx, tx), (sy, ty) = rules.get("place", {}).get("x", (1, 0)), rules.get("place", {}).get("y", (1, 0))
+    place = lambda p: (sx * p[0] + tx, sy * p[1] + ty)
+
+    # Shapes the plan draws that are not this floor's - a wing's silhouette above its roof - go;
+    # a traced shape that is an inventoried space takes that space's name.
+    dropped = set(rules.get("drop", {}))
+    for code in dropped:
+        if not any(sp["code"] == code for sp in floor["spaces"]):
+            sys.exit(f"{args.floor} has no space {code} to drop")
+    floor["spaces"] = [sp for sp in floor["spaces"] if sp["code"] not in dropped]
+    for traced, named in rules.get("becomes", {}).items():
+        a = next((sp for sp in floor["spaces"] if sp["code"] == traced), None)
+        b = next((sp for sp in floor["spaces"] if sp["code"] == named), None)
+        if not a or not b or b.get("shape"):
+            sys.exit(f"{args.floor}: {traced} cannot become {named}")
+        b["shape"], b["doors"] = a["shape"], a.get("doors") or []
+        floor["spaces"].remove(a)
+
+    moved = [f"  dropped {code}" for code in sorted(dropped)]
+    moved += [f"  {traced} is {named}" for traced, named in rules.get("becomes", {}).items()]
     for space in floor["spaces"]:
         g = group(space["code"])
         fx, fy = g.get("x", spec.get("x", [])), g.get("y", spec.get("y", []))
@@ -198,8 +224,9 @@ def main():
         if not space.get("shape"):
             continue
         before = [(p["x"], p["y"]) for p in space["shape"]]
-        shape = [move(p) for p in split(before, [a for a, _ in fx], [a for a, _ in fy])]
-        doors = [(move((d["from"]["x"], d["from"]["y"])), move((d["to"]["x"], d["to"]["y"]))) for d in space.get("doors") or []]
+        shape = [move(p) for p in split([place(p) for p in before], [a for a, _ in fx], [a for a, _ in fy])]
+        doors = [(move(place((d["from"]["x"], d["from"]["y"]))), move(place((d["to"]["x"], d["to"]["y"]))))
+                 for d in space.get("doors") or []]
         for limit in (lm for lm in rules.get("limits", []) if lm["space"] == space["code"]):
             # A wall moved in takes its doors with it.
             if "below" in limit:
@@ -232,7 +259,7 @@ def main():
                      + (f"  ({len(doors) - len(kept)} door(s) dropped)" if len(kept) < len(doors) else ""))
     # The floor's corridors move with it, and the spec's are added, drawn on the plan as they are.
     def carry(path):
-        pts = [move(p) for p in path]
+        pts = [move(place(p)) for p in path]
         return [{"x": round(x), "y": round(y)} for x, y in pts]
     fx, fy = spec.get("x", []), spec.get("y", [])
     move = lambda p: (stretch(fx, p[0]), stretch(fy, p[1]))
