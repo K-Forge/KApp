@@ -13,24 +13,118 @@
         }
       ],
       "limits": [
-        {"space": "P1-24", "below": 2205, "why": "Brian: the central wing is roofed out to the Carrera 9A, though the cadastre records no part there. The hall runs to a wall inside the lot's edge."},
-        {"space": "P1-24", "left of": 1230, "why": "Its east wall is the tower's: past it is the open passage beside the Casa de Francisco de Paula Velez."},
-        {"space": "P1-RAMPA-VEHICULAR", "below": 2205, "why": "The ramp stays inside the lot, a wall short of the Carrera 9A sidewalk."},
-        {"space": "P1-AUD-VESTIBULO", "below": 1019, "why": "The lobby ends a wall short of the open passage."},
-        {"space": "P1-AUD-SALIDA-SUR", "left of": 2346, "why": "A wall inside the Calle 62 facade."},
-        {"space": "P1-AUD-ESCALERA", "left of": 2346, "why": "A wall inside the Calle 62 facade."},
-        {"space": "P1-20", "right of": 1616, "why": "Past the auditorium's west wall the cadastre leaves a gap between the south wing's parts, open to the passage."}
+        {
+          "space": "P1-24",
+          "below": 2205,
+          "why": "Brian: the central wing is roofed out to the Carrera 9A, though the cadastre records no part there. The hall runs to a wall inside the lot's edge."
+        },
+        {
+          "space": "P1-24",
+          "left of": 1230,
+          "why": "Its east wall is the tower's: past it is the open passage beside the Casa de Francisco de Paula Velez."
+        },
+        {
+          "space": "P1-RAMPA-VEHICULAR",
+          "below": 2205,
+          "why": "The ramp stays inside the lot, a wall short of the Carrera 9A sidewalk."
+        },
+        {
+          "space": "P1-AUD-VESTIBULO",
+          "below": 1019,
+          "why": "The lobby ends a wall short of the open passage."
+        },
+        {
+          "space": "P1-AUD-SALIDA-SUR",
+          "left of": 2346,
+          "why": "A wall inside the Calle 62 facade."
+        },
+        {
+          "space": "P1-AUD-ESCALERA",
+          "left of": 2346,
+          "why": "A wall inside the Calle 62 facade."
+        },
+        {
+          "space": "P1-20",
+          "right of": 1616,
+          "why": "Past the auditorium's west wall the cadastre leaves a gap between the south wing's parts, open to the passage."
+        }
       ],
       "corridors": [
-        {"code": "PAS-CENTRAL", "name": "Eje central", "color": "#5B8DEF", "path": [[660, 540], [660, 1870]],
-         "why": "The PE's green route from the entrance on the Carrera 9 Bis, by the reception, down the food court to the ramp."},
-        {"code": "PAS-TRANSVERSAL", "name": "Pasillo transversal", "color": "#5B8DEF", "path": [[110, 858], [1300, 858]],
-         "why": "The PE's route from the exit on the Calle 63, under the north stair and the central lifts and stairs, to the auditorium's lobby."},
-        {"code": "PAS-SALIDA-9A", "name": "Paso a la salida de la Carrera 9A", "color": "#5B8DEF", "path": [[1224, 858], [1224, 2200]],
-         "why": "The PE's route down the open passage beside the Casa de Francisco de Paula Velez to the exit on the Carrera 9A."},
-        {"code": "PAS-SALON", "name": "Paso por el salon central", "color": "#5B8DEF", "path": [[966, 2086], [966, 1310], [1224, 1310]],
-         "why": "The PE's route across the central hall, out to the passage."}
+        {
+          "code": "PAS-CENTRAL",
+          "name": "Eje central",
+          "color": "#5B8DEF",
+          "path": [[660, 540], [660, 1870]],
+          "why": "The PE's green route from the entrance on the Carrera 9 Bis, by the reception, down the food court to the ramp."
+        },
+        {
+          "code": "PAS-TRANSVERSAL",
+          "name": "Pasillo transversal",
+          "color": "#5B8DEF",
+          "path": [[110, 858], [1300, 858]],
+          "why": "The PE's route from the exit on the Calle 63, under the north stair and the central lifts and stairs, to the auditorium's lobby."
+        },
+        {
+          "code": "PAS-SALIDA-9A",
+          "name": "Paso a la salida de la Carrera 9A",
+          "color": "#5B8DEF",
+          "path": [[1224, 858], [1224, 2200]],
+          "why": "The PE's route down the open passage beside the Casa de Francisco de Paula Velez to the exit on the Carrera 9A."
+        },
+        {
+          "code": "PAS-SALON",
+          "name": "Paso por el salon central",
+          "color": "#5B8DEF",
+          "path": [[966, 2086], [966, 1310], [1224, 1310]],
+          "why": "The PE's route across the central hall, out to the passage."
+        }
       ]
+    },
+    "P2": {
+      "width": 2400
+    },
+    "P3": {
+      "width": 2400
+    },
+    "P4": {
+      "width": 2400
+    },
+    "P5": {
+      "width": 2400
+    },
+    "P6": {
+      "place": {
+        "x": [0.757, 481],
+        "y": [0.908, 212],
+        "why": "The plan draws the tower's floor against the Calle 63 side of the building, where the north wing stands up to P5. Moved as a whole so its lifts and stairs stack on P3-P5's."
+      },
+      "width": 2400,
+      "becomes": {
+        "P6-26": "P6-TERRAZA-SUR"
+      },
+      "why": "Brian: on P6 the south wing is the south terrace and a couple of offices; the plan paints the whole wing, and that shape is the terrace."
+    },
+    "P7": {
+      "place": {
+        "x": [0.76, 480],
+        "y": [0.913, 211],
+        "why": "The plan draws the tower's floor against the Calle 63 side of the building, where the north wing stands up to P5. Moved as a whole so its lifts and stairs stack on P3-P5's."
+      },
+      "width": 2400,
+      "drop": {
+        "P7-02": "The plan paints the south wing's silhouette on every floor; the wing ends at P6."
+      }
+    },
+    "P8": {
+      "place": {
+        "x": [0.767, 502],
+        "y": [0.959, 167],
+        "why": "The plan draws the tower's floor against the Calle 63 side of the building, where the north wing stands up to P5. Moved as a whole so its lifts and stairs stack on P3-P5's."
+      },
+      "width": 2400,
+      "drop": {
+        "P8-01": "The plan paints the south wing's silhouette on every floor; the wing ends at P6."
+      }
     }
   }
 }
