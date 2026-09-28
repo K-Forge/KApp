@@ -67,6 +67,23 @@ Brian lo estableció en sitio, y las fotos lo confirman:
 3. **RS**, la más vieja. Pero donde existe (CPC 1, MU, ala central del EC) **es el plano más
    detallado**, y en el EC sus cantidades de salones coinciden con las placas.
 
+### Los PE, el catastro y los andenes
+
+- **El catastro mapea cada edificio desde arriba.** Donde los pisos altos vuelan sobre la acera,
+  la parte llega hasta el sardinel y el andén pasa por debajo. Es el caso del ala norte del EC
+  sobre la Calle 63, que va en columnas. En la calle, el edificio termina donde empieza el andén;
+  arriba, puede volar. Por eso el editor corta las líneas rosadas por los andenes solo en los
+  pisos de la calle.
+- **Los PE no están a escala.** En el EC dibujan la torre un 17 % más angosta y el ala sur un 15 %.
+  El ala norte y los espacios entre las alas salen bien.
+  - `scripts/plan-tracing/register.py` estira cada tramo a su medida, con paredes que los planos
+    y el catastro comparten.
+  - `specs/ec-register.json` dice cuáles son esas paredes y por qué se eligieron.
+  - El P1 ya está corregido; los demás pisos se corrigen uno a uno.
+- **Los pisos del catastro no sirven para los pisos altos del EC.** Entre el 65 y el 79 % de lo
+  que dibujan los PE de P6 a P8 cae sobre partes que el catastro registra más bajas. Hay que
+  verificarlo en sitio.
+
 ### Cómo se identifica un espacio
 
 Hay dos formas y conviven:
@@ -149,6 +166,10 @@ no exista y agregar lo que falte.
 - [ ] El formato de los números de puerta. Si "S-301 / S-304" es un rango.
 - [ ] El P7: si la puerta dice `7-01` o `701`. Ya se sabe que son 13 aulas.
 - [ ] El P1: dónde quedan Admisiones, Tesorería y el Call Center.
+- [ ] El P1, según el catastro:
+  - si el frente bajo el ala norte, hacia la Carrera 9 Bis, es abierto;
+  - si el salón central tiene techo hasta la Carrera 9A;
+  - si el patio detrás de la torre es a cielo abierto.
 - [ ] El sótano: si lo usan peatones.
 
 **BI**
