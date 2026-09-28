@@ -153,15 +153,6 @@ let uid = 0;
           <polygon class="outline" [attr.points]="points(outline())" />
         }
 
-        @for (corridor of corridors(); track $index; let i = $index) {
-          <polyline
-            class="corridor"
-            [attr.points]="points(corridor.path)"
-            [attr.stroke]="corridor.color"
-            [attr.stroke-width]="i === activeCorridor() ? 8 : 6"
-            [attr.opacity]="activeCorridor() === null || i === activeCorridor() ? 0.85 : 0.3"
-          />
-        }
 
         @for (room of rooms(); track room.space.key) {
           <polygon
@@ -190,6 +181,18 @@ let uid = 0;
             <line class="door-casing" [attr.x1]="door.from.x" [attr.y1]="door.from.y" [attr.x2]="door.to.x" [attr.y2]="door.to.y" />
             <line class="door" [attr.x1]="door.from.x" [attr.y1]="door.from.y" [attr.x2]="door.to.x" [attr.y2]="door.to.y" />
           }
+        }
+
+        <!-- The corridors over the rooms, so a room never hides a way through it, and under the
+             names. They take no taps: a tap on a room still edits it. -->
+        @for (corridor of showCorridors() ? corridors() : []; track $index; let i = $index) {
+          <polyline
+            class="corridor"
+            [attr.points]="points(corridor.path)"
+            [attr.stroke]="corridor.color"
+            [attr.stroke-width]="i === activeCorridor() ? 8 : 6"
+            [attr.opacity]="activeCorridor() === null || i === activeCorridor() ? 0.85 : 0.3"
+          />
         }
 
         @for (room of rooms(); track room.space.key) {
@@ -472,6 +475,8 @@ export class FloorPlanComponent {
   readonly sidewalks = input<Point[][]>([]);
   /** Whether the rooms are drawn; off, only what is under them shows. */
   readonly showRooms = input(true);
+  /** Whether the corridors are drawn. */
+  readonly showCorridors = input(true);
 
   readonly walkPaths = computed(() => this.sidewalks().map(areaPath));
   readonly marginPaths = computed(() => {

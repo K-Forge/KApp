@@ -259,6 +259,13 @@ const MAX_ZOOM = 8;
                   </svg>
                   Rooms
                 </button>
+                <button type="button" class="btn btn-sm layer" [class.on]="showCorridors()" [attr.aria-pressed]="showCorridors()"
+                        title="The corridors drawn on this floor" (click)="toggleCorridors()">
+                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path d="M3 18h7V9h11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  Corridors
+                </button>
                   @if (floorPlacement() && hasFootprint()) {
                     <button type="button" class="btn btn-sm layer" [class.on]="showMargin()" [attr.aria-pressed]="showMargin()"
                             title="Where this floor's rooms go, wing by wing, and the floor below's, dotted" (click)="toggleMargin()">
@@ -309,6 +316,7 @@ const MAX_ZOOM = 8;
                 [mode]="canvasMode()"
                 [disabled]="!!pendingDraft() || saving() || !showRooms()"
                 [showRooms]="showRooms()"
+                [showCorridors]="showCorridors() || mode() === 'corridor'"
                 [canPlace]="canPlace"
                 [view]="view()"
                 [surroundings]="around()"
@@ -649,6 +657,10 @@ const MAX_ZOOM = 8;
       .layer {
         justify-content: center;
       }
+      /* An odd one out takes the whole row rather than half of it. */
+      .layer:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+      }
     }
     .layer.on {
       background: var(--primary-bg);
@@ -768,6 +780,8 @@ export class FloorEditorPage {
   readonly showMargin = signal(readShown(SHOW_MARGIN_KEY));
   /** Whether the rooms are drawn. Off, the margin and the streets can be read alone. */
   readonly showRooms = signal(readShown(SHOW_ROOMS_KEY));
+  /** Whether the corridors are drawn; always, while they are being drawn. */
+  readonly showCorridors = signal(readShown(SHOW_CORRIDORS_KEY));
   /** The floor as the server last returned it. */
   readonly detail = signal<FloorDetail | null>(null);
   readonly draft = signal<FloorDraft | null>(null);
@@ -1532,6 +1546,11 @@ export class FloorEditorPage {
     if (!this.showRooms()) this.selectedKey.set(null);
   }
 
+  toggleCorridors(): void {
+    this.showCorridors.update((shown) => !shown);
+    remember(SHOW_CORRIDORS_KEY, this.showCorridors());
+  }
+
   toggleMargin(): void {
     this.showMargin.update((shown) => !shown);
     remember(SHOW_MARGIN_KEY, this.showMargin());
@@ -1706,6 +1725,7 @@ const SHOW_GROUND_KEY = 'kapp-admin:floor-ground';
 const SHOW_CADASTRE_KEY = 'kapp-admin:floor-cadastre';
 const SHOW_MARGIN_KEY = 'kapp-admin:floor-margin';
 const SHOW_ROOMS_KEY = 'kapp-admin:floor-rooms';
+const SHOW_CORRIDORS_KEY = 'kapp-admin:floor-corridors';
 
 /** Whether this device shows a layer, or `shown` when it never said. */
 function readShown(key: string, shown = true): boolean {
