@@ -1,0 +1,23 @@
+{
+  "building": "ec",
+  "why": "The PE draw the tower 17% and the south wing 15% narrower than the cadastre measures them; the north wing and the gaps between are right. Each pair is one wall, drawing x then true x: the Calle 63 facade (P2's library), the tower's west face (P3-P5), its east face (P1-P5), the south wing's west face (P3-P5 above the auditorium) and the Calle 62 facade (P5-P8). Mapped so, P1's Calle 63 facade lands on the inner edge of the sidewalk that runs under the north wing.",
+  "x": [[64, 53], [638, 625], [1150, 1243], [1437, 1521], [2144, 2355]],
+  "floors": {
+    "P1": {
+      "width": 2400,
+      "groups": [
+        {
+          "spaces": ["P1-AUD*", "P1-20", "P1-23"],
+          "y": [[723, 590], [1273, 1281]],
+          "why": "The PE draw the auditorium's front 4 m short of the south wing's, which the auditorium's own plan and P3-P5 above it reach; its back, on the lot next door, is right."
+        }
+      ],
+      "limits": [
+        {"space": "P1-24", "below": 2120, "why": "The hall stops where the tower does: past it the cadastre records no roof, and P2 above stops there too."},
+        {"space": "P1-24", "notch": [986, 1911], "why": "The tower's seven-floor part ends at y 1911; beside its eight-floor part, below that, is the open patio over the parking."},
+        {"space": "P1-RAMPA-VEHICULAR", "below": 2214, "why": "The ramp runs out to the lot's edge on Carrera 9A, not onto the sidewalk."},
+        {"space": "P1-AUD-VESTIBULO", "below": 1029, "why": "The lobby ends where the part it is in does; past it is the patio."}
+      ]
+    }
+  }
+}
