@@ -115,7 +115,10 @@ export interface Building {
   footprint?: FootprintPart[];
 }
 
-/** Mirrors BuildingRequest - the create/update payload. `id` is server-generated. */
+/**
+ * Mirrors BuildingRequest - the create/update payload. `id` is server-generated. Leaving
+ * `placement` or `footprint` out keeps the stored one.
+ */
 export interface BuildingRequest {
   code: string;
   name: string;
@@ -124,4 +127,6 @@ export interface BuildingRequest {
   aliases: string[];
   wings: Wing[];
   floors: Floor[];
+  placement?: Placement | null;
+  footprint?: FootprintPart[];
 }

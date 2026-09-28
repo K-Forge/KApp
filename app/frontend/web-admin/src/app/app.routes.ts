@@ -31,6 +31,15 @@ export const routes: Routes = [
         loadComponent: () => import('./features/data/campus/campus-map.page').then((m) => m.CampusMapPage),
       },
       {
+        path: 'data/blocks',
+        loadComponent: () => import('./features/data/blocks/block-editor.page').then((m) => m.BlockEditorPage),
+      },
+      {
+        path: 'data/blocks/:block',
+        loadComponent: () => import('./features/data/blocks/block-editor.page').then((m) => m.BlockEditorPage),
+        canDeactivate: [(page: { canLeave(): boolean }) => page.canLeave()],
+      },
+      {
         path: 'data/buildings',
         loadComponent: () => import('./features/data/buildings/buildings.page').then((m) => m.BuildingsPage),
       },

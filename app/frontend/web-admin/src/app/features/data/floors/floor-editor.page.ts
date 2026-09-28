@@ -63,6 +63,7 @@ import type { Ground } from '../ground/ground.model';
 import { GroundService } from '../ground/ground.service';
 import { BuildingsService } from '../buildings/buildings.service';
 import { groundToDrawing, margins, outlineOf, placementForFloor, reaches, surroundings, type Box } from '../ground/ground';
+import { blockOf } from '../blocks/block-geometry';
 import { FloorLegendComponent } from './floor-legend.component';
 import { FloorPlanComponent, type EditorMode } from './floor-plan.component';
 import type { FloorDetail } from './floor.model';
@@ -105,6 +106,9 @@ const MAX_ZOOM = 8;
       <div class="head">
         <div>
           <a routerLink="/data/floors" class="back">← All floors</a>
+          @if (blockCode(); as block) {
+            <a [routerLink]="['/data/blocks', block]" class="back" style="margin-left: 0.75rem">Its block</a>
+          }
           <h1>
             {{ buildingDoc()?.name ?? building() }} · {{ detail()?.name ?? floor() }}
             @if (dirty()) {
@@ -964,6 +968,8 @@ export class FloorEditorPage {
   });
 
   private readonly footprint = computed(() => this.buildingDoc()?.footprint ?? []);
+  /** The city block the building stands on, whose outlines the block editor reshapes. */
+  readonly blockCode = computed(() => blockOf(this.footprint().find((p) => p.lot)?.lot));
   readonly hasFootprint = computed(() => this.footprint().length > 0);
 
   /** Screen pixels per unit: the plan fitted to the width it has, then zoomed. */
