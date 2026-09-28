@@ -80,9 +80,19 @@ Brian lo estableció en sitio, y las fotos lo confirman:
     y el catastro comparten.
   - `specs/ec-register.json` dice cuáles son esas paredes y por qué se eligieron.
   - El P1 ya está corregido; los demás pisos se corrigen uno a uno.
-- **Los pisos del catastro no sirven para los pisos altos del EC.** Entre el 65 y el 79 % de lo
-  que dibujan los PE de P6 a P8 cae sobre partes que el catastro registra más bajas. Hay que
-  verificarlo en sitio.
+- **Los pisos altos del EC, según Brian.** El catastro se quedaba corto y ya está corregido en la
+  huella:
+  - **Ala norte:** aulas hasta el P5; el P6 es terraza.
+  - **Ala sur:** el auditorio ocupa P1–P2, hay aulas y oficinas de P3 a P5, y en el P6 está la
+    terraza sur.
+  - **Ala central:** los ocho pisos. En el P6, el pasillo de oficinas que lleva a la terraza sur;
+    en el P7, una terraza pequeña encima de ese pasillo.
+- **Los PE de P6 a P8 dibujan la torre donde abajo está el ala norte.** Se movieron para que sus
+  escaleras y ascensores queden encima de los de P3–P5. La silueta del ala sur que pintan en el
+  P7 y el P8 se quitó, porque el ala termina en el P6.
+- **El P1 no es a cielo abierto donde el catastro no registra partes.** El ala central tiene techo
+  hasta la Carrera 9A; es a cielo abierto el paso junto a la casa de Francisco de Paula Vélez.
+  Esas partes van en la huella sin predio.
 
 ### Cómo se identifica un espacio
 
@@ -166,10 +176,19 @@ no exista y agregar lo que falte.
 - [ ] El formato de los números de puerta. Si "S-301 / S-304" es un rango.
 - [ ] El P7: si la puerta dice `7-01` o `701`. Ya se sabe que son 13 aulas.
 - [ ] El P1: dónde quedan Admisiones, Tesorería y el Call Center.
-- [ ] El P1, según el catastro:
-  - si el frente bajo el ala norte, hacia la Carrera 9 Bis, es abierto;
-  - si el salón central tiene techo hasta la Carrera 9A;
-  - si el patio detrás de la torre es a cielo abierto.
+- [ ] **Si las escaleras y los ascensores quedan uno encima del otro.** Los PE no concuerdan:
+  - El P1 y el P2 ponen el núcleo central 3 m más cerca de la Calle 63 que P3–P5.
+  - El P1 lo pone además 5 m más atrás de la Carrera 9 Bis.
+  - Medir la distancia de la fachada de la Calle 63 a la puerta de los ascensores centrales en el
+    P1 y en el P3.
+- [ ] **P3–P5, ala norte:** si las aulas llegan a la fachada de la Calle 63. Los PE las dejan 6 m
+  adentro.
+- [ ] **La escalera norte:** si pasa junto al hueco que el catastro deja en el ala norte, cerca de
+  la Carrera 9 Bis, o si ese hueco es parte de ella.
+- [ ] **El extremo de la torre sobre la Carrera 9A:** si de P2 a P7 llega hasta la fachada, como
+  dibujan los PE, o termina 3 m antes, como registra el catastro.
+- [ ] **P6:** dónde quedan las oficinas del ala sur dentro de la terraza sur, y la forma de la
+  terraza norte.
 - [ ] El sótano: si lo usan peatones.
 
 **BI**
