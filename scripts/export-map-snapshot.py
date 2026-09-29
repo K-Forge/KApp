@@ -12,6 +12,10 @@ V007_TracedCampus reads, and one per campus with what else stands on its blocks 
 db/seed/structures/, in the shape V010_CampusStructures reads. Commit them: the M0 cluster keeps no backups, so what is drawn in the
 floor editor exists only in Atlas until it is exported and committed.
 
+The distances taken on site with the portal's survey sheet go to docs/map/survey/, one file per
+campus: they are not loaded into a fresh database, but they are what the outlines are drawn from,
+and the record of when each was taken.
+
 Why the API and not mongoexport: no database credential leaves the services, which is the rule
 for every database here, and the files keep the contract's shape rather than the storage's. Any
 token works - the map is readable by every role - and the one on the portal's "My token" screen
@@ -34,6 +38,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_OUT = os.path.join(REPO, "app", "backend", "microservices", "map-service", "src", "main",
                            "resources", "db", "seed", "map")
 STRUCTURES_OUT = os.path.join(os.path.dirname(DEFAULT_OUT), "structures")
+SURVEY_OUT = os.path.join(REPO, "docs", "map", "survey")
 
 
 def fetch(gateway, token, path):
@@ -99,6 +104,8 @@ def main():
     parser.add_argument("--out", default=DEFAULT_OUT, help="directory to write into (default: the seed)")
     parser.add_argument("--structures-out", default=STRUCTURES_OUT,
                         help="directory to write each campus's structures into (default: the seed's)")
+    parser.add_argument("--survey-out", default=SURVEY_OUT,
+                        help="directory to write each campus's survey into (default: docs/map/survey)")
     args = parser.parse_args()
 
     gateway = os.environ.get("KAPP_GATEWAY", "http://localhost:8080")
@@ -140,6 +147,19 @@ def main():
                                      "structures": [pick(x, ["name", "floors", "basements", "lot", "ring"], always=["floors", "basements"])
                                                     for x in listed["structures"]]}))
         print(f"  {campus}: {len(listed['structures'])} structure(s)")
+
+    # The distances taken round the blocks, with when each was taken.
+    for campus in sorted({b["campus"] for b in buildings}):
+        survey = fetch(gateway, token, "/api/map/campuses/{}/survey".format(urllib.parse.quote(campus, safe="")))
+        if not survey.get("measures"):
+            continue
+        os.makedirs(args.survey_out, exist_ok=True)
+        slug = re.sub(r"[^a-z0-9]+", "-", campus.lower()).strip("-")
+        with open(os.path.join(args.survey_out, slug + ".json"), "w", encoding="utf-8") as out:
+            out.write(snapshot_json({"campus": survey["campus"], "version": survey["version"],
+                                     "measures": [pick(m, ["id", "label", "text", "metres", "note", "updatedAt"])
+                                                  for m in survey["measures"]]}))
+        print(f"  {campus}: {len(survey['measures'])} distance(s) of the survey")
 
     where = os.path.relpath(args.out, REPO) if os.path.abspath(args.out).startswith(REPO + os.sep) else args.out
     print(f"\n{len(written)} building(s) written to {where}")
