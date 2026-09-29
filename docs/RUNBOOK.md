@@ -456,6 +456,11 @@ city's curbs. The model's figure beside each distance is there to catch a slip o
 plan there and rerun the script. The distances already taken are saved under their ids, so never
 renumber one.
 
+The script also lays the sketch out the way a plan is dimensioned. Each length is drawn beside its
+wall on the building's side, the partial ones nearer and the overall ones further out. Setbacks
+that would only repeat others on the same line are left out. It refuses to write a plan with two
+lines on top of each other or two numbers touching, and a test in the portal checks the same.
+
 Those files are also what every database is drawn from. `V007_TracedCampus` loads them again at
 the first start after they change:
 

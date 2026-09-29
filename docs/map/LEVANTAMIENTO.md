@@ -228,7 +228,7 @@ no exista y agregar lo que falte.
 
 - [ ] **Las medidas de afuera, con la hoja de levantamiento del portal** (*Survey*,
   `/data/survey`).
-  - Son 67 distancias alrededor de la manzana, en el orden en que se camina, desde la esquina de
+  - Son 63 distancias alrededor de la manzana, en el orden en que se camina, desde la esquina de
     la Calle 63 con la Cra 9 Bis.
   - Hay de dos clases. Las naranjas van del muro al borde de la calle, derecho, y dicen dónde está
     cada volumen. Las azules van a lo largo del muro o a través de una puerta, y dicen cuánto
