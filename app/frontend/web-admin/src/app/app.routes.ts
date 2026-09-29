@@ -31,6 +31,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/data/campus/campus-map.page').then((m) => m.CampusMapPage),
       },
       {
+        path: 'data/survey',
+        loadComponent: () => import('./features/data/survey/survey.page').then((m) => m.SurveyPage),
+      },
+      {
         path: 'data/blocks',
         loadComponent: () => import('./features/data/blocks/block-editor.page').then((m) => m.BlockEditorPage),
       },
