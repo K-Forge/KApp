@@ -231,6 +231,12 @@ debugging, go through the container:
 docker compose exec api-gateway wget -qO- http://auth-service:8081/auth/health
 ```
 
+**A dev server** runs the portal and the map's services with no laptop on. It follows one branch
+and picks up each push by itself, about ten minutes later. `.github/workflows/dev-images.yml`
+publishes each service's image to GHCR for the branch, and the server's agent pulls it. How to
+set one up on any host, and what a push can and cannot change there, is in
+[`deploy/dev-server/README.md`](../deploy/dev-server/README.md).
+
 ---
 
 ## Local accounts

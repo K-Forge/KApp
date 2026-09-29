@@ -1,0 +1,13 @@
+[Unit]
+Description=Keep the KApp dev server on its branch's latest images
+Documentation=https://github.com/K-Forge/KApp/tree/develop/deploy/dev-server
+After=docker.service network-online.target
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/kapp/agent.sh
+# Whatever else the host runs comes first.
+Nice=10
+IOSchedulingClass=idle
