@@ -3,10 +3,13 @@ package co.edu.konradlorenz.kapp.map.web;
 import co.edu.konradlorenz.kapp.map.service.BuildingService;
 import co.edu.konradlorenz.kapp.map.service.GroundService;
 import co.edu.konradlorenz.kapp.map.service.StructureService;
+import co.edu.konradlorenz.kapp.map.service.SurveyService;
 import co.edu.konradlorenz.kapp.map.web.dto.CampusSummaryResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.GroundResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.StructuresRequest;
 import co.edu.konradlorenz.kapp.map.web.dto.StructuresResponse;
+import co.edu.konradlorenz.kapp.map.web.dto.SurveyRequest;
+import co.edu.konradlorenz.kapp.map.web.dto.SurveyResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,7 +24,7 @@ import java.util.List;
 
 /**
  * The campus (Sede) list, which clients call first to populate the campus selector; the ground
- * around each campus; and what else stands on its blocks.
+ * around each campus; what else stands on its blocks; and the distances taken round them on site.
  *
  * <p>The list is derived from the buildings rather than stored: a campus exists precisely when a
  * building is on it, so there is no second collection to keep in step.
@@ -34,11 +37,14 @@ public class CampusController {
     private final BuildingService buildings;
     private final GroundService ground;
     private final StructureService structures;
+    private final SurveyService survey;
 
-    public CampusController(BuildingService buildings, GroundService ground, StructureService structures) {
+    public CampusController(BuildingService buildings, GroundService ground, StructureService structures,
+                            SurveyService survey) {
         this.buildings = buildings;
         this.ground = ground;
         this.structures = structures;
+        this.survey = survey;
     }
 
     @GetMapping
@@ -75,5 +81,22 @@ public class CampusController {
     public StructuresResponse replaceStructures(@PathVariable String campus,
                                                 @Valid @RequestBody StructuresRequest request) {
         return structures.replace(campus, request);
+    }
+
+    @GetMapping("/{campus}/survey")
+    @Operation(summary = "The distances taken round a campus's blocks",
+            description = "Where each wall stands from the curb and how long it is, as taken on site with the "
+                    + "portal's survey sheet. None, at version 0, while nothing has been saved. "
+                    + "Allowed roles: ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN.")
+    public SurveyResponse survey(@PathVariable String campus) {
+        return survey.forCampus(campus);
+    }
+
+    @PutMapping("/{campus}/survey")
+    @Operation(summary = "Save the distances taken round a campus's blocks",
+            description = "The whole list, with the version it was read at. 409 when it was saved from somewhere "
+                    + "else since, and nothing is changed. Allowed roles: ROLE_ADMIN.")
+    public SurveyResponse replaceSurvey(@PathVariable String campus, @Valid @RequestBody SurveyRequest request) {
+        return survey.replace(campus, request);
     }
 }

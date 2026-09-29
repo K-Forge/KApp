@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Map API
-  version: 3.3.0
+  version: 3.4.0
   summary: Schematic campus map and space search for Fundacion Universitaria Konrad Lorenz.
   description: |
     Digital campus map for Fundacion Universitaria Konrad Lorenz (Bogota, Colombia).
@@ -79,6 +79,18 @@ info:
       not the university's - a neighbour's building, a heritage house with its garden - each with
       its outline and floors, for drawing around the buildings. **`PUT`** saves the list whole,
       with the `version` it was read at, and is refused with `409` when somebody saved it since.
+
+    ## Version 3.4: the survey
+
+    The outlines are drawn from distances taken on site, round the block, with a tape or a phone's
+    Measure app. Version 3.4 adds, without changing anything else:
+
+    - **`GET /api/map/campuses/{campus}/survey`**: every distance taken round a campus's blocks,
+      each under the id of the portal's survey plan it answers (or its own, for one the plan
+      missed), as it was typed - `4,80 + 3,25` when taken in pieces - with its total in metres, a
+      note, and when it was taken. **`PUT`** saves them whole with the `version` they were read at,
+      `409` when they were saved from somewhere else since; a distance keeps the time it was taken
+      until it changes.
 
     ## Coordinate model
 
@@ -851,6 +863,86 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
 
+  /api/map/campuses/{campus}/survey:
+
+    parameters:
+      - name: campus
+        in: path
+        required: true
+        schema: { type: string, maxLength: 120 }
+        example: Sede Principal
+
+    get:
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      operationId: getCampusSurvey
+      summary: The distances taken round a campus's blocks
+      description: |
+        Where each wall stands from the curb and how long it is, as taken on site with the portal's
+        survey sheet. None, at version `0`, while nothing has been saved. The campus name matches
+        ignoring case and accents.
+
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+      tags: [Campuses]
+      responses:
+        '200':
+          description: The campus's survey.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Survey' }
+              example:
+                campus: Sede Principal
+                version: 4
+                updatedAt: '2026-09-29T15:10:00Z'
+                measures:
+                  - id: bis-09
+                    text: '4,80 + 4,96'
+                    metres: 9.76
+                    note: Planters in the way, measured round them
+                    updatedAt: '2026-09-29T15:02:11Z'
+                  - id: extra-1
+                    label: Gate on Cra 9A, its width
+                    text: '3,10'
+                    metres: 3.1
+                    updatedAt: '2026-09-29T15:09:40Z'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+    put:
+      x-roles: [ROLE_ADMIN]
+      operationId: saveCampusSurvey
+      summary: Save the distances taken round a campus's blocks
+      description: |
+        The **complete** list: a distance missing from it is gone. `version` is the survey's
+        version as it was read, `0` while nothing has been saved; when it was saved from somewhere
+        else since, the save is refused with `409` and nothing changes - read it again and lay the
+        changes over it. Two distances with one id, or a negative one, are `400`. `updatedAt` is
+        the server's: a distance keeps the time it was taken until its text, total, note or label
+        changes.
+
+        Allowed roles: `ROLE_ADMIN` only.
+      tags: [Campuses]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SurveyRequest' }
+            example:
+              version: 4
+              measures:
+                - id: bis-09
+                  text: '4,80 + 4,96'
+                  metres: 9.76
+      responses:
+        '200':
+          description: The survey as saved, with its next version.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Survey' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1118,6 +1210,43 @@ components:
           type: array
           maxItems: 500
           items: { $ref: '#/components/schemas/Structure' }
+
+    SurveyMeasure:
+      type: object
+      description: |
+        One distance taken on site round a campus's blocks, with a tape or a phone's Measure app:
+        how far a wall stands from the curb, or how long it is.
+      required: [id]
+      properties:
+        id: { type: string, pattern: '^[a-z0-9][a-z0-9-]{0,39}$', description: "Which distance of the portal's survey plan it is, or an extra one's own id.", example: bis-09 }
+        label: { type: string, maxLength: 200, description: "What an extra distance is of; absent for one the plan names.", example: 'Gate on Cra 9A, its width' }
+        text: { type: string, maxLength: 120, description: "What was typed, as it was typed: pieces joined with +.", example: '4,80 + 4,96' }
+        metres: { type: number, format: double, minimum: 0, maximum: 1000, description: "The total the portal read from the text; absent while it reads none.", example: 9.76 }
+        note: { type: string, maxLength: 500, description: "What was seen on site that the sketch does not show.", example: 'Planters in the way, measured round them' }
+        updatedAt: { type: string, format: date-time, readOnly: true, description: "When it was last changed. Set by the server; ignored in a request." }
+
+    Survey:
+      type: object
+      description: The distances taken on site round a campus's blocks.
+      required: [campus, measures, version]
+      properties:
+        campus: { type: string, example: Sede Principal }
+        measures:
+          type: array
+          items: { $ref: '#/components/schemas/SurveyMeasure' }
+        version: { type: integer, format: int64, description: Bumped by every save. Send it back with the next one., example: 4 }
+        updatedAt: { type: string, format: date-time, description: "When it was last saved; absent while nothing has been." }
+
+    SurveyRequest:
+      type: object
+      description: Every distance taken, the whole list, with the version it was read at.
+      required: [version, measures]
+      properties:
+        version: { type: integer, format: int64, minimum: 0, description: "The version the survey was read at; 0 while nothing has been saved.", example: 4 }
+        measures:
+          type: array
+          maxItems: 500
+          items: { $ref: '#/components/schemas/SurveyMeasure' }
 
     Bounds:
       type: object
