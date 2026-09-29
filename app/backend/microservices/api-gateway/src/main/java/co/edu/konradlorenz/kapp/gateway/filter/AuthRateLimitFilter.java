@@ -13,6 +13,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -91,15 +92,23 @@ public class AuthRateLimitFilter implements WebFilter, Ordered {
      * Prefers {@code X-Forwarded-For} because in any real deployment a reverse proxy
      * terminates TLS in front of this, and the socket address would otherwise be the
      * proxy for every caller alike.
+     *
+     * <p>With {@code forward-headers-strategy: framework} that header never gets here:
+     * Spring applies it to the remote address and removes it. The address it leaves is
+     * unresolved - a host string with no {@code InetAddress} behind it - so it is read as
+     * a string. Reading its {@code InetAddress} answered every request through a proxy
+     * with a 500, the login included.
      */
-    private static String clientKey(ServerHttpRequest request) {
+    static String clientKey(ServerHttpRequest request) {
         String forwarded = request.getHeaders().getFirst("X-Forwarded-For");
         if (forwarded != null && !forwarded.isBlank()) {
             return forwarded.split(",")[0].trim();
         }
-        return request.getRemoteAddress() == null
-                ? "unknown"
-                : request.getRemoteAddress().getAddress().getHostAddress();
+        InetSocketAddress remote = request.getRemoteAddress();
+        if (remote == null) {
+            return "unknown";
+        }
+        return remote.getAddress() != null ? remote.getAddress().getHostAddress() : remote.getHostString();
     }
 
     private static Mono<Void> tooManyRequests(ServerWebExchange exchange) {
