@@ -34,7 +34,8 @@ if [[ "$(sed -n 's/^KAPP_DEV_TAILSCALE_SERVE=//p' "$env" | tail -1)" == 1 ]]; th
 fi
 
 systemctl daemon-reload
-systemctl enable --now kapp-dev-agent.timer
 rm -f /opt/kapp/.stopped
-/opt/kapp/agent.sh
+# The first run through systemd, as the timer's are: one at a time, and in the journal.
+systemctl start kapp-dev-agent.service
+systemctl enable --now kapp-dev-agent.timer
 echo "installed: $(cd /opt/kapp && docker compose ps --format '{{.Service}}={{.Status}}' | tr '\n' ' ')"

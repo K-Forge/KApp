@@ -14,6 +14,11 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 [[ -e .stopped ]] && exit 0
+# One run at a time: the timer and a person running it by hand would recreate the same containers.
+exec 9>.agent.lock
+flock -n 9 || exit 0
+# sort and comm must agree on the order, whatever the host's locale.
+export LC_ALL=C
 
 setting() { sed -n "s/^$1=//p" .env | tail -1; }
 REPO=$(setting KAPP_DEV_REPO); REPO=${REPO:-K-Forge/KApp}
@@ -33,7 +38,9 @@ fi
 # Built from the branch? The compare API says "behind" or "identical" when the image's commit is in
 # the branch's history. Unauthenticated, it allows 60 calls an hour: only a changed image costs one.
 head=$(curl -fsS -H 'Accept: application/vnd.github.sha' "https://api.github.com/repos/$REPO/commits/$BRANCH")
-while read -r img; do
+# Worked out first, so that a failure here stops the run instead of leaving nothing to check.
+changed=$(comm -13 <(printf '%s\n' "$before") <(printf '%s\n' "$after") | cut -d' ' -f1)
+for img in $changed; do
   rev=$(docker image inspect -f '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$img")
   status=$(curl -fsS "https://api.github.com/repos/$REPO/compare/$head...$rev" \
     | python3 -c 'import json, sys; print(json.load(sys.stdin)["status"])')
@@ -41,7 +48,7 @@ while read -r img; do
     echo "refusing $img: built from $rev, which is not on $BRANCH (at $head): $status" >&2
     exit 1
   fi
-done < <(comm -13 <(printf '%s\n' "$before") <(printf '%s\n' "$after") | cut -d' ' -f1)
+done
 
 docker compose up -d --remove-orphans
 docker image prune -f --filter "label=org.opencontainers.image.source=https://github.com/$REPO" >/dev/null
