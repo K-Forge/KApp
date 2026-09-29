@@ -17,6 +17,10 @@ export interface PlannedDistance {
   a: Coordinate;
   /** On the curb, for a setback; the wall's other end, for a length. */
   b: Coordinate;
+  /** For a length: its dimension line, drawn beside the wall, clear of the other lines. */
+  dim?: Coordinate[];
+  /** Where its number goes on the sketch. */
+  tag: Coordinate;
   /** Metres, by the model. */
   expected: number;
 }

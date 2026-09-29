@@ -52,17 +52,23 @@ const ZOOM_MIN = 20;
         <summary>How to measure</summary>
         <p>Walk the numbers in order, from the corner of Calle 63 and Cra 9 Bis.</p>
         <p><b class="setback-key">Orange</b>: from the wall at street level, straight out from it, to the edge of the street (the curb).</p>
-        <p><b class="length-key">Blue</b>: along the wall, corner to corner.</p>
+        <p><b class="length-key">Blue</b>: along the wall, corner to corner, or across a door. Drawn beside its wall, with dotted lines back to the corners it runs between.</p>
         <p>
           Longer than {{ pieceMetres }} m, or with something in the way: in pieces. Type one, tap +, type the next. The model's figure is
           only there to catch a slip; what you see on site wins, and anything the sketch gets wrong goes in a note.
         </p>
+        <p>Notes are for what the sketch does not show. For example:</p>
+        <ul>
+          @for (n of noteExamples; track n) {
+            <li>{{ n }}</li>
+          }
+        </ul>
       </details>
 
       <div class="work">
         <section class="card sketch-card">
           <div class="sketch" #sketchBox>
-            @if (view(); as v) {
+            @if (drawn(); as v) {
               <svg [attr.viewBox]="viewBox()" preserveAspectRatio="xMidYMid meet" role="img" [attr.aria-label]="'Sketch of block ' + block">
                 @for (d of v.roadways; track $index) {
                   <path class="road" [attr.d]="d" />
@@ -78,17 +84,30 @@ const ZOOM_MIN = 20;
                 }
                 @for (d of v.lines; track d.id) {
                   <g [class]="d.cls" [class.on]="d.id === current().id" (click)="select(d.id)">
-                    <line [attr.x1]="d.a.x" [attr.y1]="d.a.y" [attr.x2]="d.b.x" [attr.y2]="d.b.y" />
-                    <circle class="end" [attr.cx]="d.a.x" [attr.cy]="d.a.y" [attr.r]="2.5 * k()" />
-                    <circle class="end" [attr.cx]="d.b.x" [attr.cy]="d.b.y" [attr.r]="2.5 * k()" />
-                    <circle class="dot" [attr.cx]="d.tag.x" [attr.cy]="d.tag.y" [attr.r]="(d.id === current().id ? 11 : 8.5) * k()" />
-                    <text [attr.x]="d.tag.x" [attr.y]="d.tag.y" [attr.font-size]="(d.id === current().id ? 11 : 9) * k()">{{ d.n }}</text>
+                    @if (d.dim; as m) {
+                      <line class="ext" [attr.x1]="d.a.x" [attr.y1]="d.a.y" [attr.x2]="m[0].x" [attr.y2]="m[0].y" />
+                      <line class="ext" [attr.x1]="d.b.x" [attr.y1]="d.b.y" [attr.x2]="m[1].x" [attr.y2]="m[1].y" />
+                      <line [attr.x1]="m[0].x" [attr.y1]="m[0].y" [attr.x2]="m[1].x" [attr.y2]="m[1].y" />
+                      <circle class="end" [attr.cx]="m[0].x" [attr.cy]="m[0].y" [attr.r]="2.5 * k()" />
+                      <circle class="end" [attr.cx]="m[1].x" [attr.cy]="m[1].y" [attr.r]="2.5 * k()" />
+                    } @else {
+                      <line [attr.x1]="d.a.x" [attr.y1]="d.a.y" [attr.x2]="d.b.x" [attr.y2]="d.b.y" />
+                      <circle class="end" [attr.cx]="d.a.x" [attr.cy]="d.a.y" [attr.r]="3 * k()" />
+                    }
+                    @if (d.shown) {
+                      <circle class="dot" [attr.cx]="d.tag.x" [attr.cy]="d.tag.y" [attr.r]="(d.id === current().id ? 11 : 8.5) * k()" />
+                      <text [attr.x]="d.tag.x" [attr.y]="d.tag.y" [attr.font-size]="(d.id === current().id ? 11 : 9) * k()">{{ d.n }}</text>
+                    }
                   </g>
                 }
               </svg>
             } @else if (loading()) {
               <p class="text-muted small">Loading the block…</p>
             }
+          </div>
+          <div class="key small">
+            <span><i class="swatch setback"></i>wall → street edge: where it stands</span>
+            <span><i class="swatch length"></i>along the wall or a door: how wide</span>
           </div>
           <button type="button" class="btn btn-sm zoom" (click)="whole.set(!whole())">{{ whole() ? 'Zoom in' : 'Whole block' }}</button>
         </section>
@@ -124,11 +143,19 @@ const ZOOM_MIN = 20;
               <button type="button" class="btn" (click)="piece(c.id, box)" title="Another piece" aria-label="Another piece">+</button>
             </div>
             <p class="small reading" [class.bad]="!!reading().error || !!reading().off">{{ readingText() }}</p>
-            <input class="note" type="text" placeholder="Note: columns, a tree in the way, the wall steps…" [value]="valueOf(c.id).note ?? ''" (input)="write(c.id, 'note', $event)" />
             <div class="steps">
               <button type="button" class="btn" (click)="step(-1)">‹ Back</button>
               <button type="button" class="btn btn-primary" (click)="step(1)">Next ›</button>
             </div>
+            <input #note class="note" type="text" placeholder="Note: what the sketch does not show" [value]="valueOf(c.id).note ?? ''" (input)="write(c.id, 'note', $event)" />
+            <details class="small examples">
+              <summary>Note examples: tap one, then finish it</summary>
+              <div class="chips">
+                @for (n of noteExamples; track n) {
+                  <button type="button" class="chip" (click)="addNote(c.id, n, note)">{{ n }}</button>
+                }
+              </div>
+            </details>
           }
         </section>
       </div>
@@ -180,7 +207,11 @@ const ZOOM_MIN = 20;
     .sketch-card { position: relative; padding: 0.4rem; }
     .sketch { height: 46vh; min-height: 260px; }
     .sketch svg { width: 100%; height: 100%; display: block; }
-    .zoom { position: absolute; right: 0.6rem; bottom: 0.6rem; }
+    .zoom { position: absolute; right: 0.6rem; bottom: 3.4rem; }
+    .key { display: flex; flex-wrap: wrap; gap: 0.2rem 1rem; padding: 0.4rem 0.3rem 0.1rem; color: var(--text-muted); }
+    .swatch { display: inline-block; width: 1.1rem; height: 3px; margin-right: 0.4rem; vertical-align: middle; background: var(--c); }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+    .chip { border: 1px solid var(--border); background: none; color: var(--text-muted); border-radius: 999px; padding: 0.15rem 0.55rem; font-size: 0.75rem; cursor: pointer; }
     svg * { vector-effect: non-scaling-stroke; }
     .road { fill: color-mix(in srgb, var(--text) 12%, transparent); }
     .walk { fill: #d9ccae; fill-opacity: 0.55; stroke: #b9ab8c; stroke-width: 0.6; }
@@ -191,6 +222,7 @@ const ZOOM_MIN = 20;
     .street { fill: var(--text-muted); font-weight: 600; }
     g { cursor: pointer; }
     g line { stroke-width: 2; stroke: currentColor; }
+    g line.ext { stroke-width: 1; stroke-dasharray: 3 3; }
     g .end, g .dot { fill: currentColor; }
     g text { fill: #fff; font-weight: 700; }
     .setback { color: #e8590c; --c: #e8590c; }
@@ -206,7 +238,8 @@ const ZOOM_MIN = 20;
     .label-in { margin-top: 0.6rem; }
     .reading { min-height: 1.2em; margin: 0.35rem 0; color: var(--text-muted); }
     .reading.bad { color: var(--danger, #c92a2a); }
-    .steps { margin-top: 0.6rem; justify-content: space-between; }
+    .steps { margin: 0.6rem 0; justify-content: space-between; }
+    .examples { margin-top: 0.4rem; color: var(--text-muted); }
     .list ol { list-style: none; margin: 0 0 0.6rem; padding: 0; }
     .list li { display: flex; gap: 0.6rem; align-items: center; padding: 0.3rem 0.2rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
     .list li.on { background: color-mix(in srgb, var(--primary) 14%, transparent); }
@@ -225,6 +258,18 @@ export class SurveyPage {
   readonly plan = SURVEY_PLAN;
   readonly block = SURVEY_BLOCK;
   readonly pieceMetres = PIECE_METRES;
+  /** What goes in a note, to tap in and finish: what the sketch cannot show. */
+  readonly noteExamples = [
+    'Columns in front: measured to the wall behind',
+    'In pieces round a tree / post / car',
+    'The wall steps in here, … m',
+    'The floors above come out … m',
+    'The door is … m further on',
+    'No door here',
+    'To a fence or railing, not a wall',
+    'The curb is a driveway ramp here',
+    'Could not reach it: estimated',
+  ];
 
   readonly loading = signal(true);
   readonly error = signal<ApiError | null>(null);
@@ -332,22 +377,11 @@ export class SurveyPage {
         .flatMap((b) => (b.footprint ?? []).map((p) => shape(p.ring, p.floors, true))),
       ...this.structures().filter((s) => near(s.ring)).map((s) => shape(s.ring, s.floors, false)),
     ];
-    const centre = middleOf(all);
+    // Where each line and number goes was laid out by scripts/survey-plan.py, clear of the others.
     const lines = planned.map(({ d, a, b }) => {
-      // The number sits past the curb for a setback, and on the street side of a wall's length.
-      let tag: ViewPoint;
-      if (d.kind === 'setback') {
-        const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
-        tag = { x: b.x + ((b.x - a.x) / len) * 1.6, y: b.y + ((b.y - a.y) / len) * 1.6 };
-      } else {
-        const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-        const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
-        let n = { x: -(b.y - a.y) / len, y: (b.x - a.x) / len };
-        if ((mid.x - centre.x) * n.x + (mid.y - centre.y) * n.y < 0) n = { x: -n.x, y: -n.y };
-        tag = { x: mid.x + n.x * 1.8, y: mid.y + n.y * 1.8 };
-      }
       const done = readDistance(this.values().get(d.id)?.text).metres !== null;
-      return { id: d.id, n: d.n, a, b, tag, cls: done ? 'done' : d.kind };
+      const dim = d.dim ? ([at(d.dim[0]), at(d.dim[1])] as const) : null;
+      return { id: d.id, n: d.n, a, b, dim, tag: at(d.tag), cls: done ? 'done' : d.kind };
     });
     const streets: { name: string; x: number; y: number; angle: number }[] = [];
     for (const street of ground.streets) {
@@ -357,15 +391,39 @@ export class SurveyPage {
     return { box, roadways: area(ground.roadways), sidewalks: area(ground.sidewalks), shapes, lines, streets };
   });
 
+  /**
+   * The lines as drawn, with the numbers that fit: zoomed in, all of them; the whole block, only
+   * those that do not touch a number already shown, the current one first.
+   */
+  readonly drawn = computed(() => {
+    const v = this.view();
+    if (!v) return null;
+    const room = 19 * this.k();
+    const kept: ViewPoint[] = [];
+    const current = this.currentId();
+    const order = [...v.lines].sort((x, y) => (x.id === current ? -1 : y.id === current ? 1 : x.n - y.n));
+    const shown = new Set<string>();
+    for (const l of order) {
+      if (!this.whole() || kept.every((t) => Math.hypot(t.x - l.tag.x, t.y - l.tag.y) >= room)) {
+        kept.push(l.tag);
+        shown.add(l.id);
+      }
+    }
+    return { ...v, lines: v.lines.map((l) => ({ ...l, shown: shown.has(l.id) })) };
+  });
+
   /** The whole block, or a window round the current distance. */
   readonly viewBox = computed(() => {
     const v = this.view();
     if (!v) return '0 0 1 1';
     const line = v.lines.find((l) => l.id === this.currentId());
     if (this.whole() || !line) return `${v.box.x} ${v.box.y} ${v.box.width} ${v.box.height}`;
-    const size = Math.max(ZOOM_MIN, Math.hypot(line.b.x - line.a.x, line.b.y - line.a.y) * 1.6 + 8);
-    const cx = (line.a.x + line.b.x + line.tag.x) / 3;
-    const cy = (line.a.y + line.b.y + line.tag.y) / 3;
+    const pts = [line.a, line.b, line.tag, ...(line.dim ?? [])];
+    const xs = pts.map((p) => p.x);
+    const ys = pts.map((p) => p.y);
+    const size = Math.max(ZOOM_MIN, Math.max(...xs) - Math.min(...xs) + 10, Math.max(...ys) - Math.min(...ys) + 10);
+    const cx = (Math.max(...xs) + Math.min(...xs)) / 2;
+    const cy = (Math.max(...ys) + Math.min(...ys)) / 2;
     return `${cx - size / 2} ${cy - size / 2} ${size} ${size}`;
   });
 
@@ -427,6 +485,17 @@ export class SurveyPage {
       }
     }
     this.select(order[(at + by + order.length) % order.length]);
+  }
+
+  /** An example added to the note, to finish by hand: the cursor goes to its "…". */
+  addNote(id: string, example: string, box: HTMLInputElement): void {
+    const note = (this.valueOf(id).note ?? '').trim();
+    const next = note ? `${note}; ${example}` : example;
+    this.change(id, { note: next });
+    box.value = next;
+    box.focus();
+    const at = next.lastIndexOf('…');
+    if (at >= 0) box.setSelectionRange(at, at + 1);
   }
 
   write(id: string, field: 'text' | 'note' | 'label', event: Event): void {

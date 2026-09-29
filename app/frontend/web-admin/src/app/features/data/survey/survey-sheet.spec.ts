@@ -1,4 +1,6 @@
-import { SURVEY_PLAN } from './survey-plan';
+import { toView, type ViewPoint } from '../blocks/block-geometry';
+import type { Coordinate } from '../ground/ground.model';
+import { SURVEY_FRAME, SURVEY_PLAN } from './survey-plan';
 import { asText, formatMetres, merged, readDistance, stillPending } from './survey-sheet';
 
 describe('survey sheet', () => {
@@ -42,6 +44,27 @@ describe('survey sheet', () => {
       '2. [bis-02] Carrera 9 Bis · North wing, corner with Calle 63: to the Cra 9 Bis curb: 4,15 m (2,10 + 2,05) · tree in the way',
       '+ [extra-1] Gate on Cra 9A: 3,10 m',
     ]);
+  });
+
+  it('lays the plan out so that no two lines run on top of each other and no two numbers touch', () => {
+    const at = (c: Coordinate) => toView(SURVEY_FRAME, c);
+    const drawn = SURVEY_PLAN.map((d) => ({ id: d.id, line: (d.dim ?? [d.a, d.b]).map(at), tag: at(d.tag) }));
+    const overlap = ([p1, p2]: ViewPoint[], [q1, q2]: ViewPoint[]) => {
+      const len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+      const u = { x: (p2.x - p1.x) / len, y: (p2.y - p1.y) / len };
+      const off = (q: ViewPoint) => Math.abs((q.x - p1.x) * u.y - (q.y - p1.y) * u.x);
+      const along = (q: ViewPoint) => (q.x - p1.x) * u.x + (q.y - p1.y) * u.y;
+      const [s0, s1] = [along(q1), along(q2)].sort((a, b) => a - b);
+      return off(q1) < 0.35 && off(q2) < 0.35 ? Math.max(0, Math.min(len, s1) - Math.max(0, s0)) : 0;
+    };
+    const problems: string[] = [];
+    drawn.forEach((p, i) =>
+      drawn.slice(i + 1).forEach((q) => {
+        if (overlap(p.line, q.line) >= 0.2) problems.push(`${p.id} over ${q.id}`);
+        if (Math.hypot(p.tag.x - q.tag.x, p.tag.y - q.tag.y) < 1.5) problems.push(`numbers of ${p.id} and ${q.id}`);
+      }),
+    );
+    expect(problems).toEqual([]);
   });
 
   it('walks a plan whose distances are numbered in order, each once, and each worth taking', () => {
