@@ -8,6 +8,7 @@ import { ApiConfigService } from '../../core/config/api-config.service';
 import { AppHttpError } from '../../core/http/api-http-error';
 import type { ApiError } from '../../core/http/api-error.model';
 import { ApiErrorBannerComponent } from '../../shared/ui/api-error-banner/api-error-banner.component';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 
 interface LoginForm {
   email: FormControl<string>;
@@ -16,7 +17,7 @@ interface LoginForm {
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, ApiErrorBannerComponent],
+  imports: [TranslatePipe, ReactiveFormsModule, ApiErrorBannerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="login-shell">
@@ -25,57 +26,57 @@ interface LoginForm {
              the same product. The explanation that used to sit here is gone: nobody reaching
              this screen needs to be told what a token is before they can type a password. -->
         <div class="login-brand">
-          <img src="/konrad-logo.png" alt="Fundación Universitaria Konrad Lorenz" width="44" height="44" />
+          <img src="/konrad-logo.png" [alt]="'Fundación Universitaria Konrad Lorenz' | t" width="44" height="44" />
           <div>
-            <h1>KApp</h1>
-            <p class="login-sub">Admin Portal</p>
+            <h1>{{ 'KApp' | t }}</h1>
+            <p class="login-sub">{{ 'Admin Portal' | t }}</p>
           </div>
         </div>
 
         @if (sessionExpired()) {
           <div class="card expired" role="alert">
-            <strong>Your session expired.</strong>
-            <p>The portal signs out as soon as the token runs out. Sign in again to go back to where you were.</p>
+            <strong>{{ 'Your session expired.' | t }}</strong>
+            <p>{{ 'The portal signs out as soon as the token runs out. Sign in again to go back to where you were.' | t }}</p>
           </div>
         }
 
         @if (refusedAsNonAdmin()) {
           <div class="card api-error" role="alert">
-            <strong>That account is not an administrator.</strong>
-            <p style="margin:0.35rem 0 0">The sign-in worked; this portal is admin-only.</p>
+            <strong>{{ 'That account is not an administrator.' | t }}</strong>
+            <p style="margin:0.35rem 0 0">{{ 'The sign-in worked; this portal is admin-only.' | t }}</p>
           </div>
         }
 
         <form [formGroup]="form" (ngSubmit)="submit()" class="stack">
           <div class="field" [class.invalid]="isInvalid('email')">
-            <label for="email">E-mail</label>
+            <label for="email">{{ 'E-mail' | t }}</label>
             <input id="email" type="email" formControlName="email" autocomplete="username" />
             @if (isInvalid('email')) {
-              <span class="error">Enter a valid e-mail address.</span>
+              <span class="error">{{ 'Enter a valid e-mail address.' | t }}</span>
             }
           </div>
 
           <div class="field" [class.invalid]="isInvalid('password')">
-            <label for="password">Password</label>
+            <label for="password">{{ 'Password' | t }}</label>
             <input id="password" type="password" formControlName="password" autocomplete="current-password" />
             @if (isInvalid('password')) {
-              <span class="error">Password is required.</span>
+              <span class="error">{{ 'Password is required.' | t }}</span>
             }
           </div>
 
           <button type="submit" class="btn btn-primary" [disabled]="form.invalid || submitting()">
-            {{ submitting() ? 'Signing in…' : 'Sign in' }}
+            {{ submitting() ? ('Signing in…' | t) : ('Sign in' | t) }}
           </button>
         </form>
 
         <app-api-error-banner [error]="error()" />
 
         <details class="settings">
-          <summary>Gateway</summary>
+          <summary>{{ 'Gateway' | t }}</summary>
           <div class="field" style="margin-top: 0.75rem">
-            <label for="base-url">Base URL</label>
+            <label for="base-url">{{ 'Base URL' | t }}</label>
             <input id="base-url" type="text" [value]="baseUrl()" (change)="onBaseUrlChange($event)" placeholder="http://localhost:8080" />
-            <span class="hint">Saved in this browser only.</span>
+            <span class="hint">{{ 'Saved in this browser only.' | t }}</span>
           </div>
         </details>
       </div>

@@ -8,7 +8,9 @@ import { TokenStore } from '../../core/auth/token.store';
 import { ClockService } from '../../core/clock/clock.service';
 import { ApiConfigService } from '../../core/config/api-config.service';
 import { ThemeService } from '../../core/theme/theme.service';
+import { I18nService } from '../../core/i18n/i18n.service';
 import { TokenCountdownComponent } from '../../shared/ui/token-countdown/token-countdown.component';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 
 interface NavLink {
   path: string;
@@ -28,37 +30,37 @@ interface NavGroup {
 // data, or to inspect how the API behaves.
 const NAV_GROUPS: NavGroup[] = [
   {
-    title: 'Academic',
+    title: /* i18n */ 'Academic',
     links: [
-      { path: '/data/programs', label: 'Programs', icon: 'M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4' },
-      { path: '/data/pensums', label: 'Pensums', icon: 'M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2zM8 7h8M8 11h8M8 15h5' },
+      { path: '/data/programs', label: /* i18n */ 'Programs', icon: 'M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4' },
+      { path: '/data/pensums', label: /* i18n */ 'Pensums', icon: 'M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2zM8 7h8M8 11h8M8 15h5' },
     ],
   },
   {
-    title: 'Campus',
+    title: /* i18n */ 'Campus',
     links: [
-      { path: '/data/campus', label: 'Campus map', icon: 'M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14' },
-      { path: '/data/survey', label: 'Survey', icon: 'M3 17 17 3l4 4L7 21zM7 13l2 2M10 10l2 2M13 7l2 2' },
-      { path: '/data/buildings', label: 'Buildings', icon: 'M3 21h18M5 21V5a2 2 0 012-2h6a2 2 0 012 2v16M9 7h2M9 11h2M9 15h2M15 21v-8h4v8' },
-      { path: '/data/floors', label: 'Floor editor', icon: 'M3 3h18v18H3zM3 9h18M9 9v12M15 15h6' },
-      { path: '/data/spaces', label: 'Spaces', icon: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z' },
-      { path: '/data/space-types', label: 'Space types', icon: 'M7 7h.01M3 11l8-8h8a2 2 0 012 2v8l-8 8a2 2 0 01-2.83 0l-5.17-5.17a2 2 0 010-2.83z' },
+      { path: '/data/campus', label: /* i18n */ 'Campus map', icon: 'M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14' },
+      { path: '/data/survey', label: /* i18n */ 'Survey', icon: 'M3 17 17 3l4 4L7 21zM7 13l2 2M10 10l2 2M13 7l2 2' },
+      { path: '/data/buildings', label: /* i18n */ 'Buildings', icon: 'M3 21h18M5 21V5a2 2 0 012-2h6a2 2 0 012 2v16M9 7h2M9 11h2M9 15h2M15 21v-8h4v8' },
+      { path: '/data/floors', label: /* i18n */ 'Floor editor', icon: 'M3 3h18v18H3zM3 9h18M9 9v12M15 15h6' },
+      { path: '/data/spaces', label: /* i18n */ 'Spaces', icon: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z' },
+      { path: '/data/space-types', label: /* i18n */ 'Space types', icon: 'M7 7h.01M3 11l8-8h8a2 2 0 012 2v8l-8 8a2 2 0 01-2.83 0l-5.17-5.17a2 2 0 010-2.83z' },
     ],
   },
   {
-    title: 'People and access',
+    title: /* i18n */ 'People and access',
     links: [
-      { path: '/data/users', label: 'Users', icon: 'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 21v-2a4 4 0 00-3-3.87' },
-      { path: '/data/invitation-codes', label: 'Invitation codes', icon: 'M15 7a4 4 0 11-5.66 5.66L3 19v2h2l6.34-6.34A4 4 0 0115 7zM16 8h.01' },
-      { path: '/data/visitor-passes', label: 'Visitor passes', icon: 'M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2zM3 11h18M7 15h4' },
+      { path: '/data/users', label: /* i18n */ 'Users', icon: 'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 21v-2a4 4 0 00-3-3.87' },
+      { path: '/data/invitation-codes', label: /* i18n */ 'Invitation codes', icon: 'M15 7a4 4 0 11-5.66 5.66L3 19v2h2l6.34-6.34A4 4 0 0115 7zM16 8h.01' },
+      { path: '/data/visitor-passes', label: /* i18n */ 'Visitor passes', icon: 'M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2zM3 11h18M7 15h4' },
     ],
   },
   {
-    title: 'Inspect',
+    title: /* i18n */ 'Inspect',
     links: [
-      { path: '/my-token', label: 'My token', icon: 'M12 2l8 4v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6l8-4zM9 12l2 2 4-4' },
-      { path: '/who-can-do-what', label: 'Who can do what', icon: 'M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11' },
-      { path: '/api-console', label: 'API console', icon: 'M8 9l-4 3 4 3M16 9l4 3-4 3M13 5l-2 14' },
+      { path: '/my-token', label: /* i18n */ 'My token', icon: 'M12 2l8 4v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6l8-4zM9 12l2 2 4-4' },
+      { path: '/who-can-do-what', label: /* i18n */ 'Who can do what', icon: 'M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11' },
+      { path: '/api-console', label: /* i18n */ 'API console', icon: 'M8 9l-4 3 4 3M16 9l4 3-4 3M13 5l-2 14' },
     ],
   },
 ];
@@ -67,7 +69,7 @@ const NAV_GROUPS: NavGroup[] = [
 @Component({
   selector: 'app-shell',
   host: { '(document:keydown.escape)': 'onEscape()' },
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TokenCountdownComponent],
+  imports: [TranslatePipe, RouterOutlet, RouterLink, RouterLinkActive, TokenCountdownComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell" [class.nav-hidden]="navHidden()" [class.drawer-open]="drawerOpen()">
@@ -81,7 +83,7 @@ const NAV_GROUPS: NavGroup[] = [
         that changes the page is worse than no skip link. The href stays so it still reads as a
         link and works if scripting is off.
       -->
-      <a class="skip-link" href="#shell-content" (click)="skipToContent($event)">Skip to content</a>
+      <a class="skip-link" href="#shell-content" (click)="skipToContent($event)">{{ 'Skip to content' | t }}</a>
 
       <header class="shell-header">
         <div class="header-start">
@@ -93,8 +95,8 @@ const NAV_GROUPS: NavGroup[] = [
             (click)="toggleNav()"
             aria-controls="shell-nav"
             [attr.aria-expanded]="navShown()"
-            [title]="navShown() ? 'Hide the menu' : 'Show the menu'"
-            [attr.aria-label]="navShown() ? 'Hide the menu' : 'Show the menu'"
+            [title]="navShown() ? ('Hide the menu' | t) : ('Show the menu' | t)"
+            [attr.aria-label]="navShown() ? ('Hide the menu' | t) : ('Show the menu' | t)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
           </button>
@@ -102,10 +104,10 @@ const NAV_GROUPS: NavGroup[] = [
           <!-- The API console, not the token screen: the console is where somebody spends the
                session, and the token is one click away from it anyway. -->
           <a class="brand" routerLink="/api-console">
-            <img src="/konrad-logo.png" alt="Fundación Universitaria Konrad Lorenz" width="34" height="34" />
+            <img src="/konrad-logo.png" [alt]="'Fundación Universitaria Konrad Lorenz' | t" width="34" height="34" />
             <span class="brand-text">
-              <strong>KApp</strong>
-              <span class="brand-sub">Admin Portal</span>
+              <strong>{{ 'KApp' | t }}</strong>
+              <span class="brand-sub">{{ 'Admin Portal' | t }}</span>
             </span>
           </a>
         </div>
@@ -117,8 +119,8 @@ const NAV_GROUPS: NavGroup[] = [
             type="button"
             class="icon-btn"
             (click)="editBaseUrl()"
-            [title]="'Gateway: ' + baseUrl() + ' — click to change'"
-            aria-label="Change the gateway address"
+            [title]="'Gateway: {url} — click to change' | t: { url: baseUrl() }"
+            [attr.aria-label]="'Change the gateway address' | t"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2a15 15 0 010 20 15 15 0 010-20" />
@@ -130,8 +132,8 @@ const NAV_GROUPS: NavGroup[] = [
             type="button"
             class="icon-btn"
             (click)="cycleTheme()"
-            [title]="'Theme: ' + theme.preference() + ' — click to change'"
-            [attr.aria-label]="'Theme: ' + theme.preference()"
+            [title]="'Theme: {theme} — click to change' | t: { theme: (theme.preference() | t) }"
+            [attr.aria-label]="'Theme: {theme}' | t: { theme: (theme.preference() | t) }"
           >
             @if (theme.preference() === 'dark') {
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" /></svg>
@@ -146,14 +148,27 @@ const NAV_GROUPS: NavGroup[] = [
                 <path d="M8 21h8M12 18v3" />
               </svg>
             }
-            <span class="icon-btn-label">{{ theme.preference() }}</span>
+            <span class="icon-btn-label">{{ theme.preference() | t }}</span>
           </button>
 
-          <button type="button" class="icon-btn danger" (click)="logout()" title="Sign out">
+          <button
+            type="button"
+            class="icon-btn"
+            (click)="cycleLanguage()"
+            [title]="'Language: {language} — click to change' | t: { language: languageName() }"
+            [attr.aria-label]="'Language: {language}' | t: { language: languageName() }"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 5h9M8.5 3v2M10.5 5c-.7 4.2-3.3 7.6-6.5 9.5M6 9c1.3 2.3 3.2 4 5.5 5M13 21l4-9 4 9M14.3 18h5.4" />
+            </svg>
+            <span class="icon-btn-label">{{ languageLabel() }}</span>
+          </button>
+
+          <button type="button" class="icon-btn danger" (click)="logout()" [title]="'Sign out' | t">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
             </svg>
-            <span class="icon-btn-label">Sign out</span>
+            <span class="icon-btn-label">{{ 'Sign out' | t }}</span>
           </button>
         </div>
       </header>
@@ -162,9 +177,9 @@ const NAV_GROUPS: NavGroup[] = [
         @if (drawerOpen()) {
           <div class="nav-backdrop" (click)="closeDrawer()" aria-hidden="true"></div>
         }
-        <nav id="shell-nav" class="shell-nav" aria-label="Sections">
+        <nav id="shell-nav" class="shell-nav" [attr.aria-label]="'Sections' | t">
           @for (group of groups; track group.title) {
-            <p class="nav-group-title">{{ group.title }}</p>
+            <p class="nav-group-title">{{ group.title | t }}</p>
             @for (link of group.links; track link.path) {
               <a
                 [routerLink]="link.path"
@@ -175,7 +190,7 @@ const NAV_GROUPS: NavGroup[] = [
                 <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path [attr.d]="link.icon" />
                 </svg>
-                {{ link.label }}
+                {{ link.label | t }}
               </a>
             }
           }
@@ -600,6 +615,7 @@ export class ShellComponent {
   private readonly config = inject(ApiConfigService);
   protected readonly tokenStore = inject(TokenStore);
   protected readonly theme = inject(ThemeService);
+  private readonly i18n = inject(I18nService);
 
   readonly groups = NAV_GROUPS;
 
@@ -618,6 +634,23 @@ export class ShellComponent {
     return this.themeIcons[this.theme.preference()] ?? '';
   }
 
+  /** "ES" or "EN", and "auto" while it follows the system's. */
+  languageLabel(): string {
+    const code = this.i18n.language().toUpperCase();
+    return this.i18n.preference() === 'system' ? `${code} · auto` : code;
+  }
+
+  languageName(): string {
+    const name = this.i18n.language() === 'es' ? 'Español' : 'English';
+    return this.i18n.preference() === 'system' ? this.i18n.t('{language}, as the system', { language: name }) : name;
+  }
+
+  /** The system's language, then Spanish, then English, as the theme cycles. */
+  cycleLanguage(): void {
+    const order = ['system', 'es', 'en'] as const;
+    this.i18n.set(order[(order.indexOf(this.i18n.preference()) + 1) % order.length]);
+  }
+
   cycleTheme(): void {
     const order = ['system', 'light', 'dark'] as const;
     const next = order[(order.indexOf(this.theme.preference()) + 1) % order.length];
@@ -625,7 +658,7 @@ export class ShellComponent {
   }
 
   editBaseUrl(): void {
-    const next = window.prompt('Gateway base URL', this.baseUrl());
+    const next = window.prompt(this.i18n.t('Gateway base URL'), this.baseUrl());
     if (next) {
       this.config.setBaseUrl(next);
     }

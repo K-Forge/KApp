@@ -8,6 +8,8 @@ import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
 import { CATEGORY_LABELS, SPACE_CATEGORIES, type SpaceCategory, type SpaceType } from './space.model';
 import { SpaceTypesService } from './space-types.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 const TYPE_CODE = /^[A-Z][A-Z0-9_]{1,39}$/;
 
@@ -27,38 +29,38 @@ type TypeForm = FormGroup<{
  */
 @Component({
   selector: 'app-space-types-page',
-  imports: [ReactiveFormsModule, DataTableComponent, ApiErrorBannerComponent, ModalComponent, PageIntroComponent],
+  imports: [TranslatePipe, ReactiveFormsModule, DataTableComponent, ApiErrorBannerComponent, ModalComponent, PageIntroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
-        title="Space types"
-        what="What kinds of space the map knows - aula, laboratorio, baño, cuarto de TI - each under the fixed category the apps draw it with."
-        [can]="['Add a type the moment you find one', 'Rename a type or move it to another category', 'Delete a type no space uses']"
-        note="The code is permanent and never shown; the name is what people read. When you cannot tell what a room is, use Sin identificar and come back to it. A type still used by a space cannot be deleted - the refusal says how many use it."
+        [title]="'Space types' | t"
+        [what]="'What kinds of space the map knows - aula, laboratorio, baño, cuarto de TI - each under the fixed category the apps draw it with.' | t"
+        [can]="[('Add a type the moment you find one' | t), ('Rename a type or move it to another category' | t), ('Delete a type no space uses' | t)]"
+        [note]="'The code is permanent and never shown; the name is what people read. When you cannot tell what a room is, use Sin identificar and come back to it. A type still used by a space cannot be deleted - the refusal says how many use it.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">New type</button>
+        <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New type' | t }}</button>
       </app-page-intro>
 
       <div class="card stack">
         <div class="field" style="margin-bottom: 0; max-width: 20rem">
-          <label for="category">Category</label>
+          <label for="category">{{ 'Category' | t }}</label>
           <select id="category" (change)="onCategoryChange($event)">
-            <option value="">All categories</option>
+            <option value="">{{ 'All categories' | t }}</option>
             @for (category of categories; track category) {
-              <option [value]="category">{{ categoryLabels[category] }}</option>
+              <option [value]="category">{{ categoryLabels[category] | t }}</option>
             }
           </select>
         </div>
 
         <app-api-error-banner [error]="error()" />
 
-        <app-data-table [loading]="loading()" [empty]="!loading() && !error() && shown().length === 0" emptyMessage="No types in this category yet.">
+        <app-data-table [loading]="loading()" [empty]="!loading() && !error() && shown().length === 0" [emptyMessage]="'No types in this category yet.' | t">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Code</th>
+              <th>{{ 'Name' | t }}</th>
+              <th>{{ 'Category' | t }}</th>
+              <th>{{ 'Code' | t }}</th>
               <th></th>
             </tr>
           </thead>
@@ -66,12 +68,12 @@ type TypeForm = FormGroup<{
             @for (type of shown(); track type.code) {
               <tr>
                 <td>{{ type.name }}</td>
-                <td><span class="badge badge-neutral">{{ categoryLabels[type.category] }}</span></td>
+                <td><span class="badge badge-neutral">{{ categoryLabels[type.category] | t }}</span></td>
                 <td class="mono text-muted">{{ type.code }}</td>
                 <td class="row">
-                  <button type="button" class="btn btn-sm" (click)="openEdit(type)">Edit</button>
+                  <button type="button" class="btn btn-sm" (click)="openEdit(type)">{{ 'Edit' | t }}</button>
                   <button type="button" class="btn btn-sm btn-danger" [disabled]="deletingCode() === type.code" (click)="remove(type)">
-                    Delete
+                    {{ 'Delete' | t }}
                   </button>
                 </td>
               </tr>
@@ -81,42 +83,42 @@ type TypeForm = FormGroup<{
       </div>
     </div>
 
-    <app-modal #formModal [title]="editing() ? 'Edit type' : 'New type'" (closed)="formError.set(null)">
+    <app-modal #formModal [title]="editing() ? ('Edit type' | t) : ('New type' | t)" (closed)="formError.set(null)">
       <app-api-error-banner [error]="formError()" />
       <form [formGroup]="form" (ngSubmit)="save()" class="stack">
         <div class="field" [class.invalid]="invalid('name')">
-          <label for="t-name">Name</label>
-          <input id="t-name" type="text" formControlName="name" placeholder="Sala de lactancia" (input)="suggestCode()" />
+          <label for="t-name">{{ 'Name' | t }}</label>
+          <input id="t-name" type="text" formControlName="name" [placeholder]="'Sala de lactancia' | t" (input)="suggestCode()" />
           @if (invalid('name')) {
-            <span class="error">Required, 1-60 characters.</span>
+            <span class="error">{{ 'Required, 1-60 characters.' | t }}</span>
           }
         </div>
 
         <div class="field">
-          <label for="t-category">Category</label>
+          <label for="t-category">{{ 'Category' | t }}</label>
           <select id="t-category" formControlName="category">
             @for (category of categories; track category) {
-              <option [value]="category">{{ categoryLabels[category] }}</option>
+              <option [value]="category">{{ categoryLabels[category] | t }}</option>
             }
           </select>
-          <span class="hint">Decides the colour and icon in the apps.</span>
+          <span class="hint">{{ 'Decides the colour and icon in the apps.' | t }}</span>
         </div>
 
         <div class="field" [class.invalid]="invalid('code')">
-          <label for="t-code">Code</label>
+          <label for="t-code">{{ 'Code' | t }}</label>
           <input id="t-code" type="text" formControlName="code" [readonly]="!!editing()" placeholder="LACTATION_ROOM" />
           @if (invalid('code')) {
-            <span class="error">Uppercase letters, digits and underscores, starting with a letter; 2-40 characters.</span>
+            <span class="error">{{ 'Uppercase letters, digits and underscores, starting with a letter; 2-40 characters.' | t }}</span>
           } @else {
-            <span class="hint">{{ editing() ? 'A code cannot change once spaces may use it.' : 'Filled in from the name; change it if you like.' }}</span>
+            <span class="hint">{{ editing() ? ('A code cannot change once spaces may use it.' | t) : ('Filled in from the name; change it if you like.' | t) }}</span>
           }
         </div>
 
         <div class="row">
           <button type="submit" class="btn btn-primary" [disabled]="submitting()">
-            {{ submitting() ? 'Saving…' : editing() ? 'Save changes' : 'Create type' }}
+            {{ submitting() ? ('Saving…' | t) : editing() ? ('Save changes' | t) : ('Create type' | t) }}
           </button>
-          <button type="button" class="btn" (click)="formModal.close()">Cancel</button>
+          <button type="button" class="btn" (click)="formModal.close()">{{ 'Cancel' | t }}</button>
         </div>
       </form>
     </app-modal>
@@ -239,7 +241,7 @@ export class SpaceTypesPage {
   }
 
   remove(type: SpaceType): void {
-    if (!window.confirm(`Delete the type ${type.name}? This cannot be undone.`)) {
+    if (!window.confirm(t('Delete the type {name}? This cannot be undone.', { name: type.name }))) {
       return;
     }
     this.deletingCode.set(type.code);

@@ -16,13 +16,13 @@ export const SPACE_CATEGORIES = [
 export type SpaceCategory = (typeof SPACE_CATEGORIES)[number];
 
 export const CATEGORY_LABELS: Record<SpaceCategory, string> = {
-  TEACHING: 'Teaching',
-  PUBLIC_SERVICE: 'Public service',
-  OFFICE: 'Office',
-  SOCIAL: 'Social and wellbeing',
-  FACILITIES: 'Facilities',
-  CIRCULATION: 'Circulation',
-  OTHER: 'Not identified yet',
+  TEACHING: /* i18n */ 'Teaching',
+  PUBLIC_SERVICE: /* i18n */ 'Public service',
+  OFFICE: /* i18n */ 'Office',
+  SOCIAL: /* i18n */ 'Social and wellbeing',
+  FACILITIES: /* i18n */ 'Facilities',
+  CIRCULATION: /* i18n */ 'Circulation',
+  OTHER: /* i18n */ 'Not identified yet',
 };
 
 /**

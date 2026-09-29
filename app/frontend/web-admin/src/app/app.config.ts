@@ -5,9 +5,14 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { registerLocaleData } from '@angular/common';
+import localeEsCo from '@angular/common/locales/es-CO';
 import { NavigationError, Router, provideRouter, withComponentInputBinding } from '@angular/router';
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { routes } from './app.routes';
+
+// Dates in Spanish: the date formatting the portal's localDate pipe does in its language.
+registerLocaleData(localeEsCo);
 
 /**
  * Recovers from a deploy that happened while the app was open.

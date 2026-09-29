@@ -1,6 +1,7 @@
 import type { Accessibility, Compass, Corridor, FloorStatus, Point } from '../buildings/building.model';
 import type { Door, SpaceCategory } from '../spaces/space.model';
 import type { FloorDetail, FloorLayoutRequest, LayoutSpace } from './floor.model';
+import { t } from '../../../core/i18n/i18n.service';
 
 /**
  * A floor while somebody is editing it: everything a layout save sends, plus a local key per
@@ -662,10 +663,10 @@ export function problems(draft: FloorDraft, context: ProblemContext): Problem[] 
   const byCode = new Map(draft.spaces.map((s) => [s.code.trim(), s]));
 
   if (draft.spaces.length > MAX_SPACES) {
-    found.push({ text: `A floor holds at most ${MAX_SPACES} spaces; this one has ${draft.spaces.length}.` });
+    found.push({ text: t('A floor holds at most {MAX_SPACES} spaces; this one has {spaces}.', { MAX_SPACES, spaces: draft.spaces.length }) });
   }
   if (draft.outline.length && !within(draft.outline, draft.width, draft.height)) {
-    found.push({ text: `The building's outline runs outside the ${draft.width} x ${draft.height} drawing.` });
+    found.push({ text: t('The building’s outline runs outside the {width} x {height} drawing.', { width: draft.width, height: draft.height }) });
   }
 
   const drawn: DraftSpace[] = [];
@@ -673,69 +674,69 @@ export function problems(draft: FloorDraft, context: ProblemContext): Problem[] 
     const name = label(space);
     const code = space.code.trim();
     if (!code || code.length > 20 || !CODE.test(code)) {
-      found.push({ key: space.key, text: `${name}: the internal code must be letters, digits and dashes, up to 20.` });
+      found.push({ key: space.key, text: t('{name}: the internal code must be letters, digits and dashes, up to 20.', { name }) });
     } else if ((codeCount.get(code.toUpperCase()) ?? 0) > 1) {
-      found.push({ key: space.key, text: `${name}: the internal code ${code} is used twice on this floor.` });
+      found.push({ key: space.key, text: t('{name}: the internal code {code} is used twice on this floor.', { name, code }) });
     }
     if (space.doorCode?.trim() && (doorCount.get(space.doorCode.trim().toUpperCase()) ?? 0) > 1) {
-      found.push({ key: space.key, text: `${name}: door ${space.doorCode.trim()} appears twice on this floor.` });
+      found.push({ key: space.key, text: t('{name}: door {doorCode} appears twice on this floor.', { name, doorCode: space.doorCode.trim() }) });
     }
     if (!space.name.trim()) {
-      found.push({ key: space.key, text: `${space.code}: needs a name.` });
+      found.push({ key: space.key, text: t('{code}: needs a name.', { code: space.code }) });
     }
     if (!context.categories.has(space.typeCode)) {
-      found.push({ key: space.key, text: `${name}: its type ${space.typeCode} is not in the catalogue.` });
+      found.push({ key: space.key, text: t('{name}: its type {typeCode} is not in the catalogue.', { name, typeCode: space.typeCode }) });
     }
     if (space.wing && !context.wings.has(space.wing)) {
-      found.push({ key: space.key, text: `${name}: wing ${space.wing} is not one of this building's.` });
+      found.push({ key: space.key, text: t('{name}: wing {wing} is not one of this building’s.', { name, wing: space.wing }) });
     }
     if (isPlaced(space)) {
       if (!within(space.shape, draft.width, draft.height)) {
-        found.push({ key: space.key, text: `${name}: reaches outside the ${draft.width} x ${draft.height} drawing.` });
+        found.push({ key: space.key, text: t('{name}: reaches outside the {width} x {height} drawing.', { name, width: draft.width, height: draft.height }) });
       } else if (area(space.shape) === 0) {
-        found.push({ key: space.key, text: `${name}: its outline encloses no area.` });
+        found.push({ key: space.key, text: t('{name}: its outline encloses no area.', { name }) });
       } else if (!simple(space.shape)) {
-        found.push({ key: space.key, text: `${name}: its outline crosses itself.` });
+        found.push({ key: space.key, text: t('{name}: its outline crosses itself.', { name }) });
       } else {
         const shape = space.shape;
         const other = drawn.find((d) => overlaps(d.shape as Point[], shape));
-        if (other) found.push({ key: space.key, text: `${name}: overlaps ${label(other)}.` });
+        if (other) found.push({ key: space.key, text: t('{name}: overlaps {value}.', { name, value: label(other) }) });
         drawn.push(space);
       }
       if (space.doors.some((d) => !doorOnOutline(space.shape as Point[], d))) {
-        found.push({ key: space.key, text: `${name}: a door is no longer on its outline.` });
+        found.push({ key: space.key, text: t('{name}: a door is no longer on its outline.', { name }) });
       }
     } else if (space.doors.length) {
-      found.push({ key: space.key, text: `${name}: has doors but is not drawn.` });
+      found.push({ key: space.key, text: t('{name}: has doors but is not drawn.', { name }) });
     }
     const via = space.accessVia?.trim();
     if (via) {
       const target = byCode.get(via);
       if (via === code) {
-        found.push({ key: space.key, text: `${name}: cannot be reached via itself.` });
+        found.push({ key: space.key, text: t('{name}: cannot be reached via itself.', { name }) });
       } else if (target && context.categories.get(target.typeCode) !== 'CIRCULATION') {
-        found.push({ key: space.key, text: `${name}: is reached via ${label(target)}, which is not a lift, stairs or entrance.` });
+        found.push({ key: space.key, text: t('{name}: is reached via {value}, which is not a lift, stairs or entrance.', { name, value: label(target) }) });
       } else if (!target && !context.circulationElsewhere.has(via)) {
-        found.push({ key: space.key, text: `${name}: is reached via ${via}, which no longer exists in this building.` });
+        found.push({ key: space.key, text: t('{name}: is reached via {via}, which no longer exists in this building.', { name, via }) });
       }
     }
   }
 
   const corridorCount = countBy(draft.corridors, (c) => c.code.trim().toUpperCase());
   draft.corridors.forEach((corridor, index) => {
-    const name = corridor.name.trim() || corridor.code || `Corridor ${index + 1}`;
+    const name = corridor.name.trim() || corridor.code || t('Corridor {value}', { value: index + 1 });
     if (!corridor.code.trim() || !corridor.name.trim()) {
-      found.push({ corridor: index, text: `${name}: a corridor needs a code and a name.` });
+      found.push({ corridor: index, text: t('{name}: a corridor needs a code and a name.', { name }) });
     } else if ((corridorCount.get(corridor.code.trim().toUpperCase()) ?? 0) > 1) {
-      found.push({ corridor: index, text: `${name}: the code ${corridor.code.trim()} is used by two corridors.` });
+      found.push({ corridor: index, text: t('{name}: the code {code} is used by two corridors.', { name, code: corridor.code.trim() }) });
     }
     if (!COLOR.test(corridor.color)) {
-      found.push({ corridor: index, text: `${name}: its colour must look like #5B8DEF.` });
+      found.push({ corridor: index, text: t('{name}: its colour must look like #5B8DEF.', { name }) });
     }
     if (corridor.path.length === 0) {
-      found.push({ corridor: index, text: `${name}: has no points yet - draw it or delete it.` });
+      found.push({ corridor: index, text: t('{name}: has no points yet - draw it or delete it.', { name }) });
     } else if (!within(corridor.path, draft.width, draft.height)) {
-      found.push({ corridor: index, text: `${name}: runs outside the ${draft.width} x ${draft.height} drawing.` });
+      found.push({ corridor: index, text: t('{name}: runs outside the {width} x {height} drawing.', { name, width: draft.width, height: draft.height }) });
     }
   });
   return found;

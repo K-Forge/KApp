@@ -6,30 +6,31 @@ import { ApiErrorBannerComponent } from '../../../shared/ui/api-error-banner/api
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
 import { FLOOR_STATUS_LABELS, type Building, type FloorStatus } from '../buildings/building.model';
 import { BuildingsService } from '../buildings/buildings.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 /** Where the floor editor starts: every floor of every building, coloured by how far along it is. */
 @Component({
   selector: 'app-floors-page',
-  imports: [RouterLink, ApiErrorBannerComponent, PageIntroComponent],
+  imports: [TranslatePipe, RouterLink, ApiErrorBannerComponent, PageIntroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
-        title="Floor editor"
-        what="Draw each floor of the campus map and put every space in its place - meant for an iPad, standing on the floor being drawn."
+        [title]="'Floor editor' | t"
+        [what]="'Draw each floor of the campus map and put every space in its place - meant for an iPad, standing on the floor being drawn.' | t"
         [can]="[
-          'Outline rooms from the evacuation plan, then say which space each one is',
-          'Load the rooms an information plaque lists, even as a range, and place them one by one',
-          'Draw corridors in the colour they are painted',
-          'Mark a floor as a draft or as verified on site'
+          ('Outline rooms from the evacuation plan, then say which space each one is' | t),
+          ('Load the rooms an information plaque lists, even as a range, and place them one by one' | t),
+          ('Draw corridors in the colour they are painted' | t),
+          ('Mark a floor as a draft or as verified on site' | t)
         ]"
-        note="Changes stay on this device until the floor is saved, so a dropped connection loses nothing. If somebody else saves the same floor first, the editor says so and lets you choose whose version stays."
+        [note]="'Changes stay on this device until the floor is saved, so a dropped connection loses nothing. If somebody else saves the same floor first, the editor says so and lets you choose whose version stays.' | t"
       />
 
       <app-api-error-banner [error]="error()" />
 
       @if (loading()) {
-        <div class="card empty-state"><p>Loading buildings…</p></div>
+        <div class="card empty-state"><p>{{ 'Loading buildings…' | t }}</p></div>
       }
 
       @for (building of buildings(); track building.code) {
@@ -45,14 +46,14 @@ import { BuildingsService } from '../buildings/buildings.service';
               <a class="floor" [class]="'floor ' + statusClass(floor.status)" [routerLink]="['/data/floors', building.code, floor.code]">
                 <span class="floor-code">{{ floor.code }}</span>
                 <span class="floor-name">{{ floor.name }}</span>
-                <span class="floor-status">{{ statusLabels[floor.status ?? 'UNMAPPED'] }}</span>
+                <span class="floor-status">{{ statusLabels[floor.status ?? 'UNMAPPED'] | t }}</span>
               </a>
             }
           </div>
         </section>
       } @empty {
         @if (!loading() && !error()) {
-          <div class="card empty-state"><p>No buildings yet. Create one under Buildings first.</p></div>
+          <div class="card empty-state"><p>{{ 'No buildings yet. Create one under Buildings first.' | t }}</p></div>
         }
       }
     </div>

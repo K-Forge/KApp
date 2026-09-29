@@ -12,6 +12,8 @@ import { SpaceFormComponent } from './space-form.component';
 import { CATEGORY_LABELS, SPACE_CATEGORIES, shownCode, type Space, type SpaceCategory, type SpaceRequest, type SpaceType } from './space.model';
 import { SpaceTypesService } from './space-types.service';
 import { SpacesService } from './spaces.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 const PAGE_SIZE = 20;
 const MIN_QUERY_LENGTH = 2;
@@ -19,56 +21,56 @@ const MIN_QUERY_LENGTH = 2;
 /** Full-text search plus CRUD over /api/map/spaces - the "find a room" screen turned inside out. */
 @Component({
   selector: 'app-spaces-page',
-  imports: [DataTableComponent, ApiErrorBannerComponent, ModalComponent, SpaceFormComponent, PageIntroComponent],
+  imports: [TranslatePipe, DataTableComponent, ApiErrorBannerComponent, ModalComponent, SpaceFormComponent, PageIntroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
-        title="Spaces"
-        what="Every room, office, bathroom, lift and stairwell the map can point at - placed on the grid of its floor, or only inventoried until somebody places it."
-        [can]="['Create a space, with or without a place on the grid', 'Edit what it is called, what it is and how to reach it', 'Delete one', 'Search by door number, name or other name', 'List a building, a floor or a category']"
-        note="The code shown is the one on the door, and a space whose door has no number shows a dash: its internal code is never shown, because a made-up code on screen looks exactly like a real one. Reached via has to name a lift, stairs or entrance of the same building, or the save is refused."
+        [title]="'Spaces' | t"
+        [what]="'Every room, office, bathroom, lift and stairwell the map can point at - placed on the grid of its floor, or only inventoried until somebody places it.' | t"
+        [can]="[('Create a space, with or without a place on the grid' | t), ('Edit what it is called, what it is and how to reach it' | t), ('Delete one' | t), ('Search by door number, name or other name' | t), ('List a building, a floor or a category' | t)]"
+        [note]="'The code shown is the one on the door, and a space whose door has no number shows a dash: its internal code is never shown, because a made-up code on screen looks exactly like a real one. Reached via has to name a lift, stairs or entrance of the same building, or the save is refused.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">New space</button>
+        <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New space' | t }}</button>
       </app-page-intro>
 
       <div class="card stack">
         <div class="row spread">
           <div class="field" style="flex: 1 1 14rem; margin-bottom: 0">
-            <label for="q">Search</label>
-            <input id="q" type="text" placeholder="door number, name or other name (min 2 characters)" (input)="onQueryInput($event)" />
+            <label for="q">{{ 'Search' | t }}</label>
+            <input id="q" type="text" [placeholder]="'door number, name or other name (min 2 characters)' | t" (input)="onQueryInput($event)" />
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="category">Category</label>
+            <label for="category">{{ 'Category' | t }}</label>
             <select id="category" (change)="onCategoryChange($event)">
-              <option value="">All categories</option>
+              <option value="">{{ 'All categories' | t }}</option>
               @for (category of categories; track category) {
-                <option [value]="category">{{ categoryLabels[category] }}</option>
+                <option [value]="category">{{ categoryLabels[category] | t }}</option>
               }
             </select>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="type">Type</label>
+            <label for="type">{{ 'Type' | t }}</label>
             <select id="type" [value]="type()" (change)="onTypeChange($event)">
-              <option value="">All types</option>
+              <option value="">{{ 'All types' | t }}</option>
               @for (option of typeOptions(); track option.code) {
                 <option [value]="option.code">{{ option.name }}</option>
               }
             </select>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="building">Building</label>
+            <label for="building">{{ 'Building' | t }}</label>
             <select id="building" (change)="onBuildingChange($event)">
-              <option value="">All buildings</option>
+              <option value="">{{ 'All buildings' | t }}</option>
               @for (building of buildings(); track building.code) {
                 <option [value]="building.code">{{ building.code }}</option>
               }
             </select>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="floor">Floor</label>
+            <label for="floor">{{ 'Floor' | t }}</label>
             <select id="floor" [value]="floor()" [disabled]="!floorOptions().length" (change)="onFloorChange($event)">
-              <option value="">All floors</option>
+              <option value="">{{ 'All floors' | t }}</option>
               @for (option of floorOptions(); track option.code) {
                 <option [value]="option.code">{{ option.code }}</option>
               }
@@ -81,8 +83,7 @@ const MIN_QUERY_LENGTH = 2;
         @if (nothingAsked()) {
           <div class="empty-state">
             <p>
-              Search by door number, name or other name — at least {{ minQueryLength }} characters —
-              or pick a building, a category or a type to list what is there.
+              {{ 'Search by door number, name or other name — at least {minQueryLength} characters — or pick a building, a category or a type to list what is there.' | t: { minQueryLength: minQueryLength } }}
             </p>
           </div>
         } @else {
@@ -97,13 +98,13 @@ const MIN_QUERY_LENGTH = 2;
           >
             <thead>
               <tr>
-                <th>Door</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Building</th>
-                <th>Floor</th>
-                <th>On the plan</th>
-                <th>Capacity</th>
+                <th>{{ 'Door' | t }}</th>
+                <th>{{ 'Name' | t }}</th>
+                <th>{{ 'Type' | t }}</th>
+                <th>{{ 'Building' | t }}</th>
+                <th>{{ 'Floor' | t }}</th>
+                <th>{{ 'On the plan' | t }}</th>
+                <th>{{ 'Capacity' | t }}</th>
                 <th></th>
               </tr>
             </thead>
@@ -115,23 +116,23 @@ const MIN_QUERY_LENGTH = 2;
                   <td>
                     {{ space.typeName ?? space.typeCode }}
                     @if (space.category; as category) {
-                      <span class="badge badge-neutral">{{ categoryLabels[category] }}</span>
+                      <span class="badge badge-neutral">{{ categoryLabels[category] | t }}</span>
                     }
                   </td>
                   <td>{{ space.buildingCode }}{{ space.wing ? ' · ' + space.wing : '' }}</td>
                   <td>{{ space.floorCode }}</td>
                   <td>
                     @if (space.shape) {
-                      <span class="text-muted">Drawn{{ space.doors?.length ? ' · ' + space.doors?.length + ' door' + (space.doors?.length === 1 ? '' : 's') : '' }}</span>
+                      <span class="text-muted">{{ !space.doors?.length ? ('Drawn' | t) : space.doors.length === 1 ? ('Drawn · 1 door' | t) : ('Drawn · {doors} doors' | t: { doors: space.doors.length }) }}</span>
                     } @else {
-                      <span class="badge badge-warning">Not drawn</span>
+                      <span class="badge badge-warning">{{ 'Not drawn' | t }}</span>
                     }
                   </td>
                   <td class="text-muted">{{ space.capacity ?? '—' }}</td>
                   <td class="row">
-                    <button type="button" class="btn btn-sm" (click)="openEdit(space)">Edit</button>
+                    <button type="button" class="btn btn-sm" (click)="openEdit(space)">{{ 'Edit' | t }}</button>
                     <button type="button" class="btn btn-sm btn-danger" [disabled]="deletingId() === space.id" (click)="remove(space)">
-                      Delete
+                      {{ 'Delete' | t }}
                     </button>
                   </td>
                 </tr>
@@ -142,7 +143,7 @@ const MIN_QUERY_LENGTH = 2;
       </div>
     </div>
 
-    <app-modal #formModal [title]="editingSpace() ? 'Edit space' : 'New space'" (closed)="formError.set(null)">
+    <app-modal #formModal [title]="editingSpace() ? ('Edit space' | t) : ('New space' | t)" (closed)="formError.set(null)">
       <app-api-error-banner [error]="formError()" />
       <app-space-form
         [initial]="editingSpace()"
@@ -197,8 +198,8 @@ export class SpacesPage {
   /** Searching and listing fail differently, and saying "no match" to a listing is wrong. */
   readonly emptyMessage = computed(() =>
     this.query().trim().length > 0
-      ? 'No spaces match this search.'
-      : 'Nothing here yet. Create a space, or widen the filter.',
+      ? t('No spaces match this search.')
+      : t('Nothing here yet. Create a space, or widen the filter.'),
   );
 
   /** True while the screen has been given neither a usable term nor a filter to list by. */
@@ -339,7 +340,7 @@ export class SpacesPage {
 
   remove(space: Space): void {
     const label = shownCode(space) ? `${shownCode(space)} — ${space.name}` : space.name;
-    if (!window.confirm(`Delete ${label} (${space.buildingCode} ${space.floorCode})? This cannot be undone.`)) {
+    if (!window.confirm(t('Delete {label} ({building} {floor})? This cannot be undone.', { label, building: space.buildingCode, floor: space.floorCode }))) {
       return;
     }
     this.deletingId.set(space.id);

@@ -14,6 +14,7 @@ import {
   withVertex,
   type DraftSpace,
 } from './floor-draft';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 export type EditorMode = 'select' | 'box' | 'corridor' | 'door' | 'split';
 
@@ -49,13 +50,14 @@ let uid = 0;
  */
 @Component({
   selector: 'app-floor-plan',
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="surface" [class.drawing]="mode() !== 'select'" [class.disabled]="disabled()" [class.still]="!interactive()">
       <svg
         #svg
         role="application"
-        [attr.aria-label]="'Floor plan, ' + width() + ' by ' + height() + ' units'"
+        [attr.aria-label]="'Floor plan, {width} by {height} units' | t: { width: width(), height: height() }"
         [attr.viewBox]="box().x + ' ' + box().y + ' ' + box().width + ' ' + box().height"
         [attr.width]="box().width * scale()"
         [attr.height]="box().height * scale()"

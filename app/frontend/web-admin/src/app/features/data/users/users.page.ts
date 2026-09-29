@@ -12,6 +12,8 @@ import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 import { RoleBadgeComponent } from '../../../shared/ui/role-badge/role-badge.component';
 import type { UserProfile } from './user.model';
 import { UsersService } from './users.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 const PAGE_SIZE = 20;
 
@@ -22,38 +24,38 @@ const PAGE_SIZE = 20;
  */
 @Component({
   selector: 'app-users-page',
-  imports: [DataTableComponent, RoleBadgeComponent, ApiErrorBannerComponent, ModalComponent, JsonViewComponent, PageIntroComponent],
+  imports: [TranslatePipe, DataTableComponent, RoleBadgeComponent, ApiErrorBannerComponent, ModalComponent, JsonViewComponent, PageIntroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
-        title="Users"
-        what="Everyone with a KApp account, and the only place to see who they are and switch them on or off."
-        [can]="['Search by name or e-mail, accent-insensitively', 'Filter by role and by status', 'Open a profile', 'Deactivate or reactivate an account']"
-        note="There is deliberately no create or delete here. Accounts are born from registration — a person signs up with an invitation code, which is what decides their role — so creating one here would invent a user that never agreed to anything. Deactivating is the reversible way to take access away."
+        [title]="'Users' | t"
+        [what]="'Everyone with a KApp account, and the only place to see who they are and switch them on or off.' | t"
+        [can]="[('Search by name or e-mail, accent-insensitively' | t), ('Filter by role and by status' | t), ('Open a profile' | t), ('Deactivate or reactivate an account' | t)]"
+        [note]="'There is deliberately no create or delete here. Accounts are born from registration — a person signs up with an invitation code, which is what decides their role — so creating one here would invent a user that never agreed to anything. Deactivating is the reversible way to take access away.' | t"
       />
 
       <div class="card stack">
         <div class="row spread">
           <div class="field" style="flex: 1 1 16rem; margin-bottom: 0">
-            <label for="q">Search</label>
-            <input id="q" type="text" placeholder="name or e-mail" (input)="onQueryInput($event)" />
+            <label for="q">{{ 'Search' | t }}</label>
+            <input id="q" type="text" [placeholder]="'name or e-mail' | t" (input)="onQueryInput($event)" />
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="role">Role</label>
+            <label for="role">{{ 'Role' | t }}</label>
             <select id="role" (change)="onRoleChange($event)">
-              <option value="">All roles</option>
+              <option value="">{{ 'All roles' | t }}</option>
               @for (role of roles; track role) {
                 <option [value]="role">{{ role }}</option>
               }
             </select>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="active">Status</label>
+            <label for="active">{{ 'Status' | t }}</label>
             <select id="active" (change)="onActiveChange($event)">
-              <option value="">All</option>
-              <option value="true">Active</option>
-              <option value="false">Deactivated</option>
+              <option value="">{{ 'All' | t }}</option>
+              <option value="true">{{ 'Active' | t }}</option>
+              <option value="false">{{ 'Deactivated' | t }}</option>
             </select>
           </div>
         </div>
@@ -63,7 +65,7 @@ const PAGE_SIZE = 20;
         <app-data-table
           [loading]="loading()"
           [empty]="!loading() && !error() && (result()?.content?.length ?? 0) === 0"
-          emptyMessage="No users match these filters."
+          [emptyMessage]="'No users match these filters.' | t"
           [totalItems]="result()?.totalElements ?? null"
           [page]="page()"
           [totalPages]="result()?.totalPages ?? 0"
@@ -71,11 +73,11 @@ const PAGE_SIZE = 20;
         >
           <thead>
             <tr>
-              <th>Name</th>
-              <th>E-mail</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Academic</th>
+              <th>{{ 'Name' | t }}</th>
+              <th>{{ 'E-mail' | t }}</th>
+              <th>{{ 'Role' | t }}</th>
+              <th>{{ 'Status' | t }}</th>
+              <th>{{ 'Academic' | t }}</th>
               <th></th>
             </tr>
           </thead>
@@ -87,26 +89,26 @@ const PAGE_SIZE = 20;
                 <td><app-role-badge [role]="user.role" /></td>
                 <td>
                   <span class="badge" [class]="user.active ? 'badge-success' : 'badge-neutral'">
-                    {{ user.active ? 'active' : 'deactivated' }}
+                    {{ user.active ? ('active' | t) : ('deactivated' | t) }}
                   </span>
                 </td>
                 <td class="text-muted">
-                  {{ user.academic ? 'level ' + user.academic.currentLevel + ' · ' + user.academic.programCode : '—' }}
+                  {{ user.academic ? ('level {level} · {program}' | t: { level: user.academic.currentLevel, program: user.academic.programCode }) : '—' }}
                 </td>
                 <td class="row">
-                  <button type="button" class="btn btn-sm" (click)="view(user)">View</button>
+                  <button type="button" class="btn btn-sm" (click)="view(user)">{{ 'View' | t }}</button>
                   <button
                     type="button"
                     class="btn btn-sm"
                     [class.btn-danger]="user.active"
                     [disabled]="updatingId() === user.id || isSelf(user)"
-                    [title]="isSelf(user) ? 'This is your own account. Deactivating it would sign you out and there is no way back in from here.' : ''"
+                    [title]="isSelf(user) ? ('This is your own account. Deactivating it would sign you out and there is no way back in from here.' | t) : ''"
                     (click)="toggleActive(user)"
                   >
-                    {{ user.active ? 'Deactivate' : 'Activate' }}
+                    {{ user.active ? ('Deactivate' | t) : ('Activate' | t) }}
                   </button>
                   @if (isSelf(user)) {
-                    <span class="text-muted" style="font-size: 0.75rem">you</span>
+                    <span class="text-muted" style="font-size: 0.75rem">{{ 'you' | t }}</span>
                   }
                 </td>
               </tr>
@@ -116,7 +118,7 @@ const PAGE_SIZE = 20;
       </div>
     </div>
 
-    <app-modal #detailModal title="User profile">
+    <app-modal #detailModal [title]="'User profile' | t">
       @if (selectedUser(); as user) {
         <div class="stack">
           <p><strong>{{ user.firstName }} {{ user.lastName }}</strong> · {{ user.email }}</p>
@@ -218,8 +220,8 @@ export class UsersPage {
 
   toggleActive(user: UserProfile): void {
     const nextActive = !user.active;
-    const verb = nextActive ? 'reactivate' : 'deactivate';
-    if (!window.confirm(`${verb[0].toUpperCase()}${verb.slice(1)} ${user.email}?`)) {
+    const question = nextActive ? t('Reactivate {email}?', { email: user.email }) : t('Deactivate {email}?', { email: user.email });
+    if (!window.confirm(question)) {
       return;
     }
 

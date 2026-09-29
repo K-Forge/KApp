@@ -35,6 +35,8 @@ import {
 } from './block-geometry';
 import type { Structure } from './structure.model';
 import { StructuresService } from './structures.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 /**
  * One outline the editor lets you reshape: a part of a university building, or something else on
@@ -94,35 +96,35 @@ const SETBACK_REACH = 12;
  */
 @Component({
   selector: 'app-block-editor-page',
-  imports: [RouterLink, ApiErrorBannerComponent],
+  imports: [TranslatePipe, RouterLink, ApiErrorBannerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="block-page">
       <div class="head">
         <div>
-          <a routerLink="/data/campus" class="back">← Campus map</a>
+          <a routerLink="/data/campus" class="back">{{ '← Campus map' | t }}</a>
           <h1>
-            Block {{ block() ?? '' }}
+            {{ 'Block {value}' | t: { value: block() ?? '' } }}
             @if (dirty()) {
-              <span class="badge badge-warning">Unsaved</span>
+              <span class="badge badge-warning">{{ 'Unsaved' | t }}</span>
             }
           </h1>
-          <p class="text-muted small">{{ campus() }} · the university's buildings, part by part, and what else stands on the block</p>
+          <p class="text-muted small">{{ '{campus} · the university’s buildings, part by part, and what else stands on the block' | t: { campus: campus() } }}</p>
         </div>
         <div class="row head-actions">
           @if (blocks().length > 1) {
-            <label class="sr-only" for="block-switch">Block</label>
+            <label class="sr-only" for="block-switch">{{ 'Block' | t }}</label>
             <select id="block-switch" class="block-switch" [value]="block()" (change)="switchBlock($event)">
               @for (b of blocks(); track b.code) {
                 <option [value]="b.code" [selected]="b.code === block()">{{ b.code }} · {{ b.names }}</option>
               }
             </select>
           }
-          <button type="button" class="btn btn-sm" [disabled]="!past().length" (click)="undo()" aria-label="Undo" title="Undo">↶</button>
-          <button type="button" class="btn btn-sm" [disabled]="!future().length" (click)="redo()" aria-label="Redo" title="Redo">↷</button>
-          <button type="button" class="btn btn-sm" [disabled]="!dirty() || saving()" (click)="discard()">Discard</button>
+          <button type="button" class="btn btn-sm" [disabled]="!past().length" (click)="undo()" [attr.aria-label]="'Undo' | t" [title]="'Undo' | t">↶</button>
+          <button type="button" class="btn btn-sm" [disabled]="!future().length" (click)="redo()" [attr.aria-label]="'Redo' | t" [title]="'Redo' | t">↷</button>
+          <button type="button" class="btn btn-sm" [disabled]="!dirty() || saving()" (click)="discard()">{{ 'Discard' | t }}</button>
           <button type="button" class="btn btn-primary" [disabled]="!dirty() || saving()" (click)="save()">
-            {{ saving() ? 'Saving…' : 'Save block' }}
+            {{ saving() ? ('Saving…' | t) : ('Save block' | t) }}
           </button>
         </div>
       </div>
@@ -131,32 +133,32 @@ const SETBACK_REACH = 12;
       <app-api-error-banner [error]="error()" />
 
       @if (loading()) {
-        <div class="card empty-state">Loading the block…</div>
+        <div class="card empty-state">{{ 'Loading the block…' | t }}</div>
       } @else if (!view()) {
-        <div class="card empty-state">No university building stands on block {{ block() }}.</div>
+        <div class="card empty-state">{{ 'No university building stands on block {block}.' | t: { block: block() } }}</div>
       } @else {
         <div class="workspace">
           <section class="card canvas">
             <div class="toolbar">
               <div class="group">
-                <button type="button" class="btn btn-sm" (click)="turn(-1)" aria-label="Turn the block a quarter to the left" title="Turn a quarter to the left">↺</button>
-                <span class="compass" [title]="'North is ' + northWords()">
+                <button type="button" class="btn btn-sm" (click)="turn(-1)" [attr.aria-label]="'Turn the block a quarter to the left' | t" [title]="'Turn a quarter to the left' | t">↺</button>
+                <span class="compass" [title]="'North is {where}' | t: { where: northWords() }">
                   <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
                     <g [attr.transform]="'rotate(' + northAngle() + ' 16 16)'"><path d="M16 9 L20.5 21 L16 18 L11.5 21 Z" fill="currentColor" /></g>
                   </svg>
                 </span>
-                <button type="button" class="btn btn-sm" (click)="turn(1)" aria-label="Turn the block a quarter to the right" title="Turn a quarter to the right">↻</button>
+                <button type="button" class="btn btn-sm" (click)="turn(1)" [attr.aria-label]="'Turn the block a quarter to the right' | t" [title]="'Turn a quarter to the right' | t">↻</button>
               </div>
               <div class="group">
-                <button type="button" class="btn btn-sm" aria-label="Zoom out" [disabled]="zoom() === 0" (click)="setZoom(zoom() - 1)">−</button>
-                <button type="button" class="btn btn-sm" aria-label="Zoom in" [disabled]="zoom() === zooms.length - 1" (click)="setZoom(zoom() + 1)">+</button>
+                <button type="button" class="btn btn-sm" [attr.aria-label]="'Zoom out' | t" [disabled]="zoom() === 0" (click)="setZoom(zoom() - 1)">−</button>
+                <button type="button" class="btn btn-sm" [attr.aria-label]="'Zoom in' | t" [disabled]="zoom() === zooms.length - 1" (click)="setZoom(zoom() + 1)">+</button>
               </div>
             </div>
             <p class="hint-line">
               @if (selected(); as s) {
-                Drag a corner, or the square on a wall to push the wall out; double-tap a corner to take it away, a wall's square to add one.
+                {{ 'Drag a corner, or the square on a wall to push the wall out; double-tap a corner to take it away, a wall’s square to add one.' | t }}
               } @else {
-                Tap an outline to reshape it.
+                {{ 'Tap an outline to reshape it.' | t }}
               }
             </p>
             <div class="scroller" #scroller>
@@ -164,7 +166,7 @@ const SETBACK_REACH = 12;
                 <svg
                   #svg
                   role="application"
-                  [attr.aria-label]="'Block ' + block() + ', to reshape its outlines'"
+                  [attr.aria-label]="('Block ' | t) + block() + (', to reshape its outlines' | t)"
                   [attr.viewBox]="v.box.x + ' ' + v.box.y + ' ' + v.box.width + ' ' + v.box.height"
                   [attr.width]="v.box.width * scale()"
                   [attr.height]="v.box.height * scale()"
@@ -216,7 +218,7 @@ const SETBACK_REACH = 12;
                   }
                   @for (lot of v.lots; track lot.code) {
                     @if (lot.here) {
-                      <text class="lot-code" [attr.x]="lot.at.x" [attr.y]="lot.at.y" [attr.font-size]="10 / scale()">lote {{ lot.code.slice(9) }}</text>
+                      <text class="lot-code" [attr.x]="lot.at.x" [attr.y]="lot.at.y" [attr.font-size]="10 / scale()">{{ 'lote {value}' | t: { value: lot.code.slice(9) } }}</text>
                     }
                   }
                   @for (s of drawn(); track s.key) {
@@ -244,12 +246,12 @@ const SETBACK_REACH = 12;
               @for (w of wingKey(); track w.label) {
                 <span class="key-item"><span class="swatch" [style.background]="w.color"></span>{{ w.label }}</span>
               }
-              <span class="key-item"><span class="swatch" [style.background]="structureColor"></span>Not the university's</span>
-              <span class="key-item"><span class="swatch hatched"></span>No floor: a plaza, a garden, an open passage</span>
-              <span class="key-item"><span class="swatch lot-key"></span>Lot, from the cadastre</span>
-              <span class="key-item"><span class="swatch walk-key"></span>Sidewalk: a building stops before it</span>
+              <span class="key-item"><span class="swatch" [style.background]="structureColor"></span>{{ 'Not the university’s' | t }}</span>
+              <span class="key-item"><span class="swatch hatched"></span>{{ 'No floor: a plaza, a garden, an open passage' | t }}</span>
+              <span class="key-item"><span class="swatch lot-key"></span>{{ 'Lot, from the cadastre' | t }}</span>
+              <span class="key-item"><span class="swatch walk-key"></span>{{ 'Sidewalk: a building stops before it' | t }}</span>
             </div>
-            <p class="credit">Lots, blocks and streets: {{ ground()?.source }}</p>
+            <p class="credit">{{ 'Lots, blocks and streets: {value}' | t: { value: ground()?.source } }}</p>
           </section>
 
           <aside class="card side">
@@ -258,21 +260,21 @@ const SETBACK_REACH = 12;
               <p class="text-muted small">
                 {{ areaOf(s.points).toFixed(1) }} m²
                 @if (s.lot) {
-                  · lot {{ s.lot }}
+                  {{ '· lot {lot}' | t: { lot: s.lot } }}
                 } @else {
-                  · found on site
+                  {{ '· found on site' | t }}
                 }
               </p>
               @if (s.kind === 'structure') {
                 <label class="field">
-                  <span>Name</span>
+                  <span>{{ 'Name' | t }}</span>
                   <input type="text" [value]="s.name" maxlength="120" (change)="setName($event)" />
                 </label>
               } @else {
                 <label class="field">
-                  <span>Wing</span>
+                  <span>{{ 'Wing' | t }}</span>
                   <select (change)="setWing($event)">
-                    <option value="" [selected]="!s.wing">None</option>
+                    <option value="" [selected]="!s.wing">{{ 'None' | t }}</option>
                     @for (w of wingsOf(s.building); track w.code) {
                       <option [value]="w.code" [selected]="w.code === s.wing">{{ w.name }}</option>
                     }
@@ -281,31 +283,31 @@ const SETBACK_REACH = 12;
               }
               <div class="pair">
                 <label class="field">
-                  <span>Floors</span>
+                  <span>{{ 'Floors' | t }}</span>
                   <input type="number" min="0" max="200" [value]="s.floors" (change)="setNumber($event, 'floors')" />
                 </label>
                 <label class="field">
-                  <span>Basements</span>
+                  <span>{{ 'Basements' | t }}</span>
                   <input type="number" min="0" max="20" [value]="s.basements" (change)="setNumber($event, 'basements')" />
                 </label>
               </div>
               @if (s.floors === 0) {
-                <p class="text-muted small">No floor above the street: drawn hatched, in no floor's margin.</p>
+                <p class="text-muted small">{{ 'No floor above the street: drawn hatched, in no floor’s margin.' | t }}</p>
               }
               <div class="row">
-                <button type="button" class="btn btn-sm" (click)="square()" title="The rectangle round it, square to the screen">Square</button>
-                <button type="button" class="btn btn-sm btn-danger" (click)="remove()">Delete</button>
+                <button type="button" class="btn btn-sm" (click)="square()" [title]="'The rectangle round it, square to the screen' | t">{{ 'Square' | t }}</button>
+                <button type="button" class="btn btn-sm btn-danger" (click)="remove()">{{ 'Delete' | t }}</button>
               </div>
               <hr />
             }
-            <h2 class="h">Add</h2>
+            <h2 class="h">{{ 'Add' | t }}</h2>
             <div class="row add">
               @for (b of editable(); track b.code) {
-                <button type="button" class="btn btn-sm" (click)="addPart(b.code)">+ Part of {{ b.code }}</button>
+                <button type="button" class="btn btn-sm" (click)="addPart(b.code)">{{ '+ Part of {code}' | t: { code: b.code } }}</button>
               }
-              <button type="button" class="btn btn-sm" (click)="addStructure()">+ Something else</button>
+              <button type="button" class="btn btn-sm" (click)="addStructure()">{{ '+ Something else' | t }}</button>
             </div>
-            <h2 class="h">On the block</h2>
+            <h2 class="h">{{ 'On the block' | t }}</h2>
             <ul class="list">
               @for (g of groups(); track g.title) {
                 <li>
@@ -808,7 +810,7 @@ export class BlockEditorPage {
     }
     const others = this.shapes().filter((s) => s.kind === 'structure');
     if (others.length) {
-      groups.push({ title: 'Not the university\'s', shapes: others.map((s) => ({ key: s.key, text: `${s.name} · ${floorsText(s)}` })) });
+      groups.push({ title: t('Not the university’s'), shapes: others.map((s) => ({ key: s.key, text: `${s.name} · ${floorsText(s)}` })) });
     }
     return groups;
   });
@@ -831,8 +833,17 @@ export class BlockEditorPage {
 
   northWords(): string {
     const angle = ((this.northAngle() % 360) + 360) % 360;
-    const words = ['up', 'up and right', 'right', 'down and right', 'down', 'down and left', 'left', 'up and left'];
-    return words[Math.round(angle / 45) % 8];
+    const words = [
+      /* i18n */ 'up',
+      /* i18n */ 'up and right',
+      /* i18n */ 'right',
+      /* i18n */ 'down and right',
+      /* i18n */ 'down',
+      /* i18n */ 'down and left',
+      /* i18n */ 'left',
+      /* i18n */ 'up and left',
+    ];
+    return t(words[Math.round(angle / 45) % 8]);
   }
 
   // ------------------------------------------------------------------ loading
@@ -974,7 +985,7 @@ export class BlockEditorPage {
 
   discard(): void {
     this.restart(this.loaded());
-    this.saveState.set('Discarded: back to what is saved.');
+    this.saveState.set(t('Discarded: back to what is saved.'));
   }
 
   square(): void {
@@ -1013,7 +1024,7 @@ export class BlockEditorPage {
   }
 
   addStructure(): void {
-    this.add({ kind: 'structure', building: null, lot: null, wing: null, name: 'Something else', floors: 1, basements: 0 });
+    this.add({ kind: 'structure', building: null, lot: null, wing: null, name: t('Something else'), floors: 1, basements: 0 });
   }
 
   private add(fields: Omit<EditShape, 'key' | 'points' | 'original' | 'moved'>): void {
@@ -1199,7 +1210,7 @@ export class BlockEditorPage {
       .subscribe({
         next: () => {
           this.saving.set(false);
-          this.saveState.set('Saved. The floor editor draws its margins from what is saved here.');
+          this.saveState.set(t('Saved. The floor editor draws its margins from what is saved here.'));
           this.load(this.block());
         },
         error: (err: unknown) => {
@@ -1207,15 +1218,15 @@ export class BlockEditorPage {
           this.error.set(err instanceof AppHttpError ? err.apiError : null);
           this.saveState.set(
             err instanceof AppHttpError && err.apiError?.status === 409
-              ? 'Somebody saved this block since you opened it. Nothing of yours was lost here: copy what you changed, then reload.'
-              : 'Not saved.',
+              ? t('Somebody saved this block since you opened it. Nothing of yours was lost here: copy what you changed, then reload.')
+              : t('Not saved.'),
           );
         },
       });
   }
 
   canLeave(): boolean {
-    return !this.dirty() || window.confirm('This block has changes that are not saved. Leave and lose them?');
+    return !this.dirty() || window.confirm(t('This block has changes that are not saved. Leave and lose them?'));
   }
 
   @HostListener('window:beforeunload', ['$event'])
@@ -1236,7 +1247,7 @@ export class BlockEditorPage {
   }
 
   private wingName(b: Building, wing: string | null): string {
-    return b.wings.find((w) => w.code === wing)?.name ?? 'No wing';
+    return b.wings.find((w) => w.code === wing)?.name ?? t('No wing');
   }
 
   private colorOf(s: EditShape): string {
@@ -1261,7 +1272,8 @@ function partEssence(p: FootprintPart) {
 }
 
 function floorsText(s: Pick<EditShape, 'floors' | 'basements'>): string {
-  return `${s.floors} ${s.floors === 1 ? 'floor' : 'floors'}` + (s.basements ? ` + ${s.basements} below` : '');
+  const floors = s.floors === 1 ? t('1 floor') : t('{floors} floors', { floors: s.floors });
+  return floors + (s.basements ? t(' + {basements} below', { basements: s.basements }) : '');
 }
 
 /** The block of the campus's building with the most parts: where a survey starts. */

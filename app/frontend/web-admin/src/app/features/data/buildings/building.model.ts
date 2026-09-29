@@ -20,9 +20,9 @@ export const ACCESSIBILITY = ['UNKNOWN', 'STEP_FREE', 'STAIRS_ONLY'] as const;
 export type Accessibility = (typeof ACCESSIBILITY)[number];
 
 export const ACCESSIBILITY_LABELS: Record<Accessibility, string> = {
-  UNKNOWN: 'Not checked yet',
-  STEP_FREE: 'Step-free (lift or ramp)',
-  STAIRS_ONLY: 'Stairs only',
+  UNKNOWN: /* i18n */ 'Not checked yet',
+  STEP_FREE: /* i18n */ 'Step-free (lift or ramp)',
+  STAIRS_ONLY: /* i18n */ 'Stairs only',
 };
 
 /** Mirrors FloorStatus: how far a floor is from being trusted. */
@@ -30,9 +30,9 @@ export const FLOOR_STATUSES = ['UNMAPPED', 'DRAFT', 'VERIFIED'] as const;
 export type FloorStatus = (typeof FLOOR_STATUSES)[number];
 
 export const FLOOR_STATUS_LABELS: Record<FloorStatus, string> = {
-  UNMAPPED: 'Not drawn',
-  DRAFT: 'Draft, from photos',
-  VERIFIED: 'Verified on site',
+  UNMAPPED: /* i18n */ 'Not drawn',
+  DRAFT: /* i18n */ 'Draft, from photos',
+  VERIFIED: /* i18n */ 'Verified on site',
 };
 
 /**

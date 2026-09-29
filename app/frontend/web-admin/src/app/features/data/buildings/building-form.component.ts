@@ -12,6 +12,7 @@ import {
   type FloorStatus,
   type Wing,
 } from './building.model';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 const CODE = /^[A-Z0-9]{1,8}$/;
 
@@ -75,90 +76,88 @@ function wingGroup(wing?: Partial<Wing>): WingForm {
  */
 @Component({
   selector: 'app-building-form',
-  imports: [ReactiveFormsModule],
+  imports: [TranslatePipe, ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()" class="stack">
       <div class="field" [class.invalid]="invalid('code')">
-        <label for="b-code">Code</label>
+        <label for="b-code">{{ 'Code' | t }}</label>
         <input id="b-code" type="text" formControlName="code" [readonly]="editing()" placeholder="EC" />
         @if (invalid('code')) {
-          <span class="error">Required, 1-10 characters.</span>
+          <span class="error">{{ 'Required, 1-10 characters.' | t }}</span>
         }
       </div>
 
       <div class="field" [class.invalid]="invalid('name')">
-        <label for="b-name">Name</label>
-        <input id="b-name" type="text" formControlName="name" placeholder="Edificio Central" />
+        <label for="b-name">{{ 'Name' | t }}</label>
+        <input id="b-name" type="text" formControlName="name" [placeholder]="'Edificio Central' | t" />
         @if (invalid('name')) {
-          <span class="error">Required, 1-120 characters.</span>
+          <span class="error">{{ 'Required, 1-120 characters.' | t }}</span>
         }
       </div>
 
       <div class="field" [class.invalid]="invalid('campus')">
-        <label for="b-campus">Campus</label>
+        <label for="b-campus">{{ 'Campus' | t }}</label>
         <input id="b-campus" type="text" formControlName="campus" />
         @if (invalid('campus')) {
-          <span class="error">Required, 1-120 characters.</span>
+          <span class="error">{{ 'Required, 1-120 characters.' | t }}</span>
         }
       </div>
 
       <div class="field">
-        <label for="b-aliases">Other names</label>
-        <textarea id="b-aliases" rows="2" formControlName="aliases" placeholder="Bienestar&#10;Edificio de bienestar"></textarea>
-        <span class="hint">One per line. What people call the building besides its name - the search matches them.</span>
+        <label for="b-aliases">{{ 'Other names' | t }}</label>
+        <textarea id="b-aliases" rows="2" formControlName="aliases" [placeholder]="'Bienestar&#10;Edificio de bienestar' | t"></textarea>
+        <span class="hint">{{ 'One per line. What people call the building besides its name - the search matches them.' | t }}</span>
       </div>
 
       <div class="field">
-        <label for="b-description">Description</label>
+        <label for="b-description">{{ 'Description' | t }}</label>
         <textarea id="b-description" rows="2" formControlName="description"></textarea>
-        <span class="hint">Optional, up to 500 characters.</span>
+        <span class="hint">{{ 'Optional, up to 500 characters.' | t }}</span>
       </div>
 
       <div class="row-between">
-        <h3 style="margin:0">Wings</h3>
-        <button type="button" class="btn btn-sm" (click)="addWing()">Add wing</button>
+        <h3 style="margin:0">{{ 'Wings' | t }}</h3>
+        <button type="button" class="btn btn-sm" (click)="addWing()">{{ 'Add wing' | t }}</button>
       </div>
       <p class="form-note">
-        Leave empty for a building with one body. The door suffix is what the doors of that wing
-        append to the number: <code>-S</code> for <code>503-S</code>. Leave it empty when they append nothing.
+        {{ 'Leave empty for a building with one body. The door suffix is what the doors of that wing append to the number:' | t }} <code>-S</code> {{ 'for' | t }} <code>503-S</code>{{ '. Leave it empty when they append nothing.' | t }}
       </p>
       @for (wing of form.controls.wings.controls; track $index) {
         <div class="card row-card" [formGroup]="wing">
           <div class="cells">
             <div class="field">
-              <label [for]="'w-code-' + $index">Code</label>
+              <label [for]="'w-code-' + $index">{{ 'Code' | t }}</label>
               <input [id]="'w-code-' + $index" type="text" formControlName="code" placeholder="S" />
             </div>
             <div class="field">
-              <label [for]="'w-name-' + $index">Name</label>
-              <input [id]="'w-name-' + $index" type="text" formControlName="name" placeholder="Ala sur" />
+              <label [for]="'w-name-' + $index">{{ 'Name' | t }}</label>
+              <input [id]="'w-name-' + $index" type="text" formControlName="name" [placeholder]="'Ala sur' | t" />
             </div>
             <div class="field">
-              <label [for]="'w-suffix-' + $index">Door suffix</label>
+              <label [for]="'w-suffix-' + $index">{{ 'Door suffix' | t }}</label>
               <input [id]="'w-suffix-' + $index" type="text" formControlName="doorSuffix" placeholder="-S" />
             </div>
           </div>
           <div class="field">
-            <label [for]="'w-note-' + $index">How to get in or across</label>
-            <input [id]="'w-note-' + $index" type="text" formControlName="note" placeholder="Se cruza por el P1 o por la terraza" />
+            <label [for]="'w-note-' + $index">{{ 'How to get in or across' | t }}</label>
+            <input [id]="'w-note-' + $index" type="text" formControlName="note" [placeholder]="'Se cruza por el P1 o por la terraza' | t" />
           </div>
-          <button type="button" class="btn btn-sm btn-danger" (click)="form.controls.wings.removeAt($index)">Remove wing</button>
+          <button type="button" class="btn btn-sm btn-danger" (click)="form.controls.wings.removeAt($index)">{{ 'Remove wing' | t }}</button>
         </div>
       }
 
       <div class="row-between">
-        <h3 style="margin:0">Floors</h3>
-        <button type="button" class="btn btn-sm" (click)="addFloor()">Add floor</button>
+        <h3 style="margin:0">{{ 'Floors' | t }}</h3>
+        <button type="button" class="btn btn-sm" (click)="addFloor()">{{ 'Add floor' | t }}</button>
       </div>
       <p class="form-note">
-        The code is what the floor is called in addresses: <code>S1</code> for a basement,
-        <code>P0</code>, <code>P1</code>, <code>MEZZ</code> for a mezzanine, <code>T</code> for a terrace.
-        The level only orders them - a mezzanine between P1 and P2 is 1.5.
+        {{ 'The code is what the floor is called in addresses:' | t }} <code>S1</code> {{ 'for a basement,' | t }}
+        <code>P0</code>, <code>P1</code>, <code>{{ 'MEZZ' | t }}</code> {{ 'for a mezzanine,' | t }} <code>T</code> {{ 'for a terrace. The level only orders them - a mezzanine between P1 and P2 is 1.5.' | t }}
       </p>
       @if (form.controls.floors.invalid && form.controls.floors.touched) {
         <div class="field">
-          <span class="error">At least one floor is required, every code must be 1-8 uppercase letters or digits, and every floor needs a name.</span>
+          <span class="error">{{ 'At least one floor is required, every code must be 1-8 uppercase letters or digits, and every floor needs a name.' | t }}</span>
         </div>
       }
 
@@ -166,55 +165,55 @@ function wingGroup(wing?: Partial<Wing>): WingForm {
         <div class="card row-card" [formGroup]="floor">
           <div class="cells">
             <div class="field">
-              <label [for]="'f-code-' + $index">Code</label>
+              <label [for]="'f-code-' + $index">{{ 'Code' | t }}</label>
               <input [id]="'f-code-' + $index" type="text" formControlName="code" placeholder="P1" />
             </div>
             <div class="field">
-              <label [for]="'f-level-' + $index">Level</label>
+              <label [for]="'f-level-' + $index">{{ 'Level' | t }}</label>
               <input [id]="'f-level-' + $index" type="number" step="0.5" formControlName="level" min="-5" max="99" />
             </div>
             <div class="field">
-              <label [for]="'f-name-' + $index">Name</label>
-              <input [id]="'f-name-' + $index" type="text" formControlName="name" placeholder="Piso 1" />
+              <label [for]="'f-name-' + $index">{{ 'Name' | t }}</label>
+              <input [id]="'f-name-' + $index" type="text" formControlName="name" [placeholder]="'Piso 1' | t" />
             </div>
             <div class="field">
-              <label [for]="'f-width-' + $index">Drawing width</label>
+              <label [for]="'f-width-' + $index">{{ 'Drawing width' | t }}</label>
               <input [id]="'f-width-' + $index" type="number" formControlName="width" min="1" max="20000" />
             </div>
             <div class="field">
-              <label [for]="'f-height-' + $index">Drawing height</label>
+              <label [for]="'f-height-' + $index">{{ 'Drawing height' | t }}</label>
               <input [id]="'f-height-' + $index" type="number" formControlName="height" min="1" max="20000" />
             </div>
             <div class="field">
-              <label [for]="'f-status-' + $index">Status</label>
+              <label [for]="'f-status-' + $index">{{ 'Status' | t }}</label>
               <select [id]="'f-status-' + $index" formControlName="status">
                 @for (status of statuses; track status) {
-                  <option [value]="status">{{ statusLabels[status] }}</option>
+                  <option [value]="status">{{ statusLabels[status] | t }}</option>
                 }
               </select>
             </div>
             <div class="field">
-              <label [for]="'f-access-' + $index">Reachable without stairs?</label>
+              <label [for]="'f-access-' + $index">{{ 'Reachable without stairs?' | t }}</label>
               <select [id]="'f-access-' + $index" formControlName="accessibility">
                 @for (value of accessibility; track value) {
-                  <option [value]="value">{{ accessibilityLabels[value] }}</option>
+                  <option [value]="value">{{ accessibilityLabels[value] | t }}</option>
                 }
               </select>
             </div>
           </div>
           <div class="field">
-            <label [for]="'f-note-' + $index">How to get here</label>
-            <input [id]="'f-note-' + $index" type="text" formControlName="note" placeholder="Se sube por la escalera exterior" />
+            <label [for]="'f-note-' + $index">{{ 'How to get here' | t }}</label>
+            <input [id]="'f-note-' + $index" type="text" formControlName="note" [placeholder]="'Se sube por la escalera exterior' | t" />
           </div>
           <div class="row-between">
             @if (corridorCount(floor.controls.code.value); as count) {
-              <span class="form-note">{{ count }} corridor{{ count === 1 ? '' : 's' }} on this floor, kept as they are.</span>
+              <span class="form-note">{{ count === 1 ? ('1 corridor on this floor, kept as it is.' | t) : ('{count} corridors on this floor, kept as they are.' | t: { count }) }}</span>
             } @else {
               <span></span>
             }
             <button type="button" class="btn btn-sm btn-danger" (click)="form.controls.floors.removeAt($index)"
                     [disabled]="form.controls.floors.length <= 1">
-              Remove floor
+              {{ 'Remove floor' | t }}
             </button>
           </div>
         </div>
@@ -222,9 +221,9 @@ function wingGroup(wing?: Partial<Wing>): WingForm {
 
       <div class="row">
         <button type="submit" class="btn btn-primary" [disabled]="submitting()">
-          {{ submitting() ? 'Saving…' : editing() ? 'Save changes' : 'Create building' }}
+          {{ submitting() ? ('Saving…' | t) : editing() ? ('Save changes' | t) : ('Create building' | t) }}
         </button>
-        <button type="button" class="btn" (click)="cancelled.emit()">Cancel</button>
+        <button type="button" class="btn" (click)="cancelled.emit()">{{ 'Cancel' | t }}</button>
       </div>
     </form>
   `,

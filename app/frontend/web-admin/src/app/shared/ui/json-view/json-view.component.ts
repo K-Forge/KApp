@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 /** Pretty-printed, monospace, copyable JSON - used for tokens, request bodies and responses alike. */
 @Component({
   selector: 'app-json-view',
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="json-view">
       <button type="button" class="btn btn-ghost btn-sm copy-btn" (click)="copy()">
-        {{ copied() ? 'Copied' : 'Copy' }}
+        {{ copied() ? ('Copied' | t) : ('Copy' | t) }}
       </button>
       <pre class="mono">{{ pretty() }}</pre>
     </div>

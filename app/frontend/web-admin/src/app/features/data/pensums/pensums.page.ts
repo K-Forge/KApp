@@ -18,6 +18,8 @@ import {
   type PensumCourse,
   type PensumSummary,
 } from './pensum.model';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 /**
  * Lookup-by-code rather than a table: the semaphore contract has no "list pensums" endpoint,
@@ -28,28 +30,28 @@ import {
  */
 @Component({
   selector: 'app-pensums-page',
-  imports: [ApiErrorBannerComponent, ModalComponent, ImportPanelComponent, PageIntroComponent, PastePensumComponent, PensumGridComponent],
+  imports: [TranslatePipe, ApiErrorBannerComponent, ModalComponent, ImportPanelComponent, PageIntroComponent, PastePensumComponent, PensumGridComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
-        title="Pensums"
-        what="A pensum is one version of a programme&#39;s plan of study: its courses, their levels, their credits and which ones unlock which."
-        [can]="['Load one by its code', 'Build one from a PDF by pasting its table', 'Edit the whole document', 'Delete one no student is following']"
-        note="The pensum is immutable as far as students are concerned — a student&#39;s own rearrangement is a separate plan layered over it, so correcting a pensum here reaches every student without rewriting anybody&#39;s plan. Deleting never cascades: one that students are following is refused with a 409 saying how many."
+        [title]="'Pensums' | t"
+        [what]="'A pensum is one version of a programme’s plan of study: its courses, their levels, their credits and which ones unlock which.' | t"
+        [can]="[('Load one by its code' | t), ('Build one from a PDF by pasting its table' | t), ('Edit the whole document' | t), ('Delete one no student is following' | t)]"
+        [note]="'The pensum is immutable as far as students are concerned — a student’s own rearrangement is a separate plan layered over it, so correcting a pensum here reaches every student without rewriting anybody’s plan. Deleting never cascades: one that students are following is refused with a 409 saying how many.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">New pensum</button>
+        <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New pensum' | t }}</button>
       </app-page-intro>
 
       <div class="card stack">
         <div class="row" style="align-items: end">
           <div class="field" style="margin-bottom: 0; flex: 1 1 22rem">
-            <label for="pensum">Pensum</label>
+            <label for="pensum">{{ 'Pensum' | t }}</label>
             <!-- A list, not a text box. Asking somebody to remember "1015" was asking them to
                  know the answer before the screen could tell them. -->
             <select id="pensum" (change)="onPensumPicked($event)" [disabled]="catalogLoading()">
               <option value="">
-                {{ catalogLoading() ? 'Loading the catalogue…' : 'Choose a pensum…' }}
+                {{ catalogLoading() ? ('Loading the catalogue…' | t) : ('Choose a pensum…' | t) }}
               </option>
               @for (p of catalog(); track p.pensumCode) {
                 <option [value]="p.pensumCode" [selected]="p.pensumCode === searchCode()">
@@ -59,13 +61,13 @@ import {
             </select>
           </div>
           <button type="button" class="btn" (click)="load()" [disabled]="loading() || !searchCode().trim()">
-            {{ loading() ? 'Loading…' : 'Load' }}
+            {{ loading() ? ('Loading…' | t) : ('Load' | t) }}
           </button>
         </div>
 
         @if (!catalogLoading() && catalog().length === 0) {
           <p class="hint" style="margin:0">
-            No pensums yet. Build the first one from its PDF below.
+            {{ 'No pensums yet. Build the first one from its PDF below.' | t }}
           </p>
         }
 
@@ -73,7 +75,7 @@ import {
 
         @if (!loading() && !error() && !loaded()) {
           <div class="empty-state">
-            <p>Choose one above to read it, edit it or delete it.</p>
+            <p>{{ 'Choose one above to read it, edit it or delete it.' | t }}</p>
           </div>
         }
 
@@ -82,34 +84,34 @@ import {
             <div class="row-between">
               <h2 style="margin:0">{{ c.programName }} · {{ c.pensumCode }}</h2>
               <div class="row">
-                <button type="button" class="btn btn-sm" (click)="openEdit(c)">Edit this pensum</button>
+                <button type="button" class="btn btn-sm" (click)="openEdit(c)">{{ 'Edit this pensum' | t }}</button>
                 <button type="button" class="btn btn-sm btn-danger" [disabled]="deleting()" (click)="remove(c)">
-                  {{ deleting() ? 'Deleting…' : 'Delete' }}
+                  {{ deleting() ? ('Deleting…' | t) : ('Delete' | t) }}
                 </button>
               </div>
             </div>
             <dl class="pensum-summary">
-              <dt>Faculty</dt>
+              <dt>{{ 'Faculty' | t }}</dt>
               <dd>{{ c.faculty }}</dd>
-              <dt>Reform</dt>
+              <dt>{{ 'Reform' | t }}</dt>
               <dd>{{ c.reform }}</dd>
-              <dt>Status</dt>
+              <dt>{{ 'Status' | t }}</dt>
               <dd><span class="badge badge-neutral">{{ c.status }}</span></dd>
-              <dt>Totals</dt>
+              <dt>{{ 'Totals' | t }}</dt>
               <dd>{{ totals(c) }}</dd>
-              <dt>Course codes</dt>
+              <dt>{{ 'Course codes' | t }}</dt>
               <dd>{{ codesNote(c) }}</dd>
             </dl>
 
-            <h3>Knowledge areas ({{ c.areas.length }})</h3>
+            <h3>{{ 'Knowledge areas ({length})' | t: { length: c.areas.length } }}</h3>
             <div class="scroll-x">
               <table>
                 <thead>
                   <tr>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Credits</th>
-                    <th>Weekly hours</th>
+                    <th>{{ 'Code' | t }}</th>
+                    <th>{{ 'Name' | t }}</th>
+                    <th>{{ 'Credits' | t }}</th>
+                    <th>{{ 'Weekly hours' | t }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -129,15 +131,15 @@ import {
             </div>
 
             <div class="row-between">
-              <h3 style="margin:0">Pensum items ({{ c.courses.length }})</h3>
+              <h3 style="margin:0">{{ 'Pensum items ({length})' | t: { length: c.courses.length } }}</h3>
               <!-- The grid is for checking a pensum against its printed plan; the table is the
                    exact data, sortable by eye and readable by a screen reader. -->
-              <div class="view-toggle" role="group" aria-label="How to show the items">
+              <div class="view-toggle" role="group" [attr.aria-label]="'How to show the items' | t">
                 <button type="button" class="btn btn-sm" [attr.aria-pressed]="view() === 'grid'" (click)="view.set('grid')">
-                  As printed
+                  {{ 'As printed' | t }}
                 </button>
                 <button type="button" class="btn btn-sm" [attr.aria-pressed]="view() === 'table'" (click)="view.set('table')">
-                  Table
+                  {{ 'Table' | t }}
                 </button>
               </div>
             </div>
@@ -148,13 +150,13 @@ import {
                 <table>
                   <thead>
                     <tr>
-                      <th>Level</th>
-                      <th>Code</th>
-                      <th>Name</th>
-                      <th>Area</th>
-                      <th>Credits</th>
-                      <th>Weekly hours</th>
-                      <th>Prerequisites</th>
+                      <th>{{ 'Level' | t }}</th>
+                      <th>{{ 'Code' | t }}</th>
+                      <th>{{ 'Name' | t }}</th>
+                      <th>{{ 'Area' | t }}</th>
+                      <th>{{ 'Credits' | t }}</th>
+                      <th>{{ 'Weekly hours' | t }}</th>
+                      <th>{{ 'Prerequisites' | t }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -166,7 +168,7 @@ import {
                         <td class="mono">
                           {{ code(course) ?? '—' }}
                           @if (course.isElectiveSlot) {
-                            <span class="text-muted">(elective)</span>
+                            <span class="text-muted">{{ '(elective)' | t }}</span>
                           }
                         </td>
                         <td>{{ course.name }}</td>
@@ -193,8 +195,8 @@ import {
            it has to check every row anyway. -->
       <details class="card import-panel" open>
         <summary>
-          <strong>Build one from a PDF</strong>
-          <span class="text-muted"> — paste the table, correct it, import it</span>
+          <strong>{{ 'Build one from a PDF' | t }}</strong>
+          <span class="text-muted"> {{ '— paste the table, correct it, import it' | t }}</span>
         </summary>
         <div style="margin-top:1rem">
           <app-paste-pensum (imported)="loadCatalog()" />
@@ -203,8 +205,8 @@ import {
 
       <details class="card import-panel">
         <summary>
-          <strong>Already have a CSV?</strong>
-          <span class="text-muted"> — upload it directly</span>
+          <strong>{{ 'Already have a CSV?' | t }}</strong>
+          <span class="text-muted"> {{ '— upload it directly' | t }}</span>
         </summary>
         <div style="margin-top:1rem">
           <app-import-panel />
@@ -212,22 +214,22 @@ import {
       </details>
     </div>
 
-    <app-modal #formModal [title]="formMode() === 'create' ? 'New pensum' : 'Edit pensum'" (closed)="formError.set(null)">
+    <app-modal #formModal [title]="formMode() === 'create' ? ('New pensum' | t) : ('Edit pensum' | t)" (closed)="formError.set(null)">
       <div class="stack">
         <app-api-error-banner [error]="formError()" />
         <p class="text-muted">
-          The whole pensum as JSON, matching the <code>Pensum</code> schema in
-          <code>docs/api/semaphore.openapi.yaml</code> — which is still what the contract calls it.
+          {{ 'The whole pensum as JSON, matching the' | t }} <code>{{ 'Pensum' | t }}</code> {{ 'schema in' | t }}
+          <code>{{ 'docs/api/semaphore.openapi.yaml' | t }}</code> {{ '— which is still what the contract calls it.' | t }}
         </p>
         <div class="field">
-          <label for="pensum-json">Pensum document</label>
+          <label for="pensum-json">{{ 'Pensum document' | t }}</label>
           <textarea id="pensum-json" rows="16" [value]="formText()" (input)="onFormTextInput($event)"></textarea>
         </div>
         <div class="row">
           <button type="button" class="btn btn-primary" [disabled]="formSubmitting()" (click)="submit()">
-            {{ formSubmitting() ? 'Saving…' : formMode() === 'create' ? 'Create pensum' : 'Save changes' }}
+            {{ formSubmitting() ? ('Saving…' | t) : formMode() === 'create' ? ('Create pensum' | t) : ('Save changes' | t) }}
           </button>
-          <button type="button" class="btn" (click)="formModal.close()">Cancel</button>
+          <button type="button" class="btn" (click)="formModal.close()">{{ 'Cancel' | t }}</button>
         </div>
       </div>
     </app-modal>
@@ -323,11 +325,15 @@ export class PensumsPage {
 
   totals(pensum: Pensum): string {
     const credits = this.published(pensum, 'credits')
-      ? `${pensum.totalCredits} credits`
+      ? t('{credits} credits', { credits: pensum.totalCredits })
       : pensum.totalCredits
-        ? `${pensum.totalCredits} credits in total, none per course`
-        : 'credits not published';
-    return [credits, this.published(pensum, 'hours') ? `${pensum.totalHours} weekly hours` : '', `${pensum.levels} levels`]
+        ? t('{credits} credits in total, none per course', { credits: pensum.totalCredits })
+        : t('credits not published');
+    return [
+      credits,
+      this.published(pensum, 'hours') ? t('{hours} weekly hours', { hours: pensum.totalHours }) : '',
+      t('{levels} levels', { levels: pensum.levels }),
+    ]
       .filter(Boolean)
       .join(' · ');
   }
@@ -359,8 +365,8 @@ export class PensumsPage {
 
   codesNote(pensum: Pensum): string {
     return publishesCourseCodes(pensum)
-      ? 'The university\'s own, as the plan prints them.'
-      : 'Not published. KApp identifies these items internally; those identifiers are not institutional codes and are not shown.';
+      ? t('The university’s own, as the plan prints them.')
+      : t('Not published. KApp identifies these items internally; those identifiers are not institutional codes and are not shown.');
   }
 
   /** How the items are shown. The grid first: it is the view a pensum is checked against its PDF with. */
@@ -471,8 +477,8 @@ export class PensumsPage {
       this.formError.set({
         timestamp: new Date().toISOString(),
         status: 0,
-        error: 'Invalid JSON',
-        message: 'The pensum document is not valid JSON.',
+        error: t('Invalid JSON'),
+        message: t('The pensum document is not valid JSON.'),
         path: '',
       });
       return;
@@ -506,9 +512,11 @@ export class PensumsPage {
   remove(pensum: Pensum): void {
     if (
       !window.confirm(
-        `Delete pensum ${pensum.pensumCode} (${pensum.programName})? ` +
-          `It has ${pensum.courses.length} courses. If any student is following it, the ` +
-          `server refuses and says how many.`,
+        t('Delete pensum {code} ({program})? It has {courses} courses. If any student is following it, the server refuses and says how many.', {
+          code: pensum.pensumCode,
+          program: pensum.programName,
+          courses: pensum.courses.length,
+        }),
       )
     ) {
       return;

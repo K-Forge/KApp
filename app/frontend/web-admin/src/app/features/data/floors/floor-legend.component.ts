@@ -6,6 +6,7 @@ import {
   type SpaceCategory,
 } from '../spaces/space.model';
 import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 /**
  * The key under the plan: what each fill means and what each mark is.
@@ -18,17 +19,18 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
  */
 @Component({
   selector: 'app-floor-legend',
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="legend" aria-label="What the plan shows">
+    <section class="legend" [attr.aria-label]="'What the plan shows' | t">
       <div class="group">
-        <h3>Spaces</h3>
+        <h3>{{ 'Spaces' | t }}</h3>
         <ul class="chips">
           @for (item of fills(); track item.category) {
             <li class="chip" [class.empty]="item.count === 0" [style.--fill]="item.color">
               <span class="swatch" aria-hidden="true"></span>
-              <span class="name">{{ item.label }}</span>
-              <span class="count" [attr.aria-label]="item.count + (item.count === 1 ? ' room' : ' rooms')">
+              <span class="name">{{ item.label | t }}</span>
+              <span class="count" [attr.aria-label]="item.count === 1 ? ('{n} room' | t: { n: 1 }) : ('{n} rooms' | t: { n: item.count })">
                 {{ item.count }}
               </span>
             </li>
@@ -37,13 +39,13 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
       </div>
 
       <div class="group">
-        <h3>On the plan</h3>
+        <h3>{{ 'On the plan' | t }}</h3>
         <ul class="marks">
           <li>
             <svg viewBox="0 0 28 18" aria-hidden="true">
               <rect class="outline" x="2" y="2" width="24" height="14" />
             </svg>
-            Building outline
+            {{ 'Building outline' | t }}
           </li>
           <li>
             <svg viewBox="0 0 28 18" aria-hidden="true">
@@ -51,7 +53,7 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
               <line class="door-casing" x1="8" y1="9" x2="20" y2="9" />
               <line class="door" x1="8" y1="9" x2="20" y2="9" />
             </svg>
-            Door
+            {{ 'Door' | t }}
           </li>
           <li>
             <svg viewBox="0 0 28 18" aria-hidden="true">
@@ -60,32 +62,32 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
                 <line class="tread" [attr.x1]="x" y1="2" [attr.x2]="x" y2="16" />
               }
             </svg>
-            Stairs
+            {{ 'Stairs' | t }}
           </li>
           <li>
             <svg viewBox="0 0 28 18" aria-hidden="true">
               <polyline class="corridor" points="2,14 10,6 18,12 26,4" />
             </svg>
-            Corridor
+            {{ 'Corridor' | t }}
           </li>
           <li>
             <svg viewBox="0 0 28 18" aria-hidden="true">
               <rect class="room unidentified" x="2" y="2" width="24" height="14" [attr.fill]="unidentifiedFill" />
             </svg>
-            Drawn, not named yet
+            {{ 'Drawn, not named yet' | t }}
           </li>
           <li>
             <svg viewBox="0 0 28 18" aria-hidden="true">
               <rect class="room problem" x="2" y="2" width="24" height="14" [attr.fill]="unidentifiedFill" />
             </svg>
-            Needs a look
+            {{ 'Needs a look' | t }}
           </li>
           @for (wing of marginWings(); track wing.code) {
             <li>
               <svg viewBox="0 0 28 18" aria-hidden="true">
                 <rect [attr.class]="'margin wing-' + wing.code" x="2" y="2" width="24" height="14" />
               </svg>
-              {{ wing.name }}: where its rooms go on this floor
+              {{ '{name}: where its rooms go on this floor' | t: { name: wing.name } }}
             </li>
           }
           @if (marginWings().length) {
@@ -93,7 +95,7 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
               <svg viewBox="0 0 28 18" aria-hidden="true">
                 <rect class="margin below" x="2" y="2" width="24" height="14" />
               </svg>
-              Where the floor below's went
+              {{ 'Where the floor below’s went' | t }}
             </li>
           }
           @if (neighbours()) {
@@ -101,7 +103,7 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
               <svg viewBox="0 0 28 18" aria-hidden="true">
                 <rect class="neighbour" x="2" y="2" width="24" height="14" />
               </svg>
-              A building next door
+              {{ 'A building next door' | t }}
             </li>
           }
           @if (groundSource()) {
@@ -109,38 +111,38 @@ import { isPlaced, isUnidentified, type DraftSpace } from './floor-draft';
               <svg viewBox="0 0 28 18" aria-hidden="true">
                 <rect class="block" x="2" y="2" width="24" height="14" />
               </svg>
-              City block
+              {{ 'City block' | t }}
             </li>
             <li>
               <svg viewBox="0 0 28 18" aria-hidden="true">
                 <rect class="sidewalk" x="1" y="5" width="26" height="8" />
               </svg>
-              Sidewalk
+              {{ 'Sidewalk' | t }}
             </li>
             <li>
               <svg viewBox="0 0 28 18" aria-hidden="true">
                 <rect class="roadway" x="1" y="4" width="26" height="10" />
               </svg>
-              Street
+              {{ 'Street' | t }}
             </li>
             @if (cadastre()) {
               <li>
                 <svg viewBox="0 0 28 18" aria-hidden="true">
                   <rect class="cadastre reaches" x="2" y="2" width="24" height="14" />
                 </svg>
-                The building on this floor, per the cadastre
+                {{ 'The building on this floor, per the cadastre' | t }}
               </li>
               <li>
                 <svg viewBox="0 0 28 18" aria-hidden="true">
                   <rect class="cadastre" x="2" y="2" width="24" height="14" />
                 </svg>
-                On the floor below, per the cadastre
+                {{ 'On the floor below, per the cadastre' | t }}
               </li>
             }
           }
         </ul>
         @if (groundSource(); as source) {
-          <p class="credit">Streets and blocks: {{ source }}</p>
+          <p class="credit">{{ 'Streets and blocks: {source}' | t: { source: source } }}</p>
         }
       </div>
     </section>

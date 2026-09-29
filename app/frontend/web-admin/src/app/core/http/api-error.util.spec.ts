@@ -58,6 +58,12 @@ describe('parseApiError', () => {
     expect(result.message).toBe('<html>502 Bad Gateway</html>');
   });
 
+  it('says the status in the portal’s words when the body says nothing', () => {
+    const err = new HttpErrorResponse({ error: null, status: 405, statusText: 'Method Not Allowed', url: 'http://localhost:8080/api/catalog/pensums' });
+
+    expect(parseApiError(err).message).toBe('The server answered 405 and gave no reason.');
+  });
+
   it('reads a message field out of an unrecognized JSON error body', () => {
     const err = new HttpErrorResponse({ error: { reason: 'ignored', message: 'from a differently-shaped body' }, status: 500 });
 

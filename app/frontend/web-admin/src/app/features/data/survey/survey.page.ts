@@ -16,6 +16,8 @@ import { SURVEY_BLOCK, SURVEY_FRAME, SURVEY_PLAN } from './survey-plan';
 import { PIECE_METRES, asText, formatMetres, isEmpty, merged, readDistance, stillPending } from './survey-sheet';
 import type { PlannedDistance, SurveyMeasure } from './survey.model';
 import { SurveyService } from './survey.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 type SaveState = 'saved' | 'waiting' | 'saving' | 'offline';
 
@@ -30,16 +32,16 @@ const ZOOM_MIN = 20;
  */
 @Component({
   selector: 'app-survey-page',
-  imports: [RouterLink, ApiErrorBannerComponent],
+  imports: [TranslatePipe, RouterLink, ApiErrorBannerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="survey">
       <header class="head">
         <div>
-          <h1>Survey</h1>
+          <h1>{{ 'Survey' | t }}</h1>
           <p class="text-muted small">
-            Block {{ block }} · the Edificio Central and what stands round it, from outside ·
-            <a [routerLink]="['/data/blocks', block]">reshape by hand</a>
+            {{ 'Block {block} · the Edificio Central and what stands round it, from outside ·' | t: { block: block } }}
+            <a [routerLink]="['/data/blocks', block]">{{ 'reshape by hand' | t }}</a>
           </p>
         </div>
         <div class="status">
@@ -49,18 +51,17 @@ const ZOOM_MIN = 20;
       </header>
       <app-api-error-banner [error]="error()" />
       <details class="how">
-        <summary>How to measure</summary>
-        <p>Walk the numbers in order, from the corner of Calle 63 and Cra 9 Bis.</p>
-        <p><b class="setback-key">Orange</b>: from the wall at street level, straight out from it, to the edge of the street (the curb).</p>
-        <p><b class="length-key">Blue</b>: along the wall, corner to corner, or across a door. Drawn beside its wall, with dotted lines back to the corners it runs between.</p>
+        <summary>{{ 'How to measure' | t }}</summary>
+        <p>{{ 'Walk the numbers in order, from the corner of Calle 63 and Cra 9 Bis.' | t }}</p>
+        <p><b class="setback-key">{{ 'Orange' | t }}</b>{{ ': from the wall at street level, straight out from it, to the edge of the street (the curb).' | t }}</p>
+        <p><b class="length-key">{{ 'Blue' | t }}</b>{{ ': along the wall, corner to corner, or across a door. Drawn beside its wall, with dotted lines back to the corners it runs between.' | t }}</p>
         <p>
-          Longer than {{ pieceMetres }} m, or with something in the way: in pieces. Type one, tap +, type the next. The model's figure is
-          only there to catch a slip; what you see on site wins, and anything the sketch gets wrong goes in a note.
+          {{ 'Longer than {pieceMetres} m, or with something in the way: in pieces. Type one, tap +, type the next. The model’s figure is only there to catch a slip; what you see on site wins, and anything the sketch gets wrong goes in a note.' | t: { pieceMetres: pieceMetres } }}
         </p>
-        <p>Notes are for what the sketch does not show. For example:</p>
+        <p>{{ 'Notes are for what the sketch does not show. For example:' | t }}</p>
         <ul>
           @for (n of noteExamples; track n) {
-            <li>{{ n }}</li>
+            <li>{{ n | t }}</li>
           }
         </ul>
       </details>
@@ -69,7 +70,7 @@ const ZOOM_MIN = 20;
         <section class="card sketch-card">
           <div class="sketch" #sketchBox>
             @if (drawn(); as v) {
-              <svg [attr.viewBox]="viewBox()" preserveAspectRatio="xMidYMid meet" role="img" [attr.aria-label]="'Sketch of block ' + block">
+              <svg [attr.viewBox]="viewBox()" preserveAspectRatio="xMidYMid meet" role="img" [attr.aria-label]="('Sketch of block ' | t) + block">
                 @for (d of v.roadways; track $index) {
                   <path class="road" [attr.d]="d" />
                 }
@@ -102,14 +103,14 @@ const ZOOM_MIN = 20;
                 }
               </svg>
             } @else if (loading()) {
-              <p class="text-muted small">Loading the block…</p>
+              <p class="text-muted small">{{ 'Loading the block…' | t }}</p>
             }
           </div>
           <div class="key small">
-            <span><i class="swatch setback"></i>wall → street edge: where it stands</span>
-            <span><i class="swatch length"></i>along the wall or a door: how wide</span>
+            <span><i class="swatch setback"></i>{{ 'wall → street edge: where it stands' | t }}</span>
+            <span><i class="swatch length"></i>{{ 'along the wall or a door: how wide' | t }}</span>
+            <button type="button" class="btn btn-sm zoom" (click)="whole.set(!whole())">{{ whole() ? ('Zoom in' | t) : ('Whole block' | t) }}</button>
           </div>
-          <button type="button" class="btn btn-sm zoom" (click)="whole.set(!whole())">{{ whole() ? 'Zoom in' : 'Whole block' }}</button>
         </section>
 
         <section class="card entry">
@@ -117,17 +118,17 @@ const ZOOM_MIN = 20;
             <div class="title">
               <span class="num" [class]="c.kind">{{ c.n ?? '+' }}</span>
               <div>
-                <strong>{{ c.text }}</strong>
+                <strong>{{ c.text | t }}</strong>
                 <div class="text-muted small">
-                  {{ c.street }} · {{ c.kind === 'setback' ? 'wall → curb, straight out' : c.kind === 'length' ? 'along the wall' : 'your own' }}
+                  {{ c.street }} · {{ c.kind === 'setback' ? ('wall → curb, straight out' | t) : c.kind === 'length' ? ('along the wall' | t) : ('your own' | t) }}
                   @if (c.expected) {
-                    · model {{ c.expected.toFixed(2) }} m{{ c.expected > pieceMetres ? ', in pieces' : '' }}
+                    {{ '· model {value}{value2}' | t: { value: metres(c.expected), value2: c.expected > pieceMetres ? (', in pieces' | t) : '' } }}
                   }
                 </div>
               </div>
             </div>
             @if (c.kind === 'extra') {
-              <input class="label-in" type="text" placeholder="What it is, from where to where" [value]="valueOf(c.id).label ?? ''" (input)="write(c.id, 'label', $event)" />
+              <input class="label-in" type="text" [placeholder]="'What it is, from where to where' | t" [value]="valueOf(c.id).label ?? ''" (input)="write(c.id, 'label', $event)" />
             }
             <div class="value">
               <input
@@ -138,21 +139,21 @@ const ZOOM_MIN = 20;
                 placeholder="4,80"
                 [value]="valueOf(c.id).text ?? ''"
                 (input)="write(c.id, 'text', $event)"
-                [attr.aria-label]="'Distance ' + (c.n ?? '') + ': ' + c.text"
+                [attr.aria-label]="'Distance {n}: {text}' | t: { n: c.n ?? '', text: (c.text | t) }"
               />
-              <button type="button" class="btn" (click)="piece(c.id, box)" title="Another piece" aria-label="Another piece">+</button>
+              <button type="button" class="btn" (click)="piece(c.id, box)" [title]="'Another piece' | t" [attr.aria-label]="'Another piece' | t">+</button>
             </div>
             <p class="small reading" [class.bad]="!!reading().error || !!reading().off">{{ readingText() }}</p>
             <div class="steps">
-              <button type="button" class="btn" (click)="step(-1)">‹ Back</button>
-              <button type="button" class="btn btn-primary" (click)="step(1)">Next ›</button>
+              <button type="button" class="btn" (click)="step(-1)">{{ '‹ Back' | t }}</button>
+              <button type="button" class="btn btn-primary" (click)="step(1)">{{ 'Next ›' | t }}</button>
             </div>
-            <input #note class="note" type="text" placeholder="Note: what the sketch does not show" [value]="valueOf(c.id).note ?? ''" (input)="write(c.id, 'note', $event)" />
+            <input #note class="note" type="text" [placeholder]="'Note: what the sketch does not show' | t" [value]="valueOf(c.id).note ?? ''" (input)="write(c.id, 'note', $event)" />
             <details class="small examples">
-              <summary>Note examples: tap one, then finish it</summary>
+              <summary>{{ 'Note examples: tap one, then finish it' | t }}</summary>
               <div class="chips">
                 @for (n of noteExamples; track n) {
-                  <button type="button" class="chip" (click)="addNote(c.id, n, note)">{{ n }}</button>
+                  <button type="button" class="chip" (click)="addNote(c.id, n, note)">{{ n | t }}</button>
                 }
               </div>
             </details>
@@ -167,25 +168,25 @@ const ZOOM_MIN = 20;
             @for (d of g.items; track d.id) {
               <li [class.on]="d.id === current().id" (click)="select(d.id, true)">
                 <span class="num" [class]="d.kind" [class.done]="d.done">{{ d.n }}</span>
-                <span class="what">{{ d.text }}</span>
+                <span class="what">{{ d.text | t }}</span>
                 <span class="got">{{ d.shown }}</span>
               </li>
             }
           </ol>
         }
-        <h2 class="h">Your own</h2>
+        <h2 class="h">{{ 'Your own' | t }}</h2>
         <ol>
           @for (x of extras(); track x.id) {
             <li [class.on]="x.id === current().id" (click)="select(x.id, true)">
               <span class="num extra">+</span>
-              <span class="what">{{ x.label || 'Not named yet' }}</span>
+              <span class="what">{{ x.label || ('Not named yet' | t) }}</span>
               <span class="got">{{ x.shown }}</span>
             </li>
           }
         </ol>
         <div class="steps">
-          <button type="button" class="btn btn-sm" (click)="addExtra()">+ Something the plan missed</button>
-          <button type="button" class="btn btn-sm" (click)="showText.set(!showText())">{{ showText() ? 'Hide' : 'As text' }}</button>
+          <button type="button" class="btn btn-sm" (click)="addExtra()">{{ '+ Something the plan missed' | t }}</button>
+          <button type="button" class="btn btn-sm" (click)="showText.set(!showText())">{{ showText() ? ('Hide' | t) : ('As text' | t) }}</button>
         </div>
         @if (showText()) {
           <textarea class="as-text" readonly rows="10" [value]="text()" (focus)="$any($event.target).select()"></textarea>
@@ -204,11 +205,12 @@ const ZOOM_MIN = 20;
     .length-key { color: #1c7ed6; }
     .work { display: grid; gap: 0.9rem; }
     @media (min-width: 900px) { .work { grid-template-columns: 3fr 2fr; align-items: start; } }
-    .sketch-card { position: relative; padding: 0.4rem; }
+    .sketch-card { padding: 0.4rem; }
     .sketch { height: 46vh; min-height: 260px; }
     .sketch svg { width: 100%; height: 100%; display: block; }
-    .zoom { position: absolute; right: 0.6rem; bottom: 3.4rem; }
-    .key { display: flex; flex-wrap: wrap; gap: 0.2rem 1rem; padding: 0.4rem 0.3rem 0.1rem; color: var(--text-muted); }
+    /* In the key, under the drawing: over it, it hid whichever number fell in its corner. */
+    .zoom { margin-left: auto; }
+    .key { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 1rem; padding: 0.4rem 0.3rem 0.1rem; color: var(--text-muted); }
     .swatch { display: inline-block; width: 1.1rem; height: 3px; margin-right: 0.4rem; vertical-align: middle; background: var(--c); }
     .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
     .chip { border: 1px solid var(--border); background: none; color: var(--text-muted); border-radius: 999px; padding: 0.15rem 0.55rem; font-size: 0.75rem; cursor: pointer; }
@@ -260,15 +262,15 @@ export class SurveyPage {
   readonly pieceMetres = PIECE_METRES;
   /** What goes in a note, to tap in and finish: what the sketch cannot show. */
   readonly noteExamples = [
-    'Columns in front: measured to the wall behind',
-    'In pieces round a tree / post / car',
-    'The wall steps in here, … m',
-    'The floors above come out … m',
-    'The door is … m further on',
-    'No door here',
-    'To a fence or railing, not a wall',
-    'The curb is a driveway ramp here',
-    'Could not reach it: estimated',
+    /* i18n */ 'Columns in front: measured to the wall behind',
+    /* i18n */ 'In pieces round a tree / post / car',
+    /* i18n */ 'The wall steps in here, … m',
+    /* i18n */ 'The floors above come out … m',
+    /* i18n */ 'The door is … m further on',
+    /* i18n */ 'No door here',
+    /* i18n */ 'To a fence or railing, not a wall',
+    /* i18n */ 'The curb is a driveway ramp here',
+    /* i18n */ 'Could not reach it: estimated',
   ];
 
   readonly loading = signal(true);
@@ -311,7 +313,7 @@ export class SurveyPage {
     const planned = this.plan.find((d) => d.id === id);
     if (planned) return { ...planned, kind: planned.kind as PlannedDistance['kind'] | 'extra' };
     const label = this.values().get(id)?.label;
-    return { id, n: null, street: 'Something the plan missed', kind: 'extra' as const, text: label || 'Not named yet', expected: 0 };
+    return { id, n: null, street: t('Something the plan missed'), kind: 'extra' as const, text: label || t('Not named yet'), expected: 0 };
   });
 
   readonly reading = computed(() => {
@@ -325,14 +327,14 @@ export class SurveyPage {
     const c = this.current();
     const r = this.reading();
     if (r.error) return r.error;
-    if (r.metres === null) return c.kind === 'setback' ? 'Metres from the wall to the curb.' : 'Metres.';
+    if (r.metres === null) return c.kind === 'setback' ? t('Metres from the wall to the curb.') : t('Metres.');
     const text = this.values().get(c.id)?.text;
-    const total = r.pieces > 1 ? `= ${formatMetres(r.metres, text)} in ${r.pieces} pieces` : formatMetres(r.metres, text);
+    const total = r.pieces > 1 ? t('= {total} in {pieces} pieces', { total: formatMetres(r.metres, text), pieces: r.pieces }) : formatMetres(r.metres, text);
     if (!c.expected) return total;
     const delta = r.metres - c.expected;
     return r.off
-      ? `${total} · the model says ${formatMetres(c.expected, text)}: check it, then note what differs`
-      : `${total} · ${delta >= 0 ? '+' : '−'}${formatMetres(Math.abs(delta), text)} from the model`;
+      ? t('{total} · the model says {expected}: check it, then note what differs', { total, expected: formatMetres(c.expected, text) })
+      : t('{total} · {delta} from the model', { total, delta: `${delta >= 0 ? '+' : '−'}${formatMetres(Math.abs(delta), text)}` });
   });
 
   readonly groups = computed(() => {
@@ -437,10 +439,10 @@ export class SurveyPage {
   readonly stateText = computed(
     () =>
       ({
-        saved: 'Saved',
-        waiting: 'Saving soon',
-        saving: 'Saving…',
-        offline: 'Kept on this device, not saved yet',
+        saved: t('Saved'),
+        waiting: t('Saving soon'),
+        saving: t('Saving…'),
+        offline: t('Kept on this device, not saved yet'),
       })[this.saveState()],
   );
 
@@ -461,6 +463,11 @@ export class SurveyPage {
       observer.observe(el);
       destroyRef.onDestroy(() => observer.disconnect());
     });
+  }
+
+  /** The model's figure, written as the portal's language writes decimals. */
+  metres(value: number): string {
+    return formatMetres(value);
   }
 
   valueOf(id: string): SurveyMeasure {
@@ -490,7 +497,8 @@ export class SurveyPage {
   /** An example added to the note, to finish by hand: the cursor goes to its "…". */
   addNote(id: string, example: string, box: HTMLInputElement): void {
     const note = (this.valueOf(id).note ?? '').trim();
-    const next = note ? `${note}; ${example}` : example;
+    const said = t(example);
+    const next = note ? `${note}; ${said}` : said;
     this.change(id, { note: next });
     box.value = next;
     box.focus();

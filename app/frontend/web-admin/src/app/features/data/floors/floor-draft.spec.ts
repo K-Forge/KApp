@@ -304,7 +304,7 @@ describe('floor draft', () => {
         floor([space('401', { wing: 'C' })], { corridors: [{ code: 'PAS', name: 'Pasillo', color: '#5B8DEF', path: [] }] }),
       );
 
-      expect(found).toContain("401: wing C is not one of this building's.");
+      expect(found).toContain("401: wing C is not one of this building’s.");
       expect(found).toContain('Pasillo: has no points yet - draw it or delete it.');
     });
   });

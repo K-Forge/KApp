@@ -9,6 +9,8 @@ import { DataTableComponent } from '../../../shared/ui/data-table/data-table.com
 import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 import { PROGRAM_LEVELS, type Program, type ProgramRequest } from './program.model';
 import { ProgramsService } from './programs.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 /**
  * Full CRUD over /api/catalog/programs.
@@ -23,17 +25,17 @@ import { ProgramsService } from './programs.service';
  */
 @Component({
   selector: 'app-programs-page',
-  imports: [DataTableComponent, ApiErrorBannerComponent, ModalComponent, ReactiveFormsModule, RouterLink, PageIntroComponent],
+  imports: [TranslatePipe, DataTableComponent, ApiErrorBannerComponent, ModalComponent, ReactiveFormsModule, RouterLink, PageIntroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
-        title="Programs"
-        what="The degree programmes the university offers. A programme is the container; the courses live in its pensum."
-        [can]="['Create a programme', 'Edit its name, faculty and level', 'Delete one that has no pensum yet', 'Jump to its active pensum']"
-        note="A programme&#39;s code cannot be changed once it exists: every pensum and every student profile points at it. Deleting never cascades either — a programme that still has a pensum is refused with a 409 naming which one."
+        [title]="'Programs' | t"
+        [what]="'The degree programmes the university offers. A programme is the container; the courses live in its pensum.' | t"
+        [can]="[('Create a programme' | t), ('Edit its name, faculty and level' | t), ('Delete one that has no pensum yet' | t), ('Jump to its active pensum' | t)]"
+        [note]="'A programme’s code cannot be changed once it exists: every pensum and every student profile points at it. Deleting never cascades either — a programme that still has a pensum is refused with a 409 naming which one.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">New program</button>
+        <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New program' | t }}</button>
       </app-page-intro>
 
       <div class="card">
@@ -42,15 +44,15 @@ import { ProgramsService } from './programs.service';
         <app-data-table
           [loading]="loading()"
           [empty]="!loading() && !error() && programs().length === 0"
-          emptyMessage="No programs yet."
+          [emptyMessage]="'No programs yet.' | t"
         >
           <thead>
             <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Faculty</th>
-              <th>Level</th>
-              <th>Active pensum</th>
+              <th>{{ 'Code' | t }}</th>
+              <th>{{ 'Name' | t }}</th>
+              <th>{{ 'Faculty' | t }}</th>
+              <th>{{ 'Level' | t }}</th>
+              <th>{{ 'Active pensum' | t }}</th>
               <th></th>
             </tr>
           </thead>
@@ -64,16 +66,16 @@ import { ProgramsService } from './programs.service';
                 <td class="mono">{{ program.activePensumCode ?? '—' }}</td>
                 <td class="row">
                   @if (program.activePensumCode) {
-                    <a class="btn btn-sm" [routerLink]="['/data/pensums']" [queryParams]="{ pensum: program.activePensumCode }">Pensum</a>
+                    <a class="btn btn-sm" [routerLink]="['/data/pensums']" [queryParams]="{ pensum: program.activePensumCode }">{{ 'Pensum' | t }}</a>
                   }
-                  <button type="button" class="btn btn-sm" (click)="openEdit(program)">Edit</button>
+                  <button type="button" class="btn btn-sm" (click)="openEdit(program)">{{ 'Edit' | t }}</button>
                   <button
                     type="button"
                     class="btn btn-sm btn-danger"
                     [disabled]="busyCode() === program.code"
                     (click)="remove(program)"
                   >
-                    Delete
+                    {{ 'Delete' | t }}
                   </button>
                 </td>
               </tr>
@@ -83,40 +85,40 @@ import { ProgramsService } from './programs.service';
       </div>
     </div>
 
-    <app-modal #formModal [title]="editing() ? 'Edit program' : 'New program'" (closed)="formError.set(null)">
+    <app-modal #formModal [title]="editing() ? ('Edit program' | t) : ('New program' | t)" (closed)="formError.set(null)">
       <app-api-error-banner [error]="formError()" />
       <form [formGroup]="form" (ngSubmit)="save()" class="stack">
         <div class="field" [class.invalid]="invalid('code')">
-          <label for="p-code">Code</label>
+          <label for="p-code">{{ 'Code' | t }}</label>
           <input id="p-code" type="text" formControlName="code" [readonly]="editing()" />
           @if (editing()) {
             <span class="hint">
-              Fixed. Every pensum and student profile points at this code.
+              {{ 'Fixed. Every pensum and student profile points at this code.' | t }}
             </span>
           }
           @if (invalid('code')) {
-            <span class="error">Required, 1-20 characters.</span>
+            <span class="error">{{ 'Required, 1-20 characters.' | t }}</span>
           }
         </div>
 
         <div class="field" [class.invalid]="invalid('name')">
-          <label for="p-name">Name</label>
+          <label for="p-name">{{ 'Name' | t }}</label>
           <input id="p-name" type="text" formControlName="name" />
           @if (invalid('name')) {
-            <span class="error">Required, 1-120 characters.</span>
+            <span class="error">{{ 'Required, 1-120 characters.' | t }}</span>
           }
         </div>
 
         <div class="field" [class.invalid]="invalid('faculty')">
-          <label for="p-faculty">Faculty</label>
+          <label for="p-faculty">{{ 'Faculty' | t }}</label>
           <input id="p-faculty" type="text" formControlName="faculty" />
           @if (invalid('faculty')) {
-            <span class="error">Required, 1-120 characters.</span>
+            <span class="error">{{ 'Required, 1-120 characters.' | t }}</span>
           }
         </div>
 
         <div class="field">
-          <label for="p-level">Level</label>
+          <label for="p-level">{{ 'Level' | t }}</label>
           <select id="p-level" formControlName="level">
             @for (level of levels; track level) {
               <option [value]="level">{{ level }}</option>
@@ -126,9 +128,9 @@ import { ProgramsService } from './programs.service';
 
         <div class="row">
           <button type="submit" class="btn btn-primary" [disabled]="submitting()">
-            {{ submitting() ? 'Saving…' : editing() ? 'Save changes' : 'Create program' }}
+            {{ submitting() ? ('Saving…' | t) : editing() ? ('Save changes' | t) : ('Create program' | t) }}
           </button>
-          <button type="button" class="btn" (click)="formModal.close()">Cancel</button>
+          <button type="button" class="btn" (click)="formModal.close()">{{ 'Cancel' | t }}</button>
         </div>
       </form>
     </app-modal>
@@ -241,7 +243,7 @@ export class ProgramsPage {
   }
 
   remove(program: Program): void {
-    if (!window.confirm(`Delete program ${program.code} — ${program.name}? Deleting never cascades: if it still has pensums, the server refuses and says which.`)) {
+    if (!window.confirm(t('Delete program {code} — {name}? Deleting never cascades: if it still has pensums, the server refuses and says which.', { code: program.code, name: program.name }))) {
       return;
     }
     this.busyCode.set(program.code);

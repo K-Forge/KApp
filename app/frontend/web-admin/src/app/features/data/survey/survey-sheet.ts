@@ -1,4 +1,5 @@
 import type { PlannedDistance, SurveyMeasure } from './survey.model';
+import { locale, t } from '../../../core/i18n/i18n.service';
 
 /**
  * The survey sheet's reading and bookkeeping, apart from the screen so it can be tested: what a
@@ -28,7 +29,7 @@ export function readDistance(text: string | null | undefined): Reading {
   for (const part of parts) {
     const match = /^(\d+(?:[.,]\d+)?)\s*(cm|m)?$/.exec(part);
     if (!match) {
-      return { metres: null, pieces: parts.length, error: part ? `Cannot read "${part}"` : 'A piece is missing' };
+      return { metres: null, pieces: parts.length, error: part ? t('Cannot read "{part}"', { part }) : t('A piece is missing') };
     }
     const value = Number(match[1].replace(',', '.'));
     total += match[2] === 'cm' ? value / 100 : value;
@@ -36,10 +37,14 @@ export function readDistance(text: string | null | undefined): Reading {
   return { metres: Math.round(total * 1000) / 1000, pieces: parts.length, error: null };
 }
 
-/** Metres as they were typed: with a decimal comma when the text has one. */
+/**
+ * Metres as they were typed: with a decimal comma when the text has one, or with nothing typed, when
+ * the portal is in Spanish.
+ */
 export function formatMetres(metres: number, text?: string | null): string {
   const value = metres.toFixed(2);
-  return `${text?.includes(',') ? value.replace('.', ',') : value} m`;
+  const comma = text ? text.includes(',') : locale().startsWith('es');
+  return `${comma ? value.replace('.', ',') : value} m`;
 }
 
 /** Nothing typed, noted or named: a distance not worth keeping. */
@@ -82,7 +87,7 @@ export function asText(plan: readonly PlannedDistance[], measures: readonly Surv
     const value = r.metres === null ? '—' : formatMetres(r.metres, m?.text) + (r.pieces > 1 ? ` (${m?.text})` : '');
     return `${head}: ${value}${m?.note ? ` · ${m.note}` : ''}`;
   };
-  const lines = plan.map((d) => line(`${d.n}. [${d.id}] ${d.street} · ${d.text}`, byId.get(d.id)));
+  const lines = plan.map((d) => line(`${d.n}. [${d.id}] ${d.street} · ${t(d.text)}`, byId.get(d.id)));
   for (const m of measures.filter((x) => !plan.some((d) => d.id === x.id))) {
     lines.push(line(`+ [${m.id}] ${m.label ?? ''}`, m));
   }

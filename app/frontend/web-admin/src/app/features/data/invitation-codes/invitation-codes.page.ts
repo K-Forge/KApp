@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
 import { ChangeDetectionStrategy, Component, ViewChild, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -14,6 +13,9 @@ import {
   type InvitationRole,
 } from './invitation-code.model';
 import { InvitationCodesService } from './invitation-codes.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
+import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
 
 /**
  * The codes that gate institutional registration.
@@ -27,34 +29,34 @@ import { InvitationCodesService } from './invitation-codes.service';
  */
 @Component({
   selector: 'app-invitation-codes-page',
-  imports: [DataTableComponent, ApiErrorBannerComponent, ModalComponent, ReactiveFormsModule, DatePipe, PageIntroComponent],
+  imports: [TranslatePipe, LocalDatePipe, DataTableComponent, ApiErrorBannerComponent, ModalComponent, ReactiveFormsModule, PageIntroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
-        title="Invitation codes"
-        what="How a student or a professor creates their own KApp account in the mobile app. The code they type decides which role they get."
-        [can]="['Create a code for an intake', 'Set how many accounts it may create, and when it expires', 'Deactivate one without losing its history', 'Delete one entirely']"
-        note="Not the same thing as a visitor pass. A code creates a permanent account for somebody who belongs to the university; a visitor pass is a 24-hour token for somebody who does not, and creates no account at all. ROLE_ADMIN is never grantable by a code — the seeded ones ship in a public repository, so a code that could mint an administrator would let anyone who can read it escalate."
+        [title]="'Invitation codes' | t"
+        [what]="'How a student or a professor creates their own KApp account in the mobile app. The code they type decides which role they get.' | t"
+        [can]="[('Create a code for an intake' | t), ('Set how many accounts it may create, and when it expires' | t), ('Deactivate one without losing its history' | t), ('Delete one entirely' | t)]"
+        [note]="'Not the same thing as a visitor pass. A code creates a permanent account for somebody who belongs to the university; a visitor pass is a 24-hour token for somebody who does not, and creates no account at all. ROLE_ADMIN is never grantable by a code — the seeded ones ship in a public repository, so a code that could mint an administrator would let anyone who can read it escalate.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">New code</button>
+        <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New code' | t }}</button>
       </app-page-intro>
 
       @if (justMinted(); as code) {
         <div class="card issued" role="status">
-          <p style="margin:0 0 0.25rem">New code — give this to the intake:</p>
+          <p style="margin:0 0 0.25rem">{{ 'New code — give this to the intake:' | t }}</p>
           <p class="issued-code mono">{{ code }}</p>
-          <button type="button" class="btn btn-sm" (click)="justMinted.set(null)">Dismiss</button>
+          <button type="button" class="btn btn-sm" (click)="justMinted.set(null)">{{ 'Dismiss' | t }}</button>
         </div>
       }
 
       <div class="card stack">
         <div class="field" style="margin-bottom:0; max-width: 14rem">
-          <label for="ic-filter">Status</label>
+          <label for="ic-filter">{{ 'Status' | t }}</label>
           <select id="ic-filter" (change)="onFilter($event)">
-            <option value="">All</option>
-            <option value="true">Active only</option>
-            <option value="false">Inactive only</option>
+            <option value="">{{ 'All' | t }}</option>
+            <option value="true">{{ 'Active only' | t }}</option>
+            <option value="false">{{ 'Inactive only' | t }}</option>
           </select>
         </div>
 
@@ -63,17 +65,17 @@ import { InvitationCodesService } from './invitation-codes.service';
         <app-data-table
           [loading]="loading()"
           [empty]="!loading() && !error() && codes().length === 0"
-          emptyMessage="No invitation codes. Create one to let an intake register."
+          [emptyMessage]="'No invitation codes. Create one to let an intake register.' | t"
         >
           <thead>
             <tr>
-              <th>Code</th>
-              <th>Role</th>
-              <th>Used</th>
-              <th>Remaining</th>
-              <th>Expires</th>
-              <th>Notes</th>
-              <th>Status</th>
+              <th>{{ 'Code' | t }}</th>
+              <th>{{ 'Role' | t }}</th>
+              <th>{{ 'Used' | t }}</th>
+              <th>{{ 'Remaining' | t }}</th>
+              <th>{{ 'Expires' | t }}</th>
+              <th>{{ 'Notes' | t }}</th>
+              <th>{{ 'Status' | t }}</th>
               <th></th>
             </tr>
           </thead>
@@ -84,11 +86,11 @@ import { InvitationCodesService } from './invitation-codes.service';
                 <td><span class="badge badge-neutral">{{ code.role }}</span></td>
                 <td>{{ code.timesUsed }} / {{ code.maxUses }}</td>
                 <td [class.text-faint]="remaining(code) === 0">{{ remaining(code) }}</td>
-                <td class="text-muted">{{ code.expiresAt ? (code.expiresAt | date: 'dd MMM y, HH:mm') : 'never' }}</td>
+                <td class="text-muted">{{ code.expiresAt ? (code.expiresAt | localDate) : ('never' | t) }}</td>
                 <td class="text-muted">{{ code.notes ?? '—' }}</td>
                 <td>
                   <span class="badge" [class.badge-ok]="code.active" [class.badge-neutral]="!code.active">
-                    {{ code.active ? 'active' : 'inactive' }}
+                    {{ code.active ? ('active' | t) : ('inactive' | t) }}
                   </span>
                 </td>
                 <td class="row">
@@ -98,7 +100,7 @@ import { InvitationCodesService } from './invitation-codes.service';
                     [disabled]="busyCode() === code.code"
                     (click)="toggle(code)"
                   >
-                    {{ code.active ? 'Deactivate' : 'Activate' }}
+                    {{ code.active ? ('Deactivate' | t) : ('Activate' | t) }}
                   </button>
                   <button
                     type="button"
@@ -106,7 +108,7 @@ import { InvitationCodesService } from './invitation-codes.service';
                     [disabled]="busyCode() === code.code"
                     (click)="remove(code)"
                   >
-                    Delete
+                    {{ 'Delete' | t }}
                   </button>
                 </td>
               </tr>
@@ -116,16 +118,15 @@ import { InvitationCodesService } from './invitation-codes.service';
       </div>
     </div>
 
-    <app-modal #formModal title="New invitation code" (closed)="formError.set(null)">
+    <app-modal #formModal [title]="'New invitation code' | t" (closed)="formError.set(null)">
       <app-api-error-banner [error]="formError()" />
       <form [formGroup]="form" (ngSubmit)="save()" class="stack">
         <p class="hint" style="margin:0">
-          The code is generated when you save — unique, and made of characters that survive being
-          read out loud. You cannot choose it: a chosen one is a guess away from the next.
+          {{ 'The code is generated when you save — unique, and made of characters that survive being read out loud. You cannot choose it: a chosen one is a guess away from the next.' | t }}
         </p>
 
         <div class="field">
-          <label for="ic-role">Role granted</label>
+          <label for="ic-role">{{ 'Role granted' | t }}</label>
           <select id="ic-role" formControlName="role">
             @for (role of roles; track role) {
               <option [value]="role">{{ role }}</option>
@@ -134,30 +135,30 @@ import { InvitationCodesService } from './invitation-codes.service';
         </div>
 
         <div class="field" [class.invalid]="invalid('maxUses')">
-          <label for="ic-max">Maximum uses</label>
+          <label for="ic-max">{{ 'Maximum uses' | t }}</label>
           <input id="ic-max" type="number" formControlName="maxUses" min="1" max="10000" />
           @if (invalid('maxUses')) {
-            <span class="error">At least 1.</span>
+            <span class="error">{{ 'At least 1.' | t }}</span>
           }
         </div>
 
         <div class="field">
-          <label for="ic-expires">Expires</label>
+          <label for="ic-expires">{{ 'Expires' | t }}</label>
           <input id="ic-expires" type="datetime-local" formControlName="expiresAt" />
-          <span class="hint">Optional. Leave empty and it never expires on its own.</span>
+          <span class="hint">{{ 'Optional. Leave empty and it never expires on its own.' | t }}</span>
         </div>
 
         <div class="field">
-          <label for="ic-notes">Notes</label>
-          <input id="ic-notes" type="text" formControlName="notes" placeholder="Intake 2026-2, Ingeniería" />
-          <span class="hint">Optional. Which intake, which cohort — for whoever reads this later.</span>
+          <label for="ic-notes">{{ 'Notes' | t }}</label>
+          <input id="ic-notes" type="text" formControlName="notes" [placeholder]="'Intake 2026-2, Ingeniería' | t" />
+          <span class="hint">{{ 'Optional. Which intake, which cohort — for whoever reads this later.' | t }}</span>
         </div>
 
         <div class="row">
           <button type="submit" class="btn btn-primary" [disabled]="submitting()">
-            {{ submitting() ? 'Creating…' : 'Create code' }}
+            {{ submitting() ? ('Creating…' | t) : ('Create code' | t) }}
           </button>
-          <button type="button" class="btn" (click)="formModal.close()">Cancel</button>
+          <button type="button" class="btn" (click)="formModal.close()">{{ 'Cancel' | t }}</button>
         </div>
       </form>
     </app-modal>
@@ -293,8 +294,8 @@ export class InvitationCodesPage {
   remove(code: InvitationCode): void {
     // Names what is being deleted and what it costs, because the two are different actions:
     // deactivating keeps the history of who used it, deleting does not.
-    const used = code.timesUsed > 0 ? ` It has been used ${code.timesUsed} time(s).` : '';
-    if (!window.confirm(`Delete invitation code ${code.code} (${code.role})?${used} Deactivating keeps its history; deleting does not.`)) {
+    const used = code.timesUsed > 0 ? ' ' + t('It has been used {times} time(s).', { times: code.timesUsed }) : '';
+    if (!window.confirm(t('Delete invitation code {code} ({role})?', { code: code.code, role: code.role }) + used + ' ' + t('Deactivating keeps its history; deleting does not.'))) {
       return;
     }
     this.busyCode.set(code.code);

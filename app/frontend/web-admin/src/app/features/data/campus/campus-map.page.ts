@@ -13,6 +13,7 @@ import { areaPath, drawingToGround, placementForFloor, streetLabel, toMetres, ty
 import type { Coordinate, Ground } from '../ground/ground.model';
 import { GroundService } from '../ground/ground.service';
 import { CATEGORY_COLORS } from '../spaces/space.model';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 /** A point on the map: metres east of its centre, and south, so the SVG's y grows down. */
 interface MapPoint {
@@ -57,39 +58,39 @@ const BUILDING_COLOR = '#c2185b';
  */
 @Component({
   selector: 'app-campus-map-page',
-  imports: [RouterLink, PageIntroComponent, ApiErrorBannerComponent],
+  imports: [TranslatePipe, RouterLink, PageIntroComponent, ApiErrorBannerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
-        title="Campus map"
-        what="The campus from above: the city's blocks and streets, and every building of the university on them, in its place and to scale."
-        [can]="['See where each building is and how far apart they are', 'Tell a building\\'s wings apart', 'Zoom in to see the rooms of a ground floor', 'Open a building\\'s floors from the map']"
-        note="North is up. The buildings and the streets are the city's own cadastre and reference map; a building drawn from its plans is laid over its footprint by where its drawing's corner is, which way it faces and at what scale."
+        [title]="'Campus map' | t"
+        [what]="'The campus from above: the city’s blocks and streets, and every building of the university on them, in its place and to scale.' | t"
+        [can]="[('See where each building is and how far apart they are' | t), ('Tell a building’s wings apart' | t), ('Zoom in to see the rooms of a ground floor' | t), ('Open a building’s floors from the map' | t)]"
+        [note]="'North is up. The buildings and the streets are the city’s own cadastre and reference map; a building drawn from its plans is laid over its footprint by where its drawing’s corner is, which way it faces and at what scale.' | t"
       />
 
       <app-api-error-banner [error]="error()" />
 
       @if (loading()) {
-        <div class="card empty-state">Loading the campus…</div>
+        <div class="card empty-state">{{ 'Loading the campus…' | t }}</div>
       } @else if (!ground()) {
         <div class="card empty-state">
-          <p>There is no map of the ground for {{ campus() }} yet.</p>
+          <p>{{ 'There is no map of the ground for {campus} yet.' | t: { campus: campus() } }}</p>
         </div>
       } @else {
         <section class="card map-card">
           <div class="row-between toolbar">
             <strong>{{ campus() }}</strong>
             <div class="row">
-              <button type="button" class="btn btn-sm" aria-label="Zoom out" [disabled]="zoom() === 0" (click)="setZoom(zoom() - 1)">−</button>
-              <button type="button" class="btn btn-sm" aria-label="Zoom in" [disabled]="zoom() === zooms.length - 1" (click)="setZoom(zoom() + 1)">+</button>
+              <button type="button" class="btn btn-sm" [attr.aria-label]="'Zoom out' | t" [disabled]="zoom() === 0" (click)="setZoom(zoom() - 1)">−</button>
+              <button type="button" class="btn btn-sm" [attr.aria-label]="'Zoom in' | t" [disabled]="zoom() === zooms.length - 1" (click)="setZoom(zoom() + 1)">+</button>
             </div>
           </div>
           <div class="scroller" #scroller>
             @if (drawn(); as m) {
               <svg
                 role="img"
-                [attr.aria-label]="'Map of ' + campus() + ', north up'"
+                [attr.aria-label]="'Map of {campus}, north up' | t: { campus: campus() }"
                 [attr.viewBox]="m.box.x + ' ' + m.box.y + ' ' + m.box.width + ' ' + m.box.height"
                 [attr.width]="m.box.width * zooms[zoom()]"
                 [attr.height]="m.box.height * zooms[zoom()]"
@@ -121,8 +122,8 @@ const BUILDING_COLOR = '#c2185b';
                 }
                 <g mask="url(#campus-walks)">
                 @for (b of mapped(); track b.code) {
-                  <a [routerLink]="b.floor ? ['/data/floors', b.code, b.floor] : ['/data/buildings']" class="building" [attr.aria-label]="b.name + ' - open its floors'">
-                    <title>{{ b.name }} · {{ b.floors }} {{ b.floors === 1 ? 'floor' : 'floors' }}</title>
+                  <a [routerLink]="b.floor ? ['/data/floors', b.code, b.floor] : ['/data/buildings']" class="building" [attr.aria-label]="'{name} - open its floors' | t: { name: b.name }">
+                    <title>{{ b.name }} · {{ b.floors === 1 ? ('1 floor' | t) : ('{floors} floors' | t: { floors: b.floors }) }}</title>
                     @for (part of b.parts; track $index) {
                       <path class="part" [attr.d]="part.d" [attr.fill]="part.fill" [attr.fill-opacity]="part.opacity" [attr.stroke]="part.fill" />
                     }
@@ -148,17 +149,17 @@ const BUILDING_COLOR = '#c2185b';
             @for (w of wingKey(); track w.code) {
               <span class="key-item"><span class="swatch" [style.background]="w.color"></span>{{ w.label }}</span>
             }
-            <span class="key-item"><span class="swatch" [style.background]="buildingColor"></span>A building, part by part</span>
-            <span class="key-item"><span class="swatch ramp"></span>Darker rises higher</span>
+            <span class="key-item"><span class="swatch" [style.background]="buildingColor"></span>{{ 'A building, part by part' | t }}</span>
+            <span class="key-item"><span class="swatch ramp"></span>{{ 'Darker rises higher' | t }}</span>
             @if (zoom() < roomsFrom) {
-              <span class="key-item hint">Zoom in to see the rooms of each drawn ground floor</span>
+              <span class="key-item hint">{{ 'Zoom in to see the rooms of each drawn ground floor' | t }}</span>
             }
           </div>
-          <p class="credit">Buildings, blocks and streets: {{ ground()?.source }}</p>
+          <p class="credit">{{ 'Buildings, blocks and streets: {value}' | t: { value: ground()?.source } }}</p>
         </section>
 
         <section class="card">
-          <h2 class="h">The buildings</h2>
+          <h2 class="h">{{ 'The buildings' | t }}</h2>
           <ul class="buildings">
             @for (b of mapped(); track b.code) {
               <li>
@@ -168,14 +169,14 @@ const BUILDING_COLOR = '#c2185b';
                 } @else {
                   {{ b.name }}
                 }
-                <span class="text-muted">· {{ b.floors }} {{ b.floors === 1 ? 'floor' : 'floors' }}</span>
+                <span class="text-muted">· {{ b.floors === 1 ? ('1 floor' | t) : ('{floors} floors' | t: { floors: b.floors }) }}</span>
               </li>
             }
           </ul>
           @if (unmapped().length) {
-            <h3 class="h3">Not on the map yet</h3>
+            <h3 class="h3">{{ 'Not on the map yet' | t }}</h3>
             <p class="text-muted">
-              Neither laid on the ground nor taken from the cadastre: nobody has said yet where they stand.
+              {{ 'Neither laid on the ground nor taken from the cadastre: nobody has said yet where they stand.' | t }}
             </p>
             <ul class="buildings">
               @for (b of unmapped(); track b.code) {

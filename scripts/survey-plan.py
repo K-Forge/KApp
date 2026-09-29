@@ -349,7 +349,8 @@ for d in PLAN:
     out.append('  {')
     for key in ('n', 'id', 'street', 'kind', 'building', 'text', 'a', 'b', 'dim', 'tag', 'expected'):
         if key in d:
-            out.append(f'    {key}: {ts(d[key])},')
+            # The description is shown translated: marked, so the i18n check finds its Spanish.
+            out.append(f'    {key}: {"/* i18n */ " if key == "text" else ""}{ts(d[key])},')
     out.append('  },')
 out.append('];')
 os.makedirs(os.path.dirname(OUT), exist_ok=True)

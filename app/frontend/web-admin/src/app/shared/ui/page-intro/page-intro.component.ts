@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 /**
  * The heading of a screen, plus a straight answer to "what is this for and what can I do here".
@@ -16,6 +17,7 @@ import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core
  */
 @Component({
   selector: 'app-page-intro',
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-intro">
@@ -33,7 +35,7 @@ import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core
           (click)="expanded.set(!expanded())"
           [attr.aria-expanded]="expanded()"
         >
-          {{ expanded() ? 'Hide what you can do here' : 'What you can do here' }}
+          {{ expanded() ? ('Hide what you can do here' | t) : ('What you can do here' | t) }}
           <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
             <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
           </svg>

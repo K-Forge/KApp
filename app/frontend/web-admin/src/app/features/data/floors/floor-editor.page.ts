@@ -70,6 +70,8 @@ import type { FloorDetail } from './floor.model';
 import { FloorsService } from './floors.service';
 import { InventoryTrayComponent, type OneSpace } from './inventory-tray.component';
 import { SpaceInspectorComponent, type CirculationOption } from './space-inspector.component';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 type Tab = 'space' | 'inventory' | 'corridors' | 'floor';
 
@@ -91,7 +93,7 @@ const MAX_ZOOM = 8;
  */
 @Component({
   selector: 'app-floor-editor-page',
-  imports: [
+  imports: [TranslatePipe, 
     RouterLink,
     ApiErrorBannerComponent,
     FloorPlanComponent,
@@ -105,20 +107,20 @@ const MAX_ZOOM = 8;
     <div class="editor-page">
       <div class="head">
         <div>
-          <a routerLink="/data/floors" class="back">← All floors</a>
+          <a routerLink="/data/floors" class="back">{{ '← All floors' | t }}</a>
           @if (blockCode(); as block) {
-            <a [routerLink]="['/data/blocks', block]" class="back" style="margin-left: 0.75rem">Its block</a>
+            <a [routerLink]="['/data/blocks', block]" class="back" style="margin-left: 0.75rem">{{ 'Its block' | t }}</a>
           }
           <h1>
             {{ buildingDoc()?.name ?? building() }} · {{ detail()?.name ?? floor() }}
             @if (dirty()) {
-              <span class="badge badge-warning">Unsaved</span>
+              <span class="badge badge-warning">{{ 'Unsaved' | t }}</span>
             }
           </h1>
         </div>
         <div class="row head-actions">
           @if (buildingDoc(); as b) {
-            <label class="sr-only" for="floor-switch">Floor</label>
+            <label class="sr-only" for="floor-switch">{{ 'Floor' | t }}</label>
             <span class="floor-switch">
               <select id="floor-switch" [value]="floor()" (change)="switchFloor($event)">
                 @for (f of b.floors; track f.code) {
@@ -130,10 +132,10 @@ const MAX_ZOOM = 8;
               </svg>
             </span>
           }
-          <button type="button" class="btn btn-sm" [disabled]="!canUndo()" (click)="undo()" aria-label="Undo" title="Undo">↶</button>
-          <button type="button" class="btn btn-sm" [disabled]="!canRedo()" (click)="redo()" aria-label="Redo" title="Redo">↷</button>
+          <button type="button" class="btn btn-sm" [disabled]="!canUndo()" (click)="undo()" [attr.aria-label]="'Undo' | t" [title]="'Undo' | t">↶</button>
+          <button type="button" class="btn btn-sm" [disabled]="!canRedo()" (click)="redo()" [attr.aria-label]="'Redo' | t" [title]="'Redo' | t">↷</button>
           <button type="button" class="btn btn-primary" [disabled]="!canSave()" (click)="save()">
-            {{ saving() ? 'Saving…' : 'Save floor' }}
+            {{ saving() ? ('Saving…' | t) : ('Save floor' | t) }}
           </button>
         </div>
       </div>
@@ -144,26 +146,24 @@ const MAX_ZOOM = 8;
 
       @if (pendingDraft(); as pending) {
         <div class="card banner warn" role="alert">
-          <p><strong>This device has changes to this floor that were never saved</strong>, from {{ time(pending.savedAt) }}.</p>
+          <p><strong>{{ 'This device has changes to this floor that were never saved' | t }}</strong>{{ ', from {value}.' | t: { value: time(pending.savedAt) } }}</p>
           @if (pendingOutdated()) {
             <p>
-              <strong>They were made on an older drawing of this floor.</strong> The floor has been
-              redrawn since; restoring them brings the old drawing back over the new one.
+              <strong>{{ 'They were made on an older drawing of this floor.' | t }}</strong> {{ 'The floor has been redrawn since; restoring them brings the old drawing back over the new one.' | t }}
             </p>
             <div class="row">
-              <button type="button" class="btn btn-sm btn-primary" (click)="discardPending()">Discard them</button>
-              <button type="button" class="btn btn-sm btn-danger" (click)="restorePending()">Restore the old drawing</button>
+              <button type="button" class="btn btn-sm btn-primary" (click)="discardPending()">{{ 'Discard them' | t }}</button>
+              <button type="button" class="btn btn-sm btn-danger" (click)="restorePending()">{{ 'Restore the old drawing' | t }}</button>
             </div>
           } @else {
             @if (pending.baseVersion !== detail()?.version) {
               <p>
-                Somebody has saved the floor since they were made. Restoring them and saving will
-                replace what that person saved.
+                {{ 'Somebody has saved the floor since they were made. Restoring them and saving will replace what that person saved.' | t }}
               </p>
             }
             <div class="row">
-              <button type="button" class="btn btn-sm btn-primary" (click)="restorePending()">Restore my changes</button>
-              <button type="button" class="btn btn-sm btn-danger" (click)="discardPending()">Discard them</button>
+              <button type="button" class="btn btn-sm btn-primary" (click)="restorePending()">{{ 'Restore my changes' | t }}</button>
+              <button type="button" class="btn btn-sm btn-danger" (click)="discardPending()">{{ 'Discard them' | t }}</button>
             </div>
           }
         </div>
@@ -172,12 +172,11 @@ const MAX_ZOOM = 8;
       @if (conflict()) {
         <div class="card banner warn" role="alert">
           <p>
-            <strong>Somebody saved this floor after you opened it.</strong> Nothing of yours was
-            saved, and your changes are still here and on this device.
+            <strong>{{ 'Somebody saved this floor after you opened it.' | t }}</strong> {{ 'Nothing of yours was saved, and your changes are still here and on this device.' | t }}
           </p>
           <div class="row">
-            <button type="button" class="btn btn-sm" (click)="takeTheirs()">Load theirs, drop mine</button>
-            <button type="button" class="btn btn-sm btn-danger" (click)="keepMine()">Save mine over theirs</button>
+            <button type="button" class="btn btn-sm" (click)="takeTheirs()">{{ 'Load theirs, drop mine' | t }}</button>
+            <button type="button" class="btn btn-sm btn-danger" (click)="keepMine()">{{ 'Save mine over theirs' | t }}</button>
           </div>
         </div>
       }
@@ -187,7 +186,7 @@ const MAX_ZOOM = 8;
       @if (issues().length) {
         <details class="card banner problems" [open]="issues().length <= 5">
           <summary>
-            {{ issues().length }} thing{{ issues().length === 1 ? '' : 's' }} to fix before this floor can be saved
+            {{ issues().length === 1 ? ('1 thing to fix before this floor can be saved' | t) : ('{count} things to fix before this floor can be saved' | t: { count: issues().length }) }}
           </summary>
           <ul>
             @for (issue of issues(); track $index) {
@@ -207,23 +206,23 @@ const MAX_ZOOM = 8;
 
       @if (draft(); as d) {
         <div class="workspace">
-          <section class="card canvas" aria-label="Floor">
+          <section class="card canvas" [attr.aria-label]="'Floor' | t">
             <div class="toolbar">
-              <div class="segmented" role="radiogroup" aria-label="What a touch on the plan does">
+              <div class="segmented" role="radiogroup" [attr.aria-label]="'What a touch on the plan does' | t">
                 <button type="button" role="radio" [attr.aria-checked]="mode() === 'select'" [class.on]="mode() === 'select'" (click)="setMode('select')">
-                  Select
+                  {{ 'Select' | t }}
                 </button>
                 <button type="button" role="radio" [attr.aria-checked]="mode() === 'box'" [class.on]="mode() === 'box'" (click)="setMode('box')">
-                  Draw rooms
+                  {{ 'Draw rooms' | t }}
                 </button>
                 <button type="button" role="radio" [attr.aria-checked]="mode() === 'corridor'" [class.on]="mode() === 'corridor'" (click)="setMode('corridor')">
-                  Corridor
+                  {{ 'Corridor' | t }}
                 </button>
               </div>
               <!-- Two groups that wrap whole: turning the plan, and zooming it. -->
               <div class="controls">
               <div class="group">
-                <button type="button" class="btn btn-sm turn" aria-label="Turn the plan a quarter to the left" title="Turn the plan a quarter to the left" (click)="turnDrawing(-1)">
+                <button type="button" class="btn btn-sm turn" [attr.aria-label]="'Turn the plan a quarter to the left' | t" [title]="'Turn the plan a quarter to the left' | t" (click)="turnDrawing(-1)">
                   <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
                     <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                     <path d="M3.5 3.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -231,8 +230,8 @@ const MAX_ZOOM = 8;
                 </button>
                 @if (d.top) {
                   <button type="button" class="compass" [disabled]="d.top === 'NORTH'" (click)="putUp('NORTH')"
-                          [attr.aria-label]="'North is ' + northWords(d.top) + (d.top === 'NORTH' ? '' : ' - turn the plan north up')"
-                          [title]="'North is ' + northWords(d.top) + (d.top === 'NORTH' ? '' : ' - tap to turn the plan north up')">
+                          [attr.aria-label]="d.top === 'NORTH' ? ('North is up' | t) : ('North is {where} - turn the plan north up' | t: { where: northWords(d.top) })"
+                          [title]="d.top === 'NORTH' ? ('North is up' | t) : ('North is {where} - tap to turn the plan north up' | t: { where: northWords(d.top) })">
                     <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true">
                       <g [attr.transform]="'rotate(' + north() + ' 16 16)'">
                         <path d="M16 9 L20.5 21 L16 18 L11.5 21 Z" fill="currentColor" />
@@ -242,7 +241,7 @@ const MAX_ZOOM = 8;
                     </svg>
                   </button>
                 }
-                <button type="button" class="btn btn-sm turn" aria-label="Turn the plan a quarter to the right" title="Turn the plan a quarter to the right" (click)="turnDrawing(1)">
+                <button type="button" class="btn btn-sm turn" [attr.aria-label]="'Turn the plan a quarter to the right' | t" [title]="'Turn the plan a quarter to the right' | t" (click)="turnDrawing(1)">
                   <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
                     <path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                     <path d="M20.5 3.5v4.5h-4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -250,69 +249,69 @@ const MAX_ZOOM = 8;
                 </button>
               </div>
               <div class="group">
-                <button type="button" class="btn btn-sm" aria-label="Zoom out" [disabled]="zoomSteps() <= minZoom" (click)="zoom(-1)">−</button>
-                <button type="button" class="btn btn-sm" aria-label="Fit to the screen" (click)="zoomSteps.set(0)">Fit</button>
-                <button type="button" class="btn btn-sm" aria-label="Zoom in" [disabled]="zoomSteps() >= maxZoom" (click)="zoom(1)">+</button>
+                <button type="button" class="btn btn-sm" [attr.aria-label]="'Zoom out' | t" [disabled]="zoomSteps() <= minZoom" (click)="zoom(-1)">−</button>
+                <button type="button" class="btn btn-sm" [attr.aria-label]="'Fit to the screen' | t" (click)="zoomSteps.set(0)">{{ 'Fit' | t }}</button>
+                <button type="button" class="btn btn-sm" [attr.aria-label]="'Zoom in' | t" [disabled]="zoomSteps() >= maxZoom" (click)="zoom(1)">+</button>
               </div>
               </div>
               <!-- What is drawn, each on its own switch; on a phone, two to a row. -->
               <div class="layers">
                 <button type="button" class="btn btn-sm layer" [class.on]="showRooms()" [attr.aria-pressed]="showRooms()"
-                        title="The rooms drawn on this floor" (click)="toggleRooms()">
+                        [title]="'The rooms drawn on this floor' | t" (click)="toggleRooms()">
                   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
                     <path d="M3 4h8v7H3zM13 4h8v7h-8zM3 13h18v7H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
                   </svg>
-                  Rooms
+                  {{ 'Rooms' | t }}
                 </button>
                 <button type="button" class="btn btn-sm layer" [class.on]="showCorridors()" [attr.aria-pressed]="showCorridors()"
-                        title="The corridors drawn on this floor" (click)="toggleCorridors()">
+                        [title]="'The corridors drawn on this floor' | t" (click)="toggleCorridors()">
                   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
                     <path d="M3 18h7V9h11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
-                  Corridors
+                  {{ 'Corridors' | t }}
                 </button>
                 @if (floorPlacement() && hasFootprint()) {
                   <button type="button" class="btn btn-sm layer" [class.on]="showMargin()" [attr.aria-pressed]="showMargin()"
-                          title="Where this floor's rooms go, wing by wing, and the floor below's, dotted" (click)="toggleMargin()">
+                          [title]="'Where this floor’s rooms go, wing by wing, and the floor below’s, dotted' | t" (click)="toggleMargin()">
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
                       <path d="M3 5h8v14H3zM11 8h10v11H11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
                     </svg>
-                    Margin
+                    {{ 'Margin' | t }}
                   </button>
                 }
                 @if (floorPlacement() && groundData()) {
                   <button type="button" class="btn btn-sm layer" [class.on]="showGround()" [attr.aria-pressed]="showGround()"
-                          title="The block, the sidewalks and the streets around the building" (click)="toggleGround()">
+                          [title]="'The block, the sidewalks and the streets around the building' | t" (click)="toggleGround()">
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
                       <path d="M4 21 9 3M20 21 15 3M12 5v2M12 11v2M12 17v2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                     </svg>
-                    Streets
+                    {{ 'Streets' | t }}
                   </button>
                 }
                 @if (floorPlacement() && groundData() && showGround() && hasFootprint()) {
                   <button type="button" class="btn btn-sm layer" [class.on]="showCadastre()" [attr.aria-pressed]="showCadastre()"
-                          title="The building's outline as the cadastre records it, the pink lines" (click)="toggleCadastre()">
+                          [title]="'The building’s outline as the cadastre records it, the pink lines' | t" (click)="toggleCadastre()">
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
                       <path d="M4 4h10v6h6v10H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-dasharray="3 2.5" />
                     </svg>
-                    Cadastre
+                    {{ 'Cadastre' | t }}
                   </button>
                 }
                 @if (floorPlacement() && neighbourBuildings().length) {
                   <button type="button" class="btn btn-sm layer" [class.on]="showNeighbours()" [attr.aria-pressed]="showNeighbours()"
-                          title="The buildings next door, to see and not to edit" (click)="toggleNeighbours()">
+                          [title]="'The buildings next door, to see and not to edit' | t" (click)="toggleNeighbours()">
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
                       <path d="M3 21V10l5-4 5 4v11M13 21v-8h8v8M3 21h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-dasharray="3 2" />
                     </svg>
-                    Neighbours
+                    {{ 'Neighbours' | t }}
                   </button>
                 }
               </div>
               @if (showCorridors() || mode() === 'corridor') {
                 <label class="thickness text-muted">
-                  <span>Corridor width</span>
+                  <span>{{ 'Corridor width' | t }}</span>
                   <input type="range" min="1" max="8" step="1" [value]="corridorWidth()" (input)="setCorridorWidth($event)" />
-                  <output>{{ corridorWidth() }} px</output>
+                  <output>{{ '{corridorWidth} px' | t: { corridorWidth: corridorWidth() } }}</output>
                 </label>
               }
             </div>
@@ -362,16 +361,16 @@ const MAX_ZOOM = 8;
           <aside class="card side" [class.locked]="!!pendingDraft()">
             <div class="tabs" role="tablist">
               <button type="button" role="tab" [attr.aria-selected]="tab() === 'space'" [class.on]="tab() === 'space'" (click)="tab.set('space')">
-                Space
+                {{ 'Space' | t }}
               </button>
               <button type="button" role="tab" [attr.aria-selected]="tab() === 'inventory'" [class.on]="tab() === 'inventory'" (click)="tab.set('inventory')">
-                Inventory <span class="count">{{ unplaced().length }}</span>
+                {{ 'Inventory' | t }} <span class="count">{{ unplaced().length }}</span>
               </button>
               <button type="button" role="tab" [attr.aria-selected]="tab() === 'corridors'" [class.on]="tab() === 'corridors'" (click)="tab.set('corridors')">
-                Corridors <span class="count">{{ d.corridors.length }}</span>
+                {{ 'Corridors' | t }} <span class="count">{{ d.corridors.length }}</span>
               </button>
               <button type="button" role="tab" [attr.aria-selected]="tab() === 'floor'" [class.on]="tab() === 'floor'" (click)="tab.set('floor')">
-                Floor
+                {{ 'Floor' | t }}
               </button>
             </div>
 
@@ -403,7 +402,7 @@ const MAX_ZOOM = 8;
                     />
                   } @else {
                     <p class="text-muted">
-                      Tap a room on the plan to edit it, or pick a space from the inventory to draw it.
+                      {{ 'Tap a room on the plan to edit it, or pick a space from the inventory to draw it.' | t }}
                     </p>
                   }
                 }
@@ -432,57 +431,51 @@ const MAX_ZOOM = 8;
                   <div class="stack floor-settings">
                     <div class="row spread">
                       <div class="field" style="flex: 1 1 9rem">
-                        <label for="f-status">Status</label>
+                        <label for="f-status">{{ 'Status' | t }}</label>
                         <select id="f-status" (change)="setFloor({ status: $any($event.target).value })">
                           @for (status of statuses; track status) {
-                            <option [value]="status" [selected]="status === d.status">{{ statusLabels[status] }}</option>
+                            <option [value]="status" [selected]="status === d.status">{{ statusLabels[status] | t }}</option>
                           }
                         </select>
                       </div>
                       <div class="field" style="flex: 1 1 9rem">
-                        <label for="f-access">Reachable without stairs?</label>
+                        <label for="f-access">{{ 'Reachable without stairs?' | t }}</label>
                         <select id="f-access" (change)="setFloor({ accessibility: $any($event.target).value })">
                           @for (value of accessibility; track value) {
-                            <option [value]="value" [selected]="value === d.accessibility">{{ accessibilityLabels[value] }}</option>
+                            <option [value]="value" [selected]="value === d.accessibility">{{ accessibilityLabels[value] | t }}</option>
                           }
                         </select>
                       </div>
                     </div>
                     <div class="field">
-                      <label for="f-note">How to get here</label>
-                      <input id="f-note" type="text" [value]="d.note" placeholder="Se sube por la escalera exterior" (change)="setFloor({ note: $any($event.target).value })" />
+                      <label for="f-note">{{ 'How to get here' | t }}</label>
+                      <input id="f-note" type="text" [value]="d.note" [placeholder]="'Se sube por la escalera exterior' | t" (change)="setFloor({ note: $any($event.target).value })" />
                     </div>
                     <div class="row spread">
                       <div class="field" style="flex: 1 1 6rem">
-                        <label for="f-width">Drawing width</label>
+                        <label for="f-width">{{ 'Drawing width' | t }}</label>
                         <input id="f-width" type="number" min="1" [max]="maxSize" [value]="d.width" (change)="setSize('width', $event)" />
                       </div>
                       <div class="field" style="flex: 1 1 6rem">
-                        <label for="f-height">Drawing height</label>
+                        <label for="f-height">{{ 'Drawing height' | t }}</label>
                         <input id="f-height" type="number" min="1" [max]="maxSize" [value]="d.height" (change)="setSize('height', $event)" />
                       </div>
                     </div>
                     <div class="field">
-                      <span class="label" id="f-top-label">The top of the drawing faces</span>
+                      <span class="label" id="f-top-label">{{ 'The top of the drawing faces' | t }}</span>
                       <div class="segmented" role="radiogroup" aria-labelledby="f-top-label">
                         @for (direction of compass; track direction) {
                           <button type="button" role="radio" [attr.aria-checked]="d.top === direction" [class.on]="d.top === direction" (click)="setTop(direction)">
-                            {{ compassLabels[direction] }}
+                            {{ compassLabels[direction] | t }}
                           </button>
                         }
                       </div>
                     </div>
                     <p class="text-faint small">
-                      Which way the top of the plan on the wall faces - a compass on the spot
-                      settles it. The round arrows next to Fit turn the plan a quarter at a time,
-                      moving every room, door and corridor with it and keeping this right; the
-                      compass there turns it north up.
+                      {{ 'Which way the top of the plan on the wall faces - a compass on the spot settles it. The round arrows next to Fit turn the plan a quarter at a time, moving every room, door and corridor with it and keeping this right; the compass there turns it north up.' | t }}
                     </p>
                     <p class="text-faint small">
-                      In the drawing's own units: a floor traced from its evacuation plan is drawn
-                      at the plan's scale. Shrinking it keeps every room; the ones left outside are
-                      listed to fix before saving. The floor's code, name and level are edited under
-                      Buildings.
+                      {{ 'In the drawing’s own units: a floor traced from its evacuation plan is drawn at the plan’s scale. Shrinking it keeps every room; the ones left outside are listed to fix before saving. The floor’s code, name and level are edited under Buildings.' | t }}
                     </p>
                   </div>
                 }
@@ -491,7 +484,7 @@ const MAX_ZOOM = 8;
           </aside>
         </div>
       } @else if (loading()) {
-        <div class="card empty-state"><p>Loading the floor…</p></div>
+        <div class="card empty-state"><p>{{ 'Loading the floor…' | t }}</p></div>
       }
     </div>
   `,
@@ -794,7 +787,7 @@ export class FloorEditorPage {
   readonly maxZoom = MAX_ZOOM;
   readonly maxSize = MAX_SIZE;
   readonly compass = COMPASS;
-  readonly compassLabels: Record<Compass, string> = { NORTH: 'North', EAST: 'East', SOUTH: 'South', WEST: 'West' };
+  readonly compassLabels: Record<Compass, string> = { NORTH: /* i18n */ 'North', EAST: /* i18n */ 'East', SOUTH: /* i18n */ 'South', WEST: /* i18n */ 'West' };
   readonly statuses = FLOOR_STATUSES;
   readonly statusLabels = FLOOR_STATUS_LABELS;
   readonly accessibility = ACCESSIBILITY;
@@ -927,7 +920,7 @@ export class FloorEditorPage {
     const codes = new Set([...shown.current, ...shown.below].map((m) => m.wing ?? 'none'));
     const wings = this.buildingDoc()?.wings ?? [];
     const named = wings.filter((w) => codes.has(w.code)).map((w) => ({ code: w.code, name: w.name }));
-    return codes.has('none') ? [...named, { code: 'none', name: this.buildingDoc()?.name ?? 'The building' }] : named;
+    return codes.has('none') ? [...named, { code: 'none', name: this.buildingDoc()?.name ?? t('The building') }] : named;
   });
 
   /**
@@ -1024,47 +1017,47 @@ export class FloorEditorPage {
   );
 
   readonly saveState = computed(() => {
-    if (this.saving()) return 'Saving…';
+    if (this.saving()) return t('Saving…');
     if (this.dirty()) {
-      if (this.keepFailed()) return 'Not saved - and this browser cannot keep a draft, so save before leaving.';
+      if (this.keepFailed()) return t('Not saved - and this browser cannot keep a draft, so save before leaving.');
       const at = this.keptAt();
-      return at ? `Not saved yet. Kept on this device at ${this.time(at)}.` : 'Not saved yet.';
+      return at ? t('Not saved yet. Kept on this device at {value}.', { value: this.time(at) }) : t('Not saved yet.');
     }
     const saved = this.savedAt();
     const version = this.detail()?.version;
-    return saved ? `Saved at ${this.time(saved)} · version ${version}.` : version !== undefined ? `Up to date · version ${version}.` : '';
+    return saved ? t('Saved at {value} · version {version}.', { value: this.time(saved), version }) : version !== undefined ? t('Up to date · version {version}.', { version }) : '';
   });
 
   readonly hint = computed(() => {
-    if (this.pendingDraft()) return 'Decide first what to do with the changes kept on this device.';
-    if (!this.showRooms()) return 'The rooms are hidden. Show them again with Rooms to edit the floor.';
+    if (this.pendingDraft()) return t('Decide first what to do with the changes kept on this device.');
+    if (!this.showRooms()) return t('The rooms are hidden. Show them again with Rooms to edit the floor.');
     const placing = this.placingKey();
     const space = placing ? this.draft()?.spaces.find((s) => s.key === placing) : null;
-    if (space) return `Drag the outline of ${label(space)} on the plan, or tap where it is for a small square to reshape.`;
+    if (space) return t('Drag the outline of {value} on the plan, or tap where it is for a small square to reshape.', { value: label(space) });
     switch (this.mode()) {
       case 'box':
-        return 'Drag across the plan to outline a room; a tap draws a small square to reshape by its corners.';
+        return t('Drag across the plan to outline a room; a tap draws a small square to reshape by its corners.');
       case 'split': {
         const selected = this.selected();
         return selected
-          ? `Tap inside ${label(selected)} where the wall between the two rooms is; it is cut across its longer side.`
-          : 'Select a room first.';
+          ? t('Tap inside {value} where the wall between the two rooms is; it is cut across its longer side.', { value: label(selected) })
+          : t('Select a room first.');
       }
       case 'door': {
         const selected = this.selected();
         return selected
-          ? `Tap a wall of ${label(selected)} to put a door there; tap a door to take it out.`
-          : 'Select a room first.';
+          ? t('Tap a wall of {value} to put a door there; tap a door to take it out.', { value: label(selected) })
+          : t('Select a room first.');
       }
       case 'corridor': {
         const index = this.activeCorridor();
         const corridor = index !== null ? this.draft()?.corridors[index] : null;
         return corridor
-          ? `Drawing ${corridor.name}: tap the points it runs through in walking order; tap one again to take it out.`
-          : 'Pick or create a corridor under Corridors to draw it.';
+          ? t('Drawing {name}: tap the points it runs through in walking order; tap one again to take it out.', { name: corridor.name })
+          : t('Pick or create a corridor under Corridors to draw it.');
       }
       default:
-        return 'Tap a room to edit it: drag it, or drag its corners. Use Draw rooms to outline new ones.';
+        return t('Tap a room to edit it: drag it, or drag its corners. Use Draw rooms to outline new ones.');
     }
   });
 
@@ -1187,13 +1180,13 @@ export class FloorEditorPage {
     if (!pending) return;
     this.pendingDraft.set(null);
     this.apply(pending.draft);
-    this.notice.set('Your changes are back. Save when they are ready.');
+    this.notice.set(t('Your changes are back. Save when they are ready.'));
   }
 
   discardPending(): void {
     clearDraft(this.building(), this.floor());
     this.pendingDraft.set(null);
-    this.notice.set('The changes kept on this device were discarded.');
+    this.notice.set(t('The changes kept on this device were discarded.'));
   }
 
   // ── History ────────────────────────────────────────────────────────────────────────────
@@ -1263,7 +1256,7 @@ export class FloorEditorPage {
     if (this.mode() === 'corridor' && !this.placingKey()) {
       const index = this.activeCorridor();
       if (index === null) {
-        this.notice.set('Pick a corridor to draw first.');
+        this.notice.set(t('Pick a corridor to draw first.'));
         this.tab.set('corridors');
         return;
       }
@@ -1306,11 +1299,11 @@ export class FloorEditorPage {
       this.apply(place(draft, space.key, shape));
       this.placingKey.set(null);
       this.selectedKey.set(space.key);
-      this.notice.set(`${label(space)} drawn. Drag its corners to match the plan.`);
+      this.notice.set(t('{value} drawn. Drag its corners to match the plan.', { value: label(space) }));
       return;
     }
     if (refusePlacement(draft, null, shape)) {
-      this.notice.set('That outline would overlap another room or leave the drawing.');
+      this.notice.set(t('That outline would overlap another room or leave the drawing.'));
       return;
     }
     const box = newBox(draft, this.floor(), shape, this.takenElsewhere());
@@ -1319,8 +1312,8 @@ export class FloorEditorPage {
     this.tab.set('space');
     this.notice.set(
       this.unplaced().length
-        ? 'Room drawn. Say which inventoried space it is, or describe it.'
-        : 'Room drawn. Describe it, or keep drawing.',
+        ? t('Room drawn. Say which inventoried space it is, or describe it.')
+        : t('Room drawn. Describe it, or keep drawing.'),
     );
   }
 
@@ -1350,7 +1343,13 @@ export class FloorEditorPage {
     const doors = space.doors.length;
     const next = place(draft, key, shape);
     const lost = doors - (next.spaces.find((s) => s.key === key)?.doors.length ?? doors);
-    this.notice.set(lost ? `${lost} door${lost === 1 ? '' : 's'} left the outline and went; undo brings ${lost === 1 ? 'it' : 'them'} back.` : '');
+    this.notice.set(
+      lost === 1
+        ? t('A door left the outline and went; undo brings it back.')
+        : lost
+          ? t('{lost} doors left the outline and went; undo brings them back.', { lost })
+          : '',
+    );
     this.apply(next);
   }
 
@@ -1359,7 +1358,7 @@ export class FloorEditorPage {
     const space = draft?.spaces.find((s) => s.key === key);
     if (!draft || !space || !isPlaced(space)) return;
     if (space.shape.length <= 3) {
-      this.notice.set('A room needs at least three corners.');
+      this.notice.set(t('A room needs at least three corners.'));
       return;
     }
     this.onReshaped(key, withoutVertex(space.shape, index));
@@ -1368,23 +1367,23 @@ export class FloorEditorPage {
   private doorTap(draft: FloorDraft, point: Point): void {
     const space = this.selected();
     if (!space || !isPlaced(space)) {
-      this.notice.set('Select a drawn room first, then tap its walls.');
+      this.notice.set(t('Select a drawn room first, then tap its walls.'));
       return;
     }
     const reach = 12 / this.scale();
     const existing = doorNear(space, point, reach);
     if (existing !== null) {
       this.apply(removeDoor(draft, space.key, existing));
-      this.notice.set('Door taken out.');
+      this.notice.set(t('Door taken out.'));
       return;
     }
     const door = doorAt(space.shape, point, doorWidth(draft));
     if (!door || Math.hypot(point.x - (door.from.x + door.to.x) / 2, point.y - (door.from.y + door.to.y) / 2) > doorWidth(draft) + reach) {
-      this.notice.set(`Tap on a wall of ${label(space)}.`);
+      this.notice.set(t('Tap on a wall of {value}.', { value: label(space) }));
       return;
     }
     this.apply(addDoor(draft, space.key, door));
-    this.notice.set('Door added. Tap it again to take it out.');
+    this.notice.set(t('Door added. Tap it again to take it out.'));
   }
 
   /** The small square a tap draws, centred on it and kept on the drawing. */
@@ -1398,11 +1397,11 @@ export class FloorEditorPage {
   private refusalText(space: DraftSpace, refusal: PlacementRefusal): string {
     switch (refusal.reason) {
       case 'bounds':
-        return `${label(space)} would reach outside the drawing.`;
+        return t('{value} would reach outside the drawing.', { value: label(space) });
       case 'shape':
-        return `${label(space)}'s outline would cross itself.`;
+        return t('{value}’s outline would cross itself.', { value: label(space) });
       default:
-        return `${label(space)} would overlap ${label(refusal.other)}.`;
+        return t('{value} would overlap {value2}.', { value: label(space), value2: label(refusal.other) });
     }
   }
 
@@ -1456,17 +1455,17 @@ export class FloorEditorPage {
   private splitTap(draft: FloorDraft, point: Point): void {
     const space = this.selected();
     if (!space || !isPlaced(space)) {
-      this.notice.set('Select a drawn room first, then tap where to cut it.');
+      this.notice.set(t('Select a drawn room first, then tap where to cut it.'));
       return;
     }
     const result = split(draft, space.key, point, this.floor(), this.takenElsewhere());
     if (!result) {
-      this.notice.set(`Tap inside ${label(space)}, away from its edges.`);
+      this.notice.set(t('Tap inside {value}, away from its edges.', { value: label(space) }));
       return;
     }
     this.apply(result.draft);
     this.mode.set('select');
-    this.notice.set(`${label(space)} cut in two. The other part is a box to name; undo puts it back.`);
+    this.notice.set(t('{value} cut in two. The other part is a box to name; undo puts it back.', { value: label(space) }));
   }
 
   removeSelectedDoor(index: number): void {
@@ -1488,7 +1487,7 @@ export class FloorEditorPage {
     if (!draft || !space) return;
     this.apply(unplace(draft, space.key));
     this.placingKey.set(null);
-    this.notice.set(`${label(space)} is back in the inventory.`);
+    this.notice.set(t('{value} is back in the inventory.', { value: label(space) }));
   }
 
   removeSelected(): void {
@@ -1498,7 +1497,7 @@ export class FloorEditorPage {
     this.apply(removeSpace(draft, space.key));
     this.selectedKey.set(null);
     this.placingKey.set(null);
-    this.notice.set(`${label(space)} deleted. Undo brings it back.`);
+    this.notice.set(t('{value} deleted. Undo brings it back.', { value: label(space) }));
   }
 
   assign(spaceKey: string): void {
@@ -1508,7 +1507,7 @@ export class FloorEditorPage {
     if (!draft || !box || !space) return;
     this.apply(assignBox(draft, box.key, spaceKey));
     this.selectedKey.set(spaceKey);
-    this.notice.set(`That box is ${label(space)}.`);
+    this.notice.set(t('That box is {value}.', { value: label(space) }));
   }
 
   // ── Inventory ──────────────────────────────────────────────────────────────────────────
@@ -1527,7 +1526,7 @@ export class FloorEditorPage {
     if (!draft) return;
     const door = one.doorCode.trim();
     if (door && draft.spaces.some((s) => (s.doorCode ?? '').toUpperCase() === door.toUpperCase())) {
-      this.notice.set(`Door ${door} is already on this floor.`);
+      this.notice.set(t('Door {door} is already on this floor.', { door }));
       return;
     }
     const taken = this.takenElsewhere();
@@ -1549,7 +1548,7 @@ export class FloorEditorPage {
       capacity: null,
     };
     this.apply(addSpaces(draft, [space]));
-    this.notice.set(`${label(space)} added to the inventory.`);
+    this.notice.set(t('{value} added to the inventory.', { value: label(space) }));
   }
 
   addRange(range: RangeRequest): void {
@@ -1558,13 +1557,15 @@ export class FloorEditorPage {
     const created = rangeSpaces(draft, range);
     const asked = Math.abs(range.to - range.from) + 1;
     if (!created.length) {
-      this.notice.set('All of those are already on this floor.');
+      this.notice.set(t('All of those are already on this floor.'));
       return;
     }
     this.apply(addSpaces(draft, created));
     const skipped = asked - created.length;
     this.notice.set(
-      `${created.length} added to the inventory${skipped ? `; ${skipped} were already on this floor` : ''}.`,
+      skipped
+        ? t('{added} added to the inventory; {skipped} were already on this floor.', { added: created.length, skipped })
+        : t('{added} added to the inventory.', { added: created.length }),
     );
   }
 
@@ -1584,7 +1585,7 @@ export class FloorEditorPage {
     const active = this.activeCorridor();
     if (active === index) this.activateCorridor(null);
     else if (active !== null && active > index) this.activeCorridor.set(active - 1);
-    this.notice.set(`${corridor.name} deleted. Undo brings it back.`);
+    this.notice.set(t('{name} deleted. Undo brings it back.', { name: corridor.name }));
   }
 
   changeCorridor(index: number, patch: Partial<Corridor>): void {
@@ -1597,7 +1598,7 @@ export class FloorEditorPage {
     const draft = this.draft();
     if (!draft) return;
     if (draft.corridors.some((c) => c.code.toUpperCase() === corridor.code.toUpperCase())) {
-      this.notice.set(`There is already a corridor ${corridor.code} on this floor.`);
+      this.notice.set(t('There is already a corridor {code} on this floor.', { code: corridor.code }));
       return;
     }
     this.apply({ ...draft, corridors: [...draft.corridors, corridor] });
@@ -1614,7 +1615,7 @@ export class FloorEditorPage {
 
   /** Where north is, in words, for whoever cannot see the compass. */
   northWords(top: Compass | null): string {
-    return ({ NORTH: 'up', EAST: 'to the left', SOUTH: 'down', WEST: 'to the right' } as const)[top ?? 'NORTH'];
+    return t(({ NORTH: /* i18n */ 'up', EAST: /* i18n */ 'to the left', SOUTH: /* i18n */ 'down', WEST: /* i18n */ 'to the right' } as const)[top ?? 'NORTH']);
   }
 
   toggleGround(): void {
@@ -1744,7 +1745,7 @@ export class FloorEditorPage {
         this.detail.set(latest);
         this.apply(fromDetail(latest));
         this.selectedKey.set(null);
-        this.notice.set('Loaded what was saved. Undo brings your changes back.');
+        this.notice.set(t('Loaded what was saved. Undo brings your changes back.'));
       },
       error: (err: unknown) => this.saveError.set(err instanceof AppHttpError ? err.apiError : null),
     });
@@ -1783,8 +1784,8 @@ export class FloorEditorPage {
       !this.dirty() ||
       window.confirm(
         this.keepFailed()
-          ? 'This floor has changes that are not saved, and this browser could not keep them. Leave and lose them?'
-          : 'This floor has changes that are not saved. They stay on this device for next time. Leave anyway?',
+          ? t('This floor has changes that are not saved, and this browser could not keep them. Leave and lose them?')
+          : t('This floor has changes that are not saved. They stay on this device for next time. Leave anyway?'),
       )
     );
   }
