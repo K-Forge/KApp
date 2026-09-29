@@ -2,6 +2,7 @@ import { toView, type ViewPoint } from '../blocks/block-geometry';
 import type { Coordinate } from '../ground/ground.model';
 import { SURVEY_FRAME, SURVEY_PLAN } from './survey-plan';
 import { asText, formatMetres, merged, readDistance, stillPending } from './survey-sheet';
+import type { SurveyMeasure } from './survey.model';
 
 describe('survey sheet', () => {
   it('adds up the pieces of a distance, as a Spanish keyboard or the Measure app writes them', () => {
@@ -32,6 +33,14 @@ describe('survey sheet', () => {
     expect(stillPending(pending, merged(server, pending))).toEqual({});
     // A change made while the save was on its way stays pending.
     expect(Object.keys(stillPending({ 'bis-01': { id: 'bis-01', text: '2,25' } }, server))).toEqual(['bis-01']);
+  });
+
+  it('stops being pending once saved, though the server trims it and drops what is blank', () => {
+    // What the phone sent, and what the server gave back for it.
+    const sent = { 'bis-04': { id: 'bis-04', label: '', text: '4,80 + 3,25 ', metres: 8.05, note: ' tree ' } };
+    const stored: SurveyMeasure[] = [{ id: 'bis-04', label: null, text: '4,80 + 3,25', metres: 8.05, note: 'tree', updatedAt: '2026-09-29T19:00:00Z' }];
+    expect(stillPending(sent, stored)).toEqual({});
+    expect(Object.keys(stillPending({ 'bis-04': { id: 'bis-04', text: '4,85' } }, stored))).toEqual(['bis-04']);
   });
 
   it('writes the survey as text in walking order, pieces and notes included', () => {

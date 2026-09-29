@@ -69,8 +69,11 @@ export function stillPending(
   pending: Readonly<Record<string, SurveyMeasure>>,
   saved: readonly SurveyMeasure[],
 ): Record<string, SurveyMeasure> {
+  // As the server stores a field: trimmed, and nothing when blank. Compared raw, a trailing space
+  // or an empty label never matched what came back, and the sheet saved again forever.
+  const kept = (v: string | null | undefined) => (v == null || !v.trim() ? null : v.trim());
   const same = (a: SurveyMeasure, b: SurveyMeasure | undefined) =>
-    !!b && (a.text ?? null) === (b.text ?? null) && (a.note ?? null) === (b.note ?? null) && (a.label ?? null) === (b.label ?? null);
+    !!b && kept(a.text) === kept(b.text) && kept(a.note) === kept(b.note) && kept(a.label) === kept(b.label);
   const out: Record<string, SurveyMeasure> = {};
   for (const [id, m] of Object.entries(pending)) {
     const there = saved.find((s) => s.id === id);
