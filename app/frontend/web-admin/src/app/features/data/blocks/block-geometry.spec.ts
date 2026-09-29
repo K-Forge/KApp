@@ -3,11 +3,14 @@ import {
   areaOf,
   blockOf,
   closeRing,
+  distanceAhead,
+  edgesOf,
   fromView,
   openRing,
   snapped,
   squared,
   toView,
+  wallsOf,
   withEdgeMoved,
   withInsertedVertex,
   withoutVertex,
@@ -93,6 +96,37 @@ describe('block geometry', () => {
     expect(snapped({ x: 10.3, y: 7.02 }, targets, 0.5)).toEqual({ x: 10, y: 7 });
     expect(snapped({ x: 11.01, y: 19.8 }, targets, 0.5)).toEqual({ x: 11, y: 20 });
     expect(alignment(square, [{ x: 10.4, y: 5.2 }], 0.5)).toEqual([expect.closeTo(0.4, 6), expect.closeTo(0.2, 6)]);
+  });
+
+  it('measures each wall, and writes it beside it, along it, never upside down', () => {
+    const walls = wallsOf(square, 1);
+    expect(walls.map((w) => w.metres)).toEqual([10, 5, 10, 5]);
+    // The top wall's length goes above it, the right one's to its right.
+    expect(walls[0]).toMatchObject({ at: { x: 5, y: -1 }, angle: 0 });
+    expect(walls[1]).toMatchObject({ at: { x: 11, y: 2.5 }, angle: 90 });
+    // The bottom wall runs right to left; its length still reads left to right, and inside when asked.
+    expect(walls[2].angle).toBeCloseTo(0, 6);
+    expect(wallsOf(square, -1)[2].at).toEqual({ x: 5, y: 4 });
+  });
+
+  it('finds the sidewalk in front of a wall, unless a neighbour stands between', () => {
+    const sidewalk = edgesOf([
+      { x: -5, y: -4 },
+      { x: 15, y: -4 },
+      { x: 15, y: -2 },
+      { x: -5, y: -2 },
+    ]);
+    const top = wallsOf(square, 0)[0];
+    expect(distanceAhead(top.middle, top.out, sidewalk, [], 10)).toBeCloseTo(2, 6);
+    expect(distanceAhead(top.middle, top.out, sidewalk, [], 1.5)).toBeNull();
+    // A neighbour built against the wall: its own wall lies on this one's line.
+    const neighbour = edgesOf([
+      { x: 0, y: -1 },
+      { x: 10, y: -1 },
+      { x: 10, y: 0 },
+      { x: 0, y: 0 },
+    ]);
+    expect(distanceAhead(top.middle, top.out, sidewalk, neighbour, 10)).toBeNull();
   });
 
   it('reads the block from a lot code', () => {

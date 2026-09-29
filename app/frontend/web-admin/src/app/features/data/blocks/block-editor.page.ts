@@ -14,6 +14,8 @@ import {
   areaOf,
   blockOf,
   closeRing,
+  distanceAhead,
+  edgesOf,
   fromView,
   middleOf,
   openRing,
@@ -23,6 +25,7 @@ import {
   squared,
   toView,
   translate,
+  wallsOf,
   withEdgeMoved,
   withInsertedVertex,
   withVertex,
@@ -76,6 +79,8 @@ const DOUBLE_TAP_MS = 400;
 const MARGIN = 14;
 /** The screen area, in square pixels, a shape needs for its label to fit. */
 const LABEL_ROOM_PX = 2500;
+/** Metres in front of a wall a sidewalk is looked for: a setback, not the street's far side. */
+const SETBACK_REACH = 12;
 
 /**
  * The block editor: every outline on one city block - the parts of the university's buildings and
@@ -218,6 +223,13 @@ const LABEL_ROOM_PX = 2500;
                     <text class="label" [attr.x]="s.at.x" [attr.y]="s.at.y" [attr.font-size]="11 / scale()">{{ s.label }}</text>
                   }
                   @if (handles(); as h) {
+                    @for (w of h.walls; track $index) {
+                      <text class="measure" [attr.transform]="'translate(' + w.at.x + ' ' + w.at.y + ') rotate(' + w.angle + ')'" [attr.font-size]="10 / scale()">{{ w.text }}</text>
+                      @if (w.setback; as g) {
+                        <line class="setback" [attr.x1]="w.middle.x" [attr.y1]="w.middle.y" [attr.x2]="g.x2" [attr.y2]="g.y2" />
+                        <text class="measure setback-text" [attr.transform]="'translate(' + g.at.x + ' ' + g.at.y + ') rotate(' + w.angle + ')'" [attr.font-size]="10 / scale()">{{ g.text }}</text>
+                      }
+                    }
                     @for (m of h.mids; track $index) {
                       <rect class="mid" [attr.data-edge]="$index" [attr.x]="m.x - 5 / scale()" [attr.y]="m.y - 5 / scale()" [attr.width]="10 / scale()" [attr.height]="10 / scale()" />
                     }
@@ -453,7 +465,8 @@ const LABEL_ROOM_PX = 2500;
     }
     .street,
     .label,
-    .lot-code {
+    .lot-code,
+    .measure {
       text-anchor: middle;
       dominant-baseline: central;
       paint-order: stroke;
@@ -475,6 +488,21 @@ const LABEL_ROOM_PX = 2500;
       fill: color-mix(in srgb, var(--text) 60%, transparent);
       stroke: var(--bg-elevated);
       stroke-width: 3;
+    }
+    .measure {
+      fill: var(--primary);
+      font-weight: 600;
+      stroke: var(--bg-elevated);
+      stroke-width: 3;
+    }
+    .setback {
+      stroke: var(--primary);
+      stroke-width: 1.5;
+      stroke-dasharray: 4 3;
+      pointer-events: none;
+    }
+    .setback-text {
+      font-style: italic;
     }
     .corner {
       fill: #fff;
@@ -689,6 +717,7 @@ export class BlockEditorPage {
       roadways: area(ground.roadways),
       medians: area(ground.medians),
       sidewalks: area(ground.sidewalks),
+      sidewalkEdges: ground.sidewalks.flatMap((r) => edgesOf(openRing(r).map(at))),
       lots,
       streets,
       context,
@@ -717,17 +746,50 @@ export class BlockEditorPage {
     });
   });
 
+  /**
+   * The selected shape's corners and walls to grab, and its measures: each wall's length, written
+   * inside it, and the setback from the wall to the sidewalk in front of it - what a tape or the
+   * phone's Measure app gives on site. Another building's wall in the way means no setback.
+   */
   readonly handles = computed(() => {
     const s = this.selected();
     if (!s) return null;
     const dragged = this.dragged();
     const points = dragged && dragged.key === s.key ? dragged.points : s.points;
+    const scale = this.scale();
+    const sidewalks = this.view()?.sidewalkEdges ?? [];
+    const blockers = this.shapes()
+      .filter((o) => o.key !== s.key && (o.floors > 0 || o.basements > 0))
+      .flatMap((o) => edgesOf(o.points));
     return {
       corners: points,
       mids: points.map((p, i) => {
         const q = points[(i + 1) % points.length];
         return { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 };
       }),
+      walls: wallsOf(points, -12 / scale)
+        .filter((w) => w.metres * scale >= 24)
+        .map((w) => {
+          const gap = distanceAhead(w.middle, w.out, sidewalks, blockers, SETBACK_REACH);
+          return {
+            ...w,
+            text: `${w.metres.toFixed(2)} m`,
+            setback:
+              gap === null || gap < 0.05
+                ? null
+                : {
+                    x2: w.middle.x + w.out.x * gap,
+                    y2: w.middle.y + w.out.y * gap,
+                    // Beside the dashed line, clear of the wall's square: a setback of a few
+                    // centimetres would otherwise be written under it.
+                    at: {
+                      x: w.middle.x + (w.out.x * gap) / 2 - (w.out.y * 30) / scale,
+                      y: w.middle.y + (w.out.y * gap) / 2 + (w.out.x * 30) / scale,
+                    },
+                    text: `${gap.toFixed(2)} m`,
+                  },
+          };
+        }),
     };
   });
 

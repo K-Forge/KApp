@@ -436,6 +436,10 @@ structures. The floor editor draws its margins from those footprints. A load kee
 somebody changed in the portal, and `V010_CampusStructures` only seeds a campus that has no
 structures yet, so after surveying a block, export and commit as above.
 
+On site, select an outline to check it against a tape or the phone's Measure app. Each wall shows
+its length, and a dashed line gives the setback from the wall to the sidewalk in front of it, up
+to 12 m. There is no setback where another building stands in between.
+
 Those files are also what every database is drawn from. `V007_TracedCampus` loads them again at
 the first start after they change:
 

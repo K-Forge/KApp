@@ -171,6 +171,68 @@ export function alignment(shape: readonly ViewPoint[], targets: readonly ViewPoi
   return [dx, dy];
 }
 
+/** A wall of a shape: its length in metres, its middle, and the way out of the shape. */
+export interface Wall {
+  metres: number;
+  middle: ViewPoint;
+  out: ViewPoint;
+  /** Where to write the length: `offset` metres out of the shape (in, when negative). */
+  at: ViewPoint;
+  /** Degrees to turn the writing so it runs along the wall, never upside down. */
+  angle: number;
+}
+
+/** Each wall of a shape, to set against a tape or the phone's Measure app. */
+export function wallsOf(shape: readonly ViewPoint[], offset: number): Wall[] {
+  const centre = middleOf(shape);
+  return shape.map((a, i) => {
+    const b = shape[(i + 1) % shape.length];
+    const metres = Math.hypot(b.x - a.x, b.y - a.y);
+    const middle = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    let out = metres ? { x: -(b.y - a.y) / metres, y: (b.x - a.x) / metres } : { x: 0, y: 0 };
+    if ((middle.x - centre.x) * out.x + (middle.y - centre.y) * out.y < 0) out = { x: -out.x, y: -out.y };
+    let angle = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+    if (angle > 90) angle -= 180;
+    if (angle < -90) angle += 180;
+    return { metres, middle, out, at: { x: middle.x + out.x * offset, y: middle.y + out.y * offset }, angle };
+  });
+}
+
+/** A ring's edges, each from a corner to the next. */
+export function edgesOf(ring: readonly ViewPoint[]): [ViewPoint, ViewPoint][] {
+  return ring.map((p, i) => [p, ring[(i + 1) % ring.length]]);
+}
+
+/**
+ * How far one goes from `from` along the unit vector `way` before meeting one of `targets`' edges:
+ * null when one of `blockers`' edges comes first, or nothing is met within `reach` metres - a
+ * wall's distance to the sidewalk in front of it, unless another building stands between.
+ */
+export function distanceAhead(
+  from: ViewPoint,
+  way: ViewPoint,
+  targets: readonly [ViewPoint, ViewPoint][],
+  blockers: readonly [ViewPoint, ViewPoint][],
+  reach: number,
+): number | null {
+  const hit = (edges: readonly [ViewPoint, ViewPoint][], from0: number) => {
+    let best = Infinity;
+    for (const [p, q] of edges) {
+      const ex = q.x - p.x;
+      const ey = q.y - p.y;
+      const den = way.x * ey - way.y * ex;
+      if (Math.abs(den) < 1e-12) continue;
+      const t = ((p.x - from.x) * ey - (p.y - from.y) * ex) / den;
+      const u = ((p.x - from.x) * way.y - (p.y - from.y) * way.x) / den;
+      if (t >= from0 && u >= 0 && u <= 1) best = Math.min(best, t);
+    }
+    return best;
+  };
+  const target = hit(targets, 0);
+  // A neighbour's wall on this one's line blocks it too: a seam leads to no sidewalk.
+  return target <= reach && hit(blockers, -0.01) >= target ? target : null;
+}
+
 /** SVG path data for a closed shape. */
 export function pathOf(shape: readonly ViewPoint[]): string {
   return shape.length ? 'M' + shape.map((p) => `${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' L') + ' Z' : '';
