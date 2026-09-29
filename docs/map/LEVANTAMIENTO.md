@@ -226,6 +226,18 @@ no exista y agregar lo que falte.
 
 **EC**
 
+- [ ] **Las medidas de afuera, con la hoja de levantamiento del portal** (*Survey*,
+  `/data/survey`).
+  - Son 67 distancias alrededor de la manzana, en el orden en que se camina, desde la esquina de
+    la Calle 63 con la Cra 9 Bis.
+  - Hay de dos clases. Las naranjas van del muro al borde de la calle, derecho, y dicen dónde está
+    cada volumen. Las azules van a lo largo del muro o a través de una puerta, y dicen cuánto
+    mide.
+  - Hay una por cada fachada de las alas y sus conexiones, y por las puertas: la recepción, la
+    salida a la Cra 9A y la entrada del auditorio.
+  - El ala sur se mide cada 5 m, porque el catastro la ve desde arriba.
+  - Con esas medidas se redibujan los contornos, en vez de moverlos a mano en el editor de
+    manzana.
 - [ ] Orientación con brújula.
 - [ ] **Ala norte, P1–P5**, y su escalera hacia la terraza norte del P6.
 - [ ] **Ala sur, P3–P6**, y por dónde se entra desde el ala central.

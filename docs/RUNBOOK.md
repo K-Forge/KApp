@@ -440,6 +440,22 @@ On site, select an outline to check it against a tape or the phone's Measure app
 its length, and a dashed line gives the setback from the wall to the sidewalk in front of it, up
 to 12 m. There is no setback where another building stands in between.
 
+Reshaping by hand is slow, so a block is measured first. The portal's *Survey* (`/data/survey`)
+walks round the Edificio Central's block one distance at a time, on a sketch zoomed to each, in
+the order you walk it. There are two kinds of distance:
+
+- **setbacks**, from a wall straight out to the curb, which say where the building stands;
+- **lengths**, along a wall or across a door, which say how wide it is.
+
+Longer ones are typed in pieces (`4,80 + 3,25`), since the Measure app drifts past 5 m. What is
+typed is saved as it is typed (`/api/map/campuses/{campus}/survey`) and kept on the phone until the
+server has it. The export above writes it to `docs/map/survey/`.
+
+The plan itself comes from `scripts/survey-plan.py`, which lays it on the seed's outlines and the
+city's curbs. The model's figure beside each distance is there to catch a slip on site. Change the
+plan there and rerun the script. The distances already taken are saved under their ids, so never
+renumber one.
+
 Those files are also what every database is drawn from. `V007_TracedCampus` loads them again at
 the first start after they change:
 
