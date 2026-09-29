@@ -8,7 +8,7 @@ import { JsonViewComponent } from '../../shared/ui/json-view/json-view.component
 import { RequestHistoryService } from './request-history.service';
 import type { ConsoleHeader, ConsoleResult, HistoryEntry } from './console.model';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
-import { t } from '../../core/i18n/i18n.service';
+import { apiText, t } from '../../core/i18n/i18n.service';
 
 function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
   return `${op.method} ${op.path}`;
@@ -49,7 +49,7 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
             <select id="operation" (change)="onOperationChange($event)">
               @for (op of operations(); track operationKey(op)) {
                 <option [value]="operationKey(op)" [selected]="operationKey(op) === selectedOpKey()">
-                  {{ op.method.toUpperCase() }} {{ op.path }} — {{ op.summary }}
+                  {{ op.method.toUpperCase() }} {{ op.path }} — {{ said(op.summary) }}
                 </option>
               }
             </select>
@@ -85,7 +85,7 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
                     <input [id]="'path-' + param.name" type="text" [value]="paramValue(param)" (input)="onParamChange(param, $event)" />
                   }
                   @if (param.description) {
-                    <span class="hint">{{ param.description }}</span>
+                    <span class="hint">{{ said(param.description) }}</span>
                   }
                 </div>
               }
@@ -117,7 +117,7 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
                     />
                   }
                   @if (param.description) {
-                    <span class="hint">{{ param.description }}</span>
+                    <span class="hint">{{ said(param.description) }}</span>
                   }
                 </div>
               }
@@ -201,7 +201,7 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
                           </td>
                           <td class="text-muted">{{ field.type }}</td>
                           <td>
-                            {{ field.description || '—' }}
+                            {{ said(field.description) || '—' }}
                             @if (field.enumValues?.length) {
                               <span class="text-muted">{{ 'One of: {value}.' | t: { value: field.enumValues!.join(', ') } }}</span>
                             }
@@ -373,8 +373,13 @@ export class ConsolePage {
   readonly selectedOperation = computed(
     () => this.operations().find((op) => operationKey(op) === this.selectedOpKey()) ?? null,
   );
+  /** What the contract says, in the portal's language. */
+  said(text: string | null | undefined): string {
+    return apiText(text);
+  }
+
   readonly descriptionParagraphs = computed(() =>
-    descriptionParagraphs(this.selectedOperation()?.description ?? ''),
+    descriptionParagraphs(apiText(this.selectedOperation()?.description)),
   );
 
   readonly pathValues = signal<Record<string, string>>({});

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { registerLocaleData } from '@angular/common';
 import localeEsCo from '@angular/common/locales/es-CO';
-import { I18nService, systemLanguage, t } from './i18n.service';
+import { I18nService, apiText, systemLanguage, t } from './i18n.service';
 import { LocalDatePipe } from './local-date.pipe';
 import { serverText } from './server-messages';
 
@@ -42,6 +42,16 @@ describe('the portal’s language', () => {
     );
     expect(serverText('must not be blank')).toBe('no puede estar vacío');
     expect(serverText('Something only the server knows')).toBe('Something only the server knows');
+  });
+
+  it('says what the API contracts say in the portal’s language, as the YAML writes it', () => {
+    i18n.set('es');
+    expect(apiText('List campuses')).toBe('Listar las sedes');
+    expect(apiText('List campuses\n')).toBe('Listar las sedes');
+    expect(apiText('A contract text nobody translated')).toBe('A contract text nobody translated');
+    expect(apiText(undefined)).toBe('');
+    i18n.set('en');
+    expect(apiText('List campuses')).toBe('List campuses');
   });
 
   it('writes dates in the portal’s language', () => {

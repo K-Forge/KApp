@@ -13,14 +13,19 @@
 // with `/* i18n */` in front - must have its Spanish in src/app/core/i18n/es.ts. English is the text
 // itself.
 //
+// And every text of the API contracts the API console shows must have its Spanish in
+// src/app/core/i18n/es-api.ts (see i18n-contracts.mjs); the contracts themselves stay English.
+//
 // A template line with `i18n-ignore` in it is skipped: for the rare text that is the same in both
 // languages on purpose.
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { SHOWN, isText, isWords, templatesOf, tokenize } from './i18n-template.mjs';
+import { contractTexts } from './i18n-contracts.mjs';
 
 const ROOT = new URL('../src/app/', import.meta.url).pathname;
 const ES_FILE = join(ROOT, 'core/i18n/es.ts');
+const ES_API_FILE = join(ROOT, 'core/i18n/es-api.ts');
 const list = process.argv.includes('--list');
 
 function files(dir) {
@@ -46,7 +51,7 @@ const isSaid = (v) => /[A-Za-z]{2,}/.test(v) && !/^[A-Z_0-9-]+$/.test(v.trim()) 
 const SHOWN_PLAIN = new RegExp(`(?<=\\s)(${SHOWN.join('|')})="([^"{]*)"`, 'g');
 
 for (const file of files(ROOT)) {
-  if (file === ES_FILE) continue;
+  if (file === ES_FILE || file === ES_API_FILE) continue;
   const source = readFileSync(file, 'utf8');
   const lineOf = (index) => source.slice(0, index).split('\n').length;
 
@@ -87,6 +92,11 @@ for (const file of files(ROOT)) {
       }
     }
   }
+}
+
+const contractSpanish = keysOf(ES_API_FILE);
+for (const { file, text } of contractTexts()) {
+  if (!contractSpanish.has(text)) findings.push({ file: `docs/api/${file}`, line: '-', what: 'no Spanish in es-api.ts', text: text.replace(/\s+/g, ' ').slice(0, 150) });
 }
 
 if (findings.length) {

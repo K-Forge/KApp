@@ -1,5 +1,6 @@
 import { Injectable, computed, effect, signal } from '@angular/core';
 import { ES } from './es';
+import { ES_API } from './es-api';
 
 export type Language = 'es' | 'en';
 export type LanguagePreference = 'system' | Language;
@@ -28,6 +29,15 @@ export function t(text: string, params?: Record<string, unknown>): string {
     for (const [name, value] of Object.entries(params)) out = out.split(`{${name}}`).join(String(value ?? ''));
   }
   return out;
+}
+
+/**
+ * What an API contract says - an operation's summary, a field's description - in the portal's
+ * language. The contracts in docs/api stay English; es-api.ts holds their Spanish.
+ */
+export function apiText(text: string | null | undefined): string {
+  if (!text) return '';
+  return language() === 'es' ? (ES_API[text.trim()] ?? text) : text;
 }
 
 /** The locale dates and numbers are written in: Colombian Spanish, or English. */
