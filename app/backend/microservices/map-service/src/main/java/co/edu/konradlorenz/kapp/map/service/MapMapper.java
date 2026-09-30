@@ -97,7 +97,7 @@ public final class MapMapper {
     }
 
     public static FootprintPartDto toFootprintPartDto(FootprintPart part) {
-        return new FootprintPartDto(part.lot(), part.floors(), part.basements(), part.wing(), part.ring());
+        return new FootprintPartDto(part.lot(), part.floors(), part.lowestFloor(), part.basements(), part.wing(), part.ring());
     }
 
     /** The footprint a request asks for, or the stored one when it names none. */
@@ -106,7 +106,7 @@ public final class MapMapper {
             return stored == null ? List.of() : stored;
         }
         return dtos.stream()
-                .map(dto -> new FootprintPart(dto.lot(), dto.floors(), dto.basements(),
+                .map(dto -> new FootprintPart(dto.lot(), dto.floors(), dto.lowestFloor(), dto.basements(),
                         dto.wing() == null || dto.wing().isBlank() ? null : dto.wing().trim(), dto.ring()))
                 .toList();
     }

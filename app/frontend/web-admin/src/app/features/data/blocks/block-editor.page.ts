@@ -53,6 +53,8 @@ interface EditShape {
   /** A structure's name. */
   name: string;
   floors: number;
+  /** A part's lowest floor above the street: 1, or higher for floors carried out over a portico. */
+  lowestFloor: number;
   basements: number;
   points: ViewPoint[];
   /** The outline as it was read, for a shape nobody has moved; null for a new one. */
@@ -290,9 +292,17 @@ const SETBACK_REACH = 12;
                   <span>{{ 'Basements' | t }}</span>
                   <input type="number" min="0" max="20" [value]="s.basements" (change)="setNumber($event, 'basements')" />
                 </label>
+                @if (s.kind === 'part') {
+                  <label class="field">
+                    <span>{{ 'From floor' | t }}</span>
+                    <input type="number" min="1" [max]="s.floors || 1" [value]="s.lowestFloor" (change)="setNumber($event, 'lowestFloor')" />
+                  </label>
+                }
               </div>
               @if (s.floors === 0) {
                 <p class="text-muted small">{{ 'No floor above the street: drawn hatched, in no floor’s margin.' | t }}</p>
+              } @else if (s.lowestFloor > 1) {
+                <p class="text-muted small">{{ 'Carried out over the street from floor {floor}: in the margins from that floor up, not in the ground floor’s.' | t: { floor: s.lowestFloor } }}</p>
               }
               <div class="row">
                 <button type="button" class="btn btn-sm" (click)="square()" [title]="'The rectangle round it, square to the screen' | t">{{ 'Square' | t }}</button>
@@ -564,7 +574,7 @@ const SETBACK_REACH = 12;
     }
     .pair {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
       gap: 0.5rem;
     }
     .add {
@@ -906,6 +916,7 @@ export class BlockEditorPage {
           wing: p.wing ?? null,
           name: '',
           floors: p.floors,
+          lowestFloor: p.lowestFloor ?? 1,
           basements: p.basements,
           points: openRing(p.ring).map((c) => toView(frame, c)),
           original: p.ring,
@@ -922,6 +933,7 @@ export class BlockEditorPage {
         wing: null,
         name: s.name,
         floors: s.floors,
+        lowestFloor: 1,
         basements: s.basements,
         points: openRing(s.ring).map((c) => toView(frame, c)),
         original: s.ring,
@@ -1012,19 +1024,28 @@ export class BlockEditorPage {
     if (s) this.update(s.key, (x) => ({ ...x, wing }));
   }
 
-  setNumber(event: Event, field: 'floors' | 'basements'): void {
+  setNumber(event: Event, field: 'floors' | 'basements' | 'lowestFloor'): void {
     const s = this.selected();
     const value = Math.round(Number((event.target as HTMLInputElement).value));
+    if (!s || !Number.isFinite(value)) return;
+    if (field === 'lowestFloor') {
+      this.update(s.key, (x) => ({ ...x, lowestFloor: Math.max(1, Math.min(Math.max(1, x.floors), value)) }));
+      return;
+    }
     const max = field === 'floors' ? 200 : 20;
-    if (s && Number.isFinite(value)) this.update(s.key, (x) => ({ ...x, [field]: Math.max(0, Math.min(max, value)) }));
+    // Fewer floors than the one it starts at would leave the part in no floor at all.
+    this.update(s.key, (x) => {
+      const next = { ...x, [field]: Math.max(0, Math.min(max, value)) };
+      return { ...next, lowestFloor: Math.min(next.lowestFloor, Math.max(1, next.floors)) };
+    });
   }
 
   addPart(building: string): void {
-    this.add({ kind: 'part', building, lot: null, wing: null, name: '', floors: 1, basements: 0 });
+    this.add({ kind: 'part', building, lot: null, wing: null, name: '', floors: 1, lowestFloor: 1, basements: 0 });
   }
 
   addStructure(): void {
-    this.add({ kind: 'structure', building: null, lot: null, wing: null, name: t('Something else'), floors: 1, basements: 0 });
+    this.add({ kind: 'structure', building: null, lot: null, wing: null, name: t('Something else'), floors: 1, lowestFloor: 1, basements: 0 });
   }
 
   private add(fields: Omit<EditShape, 'key' | 'points' | 'original' | 'moved'>): void {
@@ -1176,7 +1197,7 @@ export class BlockEditorPage {
     for (const b of this.editable()) {
       const footprint: FootprintPart[] = this.shapes()
         .filter((s) => s.kind === 'part' && s.building === b.code)
-        .map((s) => ({ lot: s.lot, floors: s.floors, basements: s.basements, wing: s.wing, ring: ring(s) }));
+        .map((s) => ({ lot: s.lot, floors: s.floors, lowestFloor: s.lowestFloor > 1 ? s.lowestFloor : null, basements: s.basements, wing: s.wing, ring: ring(s) }));
       if (JSON.stringify(footprint.map(partEssence)) === JSON.stringify((b.footprint ?? []).map(partEssence))) continue;
       writes.push(
         this.buildingsService.update(b.code, {
@@ -1264,15 +1285,20 @@ export class BlockEditorPage {
 
 /** What an edit changes: everything but the object identities. */
 function essence(s: EditShape) {
-  return { key: s.key, wing: s.wing, name: s.name, floors: s.floors, basements: s.basements, moved: s.moved, points: s.moved ? s.points : null };
+  return { key: s.key, wing: s.wing, name: s.name, floors: s.floors, lowestFloor: s.lowestFloor, basements: s.basements, moved: s.moved, points: s.moved ? s.points : null };
 }
 
 function partEssence(p: FootprintPart) {
-  return { lot: p.lot ?? null, floors: p.floors, basements: p.basements, wing: p.wing ?? null, ring: p.ring };
+  return { lot: p.lot ?? null, floors: p.floors, lowestFloor: (p.lowestFloor ?? 1) > 1 ? p.lowestFloor : null, basements: p.basements, wing: p.wing ?? null, ring: p.ring };
 }
 
-function floorsText(s: Pick<EditShape, 'floors' | 'basements'>): string {
-  const floors = s.floors === 1 ? t('1 floor') : t('{floors} floors', { floors: s.floors });
+function floorsText(s: Pick<EditShape, 'floors' | 'basements' | 'lowestFloor'>): string {
+  const floors =
+    s.lowestFloor > 1
+      ? t('floors {from} to {to}', { from: s.lowestFloor, to: s.floors })
+      : s.floors === 1
+        ? t('1 floor')
+        : t('{floors} floors', { floors: s.floors });
   return floors + (s.basements ? t(' + {basements} below', { basements: s.basements }) : '');
 }
 

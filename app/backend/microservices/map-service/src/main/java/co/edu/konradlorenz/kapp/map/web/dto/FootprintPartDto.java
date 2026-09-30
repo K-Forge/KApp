@@ -23,6 +23,10 @@ public record FootprintPartDto(
         @Schema(description = "How many floors it rises above the street: the cadastre's count, unless checked "
                 + "on site.", example = "8")
         @NotNull @Min(0) @Max(200) Integer floors,
+        @Schema(description = "The lowest floor above the street it takes in, when it is not the first: 2 for what "
+                + "the upper floors carry out over a portico or a sidewalk, which the cadastre, seeing from above, "
+                + "draws as if it reached the ground. Absent for a part that stands on the street.", example = "2")
+        @Min(1) @Max(200) Integer lowestFloor,
         @Schema(description = "How many floors it goes below the street.", example = "2")
         @NotNull @Min(0) @Max(20) Integer basements,
         @Schema(description = "The code of the building's wing it belongs to, when known.", example = "C")

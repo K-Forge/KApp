@@ -246,6 +246,10 @@ public class BuildingService {
                     issues.add(new ApiError.FieldIssue("footprint[" + i + "].wing",
                             "No wing " + part.wing() + " in this building"));
                 }
+                if (part.lowestFloor() != null && part.floors() != null && part.lowestFloor() > Math.max(1, part.floors())) {
+                    issues.add(new ApiError.FieldIssue("footprint[" + i + "].lowestFloor",
+                            "A part cannot start above its top floor, " + part.floors()));
+                }
                 if (!closedRingOnEarth(part.ring())) {
                     issues.add(new ApiError.FieldIssue("footprint[" + i + "].ring",
                             "An outline is [lon, lat] points on the earth, the first repeated at the end"));

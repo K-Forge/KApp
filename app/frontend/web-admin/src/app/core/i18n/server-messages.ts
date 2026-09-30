@@ -7,6 +7,7 @@ import { t } from './i18n.service';
  * the service wrote it.
  */
 const PATTERNS: [RegExp, string][] = [
+  [/^A part cannot start above its top floor, (\d+)$/, /* i18n */ 'A part cannot start above its top floor, {1}'],
   [/^Floor (.+) of building (.+) was saved by someone else since you opened it\. Reload it to see their changes\.$/,
     /* i18n */ 'Floor {1} of building {2} was saved by someone else since you opened it. Reload it to see their changes.'],
   [/^Building (.+) cannot drop a floor or a wing that still has spaces$/,

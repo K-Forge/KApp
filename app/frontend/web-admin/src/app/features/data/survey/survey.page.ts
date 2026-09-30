@@ -376,7 +376,8 @@ export class SurveyPage {
     const shapes = [
       ...this.buildings()
         .filter((b) => (b.footprint ?? []).some((p) => blockOf(p.lot) === SURVEY_BLOCK))
-        .flatMap((b) => (b.footprint ?? []).map((p) => shape(p.ring, p.floors, true))),
+        // What the upper floors carry out over the street is no wall to measure to: dashed, like open ground.
+        .flatMap((b) => (b.footprint ?? []).map((p) => shape(p.ring, (p.lowestFloor ?? 1) > 1 ? 0 : p.floors, true))),
       ...this.structures().filter((s) => near(s.ring)).map((s) => shape(s.ring, s.floors, false)),
     ];
     // Where each line and number goes was laid out by scripts/survey-plan.py, clear of the others.

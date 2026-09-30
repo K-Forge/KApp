@@ -47,8 +47,11 @@ export interface Margin {
 }
 
 /** Whether a part of `floors` floors and `basements` basements reaches the floor at `level`. */
-export function reaches(part: Pick<FootprintPart, 'floors' | 'basements'>, level: number): boolean {
-  return level >= 0 ? part.floors >= Math.max(1, Math.ceil(level)) : part.basements >= -Math.floor(level);
+export function reaches(part: Pick<FootprintPart, 'floors' | 'basements' | 'lowestFloor'>, level: number): boolean {
+  if (level < 0) return part.basements >= -Math.floor(level);
+  // A part the upper floors carry out over the street is in none of the floors below it.
+  const floor = Math.max(1, Math.ceil(level));
+  return part.floors >= floor && (part.lowestFloor ?? 1) <= floor;
 }
 
 /** Metres east and north of `origin`. */

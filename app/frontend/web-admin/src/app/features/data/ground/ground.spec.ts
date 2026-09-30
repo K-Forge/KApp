@@ -71,6 +71,16 @@ describe('ground', () => {
     expect(reaches({ floors: 0, basements: 2 }, -2)).toBe(true);
   });
 
+  // What the upper floors carry out over a portico is in their margins, and never in the ground floor's.
+  it('leaves a part that starts above the street out of the floors below it', () => {
+    const overhang = { floors: 5, lowestFloor: 2, basements: 0 };
+    expect(reaches(overhang, 1)).toBe(false);
+    expect(reaches(overhang, 0)).toBe(false);
+    expect(reaches(overhang, 2)).toBe(true);
+    expect(reaches(overhang, 5)).toBe(true);
+    expect(reaches({ floors: 5, lowestFloor: null, basements: 0 }, 1)).toBe(true);
+  });
+
   // Two parts that share a wall are one outline; the wall they share is not drawn.
   it('outlines neighbouring parts as one', () => {
     const [outline, ...rest] = outlineOf([square(0, 0, 2, 2), square(2, 0, 2, 2)]);

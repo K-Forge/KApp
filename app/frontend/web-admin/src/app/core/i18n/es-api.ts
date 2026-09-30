@@ -753,6 +753,8 @@ export const ES_API: Record<string, string> = {
     'El lote catastral sobre el que está la parte. No aparece para una parte que el catastro no registra, encontrada en el sitio.',
   'How many floors it rises above the street: the cadastre\'s count, unless checked on site.':
     'Cuántos pisos sube sobre la calle: el conteo del catastro, salvo que se haya revisado en el sitio.',
+  'The lowest floor above the street it takes in, when it is not the first: 2 for what the upper floors carry out over a portico or a sidewalk, which the cadastre, seeing from above, draws as if it reached the ground. Absent for a part that stands on the street.':
+    'El piso más bajo sobre la calle que abarca, cuando no es el primero: 2 para lo que los pisos de arriba sacan sobre un pórtico o un andén, que el catastro, al verlo desde arriba, dibuja como si llegara al suelo. No aparece para una parte que está sobre la calle.',
   'How many it goes below.':
     'Cuántos baja.',
   'The code of the building\'s wing it belongs to, when known.':

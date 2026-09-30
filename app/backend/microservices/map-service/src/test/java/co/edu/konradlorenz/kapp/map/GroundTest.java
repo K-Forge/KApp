@@ -108,12 +108,32 @@ class GroundTest {
     }
 
     @Test
-    @DisplayName("a part in a wing the building does not have, or an outline that does not close, is refused")
+    @DisplayName("a part the upper floors carry out over the street keeps its lowest floor; one on the street keeps none")
+    void overhangKeepsItsLowestFloor() throws Exception {
+        buildings.save(MapFixtures.building("GRD5"));
+        String ring = "[[-74.0613, 4.6485], [-74.0612, 4.6486], [-74.0611, 4.6485], [-74.0613, 4.6485]]";
+        mockMvc.perform(put("/api/map/buildings/GRD5").with(as("ROLE_ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"code": "GRD5", "name": "Portico", "campus": "Sede Test",
+                                 "floors": [{"code": "P1", "level": 1, "name": "Piso 1", "width": 400, "height": 400}],
+                                 "footprint": [{"floors": 5, "lowestFloor": 2, "basements": 0, "ring": %s},
+                                               {"floors": 5, "lowestFloor": 1, "basements": 0, "ring": %s}]}
+                                """.formatted(ring, ring)))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/map/buildings/GRD5").with(as("ROLE_GUEST")))
+                .andExpect(jsonPath("$.footprint[0].lowestFloor").value(2))
+                .andExpect(jsonPath("$.footprint[1].lowestFloor").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("a part in a wing the building does not have, an outline that does not close, or one starting above its top floor, is refused")
     void impossibleFootprintIsRefused() throws Exception {
         buildings.save(MapFixtures.building("GRD4"));
         for (String part : List.of(
                 "{\"floors\": 3, \"basements\": 0, \"wing\": \"X\", \"ring\": [[-74.0613, 4.6485], [-74.0612, 4.6486], [-74.0611, 4.6485], [-74.0613, 4.6485]]}",
-                "{\"floors\": 3, \"basements\": 0, \"ring\": [[-74.0613, 4.6485], [-74.0612, 4.6486], [-74.0611, 4.6485], [-74.0610, 4.6484]]}")) {
+                "{\"floors\": 3, \"basements\": 0, \"ring\": [[-74.0613, 4.6485], [-74.0612, 4.6486], [-74.0611, 4.6485], [-74.0610, 4.6484]]}",
+                "{\"floors\": 3, \"lowestFloor\": 4, \"basements\": 0, \"ring\": [[-74.0613, 4.6485], [-74.0612, 4.6486], [-74.0611, 4.6485], [-74.0613, 4.6485]]}",
+                "{\"floors\": 3, \"lowestFloor\": 0, \"basements\": 0, \"ring\": [[-74.0613, 4.6485], [-74.0612, 4.6486], [-74.0611, 4.6485], [-74.0613, 4.6485]]}")) {
             mockMvc.perform(put("/api/map/buildings/GRD4").with(as("ROLE_ADMIN"))
                             .contentType(MediaType.APPLICATION_JSON).content("""
                                     {"code": "GRD4", "name": "Wrong", "campus": "Sede Test",

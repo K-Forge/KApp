@@ -94,6 +94,8 @@ export interface Placement {
 export interface FootprintPart {
   lot?: string | null;
   floors: number;
+  /** The lowest floor above the street it takes in, when not the first: floors carried out over a portico. */
+  lowestFloor?: number | null;
   basements: number;
   wing?: string | null;
   ring: [number, number][];

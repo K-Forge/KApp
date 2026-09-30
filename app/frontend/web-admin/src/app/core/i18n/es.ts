@@ -92,7 +92,9 @@ export const ES: Record<string, string> = {
   'None': 'Ninguna',
   'Floors': 'Pisos',
   'Basements': 'Sótanos',
+  'From floor': 'Desde el piso',
   'No floor above the street: drawn hatched, in no floor’s margin.': 'Sin pisos sobre la calle: se dibuja rayado, sin margen en ningún piso.',
+  'Carried out over the street from floor {floor}: in the margins from that floor up, not in the ground floor’s.': 'Sobresale sobre la calle desde el piso {floor}: está en los márgenes de ese piso hacia arriba, no en el del primer piso.',
   'The rectangle round it, square to the screen': 'El rectángulo que lo encierra, alineado con la pantalla',
   'Square': 'Cuadrar',
   'Delete': 'Eliminar',
@@ -115,6 +117,7 @@ export const ES: Record<string, string> = {
   'Not saved.': 'No se guardó.',
   'This block has changes that are not saved. Leave and lose them?': 'Esta manzana tiene cambios sin guardar. ¿Salir y perderlos?',
   'No wing': 'Sin ala',
+  'floors {from} to {to}': 'pisos {from} a {to}',
   '1 floor': '1 piso',
   '{floors} floors': '{floors} pisos',
   ' + {basements} below': ' + {basements} bajo tierra',
@@ -1035,4 +1038,5 @@ export const ES: Record<string, string> = {
   'must not be null': 'es obligatorio',
   'must not be empty': 'no puede estar vacío',
   'must be a well-formed email address': 'debe ser un correo electrónico válido',
+  'A part cannot start above its top floor, {1}': 'Una parte no puede empezar por encima de su último piso, el {1}',
 };
