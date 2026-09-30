@@ -22,7 +22,7 @@ import { t, locale } from '../../core/i18n/i18n.service';
       <app-page-intro
         [title]="'My token' | t"
         [what]="'What the access token in this browser actually says: who you are to the API, what it grants you, and how long it has left.' | t"
-        [can]="[('Read every claim, decoded' | t), ('See the roles the API will act on' | t), ('Watch the countdown to expiry' | t), ('Copy the raw claims' | t)]"
+        [can]="[('Read every claim, decoded' | t), ('See the roles the API will act on' | t), ('Watch the countdown to expiry' | t), ('Copy the raw claims' | t), ('Copy the token itself, for a script' | t)]"
         [note]="'Decoded here in the browser, not verified. The signature is what the services check, and only they can — so this shows what the token CLAIMS. If a call is refused while this says you have the role, that gap is worth reporting.' | t"
       />
 
@@ -75,6 +75,14 @@ import { t, locale } from '../../core/i18n/i18n.service';
           <h2 style="margin:0">{{ 'Raw claims' | t }}</h2>
           <app-json-view [value]="decoded.claims" />
         </div>
+
+        <div class="card stack">
+          <h2 style="margin:0">{{ 'The token itself' | t }}</h2>
+          <p class="text-muted small" style="margin:0">
+            {{ 'What a script such as export-map-snapshot.py asks for. Whoever holds it acts as you until it expires, so paste it only where you would type your password.' | t }}
+          </p>
+          <app-json-view [value]="raw()" />
+        </div>
       } @else {
         <div class="card empty-state">
           <p>{{ 'No token loaded. Sign in to see what a KApp access token contains.' | t }}</p>
@@ -120,6 +128,7 @@ export class IdentityPage {
   private readonly clock = inject(ClockService);
 
   readonly decoded = this.tokenStore.decoded;
+  readonly raw = this.tokenStore.raw;
   readonly roles = this.tokenStore.roles;
 
   readonly isExpired = computed(() => {

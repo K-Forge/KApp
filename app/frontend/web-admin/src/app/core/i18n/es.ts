@@ -884,6 +884,7 @@ export const ES: Record<string, string> = {
   'See the roles the API will act on': 'Ver los roles con los que actuará la API',
   'Watch the countdown to expiry': 'Ver la cuenta regresiva hasta que venza',
   'Copy the raw claims': 'Copiar los claims sin procesar',
+  'Copy the token itself, for a script': 'Copiar el token en sí, para un script',
   'Decoded here in the browser, not verified. The signature is what the services check, and only they can — so this shows what the token CLAIMS. If a call is refused while this says you have the role, that gap is worth reporting.': 'Se decodifica aquí en el navegador, sin verificar. La firma es lo que revisan los servicios, y solo ellos pueden hacerlo: esto muestra lo que el token DICE. Si una llamada se rechaza mientras aquí aparece que usted tiene el rol, vale la pena reportar esa diferencia.',
   'Access token': 'Token de acceso',
   'This token expired at {expiryLocal}. Sign in again to get a fresh one.': 'Este token venció el {expiryLocal}. Inicie sesión de nuevo para obtener uno nuevo.',
@@ -896,6 +897,8 @@ export const ES: Record<string, string> = {
   'Header': 'Encabezado',
   'alg={value} kid={value2}': 'alg={value} kid={value2}',
   'Raw claims': 'Claims sin procesar',
+  'The token itself': 'El token en sí',
+  'What a script such as export-map-snapshot.py asks for. Whoever holds it acts as you until it expires, so paste it only where you would type your password.': 'Es lo que pide un script como export-map-snapshot.py. Quien lo tenga actúa como usted hasta que vence, así que péguelo solo donde escribiría su contraseña.',
   'No token loaded. Sign in to see what a KApp access token contains.': 'No hay token cargado. Inicie sesión para ver qué contiene un token de acceso de KApp.',
   // features/login/login.page.ts
   'Fundación Universitaria Konrad Lorenz': 'Fundación Universitaria Konrad Lorenz',
@@ -978,6 +981,7 @@ export const ES: Record<string, string> = {
   'No results.': 'Sin resultados.',
   // shared/ui/json-view/json-view.component.ts
   'Copied': 'Copiado',
+  'Select it and copy it by hand': 'Selecciónelo y cópielo a mano',
   'Copy': 'Copiar',
   // shared/ui/modal/modal.component.ts
   'Close': 'Cerrar',
