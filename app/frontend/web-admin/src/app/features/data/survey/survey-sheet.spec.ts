@@ -88,8 +88,10 @@ describe('survey sheet', () => {
   // The numbers are the ones written down on site: a distance taken off the plan leaves a gap, and
   // none of the others moves.
   it('walks a plan whose distances keep their numbers, in order, each once, and each worth taking', () => {
-    const numbers = SURVEY_PLAN.map((d) => d.n);
-    expect(numbers.every((n, i) => n >= 1 && (i === 0 || n > numbers[i - 1]))).toBe(true);
+    // The first numbering walks in order; a distance added since takes the next number free.
+    const first = SURVEY_PLAN.map((d) => d.n).filter((n) => n <= 63);
+    expect(first.every((n, i) => n >= 1 && (i === 0 || n > first[i - 1]))).toBe(true);
+    expect(new Set(SURVEY_PLAN.map((d) => d.n)).size).toBe(SURVEY_PLAN.length);
     expect(SURVEY_PLAN.find((d) => d.id === 'c63-02')?.n).toBe(57);
     expect(SURVEY_PLAN.find((d) => d.id === 'a-15')?.n).toBe(51);
     expect(new Set(SURVEY_PLAN.map((d) => d.id)).size).toBe(SURVEY_PLAN.length);

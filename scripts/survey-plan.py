@@ -157,20 +157,32 @@ length('bis-15', B, K[5], K[6], 'How far the wall steps back')
 length('bis-17', B, K[6], K[7], "South connection's front on the plaza, to where the south wing starts")
 setback('bis-18', B, K[7], EAST, 'End of that front, where it steps back again')
 # The auditorium, as the street shows it: past the south connection a glass entrance stands in beside
-# a green column, then one flat blue wall runs along Cra 9 Bis, parallel to its curb, to the
-# neighbour's. Until it is measured, the wall is the straight line that best fits what the cadastre
-# drew as steps.
+# a green column, then one flat blue wall runs along Cra 9 Bis, parallel to its curb; before the
+# neighbour's, the wall steps in to a grey stretch with a door, a small window over it and a stair.
+# Until it is measured, the blue wall is the straight line that best fits what the cadastre drew as
+# steps, and the grey stretch a metre behind it, four before the neighbour.
 SLOPE = -0.288  # the curb's, in x per metre south
 BLUE = lambda y: -16.92 + SLOPE * (y - 46.0)
+ALONG = math.hypot(1, SLOPE)
 FROM_BLUE = (1, -SLOPE)  # straight out from the blue wall, towards the curb
+INWARD = (-1 / ALONG, SLOPE / ALONG)
+AU = {1: (BLUE(46.0), 46.0), 2: (BLUE(64.5), 64.5)}
+AU[3] = (AU[2][0] + INWARD[0], AU[2][1] + INWARD[1])  # the grey stretch's corner, a metre in
+AU[4] = (AU[3][0] + SLOPE * (68.5 - AU[3][1]), 68.5)  # its end at the neighbour's wall
+grey = lambda d: (AU[3][0] + SLOPE * d / ALONG, AU[3][1] + d / ALONG)  # d metres along the grey stretch
 setback('bis-19', B, (-17.96, 44.85), EAST, "Auditorium's entrance, at its glass: to the curb")
-for i in range(4):
-    y = 46.0 + 5 * (i + 1) / math.hypot(1, SLOPE)
+for i in range(3):
+    y = 46.0 + 5 * (i + 1) / ALONG
     setback(f'bis-{21 + i}', B, (BLUE(y), y), FROM_BLUE, f"Auditorium's blue wall, {5 * (i + 1)} m from its north end: to the curb")
-length('bis-28', B, (BLUE(46.0), 46.0), (BLUE(68.5), 68.5), "Auditorium's blue wall, its whole length, from the green column to the neighbour's wall")
+setback('bis-24', B, grey(2.0), FROM_BLUE, "The grey stretch past the blue wall, at its door: to the curb")
+length('bis-28', B, AU[1], AU[2], "Auditorium's blue wall, its whole length, from the green column to where it steps in")
+length('bis-32', B, AU[2], AU[3], 'How far the wall steps in after the blue wall')
+length('bis-33', B, AU[3], AU[4], "The grey stretch past the blue wall, its whole front, to the neighbour's wall")
+length('bis-35', B, AU[3], grey(0.8), "The grey stretch's door: from the blue wall's corner to the door's nearest edge")
+length('bis-34', B, grey(0.8), grey(2.6), "The grey stretch's door: its width")
 length('bis-29', B, K[7], (-17.96, 46.0), "Auditorium's entrance: its width, from the south connection to the green column")
-length('bis-30', B, (-17.96, 46.0), (BLUE(46.0), 46.0), "How far the auditorium's blue wall stands out past the entrance")
-length('bis-31', B, (BLUE(68.5), 68.5), (-19.11, 68.59), "How far the neighbour's building comes out past the auditorium")
+length('bis-30', B, (-17.96, 46.0), AU[1], "How far the auditorium's blue wall stands out past the entrance")
+length('bis-31', B, AU[4], (-19.11, 68.59), "How far the neighbour's building comes out past the auditorium")
 
 # ---- Calle 62: the neighbour's curved corner, then the Tienda K.
 C62 = 'Calle 62'
@@ -229,7 +241,8 @@ NUMBERED = ['bis-01', 'bis-02', 'bis-03', 'bis-04', 'bis-05', 'bis-06', 'bis-07'
             'bis-24', 'bis-25', 'bis-26', 'bis-28', 'bis-29', 'bis-30', 'bis-31', 'c62-01', 'c62-02', 'c62-03',
             'c62-04', 'c62-05', 'c62-06', 'c62-07', 'c62-08', 'c62-09', 'a-01', 'a-02', 'a-03', 'a-04', 'a-05',
             'a-06', 'a-07', 'a-08', 'a-09', 'a-10', 'a-11', 'a-12', 'a-13', 'a-14', 'a-15', 'a-16', 'a-17', 'a-18',
-            'a-19', 'c63-01', 'c63-02', 'c63-03', 'c63-04', 'c63-05', 'c63-06', 'c63-07', 'c63-08', 'c63-09']
+            'a-19', 'c63-01', 'c63-02', 'c63-03', 'c63-04', 'c63-05', 'c63-06', 'c63-07', 'c63-08', 'c63-09',
+            'bis-32', 'bis-33', 'bis-34', 'bis-35']
 # The numbers people wrote down on site: a distance taken off the plan leaves its number unused, and a
 # new one is added at the end of this list, never in between.
 for d in PLAN:
