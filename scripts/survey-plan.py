@@ -134,7 +134,7 @@ B = 'Carrera 9 Bis'
 # the north wing, stepped in to the north connection, the central wing's whole front, stepped in to
 # the south connection, then the south wing over the auditorium.
 K = {1: (-12.37, 7.20), 2: (-12.37, 12.59), 3: (-13.75, 12.59), 4: (-13.76, 17.97), 5: (-13.59, 36.15),
-     6: (-17.96, 36.20), 7: (-17.97, 43.67), 18: (-21.68, 68.50)}
+     6: (-17.96, 36.20), 7: (-17.97, 43.67)}
 setback('bis-01', B, K[1], NORTH, 'North wing, corner with Calle 63: to the Calle 63 curb')
 setback('bis-02', B, K[1], EAST, 'North wing, corner with Calle 63: to the Cra 9 Bis curb')
 length('bis-03', B, K[1], K[2], 'North wing, its end on Cra 9 Bis: from the corner to where it steps in')
@@ -156,25 +156,21 @@ length('bis-13', B, on_front(23.2), on_front(30.93), "Reception's main door: its
 length('bis-15', B, K[5], K[6], 'How far the wall steps back')
 length('bis-17', B, K[6], K[7], "South connection's front on the plaza, to where the south wing starts")
 setback('bis-18', B, K[7], EAST, 'End of that front, where it steps back again')
-length('bis-19', B, (-17.19, 49.80), (-19.89, 49.87), 'How far it steps back')
-
-
-def south_wall_x(y):
-    """The south wing's front on the plaza at `y`: straight, then leaning out, then stepped back twice."""
-    if y < 44.34:
-        return -17.96
-    if y < 49.80:
-        return -17.96 + (-17.19 + 17.96) * (y - 44.34) / (49.80 - 44.34)
-    return -19.89 if y < 59.94 else -21.68
-
-
-for i, y in enumerate((48.67, 53.67, 58.67, 63.67)):
-    setback(f'bis-{21 + i}', B, (south_wall_x(y), y), EAST, f'South wing, {5 * (i + 1)} m along its wall from its first corner')
-length('bis-28', B, K[7], K[18], "South wing, its whole front along the street, from its first corner to the neighbour's wall",
-       along=(0, 1), through=(-23.5, 0))
-length('bis-29', B, (south_wall_x(45.0), 45.0), (south_wall_x(48.0), 48.0), "Auditorium's public entrance: its width (none on this street? note it)")
-length('bis-30', B, K[7], (south_wall_x(45.0), 45.0), "Auditorium's public entrance: from the south wing's first corner to its nearest edge")
-length('bis-31', B, K[18], (-19.11, 68.59), "How far the neighbour's building comes out past the south wing")
+# The auditorium, as the street shows it: past the south connection a glass entrance stands in beside
+# a green column, then one flat blue wall runs along Cra 9 Bis, parallel to its curb, to the
+# neighbour's. Until it is measured, the wall is the straight line that best fits what the cadastre
+# drew as steps.
+SLOPE = -0.288  # the curb's, in x per metre south
+BLUE = lambda y: -16.92 + SLOPE * (y - 46.0)
+FROM_BLUE = (1, -SLOPE)  # straight out from the blue wall, towards the curb
+setback('bis-19', B, (-17.96, 44.85), EAST, "Auditorium's entrance, at its glass: to the curb")
+for i in range(4):
+    y = 46.0 + 5 * (i + 1) / math.hypot(1, SLOPE)
+    setback(f'bis-{21 + i}', B, (BLUE(y), y), FROM_BLUE, f"Auditorium's blue wall, {5 * (i + 1)} m from its north end: to the curb")
+length('bis-28', B, (BLUE(46.0), 46.0), (BLUE(68.5), 68.5), "Auditorium's blue wall, its whole length, from the green column to the neighbour's wall")
+length('bis-29', B, K[7], (-17.96, 46.0), "Auditorium's entrance: its width, from the south connection to the green column")
+length('bis-30', B, (-17.96, 46.0), (BLUE(46.0), 46.0), "How far the auditorium's blue wall stands out past the entrance")
+length('bis-31', B, (BLUE(68.5), 68.5), (-19.11, 68.59), "How far the neighbour's building comes out past the auditorium")
 
 # ---- Calle 62: the neighbour's curved corner, then the Tienda K.
 C62 = 'Calle 62'
