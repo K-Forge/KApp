@@ -56,7 +56,6 @@
       "width": 1830,
       "height": 500,
       "top": "EAST",
-      "outline": [],
       "spaces": [
         {
           "code": "P0-01",
@@ -418,6 +417,7 @@
           "code": "P0-BANO",
           "name": "Baño",
           "typeCode": "RESTROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 988,
@@ -441,6 +441,7 @@
           "code": "P0-BANO-ACCESIBLE",
           "name": "Baño accesible",
           "typeCode": "RESTROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 361,
@@ -530,6 +531,7 @@
           "code": "P0-ENFERMERIA",
           "name": "Enfermería",
           "typeCode": "NURSING",
+          "aliases": [],
           "shape": [
             {
               "x": 747,
@@ -573,6 +575,7 @@
           "code": "P0-ENTRADA",
           "name": "Entrada",
           "typeCode": "ENTRANCE",
+          "aliases": [],
           "shape": [
             {
               "x": 10,
@@ -608,6 +611,7 @@
           "code": "P0-ESC",
           "name": "Escalera interior",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 610,
@@ -665,7 +669,6 @@
       "width": 1830,
       "height": 500,
       "top": "EAST",
-      "outline": [],
       "spaces": [
         {
           "code": "P1-09",
@@ -911,6 +914,7 @@
           "code": "P1-BANO",
           "name": "Baño",
           "typeCode": "RESTROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1013,
@@ -946,6 +950,7 @@
           "code": "P1-CAFE",
           "name": "Café",
           "typeCode": "SOCIAL_AREA",
+          "aliases": [],
           "shape": [
             {
               "x": 1160,
@@ -981,6 +986,7 @@
           "code": "P1-ESC",
           "name": "Escalera interior",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 760,
@@ -1004,6 +1010,7 @@
           "code": "P1-ESC-EXTERIOR",
           "name": "Escalera exterior",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 265,
@@ -1027,6 +1034,7 @@
           "code": "P1-OFICINA-1",
           "name": "Oficina 1",
           "typeCode": "OFFICE",
+          "aliases": [],
           "shape": [
             {
               "x": 1180,
@@ -1082,6 +1090,7 @@
           "code": "P1-OFICINA-2",
           "name": "Oficina 2",
           "typeCode": "OFFICE",
+          "aliases": [],
           "shape": [
             {
               "x": 1354,
@@ -1117,6 +1126,7 @@
           "code": "P1-OFICINA-3",
           "name": "Oficina 3",
           "typeCode": "OFFICE",
+          "aliases": [],
           "shape": [
             {
               "x": 1519,
@@ -1140,6 +1150,7 @@
           "code": "P1-OFICINA-4",
           "name": "Oficina 4",
           "typeCode": "OFFICE",
+          "aliases": [],
           "shape": [
             {
               "x": 1282,
@@ -1175,6 +1186,7 @@
           "code": "P1-OFICINA-SIN",
           "name": "Oficina sin nombre (1)",
           "typeCode": "OFFICE",
+          "aliases": [],
           "shape": [
             {
               "x": 944,
@@ -1210,6 +1222,7 @@
           "code": "P1-OFICINA-SIN-2",
           "name": "Oficina sin nombre (2)",
           "typeCode": "OFFICE",
+          "aliases": [],
           "shape": [
             {
               "x": 1580,
@@ -1233,6 +1246,7 @@
           "code": "P1-POCETA",
           "name": "Poceta",
           "typeCode": "CLEANING_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1112,
@@ -1301,12 +1315,12 @@
       "width": 1830,
       "height": 500,
       "top": "EAST",
-      "outline": [],
       "spaces": [
         {
           "code": "P2-BANO",
           "name": "Baño",
           "typeCode": "RESTROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 675,
@@ -1380,6 +1394,7 @@
           "code": "P2-ESC",
           "name": "Escalera interior",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 795,
@@ -1403,6 +1418,7 @@
           "code": "P2-SALA-COMPUTO-1",
           "name": "Sala de cómputo 1",
           "typeCode": "COMPUTER_LAB",
+          "aliases": [],
           "shape": [
             {
               "x": 325,
@@ -1447,6 +1463,7 @@
           "code": "P2-SALA-COMPUTO-2",
           "name": "Sala de cómputo 2",
           "typeCode": "COMPUTER_LAB",
+          "aliases": [],
           "shape": [
             {
               "x": 325,

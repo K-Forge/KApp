@@ -1,0 +1,317 @@
+{
+  "campus": "Sede Principal",
+  "version": 2715,
+  "measures": [
+    {
+      "id": "bis-01",
+      "text": "7.23",
+      "metres": 7.23,
+      "note": "Desde la esquina del edificio ala norte hasta el andén",
+      "updatedAt": "2026-09-30T00:01:00.922Z"
+    },
+    {
+      "id": "bis-02",
+      "text": "12.34",
+      "metres": 12.34,
+      "note": "Desde la esquina del edificio ala norte hasta el andén",
+      "updatedAt": "2026-09-30T00:00:36.083Z"
+    },
+    {
+      "id": "bis-03",
+      "text": "5,22",
+      "metres": 5.22,
+      "note": "Está medida es la cara frontal del ala norte, había un Arbusto decorativo en el frente.",
+      "updatedAt": "2026-09-30T00:01:42.641Z"
+    },
+    {
+      "id": "bis-04",
+      "text": "10.72",
+      "metres": 10.72,
+      "note": "Se tomó desde la otra esquina del ala norte hasta el borde del andén.",
+      "updatedAt": "2026-09-30T00:02:23.958Z"
+    },
+    {
+      "id": "bis-05",
+      "text": "1.44",
+      "metres": 1.44,
+      "note": "Hay arbusto fachada, dificultó la medida, aunque no fue exacto hice un efecto espejo yse tomó desde la esquina del ala norte haciaa dentro hasta tocar el inicio de la conexión norte.",
+      "updatedAt": "2026-09-30T00:03:47.685Z"
+    },
+    {
+      "id": "bis-10",
+      "text": "6.22",
+      "metres": 6.22,
+      "updatedAt": "2026-09-30T00:09:38.014Z"
+    },
+    {
+      "id": "bis-11",
+      "text": "16.56",
+      "metres": 16.56,
+      "note": "Esta medida la tome del ancho completo del ala central,incluyendo muros y puerta.",
+      "updatedAt": "2026-09-30T00:19:06.262Z"
+    },
+    {
+      "id": "bis-12",
+      "text": "5.45",
+      "metres": 5.45,
+      "updatedAt": "2026-09-29T22:44:34.206Z"
+    },
+    {
+      "id": "bis-13",
+      "text": "7.73",
+      "metres": 7.73,
+      "note": "Este fue el ancho de la entrada incluyendo las puertas y cristales, prácticamente es el ancho de la recepción.",
+      "updatedAt": "2026-09-30T00:28:08.852Z"
+    },
+    {
+      "id": "bis-14",
+      "text": "0.00",
+      "metres": 0.0,
+      "note": "La misma medida del 12",
+      "updatedAt": "2026-09-30T00:28:22.163Z"
+    },
+    {
+      "id": "bis-15",
+      "text": "2.96",
+      "metres": 2.96,
+      "note": "Esta medida la tome de la esquina del ala central hasta el inicio de la conexión sur.",
+      "updatedAt": "2026-09-30T00:25:37.472Z"
+    },
+    {
+      "id": "bis-18",
+      "text": "8.8",
+      "metres": 8.8,
+      "note": "Desde el fin de la conexión norte hasta el borde del andén.",
+      "updatedAt": "2026-09-30T00:29:15.512Z"
+    },
+    {
+      "id": "bis-17",
+      "text": "7.31 + 0.88",
+      "metres": 8.19,
+      "note": "Esto fue todo el ancho de la conexión sur. La medida 7.31 corresponde al ancho del 3er piso para arriba. El 0.88, es el extra que tiene en el 1er y 2do piso.",
+      "updatedAt": "2026-09-30T00:24:09.870Z"
+    },
+    {
+      "id": "bis-19",
+      "note": "No entendi",
+      "updatedAt": "2026-09-29T22:53:09.387Z"
+    },
+    {
+      "id": "c62-05",
+      "text": "4.14",
+      "metres": 4.14,
+      "note": "Diagonal hasta el saliente de la fachada.",
+      "updatedAt": "2026-09-30T00:30:02.571Z"
+    },
+    {
+      "id": "c62-06",
+      "text": "4.44",
+      "metres": 4.44,
+      "updatedAt": "2026-09-29T22:56:49.932Z"
+    },
+    {
+      "id": "c62-07",
+      "text": "5.3",
+      "metres": 5.3,
+      "note": "No se sabe cuál es el punto medio",
+      "updatedAt": "2026-09-29T22:58:02.263Z"
+    },
+    {
+      "id": "c62-08",
+      "text": "19.68",
+      "metres": 19.68,
+      "updatedAt": "2026-09-29T22:59:23.084Z"
+    },
+    {
+      "id": "c62-09",
+      "text": "3.8",
+      "metres": 3.8,
+      "updatedAt": "2026-09-29T23:00:04.575Z"
+    },
+    {
+      "id": "a-01",
+      "text": "4.63",
+      "metres": 4.63,
+      "updatedAt": "2026-09-29T23:00:29.770Z"
+    },
+    {
+      "id": "a-02",
+      "text": "14.47",
+      "metres": 14.47,
+      "updatedAt": "2026-09-29T23:01:25.816Z"
+    },
+    {
+      "id": "a-03",
+      "text": "4.84",
+      "metres": 4.84,
+      "updatedAt": "2026-09-29T23:01:53.055Z"
+    },
+    {
+      "id": "a-04",
+      "text": "4.8",
+      "metres": 4.8,
+      "updatedAt": "2026-09-29T23:02:19.800Z"
+    },
+    {
+      "id": "a-05",
+      "text": "2.61",
+      "metres": 2.61,
+      "updatedAt": "2026-09-29T23:02:57.549Z"
+    },
+    {
+      "id": "a-06",
+      "text": "0.88",
+      "metres": 0.88,
+      "updatedAt": "2026-09-29T23:03:39.227Z"
+    },
+    {
+      "id": "a-07",
+      "text": "0.75",
+      "metres": 0.75,
+      "updatedAt": "2026-09-29T23:04:20.046Z"
+    },
+    {
+      "id": "a-08",
+      "text": "24.44",
+      "metres": 24.44,
+      "updatedAt": "2026-09-29T23:05:27.824Z"
+    },
+    {
+      "id": "a-09",
+      "text": "2.63",
+      "metres": 2.63,
+      "updatedAt": "2026-09-29T23:06:17.032Z"
+    },
+    {
+      "id": "a-10",
+      "text": "4.02",
+      "metres": 4.02,
+      "updatedAt": "2026-09-29T23:06:59.077Z"
+    },
+    {
+      "id": "a-11",
+      "text": "7.37",
+      "metres": 7.37,
+      "updatedAt": "2026-09-29T23:07:55.221Z"
+    },
+    {
+      "id": "a-12",
+      "text": "2.51",
+      "metres": 2.51,
+      "updatedAt": "2026-09-29T23:08:40.599Z"
+    },
+    {
+      "id": "a-13",
+      "text": "1.49",
+      "metres": 1.49,
+      "updatedAt": "2026-09-29T23:08:50.676Z"
+    },
+    {
+      "id": "a-14",
+      "text": "5.48",
+      "metres": 5.48,
+      "updatedAt": "2026-09-29T23:09:23.129Z"
+    },
+    {
+      "id": "a-15",
+      "text": "5.39",
+      "metres": 5.39,
+      "updatedAt": "2026-09-29T23:10:30.276Z"
+    },
+    {
+      "id": "a-16",
+      "text": "5.5",
+      "metres": 5.5,
+      "updatedAt": "2026-09-29T23:11:13.437Z"
+    },
+    {
+      "id": "a-17",
+      "text": "26.32",
+      "metres": 26.32,
+      "updatedAt": "2026-09-29T23:12:39.154Z"
+    },
+    {
+      "id": "a-18",
+      "text": "5.48",
+      "metres": 5.48,
+      "updatedAt": "2026-09-29T23:14:24.681Z"
+    },
+    {
+      "id": "a-19",
+      "text": "5.03",
+      "metres": 5.03,
+      "updatedAt": "2026-09-29T23:14:47.029Z"
+    },
+    {
+      "id": "c63-01",
+      "text": "6.64",
+      "metres": 6.64,
+      "note": "Hay materas",
+      "updatedAt": "2026-09-29T23:15:33.726Z"
+    },
+    {
+      "id": "c63-02",
+      "text": "28.74",
+      "metres": 28.74,
+      "updatedAt": "2026-09-29T23:16:57.720Z"
+    },
+    {
+      "id": "c63-03",
+      "text": "6.03",
+      "metres": 6.03,
+      "updatedAt": "2026-09-29T23:17:27.651Z"
+    },
+    {
+      "id": "c63-04",
+      "text": "2.97",
+      "metres": 2.97,
+      "note": "Puerta admisión",
+      "updatedAt": "2026-09-29T23:17:58.319Z"
+    },
+    {
+      "id": "c63-05",
+      "text": "6.03",
+      "metres": 6.03,
+      "updatedAt": "2026-09-29T23:18:23.331Z"
+    },
+    {
+      "id": "c63-06",
+      "text": "9.53",
+      "metres": 9.53,
+      "updatedAt": "2026-09-29T23:19:07.443Z"
+    },
+    {
+      "id": "c63-07",
+      "text": "5.95",
+      "metres": 5.95,
+      "updatedAt": "2026-09-29T23:19:34.638Z"
+    },
+    {
+      "id": "c63-08",
+      "text": "7.92",
+      "metres": 7.92,
+      "updatedAt": "2026-09-29T23:20:04.972Z"
+    },
+    {
+      "id": "bis-06",
+      "text": "0.00",
+      "metres": 0.0,
+      "note": "Este muro no lo tuve en cuenta solo es estética de la fachada, tomé en cuenta la medida 3 como ancho completo, tomar esta medida es demasiado detalle innecesario.",
+      "updatedAt": "2026-09-30T00:06:03.843Z"
+    },
+    {
+      "id": "bis-07",
+      "text": "0.00",
+      "metres": 0.0,
+      "note": "Es la misma medida 4, por lo que la medida 3 es el mismo ancho y no tomé la medida 6.",
+      "updatedAt": "2026-09-30T00:07:50.274Z"
+    },
+    {
+      "id": "bis-08",
+      "text": "0.00",
+      "metres": 0.0,
+      "note": "Esta es la medida 5.",
+      "updatedAt": "2026-09-30T00:07:39.423Z"
+    }
+  ]
+}

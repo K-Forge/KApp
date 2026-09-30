@@ -121,47 +121,56 @@
         {
           "code": "P2-ASESOR-JURIDICO",
           "name": "Asesor Jurídico",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P2-ASISTENTE",
           "name": "Asistente Administrativo",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P2-COMPRAS",
           "name": "Compras",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P2-DEPARTAMENTO",
           "name": "Departamento de Contabilidad",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P2-DIRECTOR",
           "name": "Director Administrativo y Financiero",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P2-DIRECTORA",
           "name": "Directora de Servicios Administrativos",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P2-FONDO-EMPLEADOS",
           "name": "Fondo de Empleados",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P2-PLANTA-FISICA",
           "name": "Planta Física",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P2-SECRETARIA",
           "name": "Secretaría",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         }
       ]
     },
@@ -178,107 +187,128 @@
         {
           "code": "P3-ARCHIVO",
           "name": "Archivo",
-          "typeCode": "ARCHIVE"
+          "typeCode": "ARCHIVE",
+          "aliases": []
         },
         {
           "code": "P3-ASISTENTE",
           "name": "Asistente de Coordinación de Prácticas",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-AUXILIAR",
           "name": "Auxiliar Departamento de Aseguramiento de la Calidad Académica",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-COORDINADOR",
           "name": "Coordinador de Práctica Clínica Psicología",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-COORDINADOR-2",
           "name": "Coordinador de Prácticas Matemáticas e Ingenierías",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-COORDINADORA",
           "name": "Coordinadora de Prácticas Electivas Psicología",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-COORDINADORA-2",
           "name": "Coordinadora de Prácticas Escuela de Negocios",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-DIRECCION",
           "name": "Dirección Especialización Forense",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-DIRECCION-CENTRO",
           "name": "Dirección Centro de Medición y Evaluación",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-DIRECCION-REVISTA",
           "name": "Dirección Revista Suma de Negocios",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-DIRECTOR-CENTRO",
           "name": "Director Centro de Investigaciones Matemáticas e Ingenierías CIMI",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-DIRECTORA",
           "name": "Directora Especialización Recursos Humanos",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-DIRECTORA-CENTR-2",
           "name": "Directora Centro de Investigaciones de Psicología CIP",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-DIRECTORA-CENTRO",
           "name": "Directora Centro de Investigaciones Escuela de Negocios CIEN",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-INVESTIGADORES",
           "name": "Investigadores CIEN",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-INVESTIGADORES-2",
           "name": "Investigadores CIP",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-JEFE-OFICINA",
           "name": "Jefe Oficina de Información y Evaluación",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-JEFE-OFICINA-2",
           "name": "Jefe de Oficina de Autoevaluación y Acreditación",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-POSGRADO",
           "name": "Posgrado Psicología Clínica Doctorado",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-SECRETARIA-CENT-2",
           "name": "Secretaría Centro Docente de Prácticas Psicología",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P3-SECRETARIA-CENTRO",
           "name": "Secretaría Centro de Investigaciones",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         }
       ]
     },
@@ -295,47 +325,56 @@
         {
           "code": "P4-COMUNICACIONES",
           "name": "Comunicaciones",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P4-DEPARTAMENTO",
           "name": "Departamento Virtual y Web-Master",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P4-DEPARTAMENTO-2",
           "name": "Departamento de Seguridad y Salud en el Trabajo",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P4-DEPARTAMENTO-3",
           "name": "Departamento de Nómina",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P4-DEPARTAMENTO-TIC",
           "name": "Departamento de TIC'S",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P4-DIRECCION",
           "name": "Dirección de Recursos Humanos",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P4-OFICINA",
           "name": "Oficina de Optimización y Mejoramiento",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P4-OFICINA-SEGURIDAD",
           "name": "Oficina de Seguridad",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P4-SERVICIOS",
           "name": "Servicios Generales y Eventos",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         }
       ]
     }

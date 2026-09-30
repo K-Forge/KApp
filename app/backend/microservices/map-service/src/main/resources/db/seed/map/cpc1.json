@@ -50,13 +50,13 @@
       "width": 1750,
       "height": 650,
       "top": "SOUTH",
-      "outline": [],
       "spaces": [
         {
           "code": "101",
           "doorCode": "101",
           "name": "Consultorio 101",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1619,
@@ -93,6 +93,7 @@
           "doorCode": "102",
           "name": "Consultorio 102",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1582,
@@ -133,6 +134,7 @@
           "doorCode": "103",
           "name": "Consultorio 103",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1570,
@@ -169,6 +171,7 @@
           "doorCode": "104",
           "name": "Consultorio 104",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1393,
@@ -205,6 +208,7 @@
           "doorCode": "105",
           "name": "Consultorio 105",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1380,
@@ -241,6 +245,7 @@
           "doorCode": "106",
           "name": "Consultorio 106",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1204,
@@ -277,6 +282,7 @@
           "doorCode": "107",
           "name": "Consultorio 107",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1093,
@@ -313,6 +319,7 @@
           "doorCode": "108",
           "name": "Consultorio 108",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 997,
@@ -349,6 +356,7 @@
           "doorCode": "109",
           "name": "Consultorio 109",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 988,
@@ -385,6 +393,7 @@
           "doorCode": "110",
           "name": "Consultorio 110",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1056,
@@ -421,6 +430,7 @@
           "doorCode": "111",
           "name": "Consultorio 111",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1147,
@@ -457,6 +467,7 @@
           "doorCode": "112",
           "name": "Consultorio 112",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1238,
@@ -493,6 +504,7 @@
           "doorCode": "113",
           "name": "Consultorio 113",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1023,
@@ -529,6 +541,7 @@
           "doorCode": "114",
           "name": "Consultorio 114",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1147,
@@ -624,6 +637,7 @@
           "code": "P1-ARCHIVO",
           "name": "Archivo",
           "typeCode": "ARCHIVE",
+          "aliases": [],
           "shape": [
             {
               "x": 1147,
@@ -647,6 +661,7 @@
           "code": "P1-ASC",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 1542,
@@ -670,6 +685,7 @@
           "code": "P1-BANO-ACCESIBLE",
           "name": "Baño accesible de hombres",
           "typeCode": "RESTROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1707,
@@ -693,6 +709,7 @@
           "code": "P1-BANO-ACCESIBLE-2",
           "name": "Baño accesible de mujeres",
           "typeCode": "RESTROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1537,
@@ -716,6 +733,7 @@
           "code": "P1-CAFETERIA",
           "name": "Cafetería",
           "typeCode": "CAFETERIA",
+          "aliases": [],
           "shape": [
             {
               "x": 747,
@@ -767,6 +785,7 @@
           "code": "P1-COFFEE-BREAK",
           "name": "Coffee break",
           "typeCode": "SOCIAL_AREA",
+          "aliases": [],
           "shape": [
             {
               "x": 808,
@@ -789,18 +808,21 @@
         {
           "code": "P1-CUARTO-ASEO",
           "name": "Cuarto de aseo",
-          "typeCode": "CLEANING_ROOM"
+          "typeCode": "CLEANING_ROOM",
+          "aliases": []
         },
         {
           "code": "P1-ENTRADA",
           "name": "Entrada",
           "typeCode": "ENTRANCE",
+          "aliases": [],
           "note": "Sale al oeste."
         },
         {
           "code": "P1-ESC-EMERGENCIA",
           "name": "Escalera de emergencia",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 1345,
@@ -824,6 +846,7 @@
           "code": "P1-ESC-PRINCIPAL",
           "name": "Escalera principal",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 919,
@@ -854,12 +877,14 @@
         {
           "code": "P1-PLANTA-ELECTRICA",
           "name": "Planta eléctrica",
-          "typeCode": "ELECTRICAL_ROOM"
+          "typeCode": "ELECTRICAL_ROOM",
+          "aliases": []
         },
         {
           "code": "P1-RECEPCION",
           "name": "Recepción",
           "typeCode": "RECEPTION",
+          "aliases": [],
           "shape": [
             {
               "x": 1481,
@@ -882,12 +907,14 @@
         {
           "code": "P1-SALA-ESPERA",
           "name": "Sala de espera",
-          "typeCode": "WAITING_ROOM"
+          "typeCode": "WAITING_ROOM",
+          "aliases": []
         },
         {
           "code": "P1-SALA-ESPERA-2",
           "name": "Sala de espera 2",
-          "typeCode": "WAITING_ROOM"
+          "typeCode": "WAITING_ROOM",
+          "aliases": []
         }
       ]
     },
@@ -900,13 +927,13 @@
       "width": 1750,
       "height": 650,
       "top": "SOUTH",
-      "outline": [],
       "spaces": [
         {
           "code": "201",
           "doorCode": "201",
           "name": "Docente de Apoyo",
           "typeCode": "OFFICE",
+          "aliases": [],
           "shape": [
             {
               "x": 1702,
@@ -986,6 +1013,7 @@
           "doorCode": "203",
           "name": "Consultorio 203",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1489,
@@ -1022,6 +1050,7 @@
           "doorCode": "204",
           "name": "Consultorio 204",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1480,
@@ -1058,6 +1087,7 @@
           "doorCode": "205",
           "name": "Consultorio 205",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1368,
@@ -1094,6 +1124,7 @@
           "doorCode": "206",
           "name": "Consultorio 206",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1270,
@@ -1130,6 +1161,7 @@
           "doorCode": "207",
           "name": "Consultorio 207",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1170,
@@ -1166,6 +1198,7 @@
           "doorCode": "208",
           "name": "Consultorio 208",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1070,
@@ -1202,6 +1235,7 @@
           "doorCode": "209",
           "name": "Consultorio 209",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1269,
@@ -1238,6 +1272,7 @@
           "doorCode": "210",
           "name": "Consultorio 210",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 1092,
@@ -1278,6 +1313,7 @@
           "doorCode": "211",
           "name": "Consultorio 211",
           "typeCode": "CONSULTATION_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 977,
@@ -1313,6 +1349,7 @@
           "code": "P2-ASC",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 1531,
@@ -1336,6 +1373,7 @@
           "code": "P2-BANO-HOMBRES",
           "name": "Baño de hombres",
           "typeCode": "RESTROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 967,
@@ -1374,17 +1412,20 @@
         {
           "code": "P2-BANO-MUJERES",
           "name": "Baño de mujeres",
-          "typeCode": "RESTROOM"
+          "typeCode": "RESTROOM",
+          "aliases": []
         },
         {
           "code": "P2-COFFEE-BREAK",
           "name": "Coffee break",
-          "typeCode": "SOCIAL_AREA"
+          "typeCode": "SOCIAL_AREA",
+          "aliases": []
         },
         {
           "code": "P2-CUARTO-ASEO",
           "name": "Cuarto de aseo",
           "typeCode": "CLEANING_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 917,
@@ -1408,6 +1449,7 @@
           "code": "P2-ESC-EMERGENCIA",
           "name": "Escalera de emergencia",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 711,
@@ -1431,6 +1473,7 @@
           "code": "P2-ESC-PRINCIPAL",
           "name": "Escalera principal",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 1320,
@@ -1454,6 +1497,7 @@
           "code": "P2-RECEPCION",
           "name": "Recepción",
           "typeCode": "RECEPTION",
+          "aliases": [],
           "shape": [
             {
               "x": 1524,
@@ -1476,7 +1520,8 @@
         {
           "code": "P2-SALA-ESPERA",
           "name": "Sala de espera",
-          "typeCode": "WAITING_ROOM"
+          "typeCode": "WAITING_ROOM",
+          "aliases": []
         }
       ]
     },
@@ -1489,85 +1534,97 @@
       "width": 1750,
       "height": 650,
       "top": "SOUTH",
-      "outline": [],
       "spaces": [
         {
           "code": "301",
           "doorCode": "301",
           "name": "Consultorio 301",
-          "typeCode": "CONSULTATION_ROOM"
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": []
         },
         {
           "code": "302",
           "doorCode": "302",
           "name": "Consultorio 302",
-          "typeCode": "CONSULTATION_ROOM"
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": []
         },
         {
           "code": "303",
           "doorCode": "303",
           "name": "Consultorio 303",
-          "typeCode": "CONSULTATION_ROOM"
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": []
         },
         {
           "code": "304",
           "doorCode": "304",
           "name": "Consultorio 304",
-          "typeCode": "CONSULTATION_ROOM"
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": []
         },
         {
           "code": "305",
           "doorCode": "305",
           "name": "Consultorio 305",
-          "typeCode": "CONSULTATION_ROOM"
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": []
         },
         {
           "code": "306",
           "doorCode": "306",
           "name": "Consultorio 306",
-          "typeCode": "CONSULTATION_ROOM"
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": []
         },
         {
           "code": "307",
           "doorCode": "307",
           "name": "Consultorio 307",
-          "typeCode": "CONSULTATION_ROOM"
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": []
         },
         {
           "code": "308",
           "doorCode": "308",
           "name": "Consultorio 308",
-          "typeCode": "CONSULTATION_ROOM"
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": []
         },
         {
           "code": "309",
           "doorCode": "309",
           "name": "Consultorio 309",
-          "typeCode": "CONSULTATION_ROOM"
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": []
         },
         {
           "code": "310",
           "doorCode": "310",
           "name": "Consultorio 310",
-          "typeCode": "CONSULTATION_ROOM"
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": []
         },
         {
           "code": "311",
           "doorCode": "311",
           "name": "Consultorio 311",
-          "typeCode": "CONSULTATION_ROOM"
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": []
         },
         {
           "code": "312",
           "doorCode": "312",
           "name": "Consultorio 312",
-          "typeCode": "CONSULTATION_ROOM"
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": []
         },
         {
           "code": "313",
           "doorCode": "313",
           "name": "Consultorio 313",
-          "typeCode": "CONSULTATION_ROOM"
+          "typeCode": "CONSULTATION_ROOM",
+          "aliases": []
         },
         {
           "code": "P3-01",
@@ -1979,6 +2036,7 @@
           "code": "P3-ASC",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 1527,
@@ -2001,7 +2059,8 @@
         {
           "code": "P3-COFFEE-BREAK",
           "name": "Coffee break",
-          "typeCode": "SOCIAL_AREA"
+          "typeCode": "SOCIAL_AREA",
+          "aliases": []
         },
         {
           "code": "P3-CONSULTORIO-1",
@@ -2015,6 +2074,7 @@
           "code": "P3-ESC-EMERGENCIA",
           "name": "Escalera de emergencia",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 709,
@@ -2038,6 +2098,7 @@
           "code": "P3-ESC-PRINCIPAL",
           "name": "Escalera principal",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 1320,
@@ -2060,7 +2121,8 @@
         {
           "code": "P3-SALA-JUNTAS",
           "name": "Sala de Juntas",
-          "typeCode": "MEETING_ROOM"
+          "typeCode": "MEETING_ROOM",
+          "aliases": []
         }
       ]
     },
@@ -2073,7 +2135,6 @@
       "width": 1750,
       "height": 650,
       "top": "SOUTH",
-      "outline": [],
       "spaces": [
         {
           "code": "P4-01",
@@ -2247,6 +2308,7 @@
           "code": "P4-ASC",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 1521,
@@ -2270,6 +2332,7 @@
           "code": "P4-BANO-HOMBRES",
           "name": "Baño de hombres",
           "typeCode": "RESTROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 960,
@@ -2293,6 +2356,7 @@
           "code": "P4-BANO-MUJERES",
           "name": "Baño de mujeres",
           "typeCode": "RESTROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 916,
@@ -2332,6 +2396,7 @@
           "code": "P4-CUARTO-ASEO",
           "name": "Cuarto de aseo",
           "typeCode": "CLEANING_ROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 858,
@@ -2358,12 +2423,14 @@
         {
           "code": "P4-DOCENTE-APOYO",
           "name": "Docente de Apoyo",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P4-ESC-EMERGENCIA",
           "name": "Escalera de emergencia",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 656,
@@ -2387,6 +2454,7 @@
           "code": "P4-ESC-PRINCIPAL",
           "name": "Escalera principal",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 1320,
@@ -2410,6 +2478,7 @@
           "code": "P4-PRACTICAS-CPC",
           "name": "Prácticas CPC",
           "typeCode": "OFFICE",
+          "aliases": [],
           "shape": [
             {
               "x": 1702,
@@ -2472,7 +2541,6 @@
       "width": 1750,
       "height": 650,
       "top": "SOUTH",
-      "outline": [],
       "spaces": [
         {
           "code": "P5-01",
@@ -2646,6 +2714,7 @@
           "code": "P5-ASC",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 1528,
@@ -2669,6 +2738,7 @@
           "code": "P5-CAFETERIA",
           "name": "Cafetería",
           "typeCode": "CAFETERIA",
+          "aliases": [],
           "shape": [
             {
               "x": 1095,
@@ -2715,12 +2785,14 @@
         {
           "code": "P5-CUARTO-ASEO",
           "name": "Cuarto de aseo",
-          "typeCode": "CLEANING_ROOM"
+          "typeCode": "CLEANING_ROOM",
+          "aliases": []
         },
         {
           "code": "P5-ESC-EMERGENCIA",
           "name": "Escalera de emergencia",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 708,
@@ -2744,6 +2816,7 @@
           "code": "P5-ESC-PRINCIPAL",
           "name": "Escalera principal",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 1320,
@@ -2766,12 +2839,14 @@
         {
           "code": "P5-SALA-PRACTICANTES",
           "name": "Sala de Practicantes",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P5-SEXLAB",
           "name": "SexLab",
           "typeCode": "LAB",
+          "aliases": [],
           "shape": [
             {
               "x": 1706,
@@ -2794,7 +2869,8 @@
         {
           "code": "P5-TERRAZA",
           "name": "Terraza",
-          "typeCode": "TERRACE"
+          "typeCode": "TERRACE",
+          "aliases": []
         }
       ]
     }

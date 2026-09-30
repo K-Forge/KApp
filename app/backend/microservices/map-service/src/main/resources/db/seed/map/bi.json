@@ -168,7 +168,6 @@
       "width": 629,
       "height": 1110,
       "top": "WEST",
-      "outline": [],
       "spaces": [
         {
           "code": "P1-02",
@@ -391,6 +390,7 @@
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 199,
@@ -415,6 +415,7 @@
           "wing": "O",
           "name": "Baños",
           "typeCode": "RESTROOM",
+          "aliases": [],
           "shape": [
             {
               "x": 24,
@@ -439,6 +440,7 @@
           "wing": "O",
           "name": "Entrada",
           "typeCode": "ENTRANCE",
+          "aliases": [],
           "note": "Sale al oeste, a la Calle 62."
         },
         {
@@ -446,6 +448,7 @@
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 300,
@@ -577,7 +580,6 @@
       "width": 629,
       "height": 1110,
       "top": "WEST",
-      "outline": [],
       "spaces": [
         {
           "code": "P2-11",
@@ -808,6 +810,7 @@
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 188,
@@ -831,19 +834,22 @@
           "code": "P2-BILLAR",
           "wing": "O",
           "name": "Billar",
-          "typeCode": "GAME_ROOM"
+          "typeCode": "GAME_ROOM",
+          "aliases": []
         },
         {
           "code": "P2-COORDINACION",
           "wing": "O",
           "name": "Coordinación de Bienestar Estudiantil",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P2-ESC",
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 349,
@@ -867,7 +873,8 @@
           "code": "P2-FUTBOLIN",
           "wing": "O",
           "name": "Futbolín",
-          "typeCode": "GAME_ROOM"
+          "typeCode": "GAME_ROOM",
+          "aliases": []
         },
         {
           "code": "P2-PING-PONG",
@@ -899,7 +906,6 @@
       "width": 629,
       "height": 1110,
       "top": "WEST",
-      "outline": [],
       "spaces": [
         {
           "code": "P3-34",
@@ -1534,6 +1540,7 @@
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 185,
@@ -1558,6 +1565,7 @@
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 349,
@@ -1590,13 +1598,15 @@
           "code": "P3-SALA-DANZA",
           "wing": "O",
           "name": "Sala de Danza",
-          "typeCode": "ARTS_ROOM"
+          "typeCode": "ARTS_ROOM",
+          "aliases": []
         },
         {
           "code": "P3-SALA-MUSICA",
           "wing": "O",
           "name": "Sala de Música",
-          "typeCode": "ARTS_ROOM"
+          "typeCode": "ARTS_ROOM",
+          "aliases": []
         },
         {
           "code": "P3-SALAS-KARAOKE",
@@ -1618,7 +1628,6 @@
       "width": 629,
       "height": 1110,
       "top": "WEST",
-      "outline": [],
       "spaces": [
         {
           "code": "P4-35",
@@ -1697,6 +1706,7 @@
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 185,
@@ -1721,6 +1731,7 @@
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 349,
@@ -1826,7 +1837,6 @@
       "width": 629,
       "height": 1110,
       "top": "WEST",
-      "outline": [],
       "spaces": [
         {
           "code": "P5-50",
@@ -1857,6 +1867,7 @@
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 211,
@@ -1890,6 +1901,7 @@
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 349,

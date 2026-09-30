@@ -145,7 +145,8 @@
         {
           "code": "S1-ARCHIVO",
           "name": "Archivo Institucional",
-          "typeCode": "ARCHIVE"
+          "typeCode": "ARCHIVE",
+          "aliases": []
         }
       ]
     },
@@ -162,22 +163,26 @@
         {
           "code": "P1-ASC",
           "name": "Ascensor",
-          "typeCode": "ELEVATOR"
+          "typeCode": "ELEVATOR",
+          "aliases": []
         },
         {
           "code": "P1-ENTRADA",
           "name": "Entrada",
-          "typeCode": "ENTRANCE"
+          "typeCode": "ENTRANCE",
+          "aliases": []
         },
         {
           "code": "P1-ESC",
           "name": "Escalera",
-          "typeCode": "STAIRS"
+          "typeCode": "STAIRS",
+          "aliases": []
         },
         {
           "code": "P1-RECEPCION",
           "name": "Recepción",
-          "typeCode": "RECEPTION"
+          "typeCode": "RECEPTION",
+          "aliases": []
         }
       ]
     },
@@ -191,7 +196,6 @@
       "width": 1525,
       "height": 507,
       "top": "NORTH",
-      "outline": [],
       "spaces": [
         {
           "code": "MEZZ-01",
@@ -341,6 +345,7 @@
           "code": "MEZZ-ESC",
           "name": "Escalera",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 893,
@@ -379,7 +384,6 @@
       "width": 1525,
       "height": 629,
       "top": "NORTH",
-      "outline": [],
       "spaces": [
         {
           "code": "P2-01",
@@ -753,6 +757,7 @@
           "code": "P2-ASC",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 952,
@@ -828,6 +833,7 @@
           "code": "P2-ESC",
           "name": "Escalera",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 727,
@@ -858,7 +864,8 @@
         {
           "code": "P2-LABORATORIOS",
           "name": "Laboratorios de Conducta Animal",
-          "typeCode": "LAB"
+          "typeCode": "LAB",
+          "aliases": []
         }
       ]
     },
@@ -875,17 +882,20 @@
         {
           "code": "P3-ASC",
           "name": "Ascensor",
-          "typeCode": "ELEVATOR"
+          "typeCode": "ELEVATOR",
+          "aliases": []
         },
         {
           "code": "P3-ESC",
           "name": "Escalera",
-          "typeCode": "STAIRS"
+          "typeCode": "STAIRS",
+          "aliases": []
         },
         {
           "code": "P3-ZONA-SOCIAL",
           "name": "Zona Social",
-          "typeCode": "SOCIAL_AREA"
+          "typeCode": "SOCIAL_AREA",
+          "aliases": []
         }
       ]
     },
@@ -898,7 +908,6 @@
       "width": 1525,
       "height": 629,
       "top": "NORTH",
-      "outline": [],
       "spaces": [
         {
           "code": "P4-27",
@@ -1208,6 +1217,7 @@
           "code": "P4-ASC",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 951,
@@ -1282,17 +1292,20 @@
         {
           "code": "P4-DIRECCION",
           "name": "Dirección de Posgrados en Psicología del Consumidor",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P4-DIRECCION-GENERAL",
           "name": "Dirección General de Investigaciones",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P4-ESC",
           "name": "Escalera",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 729,
@@ -1315,17 +1328,20 @@
         {
           "code": "P4-LABORATORIO",
           "name": "Laboratorio de Psicología Social",
-          "typeCode": "LAB"
+          "typeCode": "LAB",
+          "aliases": []
         },
         {
           "code": "P4-SALA-ESTUDIANTES",
           "name": "Sala de Estudiantes de Doctorado",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P4-SALA-FORMACION",
           "name": "Sala de Formación Científica",
-          "typeCode": "CLASSROOM"
+          "typeCode": "CLASSROOM",
+          "aliases": []
         }
       ]
     },
@@ -1338,7 +1354,6 @@
       "width": 1525,
       "height": 629,
       "top": "NORTH",
-      "outline": [],
       "spaces": [
         {
           "code": "P5-26",
@@ -1808,6 +1823,7 @@
           "code": "P5-ASC",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 942,
@@ -1883,6 +1899,7 @@
           "code": "P5-ESC",
           "name": "Escalera",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 720,
@@ -1930,7 +1947,6 @@
       "width": 1525,
       "height": 629,
       "top": "NORTH",
-      "outline": [],
       "spaces": [
         {
           "code": "P6-01",
@@ -2548,6 +2564,7 @@
           "code": "P6-ASC",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
+          "aliases": [],
           "shape": [
             {
               "x": 938,
@@ -2622,12 +2639,14 @@
         {
           "code": "P6-DIRECCION",
           "name": "Dirección de Revistas Científicas",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P6-ESC",
           "name": "Escalera",
           "typeCode": "STAIRS",
+          "aliases": [],
           "shape": [
             {
               "x": 714,
@@ -2650,12 +2669,14 @@
         {
           "code": "P6-OFICINAS",
           "name": "Oficinas de Investigadores",
-          "typeCode": "OFFICE"
+          "typeCode": "OFFICE",
+          "aliases": []
         },
         {
           "code": "P6-SALA-JUNTAS",
           "name": "Sala de Juntas",
-          "typeCode": "MEETING_ROOM"
+          "typeCode": "MEETING_ROOM",
+          "aliases": []
         }
       ]
     }
