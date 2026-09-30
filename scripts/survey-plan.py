@@ -130,42 +130,50 @@ def length(sid, street, a, b, text, building='EC', along=None, through=None):
 # not the sum of others on its line: from the corner of a step, the setback of the corner ahead
 # plus the step's length already says it.
 B = 'Carrera 9 Bis'
-K = {1: (-4.19, 3.00), 2: (-4.22, 11.41), 3: (-6.29, 11.54), 4: (-6.26, 13.32), 5: (-11.15, 13.13),
-     5.5: (-11.16, 17.95), 6: (-11.16, 28.24), 7: (-13.66, 28.26), 8: (-13.59, 36.15), 9: (-17.96, 36.20),
-     18: (-21.99, 68.59)}
+# The first floor's corners, as Brian measured them on 2026-09-29 and the outline now draws them:
+# the north wing, stepped in to the north connection, the central wing's whole front, stepped in to
+# the south connection, then the south wing over the auditorium.
+K = {1: (-12.37, 7.20), 2: (-12.37, 12.59), 3: (-13.75, 12.59), 4: (-13.76, 17.97), 5: (-13.59, 36.15),
+     6: (-17.96, 36.20), 7: (-17.97, 43.67), 18: (-21.68, 68.50)}
 setback('bis-01', B, K[1], NORTH, 'North wing, corner with Calle 63: to the Calle 63 curb')
 setback('bis-02', B, K[1], EAST, 'North wing, corner with Calle 63: to the Cra 9 Bis curb')
 length('bis-03', B, K[1], K[2], 'North wing, its end on Cra 9 Bis: from the corner to where it steps in')
 setback('bis-04', B, K[2], EAST, 'North wing, where its end steps in')
 length('bis-05', B, K[2], K[3], 'How far it steps in')
-length('bis-06', B, K[3], K[4], "The short wall after the step, to the north wing's corner on the plaza")
-setback('bis-07', B, K[4], EAST, 'North wing, its corner on the plaza')
-length('bis-08', B, K[4], K[5], "North wing's wall along the plaza, to the front behind it")
-length('bis-10', B, K[5], K[5.5], "North connection's front on the plaza, to where the central wing's front starts")
-length('bis-11', B, K[5.5], K[6], "Central wing's front on the plaza, to where the wall steps back")
-setback('bis-12', B, K[6], EAST, 'End of that front, where the wall steps back')
-length('bis-13', B, (-11.16, 21.2), (-11.16, 24.4), "Reception's main door: its width")
-length('bis-14', B, K[6], (-11.16, 24.4), "Reception's main door: from the corner where the front steps back to the door's nearest edge")
-length('bis-15', B, K[6], K[7], 'How far the wall steps back')
-length('bis-17', B, K[7], K[8], "Central wing's next front, to where it steps back again")
-setback('bis-18', B, K[8], EAST, 'End of that front, where it steps back again')
-length('bis-19', B, K[8], K[9], 'How far it steps back')
+length('bis-10', B, K[3], K[4], "North connection's front on the plaza, to where the central wing's front starts")
+length('bis-11', B, K[4], K[5], "Central wing's front on the plaza, to where the wall steps back")
+setback('bis-12', B, K[5], EAST, 'End of that front, where the wall steps back')
+
+
+def on_front(y):
+    """The central wing's front at `y`: it leans 17 cm over its length."""
+    (x0, y0), (x1, y1) = K[4], K[5]
+    return (x0 + (x1 - x0) * (y - y0) / (y1 - y0), y)
+
+
+# Where the door is along that front is not known yet: in its middle, as wide as it was measured.
+length('bis-13', B, on_front(23.2), on_front(30.93), "Reception's main door: its width")
+length('bis-15', B, K[5], K[6], 'How far the wall steps back')
+length('bis-17', B, K[6], K[7], "South connection's front on the plaza, to where the south wing starts")
+setback('bis-18', B, K[7], EAST, 'End of that front, where it steps back again')
+length('bis-19', B, (-17.19, 49.80), (-19.89, 49.87), 'How far it steps back')
 
 
 def south_wall_x(y):
-    for y0, y1, x in ((36.2, 44.25, -17.96), (44.25, 49.83, -16.60), (49.83, 56.37, -18.99),
-                      (56.37, 59.94, -19.90), (59.94, 68.6, -21.68)):
-        if y0 <= y < y1:
-            return x
-    return -21.68
+    """The south wing's front on the plaza at `y`: straight, then leaning out, then stepped back twice."""
+    if y < 44.34:
+        return -17.96
+    if y < 49.80:
+        return -17.96 + (-17.19 + 17.96) * (y - 44.34) / (49.80 - 44.34)
+    return -19.89 if y < 59.94 else -21.68
 
 
-for i, y in enumerate((41.2, 46.2, 51.2, 56.2, 61.2, 66.2)):
+for i, y in enumerate((48.67, 53.67, 58.67, 63.67)):
     setback(f'bis-{21 + i}', B, (south_wall_x(y), y), EAST, f'South wing, {5 * (i + 1)} m along its wall from its first corner')
-length('bis-28', B, K[9], K[18], "South wing, its whole front along the street, from its first corner to the neighbour's wall",
+length('bis-28', B, K[7], K[18], "South wing, its whole front along the street, from its first corner to the neighbour's wall",
        along=(0, 1), through=(-23.5, 0))
-length('bis-29', B, (-17.96, 39.5), (-17.96, 42.5), "Auditorium's public entrance: its width (none on this street? note it)")
-length('bis-30', B, K[9], (-17.96, 39.5), "Auditorium's public entrance: from the south wing's first corner to its nearest edge")
+length('bis-29', B, (south_wall_x(45.0), 45.0), (south_wall_x(48.0), 48.0), "Auditorium's public entrance: its width (none on this street? note it)")
+length('bis-30', B, K[7], (south_wall_x(45.0), 45.0), "Auditorium's public entrance: from the south wing's first corner to its nearest edge")
 length('bis-31', B, K[18], (-19.11, 68.59), "How far the neighbour's building comes out past the south wing")
 
 # ---- Calle 62: the neighbour's curved corner, then the Tienda K.
@@ -192,31 +200,44 @@ setback('a-05', A, G[2], WEST, 'Garden wall, its south end', 'Casa')
 setback('a-06', A, (-66.23, 56.0), WEST, 'Garden wall, halfway', 'Casa')
 setback('a-07', A, G[3], WEST, 'Garden wall, its north end', 'Casa')
 length('a-08', A, G[2], G[3], 'Garden wall, its whole length on Cra 9A', 'Casa')
-E = {1: (-64.48, 43.59), 2: (-64.52, 36.30)}
+E = {1: (-64.48, 43.59), 2: (-61.63, 36.29)}
 length('a-09', A, G[3], E[1], 'From the garden wall to the exit')
-length('a-10', A, E[1], E[2], 'The exit: its width on the street, wall to wall')
+length('a-10', A, E[1], E[2], 'The exit: its width on the street, wall to wall', along=(0, 1), through=(-63.1, 0))
 setback('a-11', A, (-61.52, 40.0), WEST, 'The exit: from the curb to its gate or door, at its middle')
 length('a-12', A, (-61.52, 38.5), (-61.52, 41.5), 'The back door (or gate) in the exit: its width')
 length('a-13', A, (-61.52, 36.30), (-61.52, 38.5), "The back door: from the exit's north wall to the door's nearest edge")
 setback('a-14', A, E[2], WEST, 'Central wing, its corner beside the exit')
-setback('a-15', A, (-64.57, 26.3), WEST, 'About 10 m past the exit, towards Calle 63')
-setback('a-16', A, (-64.66, 16.3), WEST, 'About 20 m past the exit, towards Calle 63')
-length('a-17', A, E[2], (-64.66, 11.95), "Central wing's front on Cra 9A (one floor high), from the exit to the north wing")
-length('a-18', A, (-64.66, 11.95), (-64.74, 3.00), 'North wing, its end on Cra 9A, to the corner with Calle 63')
-setback('a-19', A, (-64.74, 3.00), WEST, 'North wing, corner with Calle 63: to the Cra 9A curb')
+setback('a-15', A, (-61.63, 26.3), WEST, 'About 10 m past the exit, towards Calle 63')
+setback('a-16', A, (-61.70, 16.3), WEST, 'About 20 m past the exit, towards Calle 63')
+length('a-17', A, E[2], (-61.70, 12.59), "Central wing's front on Cra 9A, along the small garden, from the exit to the north wing")
+length('a-18', A, (-62.35, 12.59), (-62.35, 7.20), 'North wing, its end on Cra 9A, to the corner with Calle 63')
+setback('a-19', A, (-62.35, 7.20), WEST, 'North wing, corner with Calle 63: to the Cra 9A curb')
 
-# ---- Calle 63, east, back to the start: the north wing's front in four stretches.
+# ---- Calle 63, east, back to the start: the north wing's front, from the corner to the admissions
+# door, past the door to the stairs, and past the stairs to the corner on the plaza.
 C63 = 'Calle 63'
-setback('c63-01', C63, (-64.74, 3.00), NORTH, 'North wing, corner with Cra 9A: to the Calle 63 curb')
-stations = [(-64.74, 3.00), (-49.74, 3.00), (-34.74, 3.00), (-19.74, 3.00)]
-for i in range(1, 4):
-    start = 'the corner with Cra 9A' if i == 1 else 'that point'
-    length(f'c63-{2 * i:02d}', C63, stations[i - 1], stations[i], f'North wing on Calle 63: from {start} to the next point, about 15 m on')
-    setback(f'c63-{2 * i + 1:02d}', C63, stations[i], NORTH, f'North wing, at that point, about {15 * i} m from the corner with Cra 9A')
-length('c63-08', C63, stations[3], K[1], 'North wing on Calle 63: from that point to the corner with Cra 9 Bis')
+W = 7.20  # the first floor's wall, 30 cm behind the shrubs Brian's tape stopped at
+setback('c63-01', C63, (-62.35, W), NORTH, 'North wing, corner with Cra 9A: to the Calle 63 curb')
+door, past, stairs, top = (-33.61, W), (-30.64, W), (-21.11, W), (-13.19, W)
+length('c63-02', C63, (-62.35, W), door, 'North wing on Calle 63: from the corner with Cra 9A to the admissions door')
+setback('c63-03', C63, door, NORTH, 'North wing, at the admissions door')
+length('c63-04', C63, door, past, 'The admissions door on Calle 63: its width')
+setback('c63-05', C63, past, NORTH, 'North wing, past the admissions door')
+length('c63-06', C63, past, stairs, 'North wing on Calle 63: from the admissions door to the stairs')
+setback('c63-07', C63, stairs, NORTH, 'North wing, where the stairs start')
+length('c63-08', C63, stairs, top, 'The stairs on Calle 63: their width')
+length('c63-09', C63, top, K[1], 'North wing on Calle 63: from the stairs to the corner with Cra 9 Bis')
 
-for n, d in enumerate(PLAN, 1):
-    d['n'] = n
+NUMBERED = ['bis-01', 'bis-02', 'bis-03', 'bis-04', 'bis-05', 'bis-06', 'bis-07', 'bis-08', 'bis-10', 'bis-11',
+            'bis-12', 'bis-13', 'bis-14', 'bis-15', 'bis-17', 'bis-18', 'bis-19', 'bis-21', 'bis-22', 'bis-23',
+            'bis-24', 'bis-25', 'bis-26', 'bis-28', 'bis-29', 'bis-30', 'bis-31', 'c62-01', 'c62-02', 'c62-03',
+            'c62-04', 'c62-05', 'c62-06', 'c62-07', 'c62-08', 'c62-09', 'a-01', 'a-02', 'a-03', 'a-04', 'a-05',
+            'a-06', 'a-07', 'a-08', 'a-09', 'a-10', 'a-11', 'a-12', 'a-13', 'a-14', 'a-15', 'a-16', 'a-17', 'a-18',
+            'a-19', 'c63-01', 'c63-02', 'c63-03', 'c63-04', 'c63-05', 'c63-06', 'c63-07', 'c63-08', 'c63-09']
+# The numbers people wrote down on site: a distance taken off the plan leaves its number unused, and a
+# new one is added at the end of this list, never in between.
+for d in PLAN:
+    d['n'] = NUMBERED.index(d['id']) + 1
 assert len({d['id'] for d in PLAN}) == len(PLAN)
 
 

@@ -76,8 +76,13 @@ describe('survey sheet', () => {
     expect(problems).toEqual([]);
   });
 
-  it('walks a plan whose distances are numbered in order, each once, and each worth taking', () => {
-    expect(SURVEY_PLAN.map((d) => d.n)).toEqual(SURVEY_PLAN.map((_, i) => i + 1));
+  // The numbers are the ones written down on site: a distance taken off the plan leaves a gap, and
+  // none of the others moves.
+  it('walks a plan whose distances keep their numbers, in order, each once, and each worth taking', () => {
+    const numbers = SURVEY_PLAN.map((d) => d.n);
+    expect(numbers.every((n, i) => n >= 1 && (i === 0 || n > numbers[i - 1]))).toBe(true);
+    expect(SURVEY_PLAN.find((d) => d.id === 'c63-02')?.n).toBe(57);
+    expect(SURVEY_PLAN.find((d) => d.id === 'a-15')?.n).toBe(51);
     expect(new Set(SURVEY_PLAN.map((d) => d.id)).size).toBe(SURVEY_PLAN.length);
     expect(SURVEY_PLAN.every((d) => d.expected > 0 && /^[a-z0-9][a-z0-9-]{0,39}$/.test(d.id))).toBe(true);
   });
