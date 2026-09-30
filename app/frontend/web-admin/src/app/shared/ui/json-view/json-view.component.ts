@@ -24,6 +24,8 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
     pre {
       margin: 0;
       padding: 0.75rem;
+      /* Room for the copy button above the text, so a long token never runs under it. */
+      padding-top: 2.4rem;
       overflow: auto;
       max-height: 28rem;
       font-size: 0.75rem;

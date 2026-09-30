@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Injector, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { PinchZoomDirective, ScrollZoom, type ZoomStep } from '../../../shared/ui/pinch-zoom/pinch-zoom.directive';
 import { RouterLink } from '@angular/router';
 import { forkJoin, map, of, switchMap } from 'rxjs';
@@ -194,7 +194,9 @@ const BUILDING_COLOR = '#c2185b';
     }
     .scroller {
       overflow: auto;
-      max-height: 72vh;
+      /* One size at any zoom: the map fills it, and never leaves a gap beside it. */
+      height: 72vh;
+      min-height: 320px;
       border-radius: var(--radius-sm);
       background: color-mix(in srgb, var(--text) 16%, var(--bg-elevated));
       -webkit-overflow-scrolling: touch;
@@ -334,6 +336,8 @@ export class CampusMapPage {
       const element = this.scroller()?.nativeElement;
       if (!this.drawn() || !element || this.centred) return;
       this.centred = true;
+      const cover = this.cover();
+      if (this.scale() < cover) untracked(() => this.scale.set(cover));
       requestAnimationFrame(() => {
         element.scrollLeft = element.scrollWidth / 2 - element.clientWidth / 2;
         element.scrollTop = element.scrollHeight / 2 - element.clientHeight / 2;
@@ -493,9 +497,17 @@ export class CampusMapPage {
     };
   });
 
+  /** The furthest out the map goes: filling its box both ways, so no gap shows beside or below it. */
+  private cover(): number {
+    const element = this.scroller()?.nativeElement;
+    const box = this.drawn()?.box;
+    if (!element || !box || !element.clientWidth) return ZOOMS[0];
+    return Math.min(ZOOMS[ZOOMS.length - 1], Math.max(element.clientWidth / box.width, element.clientHeight / box.height));
+  }
+
   /** A pinch, or Ctrl/⌘ and the wheel, about that point: between the whole campus and a floor's rooms. */
   zoomAt(step: ZoomStep): void {
-    const next = Math.max(ZOOMS[0], Math.min(ZOOMS[ZOOMS.length - 1], this.scale() * step.factor));
+    const next = Math.max(this.cover(), Math.min(ZOOMS[ZOOMS.length - 1], this.scale() * step.factor));
     if (next === this.scale()) return;
     this.zoomer.around(step.x, step.y);
     this.scale.set(next);
