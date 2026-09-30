@@ -34,6 +34,8 @@ export interface SurveyMeasure {
   text?: string | null;
   metres?: number | null;
   note?: string | null;
+  /** True while it is asked to be taken again: what was typed stays, for reference, until it is. */
+  recheck?: boolean | null;
   updatedAt?: string | null;
 }
 

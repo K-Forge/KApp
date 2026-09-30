@@ -35,6 +35,15 @@ describe('survey sheet', () => {
     expect(Object.keys(stillPending({ 'bis-01': { id: 'bis-01', text: '2,25' } }, server))).toEqual(['bis-01']);
   });
 
+  it('keeps an ask to take a distance again pending until the server has it, and its taking back too', () => {
+    const stored: SurveyMeasure[] = [{ id: 'a-17', text: '26,32', metres: 26.32 }];
+    const asked = { 'a-17': { id: 'a-17', text: '26,32', metres: 26.32, recheck: true } };
+    expect(Object.keys(stillPending(asked, stored))).toEqual(['a-17']);
+    expect(stillPending(asked, [{ ...stored[0], recheck: true }])).toEqual({});
+    // Taken again with the same figure: the ask goes, and that is a change too.
+    expect(Object.keys(stillPending({ 'a-17': { id: 'a-17', text: '26,32', metres: 26.32 } }, [{ ...stored[0], recheck: true }]))).toEqual(['a-17']);
+  });
+
   it('stops being pending once saved, though the server trims it and drops what is blank', () => {
     // What the phone sent, and what the server gave back for it.
     const sent = { 'bis-04': { id: 'bis-04', label: '', text: '4,80 + 3,25 ', metres: 8.05, note: ' tree ' } };

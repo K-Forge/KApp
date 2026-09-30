@@ -20,6 +20,7 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { t } from '../../../core/i18n/i18n.service';
 
 type SaveState = 'saved' | 'waiting' | 'saving' | 'offline';
+type DistanceState = 'todo' | 'done' | 'review';
 
 /** Metres round the plan the whole-block view keeps, and the least a zoomed view shows. */
 const MARGIN = 6;
@@ -46,6 +47,9 @@ const ZOOM_MIN = 20;
         </div>
         <div class="status">
           <span class="badge badge-neutral">{{ done() }} / {{ plan.length }}</span>
+          @if (toReview()) {
+            <span class="badge review-badge">{{ toReview() === 1 ? ('1 to take again' | t) : ('{n} to take again' | t: { n: toReview() }) }}</span>
+          }
           <span class="badge" [class]="stateBadge()">{{ stateText() }}</span>
         </div>
       </header>
@@ -54,6 +58,7 @@ const ZOOM_MIN = 20;
         <summary>{{ 'How to measure' | t }}</summary>
         <p>{{ 'Walk the numbers in order, from the corner of Calle 63 and Cra 9 Bis.' | t }}</p>
         <p><b class="setback-key">{{ 'Orange' | t }}</b>{{ ': from the wall at street level, straight out from it, to the edge of the street (the curb).' | t }}</p>
+        <p><b class="review-key">{{ 'Violet' | t }}</b>{{ ': taken, but to take again. What you took before shows under the box until you type the new one.' | t }}</p>
         <p><b class="length-key">{{ 'Blue' | t }}</b>{{ ': along the wall, corner to corner, or across a door. Drawn beside its wall, with dotted lines back to the corners it runs between.' | t }}</p>
         <p>
           {{ 'Longer than {pieceMetres} m, or with something in the way: in pieces. Type one, tap +, type the next. The model’s figure is only there to catch a slip; what you see on site wins, and anything the sketch gets wrong goes in a note.' | t: { pieceMetres: pieceMetres } }}
@@ -109,6 +114,8 @@ const ZOOM_MIN = 20;
           <div class="key small">
             <span><i class="swatch setback"></i>{{ 'wall → street edge: where it stands' | t }}</span>
             <span><i class="swatch length"></i>{{ 'along the wall or a door: how wide' | t }}</span>
+            <span><i class="swatch done"></i>{{ 'taken' | t }}</span>
+            <span><i class="swatch review"></i>{{ 'to take again' | t }}</span>
             <button type="button" class="btn btn-sm zoom" (click)="whole.set(!whole())">{{ whole() ? ('Zoom in' | t) : ('Whole block' | t) }}</button>
           </div>
         </section>
@@ -144,9 +151,17 @@ const ZOOM_MIN = 20;
               <button type="button" class="btn" (click)="piece(c.id, box)" [title]="'Another piece' | t" [attr.aria-label]="'Another piece' | t">+</button>
             </div>
             <p class="small reading" [class.bad]="!!reading().error || !!reading().off">{{ readingText() }}</p>
+            @if (valueOf(c.id).recheck || before()[c.id]) {
+              <p class="small review-note">{{ 'To take again. Taken before: {value}' | t: { value: before()[c.id] || shownOf(c.id) || '—' } }}</p>
+            }
             <div class="steps">
               <button type="button" class="btn" (click)="step(-1)">{{ '‹ Back' | t }}</button>
               <button type="button" class="btn btn-primary" (click)="step(1)">{{ 'Next ›' | t }}</button>
+              @if (c.kind !== 'extra' && stateOf(c.id) !== 'todo') {
+                <button type="button" class="btn btn-sm recheck-btn" (click)="toggleRecheck(c.id)">
+                  {{ valueOf(c.id).recheck ? ('It is right as it is' | t) : ('Take it again' | t) }}
+                </button>
+              }
             </div>
             <input #note class="note" type="text" [placeholder]="'Note: what the sketch does not show' | t" [value]="valueOf(c.id).note ?? ''" (input)="write(c.id, 'note', $event)" />
             <details class="small examples">
@@ -167,7 +182,7 @@ const ZOOM_MIN = 20;
           <ol>
             @for (d of g.items; track d.id) {
               <li [class.on]="d.id === current().id" (click)="select(d.id, true)">
-                <span class="num" [class]="d.kind" [class.done]="d.done">{{ d.n }}</span>
+                <span class="num" [class]="d.kind" [class.done]="d.state === 'done'" [class.review]="d.state === 'review'">{{ d.n }}</span>
                 <span class="what">{{ d.text | t }}</span>
                 <span class="got">{{ d.shown }}</span>
               </li>
@@ -230,6 +245,12 @@ const ZOOM_MIN = 20;
     .setback { color: #e8590c; --c: #e8590c; }
     .length { color: #1c7ed6; --c: #1c7ed6; }
     .done { color: #2f9e44; --c: #2f9e44; }
+    /* Taken, but to take again: its own colour, apart from pending and taken. */
+    .review { color: #ae3ec9; --c: #ae3ec9; }
+    .review-key { color: #ae3ec9; }
+    .review-badge { background: color-mix(in srgb, #ae3ec9 18%, transparent); color: #ae3ec9; }
+    .review-note { margin: 0.2rem 0 0; color: #ae3ec9; }
+    .recheck-btn { margin-left: auto; }
     g.on line { stroke-width: 4; }
     g.on .dot { stroke: var(--bg-elevated); stroke-width: 2.5; }
     .title { display: flex; gap: 0.6rem; align-items: flex-start; }
@@ -300,7 +321,8 @@ export class SurveyPage {
     return out;
   });
 
-  readonly done = computed(() => this.plan.filter((d) => readDistance(this.values().get(d.id)?.text).metres !== null).length);
+  readonly done = computed(() => this.plan.filter((d) => this.stateOf(d.id) === 'done').length);
+  readonly toReview = computed(() => this.plan.filter((d) => this.stateOf(d.id) === 'review').length);
 
   readonly extras = computed(() =>
     [...this.values().values()]
@@ -338,12 +360,12 @@ export class SurveyPage {
   });
 
   readonly groups = computed(() => {
-    const out: { street: string; items: (PlannedDistance & { done: boolean; shown: string })[] }[] = [];
+    const out: { street: string; items: (PlannedDistance & { state: DistanceState; shown: string })[] }[] = [];
     for (const d of this.plan) {
       let g = out.find((x) => x.street === d.street);
       if (!g) out.push((g = { street: d.street, items: [] }));
       const m = this.values().get(d.id);
-      g.items.push({ ...d, done: readDistance(m?.text).metres !== null, shown: m ? this.shown(m) : '' });
+      g.items.push({ ...d, state: this.stateOf(d.id), shown: m ? this.shown(m) : '' });
     }
     return out;
   });
@@ -382,9 +404,9 @@ export class SurveyPage {
     ];
     // Where each line and number goes was laid out by scripts/survey-plan.py, clear of the others.
     const lines = planned.map(({ d, a, b }) => {
-      const done = readDistance(this.values().get(d.id)?.text).metres !== null;
+      const state = this.stateOf(d.id);
       const dim = d.dim ? ([at(d.dim[0]), at(d.dim[1])] as const) : null;
-      return { id: d.id, n: d.n, a, b, dim, tag: at(d.tag), cls: done ? 'done' : d.kind };
+      return { id: d.id, n: d.n, a, b, dim, tag: at(d.tag), cls: state === 'todo' ? d.kind : state };
     });
     const streets: { name: string; x: number; y: number; angle: number }[] = [];
     for (const street of ground.streets) {
@@ -487,7 +509,7 @@ export class SurveyPage {
     const at = order.indexOf(this.currentId());
     for (let i = 1; i <= order.length; i++) {
       const id = order[(at + by * i + order.length * i) % order.length];
-      if (by < 0 || readDistance(this.values().get(id)?.text).metres === null) {
+      if (by < 0 || this.stateOf(id) !== 'done') {
         this.select(id);
         return;
       }
@@ -526,10 +548,38 @@ export class SurveyPage {
     this.select(id);
   }
 
+  /** Pending, taken, or taken but asked to be taken again. */
+  stateOf(id: string): DistanceState {
+    const m = this.values().get(id);
+    if (m?.recheck) return 'review';
+    return readDistance(m?.text).metres !== null ? 'done' : 'todo';
+  }
+
+  shownOf(id: string): string {
+    const m = this.values().get(id);
+    return m ? this.shown(m) : '';
+  }
+
+  /** What a distance asked to be taken again read before, while it is being typed anew. */
+  readonly before = signal<Record<string, string>>({});
+
+  /** Asks for a distance to be taken again, keeping what was taken; or takes the ask back. */
+  toggleRecheck(id: string): void {
+    this.change(id, { recheck: !this.valueOf(id).recheck });
+  }
+
   private change(id: string, patch: Partial<SurveyMeasure>): void {
     const next: SurveyMeasure = { ...this.valueOf(id), ...patch, id };
     delete next.updatedAt;
-    if ('text' in patch) next.metres = readDistance(next.text).metres;
+    // Typing it again is taking it again, even with the same figure.
+    if ('text' in patch) {
+      const was = this.values().get(id);
+      if (was?.recheck) this.before.update((b) => ({ ...b, [id]: this.shown(was) }));
+      next.metres = readDistance(next.text).metres;
+      delete next.recheck;
+    }
+    // Only an ask is sent: a distance nobody asked for again carries nothing.
+    if (!next.recheck) delete next.recheck;
     this.pending.update((p) => ({ ...p, [id]: next }));
     this.keep();
     this.schedule(1200);

@@ -73,7 +73,7 @@ export function stillPending(
   // or an empty label never matched what came back, and the sheet saved again forever.
   const kept = (v: string | null | undefined) => (v == null || !v.trim() ? null : v.trim());
   const same = (a: SurveyMeasure, b: SurveyMeasure | undefined) =>
-    !!b && kept(a.text) === kept(b.text) && kept(a.note) === kept(b.note) && kept(a.label) === kept(b.label);
+    !!b && kept(a.text) === kept(b.text) && kept(a.note) === kept(b.note) && kept(a.label) === kept(b.label) && !!a.recheck === !!b.recheck;
   const out: Record<string, SurveyMeasure> = {};
   for (const [id, m] of Object.entries(pending)) {
     const there = saved.find((s) => s.id === id);
@@ -88,7 +88,7 @@ export function asText(plan: readonly PlannedDistance[], measures: readonly Surv
   const line = (head: string, m: SurveyMeasure | undefined) => {
     const r = readDistance(m?.text);
     const value = r.metres === null ? '—' : formatMetres(r.metres, m?.text) + (r.pieces > 1 ? ` (${m?.text})` : '');
-    return `${head}: ${value}${m?.note ? ` · ${m.note}` : ''}`;
+    return `${head}: ${value}${m?.recheck ? ` · ${t('to take again')}` : ''}${m?.note ? ` · ${m.note}` : ''}`;
   };
   const lines = plan.map((d) => line(`${d.n}. [${d.id}] ${d.street} · ${t(d.text)}`, byId.get(d.id)));
   for (const m of measures.filter((x) => !plan.some((d) => d.id === x.id))) {

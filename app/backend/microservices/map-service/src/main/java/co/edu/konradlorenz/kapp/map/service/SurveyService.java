@@ -117,7 +117,10 @@ public class SurveyService {
                 List.of(new ApiError.FieldIssue("version", "you sent %d, the survey is at %d".formatted(sent, stored))));
     }
 
-    /** The distance as sent, keeping the time it was taken when nothing about it changed. */
+    /**
+     * The distance as sent, keeping the time it was taken when nothing about it changed. Asking for
+     * it to be taken again is not taking it: the time stays.
+     */
     private static SurveyMeasure toMeasure(SurveyMeasureDto dto, SurveyMeasure before, Instant now) {
         String label = blankToNull(dto.label());
         String text = blankToNull(dto.text());
@@ -127,7 +130,7 @@ public class SurveyService {
                 && Objects.equals(before.text(), text)
                 && Objects.equals(before.metres(), dto.metres())
                 && Objects.equals(before.note(), note);
-        return new SurveyMeasure(dto.id(), label, text, dto.metres(), note, same ? before.updatedAt() : now);
+        return new SurveyMeasure(dto.id(), label, text, dto.metres(), note, dto.recheck(), same ? before.updatedAt() : now);
     }
 
     private static String blankToNull(String value) {
@@ -137,7 +140,7 @@ public class SurveyService {
     private static SurveyResponse toResponse(CampusSurveyDocument document) {
         return new SurveyResponse(document.campus(),
                 document.measures().stream()
-                        .map(m -> new SurveyMeasureDto(m.id(), m.label(), m.text(), m.metres(), m.note(), m.updatedAt()))
+                        .map(m -> new SurveyMeasureDto(m.id(), m.label(), m.text(), m.metres(), m.note(), m.recheck(), m.updatedAt()))
                         .toList(),
                 document.version(), document.updatedAt());
     }

@@ -132,6 +132,31 @@ class SurveyTest {
     }
 
     @Test
+    @DisplayName("a distance asked to be taken again keeps its value and the time it was taken, until it is")
+    void aRecheckKeepsTheDistance() throws Exception {
+        JsonNode first = json.readTree(mockMvc.perform(put("/api/map/campuses/{campus}/survey", "Sede Revisar")
+                        .with(as("ROLE_ADMIN")).contentType(MediaType.APPLICATION_JSON).content(survey(0, SETBACK)))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
+        String taken = first.at("/measures/0/updatedAt").asText();
+        Thread.sleep(5);
+
+        JsonNode asked = json.readTree(mockMvc.perform(put("/api/map/campuses/{campus}/survey", "Sede Revisar")
+                        .with(as("ROLE_ADMIN")).contentType(MediaType.APPLICATION_JSON)
+                        .content(survey(1, SETBACK.replace("}", ", \"recheck\": true}"))))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
+        assertThat(asked.at("/measures/0/recheck").asBoolean()).isTrue();
+        assertThat(asked.at("/measures/0/text").asText()).isEqualTo("4,80 + 3,25");
+        assertThat(asked.at("/measures/0/updatedAt").asText()).isEqualTo(taken);
+
+        // Taken again with the same figure: no longer asked for, and still the same distance.
+        JsonNode retaken = json.readTree(mockMvc.perform(put("/api/map/campuses/{campus}/survey", "Sede Revisar")
+                        .with(as("ROLE_ADMIN")).contentType(MediaType.APPLICATION_JSON)
+                        .content(survey(2, SETBACK.replace("}", ", \"recheck\": false}"))))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
+        assertThat(retaken.at("/measures/0/recheck").isMissingNode() || retaken.at("/measures/0/recheck").isNull()).isTrue();
+    }
+
+    @Test
     @DisplayName("two distances with one id, a bad id, or a negative distance are refused")
     void impossibleSurveysAreRefused() throws Exception {
         for (String measures : List.of(SETBACK + "," + SETBACK,

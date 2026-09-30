@@ -27,6 +27,9 @@ public record SurveyMeasureDto(
         @Schema(description = "What was seen on site that the sketch does not show.",
                 example = "Columns in front of the wall: measured to their face")
         @Size(max = 500) String note,
+        @Schema(description = "True while it is asked to be taken again: what was typed stays, for reference, until it is. "
+                + "Absent otherwise.", example = "true")
+        Boolean recheck,
         @Schema(description = "When it was last changed. Set by the server; ignored in a request.",
                 accessMode = Schema.AccessMode.READ_ONLY)
         Instant updatedAt

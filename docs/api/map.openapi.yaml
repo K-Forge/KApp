@@ -101,6 +101,9 @@ info:
     before. The ground floor is the parts that reach it, and the floors above add those that start
     higher.
 
+    It also adds **`SurveyMeasure.recheck`**: a distance asked to be taken again keeps what was
+    typed, for reference, and the time it was taken, until it is taken again.
+
     ## Coordinate model
 
     A floor is a **drawing in its own units**, `width` by `height`, with the origin at the top-left
@@ -1233,6 +1236,7 @@ components:
         text: { type: string, maxLength: 120, description: "What was typed, as it was typed: pieces joined with +.", example: '4,80 + 4,96' }
         metres: { type: number, format: double, minimum: 0, maximum: 1000, description: "The total the portal read from the text; absent while it reads none.", example: 9.76 }
         note: { type: string, maxLength: 500, description: "What was seen on site that the sketch does not show.", example: 'Planters in the way, measured round them' }
+        recheck: { type: boolean, description: "True while it is asked to be taken again: what was typed stays, for reference, until it is. Absent otherwise.", example: true }
         updatedAt: { type: string, format: date-time, readOnly: true, description: "When it was last changed. Set by the server; ignored in a request." }
 
     Survey:

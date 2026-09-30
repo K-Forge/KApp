@@ -957,6 +957,8 @@ export const ES_API: Record<string, string> = {
     'El total que leyó el portal del texto; no aparece mientras no lea ninguno.',
   'What was seen on site that the sketch does not show.':
     'Lo que se vio en el sitio y el croquis no muestra.',
+  'True while it is asked to be taken again: what was typed stays, for reference, until it is. Absent otherwise.':
+    'Verdadero mientras se pide volver a tomarla: lo que se escribió queda, como referencia, hasta que se tome. No aparece en otro caso.',
   'When it was last changed. Set by the server; ignored in a request.':
     'Cuándo se cambió por última vez. Lo fija el servidor; se ignora en una solicitud.',
   'Save the distances taken round a campus\'s blocks':
