@@ -1,6 +1,6 @@
 {
   "campus": "Sede Principal",
-  "version": 2715,
+  "version": 2723,
   "measures": [
     {
       "id": "bis-01",
@@ -64,13 +64,6 @@
       "updatedAt": "2026-09-30T00:28:08.852Z"
     },
     {
-      "id": "bis-14",
-      "text": "0.00",
-      "metres": 0.0,
-      "note": "La misma medida del 12",
-      "updatedAt": "2026-09-30T00:28:22.163Z"
-    },
-    {
       "id": "bis-15",
       "text": "2.96",
       "metres": 2.96,
@@ -81,8 +74,8 @@
       "id": "bis-18",
       "text": "8.8",
       "metres": 8.8,
-      "note": "Desde el fin de la conexión norte hasta el borde del andén.",
-      "updatedAt": "2026-09-30T00:29:15.512Z"
+      "note": "Desde el fin de la conexión sur hasta el borde del andén.",
+      "updatedAt": "2026-09-30T02:12:56.308Z"
     },
     {
       "id": "bis-17",
@@ -253,7 +246,8 @@
       "id": "c63-02",
       "text": "28.74",
       "metres": 28.74,
-      "updatedAt": "2026-09-29T23:16:57.720Z"
+      "note": "Todo el borde hasta la puerta de audiciones.",
+      "updatedAt": "2026-09-30T01:25:04.169Z"
     },
     {
       "id": "c63-03",
@@ -278,7 +272,8 @@
       "id": "c63-06",
       "text": "9.53",
       "metres": 9.53,
-      "updatedAt": "2026-09-29T23:19:07.443Z"
+      "note": "Desde admisioneshasta el inicio de las escaleras.",
+      "updatedAt": "2026-09-30T01:25:37.434Z"
     },
     {
       "id": "c63-07",
@@ -290,28 +285,8 @@
       "id": "c63-08",
       "text": "7.92",
       "metres": 7.92,
-      "updatedAt": "2026-09-29T23:20:04.972Z"
-    },
-    {
-      "id": "bis-06",
-      "text": "0.00",
-      "metres": 0.0,
-      "note": "Este muro no lo tuve en cuenta solo es estética de la fachada, tomé en cuenta la medida 3 como ancho completo, tomar esta medida es demasiado detalle innecesario.",
-      "updatedAt": "2026-09-30T00:06:03.843Z"
-    },
-    {
-      "id": "bis-07",
-      "text": "0.00",
-      "metres": 0.0,
-      "note": "Es la misma medida 4, por lo que la medida 3 es el mismo ancho y no tomé la medida 6.",
-      "updatedAt": "2026-09-30T00:07:50.274Z"
-    },
-    {
-      "id": "bis-08",
-      "text": "0.00",
-      "metres": 0.0,
-      "note": "Esta es la medida 5.",
-      "updatedAt": "2026-09-30T00:07:39.423Z"
+      "note": "Escaleras.",
+      "updatedAt": "2026-09-30T01:25:45.815Z"
     }
   ]
 }
