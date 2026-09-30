@@ -81,7 +81,7 @@ def building_file(building, floors):
     if present(building.get("placement")):
         out["placement"] = building["placement"]
     if present(building.get("footprint")):
-        out["footprint"] = [pick(p, ["lot", "floors", "basements", "wing", "ring"]) for p in building["footprint"]]
+        out["footprint"] = [pick(p, ["lot", "floors", "lowestFloor", "basements", "wing", "ring"]) for p in building["footprint"]]
     out["floors"] = []
     for floor in sorted(floors, key=lambda f: f["level"]):
         f = pick(floor, ["code"])
