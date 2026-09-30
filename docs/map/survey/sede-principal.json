@@ -1,6 +1,6 @@
 {
   "campus": "Sede Principal",
-  "version": 2723,
+  "version": 2724,
   "measures": [
     {
       "id": "bis-01",
@@ -48,12 +48,14 @@
       "text": "16.56",
       "metres": 16.56,
       "note": "Esta medida la tome del ancho completo del ala central,incluyendo muros y puerta.",
+      "recheck": true,
       "updatedAt": "2026-09-30T00:19:06.262Z"
     },
     {
       "id": "bis-12",
       "text": "5.45",
       "metres": 5.45,
+      "recheck": true,
       "updatedAt": "2026-09-29T22:44:34.206Z"
     },
     {
@@ -61,6 +63,7 @@
       "text": "7.73",
       "metres": 7.73,
       "note": "Este fue el ancho de la entrada incluyendo las puertas y cristales, prácticamente es el ancho de la recepción.",
+      "recheck": true,
       "updatedAt": "2026-09-30T00:28:08.852Z"
     },
     {
@@ -68,6 +71,7 @@
       "text": "2.96",
       "metres": 2.96,
       "note": "Esta medida la tome de la esquina del ala central hasta el inicio de la conexión sur.",
+      "recheck": true,
       "updatedAt": "2026-09-30T00:25:37.472Z"
     },
     {
@@ -75,6 +79,7 @@
       "text": "8.8",
       "metres": 8.8,
       "note": "Desde el fin de la conexión sur hasta el borde del andén.",
+      "recheck": true,
       "updatedAt": "2026-09-30T02:12:56.308Z"
     },
     {
@@ -82,12 +87,8 @@
       "text": "7.31 + 0.88",
       "metres": 8.19,
       "note": "Esto fue todo el ancho de la conexión sur. La medida 7.31 corresponde al ancho del 3er piso para arriba. El 0.88, es el extra que tiene en el 1er y 2do piso.",
+      "recheck": true,
       "updatedAt": "2026-09-30T00:24:09.870Z"
-    },
-    {
-      "id": "bis-19",
-      "note": "No entendi",
-      "updatedAt": "2026-09-29T22:53:09.387Z"
     },
     {
       "id": "c62-05",
@@ -179,12 +180,14 @@
       "id": "a-10",
       "text": "4.02",
       "metres": 4.02,
+      "recheck": true,
       "updatedAt": "2026-09-29T23:06:59.077Z"
     },
     {
       "id": "a-11",
       "text": "7.37",
       "metres": 7.37,
+      "recheck": true,
       "updatedAt": "2026-09-29T23:07:55.221Z"
     },
     {
@@ -221,18 +224,21 @@
       "id": "a-17",
       "text": "26.32",
       "metres": 26.32,
+      "recheck": true,
       "updatedAt": "2026-09-29T23:12:39.154Z"
     },
     {
       "id": "a-18",
       "text": "5.48",
       "metres": 5.48,
+      "recheck": true,
       "updatedAt": "2026-09-29T23:14:24.681Z"
     },
     {
       "id": "a-19",
       "text": "5.03",
       "metres": 5.03,
+      "recheck": true,
       "updatedAt": "2026-09-29T23:14:47.029Z"
     },
     {
@@ -240,6 +246,7 @@
       "text": "6.64",
       "metres": 6.64,
       "note": "Hay materas",
+      "recheck": true,
       "updatedAt": "2026-09-29T23:15:33.726Z"
     },
     {

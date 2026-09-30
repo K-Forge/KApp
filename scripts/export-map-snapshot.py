@@ -157,7 +157,7 @@ def main():
         slug = re.sub(r"[^a-z0-9]+", "-", campus.lower()).strip("-")
         with open(os.path.join(args.survey_out, slug + ".json"), "w", encoding="utf-8") as out:
             out.write(snapshot_json({"campus": survey["campus"], "version": survey["version"],
-                                     "measures": [pick(m, ["id", "label", "text", "metres", "note", "updatedAt"])
+                                     "measures": [pick(m, ["id", "label", "text", "metres", "note", "recheck", "updatedAt"])
                                                   for m in survey["measures"]]}))
         print(f"  {campus}: {len(survey['measures'])} distance(s) of the survey")
 
