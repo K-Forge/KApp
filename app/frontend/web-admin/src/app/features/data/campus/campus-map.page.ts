@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, computed, effect, inject, signal, viewChild } from '@angular/core';
+import { PinchZoomDirective, ScrollZoom, type ZoomStep } from '../../../shared/ui/pinch-zoom/pinch-zoom.directive';
 import { RouterLink } from '@angular/router';
 import { forkJoin, map, of, switchMap } from 'rxjs';
 import { AppHttpError } from '../../../core/http/api-http-error';
@@ -58,7 +59,7 @@ const BUILDING_COLOR = '#c2185b';
  */
 @Component({
   selector: 'app-campus-map-page',
-  imports: [TranslatePipe, RouterLink, PageIntroComponent, ApiErrorBannerComponent],
+  imports: [TranslatePipe, RouterLink, PageIntroComponent, ApiErrorBannerComponent, PinchZoomDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
@@ -81,19 +82,15 @@ const BUILDING_COLOR = '#c2185b';
         <section class="card map-card">
           <div class="row-between toolbar">
             <strong>{{ campus() }}</strong>
-            <div class="row">
-              <button type="button" class="btn btn-sm" [attr.aria-label]="'Zoom out' | t" [disabled]="zoom() === 0" (click)="setZoom(zoom() - 1)">−</button>
-              <button type="button" class="btn btn-sm" [attr.aria-label]="'Zoom in' | t" [disabled]="zoom() === zooms.length - 1" (click)="setZoom(zoom() + 1)">+</button>
-            </div>
           </div>
-          <div class="scroller" #scroller>
+          <div class="scroller" #scroller (appPinchZoom)="zoomAt($event)">
             @if (drawn(); as m) {
               <svg
                 role="img"
                 [attr.aria-label]="'Map of {campus}, north up' | t: { campus: campus() }"
                 [attr.viewBox]="m.box.x + ' ' + m.box.y + ' ' + m.box.width + ' ' + m.box.height"
-                [attr.width]="m.box.width * zooms[zoom()]"
-                [attr.height]="m.box.height * zooms[zoom()]"
+                [attr.width]="m.box.width * scale()"
+                [attr.height]="m.box.height * scale()"
               >
                 @for (d of m.roadways; track $index) {
                   <path class="roadway" [attr.d]="d" />
@@ -118,7 +115,7 @@ const BUILDING_COLOR = '#c2185b';
                   }
                 </mask>
                 @for (s of m.labels; track $index) {
-                  <text class="street" [attr.transform]="'translate(' + s.x + ' ' + s.y + ') rotate(' + s.angle + ')'" [attr.font-size]="11 / zooms[zoom()]">{{ s.name }}</text>
+                  <text class="street" [attr.transform]="'translate(' + s.x + ' ' + s.y + ') rotate(' + s.angle + ')'" [attr.font-size]="11 / scale()">{{ s.name }}</text>
                 }
                 <g mask="url(#campus-walks)">
                 @for (b of mapped(); track b.code) {
@@ -127,16 +124,16 @@ const BUILDING_COLOR = '#c2185b';
                     @for (part of b.parts; track $index) {
                       <path class="part" [attr.d]="part.d" [attr.fill]="part.fill" [attr.fill-opacity]="part.opacity" [attr.stroke]="part.fill" />
                     }
-                    @if (zoom() >= roomsFrom) {
+                    @if (scale() >= roomsFrom) {
                       @for (room of b.rooms; track $index) {
                         <path class="room" [attr.d]="room.d" [attr.fill]="room.fill" />
                       }
                     }
-                    <text class="code" [attr.x]="b.label.x" [attr.y]="b.label.y" [attr.font-size]="13 / zooms[zoom()]">{{ b.code }}</text>
+                    <text class="code" [attr.x]="b.label.x" [attr.y]="b.label.y" [attr.font-size]="13 / scale()">{{ b.code }}</text>
                   </a>
                 }
                 </g>
-                <g class="north" [attr.transform]="'translate(' + (m.box.x + 26 / zooms[zoom()]) + ' ' + (m.box.y + 30 / zooms[zoom()]) + ') scale(' + 1 / zooms[zoom()] + ')'">
+                <g class="north" [attr.transform]="'translate(' + (m.box.x + 26 / scale()) + ' ' + (m.box.y + 30 / scale()) + ') scale(' + 1 / scale() + ')'">
                   <circle r="16" />
                   <path d="M0 -11 L5 5 L0 2 L-5 5 Z" />
                   <text y="-22" text-anchor="middle" font-size="10" font-weight="700">N</text>
@@ -151,7 +148,7 @@ const BUILDING_COLOR = '#c2185b';
             }
             <span class="key-item"><span class="swatch" [style.background]="buildingColor"></span>{{ 'A building, part by part' | t }}</span>
             <span class="key-item"><span class="swatch ramp"></span>{{ 'Darker rises higher' | t }}</span>
-            @if (zoom() < roomsFrom) {
+            @if (scale() < roomsFrom) {
               <span class="key-item hint">{{ 'Zoom in to see the rooms of each drawn ground floor' | t }}</span>
             }
           </div>
@@ -317,10 +314,10 @@ export class CampusMapPage {
   private readonly floors = inject(FloorsService);
   private readonly grounds = inject(GroundService);
 
-  readonly zooms = ZOOMS;
-  readonly roomsFrom = ROOMS_FROM;
+  readonly roomsFrom = ZOOMS[ROOMS_FROM];
   readonly buildingColor = BUILDING_COLOR;
-  readonly zoom = signal(3);
+  /** Pixels per metre: from the whole campus to a ground floor's rooms, anywhere a pinch takes it. */
+  readonly scale = signal(ZOOMS[3]);
   readonly loading = signal(true);
   readonly error = signal<ApiError | null>(null);
   readonly campus = signal('Sede Principal');
@@ -328,18 +325,18 @@ export class CampusMapPage {
   readonly all = signal<Building[]>([]);
   readonly details = signal<Map<string, FloorDetail>>(new Map());
   private readonly scroller = viewChild<ElementRef<HTMLElement>>('scroller');
-  /** The point of the map in the middle of the screen, as a share of its width and height. */
-  private centreShare = { x: 0.5, y: 0.5 };
+  private centred = false;
+  private readonly zoomer = new ScrollZoom(inject(Injector), () => this.scroller()?.nativeElement, () => this.scale());
 
   constructor() {
-    // Opened on the buildings, and zoomed about the middle of the screen rather than its corner.
+    // Opened on the buildings, once; after that a pinch zooms about the fingers.
     effect(() => {
       const element = this.scroller()?.nativeElement;
-      if (!this.drawn() || !element) return;
-      this.zoom();
+      if (!this.drawn() || !element || this.centred) return;
+      this.centred = true;
       requestAnimationFrame(() => {
-        element.scrollLeft = element.scrollWidth * this.centreShare.x - element.clientWidth / 2;
-        element.scrollTop = element.scrollHeight * this.centreShare.y - element.clientHeight / 2;
+        element.scrollLeft = element.scrollWidth / 2 - element.clientWidth / 2;
+        element.scrollTop = element.scrollHeight / 2 - element.clientHeight / 2;
       });
     });
 
@@ -476,7 +473,7 @@ export class CampusMapPage {
       width: Math.max(...xs) - Math.min(...xs) + 2 * margin,
       height: Math.max(...ys) - Math.min(...ys) + 2 * margin,
     };
-    const minLength = 60 / ZOOMS[this.zoom()];
+    const minLength = 60 / this.scale();
     const labels: { name: string; x: number; y: number; angle: number }[] = [];
     const seen = new Set<string>();
     for (const street of ground.streets) {
@@ -496,15 +493,12 @@ export class CampusMapPage {
     };
   });
 
-  setZoom(step: number): void {
-    const element = this.scroller()?.nativeElement;
-    if (element && element.scrollWidth) {
-      this.centreShare = {
-        x: (element.scrollLeft + element.clientWidth / 2) / element.scrollWidth,
-        y: (element.scrollTop + element.clientHeight / 2) / element.scrollHeight,
-      };
-    }
-    this.zoom.set(Math.max(0, Math.min(ZOOMS.length - 1, step)));
+  /** A pinch, or Ctrl/⌘ and the wheel, about that point: between the whole campus and a floor's rooms. */
+  zoomAt(step: ZoomStep): void {
+    const next = Math.max(ZOOMS[0], Math.min(ZOOMS[ZOOMS.length - 1], this.scale() * step.factor));
+    if (next === this.scale()) return;
+    this.zoomer.around(step.x, step.y);
+    this.scale.set(next);
   }
 }
 

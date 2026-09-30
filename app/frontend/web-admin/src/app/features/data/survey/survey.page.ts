@@ -4,6 +4,7 @@ import { forkJoin, map, switchMap } from 'rxjs';
 import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
 import { ApiErrorBannerComponent } from '../../../shared/ui/api-error-banner/api-error-banner.component';
+import { PinchZoomDirective, type ZoomStep } from '../../../shared/ui/pinch-zoom/pinch-zoom.directive';
 import { blockOf, middleOf, openRing, pathOf, toView, type ViewPoint } from '../blocks/block-geometry';
 import type { Structure } from '../blocks/structure.model';
 import { StructuresService } from '../blocks/structures.service';
@@ -22,9 +23,10 @@ import { t } from '../../../core/i18n/i18n.service';
 type SaveState = 'saved' | 'waiting' | 'saving' | 'offline';
 type DistanceState = 'todo' | 'done' | 'review';
 
-/** Metres round the plan the whole-block view keeps, and the least a zoomed view shows. */
+/** Metres round the plan the whole-block view keeps, the least a distance is framed in, and the closest a pinch goes. */
 const MARGIN = 6;
 const ZOOM_MIN = 20;
+const CLOSEST = 4;
 
 /**
  * The survey sheet: the distances to take round the Edificio Central's block with a phone's
@@ -33,7 +35,7 @@ const ZOOM_MIN = 20;
  */
 @Component({
   selector: 'app-survey-page',
-  imports: [TranslatePipe, RouterLink, ApiErrorBannerComponent],
+  imports: [TranslatePipe, RouterLink, ApiErrorBannerComponent, PinchZoomDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="survey">
@@ -73,9 +75,20 @@ const ZOOM_MIN = 20;
 
       <div class="work">
         <section class="card sketch-card">
-          <div class="sketch" #sketchBox>
+          <div class="sketch" #sketchBox (appPinchZoom)="zoomAt($event)" (wheel)="onWheel($event)">
             @if (drawn(); as v) {
-              <svg [attr.viewBox]="viewBox()" preserveAspectRatio="xMidYMid meet" role="img" [attr.aria-label]="('Sketch of block ' | t) + block">
+              <svg
+                [attr.viewBox]="viewBox()"
+                preserveAspectRatio="xMidYMid meet"
+                role="img"
+                [attr.aria-label]="('Sketch of block ' | t) + block"
+                [class.zoomed]="zoomed()"
+                (pointerdown)="onDown($event)"
+                (pointermove)="onMove($event)"
+                (pointerup)="onUp($event)"
+                (pointercancel)="onUp($event)"
+                (click.capture)="onClickCapture($event)"
+              >
                 @for (d of v.roadways; track $index) {
                   <path class="road" [attr.d]="d" />
                 }
@@ -116,7 +129,7 @@ const ZOOM_MIN = 20;
             <span><i class="swatch length"></i>{{ 'along the wall or a door: how wide' | t }}</span>
             <span><i class="swatch done"></i>{{ 'taken' | t }}</span>
             <span><i class="swatch review"></i>{{ 'to take again' | t }}</span>
-            <button type="button" class="btn btn-sm zoom" (click)="whole.set(!whole())">{{ whole() ? ('Zoom in' | t) : ('Whole block' | t) }}</button>
+            <span class="gesture-hint">{{ 'Pinch, or Ctrl/⌘ and the wheel, to zoom; drag to move' | t }}</span>
           </div>
         </section>
 
@@ -223,8 +236,10 @@ const ZOOM_MIN = 20;
     .sketch-card { padding: 0.4rem; }
     .sketch { height: 46vh; min-height: 260px; }
     .sketch svg { width: 100%; height: 100%; display: block; }
-    /* In the key, under the drawing: over it, it hid whichever number fell in its corner. */
-    .zoom { margin-left: auto; }
+    .gesture-hint { margin-left: auto; font-size: 0.75rem; opacity: 0.8; }
+    /* The whole block lets a finger scroll the page past it; zoomed in, a finger moves the sketch. */
+    .sketch svg { touch-action: pan-y; }
+    .sketch svg.zoomed { touch-action: none; cursor: grab; }
     .key { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 1rem; padding: 0.4rem 0.3rem 0.1rem; color: var(--text-muted); }
     .swatch { display: inline-block; width: 1.1rem; height: 3px; margin-right: 0.4rem; vertical-align: middle; background: var(--c); }
     .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
@@ -307,7 +322,8 @@ export class SurveyPage {
   readonly pending = signal<Record<string, SurveyMeasure>>({});
   readonly saveState = signal<SaveState>('saved');
   readonly currentId = signal(SURVEY_PLAN[0].id);
-  readonly whole = signal(false);
+  /** Where a pinch or a drag has taken the sketch; null for the window round the current distance. */
+  private readonly userBox = signal<Box | null>(null);
   readonly showText = signal(false);
   /** The sketch's size on screen, in pixels, to keep its numbers readable at every zoom. */
   private readonly size = signal({ w: 360, h: 300 });
@@ -417,8 +433,8 @@ export class SurveyPage {
   });
 
   /**
-   * The lines as drawn, with the numbers that fit: zoomed in, all of them; the whole block, only
-   * those that do not touch a number already shown, the current one first.
+   * The lines as drawn, with the numbers that fit: only those that do not touch a number already
+   * shown, the current one first - close up that is all of them.
    */
   readonly drawn = computed(() => {
     const v = this.view();
@@ -429,7 +445,7 @@ export class SurveyPage {
     const order = [...v.lines].sort((x, y) => (x.id === current ? -1 : y.id === current ? 1 : x.n - y.n));
     const shown = new Set<string>();
     for (const l of order) {
-      if (!this.whole() || kept.every((t) => Math.hypot(t.x - l.tag.x, t.y - l.tag.y) >= room)) {
+      if (kept.every((t) => Math.hypot(t.x - l.tag.x, t.y - l.tag.y) >= room)) {
         kept.push(l.tag);
         shown.add(l.id);
       }
@@ -437,19 +453,33 @@ export class SurveyPage {
     return { ...v, lines: v.lines.map((l) => ({ ...l, shown: shown.has(l.id) })) };
   });
 
-  /** The whole block, or a window round the current distance. */
-  readonly viewBox = computed(() => {
+  /** Where the sketch is looking: where a pinch or a drag left it, else a window round the current distance. */
+  readonly box = computed<Box>(() => {
     const v = this.view();
-    if (!v) return '0 0 1 1';
+    if (!v) return { x: 0, y: 0, width: 1, height: 1 };
+    const user = this.userBox();
+    if (user) return user;
     const line = v.lines.find((l) => l.id === this.currentId());
-    if (this.whole() || !line) return `${v.box.x} ${v.box.y} ${v.box.width} ${v.box.height}`;
+    if (!line) return v.box;
     const pts = [line.a, line.b, line.tag, ...(line.dim ?? [])];
     const xs = pts.map((p) => p.x);
     const ys = pts.map((p) => p.y);
     const size = Math.max(ZOOM_MIN, Math.max(...xs) - Math.min(...xs) + 10, Math.max(...ys) - Math.min(...ys) + 10);
     const cx = (Math.max(...xs) + Math.min(...xs)) / 2;
     const cy = (Math.max(...ys) + Math.min(...ys)) / 2;
-    return `${cx - size / 2} ${cy - size / 2} ${size} ${size}`;
+    return { x: cx - size / 2, y: cy - size / 2, width: size, height: size };
+  });
+
+  readonly viewBox = computed(() => {
+    const b = this.box();
+    return `${b.x} ${b.y} ${b.width} ${b.height}`;
+  });
+
+  /** Closer than the whole block: a finger then moves the sketch rather than the page. */
+  readonly zoomed = computed(() => {
+    const whole = this.view()?.box;
+    const b = this.box();
+    return !!whole && (b.width < whole.width * 0.98 || b.height < whole.height * 0.98);
   });
 
   /** Metres per pixel on the sketch: its numbers and labels are sized in pixels. */
@@ -493,13 +523,113 @@ export class SurveyPage {
     return formatMetres(value);
   }
 
+  // ------------------------------------------------------------------ zooming and moving
+
+  /** A pinch, or Ctrl/⌘ and the wheel: closer or further about that point, out as far as the whole block. */
+  zoomAt(step: ZoomStep): void {
+    const whole = this.view()?.box;
+    const at = this.toSketch(step.x, step.y);
+    if (!whole || !at) return;
+    const b = this.box();
+    // Never closer than CLOSEST metres across; once further out than the block, the whole block.
+    const f = Math.min(step.factor, Math.min(b.width, b.height) / CLOSEST);
+    if (!(f > 0) || f === 1) return;
+    const width = b.width / f;
+    const height = b.height / f;
+    if (width >= whole.width || height >= whole.height) {
+      this.userBox.set(whole);
+      return;
+    }
+    this.userBox.set(this.clamp({ x: at.x - (at.x - b.x) / f, y: at.y - (at.y - b.y) / f, width, height }));
+  }
+
+  /** Two fingers on a trackpad, or the wheel, move a sketch that is zoomed in; the whole block lets the page scroll. */
+  onWheel(event: WheelEvent): void {
+    if (event.ctrlKey || event.metaKey || !this.zoomed()) return;
+    event.preventDefault();
+    this.panBy(event.deltaX, event.deltaY);
+  }
+
+  private drag: { id: number; x: number; y: number; moved: boolean } | null = null;
+  private dragged = false;
+
+  onDown(event: PointerEvent): void {
+    if (!this.zoomed() || (event.pointerType === 'mouse' && event.button !== 0) || this.drag) return;
+    this.drag = { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false };
+    this.dragged = false;
+  }
+
+  onMove(event: PointerEvent): void {
+    const drag = this.drag;
+    if (!drag || drag.id !== event.pointerId) return;
+    const dx = event.clientX - drag.x;
+    const dy = event.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+    if (!drag.moved) {
+      // Keeps the drag when the finger leaves the sketch; a pointer that cannot be captured still drags.
+      try {
+        (event.currentTarget as Element).setPointerCapture?.(event.pointerId);
+      } catch {
+        /* nothing to capture */
+      }
+    }
+    drag.moved = true;
+    this.panBy(-dx, -dy);
+    drag.x = event.clientX;
+    drag.y = event.clientY;
+  }
+
+  onUp(event: PointerEvent): void {
+    if (this.drag?.id !== event.pointerId) return;
+    this.dragged = this.drag.moved;
+    this.drag = null;
+  }
+
+  /** A drag that moved the sketch is not also a tap on the distance it started over. */
+  onClickCapture(event: Event): void {
+    if (!this.dragged) return;
+    this.dragged = false;
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  /** Moves the sketch by screen pixels. */
+  private panBy(dx: number, dy: number): void {
+    const b = this.box();
+    const { w, h } = this.size();
+    const perPixel = Math.max(b.width / w, b.height / h);
+    this.userBox.set(this.clamp({ ...b, x: b.x + dx * perPixel, y: b.y + dy * perPixel }));
+  }
+
+  /** Keeps a view on the block: it may not wander off past the whole block's edges. */
+  private clamp(b: Box): Box {
+    const whole = this.view()?.box;
+    if (!whole) return b;
+    const x = Math.min(Math.max(b.x, whole.x - b.width / 2), whole.x + whole.width - b.width / 2);
+    const y = Math.min(Math.max(b.y, whole.y - b.height / 2), whole.y + whole.height - b.height / 2);
+    return { ...b, x, y };
+  }
+
+  /** A point of the screen on the sketch, as the SVG draws it with its view box met in the middle. */
+  private toSketch(clientX: number, clientY: number): ViewPoint | null {
+    const el = this.sketchBox()?.nativeElement.querySelector('svg');
+    if (!el) return null;
+    const rect = el.getBoundingClientRect();
+    const b = this.box();
+    const s = Math.min(rect.width / b.width, rect.height / b.height);
+    if (!s) return null;
+    const ox = (rect.width - b.width * s) / 2;
+    const oy = (rect.height - b.height * s) / 2;
+    return { x: b.x + (clientX - rect.left - ox) / s, y: b.y + (clientY - rect.top - oy) / s };
+  }
+
   valueOf(id: string): SurveyMeasure {
     return this.values().get(id) ?? { id };
   }
 
   select(id: string, scrollUp = false): void {
     this.currentId.set(id);
-    this.whole.set(false);
+    this.userBox.set(null);
     if (scrollUp) this.sketchBox()?.nativeElement.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
   }
 

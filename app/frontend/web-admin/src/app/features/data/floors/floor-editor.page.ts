@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, Injector, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
 import { ApiErrorBannerComponent } from '../../../shared/ui/api-error-banner/api-error-banner.component';
+import { PinchZoomDirective, ScrollZoom, type ZoomStep } from '../../../shared/ui/pinch-zoom/pinch-zoom.directive';
 import {
   ACCESSIBILITY,
   ACCESSIBILITY_LABELS,
@@ -76,9 +77,9 @@ import { t } from '../../../core/i18n/i18n.service';
 type Tab = 'space' | 'inventory' | 'corridors' | 'floor';
 
 const HISTORY = 100;
-/** Each zoom step is this much closer; the plan starts fitted to the width it has. */
+/** A zoom step is this much closer; the plan starts fitted to the width it has, which is as far as it goes out. */
 const ZOOM_STEP = 1.25;
-const MIN_ZOOM = -4;
+const MIN_ZOOM = 0;
 const MAX_ZOOM = 8;
 
 /**
@@ -95,6 +96,7 @@ const MAX_ZOOM = 8;
   selector: 'app-floor-editor-page',
   imports: [TranslatePipe, 
     RouterLink,
+    PinchZoomDirective,
     ApiErrorBannerComponent,
     FloorPlanComponent,
     SpaceInspectorComponent,
@@ -219,7 +221,7 @@ const MAX_ZOOM = 8;
                   {{ 'Corridor' | t }}
                 </button>
               </div>
-              <!-- Two groups that wrap whole: turning the plan, and zooming it. -->
+              <!-- Turning the plan; zooming it is a pinch, or Ctrl/⌘ and the wheel, on the plan itself. -->
               <div class="controls">
               <div class="group">
                 <button type="button" class="btn btn-sm turn" [attr.aria-label]="'Turn the plan a quarter to the left' | t" [title]="'Turn the plan a quarter to the left' | t" (click)="turnDrawing(-1)">
@@ -247,11 +249,6 @@ const MAX_ZOOM = 8;
                     <path d="M20.5 3.5v4.5h-4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                 </button>
-              </div>
-              <div class="group">
-                <button type="button" class="btn btn-sm" [attr.aria-label]="'Zoom out' | t" [disabled]="zoomSteps() <= minZoom" (click)="zoom(-1)">−</button>
-                <button type="button" class="btn btn-sm" [attr.aria-label]="'Fit to the screen' | t" (click)="zoomSteps.set(0)">{{ 'Fit' | t }}</button>
-                <button type="button" class="btn btn-sm" [attr.aria-label]="'Zoom in' | t" [disabled]="zoomSteps() >= maxZoom" (click)="zoom(1)">+</button>
               </div>
               </div>
               <!-- What is drawn, each on its own switch; on a phone, two to a row. -->
@@ -321,7 +318,7 @@ const MAX_ZOOM = 8;
               }
               {{ hint() }}
             </p>
-            <div class="scroller" #scroller>
+            <div class="scroller" #scroller (appPinchZoom)="zoomAt($event)">
               <app-floor-plan
                 [width]="d.width"
                 [height]="d.height"
@@ -783,8 +780,6 @@ export class FloorEditorPage {
   private readonly ground = inject(GroundService);
   private readonly buildingsService = inject(BuildingsService);
 
-  readonly minZoom = MIN_ZOOM;
-  readonly maxZoom = MAX_ZOOM;
   readonly maxSize = MAX_SIZE;
   readonly compass = COMPASS;
   readonly compassLabels: Record<Compass, string> = { NORTH: /* i18n */ 'North', EAST: /* i18n */ 'East', SOUTH: /* i18n */ 'South', WEST: /* i18n */ 'West' };
@@ -1245,8 +1240,14 @@ export class FloorEditorPage {
     }
   }
 
-  zoom(steps: number): void {
-    this.zoomSteps.update((z) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z + steps)));
+  private readonly zoomer = new ScrollZoom(inject(Injector), () => this.scroller()?.nativeElement, () => this.scale());
+
+  /** A pinch, or Ctrl/⌘ and the wheel: closer or further about that point, never further out than the whole plan. */
+  zoomAt(step: ZoomStep): void {
+    const next = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, this.zoomSteps() + Math.log(step.factor) / Math.log(ZOOM_STEP)));
+    if (next === this.zoomSteps()) return;
+    this.zoomer.around(step.x, step.y);
+    this.zoomSteps.set(next);
   }
 
   /** A tap on the plan, away from any room's click: a corridor's point, a door, a new room. */

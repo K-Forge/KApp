@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, Injector, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
+import { PinchZoomDirective, ScrollZoom, type ZoomStep } from '../../../shared/ui/pinch-zoom/pinch-zoom.directive';
 import { Router, RouterLink } from '@angular/router';
 import { concat, forkJoin, last, of, switchMap, type Observable } from 'rxjs';
 import { AppHttpError } from '../../../core/http/api-http-error';
@@ -68,7 +69,7 @@ type Gesture =
   | { kind: 'move'; key: string }
   | { kind: 'tap'; key: string | null };
 
-/** Pixels per metre at each zoom step. */
+/** Pixels per metre: the zooms it opens at, from furthest to closest; a pinch goes anywhere between. */
 const ZOOMS = [3, 4, 5, 6.5, 8, 10, 13, 16, 20];
 const WING_COLORS: Record<string, string> = { N: '#e0564f', C: '#3b82f6', S: '#8b5cf6' };
 const MORE_WING_COLORS = ['#0d9488', '#d97706', '#db2777', '#65a30d'];
@@ -98,7 +99,7 @@ const SETBACK_REACH = 12;
  */
 @Component({
   selector: 'app-block-editor-page',
-  imports: [TranslatePipe, RouterLink, ApiErrorBannerComponent],
+  imports: [TranslatePipe, RouterLink, ApiErrorBannerComponent, PinchZoomDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="block-page">
@@ -151,10 +152,6 @@ const SETBACK_REACH = 12;
                 </span>
                 <button type="button" class="btn btn-sm" (click)="turn(1)" [attr.aria-label]="'Turn the block a quarter to the right' | t" [title]="'Turn a quarter to the right' | t">↻</button>
               </div>
-              <div class="group">
-                <button type="button" class="btn btn-sm" [attr.aria-label]="'Zoom out' | t" [disabled]="zoom() === 0" (click)="setZoom(zoom() - 1)">−</button>
-                <button type="button" class="btn btn-sm" [attr.aria-label]="'Zoom in' | t" [disabled]="zoom() === zooms.length - 1" (click)="setZoom(zoom() + 1)">+</button>
-              </div>
             </div>
             <p class="hint-line">
               @if (selected(); as s) {
@@ -163,7 +160,7 @@ const SETBACK_REACH = 12;
                 {{ 'Tap an outline to reshape it.' | t }}
               }
             </p>
-            <div class="scroller" #scroller>
+            <div class="scroller" #scroller (appPinchZoom)="zoomAt($event)">
               @if (view(); as v) {
                 <svg
                   #svg
@@ -624,7 +621,6 @@ export class BlockEditorPage {
   private fitted = false;
   private opened: string | undefined;
 
-  readonly zooms = ZOOMS;
   readonly structureColor = STRUCTURE_COLOR;
   readonly areaOf = areaOf;
 
@@ -633,7 +629,8 @@ export class BlockEditorPage {
   readonly error = signal<ApiError | null>(null);
   readonly saveState = signal('');
   readonly campus = signal('');
-  readonly zoom = signal(4);
+  /** Pixels per metre: anything from the block across a phone to a wall's corner up close. */
+  readonly scale = signal(ZOOMS[4]);
   readonly ground = signal<Ground | null>(null);
   readonly buildings = signal<Building[]>([]);
   readonly frame = signal<Frame | null>(null);
@@ -658,12 +655,11 @@ export class BlockEditorPage {
       const width = this.scroller()?.nativeElement.clientWidth;
       if (!box || !width || this.fitted) return;
       this.fitted = true;
-      const fits = ZOOMS.map((z, i) => ({ z, i })).filter(({ z }) => box.width * z <= width);
-      untracked(() => this.zoom.set(fits.length ? fits[fits.length - 1].i : 0));
+      const fits = ZOOMS.filter((z) => box.width * z <= width);
+      untracked(() => this.scale.set(fits.length ? fits[fits.length - 1] : ZOOMS[0]));
     });
   }
 
-  readonly scale = computed(() => ZOOMS[this.zoom()]);
 
   /** The campus's buildings standing on this block: theirs are the parts the editor reshapes. */
   readonly editable = computed(() => {
@@ -1070,8 +1066,14 @@ export class BlockEditorPage {
     this.future.update((f) => f.map(all));
   }
 
-  setZoom(step: number): void {
-    this.zoom.set(Math.max(0, Math.min(ZOOMS.length - 1, step)));
+  private readonly zoomer = new ScrollZoom(inject(Injector), () => this.scroller()?.nativeElement, () => this.scale());
+
+  /** A pinch, or Ctrl/⌘ and the wheel, about that point: between the block across a phone and a corner up close. */
+  zoomAt(step: ZoomStep): void {
+    const next = Math.max(ZOOMS[0], Math.min(ZOOMS[ZOOMS.length - 1], this.scale() * step.factor));
+    if (next === this.scale()) return;
+    this.zoomer.around(step.x, step.y);
+    this.scale.set(next);
   }
 
   // ------------------------------------------------------------------ pointer
