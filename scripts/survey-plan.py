@@ -249,6 +249,24 @@ for d in PLAN:
     d['n'] = NUMBERED.index(d['id']) + 1
 assert len({d['id'] for d in PLAN}) == len(PLAN)
 
+# What Street View shows at a distance that is easy to take wrong, written under it on the sheet: what
+# stands there and where the tape goes. Only what the imagery shows plainly; its date is in the text.
+HINTS = {
+    'bis-19': 'Street View (2025): beside the lime-green panel there is a glass entrance raised on a few steps. Measure from its glass, at street level, past the steps.',
+    'a-04': "Street View (2023): Tienda K stands back behind its brick forecourt, and the casa's porch is almost on the sidewalk; a brick pier joins the two.",
+    'a-05': 'Street View (2023): the south end is the colonial house, with a tile roof and a porch; its white garden wall, with grilles, follows it.',
+    'a-08': 'Street View (2023): the house, then its white garden wall with grilles and the trees behind, up to a pillar beside the exit.',
+    'a-10': 'Street View (2023): the opening runs from the last pillar of the garden wall to the planter in front of the central wing.',
+    'a-11': 'Street View (2023): the gate stands back in a short passage, behind a planter. Measure to the gate, not to the planter.',
+    'a-18': 'Street View (2023): raised planters run along this corner. Measure along the wall behind them.',
+    'a-19': 'Street View (2023): raised planters stand between the wall and the sidewalk. Measure from the wall, behind them.',
+    'c63-01': 'Street View (2023): the planters wrap round the corner. Measure from the wall, behind them.',
+}
+for d in PLAN:
+    if d['id'] in HINTS:
+        d['hint'] = HINTS[d['id']]
+assert set(HINTS) <= {d['id'] for d in PLAN}
+
 
 # ---- Laying the distances out on the sketch, as a plan is dimensioned: a setback runs from the
 # wall to the curb; a length is drawn beside its wall, on the building's side, the shorter ones
@@ -377,10 +395,10 @@ out = [
 ]
 for d in PLAN:
     out.append('  {')
-    for key in ('n', 'id', 'street', 'kind', 'building', 'text', 'a', 'b', 'dim', 'tag', 'expected'):
+    for key in ('n', 'id', 'street', 'kind', 'building', 'text', 'hint', 'a', 'b', 'dim', 'tag', 'expected'):
         if key in d:
-            # The description is shown translated: marked, so the i18n check finds its Spanish.
-            out.append(f'    {key}: {"/* i18n */ " if key == "text" else ""}{ts(d[key])},')
+            # The description and the hint are shown translated: marked, so the i18n check finds their Spanish.
+            out.append(f'    {key}: {"/* i18n */ " if key in ("text", "hint") else ""}{ts(d[key])},')
     out.append('  },')
 out.append('];')
 os.makedirs(os.path.dirname(OUT), exist_ok=True)

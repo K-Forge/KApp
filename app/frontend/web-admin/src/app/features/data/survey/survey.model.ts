@@ -13,6 +13,8 @@ export interface PlannedDistance {
   kind: 'setback' | 'length';
   building: string;
   text: string;
+  /** What Street View shows there, when it changes where the tape goes. */
+  hint?: string;
   /** On the wall. */
   a: Coordinate;
   /** On the curb, for a setback; the wall's other end, for a length. */

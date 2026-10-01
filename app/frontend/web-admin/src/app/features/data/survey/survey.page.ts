@@ -161,6 +161,9 @@ const CLOSEST = 4;
                 </div>
               </div>
             </div>
+            @if (c.hint) {
+              <p class="small" style="margin: 0.5rem 0 0; color: var(--text-muted)">{{ c.hint | t }}</p>
+            }
             @if (c.kind === 'extra') {
               <input class="label-in" type="text" [placeholder]="'What it is, from where to where' | t" [value]="valueOf(c.id).label ?? ''" (input)="write(c.id, 'label', $event)" />
             }
@@ -402,7 +405,7 @@ export class SurveyPage {
     const planned = this.plan.find((d) => d.id === id);
     if (planned) return { ...planned, kind: planned.kind as PlannedDistance['kind'] | 'extra' };
     const label = this.values().get(id)?.label;
-    return { id, n: null, street: t('Something the plan missed'), kind: 'extra' as const, text: label || t('Not named yet'), expected: 0 };
+    return { id, n: null, street: t('Something the plan missed'), kind: 'extra' as const, text: label || t('Not named yet'), hint: undefined, expected: 0 };
   });
 
   /** Where Next goes: the next distance not taken yet, shown at the foot of the entry. */
