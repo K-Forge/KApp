@@ -74,6 +74,6 @@ case "${1:-status} ${2:-}" in
   "extras off") extras_off ;;
   "extras "|"extras status") echo "extras: $(is_on && echo on || echo off)   available on the host: $(available_mb) MB" ;;
   *)
-    sed -n '3,9p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2p;4,9p' "$0" | sed 's/^# \{0,1\}//'
     exit 2 ;;
 esac
