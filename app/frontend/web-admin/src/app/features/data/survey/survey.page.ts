@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, Injector, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin, map, switchMap } from 'rxjs';
 import { AppHttpError } from '../../../core/http/api-http-error';
@@ -198,9 +198,8 @@ const CLOSEST = 4;
             </details>
           }
         </section>
-      </div>
 
-      <section class="card list">
+        <section class="card list" #listBox>
         @for (g of groups(); track g.street) {
           <h2 class="h">{{ g.street }}</h2>
           <ol>
@@ -230,7 +229,8 @@ const CLOSEST = 4;
         @if (showText()) {
           <textarea class="as-text" readonly rows="10" [value]="text()" (focus)="$any($event.target).select()"></textarea>
         }
-      </section>
+        </section>
+      </div>
     </div>
   `,
   styles: `
@@ -243,10 +243,35 @@ const CLOSEST = 4;
     .how ul.keys { list-style: none; padding: 0; display: grid; gap: 0.2rem; }
     .setback-key { color: #e8590c; }
     .length-key { color: #1c7ed6; }
-    .work { display: grid; gap: 0.9rem; }
-    @media (min-width: 900px) { .work { grid-template-columns: 3fr 2fr; align-items: start; } }
-    .sketch-card { padding: 0.4rem; }
+    /* The sketch, what is being typed and the list, all three in view: stacked on a phone; on an
+       upright tablet the sketch across the top and the other two side by side; on a screen lying
+       down, three columns as tall as the screen, each scrolling on its own. */
+    .work { display: grid; gap: 0.75rem; grid-template-areas: 'sketch' 'entry' 'list'; }
+    .sketch-card { grid-area: sketch; padding: 0.4rem; min-width: 0; }
+    .entry { grid-area: entry; min-width: 0; }
+    .list { grid-area: list; min-width: 0; max-height: 42vh; overflow: auto; }
     .sketch { height: 46vh; min-height: 260px; }
+    @media (min-width: 700px) {
+      .work { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'sketch sketch' 'entry list'; align-items: start; }
+      .entry, .list { max-height: 40vh; overflow: auto; }
+    }
+    @media (min-width: 1000px) and (orientation: landscape) {
+      /* The page is the screen's height below the portal's header (59 px, and 24 above and below the
+         page), and the three columns take what the title leaves: nothing scrolls but each column. */
+      .survey { display: flex; flex-direction: column; height: calc(100dvh - 107px); }
+      .work {
+        flex: 1;
+        grid-template-columns: minmax(14rem, 19rem) minmax(0, 1fr) minmax(16rem, 21rem);
+        grid-template-areas: 'list sketch entry';
+        /* One row the height left, not as tall as the list: or the list would never scroll. */
+        grid-template-rows: minmax(0, 1fr);
+        align-items: stretch;
+        min-height: 26rem;
+      }
+      .sketch-card { display: flex; flex-direction: column; min-height: 0; }
+      .sketch { flex: 1; height: auto; min-height: 0; }
+      .entry, .list { max-height: none; min-height: 0; overflow: auto; }
+    }
     .sketch svg { width: 100%; height: 100%; display: block; }
     .gesture-hint { margin-left: auto; font-size: 0.75rem; opacity: 0.8; }
     /* The whole block lets a finger scroll the page past it; zoomed in, a finger moves the sketch. */
@@ -304,6 +329,8 @@ export class SurveyPage {
   private readonly structuresService = inject(StructuresService);
   private readonly surveyService = inject(SurveyService);
   private readonly sketchBox = viewChild<ElementRef<HTMLElement>>('sketchBox');
+  private readonly listBox = viewChild<ElementRef<HTMLElement>>('listBox');
+  private readonly injector = inject(Injector);
 
   readonly plan = SURVEY_PLAN;
   readonly block = SURVEY_BLOCK;
@@ -642,7 +669,13 @@ export class SurveyPage {
   select(id: string, scrollUp = false): void {
     this.currentId.set(id);
     this.userBox.set(null);
-    if (scrollUp) this.sketchBox()?.nativeElement.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+    // Stacked, the sketch is above the list; side by side it is already in view and nothing moves.
+    if (scrollUp) this.sketchBox()?.nativeElement.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+    // The list keeps the distance chosen in view, however it was chosen: Next, Back, the sketch.
+    // At once, not smoothly: a smooth scroll is dropped by a browser that is not drawing frames.
+    afterNextRender(() => this.listBox()?.nativeElement.querySelector('li.on')?.scrollIntoView?.({ block: 'nearest' }), {
+      injector: this.injector,
+    });
   }
 
   /** The next or previous distance of the walk; Next skips the ones already taken. */
