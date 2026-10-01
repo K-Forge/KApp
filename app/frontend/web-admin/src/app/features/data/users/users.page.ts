@@ -1,5 +1,6 @@
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
-import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ALL_ROLES, type Role } from '../../../core/auth/auth.model';
 import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
@@ -13,7 +14,12 @@ import { RoleBadgeComponent } from '../../../shared/ui/role-badge/role-badge.com
 import type { UserProfile } from './user.model';
 import { UsersService } from './users.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
-import { t } from '../../../core/i18n/i18n.service';
+import { locale, t } from '../../../core/i18n/i18n.service';
+import { formatDate } from '@angular/common';
+import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
+import { copyText } from '../../../shared/ui/copy-text';
+import { INVITATION_ROLES, type InvitationRole } from '../invitation-codes/invitation-code.model';
+import { InvitationCodesService } from '../invitation-codes/invitation-codes.service';
 
 const PAGE_SIZE = 20;
 
@@ -24,19 +30,36 @@ const PAGE_SIZE = 20;
  */
 @Component({
   selector: 'app-users-page',
-  imports: [TranslatePipe, DataTableComponent, RoleBadgeComponent, ApiErrorBannerComponent, ModalComponent, JsonViewComponent, PageIntroComponent],
+  imports: [TranslatePipe, LocalDatePipe, ReactiveFormsModule, DataTableComponent, RoleBadgeComponent, ApiErrorBannerComponent, ModalComponent, JsonViewComponent, PageIntroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
         [title]="'Users' | t"
         [what]="'Everyone with a KApp account.' | t"
-        [can]="[('Search by name or e-mail' | t), ('Filter by role and status' | t), ('Deactivate or reactivate an account' | t)]"
-        [note]="'Deactivating takes access away, and can be undone.' | t"
+        [can]="[('Invite someone: a code only they can use, for the role you choose' | t), ('Search by name or e-mail' | t), ('Filter by role and status' | t), ('Deactivate or reactivate an account' | t)]"
+        [note]="'The person invited creates the account in the app, with their own password. Deactivating takes access away, and can be undone.' | t"
       />
 
+      @if (invited(); as invite) {
+        <div class="card invited" role="status">
+          <p class="invited-head">{{ 'Invitation for {name}' | t: { name: invite.name } }}</p>
+          <p class="invited-code mono">{{ invite.code }}</p>
+          <p class="text-muted invited-when">
+            {{ 'Works once, as {role}, until {date}.' | t: { role: roleLabel(invite.role), date: (invite.expiresAt | localDate) } }}
+          </p>
+          <div class="row spread">
+            <button type="button" class="btn btn-primary btn-sm" (click)="copyMessage()">
+              {{ copyState() === 'copied' ? ('Copied' | t) : copyState() === 'failed' ? ('Select it and copy it by hand' | t) : ('Copy the message for {name}' | t: { name: invite.name }) }}
+            </button>
+            <button type="button" class="btn btn-sm" (click)="invited.set(null)">{{ 'Dismiss' | t }}</button>
+          </div>
+          <p class="invited-message">{{ message() }}</p>
+        </div>
+      }
+
       <div class="card stack">
-        <div class="row spread">
+        <div class="work-bar">
           <div class="field" style="flex: 1 1 16rem; margin-bottom: 0">
             <label for="q">{{ 'Search' | t }}</label>
             <input id="q" type="text" [placeholder]="'name or e-mail' | t" (input)="onQueryInput($event)" />
@@ -58,6 +81,7 @@ const PAGE_SIZE = 20;
               <option value="false">{{ 'Deactivated' | t }}</option>
             </select>
           </div>
+          <button type="button" class="btn btn-primary work-create" (click)="openInvite()">{{ 'Invite someone' | t }}</button>
         </div>
 
         <app-api-error-banner [error]="error()" />
@@ -126,6 +150,76 @@ const PAGE_SIZE = 20;
         </div>
       }
     </app-modal>
+
+    <app-modal #inviteModal [title]="'Invite someone' | t" (closed)="inviteError.set(null)">
+      <app-api-error-banner [error]="inviteError()" />
+      <form [formGroup]="inviteForm" (ngSubmit)="sendInvite()" class="stack">
+        <p class="hint" style="margin:0">
+          {{ 'You get a code that creates one account, with the role you choose here. Give it to the person: they create the account in the app, with their own password.' | t }}
+        </p>
+        <div class="field" [class.invalid]="invalid('name')">
+          <label for="inv-name">{{ 'Name' | t }}</label>
+          <input id="inv-name" type="text" formControlName="name" autocomplete="off" />
+          @if (invalid('name')) {
+            <span class="error">{{ 'Write the name of the person.' | t }}</span>
+          }
+        </div>
+        <div class="field" [class.invalid]="invalid('email')">
+          <label for="inv-email">{{ 'E-mail' | t }}</label>
+          <input id="inv-email" type="email" formControlName="email" autocomplete="off" />
+          @if (invalid('email')) {
+            <span class="error">{{ 'Write an e-mail address, such as name@konradlorenz.edu.co.' | t }}</span>
+          }
+        </div>
+        <div class="field">
+          <label for="inv-role">{{ 'Role' | t }}</label>
+          <select id="inv-role" formControlName="role">
+            @for (role of inviteRoles; track role) {
+              <option [value]="role">{{ roleLabel(role) }}</option>
+            }
+          </select>
+        </div>
+        <div class="field" [class.invalid]="invalid('days')">
+          <label for="inv-days">{{ 'Days it works' | t }}</label>
+          <input id="inv-days" type="number" formControlName="days" min="1" max="90" />
+          @if (invalid('days')) {
+            <span class="error">{{ 'Between 1 and 90 days.' | t }}</span>
+          }
+        </div>
+        <div class="row">
+          <button type="submit" class="btn btn-primary" [disabled]="inviting()">
+            {{ inviting() ? ('Creating…' | t) : ('Create the invitation' | t) }}
+          </button>
+          <button type="button" class="btn" (click)="inviteModal.close()">{{ 'Cancel' | t }}</button>
+        </div>
+      </form>
+    </app-modal>
+  `,
+  styles: `
+    .invited {
+      border-color: var(--primary-brand);
+    }
+    .invited-head {
+      margin: 0;
+      font-weight: 600;
+    }
+    .invited-code {
+      margin: 0.25rem 0;
+      font-size: 1.5rem;
+      letter-spacing: 0.08em;
+      user-select: all;
+    }
+    .invited-when {
+      margin: 0 0 0.75rem;
+    }
+    .invited-message {
+      margin: 0.75rem 0 0;
+      padding: 0.6rem 0.75rem;
+      border-radius: 0.5rem;
+      background: var(--bg-inset);
+      font-size: 0.875rem;
+      user-select: all;
+    }
   `,
 })
 export class UsersPage {
@@ -147,6 +241,28 @@ export class UsersPage {
   readonly updatingId = signal<string | null>(null);
 
   @ViewChild('detailModal') private detailModal?: ModalComponent;
+  @ViewChild('inviteModal') private inviteModal?: ModalComponent;
+
+  private readonly invitations = inject(InvitationCodesService);
+  readonly inviteRoles = INVITATION_ROLES;
+  readonly inviting = signal(false);
+  readonly inviteError = signal<ApiError | null>(null);
+  /** The invitation just made, shown once so its code can be handed over. */
+  readonly invited = signal<{ code: string; name: string; email: string; role: InvitationRole; expiresAt: string } | null>(null);
+  readonly copyState = signal<'idle' | 'copied' | 'failed'>('idle');
+  inviteForm = this.blankInvite();
+
+  /** What to send the person, ready to paste into an e-mail or a chat. */
+  readonly message = computed(() => {
+    const invite = this.invited();
+    if (!invite) return '';
+    return t('Hi {name}: to create your KApp account as {role}, use the invitation code {code} when you sign up in the app. It works once, until {date}.', {
+      name: invite.name,
+      role: this.roleLabel(invite.role),
+      code: invite.code,
+      date: formatDate(invite.expiresAt, 'dd MMM y, HH:mm', locale()),
+    });
+  });
 
   private debounceHandle?: ReturnType<typeof setTimeout>;
 
@@ -196,6 +312,68 @@ export class UsersPage {
     this.page.set(page);
   }
 
+  roleLabel(role: InvitationRole): string {
+    return role === 'ROLE_PROFESSOR' ? t('professor') : t('student');
+  }
+
+  private blankInvite() {
+    return new FormGroup({
+      name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(80)] }),
+      email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email, Validators.maxLength(100)] }),
+      role: new FormControl<InvitationRole>('ROLE_STUDENT', { nonNullable: true }),
+      days: new FormControl(14, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(90)] }),
+    });
+  }
+
+  invalid(name: 'name' | 'email' | 'days'): boolean {
+    const control = this.inviteForm.controls[name];
+    return control.invalid && control.touched;
+  }
+
+  openInvite(): void {
+    this.inviteForm = this.blankInvite();
+    this.inviteError.set(null);
+    this.inviteModal?.open();
+  }
+
+  /**
+   * An invitation is a code that creates one account: the auth service mints it, with the person
+   * written in its notes, so the codes list says who each one was for. Making the account here,
+   * password and all, would need endpoints neither service has yet.
+   */
+  sendInvite(): void {
+    if (this.inviteForm.invalid) {
+      this.inviteForm.markAllAsTouched();
+      return;
+    }
+    const raw = this.inviteForm.getRawValue();
+    const name = raw.name.trim();
+    const email = raw.email.trim();
+    const expiresAt = new Date(Date.now() + raw.days * 24 * 60 * 60 * 1000).toISOString();
+    this.inviting.set(true);
+    this.inviteError.set(null);
+    this.invitations
+      .create({ role: raw.role, maxUses: 1, expiresAt, notes: t('For {name} <{email}>', { name, email }).slice(0, 200) })
+      .subscribe({
+        next: (created) => {
+          this.inviting.set(false);
+          this.inviteModal?.close();
+          this.copyState.set('idle');
+          this.invited.set({ code: created.code, name, email, role: created.role, expiresAt: created.expiresAt ?? expiresAt });
+        },
+        error: (err: unknown) => {
+          this.inviting.set(false);
+          this.inviteError.set(err instanceof AppHttpError ? err.apiError : null);
+        },
+      });
+  }
+
+  async copyMessage(): Promise<void> {
+    const copied = await copyText(this.message());
+    this.copyState.set(copied ? 'copied' : 'failed');
+    setTimeout(() => this.copyState.set('idle'), copied ? 1500 : 4000);
+  }
+
   view(user: UserProfile): void {
     this.selectedUser.set(user);
     this.detailModal?.open();
@@ -204,8 +382,8 @@ export class UsersPage {
   /**
    * Your own row, which you may not switch off.
    *
-   * <p>Deactivating an account genuinely removes access now, and there is no create-user path
-   * here by design - accounts are born from registration. Turning your own off signs you out of
+   * <p>Deactivating an account genuinely removes access now, and accounts are born from
+   * registration - an invitation from here is a code, not an account. Turning your own off signs you out of
    * a portal you cannot let yourself back into; the way back is editing MongoDB by hand. One
    * disabled button is cheaper than that.
    *

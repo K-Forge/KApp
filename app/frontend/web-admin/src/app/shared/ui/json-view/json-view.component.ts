@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { copyText } from '../copy-text';
 
 /** Pretty-printed, monospace, copyable JSON - used for tokens, request bodies and responses alike. */
 @Component({
@@ -55,47 +56,10 @@ export class JsonViewComponent {
     }
   });
 
-  /**
-   * Copies what is shown. The Clipboard API exists only on a secure page - HTTPS or localhost - so
-   * on the portal opened over plain http by a tailnet address the button did nothing at all. There,
-   * and wherever the browser refuses, it copies the old way, still inside the tap; when both fail it
-   * says so instead of looking as if it worked.
-   */
+  /** Copies what is shown; when the browser lets nothing copy, the button says so instead of looking as if it worked. */
   async copy(): Promise<void> {
-    const text = this.pretty();
-    let copied = false;
-    if (window.isSecureContext && navigator.clipboard) {
-      try {
-        await navigator.clipboard.writeText(text);
-        copied = true;
-      } catch {
-        copied = copyByHand(text);
-      }
-    } else {
-      copied = copyByHand(text);
-    }
+    const copied = await copyText(this.pretty());
     this.copyState.set(copied ? 'copied' : 'failed');
     setTimeout(() => this.copyState.set('idle'), copied ? 1500 : 4000);
   }
-}
-
-/** Copies through a hidden text box and the browser's copy command, as pages did before the Clipboard API. */
-function copyByHand(text: string): boolean {
-  const box = document.createElement('textarea');
-  box.value = text;
-  box.setAttribute('readonly', '');
-  box.style.position = 'fixed';
-  box.style.top = '0';
-  box.style.opacity = '0';
-  document.body.appendChild(box);
-  box.select();
-  box.setSelectionRange(0, text.length); // Safari on iOS selects nothing without it
-  let done = false;
-  try {
-    done = typeof document.execCommand === 'function' && document.execCommand('copy');
-  } catch {
-    done = false;
-  }
-  box.remove();
-  return done;
 }
