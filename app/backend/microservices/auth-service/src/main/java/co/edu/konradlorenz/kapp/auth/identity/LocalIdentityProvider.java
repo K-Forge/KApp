@@ -3,6 +3,7 @@ package co.edu.konradlorenz.kapp.auth.identity;
 import co.edu.konradlorenz.kapp.auth.domain.Credential;
 import co.edu.konradlorenz.kapp.auth.domain.CredentialRepository;
 import co.edu.konradlorenz.kapp.auth.error.PasswordChangeRequiredException;
+import co.edu.konradlorenz.kapp.auth.error.RoleNotAllowedException;
 import co.edu.konradlorenz.kapp.common.error.InvalidCredentialsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -76,6 +78,7 @@ public class LocalIdentityProvider implements IdentityProviderPort {
         }
 
         Credential credential = verify(password.email(), password.rawPassword());
+        requireAllowedRole(credential, password.allowedRoles());
         if (credential.mustChangePassword()) {
             log.info("Sign-in refused for {}: the password is temporary", credential.email());
             throw new PasswordChangeRequiredException();
@@ -83,6 +86,18 @@ public class LocalIdentityProvider implements IdentityProviderPort {
         return new AuthenticatedIdentity(
                 credential.userId(), credential.email(), credential.roles(),
                 credential.emailVerified());
+    }
+
+    /**
+     * Refuses an account the client does not take - the admin portal takes administrators -
+     * before a temporary password is offered for replacing. Empty means any account.
+     */
+    public void requireAllowedRole(Credential credential, List<String> allowedRoles) {
+        if (allowedRoles.isEmpty() || credential.roles().stream().anyMatch(allowedRoles::contains)) {
+            return;
+        }
+        log.info("Sign-in refused for {}: roles {} are none of {}", credential.email(), credential.roles(), allowedRoles);
+        throw new RoleNotAllowedException();
     }
 
     /**

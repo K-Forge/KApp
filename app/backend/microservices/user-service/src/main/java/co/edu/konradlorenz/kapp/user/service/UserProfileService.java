@@ -147,6 +147,14 @@ public class UserProfileService {
      * first attempt created instead of duplicating it - which is why this endpoint returns
      * 200 for both cases and never 409.
      */
+    /**
+     * The profile of an account an administrator deleted. Nothing else here points at a
+     * profile, so removing the document removes the person from the directory.
+     */
+    public void deleteForAccount(String userId) {
+        repository.deleteById(userId);
+    }
+
     public UserProfileResponse upsertFromRegistration(InternalUserUpsertRequest request) {
         requireAcademicToMatchRole(request.role(), request.academic());
 

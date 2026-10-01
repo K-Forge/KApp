@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Auth API
-  version: 0.2.0
+  version: 0.3.0
   summary: Credential and token service for the KApp platform.
   description: |
     Authentication service for KApp, the mobile application of Fundación
@@ -46,6 +46,16 @@ info:
     same way: an administrator issues a new temporary one.
 
     Since 0.2.0. Additive: nothing that worked before changes.
+
+    ## A client that takes only some accounts: `allowedRoles`
+
+    A client that serves only some roles names them in `allowedRoles` at login and
+    when replacing a password: the admin portal sends `[ROLE_ADMIN]`. An account
+    with none of them is refused with `403` and an issue for the field
+    `allowedRoles`, after its password is checked and **before anything else** - in
+    particular before a temporary password is offered for replacing, so a client for
+    one kind of account never sets another kind's password. Left out, any account.
+    Since 0.3.0, additive.
 
     ## Deliberately deferred past the MVP
 
@@ -180,6 +190,9 @@ paths:
           new password and send both to `POST /auth/password`.
         - `401` as well for a temporary password past its expiry: an
           administrator has to issue a new one.
+        - `403` with an issue for the field `allowedRoles`: the credentials are
+          valid, and the account has none of the roles the client named. Checked
+          before the temporary password.
 
         There is no refresh token. When `expiresIn` elapses the client must
         prompt for credentials again.
@@ -236,7 +249,9 @@ paths:
           current one.
         - `401` unknown e-mail, wrong current password, or a temporary password past
           its expiry. One message for all of them, as with login.
-        - `403` the address has not been confirmed yet.
+        - `403` the address has not been confirmed yet, or, with an issue for
+          `allowedRoles`, the account has none of the roles the client named. In
+          both cases nothing is changed.
       tags: [Authentication]
       security: []
       requestBody:
@@ -540,7 +555,8 @@ paths:
 
         - `role` is `ROLE_STUDENT` or `ROLE_PROFESSOR`. `ROLE_ADMIN` is never granted
           this way, as with invitation codes.
-        - A student needs `studentCode` and `programCode`, as in registration.
+        - A student needs `studentCode`. `programCode` may be left out: it is the
+          first three digits of the student code, as the university numbers them.
         - `email` must use one of the configured domains, as in registration.
         - The account may sign in at once: an administrator vouched for it. Its
           address is still recorded as not verified.
@@ -571,6 +587,36 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+
+  /auth/admin/accounts/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema: { type: string, maxLength: 64 }
+        description: The account's id, the `sub` of its tokens.
+    delete:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: [ROLE_ADMIN]
+      operationId: deleteAccount
+      summary: Delete an account and its profile
+      description: |
+        Requires `ROLE_ADMIN`. Removes the account's credential, then asks the User
+        API to remove its profile. Deleting again is safe: an account with no
+        credential left still has its profile removed. Never an administrator's
+        account, and never one's own: `400`. `503` when the profile could not be
+        removed yet; the account already signs nobody in, and deleting again
+        finishes it. Since 0.3.0.
+      tags: [Accounts]
+      responses:
+        '204':
+          description: The account and its profile are gone
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 
   /auth/admin/accounts/{userId}/temporary-password:
     parameters:
@@ -1076,7 +1122,8 @@ components:
           pattern: '^\d{1,10}$'
           description: |
             Academic program code the student is enrolled in. `506` is
-            Ingeniería de Sistemas.
+            Ingeniería de Sistemas. Optional since 0.3.0: left out, it is the first
+            three digits of `studentCode`, as the university numbers them.
           example: '506'
 
     VisitorPassRequest:
@@ -1230,6 +1277,17 @@ components:
           minLength: 10
           maxLength: 72
           example: ExamplePassword123
+        allowedRoles:
+          type: array
+          maxItems: 4
+          description: |
+            The roles the client takes, any one of them: the admin portal sends `[ROLE_ADMIN]`.
+            An account with none of them is refused with `403`, before a temporary password is
+            offered for replacing. Left out, any account.
+          items:
+            type: string
+            enum: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+          example: [ROLE_ADMIN]
 
     PasswordChangeRequest:
       type: object
@@ -1255,12 +1313,23 @@ components:
           maxLength: 72
           description: The password it will have. Must differ from the current one.
           example: ExamplePassword123
+        allowedRoles:
+          type: array
+          maxItems: 4
+          description: |
+            The roles the client takes, any one of them. An account with none of them is
+            refused with `403` before anything changes. Left out, any account.
+          items:
+            type: string
+            enum: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+          example: [ROLE_ADMIN]
 
     AccountRequest:
       type: object
       description: |
-        An account an administrator creates. `studentCode` and `programCode` are
-        required for a student and ignored for a professor.
+        An account an administrator creates. A student needs `studentCode`; its
+        `programCode` is read from the code's first three digits when left out. Both
+        are ignored for a professor.
       required: [email, firstName, lastName, role]
       properties:
         email:
@@ -1294,7 +1363,9 @@ components:
         programCode:
           type: string
           pattern: '^\d{1,10}$'
-          description: Academic program code the student is enrolled in. Required for a student.
+          description: |
+            Academic program code the student is enrolled in. Optional: left out, it is the
+            first three digits of `studentCode` - 506232730 is a 506, Ingeniería de Sistemas.
           example: '506'
 
     TemporaryPassword:

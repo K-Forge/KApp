@@ -56,6 +56,9 @@ public class RegistrationService {
 
     private static final Logger log = LoggerFactory.getLogger(RegistrationService.class);
 
+    /** How many of a student code's first digits are its program's: 506232730 is a 506. */
+    static final int PROGRAM_DIGITS = 3;
+
     private final CredentialRepository credentials;
     private final InvitationCodeService invitationCodes;
     private final UserProfileClient userProfiles;
@@ -184,17 +187,22 @@ public class RegistrationService {
     /**
      * A staff invitation carries no student code, and user-service requires an academic
      * record for a student and forbids one for a guest.
+     *
+     * <p>The program may be left out: the university's student codes begin with their
+     * program's three digits - 506232730 is a 506, Ingeniería de Sistemas - so it is read from
+     * there. One sent anyway is kept as sent.
      */
     private InternalUserUpsert.AcademicInfo academicFor(String role, String studentCode, String programCode) {
         if (!KappRoles.STUDENT.equals(role)) {
             return null;
         }
-        if (isBlank(studentCode) || isBlank(programCode)) {
+        if (isBlank(studentCode)) {
             throw new BusinessRuleException(
-                    "A student account requires studentCode and programCode",
-                    List.of(
-                            new ApiError.FieldIssue("studentCode", "Required for a student"),
-                            new ApiError.FieldIssue("programCode", "Required for a student")));
+                    "A student account requires studentCode",
+                    List.of(new ApiError.FieldIssue("studentCode", "Required for a student")));
+        }
+        if (isBlank(programCode)) {
+            programCode = studentCode.trim().substring(0, PROGRAM_DIGITS);
         }
         // pensumCode and currentLevel are not in the registration contract but are
         // mandatory on the profile, so the deployment supplies them. A new student starts

@@ -42,8 +42,11 @@ public class PasswordService {
     }
 
     /** A temporary password, or a person's own, for a new one of their choosing; signed in with it. */
-    public JwtIssuer.IssuedToken change(String email, String currentPassword, String newPassword) {
+    public JwtIssuer.IssuedToken change(String email, String currentPassword, String newPassword,
+                                        List<String> allowedRoles) {
         Credential credential = localIdentity.verify(email, currentPassword);
+        // Before anything changes: a client for one kind of account never sets another's password.
+        localIdentity.requireAllowedRole(credential, allowedRoles == null ? List.of() : allowedRoles);
         if (passwordEncoder.matches(newPassword, credential.passwordHash())) {
             throw new BusinessRuleException("The new password must differ from the current one",
                     List.of(new ApiError.FieldIssue("newPassword", "Must differ from the current password")));

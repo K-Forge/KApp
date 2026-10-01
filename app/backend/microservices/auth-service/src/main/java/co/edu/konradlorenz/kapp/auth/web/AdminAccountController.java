@@ -1,12 +1,15 @@
 package co.edu.konradlorenz.kapp.auth.web;
 
+import co.edu.konradlorenz.kapp.auth.service.AccountDeletionService;
 import co.edu.konradlorenz.kapp.auth.service.PasswordService;
 import co.edu.konradlorenz.kapp.auth.service.RegistrationService;
+import co.edu.konradlorenz.kapp.common.security.CurrentUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,10 +31,13 @@ public class AdminAccountController {
 
     private final RegistrationService registration;
     private final PasswordService passwords;
+    private final AccountDeletionService deletion;
 
-    public AdminAccountController(RegistrationService registration, PasswordService passwords) {
+    public AdminAccountController(RegistrationService registration, PasswordService passwords,
+                                  AccountDeletionService deletion) {
         this.registration = registration;
         this.passwords = passwords;
+        this.deletion = deletion;
     }
 
     @PostMapping
@@ -47,5 +53,13 @@ public class AdminAccountController {
     @Operation(summary = "Give an account a new temporary password")
     public TemporaryPasswordResponse issueTemporaryPassword(@PathVariable String userId) {
         return TemporaryPasswordResponse.from(passwords.issueTemporary(userId));
+    }
+
+    @DeleteMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Delete an account and its profile")
+    public void deleteAccount(@PathVariable String userId) {
+        deletion.delete(userId, CurrentUser.id());
     }
 }

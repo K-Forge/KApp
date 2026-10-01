@@ -16,6 +16,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -190,5 +192,91 @@ class TemporaryPasswordIntegrationTest extends AbstractAuthIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body.formatted("@gmail.com", "ROLE_PROFESSOR", "")))
                 .andExpect(status().isBadRequest());
+    }
+
+    // ── A client that takes only some accounts: the admin portal ──────────────────
+
+    private org.springframework.test.web.servlet.ResultActions loginAsAdminPortal(String email, String password) throws Exception {
+        return mockMvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"email":"%s","password":"%s","allowedRoles":["ROLE_ADMIN"]}
+                        """.formatted(email, password)));
+    }
+
+    @Test
+    @DisplayName("the admin portal refuses a professor's temporary password before offering to replace it")
+    void aPortalForAdminsNeverReplacesAnotherKindsPassword() throws Exception {
+        String email = "not.an.admin" + INSTITUTIONAL_DOMAIN;
+        String temporary = JsonPath.read(createProfessor("not.an.admin"), "$.temporaryPassword");
+
+        loginAsAdminPortal(email, temporary)
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.details[0].field").value("allowedRoles"));
+        mockMvc.perform(post("/auth/password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"%s","currentPassword":"%s","newPassword":"MyOwnPassword2026","allowedRoles":["ROLE_ADMIN"]}
+                                """.formatted(email, temporary)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.details[0].field").value("allowedRoles"));
+
+        // Nothing changed: the temporary password is still the one, still to be replaced.
+        assertThat(credentials.findByEmailIgnoreCase(email).orElseThrow().mustChangePassword()).isTrue();
+        login(email, temporary).andExpect(status().isForbidden()).andExpect(jsonPath("$.details[0].field").value("newPassword"));
+    }
+
+    @Test
+    @DisplayName("an administrator with a temporary password goes on to choose one in the portal")
+    void anAdminWithATemporaryPasswordChoosesOne() throws Exception {
+        String email = "admin.forgot" + INSTITUTIONAL_DOMAIN;
+        Credential admin = seedCredential(email, "AdminPassword2026", List.of("ROLE_ADMIN"), Credential.Status.ACTIVE, false);
+        String temporary = JsonPath.read(mockMvc.perform(post("/auth/admin/accounts/{id}/temporary-password", admin.userId())
+                        .header("Authorization", bearerFor("admin-2", "other" + INSTITUTIONAL_DOMAIN, "ROLE_ADMIN")))
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), "$.temporaryPassword");
+
+        loginAsAdminPortal(email, temporary)
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.details[0].field").value("newPassword"));
+    }
+
+    @Test
+    @DisplayName("a student's program is read from the first three digits of its student code")
+    void theProgramComesFromTheStudentCode() throws Exception {
+        mockMvc.perform(post("/auth/admin/accounts")
+                        .header("Authorization", adminToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"codigo.solo%s","firstName":"Pepe","lastName":"Veras","role":"ROLE_STUDENT","studentCode":"506232730"}
+                                """.formatted(INSTITUTIONAL_DOMAIN)))
+                .andExpect(status().isCreated());
+
+        ArgumentCaptor<InternalUserUpsert> profile = ArgumentCaptor.forClass(InternalUserUpsert.class);
+        verify(userProfileClient, atLeastOnce()).upsert(profile.capture());
+        assertThat(profile.getValue().academic().studentCode()).isEqualTo("506232730");
+        assertThat(profile.getValue().academic().programCode()).isEqualTo("506");
+    }
+
+    @Test
+    @DisplayName("an admin deletes an account and its profile, but never their own or another admin's")
+    void deletingAnAccount() throws Exception {
+        String email = "borrar" + INSTITUTIONAL_DOMAIN;
+        Credential student = seedCredential(email, "StudentPassword1", List.of("ROLE_STUDENT"), Credential.Status.ACTIVE, false);
+        Credential otherAdmin = seedCredential("otro.admin" + INSTITUTIONAL_DOMAIN, "AdminPassword2026", List.of("ROLE_ADMIN"), Credential.Status.ACTIVE, false);
+
+        mockMvc.perform(delete("/auth/admin/accounts/{id}", student.userId())
+                        .header("Authorization", bearerFor("prof-1", "p" + INSTITUTIONAL_DOMAIN, "ROLE_PROFESSOR")))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(delete("/auth/admin/accounts/{id}", student.userId()).header("Authorization", adminToken()))
+                .andExpect(status().isNoContent());
+        assertThat(credentials.findByEmailIgnoreCase(email)).isEmpty();
+        verify(userProfileClient).delete(eq(student.userId()));
+        login(email, "StudentPassword1").andExpect(status().isUnauthorized());
+
+        mockMvc.perform(delete("/auth/admin/accounts/{id}", otherAdmin.userId()).header("Authorization", adminToken()))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(delete("/auth/admin/accounts/{id}", "admin-1").header("Authorization", adminToken()))
+                .andExpect(status().isBadRequest());
+        assertThat(credentials.findByUserId(otherAdmin.userId())).isPresent();
     }
 }

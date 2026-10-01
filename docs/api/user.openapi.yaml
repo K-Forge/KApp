@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp User API
-  version: 0.1.0
+  version: 0.2.0
   summary: Profile service for the KApp platform.
   description: |
     Profile service for KApp, the mobile application of Fundación Universitaria
@@ -602,6 +602,35 @@ paths:
                     academic: null
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /internal/users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, maxLength: 64 }
+        description: The profile's id, the `sub` of the account's tokens.
+    delete:
+      # Not role-protected: reachable only from inside the compose network, with the
+      # shared internal token, and it has no gateway route at all.
+      x-roles: [SERVICE_ONLY]
+      operationId: deleteInternalUser
+      summary: Delete a profile from another service
+      description: |
+        Service-to-service endpoint. The Auth API calls it when an administrator
+        deletes an account, after removing the account's credential. Not reachable
+        from outside, with `X-Internal-Token` only, as the upsert above.
+
+        **Idempotent.** `204` whether or not the profile existed, so a deletion
+        that timed out can be sent again. Since 0.2.0.
+      tags: [Internal]
+      security:
+        - internalToken: []
+      responses:
+        '204':
+          description: The profile is gone, or was never there
         '401':
           $ref: '#/components/responses/Unauthorized'
 

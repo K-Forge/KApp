@@ -44,6 +44,15 @@ public class AuthExceptionHandler {
         return ResponseEntity.status(status).body(body);
     }
 
+    @ExceptionHandler(RoleNotAllowedException.class)
+    public ResponseEntity<ApiError> handleRoleNotAllowed(RoleNotAllowedException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        ApiError body = ApiError.of(status.value(), status.getReasonPhrase(), ex.getMessage(),
+                request.getRequestURI(),
+                List.of(new ApiError.FieldIssue("allowedRoles", "The account has none of these roles. Nothing was changed")));
+        return ResponseEntity.status(status).body(body);
+    }
+
     @ExceptionHandler(PasswordChangeRequiredException.class)
     public ResponseEntity<ApiError> handlePasswordChangeRequired(
             PasswordChangeRequiredException ex, HttpServletRequest request) {
