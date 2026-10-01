@@ -215,8 +215,8 @@
     --nav-active-text: #f2d9fa;
     --nav-active-edge: #e8578f;
     --light-mid: var(--brand-pink);
-    --logo-tile: transparent;
-    --logo-tile-edge: transparent;
+    --logo-tile: #2d2135;
+    --logo-tile-edge: #45374f;
     --scrim: rgb(8 2 6 / 0.6);
     --margin-n: #22d3ee;
     --margin-c: #2dd4bf;
@@ -282,8 +282,8 @@
   --nav-active-text: #f2d9fa;
   --nav-active-edge: #e8578f;
   --light-mid: var(--brand-pink);
-  --logo-tile: transparent;
-  --logo-tile-edge: transparent;
+  --logo-tile: #2d2135;
+  --logo-tile-edge: #45374f;
   --scrim: rgb(8 2 6 / 0.6);
   --margin-n: #22d3ee;
   --margin-c: #2dd4bf;
@@ -1032,8 +1032,8 @@ details.help .help-note {
   font-size: 0.8125rem;
 }
 
-/* The K on the header: by day on a white tile, so its lime green does not fade into the violet;
-   at night the tile is clear and the mark stands on the dark header as it is. */
+/* The K on the header, on a tile: white by day, so its lime green does not fade into the violet;
+   at night a step lighter than the dark header, with the theme's own edge. */
 .logo-tile {
   padding: 3px;
   border-radius: 9px;
