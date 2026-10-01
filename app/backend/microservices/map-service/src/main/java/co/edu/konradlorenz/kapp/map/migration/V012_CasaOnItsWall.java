@@ -60,6 +60,17 @@ public class V012_CasaOnItsWall {
 
     /** @return how many campus lists had their casa redrawn */
     static int redraw(MongoTemplate mongo, List<V010_CampusStructures.Seed> seeds, Instant now) {
+        return redraw(mongo, seeds, now, SEEDED);
+    }
+
+    /**
+     * The seed's casa on every campus whose casa is still {@code replacing}, the outline an earlier
+     * change unit put there; one corrected in the portal since is left alone.
+     *
+     * @return how many campus lists had their casa redrawn
+     */
+    static int redraw(MongoTemplate mongo, List<V010_CampusStructures.Seed> seeds, Instant now,
+                      List<List<Double>> replacing) {
         int redrawn = 0;
         for (V010_CampusStructures.Seed seed : seeds) {
             Structure wanted = seed.structures().stream().filter(s -> CASA_LOT.equals(s.lot())).findFirst().orElse(null);
@@ -70,7 +81,7 @@ public class V012_CasaOnItsWall {
             List<Structure> structures = new ArrayList<>();
             boolean changed = false;
             for (Structure s : stored.structures()) {
-                if (CASA_LOT.equals(s.lot()) && SEEDED.equals(s.ring())) {
+                if (CASA_LOT.equals(s.lot()) && replacing.equals(s.ring())) {
                     structures.add(new Structure(s.name(), s.floors(), s.basements(), s.lot(), wanted.ring()));
                     changed = true;
                 } else {

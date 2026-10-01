@@ -487,8 +487,8 @@ class TracedCampusTest {
         String id = co.edu.konradlorenz.kapp.map.service.GroundService.key("Sede Principal");
         CampusStructuresDocument now = mongo.findById(id, CampusStructuresDocument.class);
         Structure seeded = now.structures().stream().filter(s -> V012_CasaOnItsWall.CASA_LOT.equals(s.lot())).findFirst().orElseThrow();
-        // A fresh database gets the seed's casa, on its wall, straight away.
-        assertThat(seeded.ring()).isNotEqualTo(V012_CasaOnItsWall.SEEDED).hasSize(6);
+        // A fresh database gets the seed's casa, on its wall with its door and balcony, straight away.
+        assertThat(seeded.ring()).isNotEqualTo(V012_CasaOnItsWall.SEEDED).isNotEqualTo(V013_CasaDoorAndBalcony.FROM_V012).hasSize(8);
 
         // One V010 seeded before: redrawn, the version moved on, the other structures kept.
         List<Structure> cadastre = now.structures().stream()
@@ -500,6 +500,14 @@ class TracedCampusTest {
         assertThat(redrawn.version()).isEqualTo(8);
         assertThat(redrawn.structures()).hasSameSizeAs(cadastre);
         assertThat(redrawn.structures()).contains(seeded);
+
+        // One V012 left, a straight front: given its door and balcony too.
+        List<Structure> straight = now.structures().stream()
+                .map(s -> V012_CasaOnItsWall.CASA_LOT.equals(s.lot()) ? new Structure(s.name(), s.floors(), s.basements(), s.lot(), V013_CasaDoorAndBalcony.FROM_V012) : s)
+                .toList();
+        mongo.save(new CampusStructuresDocument(id, now.campus(), straight, 8, Instant.now()));
+        assertThat(V012_CasaOnItsWall.redraw(mongo, V010_CampusStructures.load(), Instant.now(), V013_CasaDoorAndBalcony.FROM_V012)).isEqualTo(1);
+        assertThat(mongo.findById(id, CampusStructuresDocument.class).structures()).contains(seeded);
 
         // One somebody corrected in the portal: theirs.
         List<List<Double>> corrected = List.of(List.of(-74.0619, 4.6484), List.of(-74.0618, 4.6485), List.of(-74.0617, 4.6484), List.of(-74.0619, 4.6484));

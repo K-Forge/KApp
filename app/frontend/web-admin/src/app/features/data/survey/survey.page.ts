@@ -1,5 +1,5 @@
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, Injector, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, Injector, afterNextRender, afterRenderEffect, computed, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin, map, switchMap } from 'rxjs';
 import { AppHttpError } from '../../../core/http/api-http-error';
@@ -147,7 +147,7 @@ const CLOSEST = 4;
           </div>
         </section>
 
-        <section class="card entry">
+        <section class="card entry" #entryBox>
           @if (current(); as c) {
             <div class="title">
               <span class="num" [class]="c.kind">{{ c.n ?? '+' }}</span>
@@ -189,11 +189,11 @@ const CLOSEST = 4;
               <button type="button" class="btn btn-primary" (click)="step(1)">{{ 'Next ›' | t }}</button>
               @if (c.kind !== 'extra' && stateOf(c.id) !== 'todo') {
                 <button type="button" class="btn btn-sm recheck-btn" (click)="toggleRecheck(c.id)">
-                  {{ valueOf(c.id).recheck ? ('It is right as it is' | t) : ('Take it again' | t) }}
+                  {{ valueOf(c.id).recheck ? ('It is right' | t) : ('Retake' | t) }}
                 </button>
               }
             </div>
-            <input #note class="note" type="text" [placeholder]="'Note: what the sketch does not show' | t" [value]="valueOf(c.id).note ?? ''" (input)="write(c.id, 'note', $event)" />
+            <input #note class="note" type="text" [placeholder]="'Note' | t" [value]="valueOf(c.id).note ?? ''" (input)="write(c.id, 'note', $event)" />
             <details class="small examples">
               <summary>{{ 'Note examples: tap one, then finish it' | t }}</summary>
               <div class="chips">
@@ -259,7 +259,7 @@ const CLOSEST = 4;
     .work { display: grid; gap: 0.75rem; grid-template-areas: 'sketch' 'entry' 'list'; }
     .sketch-card { grid-area: sketch; padding: 0.4rem; min-width: 0; }
     .entry { grid-area: entry; min-width: 0; container-type: inline-size; display: flex; flex-direction: column; --f: 1rem; }
-    .entry > * { font-size: var(--f); }
+    .entry > * { font-size: var(--f); flex-shrink: 0; }
     .entry .small { font-size: 0.82em; }
     .entry > .small { font-size: calc(var(--f) * 0.82); }
     .list { grid-area: list; min-width: 0; max-height: 42vh; overflow: auto; }
@@ -284,7 +284,7 @@ const CLOSEST = 4;
       .sketch-card { display: flex; flex-direction: column; min-height: 0; }
       .sketch { flex: 1; height: auto; min-height: 0; }
       .entry, .list { max-height: none; min-height: 0; overflow: auto; }
-      .entry { --f: clamp(1rem, 5.6cqi, 1.35rem); }
+      .entry { --f: clamp(1rem, 5.6cqi, 1.35rem); overflow: hidden; }
     }
     .sketch svg { width: 100%; height: 100%; display: block; touch-action: pan-y; }
     .gesture-hint { margin-left: auto; font-size: 0.75rem; }
@@ -303,7 +303,7 @@ const CLOSEST = 4;
     .street { fill: var(--text-muted); font-weight: 600; }
     g { cursor: pointer; }
     g line { stroke-width: 2; stroke: currentColor; }
-    g line.ext { stroke-width: 1; stroke-dasharray: 3 3; }
+    g line.ext { stroke-width: 1; stroke-dasharray: 3; }
     g .end, g .dot { fill: currentColor; }
     g text { fill: #fff; font-weight: 700; }
     .setback, .setback-key { color: #e8590c; --c: #e8590c; }
@@ -313,7 +313,6 @@ const CLOSEST = 4;
     .review, .review-key { color: #ae3ec9; --c: #ae3ec9; }
     .review-badge { background: #ae3ec92e; color: #ae3ec9; }
     .review-note { margin: 0.2rem 0 0; color: #ae3ec9; }
-    .recheck-btn { margin-left: auto; }
     g.on line { stroke-width: 4; }
     g.on .dot { stroke: var(--bg-elevated); stroke-width: 2.5; }
     .title { display: flex; gap: 0.6rem; align-items: flex-start; }
@@ -323,12 +322,12 @@ const CLOSEST = 4;
     .value input { font-size: 1.8em; }
     .value .btn { min-width: 2.6em; font-size: 1.2em; }
     .title .num { min-width: 2em; height: 2em; font-size: 0.8em; }
-    .steps .btn { flex: 1; min-height: 2.8em; font-size: 0.95em; }
+    .steps .btn { flex: 1; min-height: 2.8em; font-size: 0.95em; white-space: nowrap; }
     .next { margin-top: auto; padding-top: 0.8rem; border: 0; background: none; color: inherit; text-align: left; font: inherit; font-size: 0.85em; }
     .label-in { margin-top: 0.6rem; }
     .reading { min-height: 1.2em; margin: 0.35rem 0; color: var(--text-muted); }
     .reading.bad { color: var(--danger); }
-    .steps { margin: 0.6rem 0; justify-content: space-between; }
+    .steps { margin: 0.6rem 0; }
     .examples { margin-top: 0.4rem; color: var(--text-muted); }
     .list ol { list-style: none; margin: 0 0 0.6rem; padding: 0; }
     .list li { display: flex; gap: 0.6rem; align-items: center; padding: 0.3rem 0.2rem; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
@@ -345,6 +344,14 @@ export class SurveyPage {
   private readonly surveyService = inject(SurveyService);
   private readonly sketchBox = viewChild<ElementRef<HTMLElement>>('sketchBox');
   private readonly listBox = viewChild<ElementRef<HTMLElement>>('listBox');
+  private readonly entryBox = viewChild<ElementRef<HTMLElement>>('entryBox');
+
+  /** Whatever the distance says, the entry fits its column: refitted when it or what is typed changes. */
+  private readonly refit = afterRenderEffect(() => {
+    this.current();
+    this.reading();
+    this.fitEntry();
+  });
   private readonly injector = inject(Injector);
 
   readonly plan = SURVEY_PLAN;
@@ -580,7 +587,29 @@ export class SurveyPage {
       });
       observer.observe(el);
       destroyRef.onDestroy(() => observer.disconnect());
+      const entry = this.entryBox()?.nativeElement;
+      if (!entry) return;
+      const fit = new ResizeObserver(() => this.fitEntry());
+      fit.observe(entry);
+      destroyRef.onDestroy(() => fit.disconnect());
     });
+  }
+
+  /**
+   * Lying down, the entry is as tall as the screen and never scrolls: when what it holds - a long
+   * description, a hint, the reading - is taller, its text comes down until it all fits. Upright it
+   * takes the height it needs and nothing changes.
+   */
+  private fitEntry(): void {
+    const el = this.entryBox()?.nativeElement;
+    if (!el) return;
+    el.style.removeProperty('--f');
+    if (getComputedStyle(el).overflowY !== 'hidden') return;
+    const first = el.firstElementChild as HTMLElement | null;
+    for (let i = 0; i < 6 && first && el.scrollHeight > el.clientHeight + 1; i++) {
+      const size = parseFloat(getComputedStyle(first).fontSize);
+      el.style.setProperty('--f', `${Math.max(11, size * (el.clientHeight / el.scrollHeight) * 0.97)}px`);
+    }
   }
 
   /** The model's figure, written as the portal's language writes decimals. */
