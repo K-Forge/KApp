@@ -3,8 +3,10 @@
   "name": "Casa Medio Universitario",
   "campus": "Sede Principal",
   "description": "Casa antigua de tres niveles: el Servicio Médico a nivel de la calle y las oficinas de Medio Universitario arriba, a las que se sube por una escalera exterior.",
+  "address": "Cl. 62 # 9-65",
   "aliases": [
-    "Medio Universitario"
+    "Medio Universitario",
+    "Casita blanca"
   ],
   "wings": [],
   "placement": {

@@ -31,6 +31,8 @@ import java.util.Optional;
  * @param placement where the building's drawing lies on the ground; null until somebody lays it
  * @param footprint the building from above, part by part, as the city's cadastre records it;
  *                  empty until somebody takes it from there
+ * @param address   its street address as people write it, "Cra. 9 Bis # 62-43"; null when nobody
+ *                  has said
  */
 @Document(collection = "buildings")
 public record BuildingDocument(
@@ -46,7 +48,8 @@ public record BuildingDocument(
         Instant createdAt,
         Instant updatedAt,
         Placement placement,
-        List<FootprintPart> footprint
+        List<FootprintPart> footprint,
+        String address
 ) {
 
     @PersistenceCreator
@@ -57,6 +60,15 @@ public record BuildingDocument(
                 ? List.of()
                 : floors.stream().sorted(Comparator.comparingDouble(Floor::level)).toList();
         footprint = footprint == null ? List.of() : List.copyOf(footprint);
+        address = address == null || address.isBlank() ? null : address.trim();
+    }
+
+    /** A building nobody has given an address yet. */
+    public BuildingDocument(String id, String code, String name, String campus, String description,
+                            List<String> aliases, List<Wing> wings, List<Floor> floors, boolean placeholder,
+                            Instant createdAt, Instant updatedAt, Placement placement, List<FootprintPart> footprint) {
+        this(id, code, name, campus, description, aliases, wings, floors, placeholder, createdAt, updatedAt, placement,
+                footprint, null);
     }
 
     /** A building nobody has laid on the ground yet. */

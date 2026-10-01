@@ -3,7 +3,10 @@
   "name": "Edificio Administrativo",
   "campus": "Sede Principal",
   "description": "Oficinas administrativas: contabilidad, recursos humanos, nómina, planta física, TIC y direcciones de investigación y prácticas.",
-  "aliases": [],
+  "address": "Cra. 9A # 62-27",
+  "aliases": [
+    "Edificio Luna"
+  ],
   "wings": [],
   "placement": {
     "origin": {

@@ -3,6 +3,7 @@
   "name": "Edificio Central",
   "campus": "Sede Principal",
   "description": "Tres alas sobre un sótano de parqueadero. El auditorio Sonia Fajardo Forero ocupa los pisos 1 y 2 del ala sur, y el ala sur sigue encima con oficinas y aulas hasta el piso 6.",
+  "address": "Cra. 9 Bis # 62-43",
   "aliases": [],
   "wings": [
     {

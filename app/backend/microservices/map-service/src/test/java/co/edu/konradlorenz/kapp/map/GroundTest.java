@@ -45,6 +45,8 @@ class GroundTest {
     private MockMvc mockMvc;
     @Autowired
     private BuildingRepository buildings;
+    @Autowired
+    private org.springframework.data.mongodb.core.MongoTemplate mongo;
 
     private static RequestPostProcessor as(String role) {
         return jwt().jwt(b -> b.subject("ground-" + role).claim("roles", List.of(role)))
@@ -105,6 +107,44 @@ class GroundTest {
         mockMvc.perform(get("/api/map/buildings/GRD3").with(as("ROLE_GUEST")))
                 .andExpect(jsonPath("$.footprint[0].floors").value(5))
                 .andExpect(jsonPath("$.footprint[0].ring[0][0]").value(-74.0613));
+    }
+
+    @Test
+    @DisplayName("a building keeps the address it was given when a save leaves it out, and loses it when sent empty")
+    void addressIsKept() throws Exception {
+        buildings.save(MapFixtures.building("GRD6"));
+        String body = """
+                {"code": "GRD6", "name": "Dirigido", "campus": "Sede Test"%s,
+                 "floors": [{"code": "P1", "level": 1, "name": "Piso 1", "width": 400, "height": 400}]}
+                """;
+        mockMvc.perform(put("/api/map/buildings/GRD6").with(as("ROLE_ADMIN")).contentType(MediaType.APPLICATION_JSON)
+                        .content(body.formatted(", \"address\": \" Cra. 9 Bis # 62-43 \"")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.address").value("Cra. 9 Bis # 62-43"));
+        mockMvc.perform(put("/api/map/buildings/GRD6").with(as("ROLE_ADMIN")).contentType(MediaType.APPLICATION_JSON)
+                        .content(body.formatted("")))
+                .andExpect(jsonPath("$.address").value("Cra. 9 Bis # 62-43"));
+        mockMvc.perform(put("/api/map/buildings/GRD6").with(as("ROLE_ADMIN")).contentType(MediaType.APPLICATION_JSON)
+                        .content(body.formatted(", \"address\": \"\"")))
+                .andExpect(jsonPath("$.address").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("the addresses and nicknames are given once, and never over what somebody wrote")
+    void addressesAreGivenOnce() throws Exception {
+        buildings.save(MapFixtures.building("MU"));
+        buildings.save(new co.edu.konradlorenz.kapp.map.domain.BuildingDocument(java.util.UUID.randomUUID().toString(), "EC", "Central",
+                "Sede Test", null, List.of(), List.of(), List.of(MapFixtures.floor("P1", 1)), false, java.time.Instant.now(),
+                java.time.Instant.now(), null, List.of(), "Written by hand"));
+        co.edu.konradlorenz.kapp.map.migration.V011_BuildingAddresses.addresses(mongo);
+        co.edu.konradlorenz.kapp.map.migration.V011_BuildingAddresses.nicknames(mongo);
+        co.edu.konradlorenz.kapp.map.migration.V011_BuildingAddresses.nicknames(mongo);
+        mockMvc.perform(get("/api/map/buildings/MU").with(as("ROLE_GUEST")))
+                .andExpect(jsonPath("$.address").value("Cl. 62 # 9-65"))
+                .andExpect(jsonPath("$.aliases[?(@ == 'Casita blanca')]").isNotEmpty())
+                .andExpect(jsonPath("$.aliases.length()").value(1));
+        mockMvc.perform(get("/api/map/buildings/EC").with(as("ROLE_GUEST")))
+                .andExpect(jsonPath("$.address").value("Written by hand"));
     }
 
     @Test

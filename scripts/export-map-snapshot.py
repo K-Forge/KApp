@@ -76,7 +76,7 @@ def snapshot_json(data):
 
 
 def building_file(building, floors):
-    out = pick(building, ["code", "name", "campus", "description", "aliases"], always=["aliases"])
+    out = pick(building, ["code", "name", "campus", "description", "address", "aliases"], always=["aliases"])
     out["wings"] = [pick(w, ["code", "name", "doorSuffix", "note"]) for w in building.get("wings", [])]
     if present(building.get("placement")):
         out["placement"] = building["placement"]

@@ -103,7 +103,8 @@ public class BuildingService {
                 now,
                 now,
                 MapMapper.toPlacement(request.placement(), null),
-                MapMapper.toFootprint(request.footprint(), null)));
+                MapMapper.toFootprint(request.footprint(), null),
+                request.address()));
 
         log.info("Created building {} on campus {} with {} floors",
                 saved.code(), saved.campus(), saved.floors().size());
@@ -150,7 +151,9 @@ public class BuildingService {
                 existing.createdAt(),
                 Instant.now(),
                 MapMapper.toPlacement(request.placement(), existing.placement()),
-                MapMapper.toFootprint(request.footprint(), existing.footprint())));
+                MapMapper.toFootprint(request.footprint(), existing.footprint()),
+                // Left out, the address stays; sent empty, it goes.
+                request.address() == null ? existing.address() : request.address()));
 
         propagateToSpaces(saved);
         return MapMapper.toBuildingResponse(saved);

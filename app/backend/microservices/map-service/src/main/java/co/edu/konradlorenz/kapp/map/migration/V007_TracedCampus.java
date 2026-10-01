@@ -267,7 +267,9 @@ public class V007_TracedCampus {
                 stored.placement() == null || unedited(buildingUntouched, was == null ? null : was.toPlacement(),
                         stored.placement()) ? surveyed.toPlacement() : stored.placement(),
                 stored.footprint().isEmpty() || unedited(buildingUntouched, was == null ? null : was.toFootprint(),
-                        stored.footprint()) ? surveyed.toFootprint() : stored.footprint());
+                        stored.footprint()) ? surveyed.toFootprint() : stored.footprint(),
+                // An address somebody wrote stays; the snapshot's only fills one nobody has.
+                stored.address() != null ? stored.address() : surveyed.address());
         mongo.save(merged);
         removals.forEach(mongo::remove);
         // Written after the building, so a space's wing is always one its building declares.
@@ -299,7 +301,7 @@ public class V007_TracedCampus {
             BuildingDocument withWings = new BuildingDocument(stored.id(), stored.code(), stored.name(),
                     stored.campus(), stored.description(), stored.aliases(), List.copyOf(wings.values()),
                     stored.floors(), false, stored.createdAt(), stored.updatedAt(), stored.placement(),
-                    stored.footprint());
+                    stored.footprint(), stored.address());
             return SpaceService.toDocument(space, withWings, floor, id, false, created, updated);
         }
     }

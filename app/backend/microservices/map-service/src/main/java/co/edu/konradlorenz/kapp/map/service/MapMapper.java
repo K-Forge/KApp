@@ -93,7 +93,8 @@ public final class MapMapper {
                 building.wings().stream().map(MapMapper::toWingDto).toList(),
                 building.floors().stream().map(MapMapper::toFloorDto).toList(),
                 toPlacementDto(building.placement()),
-                building.footprint().stream().map(MapMapper::toFootprintPartDto).toList());
+                building.footprint().stream().map(MapMapper::toFootprintPartDto).toList(),
+                building.address());
     }
 
     public static FootprintPartDto toFootprintPartDto(FootprintPart part) {

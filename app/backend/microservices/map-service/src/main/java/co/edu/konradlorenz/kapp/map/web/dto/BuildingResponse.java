@@ -24,6 +24,7 @@ public record BuildingResponse(
         List<WingDto> wings,
         List<FloorDto> floors,
         PlacementDto placement,
-        List<FootprintPartDto> footprint
+        List<FootprintPartDto> footprint,
+        String address
 ) {
 }

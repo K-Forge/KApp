@@ -101,7 +101,8 @@ info:
     before. The ground floor is the parts that reach it, and the floors above add those that start
     higher.
 
-    It also adds **`SurveyMeasure.recheck`**: a distance asked to be taken again keeps what was
+    It also adds **`Building.address`**, the street address as people write it, and
+    **`SurveyMeasure.recheck`**: a distance asked to be taken again keeps what was
     typed, for reference, and the time it was taken, until it is taken again.
 
     ## Coordinate model
@@ -1386,6 +1387,7 @@ components:
           type: array
           description: The building from above, part by part, as the cadastre records it. Empty until somebody takes it from there.
           items: { $ref: '#/components/schemas/FootprintPart' }
+        address: { type: string, maxLength: 200, description: "Its street address as people write it. Absent when nobody has said.", example: 'Cra. 9 Bis # 62-43' }
 
     BuildingSummary:
       type: object
@@ -1429,6 +1431,7 @@ components:
           type: array
           description: The building from above, part by part. Omitted on `PUT`, the stored one is kept; a part's `wing` must be one of the building's.
           items: { $ref: '#/components/schemas/FootprintPart' }
+        address: { type: string, maxLength: 200, description: "Its street address as people write it. Omitted on PUT, the stored one is kept; empty clears it.", example: 'Cra. 9 Bis # 62-43' }
 
     Space:
       type: object

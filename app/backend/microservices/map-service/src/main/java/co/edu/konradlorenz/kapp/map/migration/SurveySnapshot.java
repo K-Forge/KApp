@@ -58,8 +58,16 @@ public final class SurveySnapshot {
             List<WingDto> wings,
             List<SnapshotFloor> floors,
             PlacementDto placement,
-            List<FootprintPartDto> footprint
+            List<FootprintPartDto> footprint,
+            String address
     ) {
+        /** A snapshot building that gives no address. */
+        public Building(String code, String name, String campus, String description, List<String> aliases,
+                        List<WingDto> wings, List<SnapshotFloor> floors, PlacementDto placement,
+                        List<FootprintPartDto> footprint) {
+            this(code, name, campus, description, aliases, wings, floors, placement, footprint, null);
+        }
+
         public Building {
             aliases = aliases == null ? List.of() : List.copyOf(aliases);
             wings = wings == null ? List.of() : List.copyOf(wings);
@@ -71,7 +79,7 @@ public final class SurveySnapshot {
             return new BuildingDocument(UUID.randomUUID().toString(), code, name, campus, description,
                     aliases, wings.stream().map(MapMapper::toWing).toList(),
                     floors.stream().map(SnapshotFloor::toFloor).toList(), false, now, now, toPlacement(),
-                    toFootprint());
+                    toFootprint(), address);
         }
 
         /** The building from above as the snapshot takes it from the cadastre; empty when it has none. */

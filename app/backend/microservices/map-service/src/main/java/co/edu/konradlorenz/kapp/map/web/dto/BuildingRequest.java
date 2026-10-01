@@ -50,12 +50,16 @@ public record BuildingRequest(
         @Valid PlacementDto placement,
         @Schema(description = "The building from above, part by part, as the city's cadastre records it. "
                 + "Omitted on PUT, the stored one is kept.")
-        List<@NotNull @Valid FootprintPartDto> footprint
+        List<@NotNull @Valid FootprintPartDto> footprint,
+        @Schema(description = "Its street address as people write it. Omitted on PUT, the stored one is kept; "
+                + "empty clears it.", example = "Cra. 9 Bis # 62-43")
+        @Size(max = 200)
+        String address
 ) {
     /** A request that leaves the building's placement and footprint as they are. */
     public BuildingRequest(String code, String name, String campus, String description, List<String> aliases,
                            List<WingDto> wings, List<FloorDto> floors) {
-        this(code, name, campus, description, aliases, wings, floors, null, null);
+        this(code, name, campus, description, aliases, wings, floors, null, null, null);
     }
 
 

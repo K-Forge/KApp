@@ -691,6 +691,10 @@ export const ES_API: Record<string, string> = {
   'Identifier of the student whose schedule is being read.':
     'Identificador del estudiante cuyo horario se lee.',
   // map.openapi.yaml
+  'Its street address as people write it. Absent when nobody has said.':
+    'Su dirección, como la escribe la gente. No aparece cuando nadie la ha dicho.',
+  'Its street address as people write it. Omitted on PUT, the stored one is kept; empty clears it.':
+    'Su dirección, como la escribe la gente. Si se omite en un PUT, se conserva la guardada; vacía, la borra.',
   'List buildings':
     'Listar los edificios',
   'Every building with its wings and floors, ordered by code. `q` matches the code, the name\nand every alias, ignoring case and accents.\n\nAllowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.':
