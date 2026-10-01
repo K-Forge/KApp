@@ -3,9 +3,9 @@ import { areaPath, toMetres } from '../ground/ground';
 
 /** The colour each wing of a building is drawn in, on every map: north, central, south first. */
 const WING_COLORS: Record<string, string> = { N: '#e0564f', C: '#3b82f6', S: '#8b5cf6' };
-const MORE_WING_COLORS = ['#0d9488', '#d97706', '#db2777', '#65a30d'];
-/** A building whose parts carry no wing. */
-export const BUILDING_COLOR = '#c2185b';
+const MORE_WING_COLORS = ['#0d9488', '#d97706', '#0891b2', '#65a30d'];
+/** A building whose parts carry no wing: a deep violet, the portal's own colour (it was a pink). */
+export const BUILDING_COLOR = '#6d28d9';
 
 /** Each wing's colour, by its code: the same on the campus map, the block editor and the floor list. */
 export function wingColors(building: Building): Map<string, string> {

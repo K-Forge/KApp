@@ -310,7 +310,7 @@ const ROOMS_FROM = 4;
       opacity: 0.8;
     }
     .swatch.ramp {
-      background: linear-gradient(90deg, color-mix(in srgb, #c2185b 25%, #fff), #c2185b);
+      background: linear-gradient(90deg, color-mix(in srgb, #6d28d9 25%, #fff), #6d28d9);
       opacity: 1;
     }
     .credit {

@@ -11,41 +11,42 @@
 :root {
   color-scheme: light;
 
-  /* Paper, but not a blank sheet: the dark theme's purple by day - the same hue (OKLCH 316) at the
-     lightness a light theme needs, so the portal stays purple in both, deep at night and pale by
-     day. It was an orchid drawn from the K's pink; Brian kept that for the mobile apps'
-     personalisation (docs/design/orchid-palette.md). Each tone kept its lightness and chroma, so
-     every contrast below is the orchid's. */
-  --bg: #e6caf2;
+  /* Paper, but not a blank sheet: a violet, OKLCH hue 298. At the lightness a light theme needs,
+     the dark theme's own hue (316) reads lilac-pink, and Brian wanted violet and no pink at all, so
+     the day turns a little toward blue. The orchid it started as, drawn from the K's pink, is kept
+     for the mobile apps' personalisation (docs/design/orchid-palette.md). */
+  --bg: #dbd1f5;
   --bg-elevated: #ffffff;
-  --bg-inset: #f4e7fa;
-  --bg-hover: #e2c4ef;
-  --border: #d3badd;
-  --border-strong: #a688b2;
+  --bg-inset: #ede8fc;
+  --bg-hover: #d5c9f4;
+  --border: #ccc4e0;
+  --border-strong: #9789b8;
 
-  --text: #211525;
-  --text-muted: #57465e;
-  /* 7.0:1 on a card and 4.69 on the ground - over the 4.5 minimum for body text, and still
-     clearly softer than --text-muted (8.62), so the hierarchy survives. */
-  --text-faint: #65536c;
+  --text: #1c142b;
+  --text-muted: #534a68;
+  /* 6.8:1 on a card and 4.70 on the ground - over the 4.5 minimum for body text, and still
+     clearly softer than --text-muted (8.24), so the hierarchy survives. */
+  --text-faint: #5f5675;
   --text-on-accent: #ffffff;
 
   /* A shade deeper than the brand teal's own text tone, so a link still clears 4.5:1 on the
-     orchid ground (4.88). */
+     violet ground (5.02). */
   --primary: #2f5e5d;
   --primary-strong: #244847;
   --primary-bg: #e2efee;
   --primary-brand: #539392;
 
-  --danger: #9e0e4d;
-  --danger-strong: #800c3f;
-  --danger-bg: #fbe7ee;
+  /* A red, not the crimson it was: on a violet ground a crimson reads as pink. 4.52:1 on the
+     ground, 6.57 on a card. */
+  --danger: #b42318;
+  --danger-strong: #912018;
+  --danger-bg: #fdecea;
 
   --success: #285e51;
   --success-strong: #1f5044;
   --success-bg: #dcefe8;
 
-  /* Darker than it was: on the orchid ground #92620a measured under 4.5:1. */
+  /* Darker than it was: on a tinted ground #92620a measured under 4.5:1 (5.41 now). */
   --warning: #704a06;
   --warning-bg: #faedd3;
 
@@ -68,20 +69,20 @@
   );
 
   /* The header and sidebar are tinted rather than white. Three stacked white
-     planes read as flat; a lighter wash of the ground's orchid separates the chrome
+     planes read as flat; a lighter wash of the ground's violet separates the chrome
      from the content without drawing attention to itself. */
-  --header-bg: #f6d1ea;
-  --nav-bg: #f3e0fa;
+  --header-bg: #e9e2fb;
+  --nav-bg: #ede7fd;
 
   /* The selected section: a real step, not a slab. A solid fill is the loudest thing on the
-     screen and the eye goes there instead of to the content; a deeper orchid, a full-strength
-     pink edge and bold text carry it without shouting. 6.7:1. */
-  --nav-active-bg: #d7aae9;
-  --nav-active-text: #4c1b5d;
-  --nav-active-edge: #D51A65;
+     screen and the eye goes there instead of to the content; a deeper violet, a full-strength
+     violet edge and bold text carry it without shouting. 7.1:1. */
+  --nav-active-bg: #c9b6f6;
+  --nav-active-text: #3f1e6e;
+  --nav-active-edge: #7e35d8;
 
-  /* Behind a drawer or a dialog: the plum of the dark theme, not a neutral grey. */
-  --scrim: rgb(33 21 37 / 0.45);
+  /* Behind a drawer or a dialog: the ground's ink, not a neutral grey. */
+  --scrim: rgb(28 20 43 / 0.45);
   /* A building's margin on the floor plans: one family of greens and blues, a shade per wing. */
   --margin-n: #0e7490;
   --margin-c: #0f766e;
@@ -93,11 +94,14 @@
      a grey base it read as a stain rather than as a colour. The fix was not less of it but
      more: a wash that faint is dirt, and a wash this strong is a light. Mixed in oklab rather
      than srgb, which is what keeps a teal from going grey on its way to transparent. */
-  /* The teal and the green were set against a teal-grey ground. Over the orchid they mix
-     toward a grey, so they come down to where they still read as light of their own colour;
-     the pink, now the ground's own hue, goes up. */
+  /* The teal and the green were set against a teal-grey ground. Over the violet they mix
+     toward a grey, so they come down to where they still read as light of their own colour.
+     The middle light is the ground's own violet by day; at night it stays the K's pink. */
+  --light-mid: #9762ec;
   --wash-strength: 34%;
-  --wash-green: 36%;
+  /* The green is violet's opposite: where the two meet they mix to a grey that reads dusty pink,
+     so by day it is a hint at the corner rather than a light. */
+  --wash-green: 18%;
   --wash-accent: 50%;
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 
@@ -132,7 +136,7 @@
     ),
     radial-gradient(
     64rem 32rem at 49.5% -6%,
-    color-mix(in oklab, var(--brand-pink) var(--wash-accent), transparent) 0%,
+    color-mix(in oklab, var(--light-mid) var(--wash-accent), transparent) 0%,
     transparent 55%
     ),
     radial-gradient(
@@ -147,7 +151,7 @@
     ),
     radial-gradient(
     64rem 32rem at 49.5% 106%,
-    color-mix(in oklab, var(--brand-pink) var(--wash-accent), transparent) 0%,
+    color-mix(in oklab, var(--light-mid) var(--wash-accent), transparent) 0%,
     transparent 55%
     ),
     radial-gradient(
@@ -207,6 +211,7 @@
     --nav-active-bg: #452252;
     --nav-active-text: #f2d9fa;
     --nav-active-edge: #e8578f;
+    --light-mid: var(--brand-pink);
     --scrim: rgb(8 2 6 / 0.6);
     --margin-n: #22d3ee;
     --margin-c: #2dd4bf;
@@ -271,6 +276,7 @@
   --nav-active-bg: #452252;
   --nav-active-text: #f2d9fa;
   --nav-active-edge: #e8578f;
+  --light-mid: var(--brand-pink);
   --scrim: rgb(8 2 6 / 0.6);
   --margin-n: #22d3ee;
   --margin-c: #2dd4bf;
