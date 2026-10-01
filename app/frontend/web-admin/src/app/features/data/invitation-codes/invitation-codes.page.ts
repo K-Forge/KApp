@@ -1,3 +1,4 @@
+import { CopyButtonComponent } from '../../../shared/ui/copy-button/copy-button.component';
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
 import { ChangeDetectionStrategy, Component, ViewChild, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -29,7 +30,7 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
  */
 @Component({
   selector: 'app-invitation-codes-page',
-  imports: [TranslatePipe, LocalDatePipe, DataTableComponent, ApiErrorBannerComponent, ModalComponent, ReactiveFormsModule, PageIntroComponent],
+  imports: [TranslatePipe, LocalDatePipe, DataTableComponent, ApiErrorBannerComponent, ModalComponent, ReactiveFormsModule, PageIntroComponent, CopyButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
@@ -45,7 +46,10 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
         <div class="card issued" role="status">
           <p style="margin:0 0 0.25rem">{{ 'New code — give this to the intake:' | t }}</p>
           <p class="issued-code mono">{{ code }}</p>
-          <button type="button" class="btn btn-sm" (click)="justMinted.set(null)">{{ 'Dismiss' | t }}</button>
+          <div class="row">
+            <app-copy-button [text]="code" [primary]="true" />
+            <button type="button" class="btn btn-sm" (click)="justMinted.set(null)">{{ 'Dismiss' | t }}</button>
+          </div>
         </div>
       }
 
@@ -164,6 +168,18 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
         </div>
       </form>
     </app-modal>
+  `,
+  styles: `
+    .issued {
+      border-color: var(--primary-brand);
+    }
+    .issued-code {
+      margin: 0.25rem 0 0.75rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      user-select: all;
+    }
   `,
 })
 export class InvitationCodesPage {

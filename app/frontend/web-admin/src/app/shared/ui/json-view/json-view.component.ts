@@ -1,17 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
-import { TranslatePipe } from '../../../core/i18n/translate.pipe';
-import { copyText } from '../copy-text';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { CopyButtonComponent } from '../copy-button/copy-button.component';
 
 /** Pretty-printed, monospace, copyable JSON - used for tokens, request bodies and responses alike. */
 @Component({
   selector: 'app-json-view',
-  imports: [TranslatePipe],
+  imports: [CopyButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="json-view">
-      <button type="button" class="btn btn-ghost btn-sm copy-btn" (click)="copy()">
-        {{ copyState() === 'copied' ? ('Copied' | t) : copyState() === 'failed' ? ('Select it and copy it by hand' | t) : ('Copy' | t) }}
-      </button>
+      <app-copy-button class="copy-btn" [text]="pretty()" [ghost]="true" />
       <pre class="mono">{{ pretty() }}</pre>
     </div>
   `,
@@ -42,7 +39,6 @@ import { copyText } from '../copy-text';
 })
 export class JsonViewComponent {
   readonly value = input<unknown>(undefined);
-  readonly copyState = signal<'idle' | 'copied' | 'failed'>('idle');
 
   readonly pretty = computed(() => {
     const value = this.value();
@@ -55,11 +51,4 @@ export class JsonViewComponent {
       return String(value);
     }
   });
-
-  /** Copies what is shown; when the browser lets nothing copy, the button says so instead of looking as if it worked. */
-  async copy(): Promise<void> {
-    const copied = await copyText(this.pretty());
-    this.copyState.set(copied ? 'copied' : 'failed');
-    setTimeout(() => this.copyState.set('idle'), copied ? 1500 : 4000);
-  }
 }

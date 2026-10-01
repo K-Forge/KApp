@@ -17,7 +17,7 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { locale, t } from '../../../core/i18n/i18n.service';
 import { formatDate } from '@angular/common';
 import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
-import { copyText } from '../../../shared/ui/copy-text';
+import { CopyButtonComponent } from '../../../shared/ui/copy-button/copy-button.component';
 import { INVITATION_ROLES, type InvitationRole } from '../invitation-codes/invitation-code.model';
 import { InvitationCodesService } from '../invitation-codes/invitation-codes.service';
 
@@ -30,7 +30,7 @@ const PAGE_SIZE = 20;
  */
 @Component({
   selector: 'app-users-page',
-  imports: [TranslatePipe, LocalDatePipe, ReactiveFormsModule, DataTableComponent, RoleBadgeComponent, ApiErrorBannerComponent, ModalComponent, JsonViewComponent, PageIntroComponent],
+  imports: [TranslatePipe, LocalDatePipe, ReactiveFormsModule, CopyButtonComponent, DataTableComponent, RoleBadgeComponent, ApiErrorBannerComponent, ModalComponent, JsonViewComponent, PageIntroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
@@ -49,9 +49,8 @@ const PAGE_SIZE = 20;
             {{ 'Works once, as {role}, until {date}.' | t: { role: roleLabel(invite.role), date: (invite.expiresAt | localDate) } }}
           </p>
           <div class="row spread">
-            <button type="button" class="btn btn-primary btn-sm" (click)="copyMessage()">
-              {{ copyState() === 'copied' ? ('Copied' | t) : copyState() === 'failed' ? ('Select it and copy it by hand' | t) : ('Copy the message for {name}' | t: { name: invite.name }) }}
-            </button>
+            <app-copy-button [text]="message()" [primary]="true" [label]="'Copy the message for {name}' | t: { name: invite.name }" />
+            <app-copy-button [text]="invite.code" [label]="'Copy only the code' | t" />
             <button type="button" class="btn btn-sm" (click)="invited.set(null)">{{ 'Dismiss' | t }}</button>
           </div>
           <p class="invited-message">{{ message() }}</p>
@@ -249,7 +248,6 @@ export class UsersPage {
   readonly inviteError = signal<ApiError | null>(null);
   /** The invitation just made, shown once so its code can be handed over. */
   readonly invited = signal<{ code: string; name: string; email: string; role: InvitationRole; expiresAt: string } | null>(null);
-  readonly copyState = signal<'idle' | 'copied' | 'failed'>('idle');
   inviteForm = this.blankInvite();
 
   /** What to send the person, ready to paste into an e-mail or a chat. */
@@ -358,7 +356,6 @@ export class UsersPage {
         next: (created) => {
           this.inviting.set(false);
           this.inviteModal?.close();
-          this.copyState.set('idle');
           this.invited.set({ code: created.code, name, email, role: created.role, expiresAt: created.expiresAt ?? expiresAt });
         },
         error: (err: unknown) => {
@@ -366,12 +363,6 @@ export class UsersPage {
           this.inviteError.set(err instanceof AppHttpError ? err.apiError : null);
         },
       });
-  }
-
-  async copyMessage(): Promise<void> {
-    const copied = await copyText(this.message());
-    this.copyState.set(copied ? 'copied' : 'failed');
-    setTimeout(() => this.copyState.set('idle'), copied ? 1500 : 4000);
   }
 
   view(user: UserProfile): void {

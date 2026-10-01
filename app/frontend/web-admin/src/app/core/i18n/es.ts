@@ -848,9 +848,8 @@ export const ES: Record<string, string> = {
   'The person invited creates the account in the app, with their own password. Deactivating takes access away, and can be undone.': 'La persona invitada crea la cuenta en la app, con su propia contraseña. Desactivar quita el acceso y se puede deshacer.',
   'Invitation for {name}': 'Invitación para {name}',
   'Works once, as {role}, until {date}.': 'Sirve una sola vez, como {role}, hasta el {date}.',
-  'Copied': 'Copiado',
-  'Select it and copy it by hand': 'Selecciónelo y cópielo a mano',
   'Copy the message for {name}': 'Copiar el mensaje para {name}',
+  'Copy only the code': 'Copiar solo el código',
   'name or e-mail': 'nombre o correo',
   'All roles': 'Todos los roles',
   'Active': 'Activos',
@@ -994,14 +993,16 @@ export const ES: Record<string, string> = {
   'The server is not answering': 'El servidor no responde',
   'The server is not available': 'El servidor no está disponible',
   'The server took too long': 'El servidor tardó demasiado',
+  // shared/ui/copy-button/copy-button.component.ts
+  'Copied': 'Copiado',
+  'Select it and copy it by hand': 'Selecciónelo y cópielo a mano',
+  'Copy': 'Copiar',
   // shared/ui/data-table/data-table.component.ts
   'Page {value} of {totalPages}': 'Página {value} de {totalPages}',
   '· {totalItems} total': '· {totalItems} en total',
   'Previous': 'Anterior',
   'Next': 'Siguiente',
   'No results.': 'Sin resultados.',
-  // shared/ui/json-view/json-view.component.ts
-  'Copy': 'Copiar',
   // shared/ui/modal/modal.component.ts
   'Close': 'Cerrar',
   // shared/ui/page-intro/page-intro.component.ts

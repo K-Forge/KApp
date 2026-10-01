@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { JsonViewComponent } from './json-view.component';
+import { CopyButtonComponent } from './copy-button.component';
 
-describe('copying what a JSON view shows', () => {
+describe('copying with the copy button', () => {
   const secure = Object.getOwnPropertyDescriptor(window, 'isSecureContext');
   const clipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
 
@@ -13,9 +13,9 @@ describe('copying what a JSON view shows', () => {
     else delete (navigator as { clipboard?: unknown }).clipboard;
   });
 
-  function view(value: unknown) {
-    const fixture = TestBed.createComponent(JsonViewComponent);
-    fixture.componentRef.setInput('value', value);
+  function button(text: string) {
+    const fixture = TestBed.createComponent(CopyButtonComponent);
+    fixture.componentRef.setInput('text', text);
     return fixture.componentInstance;
   }
 
@@ -23,21 +23,21 @@ describe('copying what a JSON view shows', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(window, 'isSecureContext', { value: true, configurable: true });
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
-    const json = view('eyJ.token.itself');
+    const copy = button('eyJ.token.itself');
 
-    await json.copy();
+    await copy.copy();
 
     expect(writeText).toHaveBeenCalledWith('eyJ.token.itself');
-    expect(json.copyState()).toBe('copied');
+    expect(copy.state()).toBe('copied');
   });
 
   it('says it could not copy, over plain http where there is no Clipboard API, rather than looking as if it had', async () => {
     Object.defineProperty(window, 'isSecureContext', { value: false, configurable: true });
-    const json = view({ sub: 'someone' });
+    const copy = button('{ "sub": "someone" }');
 
-    await json.copy();
+    await copy.copy();
 
     // jsdom has no copy command either, so the old way fails too: the button must say so.
-    expect(json.copyState()).toBe('failed');
+    expect(copy.state()).toBe('failed');
   });
 });

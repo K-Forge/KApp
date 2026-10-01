@@ -1,3 +1,4 @@
+import { CopyButtonComponent } from '../../../shared/ui/copy-button/copy-button.component';
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { AppHttpError } from '../../../core/http/api-http-error';
@@ -22,7 +23,7 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
  */
 @Component({
   selector: 'app-visitor-passes-page',
-  imports: [TranslatePipe, LocalDatePipe, DataTableComponent, ApiErrorBannerComponent, PageIntroComponent],
+  imports: [TranslatePipe, LocalDatePipe, DataTableComponent, ApiErrorBannerComponent, PageIntroComponent, CopyButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
@@ -37,7 +38,10 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
       @if (justIssued(); as pass) {
         <div class="card issued" role="status">
           <p style="margin:0 0 0.25rem">{{ 'Read this out to the visitor:' | t }}</p>
-          <p class="issued-code mono">{{ pass.code }}</p>
+          <div class="issued-row">
+            <p class="issued-code mono">{{ pass.code }}</p>
+            <app-copy-button [text]="pass.code" />
+          </div>
           <p class="text-muted" style="margin:0">
             {{ 'Redeemable until {value}. They need an identity document to redeem it.' | t: { value: (pass.redeemableUntil | localDate) } }}
           </p>
@@ -121,7 +125,13 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
   `,
   styles: `
     .issued {
-      border-color: var(--accent);
+      border-color: var(--primary-brand);
+    }
+    .issued-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.25rem 0.75rem;
     }
     .issued-code {
       font-size: 1.75rem;
