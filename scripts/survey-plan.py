@@ -202,18 +202,31 @@ A = 'Carrera 9A'
 setback('a-01', A, T[2], (-0.97, 0.24), 'Tienda K, corner with Cra 9A: to the Cra 9A curb', 'TK')
 length('a-02', A, T[2], T[3], 'Tienda K, its front on Cra 9A', 'TK')
 setback('a-03', A, T[3], (-0.97, 0.1), 'Tienda K, its far corner on Cra 9A', 'TK')
-G = {1: (-63.82, 69.45), 2: (-66.23, 66.00), 3: (-66.24, 45.42)}
-length('a-04', A, T[3], G[1], "From the Tienda K to the casa's garden wall", 'Casa')
+# The casa's front, straight along Cra 9A from its south corner to the north end of its garden
+# wall: its house almost on the sidewalk, then the wall. A brick wall runs from the Tienda K's far
+# corner straight to that south corner, across the end of the Tienda K's forecourt (Street View,
+# 2023), so 40 ends where 41 is taken.
+G = {2: (-66.23, 66.00), 3: (-66.24, 45.42)}
+length('a-04', A, T[3], G[2], "From the Tienda K to the casa's corner, along the brick wall", 'Casa')
 setback('a-05', A, G[2], WEST, 'Garden wall, its south end', 'Casa')
 setback('a-06', A, (-66.23, 56.0), WEST, 'Garden wall, halfway', 'Casa')
 setback('a-07', A, G[3], WEST, 'Garden wall, its north end', 'Casa')
 length('a-08', A, G[2], G[3], 'Garden wall, its whole length on Cra 9A', 'Casa')
+# The exit, as the street shows it: from the pillar that ends the casa's garden wall, an opening
+# about 4 m wide to the guard's booth; behind it, set back inside, the gate; past the booth, the
+# planter in front of the central wing. Where the booth and the gate stand is not measured yet.
 E = {1: (-64.48, 43.59), 2: (-61.63, 36.29)}
+BOOTH = {1: (-62.80, 37.90), 2: (-62.80, 39.50), 3: (-61.30, 39.50)}  # its front's ends, and its back by the gate
+GATE = -61.52  # the gate's line, inside the opening
 length('a-09', A, G[3], E[1], 'From the garden wall to the exit')
-length('a-10', A, E[1], E[2], 'The exit: its width on the street, wall to wall', along=(0, 1), through=(-63.1, 0))
-setback('a-11', A, (-61.52, 40.0), WEST, 'The exit: from the curb to its gate or door, at its middle')
-length('a-12', A, (-61.52, 38.5), (-61.52, 41.5), 'The back door (or gate) in the exit: its width')
-length('a-13', A, (-61.52, 36.30), (-61.52, 38.5), "The back door: from the exit's north wall to the door's nearest edge")
+length('a-10', A, E[1], BOOTH[2], "The exit: its width on the street, from the garden wall's pillar to the guard's booth",
+       along=(0, 1), through=(-63.6, 0))
+setback('a-11', A, (GATE, 40.75), WEST, 'The exit: from the curb to its gate, inside, at its middle')
+length('a-12', A, (GATE, 39.50), (GATE, 42.01), 'The gate, inside the exit: its width')
+length('a-13', A, (GATE, 42.01), (GATE, 43.55), "The gate: from its far edge to the casa's wall")
+length('a-20', A, BOOTH[1], BOOTH[2], "The guard's booth beside the exit: its front on the street")
+setback('a-21', A, (BOOTH[1][0], 38.70), WEST, "The guard's booth: from the curb to its front")
+length('a-22', A, BOOTH[2], BOOTH[3], "The guard's booth: how far it goes in, along its side by the gate")
 setback('a-14', A, E[2], WEST, 'Central wing, its corner beside the exit')
 setback('a-15', A, (-61.63, 26.3), WEST, 'About 10 m past the exit, towards Calle 63')
 setback('a-16', A, (-61.70, 16.3), WEST, 'About 20 m past the exit, towards Calle 63')
@@ -242,7 +255,7 @@ NUMBERED = ['bis-01', 'bis-02', 'bis-03', 'bis-04', 'bis-05', 'bis-06', 'bis-07'
             'c62-04', 'c62-05', 'c62-06', 'c62-07', 'c62-08', 'c62-09', 'a-01', 'a-02', 'a-03', 'a-04', 'a-05',
             'a-06', 'a-07', 'a-08', 'a-09', 'a-10', 'a-11', 'a-12', 'a-13', 'a-14', 'a-15', 'a-16', 'a-17', 'a-18',
             'a-19', 'c63-01', 'c63-02', 'c63-03', 'c63-04', 'c63-05', 'c63-06', 'c63-07', 'c63-08', 'c63-09',
-            'bis-32', 'bis-33', 'bis-34', 'bis-35']
+            'bis-32', 'bis-33', 'bis-34', 'bis-35', 'a-20', 'a-21', 'a-22']
 # The numbers people wrote down on site: a distance taken off the plan leaves its number unused, and a
 # new one is added at the end of this list, never in between.
 for d in PLAN:
@@ -253,11 +266,14 @@ assert len({d['id'] for d in PLAN}) == len(PLAN)
 # stands there and where the tape goes. Only what the imagery shows plainly; its date is in the text.
 HINTS = {
     'bis-19': 'Street View (2025): beside the lime-green panel there is a glass entrance raised on a few steps. Measure from its glass, at street level, past the steps.',
-    'a-04': "Street View (2023): Tienda K stands back behind its brick forecourt, and the casa's porch is almost on the sidewalk; a brick pier joins the two.",
-    'a-05': 'Street View (2023): the south end is the colonial house, with a tile roof and a porch; its white garden wall, with grilles, follows it.',
+    'a-04': "Take it again: the sketch changed here on 1 October. From the Tienda K's far corner, along the brick wall that closes its forecourt, to the casa's corner on the sidewalk, where 41 is taken.",
+    'a-05': "Take it again: the sketch changed here on 1 October. The casa's corner on the sidewalk, where the brick wall from the Tienda K (40) meets it.",
     'a-08': 'Street View (2023): the house, then its white garden wall with grilles and the trees behind, up to a pillar beside the exit.',
-    'a-10': 'Street View (2023): the opening runs from the last pillar of the garden wall to the planter in front of the central wing.',
-    'a-11': 'Street View (2023): the gate stands back in a short passage, behind a planter. Measure to the gate, not to the planter.',
+    'a-10': "Take it again: the sketch changed here on 1 October. From the pillar that ends the casa's garden wall to the guard's booth, on the street.",
+    'a-11': 'Take it again: the sketch changed here on 1 October. The gate stands inside, behind the line of the wall: measure to the gate itself.',
+    'a-12': 'Take it again: the sketch changed here on 1 October. The gate itself, inside the exit, beside the guard\'s booth.',
+    'a-13': "Take it again: the sketch changed here on 1 October. From the gate's far edge to the casa's wall, on the gate's line.",
+    'a-20': "Street View (2023): a small white booth with a window, between the gate and the planter.",
     'a-18': 'Street View (2023): raised planters run along this corner. Measure along the wall behind them.',
     'a-19': 'Street View (2023): raised planters stand between the wall and the sidewalk. Measure from the wall, behind them.',
     'c63-01': 'Street View (2023): the planters wrap round the corner. Measure from the wall, behind them.',

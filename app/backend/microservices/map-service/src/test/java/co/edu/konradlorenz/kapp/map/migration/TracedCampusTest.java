@@ -480,4 +480,36 @@ class TracedCampusTest {
                 List.of(new Point(0, 0), new Point(40, 0), new Point(40, 40), new Point(0, 40)), List.of(),
                 null, null, null, null, placeholder, then, then);
     }
+
+    @Test
+    @DisplayName("the casa is redrawn on its wall where it is still the cadastre's, and left alone where somebody corrected it")
+    void theCasaIsRedrawnOnlyWhereNobodyTouchedIt() {
+        String id = co.edu.konradlorenz.kapp.map.service.GroundService.key("Sede Principal");
+        CampusStructuresDocument now = mongo.findById(id, CampusStructuresDocument.class);
+        Structure seeded = now.structures().stream().filter(s -> V012_CasaOnItsWall.CASA_LOT.equals(s.lot())).findFirst().orElseThrow();
+        // A fresh database gets the seed's casa, on its wall, straight away.
+        assertThat(seeded.ring()).isNotEqualTo(V012_CasaOnItsWall.SEEDED).hasSize(6);
+
+        // One V010 seeded before: redrawn, the version moved on, the other structures kept.
+        List<Structure> cadastre = now.structures().stream()
+                .map(s -> V012_CasaOnItsWall.CASA_LOT.equals(s.lot()) ? new Structure(s.name(), s.floors(), s.basements(), s.lot(), V012_CasaOnItsWall.SEEDED) : s)
+                .toList();
+        mongo.save(new CampusStructuresDocument(id, now.campus(), cadastre, 7, Instant.now()));
+        assertThat(V012_CasaOnItsWall.redraw(mongo, V010_CampusStructures.load(), Instant.now())).isEqualTo(1);
+        CampusStructuresDocument redrawn = mongo.findById(id, CampusStructuresDocument.class);
+        assertThat(redrawn.version()).isEqualTo(8);
+        assertThat(redrawn.structures()).hasSameSizeAs(cadastre);
+        assertThat(redrawn.structures()).contains(seeded);
+
+        // One somebody corrected in the portal: theirs.
+        List<List<Double>> corrected = List.of(List.of(-74.0619, 4.6484), List.of(-74.0618, 4.6485), List.of(-74.0617, 4.6484), List.of(-74.0619, 4.6484));
+        List<Structure> edited = now.structures().stream()
+                .map(s -> V012_CasaOnItsWall.CASA_LOT.equals(s.lot()) ? new Structure(s.name(), s.floors(), s.basements(), s.lot(), corrected) : s)
+                .toList();
+        mongo.save(new CampusStructuresDocument(id, now.campus(), edited, 9, Instant.now()));
+        assertThat(V012_CasaOnItsWall.redraw(mongo, V010_CampusStructures.load(), Instant.now())).isZero();
+        assertThat(mongo.findById(id, CampusStructuresDocument.class).version()).isEqualTo(9);
+
+        mongo.save(now);
+    }
 }
