@@ -5,7 +5,7 @@ import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
 import { ApiErrorBannerComponent } from '../../../shared/ui/api-error-banner/api-error-banner.component';
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
-import { FLOOR_STATUS_LABELS, type Building, type FloorStatus } from '../buildings/building.model';
+import { FLOOR_STATUS_LABELS, floorLabel, type Building, type Floor, type FloorStatus } from '../buildings/building.model';
 import { BuildingsService } from '../buildings/buildings.service';
 import { thumbnail } from '../buildings/building-colors';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
@@ -44,52 +44,71 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
         </div>
       }
 
-      @for (b of rows(); track b.building.code) {
-        <section class="card building">
-          @if (b.thumb; as thumb) {
-            <svg class="thumb" [attr.viewBox]="thumb.viewBox" aria-hidden="true">
-              @for (part of thumb.parts; track $index) {
-                <path [attr.d]="part.d" [attr.fill]="part.fill" [attr.fill-opacity]="part.opacity" [attr.stroke]="part.fill" />
+      <div class="skyline">
+        @for (b of rows(); track b.building.code) {
+          <article class="card bldg">
+            <header class="head">
+              @if (b.thumb; as thumb) {
+                <svg class="thumb" [attr.viewBox]="thumb.viewBox" aria-hidden="true">
+                  @for (part of thumb.parts; track $index) {
+                    <path [attr.d]="part.d" [attr.fill]="part.fill" [attr.fill-opacity]="part.opacity" [attr.stroke]="part.fill" />
+                  }
+                </svg>
+              } @else {
+                <div class="thumb none" aria-hidden="true"></div>
               }
-            </svg>
-          } @else {
-            <div class="thumb thumb-none" aria-hidden="true">{{ b.building.code }}</div>
-          }
-          <div class="who">
-            <h2>{{ b.building.name }}</h2>
-            <div class="facts small">
-              <span class="code">{{ b.building.code }}</span>
-              @if (b.building.address) {
-                <span>{{ b.building.address }}</span>
+              <div class="who">
+                <h2>{{ b.building.name }}</h2>
+                <div class="facts small">
+                  <span class="code">{{ b.building.code }}</span>
+                  @if (b.building.address) {
+                    <span>{{ b.building.address }}</span>
+                  }
+                </div>
+              </div>
+            </header>
+            <p class="aka small">
+              @if (b.nicknames.length) {
+                {{ 'Known as {names}' | t: { names: b.nicknames.join(', ') } }}
+              }
+            </p>
+            <!-- The building cut through: its floors stacked as they stand, the highest on top,
+                 and what is under the street below the line. -->
+            <div class="above" role="group" [attr.aria-label]="'Floors of {name}' | t: { name: b.building.name }">
+              @for (floor of b.above; track floor.code) {
+                <ng-container *ngTemplateOutlet="storey; context: { $implicit: floor, building: b.building.code }" />
               }
             </div>
-            @if (b.nicknames.length) {
-              <div class="text-muted small">{{ 'Known as {names}' | t: { names: b.nicknames.join(', ') } }}</div>
-            }
-          </div>
-          <!-- The floors as a lift's buttons: the highest at the top, each with its mark. -->
-          <nav class="lift" [attr.aria-label]="'Floors of {name}' | t: { name: b.building.name }">
-            @for (floor of b.floors; track floor.code) {
-              <a
-                [class]="'stop ' + statusClass(floor.status)"
-                [routerLink]="['/data/floors', b.building.code, floor.code]"
-                [title]="floor.name + ' · ' + (statusLabels[floor.status ?? 'UNMAPPED'] | t)"
-                [attr.aria-label]="floor.name + ' · ' + (statusLabels[floor.status ?? 'UNMAPPED'] | t)"
-              >
-                <span class="stop-code">{{ floor.code }}</span>
-                <span class="mark" aria-hidden="true">
-                  <ng-container *ngTemplateOutlet="markIcon; context: { $implicit: floor.status ?? 'UNMAPPED' }" />
-                </span>
-              </a>
-            }
-          </nav>
-        </section>
-      } @empty {
-        @if (!loading() && !error()) {
-          <div class="card empty-state"><p>{{ 'No buildings yet. Create one under Buildings first.' | t }}</p></div>
+            <div class="below">
+              <div class="street" aria-hidden="true">{{ 'street' | t }}</div>
+              @for (floor of b.below; track floor.code) {
+                <ng-container *ngTemplateOutlet="storey; context: { $implicit: floor, building: b.building.code }" />
+              }
+            </div>
+          </article>
+        } @empty {
+          @if (!loading() && !error()) {
+            <div class="card empty-state"><p>{{ 'No buildings yet. Create one under Buildings first.' | t }}</p></div>
+          }
         }
-      }
+      </div>
     </div>
+
+    <ng-template #storey let-floor let-building="building">
+      <a
+        [class]="'storey ' + statusClass(floor.status)"
+        [routerLink]="['/data/floors', building, floor.code]"
+        [title]="floor.name + ' · ' + (statusOf(floor) | t)"
+      >
+        <b>{{ floor.code }}</b>
+        @if (named(floor); as name) {
+          <span class="name">{{ name }}</span>
+        }
+        <span class="mark" [attr.aria-label]="statusOf(floor) | t">
+          <ng-container *ngTemplateOutlet="markIcon; context: { $implicit: floor.status ?? 'UNMAPPED' }" />
+        </span>
+      </a>
+    </ng-template>
 
     <ng-template #markIcon let-status>
       @switch (status) {
@@ -110,91 +129,117 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
       display: flex;
       flex-wrap: wrap;
       gap: 0.3rem 1.1rem;
-      color: var(--text);
     }
     .legend-item {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
     }
-    .building {
+    /* Several buildings to a row, each standing on the same street line: the cards share their
+       rows - heading, names, floors above, street and below - so the streets of a row line up
+       whether or not a building has a basement. */
+    .skyline {
       display: grid;
-      grid-template-columns: 5.5rem minmax(0, 1fr) auto;
+      grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr));
       gap: 1rem;
-      align-items: center;
     }
-    @media (max-width: 560px) {
-      .building {
-        grid-template-columns: 4rem minmax(0, 1fr);
-      }
-      .lift {
-        grid-column: 1 / -1;
-      }
+    .bldg {
+      display: grid;
+      grid-row: span 4;
+      grid-template-rows: subgrid;
+      row-gap: 0.5rem;
+    }
+    .head {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
     .thumb {
-      width: 100%;
-      aspect-ratio: 1;
+      flex: none;
+      width: 3.5rem;
+      height: 3.5rem;
     }
     .thumb path {
       stroke-width: 1;
       vector-effect: non-scaling-stroke;
     }
-    .thumb-none {
-      display: grid;
-      place-items: center;
+    .none {
       border: 1px dashed var(--border-strong);
-      border-radius: var(--radius-sm);
-      color: var(--text-muted);
-      font-weight: 700;
+      border-radius: var(--radius-md);
     }
-    .who h2 {
+    .who {
+      min-width: 0;
+    }
+    h2 {
       margin: 0;
-      font-size: 1.05rem;
+      font-size: 1rem;
+      line-height: 1.25;
     }
     .facts {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.2rem 0.6rem;
-      margin-top: 0.2rem;
+      gap: 0.2rem 0.5rem;
+      margin-top: 0.25rem;
       color: var(--text-muted);
     }
     .code {
       padding: 0 0.35rem;
-      border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      background: var(--bg-inset);
-      color: var(--text);
-      font-weight: 600;
+      background: var(--nav-active-bg);
+      color: var(--nav-active-text);
+      font-weight: 700;
     }
-    .lift {
+    .aka {
+      margin: 0;
+      color: var(--text-muted);
+    }
+    .above,
+    .below {
+      display: grid;
+      align-content: end;
+      gap: 3px;
+    }
+    .below {
+      align-content: start;
+    }
+    .storey {
       display: flex;
-      flex-direction: column-reverse;
-      flex-wrap: wrap-reverse;
-      max-height: 15rem;
-      gap: 0.3rem;
-      align-content: flex-end;
-    }
-    .stop {
-      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 0.35rem;
-      min-width: 4.4rem;
-      padding: 0.3rem 0.55rem;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: var(--bg-elevated);
+      gap: 0.5rem;
+      min-height: 2.1rem;
+      padding: 0 0.7rem;
+      border: 1px solid transparent;
+      border-radius: 5px;
       color: var(--text);
       text-decoration: none;
-      font-weight: 700;
       font-size: 0.85rem;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
     }
-    .stop:hover {
-      background: var(--bg-hover);
+    .storey:first-child {
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
+    .storey:hover {
+      transform: translateX(3px);
+      box-shadow: var(--shadow-sm);
       border-color: var(--border-strong);
+    }
+    .name {
+      color: var(--text-muted);
     }
     .mark {
       display: inline-flex;
+      margin-left: auto;
+    }
+    .storey.verified {
+      background: var(--success-bg);
+    }
+    .storey.draft {
+      background: var(--warning-bg);
+    }
+    .storey.unmapped {
+      border: 1px dashed var(--border-strong);
+      background: color-mix(in srgb, var(--bg-elevated) 60%, transparent);
     }
     .verified .mark,
     .mark.verified {
@@ -208,6 +253,23 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
     .mark.unmapped {
       color: var(--text-muted);
     }
+    /* The street: a line the floors stand on, the basements hang under. */
+    .street {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.15rem 0;
+      color: var(--text-faint);
+      font-size: 0.6875rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .street::before,
+    .street::after {
+      content: '';
+      flex: 1;
+      border-top: 2px solid var(--border-strong);
+    }
   `,
 })
 export class FloorsPage {
@@ -220,21 +282,35 @@ export class FloorsPage {
   readonly statuses: FloorStatus[] = ['VERIFIED', 'DRAFT', 'UNMAPPED'];
 
   /**
-   * Each building as a row: seen from above, by its real name with its code beside it, where it
+   * Each building as a card: seen from above, by its real name with its code beside it, where it
    * is, and what people call it - but not again by its own code ("CPC 1" for CPC1), which only
-   * repeated the title.
+   * repeated the title. Its floors stand as a section of it, the highest on top, the basements
+   * under the street.
    */
   readonly rows = computed(() =>
     this.buildings().map((building) => {
       const same = (a: string, b: string) => a.replace(/\s+/g, '').toLowerCase() === b.replace(/\s+/g, '').toLowerCase();
+      const floors = [...building.floors].sort((a, b) => b.level - a.level);
       return {
         building,
         thumb: thumbnail(building),
         nicknames: building.aliases.filter((a) => !same(a, building.code) && !same(a, building.name)),
-        floors: building.floors,
+        above: floors.filter((f) => f.level > 0),
+        below: floors.filter((f) => f.level <= 0),
       };
     }),
   );
+
+  /** How far along a floor is, in words. */
+  statusOf(floor: Floor): string {
+    return this.statusLabels[floor.status ?? 'UNMAPPED'];
+  }
+
+  /** A floor's own name, when it says more than its code: "Terraza", not "Piso 3" beside P3. */
+  named(floor: Floor): string | null {
+    const label = floorLabel(floor);
+    return label === floor.code ? null : floor.name.trim();
+  }
 
   constructor() {
     this.buildingsService.list().subscribe({

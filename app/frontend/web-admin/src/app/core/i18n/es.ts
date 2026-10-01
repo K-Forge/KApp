@@ -383,6 +383,7 @@ export const ES: Record<string, string> = {
   'Loading buildings…': 'Cargando edificios…',
   'What the marks on a floor mean': 'Qué significa cada marca de un piso',
   'Floors of {name}': 'Pisos de {name}',
+  'street': 'calle',
   'No buildings yet. Create one under Buildings first.': 'Aún no hay edificios. Cree uno primero en Edificios.',
   // features/data/floors/inventory-tray.component.ts
   'Spaces not on the grid yet': 'Espacios que aún no están en el plano',
