@@ -73,6 +73,9 @@
      from the content without drawing attention to itself. */
   --header-bg: #e9e2fb;
   --nav-bg: #ede7fd;
+  /* The K's lime green fades on the violet: by day the mark sits on a white tile. */
+  --logo-tile: #ffffff;
+  --logo-tile-edge: #d9d0f2;
 
   /* The selected section: a real step, not a slab. A solid fill is the loudest thing on the
      screen and the eye goes there instead of to the content; a deeper violet, a full-strength
@@ -212,6 +215,8 @@
     --nav-active-text: #f2d9fa;
     --nav-active-edge: #e8578f;
     --light-mid: var(--brand-pink);
+    --logo-tile: transparent;
+    --logo-tile-edge: transparent;
     --scrim: rgb(8 2 6 / 0.6);
     --margin-n: #22d3ee;
     --margin-c: #2dd4bf;
@@ -277,6 +282,8 @@
   --nav-active-text: #f2d9fa;
   --nav-active-edge: #e8578f;
   --light-mid: var(--brand-pink);
+  --logo-tile: transparent;
+  --logo-tile-edge: transparent;
   --scrim: rgb(8 2 6 / 0.6);
   --margin-n: #22d3ee;
   --margin-c: #2dd4bf;
@@ -1023,6 +1030,15 @@ details.help .help-note {
   background: var(--bg-inset);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   font-size: 0.8125rem;
+}
+
+/* The K on the header: by day on a white tile, so its lime green does not fade into the violet;
+   at night the tile is clear and the mark stands on the dark header as it is. */
+.logo-tile {
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--logo-tile);
+  box-shadow: 0 0 0 1px var(--logo-tile-edge);
 }
 
 /* Inside a folded help with a list of its own, such as the survey's "How to measure". */

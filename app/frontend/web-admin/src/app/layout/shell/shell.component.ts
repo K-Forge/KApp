@@ -47,13 +47,23 @@ import { NAV_GROUPS } from '../nav';
             [title]="navShown() ? ('Hide the menu' | t) : ('Show the menu' | t)"
             [attr.aria-label]="navShown() ? ('Hide the menu' | t) : ('Show the menu' | t)"
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+            <!-- A window with its side panel, and which way pressing it moves the panel: clearer than
+                 three lines, which say "menu" without saying it is the panel beside the page. -->
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="16" rx="2.5" />
+              <path d="M9 4v16" />
+              @if (navShown()) {
+                <path d="m16 9-3 3 3 3" />
+              } @else {
+                <path d="m13 9 3 3-3 3" />
+              }
+            </svg>
           </button>
 
           <!-- The API console, not the token screen: the console is where somebody spends the
                session, and the token is one click away from it anyway. -->
           <a class="brand" routerLink="/api-console">
-            <img src="/konrad-logo.png" [alt]="'Fundación Universitaria Konrad Lorenz' | t" width="34" height="34" />
+            <img class="logo-tile" src="/konrad-logo.png" [alt]="'Fundación Universitaria Konrad Lorenz' | t" width="34" height="34" />
             <span class="brand-text">
               <strong>{{ 'KApp' | t }}</strong>
               <span class="brand-sub">{{ 'Admin Portal' | t }}</span>
