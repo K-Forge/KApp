@@ -2,6 +2,7 @@ package co.edu.konradlorenz.kapp.auth.identity;
 
 import co.edu.konradlorenz.kapp.auth.domain.Credential;
 import co.edu.konradlorenz.kapp.auth.domain.CredentialRepository;
+import co.edu.konradlorenz.kapp.auth.error.PasswordChangeRequiredException;
 import co.edu.konradlorenz.kapp.common.error.InvalidCredentialsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.Optional;
 
 /**
@@ -27,6 +29,10 @@ import java.util.Optional;
  * there so clients can route the user to the "resend verification" screen. That is a
  * narrow account oracle, accepted knowingly - it only speaks to someone who already knows
  * the password, which is the harder half.
+ *
+ * <p>A temporary password an administrator issued is the second: also 403, with an issue for
+ * {@code newPassword}, so the client asks for one. It too speaks only to whoever holds the
+ * password. Past its expiry it is just a wrong password.
  */
 @Component
 public class LocalIdentityProvider implements IdentityProviderPort {
@@ -69,14 +75,31 @@ public class LocalIdentityProvider implements IdentityProviderPort {
                     "LocalIdentityProvider only handles password assertions");
         }
 
-        String email = normalise(password.email());
+        Credential credential = verify(password.email(), password.rawPassword());
+        if (credential.mustChangePassword()) {
+            log.info("Sign-in refused for {}: the password is temporary", credential.email());
+            throw new PasswordChangeRequiredException();
+        }
+        return new AuthenticatedIdentity(
+                credential.userId(), credential.email(), credential.roles(),
+                credential.emailVerified());
+    }
+
+    /**
+     * The account this e-mail and password open, checked as sign-in checks them - the same
+     * timing whether or not the address is known, the same answer for a wrong password and a
+     * suspended account - but without refusing a temporary password, which is what replacing
+     * one needs. An expired temporary password is refused here: it proves nothing any more.
+     */
+    public Credential verify(String rawEmail, String rawPassword) {
+        String email = normalise(rawEmail);
         Optional<Credential> found = credentials.findByEmailIgnoreCase(email);
 
         // Always run a BCrypt comparison, even when nothing matched, so the response time
         // does not reveal whether the address is known.
         String hash = found.map(Credential::passwordHash).orElse(DUMMY_HASH);
         boolean passwordMatches =
-                passwordEncoder.matches(password.rawPassword(), hash == null ? DUMMY_HASH : hash);
+                passwordEncoder.matches(rawPassword, hash == null ? DUMMY_HASH : hash);
 
         if (found.isEmpty() || !passwordMatches) {
             // Logged with the reason, returned without it.
@@ -98,10 +121,12 @@ public class LocalIdentityProvider implements IdentityProviderPort {
             log.info("Sign-in refused for {}: status={}", email, credential.status());
             throw new InvalidCredentialsException();
         }
-
-        return new AuthenticatedIdentity(
-                credential.userId(), credential.email(), credential.roles(),
-                credential.emailVerified());
+        if (credential.temporaryPasswordExpired(Instant.now())) {
+            log.info("Sign-in refused for {}: the temporary password expired at {}",
+                    email, credential.temporaryPasswordExpiresAt());
+            throw new InvalidCredentialsException();
+        }
+        return credential;
     }
 
     private static String normalise(String email) {

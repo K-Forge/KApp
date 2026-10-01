@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Auth API
-  version: 0.1.0
+  version: 0.2.0
   summary: Credential and token service for the KApp platform.
   description: |
     Authentication service for KApp, the mobile application of Fundación
@@ -30,9 +30,22 @@ info:
     | Role | Granted by |
     |---|---|
     | `ROLE_GUEST` | Guest registration. May only read the campus map. |
-    | `ROLE_STUDENT` | Institutional registration with a student intake code. |
-    | `ROLE_PROFESSOR` | Institutional registration with a staff invitation code. |
+    | `ROLE_STUDENT` | Institutional registration with a student intake code, or an account an administrator creates. |
+    | `ROLE_PROFESSOR` | Institutional registration with a staff invitation code, or an account an administrator creates. |
     | `ROLE_ADMIN` | Assigned manually by the registrar, never through signup. |
+
+    ## Accounts an administrator creates: temporary passwords
+
+    Until the university's own identity provider is available, an administrator can
+    create an account directly (`POST /auth/admin/accounts`). It is given a
+    **temporary password**, returned once to the administrator to hand over, and
+    valid for seven days. The person cannot use the API with it: `POST /auth/login`
+    answers `403` with an `ApiError` whose `details` name the field `newPassword`,
+    and the client asks for a password of their own and sends both to
+    `POST /auth/password`, which signs them in. A forgotten password is handled the
+    same way: an administrator issues a new temporary one.
+
+    Since 0.2.0. Additive: nothing that worked before changes.
 
     ## Deliberately deferred past the MVP
 
@@ -67,6 +80,10 @@ tags:
     description: Account creation for institutional members.
   - name: Authentication
     description: Credential exchange for access tokens.
+  - name: Accounts
+    description: |
+      Accounts an administrator creates, each with a temporary password the person
+      replaces at first sign-in.
   - name: Verification
     description: E-mail ownership confirmation.
   - name: Discovery
@@ -158,6 +175,11 @@ paths:
         - `403` credentials are valid but the address has not been confirmed
           yet. Clients should route the user to the "resend verification"
           screen.
+        - `403` with an issue for the field `newPassword` in `details`: the
+          password is a temporary one an administrator issued. Clients ask for a
+          new password and send both to `POST /auth/password`.
+        - `401` as well for a temporary password past its expiry: an
+          administrator has to issue a new one.
 
         There is no refresh token. When `expiresIn` elapses the client must
         prompt for credentials again.
@@ -185,6 +207,55 @@ paths:
                 expiresIn: 3600
                 userId: 3f8a1c2e-7b4d-4e5a-9c6f-2d1b8e0a4c73
                 roles: [ROLE_STUDENT]
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /auth/password:
+    post:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: []          # public - no token required
+      operationId: changePassword
+      summary: Replace a password, and sign in with the new one
+      description: |
+        Sets a new password for an account, given the current one, and returns an
+        access token exactly as `POST /auth/login` does. It is how a temporary
+        password an administrator issued is replaced at first sign-in, and it works
+        for any password.
+
+        Public endpoint: no token required. The current password is the proof, and
+        the gateway rate-limits it like login.
+
+        Outcomes:
+
+        - `200` the new password is set and the token is for it.
+        - `400` the new password is under 10 characters, over 72, or the same as the
+          current one.
+        - `401` unknown e-mail, wrong current password, or a temporary password past
+          its expiry. One message for all of them, as with login.
+        - `403` the address has not been confirmed yet.
+      tags: [Authentication]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+            example:
+              email: pepito.perez@konradlorenz.edu.co
+              currentPassword: K7QM-X2RP-94TB
+              newPassword: ExamplePassword123
+      responses:
+        '200':
+          description: Password replaced; signed in with the new one
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -454,6 +525,83 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+
+  /auth/admin/accounts:
+    post:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: [ROLE_ADMIN]
+      operationId: createAccount
+      summary: Create an account with a temporary password
+      description: |
+        Requires `ROLE_ADMIN`. Creates the profile in the User API and the account
+        here, with a temporary password returned once in the response: hand it to
+        the person, who replaces it at first sign-in (`POST /auth/password`). It is
+        valid for seven days.
+
+        - `role` is `ROLE_STUDENT` or `ROLE_PROFESSOR`. `ROLE_ADMIN` is never granted
+          this way, as with invitation codes.
+        - A student needs `studentCode` and `programCode`, as in registration.
+        - `email` must use one of the configured domains, as in registration.
+        - The account may sign in at once: an administrator vouched for it. Its
+          address is still recorded as not verified.
+      tags: [Accounts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRequest'
+            example:
+              email: ana.ruiz@konradlorenz.edu.co
+              firstName: Ana
+              lastName: Ruiz
+              role: ROLE_PROFESSOR
+      responses:
+        '201':
+          description: The account, and its temporary password - shown this once
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemporaryPassword'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /auth/admin/accounts/{userId}/temporary-password:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema: { type: string, maxLength: 64 }
+        description: The account's id, the `sub` of its tokens.
+    post:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: [ROLE_ADMIN]
+      operationId: issueTemporaryPassword
+      summary: Give an account a new temporary password
+      description: |
+        Requires `ROLE_ADMIN`. For a person who forgot their password: the one they
+        had stops working at once, and the new temporary password, returned once
+        here, must be replaced at their next sign-in. Valid for seven days.
+      tags: [Accounts]
+      responses:
+        '200':
+          description: The new temporary password - shown this once
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemporaryPassword'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /auth/visitor-passes/{code}/redeem:
     parameters:
@@ -1082,6 +1230,107 @@ components:
           minLength: 10
           maxLength: 72
           example: ExamplePassword123
+
+    PasswordChangeRequest:
+      type: object
+      required: [email, currentPassword, newPassword]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          description: The account's address.
+          example: pepito.perez@konradlorenz.edu.co
+        currentPassword:
+          type: string
+          format: password
+          minLength: 10
+          maxLength: 72
+          description: The password it has now - a temporary one, or the person's own.
+          example: K7QM-X2RP-94TB
+        newPassword:
+          type: string
+          format: password
+          minLength: 10
+          maxLength: 72
+          description: The password it will have. Must differ from the current one.
+          example: ExamplePassword123
+
+    AccountRequest:
+      type: object
+      description: |
+        An account an administrator creates. `studentCode` and `programCode` are
+        required for a student and ignored for a professor.
+      required: [email, firstName, lastName, role]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          description: The person's address, in one of the configured domains.
+          example: ana.ruiz@konradlorenz.edu.co
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Given names as printed on the identity document.
+          example: Ana
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Family names as printed on the identity document.
+          example: Ruiz
+        role:
+          type: string
+          enum: [ROLE_STUDENT, ROLE_PROFESSOR]
+          description: The role the account receives. Never `ROLE_ADMIN`.
+          example: ROLE_PROFESSOR
+        studentCode:
+          type: string
+          pattern: '^\d{6,20}$'
+          description: University student code. Required for a student.
+          example: '506999999'
+        programCode:
+          type: string
+          pattern: '^\d{1,10}$'
+          description: Academic program code the student is enrolled in. Required for a student.
+          example: '506'
+
+    TemporaryPassword:
+      type: object
+      description: |
+        A temporary password, returned once: it is stored only as a hash. The person
+        replaces it at first sign-in with `POST /auth/password`.
+      required: [userId, email, role, temporaryPassword, expiresAt]
+      properties:
+        userId:
+          type: string
+          maxLength: 64
+          description: The account's id, the `sub` of its tokens.
+          example: 3f8a1c2e-7b4d-4e5a-9c6f-2d1b8e0a4c73
+        email:
+          type: string
+          format: email
+          description: The account's address.
+          example: ana.ruiz@konradlorenz.edu.co
+        role:
+          type: string
+          enum: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+          description: The account's role.
+          example: ROLE_PROFESSOR
+        temporaryPassword:
+          type: string
+          minLength: 14
+          maxLength: 14
+          description: |
+            Three groups of four letters and digits that read out loud without doubt -
+            no 0 or O, no 1 or I - joined by hyphens.
+          example: K7QM-X2RP-94TB
+        expiresAt:
+          type: string
+          format: date-time
+          description: When it stops being accepted. Seven days after it was issued.
 
     TokenResponse:
       type: object

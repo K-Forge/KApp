@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.auth.web;
 
 import co.edu.konradlorenz.kapp.auth.service.AuthService;
+import co.edu.konradlorenz.kapp.auth.service.PasswordService;
 import co.edu.konradlorenz.kapp.auth.service.RegistrationService;
 import co.edu.konradlorenz.kapp.auth.service.VerificationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,13 +37,16 @@ public class AuthController {
     private final AuthService authService;
     private final RegistrationService registrationService;
     private final VerificationService verificationService;
+    private final PasswordService passwordService;
 
     public AuthController(AuthService authService,
                           RegistrationService registrationService,
-                          VerificationService verificationService) {
+                          VerificationService verificationService,
+                          PasswordService passwordService) {
         this.authService = authService;
         this.registrationService = registrationService;
         this.verificationService = verificationService;
+        this.passwordService = passwordService;
     }
 
     @PostMapping("/register")
@@ -57,6 +61,20 @@ public class AuthController {
     @Operation(summary = "Exchange credentials for an access token")
     public TokenResponse login(@Valid @RequestBody LoginRequest request) {
         var issued = authService.login(request.email(), request.password());
+        return new TokenResponse(
+                issued.accessToken(), issued.tokenType(), issued.expiresIn(),
+                issued.userId(), issued.roles());
+    }
+
+    /**
+     * A new password for the current one, and signed in with it: how a temporary password an
+     * administrator issued is replaced at first sign-in. Public, like login - the current
+     * password is the proof - and rate-limited with it at the gateway.
+     */
+    @PostMapping("/password")
+    @Operation(summary = "Replace a password, and sign in with the new one")
+    public TokenResponse changePassword(@Valid @RequestBody PasswordChangeRequest request) {
+        var issued = passwordService.change(request.email(), request.currentPassword(), request.newPassword());
         return new TokenResponse(
                 issued.accessToken(), issued.tokenType(), issued.expiresIn(),
                 issued.userId(), issued.roles());
@@ -97,6 +115,12 @@ public class AuthController {
     public record LoginRequest(
             @NotBlank @Email @Size(max = 100) String email,
             @NotBlank @Size(min = 10, max = 72) String password) {
+    }
+
+    public record PasswordChangeRequest(
+            @NotBlank @Email @Size(max = 100) String email,
+            @NotBlank @Size(min = 10, max = 72) String currentPassword,
+            @NotBlank @Size(min = 10, max = 72) String newPassword) {
     }
 
     public record TokenResponse(

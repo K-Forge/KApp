@@ -65,6 +65,8 @@ public class AuthRateLimitFilter implements WebFilter, Ordered {
 
     private static boolean isCredentialEndpoint(String path) {
         return path.equals("/auth/login")
+                // Replacing a password takes the current one, so it is guessed at like login.
+                || path.equals("/auth/password")
                 || path.equals("/auth/register")
                 || path.equals("/auth/verify/resend")
                 // A visitor pass code IS the credential - there is no account behind it -

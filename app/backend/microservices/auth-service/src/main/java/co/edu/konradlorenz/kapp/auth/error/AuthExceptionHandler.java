@@ -43,4 +43,16 @@ public class AuthExceptionHandler {
                 request.getRequestURI(), List.of());
         return ResponseEntity.status(status).body(body);
     }
+
+    @ExceptionHandler(PasswordChangeRequiredException.class)
+    public ResponseEntity<ApiError> handlePasswordChangeRequired(
+            PasswordChangeRequiredException ex, HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        ApiError body = ApiError.of(status.value(), status.getReasonPhrase(), ex.getMessage(),
+                request.getRequestURI(),
+                List.of(new ApiError.FieldIssue("newPassword",
+                        "Required: the password is temporary. Send it with a new one to POST /auth/password")));
+        return ResponseEntity.status(status).body(body);
+    }
 }

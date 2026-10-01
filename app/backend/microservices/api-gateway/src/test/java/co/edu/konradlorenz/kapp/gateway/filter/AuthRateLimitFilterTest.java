@@ -45,4 +45,19 @@ class AuthRateLimitFilterTest {
                     .isEqualTo(attempt <= 2 ? null : HttpStatus.TOO_MANY_REQUESTS);
         }
     }
+
+    @Test
+    @DisplayName("replacing a password takes the current one, so it is counted like a login")
+    void passwordChangesAreCounted() {
+        AuthRateLimitFilter filter = new AuthRateLimitFilter(1);
+        InetSocketAddress phone = new InetSocketAddress("127.0.0.1", 50000);
+        HttpStatus last = null;
+        for (int attempt = 1; attempt <= 2; attempt++) {
+            MockServerWebExchange exchange = MockServerWebExchange.from(
+                    MockServerHttpRequest.post("/auth/password").remoteAddress(phone).build());
+            filter.filter(exchange, e -> Mono.empty()).block();
+            last = (HttpStatus) exchange.getResponse().getStatusCode();
+        }
+        assertThat(last).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+    }
 }
