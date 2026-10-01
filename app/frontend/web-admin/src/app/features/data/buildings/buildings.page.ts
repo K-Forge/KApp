@@ -21,7 +21,7 @@ import { t } from '../../../core/i18n/i18n.service';
     <div class="stack">
       <app-page-intro
         [title]="'Buildings' | t"
-        [what]="'Each building of a campus, with its wings and floors.' | t"
+        [what]="'Each building of the university, with its address, wings and floors.' | t"
         [can]="[('Create, edit and delete buildings' | t), ('Edit their wings and floors' | t), ('Find one by code or name' | t)]"
         [note]="'A floor, a wing or a building that still has spaces cannot be removed.' | t"
       >
@@ -33,10 +33,6 @@ import { t } from '../../../core/i18n/i18n.service';
             <label for="q">{{ 'Search' | t }}</label>
             <input id="q" type="text" [placeholder]="'code, name or other name' | t" (input)="onQueryInput($event)" />
           </div>
-          <div class="field" style="margin-bottom: 0; flex: 1 1 14rem">
-            <label for="campus">{{ 'Campus' | t }}</label>
-            <input id="campus" type="text" [placeholder]="'filter by campus' | t" (input)="onCampusInput($event)" />
-          </div>
           <button type="button" class="btn btn-primary work-create" (click)="openCreate()">{{ 'New building' | t }}</button>
         </div>
 
@@ -47,7 +43,7 @@ import { t } from '../../../core/i18n/i18n.service';
             <tr>
               <th>{{ 'Code' | t }}</th>
               <th>{{ 'Name' | t }}</th>
-              <th>{{ 'Campus' | t }}</th>
+              <th>{{ 'Address' | t }}</th>
               <th>{{ 'Wings' | t }}</th>
               <th>{{ 'Floors' | t }}</th>
               <th></th>
@@ -63,7 +59,7 @@ import { t } from '../../../core/i18n/i18n.service';
                     <div class="text-faint">{{ building.aliases.join(' · ') }}</div>
                   }
                 </td>
-                <td>{{ building.campus }}</td>
+                <td class="text-muted">{{ building.address || '—' }}</td>
                 <td class="text-muted">{{ wingNames(building) }}</td>
                 <td style="min-width: 10rem">
                   <div class="row" style="flex-wrap: wrap; gap: 0.25rem">
@@ -118,7 +114,6 @@ export class BuildingsPage {
 
   @ViewChild('formModal') private formModal?: ModalComponent;
 
-  private campus = '';
   private query = '';
   private debounceHandle?: ReturnType<typeof setTimeout>;
 
@@ -129,7 +124,7 @@ export class BuildingsPage {
   private fetch(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.buildingsService.list(this.campus.trim() || undefined, this.query.trim() || undefined).subscribe({
+    this.buildingsService.list(undefined, this.query.trim() || undefined).subscribe({
       next: (buildings) => {
         this.buildings.set(buildings);
         this.loading.set(false);
@@ -139,11 +134,6 @@ export class BuildingsPage {
         this.error.set(err instanceof AppHttpError ? err.apiError : null);
       },
     });
-  }
-
-  onCampusInput(event: Event): void {
-    this.campus = (event.target as HTMLInputElement).value;
-    this.fetchSoon();
   }
 
   onQueryInput(event: Event): void {

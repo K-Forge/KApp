@@ -70,7 +70,13 @@ const ROOMS_FROM = 4;
         [what]="'The campus from above, every building in its place and to scale.' | t"
         [can]="[('See where each building is' | t), ('Tell its wings apart' | t), ('Zoom in to see a ground floor’s rooms' | t), ('Open a building’s floors' | t)]"
         [note]="'North is up. Streets and blocks come from the city’s own map.' | t"
-      />
+      >
+        @if (mapped().length) {
+          <span actions class="badge badge-neutral">
+            {{ mapped().length === 1 ? ('1 building on the map' | t) : ('{n} buildings on the map' | t: { n: mapped().length }) }}
+          </span>
+        }
+      </app-page-intro>
 
       <app-api-error-banner [error]="error()" />
 
@@ -82,13 +88,6 @@ const ROOMS_FROM = 4;
         </div>
       } @else {
         <section class="card map-card">
-          <div class="toolbar">
-            <span class="eyebrow">{{ 'Campus' | t }}</span>
-            <strong class="campus-name">{{ campusName() }}</strong>
-            <span class="text-muted small">
-              {{ mapped().length === 1 ? ('1 building on the map' | t) : ('{n} buildings on the map' | t: { n: mapped().length }) }}
-            </span>
-          </div>
           <div class="scroller" #scroller (appPinchZoom)="zoomAt($event)">
             @if (drawn(); as m) {
               <svg
@@ -211,9 +210,6 @@ const ROOMS_FROM = 4;
     .map-card {
       padding: 0.75rem;
     }
-    .toolbar {
-      margin-bottom: 0.5rem;
-    }
     .scroller {
       overflow: auto;
       /* One size at any zoom: the map fills it, and never leaves a gap beside it. */
@@ -331,23 +327,6 @@ const ROOMS_FROM = 4;
       display: grid;
       gap: 0.25rem;
     }
-    .toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: 0.2rem 0.6rem;
-    }
-    .eyebrow {
-      width: 100%;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-    .campus-name {
-      font-size: 1.15rem;
-    }
     .tiles {
       list-style: none;
       margin: 0.5rem 0 0;
@@ -427,8 +406,6 @@ export class CampusMapPage {
   readonly loading = signal(true);
   readonly error = signal<ApiError | null>(null);
   readonly campus = signal('Sede Principal');
-  /** The campus by its own name: "Principal" under "Campus", not "Campus · Sede Principal". */
-  readonly campusName = computed(() => this.campus().replace(/^sede\s+/i, ''));
   readonly ground = signal<Ground | null>(null);
   readonly all = signal<Building[]>([]);
   readonly details = signal<Map<string, FloorDetail>>(new Map());

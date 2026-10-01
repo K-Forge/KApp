@@ -98,8 +98,9 @@ function wingGroup(wing?: Partial<Wing>): WingForm {
       </div>
 
       <div class="field" [class.invalid]="invalid('campus')">
-        <label for="b-campus">{{ 'Campus' | t }}</label>
+        <label for="b-campus">{{ 'Map it is drawn on' | t }}</label>
         <input id="b-campus" type="text" formControlName="campus" />
+        <span class="hint">{{ 'The buildings drawn together on one map share this name. All of the university’s are on “Sede Principal”.' | t }}</span>
         @if (invalid('campus')) {
           <span class="error">{{ 'Required, 1-120 characters.' | t }}</span>
         }
@@ -283,7 +284,8 @@ export class BuildingFormComponent {
         nonNullable: true,
         validators: [Validators.required, Validators.minLength(1), Validators.maxLength(120)],
       }),
-      campus: new FormControl(building?.campus ?? '', {
+      // The one map there is; a building typed onto another would be drawn on a map of its own.
+      campus: new FormControl(building?.campus ?? 'Sede Principal', {
         nonNullable: true,
         validators: [Validators.required, Validators.minLength(1), Validators.maxLength(120)],
       }),
