@@ -18,7 +18,7 @@ import { locale, t } from '../../../core/i18n/i18n.service';
 import { formatDate } from '@angular/common';
 import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
 import { CopyButtonComponent } from '../../../shared/ui/copy-button/copy-button.component';
-import { ACCOUNT_ROLES, AccountsService, type AccountRole, type TemporaryPassword } from './accounts.service';
+import { ACCOUNT_ROLES, AccountsService, programOf, type AccountRole, type TemporaryPassword } from './accounts.service';
 
 const PAGE_SIZE = 20;
 
@@ -135,6 +135,11 @@ const PAGE_SIZE = 20;
                     <button type="button" class="btn btn-sm" [disabled]="updatingId() === user.id" (click)="newTemporaryPassword(user)">
                       {{ 'Temporary password' | t }}
                     </button>
+                    @if (user.role !== 'ROLE_ADMIN') {
+                      <button type="button" class="btn btn-sm btn-danger" [disabled]="updatingId() === user.id" (click)="deleteAccount(user)">
+                        {{ 'Delete' | t }}
+                      </button>
+                    }
                   } @else {
                     <span class="text-muted" style="font-size: 0.75rem">{{ 'you' | t }}</span>
                   }
@@ -187,21 +192,14 @@ const PAGE_SIZE = 20;
           </select>
         </div>
         @if (createForm.controls.role.value === 'ROLE_STUDENT') {
-          <div class="row spread">
-            <div class="field" style="flex: 1 1 10rem" [class.invalid]="invalid('studentCode')">
-              <label for="acc-code">{{ 'Student code' | t }}</label>
-              <input id="acc-code" type="text" inputmode="numeric" formControlName="studentCode" autocomplete="off" />
-              @if (invalid('studentCode')) {
-                <span class="error">{{ '6 to 20 digits.' | t }}</span>
-              }
-            </div>
-            <div class="field" style="flex: 1 1 8rem" [class.invalid]="invalid('programCode')">
-              <label for="acc-program">{{ 'Program code' | t }}</label>
-              <input id="acc-program" type="text" inputmode="numeric" formControlName="programCode" placeholder="506" autocomplete="off" />
-              @if (invalid('programCode')) {
-                <span class="error">{{ 'Up to 10 digits.' | t }}</span>
-              }
-            </div>
+          <div class="field" [class.invalid]="invalid('studentCode')">
+            <label for="acc-code">{{ 'Student code' | t }}</label>
+            <input id="acc-code" type="text" inputmode="numeric" formControlName="studentCode" autocomplete="off" />
+            @if (invalid('studentCode')) {
+              <span class="error">{{ '6 to 20 digits.' | t }}</span>
+            } @else if (program(); as code) {
+              <span class="hint">{{ 'Program {code}, from the first three digits.' | t: { code } }}</span>
+            }
           </div>
         }
         <div class="row">
@@ -351,11 +349,15 @@ export class UsersPage {
       email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email, Validators.maxLength(100)] }),
       role: new FormControl<AccountRole>('ROLE_PROFESSOR', { nonNullable: true }),
       studentCode: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^\d{6,20}$/)] }),
-      programCode: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^\d{1,10}$/)] }),
     });
   }
 
-  invalid(name: 'firstName' | 'lastName' | 'email' | 'studentCode' | 'programCode'): boolean {
+  /** The program the student code belongs to, shown under it: the server reads it the same way. */
+  program(): string {
+    return programOf(this.createForm.controls.studentCode.value);
+  }
+
+  invalid(name: 'firstName' | 'lastName' | 'email' | 'studentCode'): boolean {
     const control = this.createForm.controls[name];
     return control.invalid && control.touched;
   }
@@ -373,9 +375,8 @@ export class UsersPage {
   createAccount(): void {
     const raw = this.createForm.getRawValue();
     const student = raw.role === 'ROLE_STUDENT';
-    if (student && (!raw.studentCode.trim() || !raw.programCode.trim())) {
-      this.createForm.controls.studentCode.setErrors(raw.studentCode.trim() ? null : { required: true });
-      this.createForm.controls.programCode.setErrors(raw.programCode.trim() ? null : { required: true });
+    if (student && !raw.studentCode.trim()) {
+      this.createForm.controls.studentCode.setErrors({ required: true });
     }
     if (this.createForm.invalid) {
       this.createForm.markAllAsTouched();
@@ -390,7 +391,7 @@ export class UsersPage {
         firstName: raw.firstName.trim(),
         lastName: raw.lastName.trim(),
         role: raw.role,
-        ...(student ? { studentCode: raw.studentCode.trim(), programCode: raw.programCode.trim() } : {}),
+        ...(student ? { studentCode: raw.studentCode.trim() } : {}),
       })
       .subscribe({
         next: (password) => {
@@ -404,6 +405,24 @@ export class UsersPage {
           this.createError.set(err instanceof AppHttpError ? err.apiError : null);
         },
       });
+  }
+
+  /** The account and its profile, for good: the person can no longer sign in, and leaves the list. */
+  deleteAccount(user: UserProfile): void {
+    if (!window.confirm(t('Delete the account of {email} for good? Their profile goes with it, and it cannot be undone. Deactivating keeps it.', { email: user.email }))) {
+      return;
+    }
+    this.updatingId.set(user.id);
+    this.accounts.delete(user.id).subscribe({
+      next: () => {
+        this.updatingId.set(null);
+        this.refresh.update((n) => n + 1);
+      },
+      error: (err: unknown) => {
+        this.updatingId.set(null);
+        this.error.set(err instanceof AppHttpError ? err.apiError : null);
+      },
+    });
   }
 
   /** For somebody who forgot their password: the one they had stops working at once. */

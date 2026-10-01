@@ -34,6 +34,7 @@ describe('UsersPage', () => {
   });
   const create = vi.fn((request: AccountRequest) => of(issued(request.email, request.role)));
   const issueTemporaryPassword = vi.fn(() => of(issued('pepita@kforge.dev', 'ROLE_STUDENT')));
+  const deleteAccount = vi.fn(() => of(undefined));
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -45,7 +46,7 @@ describe('UsersPage', () => {
           provide: TokenStore,
           useValue: { decoded: () => ({ claims: { sub: 'me' } }) },
         },
-        { provide: AccountsService, useValue: { create, issueTemporaryPassword } },
+        { provide: AccountsService, useValue: { create, issueTemporaryPassword, delete: deleteAccount } },
       ],
     }).compileComponents();
     page = TestBed.createComponent(UsersPage).componentInstance;
@@ -62,7 +63,7 @@ describe('UsersPage', () => {
   });
 
   it('creates a professor account and shows its temporary password, with the message to send', () => {
-    page.createForm.setValue({ firstName: ' Ana ', lastName: 'Ruiz', email: 'ana.ruiz@konradlorenz.edu.co', role: 'ROLE_PROFESSOR', studentCode: '', programCode: '' });
+    page.createForm.setValue({ firstName: ' Ana ', lastName: 'Ruiz', email: 'ana.ruiz@konradlorenz.edu.co', role: 'ROLE_PROFESSOR', studentCode: '' });
 
     page.createAccount();
 
@@ -72,17 +73,19 @@ describe('UsersPage', () => {
     expect(page.message()).toContain('ana.ruiz@konradlorenz.edu.co');
   });
 
-  it('asks a student account for its two codes before creating it', () => {
+  it('asks a student account for its code before creating it, and reads its program from it', () => {
     create.mockClear();
-    page.createForm.setValue({ firstName: 'Pepito', lastName: 'Perez', email: 'pepito@konradlorenz.edu.co', role: 'ROLE_STUDENT', studentCode: '', programCode: '' });
+    page.createForm.setValue({ firstName: 'Pepito', lastName: 'Perez', email: 'pepito@konradlorenz.edu.co', role: 'ROLE_STUDENT', studentCode: '' });
 
     page.createAccount();
     expect(create).not.toHaveBeenCalled();
     expect(page.invalid('studentCode')).toBe(true);
 
-    page.createForm.patchValue({ studentCode: '506999999', programCode: '506' });
+    page.createForm.patchValue({ studentCode: '506232730' });
+    // The program is the code's first three digits: shown, and left to the server to read the same way.
+    expect(page.program()).toBe('506');
     page.createAccount();
-    expect(create.mock.calls.at(-1)![0]).toMatchObject({ role: 'ROLE_STUDENT', studentCode: '506999999', programCode: '506' });
+    expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'pepito@konradlorenz.edu.co', firstName: 'Pepito', lastName: 'Perez', role: 'ROLE_STUDENT', studentCode: '506232730' });
   });
 
   it('gives somebody else a new temporary password once it is confirmed', () => {
@@ -90,5 +93,15 @@ describe('UsersPage', () => {
     page.newTemporaryPassword(profile('someone-else'));
     expect(issueTemporaryPassword).toHaveBeenCalledWith('someone-else');
     expect(page.issued()).toMatchObject({ created: false });
+  });
+
+  it('deletes the account of somebody else once it is confirmed, and asks before it', () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    page.deleteAccount(profile('someone-else'));
+    expect(deleteAccount).not.toHaveBeenCalled();
+
+    confirm.mockReturnValue(true);
+    page.deleteAccount(profile('someone-else'));
+    expect(deleteAccount).toHaveBeenCalledWith('someone-else');
   });
 });

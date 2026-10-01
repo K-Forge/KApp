@@ -25,6 +25,11 @@ export function asksForNewPassword(error: ApiError | null): boolean {
   return error?.status === 403 && (error.details ?? []).some((issue) => issue.field === 'newPassword');
 }
 
+/** The server's 403 for an account this portal does not take: it names `allowedRoles`. */
+export function notForThisPortal(error: ApiError | null): boolean {
+  return error?.status === 403 && (error.details ?? []).some((issue) => issue.field === 'allowedRoles');
+}
+
 @Component({
   selector: 'app-login-page',
   imports: [TranslatePipe, ReactiveFormsModule, ApiErrorBannerComponent],
@@ -50,10 +55,12 @@ export function asksForNewPassword(error: ApiError | null): boolean {
           </div>
         }
 
-        @if (refusedAsNonAdmin()) {
+        @if (refusedAsNonAdmin() || notAdmin()) {
           <div class="card api-error" role="alert">
             <strong>{{ 'That account is not an administrator.' | t }}</strong>
-            <p style="margin:0.35rem 0 0">{{ 'The sign-in worked; this portal is admin-only.' | t }}</p>
+            <p style="margin:0.35rem 0 0">
+              {{ notAdmin() ? ('The password is right, but this portal is only for administrators: students and professors sign in in the KApp app. Nothing about the account changed.' | t) : ('The sign-in worked; this portal is admin-only.' | t) }}
+            </p>
           </div>
         }
 
@@ -251,6 +258,8 @@ export class LoginPage {
 
   /** True once login said the password is temporary: the form asks for the person's own. */
   readonly choosing = signal(false);
+  /** The server refused the account here: it is not an administrator. Nothing about it changed. */
+  readonly notAdmin = signal(false);
   readonly submitting = signal(false);
   readonly error = signal<ApiError | null>(null);
   readonly baseUrl = this.config.baseUrl;
@@ -279,6 +288,7 @@ export class LoginPage {
 
     this.submitting.set(true);
     this.error.set(null);
+    this.notAdmin.set(false);
     const { email, password } = this.form.getRawValue();
 
     this.auth.login(email, password).subscribe({
@@ -286,6 +296,10 @@ export class LoginPage {
       error: (err: unknown) => {
         this.submitting.set(false);
         const apiError = err instanceof AppHttpError ? err.apiError : null;
+        if (notForThisPortal(apiError)) {
+          this.notAdmin.set(true);
+          return;
+        }
         if (asksForNewPassword(apiError)) {
           this.newPassword.reset();
           this.choosing.set(true);
@@ -309,7 +323,13 @@ export class LoginPage {
       next: () => this.signedIn(),
       error: (err: unknown) => {
         this.submitting.set(false);
-        this.error.set(err instanceof AppHttpError ? err.apiError : null);
+        const apiError = err instanceof AppHttpError ? err.apiError : null;
+        if (notForThisPortal(apiError)) {
+          this.backToSignIn();
+          this.notAdmin.set(true);
+          return;
+        }
+        this.error.set(apiError);
       },
     });
   }

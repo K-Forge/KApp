@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AuthService } from '../../core/auth/auth.service';
 import { AppHttpError } from '../../core/http/api-http-error';
 import type { ApiError } from '../../core/http/api-error.model';
-import { LoginPage, asksForNewPassword } from './login.page';
+import { LoginPage, asksForNewPassword, notForThisPortal } from './login.page';
 
 const temporary: ApiError = {
   timestamp: '2026-10-01T15:00:00Z',
@@ -45,5 +45,26 @@ describe('signing in with a temporary password', () => {
     page.newPassword.setValue({ password: 'MyOwnPassword2026', repeat: 'MyOwnPassword2026' });
     page.choose();
     expect(changePassword).toHaveBeenCalledWith('ana.ruiz@konradlorenz.edu.co', 'K7QM-X2RP-94TB', 'MyOwnPassword2026');
+  });
+
+  it('stops at sign-in for an account that is not an administrator, temporary password or not', () => {
+    const refused: ApiError = { ...temporary, message: 'This account cannot sign in here', details: [{ field: 'allowedRoles', issue: 'The account has none of these roles. Nothing was changed' }] };
+    expect(notForThisPortal(refused)).toBe(true);
+    expect(notForThisPortal(temporary)).toBe(false);
+
+    const login = vi.fn(() => throwError(() => new AppHttpError(refused)));
+    const changePassword = vi.fn();
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [LoginPage],
+      providers: [provideRouter([{ path: '**', children: [] }]), { provide: AuthService, useValue: { login, changePassword } }],
+    });
+    const page = TestBed.createComponent(LoginPage).componentInstance;
+    page.form.setValue({ email: 'pepe.veras@konradlorenz.edu.co', password: 'K7QM-X2RP-94TB' });
+    page.submit();
+
+    expect(page.notAdmin()).toBe(true);
+    expect(page.choosing()).toBe(false);
+    expect(changePassword).not.toHaveBeenCalled();
   });
 });

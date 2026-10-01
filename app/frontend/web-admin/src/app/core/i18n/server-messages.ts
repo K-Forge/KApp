@@ -62,9 +62,14 @@ export const SERVER_MESSAGES = [
   /* i18n */ 'An account can be created as a student or a professor',
   /* i18n */ 'ROLE_STUDENT or ROLE_PROFESSOR',
   /* i18n */ 'must be ROLE_STUDENT or ROLE_PROFESSOR',
-  /* i18n */ 'A student account requires studentCode and programCode',
   /* i18n */ 'Required for a student',
   /* i18n */ 'This account signs in through the university, not with a password',
+  /* i18n */ 'This account cannot sign in here',
+  /* i18n */ 'The account has none of these roles. Nothing was changed',
+  /* i18n */ 'A student account requires studentCode',
+  /* i18n */ 'You cannot delete your own account',
+  /* i18n */ "An administrator's account is not deleted from here",
+  /* i18n */ 'The account was removed, but not yet its profile. Delete it again in a moment.',
 ];
 
 /** A service's message in the portal's language, when the portal knows it. */

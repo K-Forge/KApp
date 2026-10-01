@@ -13,6 +13,9 @@ import { TokenStore } from './token.store';
  * attach, and it is also where a bad base URL first becomes visible, so its errors go through
  * the same AppHttpError/ApiError path as everything else rather than a special case.
  */
+/** Who may sign in to this portal. Later, some administrative staff too. */
+export const PORTAL_ROLES = ['ROLE_ADMIN'];
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -21,7 +24,9 @@ export class AuthService {
   private readonly router = inject(Router);
 
   login(email: string, password: string): Observable<TokenResponse> {
-    return this.http.post<TokenResponse>(`${this.config.baseUrl()}/auth/login`, { email, password }).pipe(
+    // The portal is for administrators: the server refuses any other account here, before it
+    // offers to replace a temporary password - a student's is replaced in the app, not here.
+    return this.http.post<TokenResponse>(`${this.config.baseUrl()}/auth/login`, { email, password, allowedRoles: PORTAL_ROLES }).pipe(
       tap((response) => this.tokenStore.set(response.accessToken)),
       catchError((err) => throwError(() => new AppHttpError(parseApiError(err)))),
     );
@@ -32,7 +37,9 @@ export class AuthService {
    * answers as login does, so the session starts with the new password.
    */
   changePassword(email: string, currentPassword: string, newPassword: string): Observable<TokenResponse> {
-    return this.http.post<TokenResponse>(`${this.config.baseUrl()}/auth/password`, { email, currentPassword, newPassword }).pipe(
+    return this.http
+      .post<TokenResponse>(`${this.config.baseUrl()}/auth/password`, { email, currentPassword, newPassword, allowedRoles: PORTAL_ROLES })
+      .pipe(
       tap((response) => this.tokenStore.set(response.accessToken)),
       catchError((err) => throwError(() => new AppHttpError(parseApiError(err)))),
     );

@@ -13,7 +13,14 @@ export interface AccountRequest {
   lastName: string;
   role: AccountRole;
   studentCode?: string;
+  /** Left out, the server reads it from the student code's first three digits. */
   programCode?: string;
+}
+
+/** The program a student code belongs to: its first three digits, 506232730 is a 506. */
+export function programOf(studentCode: string): string {
+  const code = studentCode.trim();
+  return /^\d{6,20}$/.test(code) ? code.slice(0, 3) : '';
 }
 
 /** Mirrors TemporaryPassword: the only answer the password appears in, since only its hash is kept. */
@@ -32,6 +39,11 @@ export class AccountsService {
 
   create(request: AccountRequest): Observable<TemporaryPassword> {
     return this.api.post<TemporaryPassword>('/auth/admin/accounts', request);
+  }
+
+  /** The account and its profile, gone. Never an administrator's, never one's own: the server refuses. */
+  delete(userId: string): Observable<void> {
+    return this.api.delete(`/auth/admin/accounts/${encodeURIComponent(userId)}`);
   }
 
   /** A new temporary password for somebody who forgot theirs: the one they had stops working. */
