@@ -52,6 +52,8 @@ somebody switches them on, on the host (an SSH session from a phone will do):
 kapp extras on       # checks the host has room, pulls them, starts them, waits until they answer
 kapp extras off      # stops them; the map, the portal and signing in keep running
 kapp status          # what runs, what each takes, and how much the host has left
+kapp stop            # the whole server down, and it stays down (the agent leaves it alone)
+kapp start           # the map's five up again, and the extras if they were on
 ```
 
 - `on` refuses when the host has under ~950 MB available: the two may take up to ~550 MB, and

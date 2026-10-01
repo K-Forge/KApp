@@ -3,6 +3,8 @@
 # install.sh puts it in /usr/local/bin/kapp.
 #
 #   kapp status          what runs, how much each takes, and how much the host has left
+#   kapp stop            stop the whole server, the map's five and the extras; it stays stopped
+#   kapp start           start the map's five again, and the extras if they were on
 #   kapp extras on       start users and the semaphore (users, programs, pensums), if there is room
 #   kapp extras off      stop them again
 #   kapp extras          whether they are on
@@ -33,6 +35,7 @@ status() {
 }
 
 extras_on() {
+  [[ -e .stopped ]] && { echo "The server is stopped: 'kapp start' first." >&2; exit 1; }
   for key in MONGO_USER_URI MONGO_SEMAPHORE_URI; do
     grep -q "^$key=." .env || { echo "$key is missing in /opt/kapp/.env: run kapp-dev.sh install from the Mac" >&2; exit 1; }
   done
@@ -62,6 +65,21 @@ extras_on() {
   echo "Still starting; 'kapp status' shows how they are doing."
 }
 
+stop_all() {
+  # The agent leaves a stopped server alone, so it does not start it again two minutes later.
+  touch .stopped
+  COMPOSE_PROFILES=extras docker compose stop
+  echo "Stopped: the whole server is down until 'kapp start'. The host's other work is untouched."
+}
+
+start_all() {
+  rm -f .stopped
+  local profiles=''
+  is_on && profiles=extras
+  COMPOSE_PROFILES=$profiles docker compose up -d
+  echo "Started: the map's five$(is_on && echo ' and the extras'). The gateway answers in about a minute."
+}
+
 extras_off() {
   rm -f .extras .extras-auto-off
   COMPOSE_PROFILES=extras docker compose rm -sf "${EXTRAS[@]}" >/dev/null 2>&1 || true
@@ -70,10 +88,12 @@ extras_off() {
 
 case "${1:-status} ${2:-}" in
   "status "*) status ;;
+  "stop "*) stop_all ;;
+  "start "*) start_all ;;
   "extras on") extras_on ;;
   "extras off") extras_off ;;
   "extras "|"extras status") echo "extras: $(is_on && echo on || echo off)   available on the host: $(available_mb) MB" ;;
   *)
-    sed -n '2p;4,9p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2p;4,11p' "$0" | sed 's/^# \{0,1\}//'
     exit 2 ;;
 esac
