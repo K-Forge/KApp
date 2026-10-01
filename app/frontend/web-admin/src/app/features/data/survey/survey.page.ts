@@ -241,8 +241,6 @@ const CLOSEST = 4;
     .how p { margin: 0.35rem 0; }
     .how ul { margin: 0.35rem 0; padding-left: 1.2rem; }
     .how ul.keys { list-style: none; padding: 0; display: grid; gap: 0.2rem; }
-    .setback-key { color: #e8590c; }
-    .length-key { color: #1c7ed6; }
     /* The sketch, what is being typed and the list, all three in view: stacked on a phone; on an
        upright tablet the sketch across the top and the other two side by side; on a screen lying
        down, three columns as tall as the screen, each scrolling on its own. */
@@ -270,12 +268,11 @@ const CLOSEST = 4;
       }
       .sketch-card { display: flex; flex-direction: column; min-height: 0; }
       .sketch { flex: 1; height: auto; min-height: 0; }
-      .entry, .list { max-height: none; min-height: 0; overflow: auto; }
+      .entry, .list { max-height: none; min-height: 0; }
     }
-    .sketch svg { width: 100%; height: 100%; display: block; }
+    .sketch svg { width: 100%; height: 100%; display: block; touch-action: pan-y; }
     .gesture-hint { margin-left: auto; font-size: 0.75rem; opacity: 0.8; }
     /* The whole block lets a finger scroll the page past it; zoomed in, a finger moves the sketch. */
-    .sketch svg { touch-action: pan-y; }
     .sketch svg.zoomed { touch-action: none; cursor: grab; }
     .key { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 1rem; padding: 0.4rem 0.3rem 0.1rem; color: var(--text-muted); }
     .swatch { display: inline-block; width: 1.1rem; height: 3px; margin-right: 0.4rem; vertical-align: middle; background: var(--c); }
@@ -294,12 +291,11 @@ const CLOSEST = 4;
     g line.ext { stroke-width: 1; stroke-dasharray: 3 3; }
     g .end, g .dot { fill: currentColor; }
     g text { fill: #fff; font-weight: 700; }
-    .setback { color: #e8590c; --c: #e8590c; }
-    .length { color: #1c7ed6; --c: #1c7ed6; }
+    .setback, .setback-key { color: #e8590c; --c: #e8590c; }
+    .length, .length-key { color: #1c7ed6; --c: #1c7ed6; }
     .done { color: #2f9e44; --c: #2f9e44; }
     /* Taken, but to take again: its own colour, apart from pending and taken. */
-    .review { color: #ae3ec9; --c: #ae3ec9; }
-    .review-key { color: #ae3ec9; }
+    .review, .review-key { color: #ae3ec9; --c: #ae3ec9; }
     .review-badge { background: color-mix(in srgb, #ae3ec9 18%, transparent); color: #ae3ec9; }
     .review-note { margin: 0.2rem 0 0; color: #ae3ec9; }
     .recheck-btn { margin-left: auto; }
