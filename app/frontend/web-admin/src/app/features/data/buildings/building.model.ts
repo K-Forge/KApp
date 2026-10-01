@@ -108,6 +108,8 @@ export interface Building {
   name: string;
   campus: string;
   description?: string;
+  /** Its street address as people write it, "Cra. 9 Bis # 62-43"; absent when nobody has said. */
+  address?: string | null;
   aliases: string[];
   wings: Wing[];
   floors: Floor[];
@@ -126,9 +128,23 @@ export interface BuildingRequest {
   name: string;
   campus: string;
   description?: string;
+  /** Left out, the stored one stays; empty, it goes. */
+  address?: string;
   aliases: string[];
   wings: Wing[];
   floors: Floor[];
   placement?: Placement | null;
   footprint?: FootprintPart[];
 }
+
+/**
+ * A floor by its code, and by its name only when the name says more than the code: "S1 · Sótano",
+ * "MEZZ · Mezzanine", but "P1" rather than "P1 — Piso 1".
+ */
+export function floorLabel(floor: { code: string; name: string }): string {
+  const name = floor.name.trim();
+  const digits = floor.code.replace(/\D/g, '');
+  const repeats = !name || name.toLowerCase() === floor.code.toLowerCase() || (!!digits && new RegExp(`^(piso|floor)\\s*${digits}$`, 'i').test(name));
+  return repeats ? floor.code : `${floor.code} · ${name}`;
+}
+

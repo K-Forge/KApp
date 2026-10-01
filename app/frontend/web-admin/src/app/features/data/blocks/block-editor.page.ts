@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, HostListener, Injector, computed, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
+import { BUILDING_COLOR, wingColors } from '../buildings/building-colors';
 import { PinchZoomDirective, ScrollZoom, type ZoomStep } from '../../../shared/ui/pinch-zoom/pinch-zoom.directive';
 import { Router, RouterLink } from '@angular/router';
 import { concat, forkJoin, last, of, switchMap, type Observable } from 'rxjs';
@@ -71,9 +72,6 @@ type Gesture =
 
 /** Pixels per metre: the zooms it opens at, from furthest to closest; a pinch goes anywhere between. */
 const ZOOMS = [3, 4, 5, 6.5, 8, 10, 13, 16, 20];
-const WING_COLORS: Record<string, string> = { N: '#e0564f', C: '#3b82f6', S: '#8b5cf6' };
-const MORE_WING_COLORS = ['#0d9488', '#d97706', '#db2777', '#65a30d'];
-const BUILDING_COLOR = '#c2185b';
 const STRUCTURE_COLOR = '#6b7280';
 /** How close, in pixels, a dragged corner has to come to another's line to land on it. */
 const SNAP_PX = 8;
@@ -1329,11 +1327,3 @@ function frameFor(block: string, buildings: Building[], ground: Ground | null): 
   return { origin, up };
 }
 
-function wingColors(building: Building): Map<string, string> {
-  const colors = new Map<string, string>();
-  let next = 0;
-  for (const wing of building.wings) {
-    colors.set(wing.code, WING_COLORS[wing.code] ?? MORE_WING_COLORS[next++ % MORE_WING_COLORS.length]);
-  }
-  return colors;
-}

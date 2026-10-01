@@ -5,6 +5,7 @@ import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
 import { ApiErrorBannerComponent } from '../../../shared/ui/api-error-banner/api-error-banner.component';
 import { PinchZoomDirective, ScrollZoom, type ZoomStep } from '../../../shared/ui/pinch-zoom/pinch-zoom.directive';
+import { floorLabel } from '../buildings/building.model';
 import {
   ACCESSIBILITY,
   ACCESSIBILITY_LABELS,
@@ -126,7 +127,7 @@ const MAX_ZOOM = 8;
             <span class="floor-switch">
               <select id="floor-switch" [value]="floor()" (change)="switchFloor($event)">
                 @for (f of b.floors; track f.code) {
-                  <option [value]="f.code" [selected]="f.code === floor()">{{ f.code }} — {{ f.name }}</option>
+                  <option [value]="f.code" [selected]="f.code === floor()">{{ floorLabel(f) }}</option>
                 }
               </select>
               <svg class="chevron" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
@@ -1241,6 +1242,11 @@ export class FloorEditorPage {
   }
 
   private readonly zoomer = new ScrollZoom(inject(Injector), () => this.scroller()?.nativeElement, () => this.scale());
+
+  /** A floor by its code, and by its name only when the name says more: "S1 · Sótano", but "P1", not "P1 — Piso 1". */
+  floorLabel(f: { code: string; name: string }): string {
+    return floorLabel(f);
+  }
 
   /** A pinch, or Ctrl/⌘ and the wheel: closer or further about that point, never further out than the whole plan. */
   zoomAt(step: ZoomStep): void {

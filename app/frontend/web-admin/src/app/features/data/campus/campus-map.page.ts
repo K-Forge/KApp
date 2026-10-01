@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Injector, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, afterNextRender, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import { BUILDING_COLOR, wingColors } from '../buildings/building-colors';
 import { PinchZoomDirective, ScrollZoom, type ZoomStep } from '../../../shared/ui/pinch-zoom/pinch-zoom.directive';
 import { RouterLink } from '@angular/router';
 import { forkJoin, map, of, switchMap } from 'rxjs';
@@ -31,6 +32,11 @@ interface MappedBuilding {
   parts: { d: string; fill: string; opacity: number; wing: string | null }[];
   rooms: { d: string; fill: string }[];
   label: MapPoint;
+  /** Round all of it, in the map's metres: for its thumbnail, and to take the map to it. */
+  box: { x: number; y: number; width: number; height: number };
+  /** What people call it besides its name. */
+  aliases: string[];
+  wings: { name: string; color: string }[];
 }
 
 /** Pixels per metre at each zoom step. */
@@ -43,10 +49,6 @@ const ROOMS_FROM = 4;
  * red, its central one blue and its south one purple, as the photograph of its front shows them.
  * Any other wing takes the next of the rest.
  */
-const WING_COLORS: Record<string, string> = { N: '#e0564f', C: '#3b82f6', S: '#8b5cf6' };
-const MORE_WING_COLORS = ['#0d9488', '#d97706', '#db2777', '#65a30d'];
-/** A building whose parts carry no wing. */
-const BUILDING_COLOR = '#c2185b';
 
 /**
  * The campus from above: the city's blocks and streets, and on them every building of the
@@ -80,8 +82,12 @@ const BUILDING_COLOR = '#c2185b';
         </div>
       } @else {
         <section class="card map-card">
-          <div class="row-between toolbar">
-            <strong>{{ campus() }}</strong>
+          <div class="toolbar">
+            <span class="eyebrow">{{ 'Campus' | t }}</span>
+            <strong class="campus-name">{{ campusName() }}</strong>
+            <span class="text-muted small">
+              {{ mapped().length === 1 ? ('1 building on the map' | t) : ('{n} buildings on the map' | t: { n: mapped().length }) }}
+            </span>
           </div>
           <div class="scroller" #scroller (appPinchZoom)="zoomAt($event)">
             @if (drawn(); as m) {
@@ -157,16 +163,32 @@ const BUILDING_COLOR = '#c2185b';
 
         <section class="card">
           <h2 class="h">{{ 'The buildings' | t }}</h2>
-          <ul class="buildings">
+          <ul class="tiles">
             @for (b of mapped(); track b.code) {
-              <li>
-                <strong>{{ b.code }}</strong>
-                @if (b.floor) {
-                  <a [routerLink]="['/data/floors', b.code, b.floor]">{{ b.name }}</a>
-                } @else {
-                  {{ b.name }}
-                }
-                <span class="text-muted">· {{ b.floors === 1 ? ('1 floor' | t) : ('{floors} floors' | t: { floors: b.floors }) }}</span>
+              <li class="tile">
+                <svg class="thumb" [attr.viewBox]="(b.box.x - 2) + ' ' + (b.box.y - 2) + ' ' + (b.box.width + 4) + ' ' + (b.box.height + 4)" aria-hidden="true">
+                  @for (part of b.parts; track $index) {
+                    <path [attr.d]="part.d" [attr.fill]="part.fill" [attr.fill-opacity]="part.opacity" [attr.stroke]="part.fill" />
+                  }
+                </svg>
+                <div class="tile-text">
+                  <div class="tile-title"><span class="code">{{ b.code }}</span> {{ b.name }}</div>
+                  @if (b.aliases.length) {
+                    <div class="text-muted small">{{ 'Known as {names}' | t: { names: b.aliases.join(', ') } }}</div>
+                  }
+                  <div class="small tile-facts">
+                    <span>{{ b.floors === 1 ? ('1 floor' | t) : ('{floors} floors' | t: { floors: b.floors }) }}</span>
+                    @for (w of b.wings; track w.name) {
+                      <span class="wing"><i [style.background]="w.color"></i>{{ w.name }}</span>
+                    }
+                  </div>
+                  <div class="tile-actions">
+                    <button type="button" class="btn btn-sm" (click)="focus(b)">{{ 'Show on the map' | t }}</button>
+                    @if (b.floor) {
+                      <a class="btn btn-sm" [routerLink]="['/data/floors', b.code, b.floor]">{{ 'Open its floors' | t }}</a>
+                    }
+                  </div>
+                </div>
               </li>
             }
           </ul>
@@ -309,6 +331,88 @@ const BUILDING_COLOR = '#c2185b';
       display: grid;
       gap: 0.25rem;
     }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.2rem 0.6rem;
+    }
+    .eyebrow {
+      width: 100%;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .campus-name {
+      font-size: 1.15rem;
+    }
+    .tiles {
+      list-style: none;
+      margin: 0.5rem 0 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+      gap: 0.75rem;
+    }
+    .tile {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--bg-inset);
+    }
+    .thumb {
+      flex: none;
+      width: 4.5rem;
+      height: 4.5rem;
+    }
+    .thumb path {
+      stroke-width: 1;
+      vector-effect: non-scaling-stroke;
+    }
+    .tile-text {
+      display: grid;
+      gap: 0.25rem;
+      min-width: 0;
+    }
+    .tile-title {
+      font-weight: 600;
+    }
+    .tile-title .code {
+      display: inline-block;
+      padding: 0 0.35rem;
+      margin-right: 0.15rem;
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+    .tile-facts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.15rem 0.6rem;
+      color: var(--text-muted);
+    }
+    .wing i {
+      display: inline-block;
+      width: 0.6rem;
+      height: 0.6rem;
+      margin-right: 0.25rem;
+      border-radius: 2px;
+      vertical-align: -0.05rem;
+    }
+    .tile-actions a {
+      text-decoration: none;
+    }
+    .tile-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.15rem;
+    }
   `,
 })
 export class CampusMapPage {
@@ -323,12 +427,15 @@ export class CampusMapPage {
   readonly loading = signal(true);
   readonly error = signal<ApiError | null>(null);
   readonly campus = signal('Sede Principal');
+  /** The campus by its own name: "Principal" under "Campus", not "Campus · Sede Principal". */
+  readonly campusName = computed(() => this.campus().replace(/^sede\s+/i, ''));
   readonly ground = signal<Ground | null>(null);
   readonly all = signal<Building[]>([]);
   readonly details = signal<Map<string, FloorDetail>>(new Map());
   private readonly scroller = viewChild<ElementRef<HTMLElement>>('scroller');
   private centred = false;
-  private readonly zoomer = new ScrollZoom(inject(Injector), () => this.scroller()?.nativeElement, () => this.scale());
+  private readonly injector = inject(Injector);
+  private readonly zoomer = new ScrollZoom(this.injector, () => this.scroller()?.nativeElement, () => this.scale());
 
   constructor() {
     // Opened on the buildings, once; after that a pinch zooms about the fingers.
@@ -432,6 +539,11 @@ export class CampusMapPage {
       // The label on the building's biggest part, or on its rooms when the cadastre has none.
       const biggest = [...parts].sort((a, b) => area(b.points) - area(a.points))[0]?.points ?? roomPoints;
       const floorCount = Math.max(0, ...parts.map((p) => p.floors), ...building.floors.map((f) => Math.round(f.level)));
+      const all = [...parts.flatMap((p) => p.points), ...roomPoints];
+      const xs = all.map((p) => p.x);
+      const ys = all.map((p) => p.y);
+      const box = { x: Math.min(...xs), y: Math.min(...ys), width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
+      const used = new Set(parts.map((p) => p.wing).filter((w): w is string => !!w));
       out.push({
         code: building.code,
         name: building.name,
@@ -440,6 +552,10 @@ export class CampusMapPage {
         parts: parts.map(({ d, fill, opacity, wing }) => ({ d, fill, opacity, wing })),
         rooms,
         label: middle(biggest),
+        box,
+        // Not its own code again, "CPC 1" for CPC1: the tile already shows it.
+        aliases: (building.aliases ?? []).filter((a) => a.replace(/\s+/g, '').toLowerCase() !== building.code.toLowerCase()),
+        wings: building.wings.filter((w) => used.has(w.code)).map((w) => ({ name: w.name, color: wingColor.get(w.code) ?? BUILDING_COLOR })),
       });
     }
     return out.sort((a, b) => a.code.localeCompare(b.code));
@@ -497,6 +613,27 @@ export class CampusMapPage {
     };
   });
 
+  /** Takes the map to a building: close enough that it fills about half the map, in the middle of it. */
+  focus(b: MappedBuilding): void {
+    const element = this.scroller()?.nativeElement;
+    const box = this.drawn()?.box;
+    if (!element || !box) return;
+    const fit = Math.min(element.clientWidth / Math.max(b.box.width, 1), element.clientHeight / Math.max(b.box.height, 1)) * 0.5;
+    this.scale.set(Math.max(this.cover(), Math.min(ZOOMS[ZOOMS.length - 1], fit)));
+    element.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    afterNextRender(
+      () => {
+        const s = this.scale();
+        element.scrollTo({
+          left: (b.box.x + b.box.width / 2 - box.x) * s - element.clientWidth / 2,
+          top: (b.box.y + b.box.height / 2 - box.y) * s - element.clientHeight / 2,
+          behavior: 'smooth',
+        });
+      },
+      { injector: this.injector },
+    );
+  }
+
   /** The furthest out the map goes: filling its box both ways, so no gap shows beside or below it. */
   private cover(): number {
     const element = this.scroller()?.nativeElement;
@@ -520,15 +657,6 @@ function groundFloor(building: Building): Floor | null {
   return floors.find((f) => f.level >= 0 && f.status !== 'UNMAPPED') ?? floors.find((f) => f.level >= 0) ?? null;
 }
 
-/** Each of a building's wings with the colour the map gives it. */
-function wingColors(building: Building): Map<string, string> {
-  const colors = new Map<string, string>();
-  let next = 0;
-  for (const wing of building.wings) {
-    colors.set(wing.code, WING_COLORS[wing.code] ?? MORE_WING_COLORS[next++ % MORE_WING_COLORS.length]);
-  }
-  return colors;
-}
 
 function area(points: MapPoint[]): number {
   let total = 0;

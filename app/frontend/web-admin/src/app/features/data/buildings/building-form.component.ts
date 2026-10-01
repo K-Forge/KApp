@@ -39,6 +39,7 @@ type BuildingForm = FormGroup<{
   name: FormControl<string>;
   campus: FormControl<string>;
   description: FormControl<string>;
+  address: FormControl<string>;
   aliases: FormControl<string>;
   wings: FormArray<WingForm>;
   floors: FormArray<FloorForm>;
@@ -108,6 +109,11 @@ function wingGroup(wing?: Partial<Wing>): WingForm {
         <label for="b-aliases">{{ 'Other names' | t }}</label>
         <textarea id="b-aliases" rows="2" formControlName="aliases" [placeholder]="'Bienestar&#10;Edificio de bienestar' | t"></textarea>
         <span class="hint">{{ 'One per line. What people call the building besides its name - the search matches them.' | t }}</span>
+      </div>
+
+      <div class="field">
+        <label for="b-address">{{ 'Address' | t }}</label>
+        <input id="b-address" type="text" formControlName="address" placeholder="Cra. 9 Bis # 62-43" /><!-- i18n-ignore: an address is written the same in both -->
       </div>
 
       <div class="field">
@@ -282,6 +288,7 @@ export class BuildingFormComponent {
         validators: [Validators.required, Validators.minLength(1), Validators.maxLength(120)],
       }),
       description: new FormControl(building?.description ?? '', { nonNullable: true, validators: [Validators.maxLength(500)] }),
+      address: new FormControl(building?.address ?? '', { nonNullable: true, validators: [Validators.maxLength(200)] }),
       aliases: new FormControl((building?.aliases ?? []).join('\n'), { nonNullable: true }),
       wings: new FormArray((building?.wings ?? []).map((w) => wingGroup(w))),
       floors: new FormArray(
@@ -326,6 +333,8 @@ export class BuildingFormComponent {
       name: raw.name,
       campus: raw.campus,
       description: raw.description || undefined,
+      // Sent even when emptied, so a cleared address is cleared rather than kept.
+      address: raw.address.trim(),
       aliases: raw.aliases.split('\n').map((a) => a.trim()).filter(Boolean),
       wings: raw.wings.map((w) => ({
         code: w.code,
