@@ -39,7 +39,6 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
         [can]="[('Create a code' | t), ('Limit its uses and when it expires' | t), ('Deactivate or delete it' | t)]"
         [note]="'A code never grants ROLE_ADMIN. For a one-day visit, use a visitor pass.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New code' | t }}</button>
       </app-page-intro>
 
       @if (justMinted(); as code) {
@@ -51,6 +50,7 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
       }
 
       <div class="card stack">
+        <div class="work-bar">
         <div class="field" style="margin-bottom:0; max-width: 14rem">
           <label for="ic-filter">{{ 'Status' | t }}</label>
           <select id="ic-filter" (change)="onFilter($event)">
@@ -58,6 +58,8 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
             <option value="true">{{ 'Active only' | t }}</option>
             <option value="false">{{ 'Inactive only' | t }}</option>
           </select>
+        </div>
+          <button type="button" class="btn btn-primary work-create" (click)="openCreate()">{{ 'New code' | t }}</button>
         </div>
 
         <app-api-error-banner [error]="error()" />

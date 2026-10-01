@@ -40,11 +40,10 @@ import { t } from '../../../core/i18n/i18n.service';
         [can]="[('Open one by its code' | t), ('Build one by pasting a PDF’s table' | t), ('Edit or delete it' | t)]"
         [note]="'Correcting a pensum reaches every student. One that students follow cannot be deleted.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New pensum' | t }}</button>
       </app-page-intro>
 
       <div class="card stack">
-        <div class="row" style="align-items: end">
+        <div class="work-bar">
           <div class="field" style="margin-bottom: 0; flex: 1 1 22rem">
             <label for="pensum">{{ 'Pensum' | t }}</label>
             <!-- A list, not a text box. Asking somebody to remember "1015" was asking them to
@@ -63,6 +62,7 @@ import { t } from '../../../core/i18n/i18n.service';
           <button type="button" class="btn" (click)="load()" [disabled]="loading() || !searchCode().trim()">
             {{ loading() ? ('Loading…' | t) : ('Load' | t) }}
           </button>
+          <button type="button" class="btn btn-primary work-create" (click)="openCreate()">{{ 'New pensum' | t }}</button>
         </div>
 
         @if (!catalogLoading() && catalog().length === 0) {

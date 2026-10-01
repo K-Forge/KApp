@@ -32,9 +32,6 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
         [can]="[('Issue a pass' | t), ('See who used each one' | t), ('Revoke one nobody has used' | t)]"
         [note]="'The register keeps visitors’ identity documents, and deletes them 30 days after each visit.' | t"
       >
-          <button actions type="button" class="btn btn-primary" [disabled]="issuing()" (click)="issue()">
-            {{ issuing() ? ('Issuing…' | t) : ('Issue a pass' | t) }}
-          </button>
       </app-page-intro>
 
       @if (justIssued(); as pass) {
@@ -48,6 +45,7 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
       }
 
       <div class="card stack">
+        <div class="work-bar">
         <div class="field" style="margin-bottom:0; max-width: 14rem">
           <label for="vp-filter">{{ 'Show' | t }}</label>
           <select id="vp-filter" (change)="onFilter($event)">
@@ -55,6 +53,10 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
             <option value="true">{{ 'Redeemed (the register)' | t }}</option>
             <option value="false">{{ 'Issued, not yet used' | t }}</option>
           </select>
+        </div>
+          <button type="button" class="btn btn-primary work-create" [disabled]="issuing()" (click)="issue()">
+            {{ issuing() ? ('Issuing…' | t) : ('Issue a pass' | t) }}
+          </button>
         </div>
 
         <app-api-error-banner [error]="error()" />

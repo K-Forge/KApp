@@ -1010,3 +1010,15 @@ details.help .help-note {
   font-size: 0.8125rem;
 }
 
+/* The row a work area opens with: its filters, and the button that adds to what it lists, where
+   the list is rather than up by the page's title. On a phone the button takes its own line. */
+.work-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+}
+.work-bar > .work-create {
+  margin-left: auto;
+}
+

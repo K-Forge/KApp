@@ -25,11 +25,10 @@ import { t } from '../../../core/i18n/i18n.service';
         [can]="[('Create, edit and delete buildings' | t), ('Edit their wings and floors' | t), ('Find one by code or name' | t)]"
         [note]="'A floor, a wing or a building that still has spaces cannot be removed.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New building' | t }}</button>
       </app-page-intro>
 
       <div class="card stack">
-        <div class="row spread">
+        <div class="work-bar">
           <div class="field" style="margin-bottom: 0; flex: 1 1 14rem">
             <label for="q">{{ 'Search' | t }}</label>
             <input id="q" type="text" [placeholder]="'code, name or other name' | t" (input)="onQueryInput($event)" />
@@ -38,6 +37,7 @@ import { t } from '../../../core/i18n/i18n.service';
             <label for="campus">{{ 'Campus' | t }}</label>
             <input id="campus" type="text" [placeholder]="'filter by campus' | t" (input)="onCampusInput($event)" />
           </div>
+          <button type="button" class="btn btn-primary work-create" (click)="openCreate()">{{ 'New building' | t }}</button>
         </div>
 
         <app-api-error-banner [error]="error()" />

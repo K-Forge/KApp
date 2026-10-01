@@ -31,11 +31,10 @@ const MIN_QUERY_LENGTH = 2;
         [can]="[('Create, edit and delete spaces' | t), ('Find one by door number or name' | t), ('Filter by building, floor or category' | t)]"
         [note]="'The code shown is the one on the door; a door with no number shows a dash.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New space' | t }}</button>
       </app-page-intro>
 
       <div class="card stack">
-        <div class="row spread">
+        <div class="work-bar">
           <div class="field" style="flex: 1 1 14rem; margin-bottom: 0">
             <label for="q">{{ 'Search' | t }}</label>
             <input id="q" type="text" [placeholder]="'door number, name or other name (min 2 characters)' | t" (input)="onQueryInput($event)" />
@@ -76,6 +75,7 @@ const MIN_QUERY_LENGTH = 2;
               }
             </select>
           </div>
+          <button type="button" class="btn btn-primary work-create" (click)="openCreate()">{{ 'New space' | t }}</button>
         </div>
 
         <app-api-error-banner [error]="error()" />

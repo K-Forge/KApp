@@ -35,10 +35,12 @@ import { t } from '../../../core/i18n/i18n.service';
         [can]="[('Create, edit and delete programmes' | t), ('Open a programme’s active pensum' | t)]"
         [note]="'A programme’s code cannot change, and one with a pensum cannot be deleted.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New program' | t }}</button>
       </app-page-intro>
 
-      <div class="card">
+      <div class="card stack">
+        <div class="work-bar">
+          <button type="button" class="btn btn-primary work-create" (click)="openCreate()">{{ 'New program' | t }}</button>
+        </div>
         <app-api-error-banner [error]="error()" />
 
         <app-data-table
