@@ -15,6 +15,7 @@ import { CATEGORY_LABELS, SPACE_CATEGORIES, shownCode, type Space, type SpaceCat
 import { SpaceTypesService } from './space-types.service';
 import { SpaceTypesPage } from './space-types.page';
 import { SpacesService } from './spaces.service';
+import { SortHeaderComponent, compareText, sortRows, type Sort } from '../../../shared/ui/sort-header/sort-header.component';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { t } from '../../../core/i18n/i18n.service';
 
@@ -22,13 +23,23 @@ const PAGE_SIZE = 20;
 const MIN_QUERY_LENGTH = 2;
 /** The most the server gives in one page: the whole list comes in as few requests as that allows. */
 const FETCH_SIZE = 100;
-/** Alphabetical as a person reads it: accents and case aside, Aula 2 before Aula 10. */
-const BY_NAME = new Intl.Collator('es', { sensitivity: 'base', numeric: true });
+/** What each column sorts by. "On the plan" runs from not drawn, through drawn, to most doors. */
+const SORT_VALUE: Record<string, (space: Space) => string | number | null | undefined> = {
+  code: (s) => shownCode(s),
+  name: (s) => s.name,
+  type: (s) => s.typeName ?? s.typeCode,
+  building: (s) => (s.buildingCode ? `${s.buildingCode} ${s.wing ?? ''}` : null),
+  floor: (s) => s.floorCode,
+  plan: (s) => (s.shape ? 1 + (s.doors?.length ?? 0) : 0),
+  capacity: (s) => s.capacity,
+};
+/** Two spaces equal in the column go by name, then by door. */
+const byNameThenDoor = (a: Space, b: Space) => compareText(a.name, b.name) || compareText(shownCode(a), shownCode(b));
 
 /** Full-text search plus CRUD over /api/map/spaces - the "find a room" screen turned inside out. */
 @Component({
   selector: 'app-spaces-page',
-  imports: [TranslatePipe, RouterLink, DataTableComponent, ApiErrorBannerComponent, ModalComponent, SpaceFormComponent, PageIntroComponent, SpaceTypesPage],
+  imports: [TranslatePipe, RouterLink, DataTableComponent, ApiErrorBannerComponent, ModalComponent, SpaceFormComponent, PageIntroComponent, SpaceTypesPage, SortHeaderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
@@ -126,13 +137,13 @@ const BY_NAME = new Intl.Collator('es', { sensitivity: 'base', numeric: true });
           >
             <thead>
               <tr>
-                <th>{{ 'Door' | t }}</th>
-                <th>{{ 'Name' | t }}</th>
-                <th>{{ 'Type' | t }}</th>
-                <th>{{ 'Building' | t }}</th>
-                <th>{{ 'Floor' | t }}</th>
-                <th>{{ 'On the plan' | t }}</th>
-                <th>{{ 'Capacity' | t }}</th>
+                <th appSort="code" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'Door' | t }}</th>
+                <th appSort="name" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'Name' | t }}</th>
+                <th appSort="type" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'Type' | t }}</th>
+                <th appSort="building" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'Building' | t }}</th>
+                <th appSort="floor" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'Floor' | t }}</th>
+                <th appSort="plan" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'On the plan' | t }}</th>
+                <th appSort="capacity" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'Capacity' | t }}</th>
                 <th></th>
               </tr>
             </thead>
@@ -239,14 +250,24 @@ export class SpacesPage {
   /** `?tab=types` opens the types of space; anything else, the spaces. */
   readonly tab = input<string | undefined>(undefined);
 
-  /** Every space the filters allow, by name - what the screen opens on, with no search typed. */
+  /** Every space the filters and the search allow, in the server's order: by relevance when searching. */
   private readonly listed = signal<Space[] | null>(null);
-  private readonly searched = signal<PageResponse<Space> | null>(null);
 
-  /** The page shown: the server's when searching, by relevance; else a page of the whole list, by name. */
-  readonly result = computed<PageResponse<Space> | null>(() => {
-    if (this.query().trim().length > 0) return this.searched();
+  /** The column the table is sorted by. By name to start with; a search keeps its relevance until a column is picked. */
+  readonly sort = signal<Sort>({ key: 'name', dir: 1 });
+  private readonly sortPicked = signal(false);
+
+  readonly sorted = computed<Space[] | null>(() => {
     const all = this.listed();
+    if (!all) return null;
+    if (this.query().trim().length > 0 && !this.sortPicked()) return all;
+    const { key, dir } = this.sort();
+    return sortRows(all, SORT_VALUE[key] ?? SORT_VALUE['name'], dir, byNameThenDoor);
+  });
+
+  /** A page of the sorted list: the whole of it is here, so any column orders all of it. */
+  readonly result = computed<PageResponse<Space> | null>(() => {
+    const all = this.sorted();
     if (!all) return null;
     const page = this.page();
     const totalPages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
@@ -281,7 +302,7 @@ export class SpacesPage {
 
     // A term shorter than the minimum is a half-typed search: it waits.
     if (q.length > 0 && q.length < MIN_QUERY_LENGTH) {
-      this.searched.set(null);
+      this.listed.set(null);
       return;
     }
     this.loading.set(true);
@@ -291,26 +312,17 @@ export class SpacesPage {
       this.error.set(err instanceof AppHttpError ? err.apiError : null);
     };
 
-    if (q.length > 0) {
-      this.spacesService.search({ q, page: this.page(), size: PAGE_SIZE, ...filters }).subscribe({
-        next: (found) => {
-          this.searched.set(found);
-          this.loading.set(false);
-        },
-        error: failed,
-      });
-      return;
-    }
-    // No term: every space the filters allow, all of it, so it can be read in alphabetical order.
+    // All of it, every page, so any column can sort the whole list: a search's matches are few.
+    const term = q.length > 0 ? { q } : {};
     this.spacesService
-      .search({ page: 0, size: FETCH_SIZE, ...filters })
+      .search({ ...term, page: 0, size: FETCH_SIZE, ...filters })
       .pipe(
         switchMap((first) =>
           first.totalPages <= 1
             ? of([first])
-            : forkJoin([of(first), ...Array.from({ length: first.totalPages - 1 }, (_, i) => this.spacesService.search({ page: i + 1, size: FETCH_SIZE, ...filters }))]),
+            : forkJoin([of(first), ...Array.from({ length: first.totalPages - 1 }, (_, i) => this.spacesService.search({ ...term, page: i + 1, size: FETCH_SIZE, ...filters }))]),
         ),
-        map((pages) => pages.flatMap((p) => p.content).sort((a, b) => BY_NAME.compare(a.name, b.name) || BY_NAME.compare(shownCode(a) ?? '', shownCode(b) ?? ''))),
+        map((pages) => pages.flatMap((p) => p.content)),
       )
       .subscribe({
         next: (all) => {
@@ -358,6 +370,12 @@ export class SpacesPage {
   onFloorChange(event: Event): void {
     this.page.set(0);
     this.floor.set((event.target as HTMLSelectElement).value);
+  }
+
+  sortBy(sort: Sort): void {
+    this.sort.set(sort);
+    this.sortPicked.set(true);
+    this.page.set(0);
   }
 
   onPageChange(page: number): void {
