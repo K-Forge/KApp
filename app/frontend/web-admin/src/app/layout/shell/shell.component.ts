@@ -160,7 +160,7 @@ const NAV_GROUPS: NavGroup[] = [
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M4 5h9M8.5 3v2M10.5 5c-.7 4.2-3.3 7.6-6.5 9.5M6 9c1.3 2.3 3.2 4 5.5 5M13 21l4-9 4 9M14.3 18h5.4" />
             </svg>
-            <span class="icon-btn-label">{{ languageLabel() }}</span>
+            <span class="icon-btn-label keep">{{ languageLabel() }}</span>
           </button>
 
           <button type="button" class="icon-btn danger" (click)="logout()" [title]="'Sign out' | t">
@@ -240,6 +240,7 @@ const NAV_GROUPS: NavGroup[] = [
       display: flex;
       align-items: center;
       gap: 0.6rem;
+      min-width: 0;
       text-decoration: none;
       color: inherit;
       border-radius: var(--radius-md);
@@ -270,16 +271,21 @@ const NAV_GROUPS: NavGroup[] = [
       width: 20px;
       height: 20px;
     }
+    /* One line each, cut short rather than wrapped: wrapped, the name ran under the countdown. */
     .brand-text {
       display: flex;
       flex-direction: column;
-      line-height: 1.1;
+      min-width: 0;
+      line-height: 1.2;
+      white-space: nowrap;
     }
     .brand strong {
       font-size: 1.0625rem;
       letter-spacing: -0.01em;
     }
     .brand-sub {
+      overflow: hidden;
+      text-overflow: ellipsis;
       font-size: 0.75rem;
       color: var(--text-muted);
       text-transform: uppercase;
@@ -517,6 +523,17 @@ const NAV_GROUPS: NavGroup[] = [
       .icon-btn-label,
       .brand-sub {
         display: none;
+      }
+    }
+    /* Between a tablet and a wide screen the five labels, in Spanish, take the brand's room: the
+       icons and their titles carry them, and the language keeps its two letters, which no icon
+       says. */
+    @media (min-width: 721px) and (max-width: 1180px) {
+      .icon-btn-label:not(.keep) {
+        display: none;
+      }
+      .icon-btn:not(.nav-toggle) {
+        padding: 0.4rem 0.5rem;
       }
     }
     /* The mark alone says whose portal this is; the name gives its room to the countdown. */
