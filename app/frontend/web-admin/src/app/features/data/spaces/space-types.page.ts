@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewChild, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild, computed, inject, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
@@ -33,16 +33,18 @@ type TypeForm = FormGroup<{
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
+      @if (!embedded()) {
       <app-page-intro
         [title]="'Space types' | t"
         [what]="'The kinds of space the map knows, each under the category the apps draw it with.' | t"
         [can]="[('Add, rename and delete types' | t)]"
         [note]="'A type still used by a space cannot be deleted.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New type' | t }}</button>
       </app-page-intro>
+      }
 
       <div class="card stack">
+        <div class="work-bar">
         <div class="field" style="margin-bottom: 0; max-width: 20rem">
           <label for="category">{{ 'Category' | t }}</label>
           <select id="category" (change)="onCategoryChange($event)">
@@ -51,6 +53,8 @@ type TypeForm = FormGroup<{
               <option [value]="category">{{ categoryLabels[category] | t }}</option>
             }
           </select>
+        </div>
+          <button type="button" class="btn btn-primary work-create" (click)="openCreate()">{{ 'New type' | t }}</button>
         </div>
 
         <app-api-error-banner [error]="error()" />
@@ -125,6 +129,9 @@ type TypeForm = FormGroup<{
   `,
 })
 export class SpaceTypesPage {
+  /** Inside the spaces page, as its second tab: no page heading of its own. */
+  readonly embedded = input(false);
+
   private readonly service = inject(SpaceTypesService);
 
   readonly categories = SPACE_CATEGORIES;

@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild, computed, effect, inject, input, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { forkJoin, of, switchMap, map } from 'rxjs';
 import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
 import type { PageResponse } from '../../../core/http/page-response.model';
@@ -11,27 +13,41 @@ import { BuildingsService } from '../buildings/buildings.service';
 import { SpaceFormComponent } from './space-form.component';
 import { CATEGORY_LABELS, SPACE_CATEGORIES, shownCode, type Space, type SpaceCategory, type SpaceRequest, type SpaceType } from './space.model';
 import { SpaceTypesService } from './space-types.service';
+import { SpaceTypesPage } from './space-types.page';
 import { SpacesService } from './spaces.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { t } from '../../../core/i18n/i18n.service';
 
 const PAGE_SIZE = 20;
 const MIN_QUERY_LENGTH = 2;
+/** The most the server gives in one page: the whole list comes in as few requests as that allows. */
+const FETCH_SIZE = 100;
+/** Alphabetical as a person reads it: accents and case aside, Aula 2 before Aula 10. */
+const BY_NAME = new Intl.Collator('es', { sensitivity: 'base', numeric: true });
 
 /** Full-text search plus CRUD over /api/map/spaces - the "find a room" screen turned inside out. */
 @Component({
   selector: 'app-spaces-page',
-  imports: [TranslatePipe, DataTableComponent, ApiErrorBannerComponent, ModalComponent, SpaceFormComponent, PageIntroComponent],
+  imports: [TranslatePipe, RouterLink, DataTableComponent, ApiErrorBannerComponent, ModalComponent, SpaceFormComponent, PageIntroComponent, SpaceTypesPage],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
         [title]="'Spaces' | t"
         [what]="'Every room, office, bathroom, lift and stair the map can show.' | t"
-        [can]="[('Create, edit and delete spaces' | t), ('Find one by door number or name' | t), ('Filter by building, floor or category' | t)]"
+        [can]="[('Create, edit and delete spaces' | t), ('Find one by door number or name' | t), ('Filter by building, floor or category' | t), ('Create, rename and delete the types of space' | t)]"
         [note]="'The code shown is the one on the door; a door with no number shows a dash.' | t"
       >
       </app-page-intro>
+
+      <nav class="tabs" [attr.aria-label]="'Spaces and their types' | t">
+        <a routerLink="." [queryParams]="{}" [class.on]="tab() !== 'types'" [attr.aria-current]="tab() !== 'types' ? 'page' : null">{{ 'Spaces' | t }}</a>
+        <a routerLink="." [queryParams]="{ tab: 'types' }" [class.on]="tab() === 'types'" [attr.aria-current]="tab() === 'types' ? 'page' : null">{{ 'Types of space' | t }}</a>
+      </nav>
+
+      @if (tab() === 'types') {
+        <app-space-types-page [embedded]="true" />
+      } @else {
 
       <div class="card stack">
         <div class="work-bar">
@@ -141,6 +157,7 @@ const MIN_QUERY_LENGTH = 2;
           </app-data-table>
         }
       </div>
+      }
     </div>
 
     <app-modal #formModal [title]="editingSpace() ? ('Edit space' | t) : ('New space' | t)" (closed)="formError.set(null)">
@@ -177,7 +194,6 @@ export class SpacesPage {
 
   readonly loading = signal(false);
   readonly error = signal<ApiError | null>(null);
-  readonly result = signal<PageResponse<Space> | null>(null);
   readonly buildings = signal<Building[]>([]);
   readonly types = signal<SpaceType[]>([]);
 
@@ -205,9 +221,32 @@ export class SpacesPage {
   /** True while the screen has been given neither a usable term nor a filter to list by. */
   readonly nothingAsked = computed(() => {
     const q = this.query().trim();
-    if (q.length >= MIN_QUERY_LENGTH) return false;
-    if (q.length > 0) return true;
-    return !this.category() && !this.type() && !this.buildingCodeFilter();
+    return q.length > 0 && q.length < MIN_QUERY_LENGTH;
+  });
+
+  /** `?tab=types` opens the types of space; anything else, the spaces. */
+  readonly tab = input<string | undefined>(undefined);
+
+  /** Every space the filters allow, by name - what the screen opens on, with no search typed. */
+  private readonly listed = signal<Space[] | null>(null);
+  private readonly searched = signal<PageResponse<Space> | null>(null);
+
+  /** The page shown: the server's when searching, by relevance; else a page of the whole list, by name. */
+  readonly result = computed<PageResponse<Space> | null>(() => {
+    if (this.query().trim().length > 0) return this.searched();
+    const all = this.listed();
+    if (!all) return null;
+    const page = this.page();
+    const totalPages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
+    return {
+      content: all.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE),
+      page,
+      size: PAGE_SIZE,
+      totalElements: all.length,
+      totalPages,
+      first: page === 0,
+      last: page >= totalPages - 1,
+    };
   });
 
   @ViewChild('formModal') private formModal?: ModalComponent;
@@ -220,47 +259,53 @@ export class SpacesPage {
     const type = this.type();
     const buildingCode = this.buildingCodeFilter();
     const floor = this.floor();
-    const page = this.page();
     this.refreshTick();
+    const filters = {
+      category: category || undefined,
+      type: type || undefined,
+      buildingCode: buildingCode || undefined,
+      floor: floor || undefined,
+    };
 
-    // A term shorter than the minimum is a half-typed search, not a request to list the
-    // campus - so it waits. A filter with no term at all is a different question entirely:
-    // "what is in building A". The server answers that now, and without it this screen could
-    // not show you the space you had just created, and the building and type dropdowns did
-    // nothing on their own.
-    const searching = q.length > 0;
-    const filtering = !!category || !!type || !!buildingCode;
-
-    if (searching && q.length < MIN_QUERY_LENGTH) {
-      this.result.set(null);
+    // A term shorter than the minimum is a half-typed search: it waits.
+    if (q.length > 0 && q.length < MIN_QUERY_LENGTH) {
+      this.searched.set(null);
       return;
     }
-    if (!searching && !filtering) {
-      this.result.set(null);
-      return;
-    }
-
     this.loading.set(true);
     this.error.set(null);
+    const failed = (err: unknown) => {
+      this.loading.set(false);
+      this.error.set(err instanceof AppHttpError ? err.apiError : null);
+    };
+
+    if (q.length > 0) {
+      this.spacesService.search({ q, page: this.page(), size: PAGE_SIZE, ...filters }).subscribe({
+        next: (found) => {
+          this.searched.set(found);
+          this.loading.set(false);
+        },
+        error: failed,
+      });
+      return;
+    }
+    // No term: every space the filters allow, all of it, so it can be read in alphabetical order.
     this.spacesService
-      .search({
-        q: searching ? q : undefined,
-        page,
-        size: PAGE_SIZE,
-        category: category || undefined,
-        type: type || undefined,
-        buildingCode: buildingCode || undefined,
-        floor: floor || undefined,
-      })
+      .search({ page: 0, size: FETCH_SIZE, ...filters })
+      .pipe(
+        switchMap((first) =>
+          first.totalPages <= 1
+            ? of([first])
+            : forkJoin([of(first), ...Array.from({ length: first.totalPages - 1 }, (_, i) => this.spacesService.search({ page: i + 1, size: FETCH_SIZE, ...filters }))]),
+        ),
+        map((pages) => pages.flatMap((p) => p.content).sort((a, b) => BY_NAME.compare(a.name, b.name) || BY_NAME.compare(shownCode(a) ?? '', shownCode(b) ?? ''))),
+      )
       .subscribe({
-        next: (page) => {
-          this.result.set(page);
+        next: (all) => {
+          this.listed.set(all);
           this.loading.set(false);
         },
-        error: (err: unknown) => {
-          this.loading.set(false);
-          this.error.set(err instanceof AppHttpError ? err.apiError : null);
-        },
+        error: failed,
       });
   });
 

@@ -1022,3 +1022,25 @@ details.help .help-note {
   margin-left: auto;
 }
 
+/* Two or three views of one section, as tabs: the one shown underlined in the brand's teal. */
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.tabs a {
+  padding: 0.5rem 0.9rem;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.tabs a:hover {
+  border-bottom-color: var(--border-strong);
+}
+.tabs a.on {
+  border-bottom-color: var(--brand-teal);
+}
+
