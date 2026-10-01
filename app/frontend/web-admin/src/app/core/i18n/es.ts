@@ -820,6 +820,7 @@ export const ES: Record<string, string> = {
   'Take it again': 'Volver a tomarla',
   'Note: what the sketch does not show': 'Nota: lo que el croquis no muestra',
   'Note examples: tap one, then finish it': 'Ejemplos de notas: toque uno y complételo',
+  'Then': 'Después',
   'Your own': 'Suyas',
   'Not named yet': 'Sin nombre aún',
   '+ Something the plan missed': '+ Algo que le faltó al plan',

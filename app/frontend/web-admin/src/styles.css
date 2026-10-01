@@ -1025,6 +1025,35 @@ details.help .help-note {
   font-size: 0.8125rem;
 }
 
+/* Inside a folded help with a list of its own, such as the survey's "How to measure". */
+details.help .help-body ul {
+  margin: 0.35rem 0;
+  padding-left: 1.2rem;
+}
+details.help .help-body ul.keys {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+/* Small rounded choices to tap, such as the survey's note examples. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+}
+.chip {
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-muted);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
 /* The row a work area opens with: its filters, and the button that adds to what it lists, where
    the list is rather than up by the page's title. On a phone the button takes its own line. */
 .work-bar {

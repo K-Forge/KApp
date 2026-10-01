@@ -482,9 +482,6 @@ import { NAV_GROUPS } from '../nav';
       .icon-btn-label:not(.keep) {
         display: none;
       }
-      .icon-btn:not(.nav-toggle) {
-        padding: 0.4rem 0.5rem;
-      }
     }
     /* The mark alone says whose portal this is; the name gives its room to the countdown. */
     @media (max-width: 400px) {

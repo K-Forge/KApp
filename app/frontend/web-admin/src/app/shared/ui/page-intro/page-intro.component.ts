@@ -80,6 +80,9 @@ import { navEntryFor } from '../../../layout/nav';
     </div>
   `,
   styles: `
+    :host {
+      display: block;
+    }
     .page-intro {
       margin-bottom: 1rem;
     }

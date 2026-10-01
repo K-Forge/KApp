@@ -199,6 +199,15 @@ const CLOSEST = 4;
                 }
               </div>
             </details>
+            @if (upNext(); as u) {
+              <button type="button" class="next" (click)="select(u.id)">
+                <span class="text-muted">{{ 'Then' | t }}</span>
+                <span class="title">
+                  <span class="num" [class]="u.kind">{{ u.n }}</span>
+                  <span>{{ u.text | t }} <span class="text-muted">· {{ u.street }}</span></span>
+                </span>
+              </button>
+            }
           }
         </section>
 
@@ -238,23 +247,23 @@ const CLOSEST = 4;
   `,
   styles: `
     .survey { display: grid; gap: 0.9rem; }
-    .survey app-page-intro { display: block; margin-bottom: -1rem; }
+    .survey app-page-intro { margin-bottom: -1rem; }
     .lede { margin: 0.1rem 0 0; font-size: 0.8125rem; }
     .status, .steps, .value { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .how p { margin: 0.35rem 0; }
-    .how ul { margin: 0.35rem 0; padding-left: 1.2rem; }
-    .how ul.keys { list-style: none; padding: 0; display: grid; gap: 0.2rem; }
     /* The sketch, what is being typed and the list, all three in view: stacked on a phone; on an
        upright tablet the sketch across the top and the other two side by side; on a screen lying
        down, three columns as tall as the screen, each scrolling on its own. */
     .work { display: grid; gap: 0.75rem; grid-template-areas: 'sketch' 'entry' 'list'; }
     .sketch-card { grid-area: sketch; padding: 0.4rem; min-width: 0; }
-    .entry { grid-area: entry; min-width: 0; }
+    .entry { grid-area: entry; min-width: 0; container-type: inline-size; display: flex; flex-direction: column; --f: 1rem; }
+    .entry > * { font-size: var(--f); }
+    .entry .small { font-size: 0.82em; }
+    .entry > .small { font-size: calc(var(--f) * 0.82); }
     .list { grid-area: list; min-width: 0; max-height: 42vh; overflow: auto; }
     .sketch { height: 46vh; min-height: 260px; }
     @media (min-width: 700px) {
       .work { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'sketch sketch' 'entry list'; align-items: start; }
-      .entry, .list { max-height: 40vh; overflow: auto; }
+      .list { max-height: 40vh; }
     }
     @media (min-width: 1000px) and (orientation: landscape) {
       /* The page is the screen's height below the portal's header (59 px, and 24 above and below the
@@ -262,7 +271,7 @@ const CLOSEST = 4;
       .survey { display: flex; flex-direction: column; height: calc(100dvh - 107px); }
       .work {
         flex: 1;
-        grid-template-columns: minmax(14rem, 19rem) minmax(0, 1fr) minmax(16rem, 21rem);
+        grid-template-columns: minmax(12rem, 17rem) minmax(20rem, 1fr) minmax(15rem, 21rem);
         grid-template-areas: 'list sketch entry';
         /* One row the height left, not as tall as the list: or the list would never scroll. */
         grid-template-rows: minmax(0, 1fr);
@@ -271,21 +280,21 @@ const CLOSEST = 4;
       }
       .sketch-card { display: flex; flex-direction: column; min-height: 0; }
       .sketch { flex: 1; height: auto; min-height: 0; }
-      .entry, .list { max-height: none; min-height: 0; }
+      .entry, .list { max-height: none; min-height: 0; overflow: auto; }
+      .entry { --f: clamp(1rem, 5.6cqi, 1.35rem); }
     }
     .sketch svg { width: 100%; height: 100%; display: block; touch-action: pan-y; }
-    .gesture-hint { margin-left: auto; font-size: 0.75rem; opacity: 0.8; }
+    .gesture-hint { margin-left: auto; font-size: 0.75rem; }
     /* The whole block lets a finger scroll the page past it; zoomed in, a finger moves the sketch. */
     .sketch svg.zoomed { touch-action: none; cursor: grab; }
     .key { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 1rem; padding: 0.4rem 0.3rem 0.1rem; color: var(--text-muted); }
     .swatch { display: inline-block; width: 1.1rem; height: 3px; margin-right: 0.4rem; vertical-align: middle; background: var(--c); }
-    .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
-    .chip { border: 1px solid var(--border); background: none; color: var(--text-muted); border-radius: 999px; padding: 0.15rem 0.55rem; font-size: 0.75rem; cursor: pointer; }
     svg * { vector-effect: non-scaling-stroke; }
     .road { fill: color-mix(in srgb, var(--text) 12%, transparent); }
-    .walk { fill: #d9ccae; fill-opacity: 0.55; stroke: #b9ab8c; stroke-width: 0.6; }
-    .built { fill: color-mix(in srgb, var(--primary) 22%, transparent); stroke: var(--text-muted); stroke-width: 0.8; }
-    .other { fill: color-mix(in srgb, var(--text) 14%, transparent); stroke: var(--text-muted); stroke-width: 0.8; }
+    .walk { fill: #d9ccae8c; stroke: #b9ab8c; stroke-width: 0.6; }
+    .built, .other { stroke: var(--text-muted); stroke-width: 0.8; }
+    .built { fill: color-mix(in srgb, var(--primary) 22%, transparent); }
+    .other { fill: color-mix(in srgb, var(--text) 14%, transparent); }
     .open { fill: none; stroke: var(--text-muted); stroke-width: 0.8; stroke-dasharray: 3 2; }
     .street, text { text-anchor: middle; dominant-baseline: central; pointer-events: none; }
     .street { fill: var(--text-muted); font-weight: 600; }
@@ -299,19 +308,23 @@ const CLOSEST = 4;
     .done { color: #2f9e44; --c: #2f9e44; }
     /* Taken, but to take again: its own colour, apart from pending and taken. */
     .review, .review-key { color: #ae3ec9; --c: #ae3ec9; }
-    .review-badge { background: color-mix(in srgb, #ae3ec9 18%, transparent); color: #ae3ec9; }
+    .review-badge { background: #ae3ec92e; color: #ae3ec9; }
     .review-note { margin: 0.2rem 0 0; color: #ae3ec9; }
     .recheck-btn { margin-left: auto; }
     g.on line { stroke-width: 4; }
     g.on .dot { stroke: var(--bg-elevated); stroke-width: 2.5; }
     .title { display: flex; gap: 0.6rem; align-items: flex-start; }
     .num { flex: none; display: inline-grid; place-items: center; min-width: 1.7rem; height: 1.7rem; border-radius: 999px; background: var(--c, #868e96); color: #fff; font-size: 0.75rem; font-weight: 700; }
-    .entry input { width: 100%; }
+    .entry input { width: 100%; min-height: 2.6em; }
     .value { margin-top: 0.7rem; flex-wrap: nowrap; }
-    .value input { font-size: 1.4rem; }
+    .value input { font-size: 1.8em; }
+    .value .btn { min-width: 2.6em; font-size: 1.2em; }
+    .title .num { min-width: 2em; height: 2em; font-size: 0.8em; }
+    .steps .btn { flex: 1; min-height: 2.8em; font-size: 0.95em; }
+    .next { margin-top: auto; padding-top: 0.8rem; border: 0; background: none; color: inherit; text-align: left; font: inherit; font-size: 0.85em; }
     .label-in { margin-top: 0.6rem; }
     .reading { min-height: 1.2em; margin: 0.35rem 0; color: var(--text-muted); }
-    .reading.bad { color: var(--danger, #c92a2a); }
+    .reading.bad { color: var(--danger); }
     .steps { margin: 0.6rem 0; justify-content: space-between; }
     .examples { margin-top: 0.4rem; color: var(--text-muted); }
     .list ol { list-style: none; margin: 0 0 0.6rem; padding: 0; }
@@ -319,7 +332,7 @@ const CLOSEST = 4;
     .list li.on { background: color-mix(in srgb, var(--primary) 14%, transparent); }
     .what { flex: 1; }
     .got { font-variant-numeric: tabular-nums; }
-    .as-text { width: 100%; font-family: ui-monospace, monospace; font-size: 0.75rem; }
+    .as-text { width: 100%; font-family: var(--font-mono); font-size: 0.75rem; }
   `,
 })
 export class SurveyPage {
@@ -390,6 +403,17 @@ export class SurveyPage {
     if (planned) return { ...planned, kind: planned.kind as PlannedDistance['kind'] | 'extra' };
     const label = this.values().get(id)?.label;
     return { id, n: null, street: t('Something the plan missed'), kind: 'extra' as const, text: label || t('Not named yet'), expected: 0 };
+  });
+
+  /** Where Next goes: the next distance not taken yet, shown at the foot of the entry. */
+  readonly upNext = computed(() => {
+    const order = this.plan.map((d) => d.id);
+    const at = order.indexOf(this.currentId());
+    for (let i = 1; i < order.length; i++) {
+      const id = order[(Math.max(at, -1) + i) % order.length];
+      if (this.stateOf(id) !== 'done') return this.plan.find((d) => d.id === id) ?? null;
+    }
+    return null;
   });
 
   readonly reading = computed(() => {
