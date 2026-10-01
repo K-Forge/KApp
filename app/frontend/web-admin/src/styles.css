@@ -11,23 +11,23 @@
 :root {
   color-scheme: light;
 
-  /* Paper, but not a blank sheet: an orchid drawn from the institutional pink of the K, halfway
-     to purple. It was a teal-grey, and next to the teal buttons the whole portal read as green;
-     then a greyed mauve, which read as washed out. Chosen in OKLCH - lightness 0.875, chroma
-     0.062, hue 338 - so it is as light as a light theme needs and still reads as a colour. The
-     ground carries the K's warmth and the teal the actions, as the two sit in the K itself. */
-  --bg: #f2c7e4;
+  /* Paper, but not a blank sheet: the dark theme's purple by day - the same hue (OKLCH 316) at the
+     lightness a light theme needs, so the portal stays purple in both, deep at night and pale by
+     day. It was an orchid drawn from the K's pink; Brian kept that for the mobile apps'
+     personalisation (docs/design/orchid-palette.md). Each tone kept its lightness and chroma, so
+     every contrast below is the orchid's. */
+  --bg: #e6caf2;
   --bg-elevated: #ffffff;
-  --bg-inset: #fae6f3;
-  --bg-hover: #efc1e0;
-  --border: #ddb7d1;
-  --border-strong: #b285a4;
+  --bg-inset: #f4e7fa;
+  --bg-hover: #e2c4ef;
+  --border: #d3badd;
+  --border-strong: #a688b2;
 
-  --text: #251420;
-  --text-muted: #5e4456;
+  --text: #211525;
+  --text-muted: #57465e;
   /* 7.0:1 on a card and 4.69 on the ground - over the 4.5 minimum for body text, and still
      clearly softer than --text-muted (8.62), so the hierarchy survives. */
-  --text-faint: #6c5164;
+  --text-faint: #65536c;
   --text-on-accent: #ffffff;
 
   /* A shade deeper than the brand teal's own text tone, so a link still clears 4.5:1 on the
@@ -71,17 +71,17 @@
      planes read as flat; a lighter wash of the ground's orchid separates the chrome
      from the content without drawing attention to itself. */
   --header-bg: #f6d1ea;
-  --nav-bg: #fbdef1;
+  --nav-bg: #f3e0fa;
 
   /* The selected section: a real step, not a slab. A solid fill is the loudest thing on the
      screen and the eye goes there instead of to the content; a deeper orchid, a full-strength
      pink edge and bold text carry it without shouting. 6.7:1. */
-  --nav-active-bg: #e8a5d4;
-  --nav-active-text: #59134a;
+  --nav-active-bg: #d7aae9;
+  --nav-active-text: #4c1b5d;
   --nav-active-edge: #D51A65;
 
   /* Behind a drawer or a dialog: the plum of the dark theme, not a neutral grey. */
-  --scrim: rgb(37 20 32 / 0.45);
+  --scrim: rgb(33 21 37 / 0.45);
   /* A building's margin on the floor plans: one family of greens and blues, a shade per wing. */
   --margin-n: #0e7490;
   --margin-c: #0f766e;
