@@ -35,9 +35,9 @@ type TypeForm = FormGroup<{
     <div class="stack">
       <app-page-intro
         [title]="'Space types' | t"
-        [what]="'What kinds of space the map knows - aula, laboratorio, baño, cuarto de TI - each under the fixed category the apps draw it with.' | t"
-        [can]="[('Add a type the moment you find one' | t), ('Rename a type or move it to another category' | t), ('Delete a type no space uses' | t)]"
-        [note]="'The code is permanent and never shown; the name is what people read. When you cannot tell what a room is, use Sin identificar and come back to it. A type still used by a space cannot be deleted - the refusal says how many use it.' | t"
+        [what]="'The kinds of space the map knows, each under the category the apps draw it with.' | t"
+        [can]="[('Add, rename and delete types' | t)]"
+        [note]="'A type still used by a space cannot be deleted.' | t"
       >
         <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New type' | t }}</button>
       </app-page-intro>

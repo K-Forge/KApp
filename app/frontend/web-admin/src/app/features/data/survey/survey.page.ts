@@ -56,21 +56,32 @@ const CLOSEST = 4;
         </div>
       </header>
       <app-api-error-banner [error]="error()" />
-      <details class="how">
-        <summary>{{ 'How to measure' | t }}</summary>
-        <p>{{ 'Walk the numbers in order, from the corner of Calle 63 and Cra 9 Bis.' | t }}</p>
-        <p><b class="setback-key">{{ 'Orange' | t }}</b>{{ ': from the wall at street level, straight out from it, to the edge of the street (the curb).' | t }}</p>
-        <p><b class="review-key">{{ 'Violet' | t }}</b>{{ ': taken, but to take again. What you took before shows under the box until you type the new one.' | t }}</p>
-        <p><b class="length-key">{{ 'Blue' | t }}</b>{{ ': along the wall, corner to corner, or across a door. Drawn beside its wall, with dotted lines back to the corners it runs between.' | t }}</p>
-        <p>
-          {{ 'Longer than {pieceMetres} m, or with something in the way: in pieces. Type one, tap +, type the next. The model’s figure is only there to catch a slip; what you see on site wins, and anything the sketch gets wrong goes in a note.' | t: { pieceMetres: pieceMetres } }}
-        </p>
-        <p>{{ 'Notes are for what the sketch does not show. For example:' | t }}</p>
-        <ul>
-          @for (n of noteExamples; track n) {
-            <li>{{ n | t }}</li>
-          }
-        </ul>
+      <details class="help how">
+        <summary>
+          <svg class="help-icon" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+            <path d="M2 11.5 11.5 2l2.5 2.5L4.5 14H2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
+            <path d="M9.5 4 12 6.5" stroke="currentColor" stroke-width="1.4" />
+          </svg>
+          {{ 'How to measure' | t }}
+          <svg class="help-chevron" viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
+            <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </summary>
+        <div class="help-body">
+          <p>{{ 'Walk the numbers in order, from the corner of Calle 63 and Cra 9 Bis.' | t }}</p>
+          <ul class="keys">
+            <li><b class="setback-key">{{ 'Orange' | t }}</b> {{ 'wall to curb, straight out, at street level' | t }}</li>
+            <li><b class="length-key">{{ 'Blue' | t }}</b> {{ 'along the wall, corner to corner, or across a door' | t }}</li>
+            <li><b class="review-key">{{ 'Violet' | t }}</b> {{ 'to take again: the earlier figure shows under the box' | t }}</li>
+          </ul>
+          <p>{{ 'Over {pieceMetres} m, or with something in the way: in pieces, with +. The model’s figure only catches a slip; what you see on site wins.' | t: { pieceMetres: pieceMetres } }}</p>
+          <p>{{ 'Notes are for what the sketch does not show, for example:' | t }}</p>
+          <ul>
+            @for (n of noteExamples; track n) {
+              <li>{{ n | t }}</li>
+            }
+          </ul>
+              </div>
       </details>
 
       <div class="work">
@@ -227,8 +238,9 @@ const CLOSEST = 4;
     .head { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; justify-content: space-between; align-items: flex-start; }
     h1 { margin: 0; }
     .status, .steps, .value { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .how { font-size: 0.875rem; }
     .how p { margin: 0.35rem 0; }
+    .how ul { margin: 0.35rem 0; padding-left: 1.2rem; }
+    .how ul.keys { list-style: none; padding: 0; display: grid; gap: 0.2rem; }
     .setback-key { color: #e8590c; }
     .length-key { color: #1c7ed6; }
     .work { display: grid; gap: 0.9rem; }

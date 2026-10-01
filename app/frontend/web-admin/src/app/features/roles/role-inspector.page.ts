@@ -30,9 +30,9 @@ interface InspectedRow {
     <div class="stack">
       <app-page-intro
         [title]="'Who can do what' | t"
-        [what]="'Every endpoint across the services, and which roles the API contract says may call it.' | t"
-        [can]="[('Filter by service, by role, or by path' | t), ('See which operations are public' | t), ('Spot the ones whose contract says nothing usable' | t)]"
-        [note]="'Read from each operation’s x-roles, written from the authorization the services actually enforce — their @PreAuthorize annotations and the map’s security configuration. A row marked “inferred” was guessed from the description’s prose instead, and should be treated as one. Either way, the thing that would fail if a rule and its contract ever disagreed is the backend’s authorization matrix tests; the API console is how you check a single row by hand.' | t"
+        [what]="'Which roles may call each endpoint, as the API contracts say.' | t"
+        [can]="[('Filter by role or by path' | t), ('See which endpoints are public' | t)]"
+        [note]="'A row marked “inferred” was read from the description, not from the rule itself.' | t"
       />
 
       <div class="card stack">

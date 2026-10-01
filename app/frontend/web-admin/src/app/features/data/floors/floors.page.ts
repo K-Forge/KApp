@@ -17,14 +17,9 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
     <div class="stack">
       <app-page-intro
         [title]="'Floor editor' | t"
-        [what]="'Draw each floor of the campus map and put every space in its place - meant for an iPad, standing on the floor being drawn.' | t"
-        [can]="[
-          ('Outline rooms from the evacuation plan, then say which space each one is' | t),
-          ('Load the rooms an information plaque lists, even as a range, and place them one by one' | t),
-          ('Draw corridors in the colour they are painted' | t),
-          ('Mark a floor as a draft or as verified on site' | t)
-        ]"
-        [note]="'Changes stay on this device until the floor is saved, so a dropped connection loses nothing. If somebody else saves the same floor first, the editor says so and lets you choose whose version stays.' | t"
+        [what]="'Draw each floor and put every space in its place, from an iPad on site.' | t"
+        [can]="[('Outline rooms from the evacuation plan' | t), ('Load the rooms a plaque lists' | t), ('Draw corridors' | t), ('Mark a floor as a draft or verified' | t)]"
+        [note]="'Changes stay on this device until you save. If somebody saved first, you choose which version stays.' | t"
       />
 
       <app-api-error-banner [error]="error()" />

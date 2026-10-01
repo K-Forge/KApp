@@ -36,9 +36,9 @@ import { t } from '../../../core/i18n/i18n.service';
     <div class="stack">
       <app-page-intro
         [title]="'Pensums' | t"
-        [what]="'A pensum is one version of a programme’s plan of study: its courses, their levels, their credits and which ones unlock which.' | t"
-        [can]="[('Load one by its code' | t), ('Build one from a PDF by pasting its table' | t), ('Edit the whole document' | t), ('Delete one no student is following' | t)]"
-        [note]="'The pensum is immutable as far as students are concerned — a student’s own rearrangement is a separate plan layered over it, so correcting a pensum here reaches every student without rewriting anybody’s plan. Deleting never cascades: one that students are following is refused with a 409 saying how many.' | t"
+        [what]="'A programme’s plan of study: its courses, levels, credits and prerequisites.' | t"
+        [can]="[('Open one by its code' | t), ('Build one by pasting a PDF’s table' | t), ('Edit or delete it' | t)]"
+        [note]="'Correcting a pensum reaches every student. One that students follow cannot be deleted.' | t"
       >
         <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New pensum' | t }}</button>
       </app-page-intro>

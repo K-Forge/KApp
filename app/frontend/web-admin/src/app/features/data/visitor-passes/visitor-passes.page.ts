@@ -28,9 +28,9 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
     <div class="stack">
       <app-page-intro
         [title]="'Visitor passes' | t"
-        [what]="'A one-day pass reception hands to somebody visiting campus. They redeem it, get 24 hours of map access, and no account is ever created.' | t"
-        [can]="[('Issue a pass and read the code out' | t), ('See who redeemed each one' | t), ('Revoke a pass nobody has used yet' | t)]"
-        [note]="'Not the same thing as an invitation code. A code creates a permanent account for a student or a professor; this creates nothing — it is a token that expires. The register below holds visitors’ identity documents, which is the point of keeping it, and it deletes itself 30 days after each visit.' | t"
+        [what]="'One-day passes for visitors: 24 hours of map access, and no account.' | t"
+        [can]="[('Issue a pass' | t), ('See who used each one' | t), ('Revoke one nobody has used' | t)]"
+        [note]="'The register keeps visitors’ identity documents, and deletes them 30 days after each visit.' | t"
       >
           <button actions type="button" class="btn btn-primary" [disabled]="issuing()" (click)="issue()">
             {{ issuing() ? ('Issuing…' | t) : ('Issue a pass' | t) }}

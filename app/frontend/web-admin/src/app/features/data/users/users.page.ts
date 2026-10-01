@@ -30,9 +30,9 @@ const PAGE_SIZE = 20;
     <div class="stack">
       <app-page-intro
         [title]="'Users' | t"
-        [what]="'Everyone with a KApp account, and the only place to see who they are and switch them on or off.' | t"
-        [can]="[('Search by name or e-mail, accent-insensitively' | t), ('Filter by role and by status' | t), ('Open a profile' | t), ('Deactivate or reactivate an account' | t)]"
-        [note]="'There is deliberately no create or delete here. Accounts are born from registration — a person signs up with an invitation code, which is what decides their role — so creating one here would invent a user that never agreed to anything. Deactivating is the reversible way to take access away.' | t"
+        [what]="'Everyone with a KApp account.' | t"
+        [can]="[('Search by name or e-mail' | t), ('Filter by role and status' | t), ('Deactivate or reactivate an account' | t)]"
+        [note]="'Deactivating takes access away, and can be undone.' | t"
       />
 
       <div class="card stack">

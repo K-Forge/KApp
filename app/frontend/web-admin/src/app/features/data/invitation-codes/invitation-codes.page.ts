@@ -35,9 +35,9 @@ import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
     <div class="stack">
       <app-page-intro
         [title]="'Invitation codes' | t"
-        [what]="'How a student or a professor creates their own KApp account in the mobile app. The code they type decides which role they get.' | t"
-        [can]="[('Create a code for an intake' | t), ('Set how many accounts it may create, and when it expires' | t), ('Deactivate one without losing its history' | t), ('Delete one entirely' | t)]"
-        [note]="'Not the same thing as a visitor pass. A code creates a permanent account for somebody who belongs to the university; a visitor pass is a 24-hour token for somebody who does not, and creates no account at all. ROLE_ADMIN is never grantable by a code — the seeded ones ship in a public repository, so a code that could mint an administrator would let anyone who can read it escalate.' | t"
+        [what]="'The codes students and professors use to create their account; each code sets the role.' | t"
+        [can]="[('Create a code' | t), ('Limit its uses and when it expires' | t), ('Deactivate or delete it' | t)]"
+        [note]="'A code never grants ROLE_ADMIN. For a one-day visit, use a visitor pass.' | t"
       >
         <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New code' | t }}</button>
       </app-page-intro>

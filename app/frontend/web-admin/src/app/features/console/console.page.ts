@@ -29,9 +29,9 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
       <div class="stack console-main">
         <app-page-intro
           [title]="'API console' | t"
-          [what]="'Call any endpoint of the services with your own token, without leaving the browser or writing a curl.' | t"
-          [can]="[('Pick an operation from the contracts' | t), ('Fill path, query and body from the contract examples' | t), ('Send it and read the real response' | t), ('Look back at what you already sent' | t)]"
-          [note]="'It sends your actual token to the actual gateway — this is not a simulation. A DELETE here deletes. It is also the way to verify a row on the “Who can do what” screen: sign in as that role and call it. Service-to-service endpoints under /internal are left out: the gateway does not route them, so every attempt from here would be a 404 that says nothing about whether they work. They are listed on “Who can do what”, marked SERVICE_ONLY.' | t"
+          [what]="'Call any service endpoint with your own token.' | t"
+          [can]="[('Pick an operation' | t), ('Fill it from the contract’s examples' | t), ('Send it and read the answer' | t), ('See what you sent before' | t)]"
+          [note]="'It uses your real token on the real gateway: a DELETE here deletes. Endpoints under /internal are not listed; they are on “Who can do what”.' | t"
         />
 
         <div class="card stack">

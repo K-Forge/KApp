@@ -31,9 +31,9 @@ import { t } from '../../../core/i18n/i18n.service';
     <div class="stack">
       <app-page-intro
         [title]="'Programs' | t"
-        [what]="'The degree programmes the university offers. A programme is the container; the courses live in its pensum.' | t"
-        [can]="[('Create a programme' | t), ('Edit its name, faculty and level' | t), ('Delete one that has no pensum yet' | t), ('Jump to its active pensum' | t)]"
-        [note]="'A programme’s code cannot be changed once it exists: every pensum and every student profile points at it. Deleting never cascades either — a programme that still has a pensum is refused with a 409 naming which one.' | t"
+        [what]="'The degree programmes; their courses live in their pensum.' | t"
+        [can]="[('Create, edit and delete programmes' | t), ('Open a programme’s active pensum' | t)]"
+        [note]="'A programme’s code cannot change, and one with a pensum cannot be deleted.' | t"
       >
         <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New program' | t }}</button>
       </app-page-intro>

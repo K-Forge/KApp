@@ -27,9 +27,9 @@ const MIN_QUERY_LENGTH = 2;
     <div class="stack">
       <app-page-intro
         [title]="'Spaces' | t"
-        [what]="'Every room, office, bathroom, lift and stairwell the map can point at - placed on the grid of its floor, or only inventoried until somebody places it.' | t"
-        [can]="[('Create a space, with or without a place on the grid' | t), ('Edit what it is called, what it is and how to reach it' | t), ('Delete one' | t), ('Search by door number, name or other name' | t), ('List a building, a floor or a category' | t)]"
-        [note]="'The code shown is the one on the door, and a space whose door has no number shows a dash: its internal code is never shown, because a made-up code on screen looks exactly like a real one. Reached via has to name a lift, stairs or entrance of the same building, or the save is refused.' | t"
+        [what]="'Every room, office, bathroom, lift and stair the map can show.' | t"
+        [can]="[('Create, edit and delete spaces' | t), ('Find one by door number or name' | t), ('Filter by building, floor or category' | t)]"
+        [note]="'The code shown is the one on the door; a door with no number shows a dash.' | t"
       >
         <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New space' | t }}</button>
       </app-page-intro>

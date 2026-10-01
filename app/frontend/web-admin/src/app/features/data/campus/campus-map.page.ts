@@ -65,9 +65,9 @@ const BUILDING_COLOR = '#c2185b';
     <div class="stack">
       <app-page-intro
         [title]="'Campus map' | t"
-        [what]="'The campus from above: the city’s blocks and streets, and every building of the university on them, in its place and to scale.' | t"
-        [can]="[('See where each building is and how far apart they are' | t), ('Tell a building’s wings apart' | t), ('Zoom in to see the rooms of a ground floor' | t), ('Open a building’s floors from the map' | t)]"
-        [note]="'North is up. The buildings and the streets are the city’s own cadastre and reference map; a building drawn from its plans is laid over its footprint by where its drawing’s corner is, which way it faces and at what scale.' | t"
+        [what]="'The campus from above, every building in its place and to scale.' | t"
+        [can]="[('See where each building is' | t), ('Tell its wings apart' | t), ('Zoom in to see a ground floor’s rooms' | t), ('Open a building’s floors' | t)]"
+        [note]="'North is up. Streets and blocks come from the city’s own map.' | t"
       />
 
       <app-api-error-banner [error]="error()" />

@@ -21,9 +21,9 @@ import { t } from '../../../core/i18n/i18n.service';
     <div class="stack">
       <app-page-intro
         [title]="'Buildings' | t"
-        [what]="'The buildings of a campus, the wings they are split into and the floors inside each one - with how far each floor is from being trusted.' | t"
-        [can]="[('Create a building with its wings and floors' | t), ('Edit its names, its wings or a floor' | t), ('Delete one that has no spaces on it' | t), ('Find one by code, name or any other name' | t)]"
-        [note]="'A floor is known by its code - S1, P0, P1, MEZZ, T - and its level only orders them, so a mezzanine is 1.5. A floor or a wing that still has spaces cannot be removed - the save is refused naming it - and a building that still has spaces cannot be deleted.' | t"
+        [what]="'Each building of a campus, with its wings and floors.' | t"
+        [can]="[('Create, edit and delete buildings' | t), ('Edit their wings and floors' | t), ('Find one by code or name' | t)]"
+        [note]="'A floor, a wing or a building that still has spaces cannot be removed.' | t"
       >
         <button actions type="button" class="btn btn-primary" (click)="openCreate()">{{ 'New building' | t }}</button>
       </app-page-intro>

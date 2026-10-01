@@ -917,3 +917,96 @@ body::after {
 .badge-neutral {
   border-color: var(--border-strong);
 }
+
+/* ------------------------------------------------------------------ help that folds away
+   "What can I do here?" under each page's title, and the survey's "How to measure": a small pill,
+   closed until somebody needs it, opening onto a card. */
+details.help {
+  margin-top: 0.45rem;
+}
+details.help > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.7rem 0.28rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-elevated) 70%, transparent);
+  /* Body colour: the pill sits on the lit ground, where muted text loses contrast. */
+  color: var(--text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+details.help > summary::-webkit-details-marker {
+  display: none;
+}
+details.help > summary:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+}
+details.help > summary:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+details.help .help-icon {
+  color: var(--brand-teal);
+}
+details.help .help-chevron {
+  transition: transform 0.15s ease;
+}
+details.help[open] .help-chevron {
+  transform: rotate(180deg);
+}
+details.help .help-body {
+  margin-top: 0.55rem;
+  padding: 0.75rem 1rem;
+  max-width: 72ch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  font-size: 0.875rem;
+}
+details.help .help-body > :first-child {
+  margin-top: 0;
+}
+details.help .help-body > :last-child {
+  margin-bottom: 0;
+}
+details.help .help-what {
+  margin: 0 0 0.5rem;
+}
+details.help .help-can {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.3rem;
+}
+details.help .help-can li {
+  position: relative;
+  padding-left: 1.2rem;
+}
+/* A tick rather than a bullet: these are things you can do, not things to read. */
+details.help .help-can li::before {
+  content: '';
+  position: absolute;
+  left: 0.1rem;
+  top: 0.42em;
+  width: 0.5rem;
+  height: 0.28rem;
+  border-left: 2px solid var(--brand-teal);
+  border-bottom: 2px solid var(--brand-teal);
+  transform: rotate(-45deg);
+}
+details.help .help-note {
+  margin: 0.65rem 0 0;
+  padding: 0.45rem 0.7rem;
+  border-left: 3px solid var(--brand-green);
+  background: var(--bg-inset);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.8125rem;
+}
+
