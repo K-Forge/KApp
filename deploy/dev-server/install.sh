@@ -6,7 +6,8 @@
 # Needs Docker with the compose plugin, curl, python3, systemd, and /opt/kapp/.env written first
 # (env.example lists what goes in it). Puts compose.yaml and agent.sh in /opt/kapp, starts
 # kapp-dev-agent.timer, and runs the agent once. Run it again after compose.yaml or the agent
-# change: the agent itself never touches them.
+# change: the agent itself never touches them. It also installs `kapp` (kapp.sh), to switch the
+# extras - users and the semaphore - on and off by hand.
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 [[ $EUID -eq 0 ]] || { echo "run it as root" >&2; exit 1; }
@@ -25,6 +26,7 @@ done
 
 install -m 0644 "$here/compose.yaml" /opt/kapp/compose.yaml
 install -m 0755 "$here/agent.sh" /opt/kapp/agent.sh
+install -m 0755 "$here/kapp.sh" /usr/local/bin/kapp
 install -m 0644 "$here/kapp-dev-agent.service" "$here/kapp-dev-agent.timer" /etc/systemd/system/
 (cd /opt/kapp && docker compose config -q)
 

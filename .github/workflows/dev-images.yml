@@ -29,8 +29,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # What a dev server runs (deploy/dev-server/compose.yaml). A service added there is added here.
-  SERVICES: discovery-server api-gateway auth-service map-service web-admin
+  # What a dev server runs (deploy/dev-server/compose.yaml), the extras included: they are off
+  # until switched on, but their images have to be there. A service added there is added here.
+  SERVICES: discovery-server api-gateway auth-service map-service web-admin user-service semaphore-service
 
 jobs:
   plan:

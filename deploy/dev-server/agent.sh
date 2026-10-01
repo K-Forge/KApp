@@ -11,6 +11,11 @@
 # It never changes compose.yaml or .env: what the containers may do on the host is decided at
 # install, by a person, not by whoever pushes next. A server stopped on purpose - README.md's
 # `stop` leaves /opt/kapp/.stopped - stays stopped.
+#
+# The extras (users and the semaphore) follow the branch too while somebody has them on
+# (`kapp extras on` leaves /opt/kapp/.extras). When the host's available memory drops under
+# EXTRAS_FLOOR_MB the agent switches them off itself, and says so in the journal and in
+# `kapp status`: whatever else the host runs comes first.
 set -euo pipefail
 cd "$(dirname "$0")"
 [[ -e .stopped ]] && exit 0
@@ -19,6 +24,19 @@ exec 9>.agent.lock
 flock -n 9 || exit 0
 # sort and comm must agree on the order, whatever the host's locale.
 export LC_ALL=C
+
+EXTRAS_FLOOR_MB=300
+if [[ -e .extras ]]; then
+  available=$(awk '/^MemAvailable:/ {print int($2 / 1024)}' /proc/meminfo)
+  if (( available < EXTRAS_FLOOR_MB )); then
+    rm -f .extras
+    COMPOSE_PROFILES=extras docker compose rm -sf user-service semaphore-service >/dev/null 2>&1 || true
+    echo "switched off on $(date '+%F %R') by the agent: only $available MB were left on the host" > .extras-auto-off
+    echo "extras switched off: only $available MB available on the host" >&2
+  else
+    export COMPOSE_PROFILES=extras
+  fi
+fi
 
 setting() { sed -n "s/^$1=//p" .env | tail -1; }
 REPO=$(setting KAPP_DEV_REPO); REPO=${REPO:-K-Forge/KApp}

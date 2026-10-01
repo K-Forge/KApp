@@ -26,10 +26,11 @@ nowhere else.
 Any Linux host with Docker (and the compose plugin), curl, python3 and systemd, amd64 or arm64.
 
 1. Copy this directory to it.
-2. Write `/opt/kapp/.env`, mode 0600, from [`env.example`](env.example). The five secrets are the
+2. Write `/opt/kapp/.env`, mode 0600, from [`env.example`](env.example). The secrets are the
    ones in a laptop's `app/backend/microservices/.env`. Never print them, and never commit them.
 3. Run `sudo ./install.sh`. It checks the `.env`, installs [`compose.yaml`](compose.yaml), the
-   agent and its timer, and brings the services up.
+   agent and its timer and the `kapp` command ([`kapp.sh`](kapp.sh)), and brings the services
+   up.
 4. Publish the portal (`127.0.0.1:4300`) and the gateway (`127.0.0.1:8080`) over HTTPS.
    - On a Tailscale host, set `KAPP_DEV_TAILSCALE_SERVE=1` and install does it with
      `tailscale serve`.
@@ -40,6 +41,25 @@ Everything here listens on 127.0.0.1 and nothing is published with `ports:`: the
 what leaves it. The limits in `compose.yaml` suit a host that is lent for other things too. Every
 JVM stays small, and the kernel and the scheduler put the services last. A host with room can
 relax that in `.env`.
+
+## Users and the semaphore, on demand
+
+The map's five services always run. The **extras** - user-service and semaphore-service, which
+the portal's *Users*, *Programs* and *Pensums* pages and registration need - are off until
+somebody switches them on, on the host (an SSH session from a phone will do):
+
+```bash
+kapp extras on       # checks the host has room, pulls them, starts them, waits until they answer
+kapp extras off      # stops them; the map, the portal and signing in keep running
+kapp status          # what runs, what each takes, and how much the host has left
+```
+
+- `on` refuses when the host has under ~950 MB available: the two may take up to ~550 MB, and
+  the rest is the margin the host keeps.
+- While they are on, the agent keeps them on the branch's images like the rest. If the host's
+  available memory falls under 300 MB it switches them off itself, and `kapp status` says when
+  and why. The host's other work comes first.
+- They need `MONGO_USER_URI` and `MONGO_SEMAPHORE_URI` in `.env`; without them they stay off.
 
 ## Running it
 

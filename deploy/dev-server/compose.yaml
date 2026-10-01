@@ -6,10 +6,14 @@
 # address people open, the database credentials, and how much the host lends. Nothing in this file
 # names a host.
 #
-#   - Only the map's services: discovery, gateway, auth, map and the portal. No user-service (only
-#     registration and the portal's Users page use it), no semaphore, schedule or mocks.
-#   - Small heaps, the serial GC and the C1 compiler only: each JVM stays at ~200 MB and all five
-#     under 1.2 GB, so a shared host (the first one also runs a Minecraft server) lends little.
+#   - The map's services always: discovery, gateway, auth, map and the portal.
+#   - user-service and semaphore-service (users, programs and pensums) only when somebody switches
+#     them on: they are the `extras` profile, and `kapp extras on` (kapp.sh) starts them after
+#     checking the host has room. The agent switches them off again on its own when the host runs
+#     short. No schedule service and no mocks.
+#   - Small heaps, the serial GC and the C1 compiler only: each JVM stays at ~200 MB, the five under
+#     1.2 GB and the extras under 560 MB more, so a shared host (the first one also runs a
+#     Minecraft server) lends little.
 #   - oom_score_adj and cpu_shares make this the first thing the host drops when it runs short, and
 #     the last to get the CPU. Both can be set in .env for a host that has room to spare.
 #   - Host networking, everything on 127.0.0.1: a host publishes the portal (4300) and the gateway
@@ -135,6 +139,64 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8085/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 180s
+
+  # The extras: off unless /opt/kapp/.extras exists (kapp.sh writes it). Registration needs
+  # user-service, so it works only while they are on; signing in never does.
+  user-service:
+    <<: *jvm
+    profiles: [extras]
+    image: ${KAPP_DEV_IMAGES:-ghcr.io/k-forge/kapp}-user-service:${KAPP_DEV_TAG:?set KAPP_DEV_TAG in .env}
+    container_name: kapp-user-service
+    mem_limit: 256m
+    memswap_limit: 256m
+    environment:
+      SERVER_PORT: 8082
+      SERVER_ADDRESS: 127.0.0.1
+      MONGODB_URI: ${MONGO_USER_URI:-}
+      KAPP_JWKS_URI: http://127.0.0.1:8081/.well-known/jwks.json
+      EUREKA_URI: http://127.0.0.1:8761/eureka/
+      EUREKA_ENABLED: "true"
+      EUREKA_INSTANCE_IPADDRESS: 127.0.0.1
+      KAPP_LOG_LEVEL: INFO
+      KAPP_INTERNAL_TOKEN: ${KAPP_INTERNAL_TOKEN:?set it in .env}
+      JAVA_OPTS: "-Xmx96m -XX:MaxDirectMemorySize=16m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:CICompilerCount=1 -XX:ReservedCodeCacheSize=48m -XX:MaxMetaspaceSize=160m -Xss512k"
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8082/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 180s
+
+  semaphore-service:
+    <<: *jvm
+    profiles: [extras]
+    image: ${KAPP_DEV_IMAGES:-ghcr.io/k-forge/kapp}-semaphore-service:${KAPP_DEV_TAG:?set KAPP_DEV_TAG in .env}
+    container_name: kapp-semaphore-service
+    mem_limit: 288m
+    memswap_limit: 288m
+    environment:
+      SERVER_PORT: 8083
+      SERVER_ADDRESS: 127.0.0.1
+      MONGODB_URI: ${MONGO_SEMAPHORE_URI:-}
+      KAPP_JWKS_URI: http://127.0.0.1:8081/.well-known/jwks.json
+      EUREKA_URI: http://127.0.0.1:8761/eureka/
+      EUREKA_ENABLED: "true"
+      EUREKA_INSTANCE_IPADDRESS: 127.0.0.1
+      KAPP_LOG_LEVEL: INFO
+      # The programs' catalogue and every pensum's grid weigh a little more than a profile.
+      JAVA_OPTS: "-Xmx112m -XX:MaxDirectMemorySize=16m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:CICompilerCount=1 -XX:ReservedCodeCacheSize=48m -XX:MaxMetaspaceSize=160m -Xss512k"
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8083/actuator/health || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 10
