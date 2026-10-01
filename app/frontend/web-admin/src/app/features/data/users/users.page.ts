@@ -18,8 +18,7 @@ import { locale, t } from '../../../core/i18n/i18n.service';
 import { formatDate } from '@angular/common';
 import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
 import { CopyButtonComponent } from '../../../shared/ui/copy-button/copy-button.component';
-import { INVITATION_ROLES, type InvitationRole } from '../invitation-codes/invitation-code.model';
-import { InvitationCodesService } from '../invitation-codes/invitation-codes.service';
+import { ACCOUNT_ROLES, AccountsService, type AccountRole, type TemporaryPassword } from './accounts.service';
 
 const PAGE_SIZE = 20;
 
@@ -37,23 +36,25 @@ const PAGE_SIZE = 20;
       <app-page-intro
         [title]="'Users' | t"
         [what]="'Everyone with a KApp account.' | t"
-        [can]="[('Invite someone: a code only they can use, for the role you choose' | t), ('Search by name or e-mail' | t), ('Filter by role and status' | t), ('Deactivate or reactivate an account' | t)]"
-        [note]="'The person invited creates the account in the app, with their own password. Deactivating takes access away, and can be undone.' | t"
+        [can]="[('Create an account, with a temporary password to hand over' | t), ('Give someone who forgot theirs a new temporary password' | t), ('Search by name or e-mail' | t), ('Filter by role and status' | t), ('Deactivate or reactivate an account' | t)]"
+        [note]="'A temporary password works for 7 days and signs nobody in by itself: the first time, the person chooses their own. Deactivating takes access away, and can be undone.' | t"
       />
 
-      @if (invited(); as invite) {
-        <div class="card invited" role="status">
-          <p class="invited-head">{{ 'Invitation for {name}' | t: { name: invite.name } }}</p>
-          <p class="invited-code mono">{{ invite.code }}</p>
-          <p class="text-muted invited-when">
-            {{ 'Works once, as {role}, until {date}.' | t: { role: roleLabel(invite.role), date: (invite.expiresAt | localDate) } }}
+      @if (issued(); as given) {
+        <div class="card issued" role="status">
+          <p class="issued-head">{{ given.created ? ('Account created for {name}' | t: { name: given.name }) : ('New temporary password for {name}' | t: { name: given.name }) }}</p>
+          <p class="text-muted issued-email mono">{{ given.password.email }}</p>
+          <p class="issued-code mono">{{ given.password.temporaryPassword }}</p>
+          <p class="text-muted issued-when">
+            {{ 'Temporary: it works until {date}, and the first time it asks for a password of their own.' | t: { date: (given.password.expiresAt | localDate) } }}
           </p>
           <div class="row spread">
-            <app-copy-button [text]="message()" [primary]="true" [label]="'Copy the message for {name}' | t: { name: invite.name }" />
-            <app-copy-button [text]="invite.code" [label]="'Copy only the code' | t" />
-            <button type="button" class="btn btn-sm" (click)="invited.set(null)">{{ 'Dismiss' | t }}</button>
+            <app-copy-button [text]="message()" [primary]="true" [label]="'Copy the message for {name}' | t: { name: given.name }" />
+            <app-copy-button [text]="given.password.temporaryPassword" [label]="'Copy only the password' | t" />
+            <button type="button" class="btn btn-sm" (click)="issued.set(null)">{{ 'Dismiss' | t }}</button>
           </div>
-          <p class="invited-message">{{ message() }}</p>
+          <p class="issued-message">{{ message() }}</p>
+          <p class="text-faint issued-once">{{ 'It is shown only now: the server keeps it only as a hash.' | t }}</p>
         </div>
       }
 
@@ -80,7 +81,7 @@ const PAGE_SIZE = 20;
               <option value="false">{{ 'Deactivated' | t }}</option>
             </select>
           </div>
-          <button type="button" class="btn btn-primary work-create" (click)="openInvite()">{{ 'Invite someone' | t }}</button>
+          <button type="button" class="btn btn-primary work-create" (click)="openCreate()">{{ 'Create an account' | t }}</button>
         </div>
 
         <app-api-error-banner [error]="error()" />
@@ -130,7 +131,11 @@ const PAGE_SIZE = 20;
                   >
                     {{ user.active ? ('Deactivate' | t) : ('Activate' | t) }}
                   </button>
-                  @if (isSelf(user)) {
+                  @if (!isSelf(user)) {
+                    <button type="button" class="btn btn-sm" [disabled]="updatingId() === user.id" (click)="newTemporaryPassword(user)">
+                      {{ 'Temporary password' | t }}
+                    </button>
+                  } @else {
                     <span class="text-muted" style="font-size: 0.75rem">{{ 'you' | t }}</span>
                   }
                 </td>
@@ -150,68 +155,90 @@ const PAGE_SIZE = 20;
       }
     </app-modal>
 
-    <app-modal #inviteModal [title]="'Invite someone' | t" (closed)="inviteError.set(null)">
-      <app-api-error-banner [error]="inviteError()" />
-      <form [formGroup]="inviteForm" (ngSubmit)="sendInvite()" class="stack">
+    <app-modal #createModal [title]="'Create an account' | t" (closed)="createError.set(null)">
+      <app-api-error-banner [error]="createError()" />
+      <form [formGroup]="createForm" (ngSubmit)="createAccount()" class="stack">
         <p class="hint" style="margin:0">
-          {{ 'You get a code that creates one account, with the role you choose here. Give it to the person: they create the account in the app, with their own password.' | t }}
+          {{ 'You get a temporary password to hand over. The first time the person signs in, they choose their own.' | t }}
         </p>
-        <div class="field" [class.invalid]="invalid('name')">
-          <label for="inv-name">{{ 'Name' | t }}</label>
-          <input id="inv-name" type="text" formControlName="name" autocomplete="off" />
-          @if (invalid('name')) {
-            <span class="error">{{ 'Write the name of the person.' | t }}</span>
-          }
+        <div class="row spread">
+          <div class="field" style="flex: 1 1 10rem" [class.invalid]="invalid('firstName')">
+            <label for="acc-first">{{ 'First names' | t }}</label>
+            <input id="acc-first" type="text" formControlName="firstName" autocomplete="off" />
+          </div>
+          <div class="field" style="flex: 1 1 10rem" [class.invalid]="invalid('lastName')">
+            <label for="acc-last">{{ 'Last names' | t }}</label>
+            <input id="acc-last" type="text" formControlName="lastName" autocomplete="off" />
+          </div>
         </div>
         <div class="field" [class.invalid]="invalid('email')">
-          <label for="inv-email">{{ 'E-mail' | t }}</label>
-          <input id="inv-email" type="email" formControlName="email" autocomplete="off" />
+          <label for="acc-email">{{ 'E-mail' | t }}</label>
+          <input id="acc-email" type="email" formControlName="email" autocomplete="off" />
           @if (invalid('email')) {
             <span class="error">{{ 'Write an e-mail address, such as name@konradlorenz.edu.co.' | t }}</span>
           }
         </div>
         <div class="field">
-          <label for="inv-role">{{ 'Role' | t }}</label>
-          <select id="inv-role" formControlName="role">
-            @for (role of inviteRoles; track role) {
+          <label for="acc-role">{{ 'Role' | t }}</label>
+          <select id="acc-role" formControlName="role">
+            @for (role of accountRoles; track role) {
               <option [value]="role">{{ roleLabel(role) }}</option>
             }
           </select>
         </div>
-        <div class="field" [class.invalid]="invalid('days')">
-          <label for="inv-days">{{ 'Days it works' | t }}</label>
-          <input id="inv-days" type="number" formControlName="days" min="1" max="90" />
-          @if (invalid('days')) {
-            <span class="error">{{ 'Between 1 and 90 days.' | t }}</span>
-          }
-        </div>
+        @if (createForm.controls.role.value === 'ROLE_STUDENT') {
+          <div class="row spread">
+            <div class="field" style="flex: 1 1 10rem" [class.invalid]="invalid('studentCode')">
+              <label for="acc-code">{{ 'Student code' | t }}</label>
+              <input id="acc-code" type="text" inputmode="numeric" formControlName="studentCode" autocomplete="off" />
+              @if (invalid('studentCode')) {
+                <span class="error">{{ '6 to 20 digits.' | t }}</span>
+              }
+            </div>
+            <div class="field" style="flex: 1 1 8rem" [class.invalid]="invalid('programCode')">
+              <label for="acc-program">{{ 'Program code' | t }}</label>
+              <input id="acc-program" type="text" inputmode="numeric" formControlName="programCode" placeholder="506" autocomplete="off" />
+              @if (invalid('programCode')) {
+                <span class="error">{{ 'Up to 10 digits.' | t }}</span>
+              }
+            </div>
+          </div>
+        }
         <div class="row">
-          <button type="submit" class="btn btn-primary" [disabled]="inviting()">
-            {{ inviting() ? ('Creating…' | t) : ('Create the invitation' | t) }}
+          <button type="submit" class="btn btn-primary" [disabled]="creating()">
+            {{ creating() ? ('Creating…' | t) : ('Create the account' | t) }}
           </button>
-          <button type="button" class="btn" (click)="inviteModal.close()">{{ 'Cancel' | t }}</button>
+          <button type="button" class="btn" (click)="createModal.close()">{{ 'Cancel' | t }}</button>
         </div>
       </form>
     </app-modal>
   `,
   styles: `
-    .invited {
+    .issued {
       border-color: var(--primary-brand);
     }
-    .invited-head {
+    .issued-head {
       margin: 0;
       font-weight: 600;
     }
-    .invited-code {
-      margin: 0.25rem 0;
+    .issued-email {
+      margin: 0.1rem 0 0;
+    }
+    .issued-code {
+      margin: 0.35rem 0;
       font-size: 1.5rem;
+      font-weight: 700;
       letter-spacing: 0.08em;
       user-select: all;
     }
-    .invited-when {
+    .issued-when {
       margin: 0 0 0.75rem;
     }
-    .invited-message {
+    .issued-once {
+      margin: 0.5rem 0 0;
+      font-size: 0.8125rem;
+    }
+    .issued-message {
       margin: 0.75rem 0 0;
       padding: 0.6rem 0.75rem;
       border-radius: 0.5rem;
@@ -240,31 +267,34 @@ export class UsersPage {
   readonly updatingId = signal<string | null>(null);
 
   @ViewChild('detailModal') private detailModal?: ModalComponent;
-  @ViewChild('inviteModal') private inviteModal?: ModalComponent;
+  @ViewChild('createModal') private createModal?: ModalComponent;
 
-  private readonly invitations = inject(InvitationCodesService);
-  readonly inviteRoles = INVITATION_ROLES;
-  readonly inviting = signal(false);
-  readonly inviteError = signal<ApiError | null>(null);
-  /** The invitation just made, shown once so its code can be handed over. */
-  readonly invited = signal<{ code: string; name: string; email: string; role: InvitationRole; expiresAt: string } | null>(null);
-  inviteForm = this.blankInvite();
+  private readonly accounts = inject(AccountsService);
+  readonly accountRoles = ACCOUNT_ROLES;
+  readonly creating = signal(false);
+  readonly createError = signal<ApiError | null>(null);
+  /** The temporary password just issued, shown once: the server keeps only its hash. */
+  readonly issued = signal<{ password: TemporaryPassword; name: string; created: boolean } | null>(null);
+  createForm = this.blankAccount();
+  /** Bumped to list the users again, after one is created. */
+  private readonly refresh = signal(0);
 
   /** What to send the person, ready to paste into an e-mail or a chat. */
   readonly message = computed(() => {
-    const invite = this.invited();
-    if (!invite) return '';
-    return t('Hi {name}: to create your KApp account as {role}, use the invitation code {code} when you sign up in the app. It works once, until {date}.', {
-      name: invite.name,
-      role: this.roleLabel(invite.role),
-      code: invite.code,
-      date: formatDate(invite.expiresAt, 'dd MMM y, HH:mm', locale()),
+    const given = this.issued();
+    if (!given) return '';
+    return t('Hi {name}: your KApp account is ready. Sign in with {email} and the temporary password {password}; the first time, it asks you to choose your own. It works until {date}.', {
+      name: given.name,
+      email: given.password.email,
+      password: given.password.temporaryPassword,
+      date: formatDate(given.password.expiresAt, 'dd MMM y, HH:mm', locale()),
     });
   });
 
   private debounceHandle?: ReturnType<typeof setTimeout>;
 
   private readonly fetchEffect = effect(() => {
+    this.refresh();
     const filters = {
       page: this.page(),
       size: PAGE_SIZE,
@@ -310,59 +340,88 @@ export class UsersPage {
     this.page.set(page);
   }
 
-  roleLabel(role: InvitationRole): string {
+  roleLabel(role: AccountRole): string {
     return role === 'ROLE_PROFESSOR' ? t('professor') : t('student');
   }
 
-  private blankInvite() {
+  private blankAccount() {
     return new FormGroup({
-      name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(80)] }),
+      firstName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(50)] }),
+      lastName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(50)] }),
       email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email, Validators.maxLength(100)] }),
-      role: new FormControl<InvitationRole>('ROLE_STUDENT', { nonNullable: true }),
-      days: new FormControl(14, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(90)] }),
+      role: new FormControl<AccountRole>('ROLE_PROFESSOR', { nonNullable: true }),
+      studentCode: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^\d{6,20}$/)] }),
+      programCode: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^\d{1,10}$/)] }),
     });
   }
 
-  invalid(name: 'name' | 'email' | 'days'): boolean {
-    const control = this.inviteForm.controls[name];
+  invalid(name: 'firstName' | 'lastName' | 'email' | 'studentCode' | 'programCode'): boolean {
+    const control = this.createForm.controls[name];
     return control.invalid && control.touched;
   }
 
-  openInvite(): void {
-    this.inviteForm = this.blankInvite();
-    this.inviteError.set(null);
-    this.inviteModal?.open();
+  openCreate(): void {
+    this.createForm = this.blankAccount();
+    this.createError.set(null);
+    this.createModal?.open();
   }
 
   /**
-   * An invitation is a code that creates one account: the auth service mints it, with the person
-   * written in its notes, so the codes list says who each one was for. Making the account here,
-   * password and all, would need endpoints neither service has yet.
+   * The account and its profile, at once, with a temporary password to hand over. A student
+   * needs its two codes, which the server checks too; a professor's are not sent.
    */
-  sendInvite(): void {
-    if (this.inviteForm.invalid) {
-      this.inviteForm.markAllAsTouched();
+  createAccount(): void {
+    const raw = this.createForm.getRawValue();
+    const student = raw.role === 'ROLE_STUDENT';
+    if (student && (!raw.studentCode.trim() || !raw.programCode.trim())) {
+      this.createForm.controls.studentCode.setErrors(raw.studentCode.trim() ? null : { required: true });
+      this.createForm.controls.programCode.setErrors(raw.programCode.trim() ? null : { required: true });
+    }
+    if (this.createForm.invalid) {
+      this.createForm.markAllAsTouched();
       return;
     }
-    const raw = this.inviteForm.getRawValue();
-    const name = raw.name.trim();
-    const email = raw.email.trim();
-    const expiresAt = new Date(Date.now() + raw.days * 24 * 60 * 60 * 1000).toISOString();
-    this.inviting.set(true);
-    this.inviteError.set(null);
-    this.invitations
-      .create({ role: raw.role, maxUses: 1, expiresAt, notes: t('For {name} <{email}>', { name, email }).slice(0, 200) })
+    this.creating.set(true);
+    this.createError.set(null);
+    const name = `${raw.firstName.trim()} ${raw.lastName.trim()}`;
+    this.accounts
+      .create({
+        email: raw.email.trim(),
+        firstName: raw.firstName.trim(),
+        lastName: raw.lastName.trim(),
+        role: raw.role,
+        ...(student ? { studentCode: raw.studentCode.trim(), programCode: raw.programCode.trim() } : {}),
+      })
       .subscribe({
-        next: (created) => {
-          this.inviting.set(false);
-          this.inviteModal?.close();
-          this.invited.set({ code: created.code, name, email, role: created.role, expiresAt: created.expiresAt ?? expiresAt });
+        next: (password) => {
+          this.creating.set(false);
+          this.createModal?.close();
+          this.issued.set({ password, name, created: true });
+          this.refresh.update((n) => n + 1);
         },
         error: (err: unknown) => {
-          this.inviting.set(false);
-          this.inviteError.set(err instanceof AppHttpError ? err.apiError : null);
+          this.creating.set(false);
+          this.createError.set(err instanceof AppHttpError ? err.apiError : null);
         },
       });
+  }
+
+  /** For somebody who forgot their password: the one they had stops working at once. */
+  newTemporaryPassword(user: UserProfile): void {
+    if (!window.confirm(t('Give {email} a new temporary password? The one they have stops working at once.', { email: user.email }))) {
+      return;
+    }
+    this.updatingId.set(user.id);
+    this.accounts.issueTemporaryPassword(user.id).subscribe({
+      next: (password) => {
+        this.updatingId.set(null);
+        this.issued.set({ password, name: `${user.firstName} ${user.lastName}`, created: false });
+      },
+      error: (err: unknown) => {
+        this.updatingId.set(null);
+        this.error.set(err instanceof AppHttpError ? err.apiError : null);
+      },
+    });
   }
 
   view(user: UserProfile): void {
@@ -373,8 +432,8 @@ export class UsersPage {
   /**
    * Your own row, which you may not switch off.
    *
-   * <p>Deactivating an account genuinely removes access now, and accounts are born from
-   * registration - an invitation from here is a code, not an account. Turning your own off signs you out of
+   * <p>Deactivating an account genuinely removes access now, and an account created here
+   * signs in with a password that is not the administrator's. Turning your own off signs you out of
    * a portal you cannot let yourself back into; the way back is editing MongoDB by hand. One
    * disabled button is cheaper than that.
    *

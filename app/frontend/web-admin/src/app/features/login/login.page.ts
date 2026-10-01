@@ -15,6 +15,16 @@ interface LoginForm {
   password: FormControl<string>;
 }
 
+interface NewPasswordForm {
+  password: FormControl<string>;
+  repeat: FormControl<string>;
+}
+
+/** The server's 403 for a temporary password: it names the field to send, `newPassword`. */
+export function asksForNewPassword(error: ApiError | null): boolean {
+  return error?.status === 403 && (error.details ?? []).some((issue) => issue.field === 'newPassword');
+}
+
 @Component({
   selector: 'app-login-page',
   imports: [TranslatePipe, ReactiveFormsModule, ApiErrorBannerComponent],
@@ -47,6 +57,34 @@ interface LoginForm {
           </div>
         }
 
+        @if (choosing()) {
+          <!-- A temporary password worked: the person picks their own, and the browser offers to
+               keep it. The address goes with it, hidden, so the password manager files the new
+               password under the right account. -->
+          <form [formGroup]="newPassword" (ngSubmit)="choose()" class="stack">
+            <div class="card choose" role="status">
+              <strong>{{ 'Choose your password' | t }}</strong>
+              <p>{{ 'The one you were given is temporary. The one you choose now is the one you will use from here on; your iPhone or Mac will offer to save it.' | t }}</p>
+            </div>
+            <input type="email" name="username" autocomplete="username" [value]="form.controls.email.value" readonly hidden />
+            <div class="field" [class.invalid]="newInvalid('password')">
+              <label for="new-password">{{ 'New password' | t }}</label>
+              <input id="new-password" type="password" formControlName="password" autocomplete="new-password" />
+              <span class="hint">{{ 'At least 10 characters.' | t }}</span>
+            </div>
+            <div class="field" [class.invalid]="newInvalid('repeat')">
+              <label for="repeat-password">{{ 'The same, again' | t }}</label>
+              <input id="repeat-password" type="password" formControlName="repeat" autocomplete="new-password" />
+              @if (newInvalid('repeat')) {
+                <span class="error">{{ 'The two do not match.' | t }}</span>
+              }
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+              {{ submitting() ? ('Saving…' | t) : ('Save it and sign in' | t) }}
+            </button>
+            <button type="button" class="btn btn-ghost" (click)="backToSignIn()">{{ 'Use another account' | t }}</button>
+          </form>
+        } @else {
         <form [formGroup]="form" (ngSubmit)="submit()" class="stack">
           <div class="field" [class.invalid]="isInvalid('email')">
             <label for="email">{{ 'E-mail' | t }}</label>
@@ -68,6 +106,7 @@ interface LoginForm {
             {{ submitting() ? ('Signing in…' | t) : ('Sign in' | t) }}
           </button>
         </form>
+        }
 
         <app-api-error-banner [error]="error()" />
 
@@ -149,6 +188,14 @@ interface LoginForm {
       margin: 0.35rem 0 0;
       color: var(--text);
     }
+    .choose {
+      padding: 0.75rem 0.9rem;
+      background: var(--bg-inset);
+      box-shadow: none;
+    }
+    .choose p {
+      margin: 0.35rem 0 0;
+    }
     .settings {
       margin-top: 1.5rem;
       font-size: 0.8125rem;
@@ -193,9 +240,26 @@ export class LoginPage {
     password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
 
+  /** The new password the person chooses, once their temporary one has been accepted. */
+  readonly newPassword = new FormGroup<NewPasswordForm>(
+    {
+      password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(10), Validators.maxLength(72)] }),
+      repeat: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    },
+    { validators: (group) => (group.value.password === group.value.repeat ? null : { mismatch: true }) },
+  );
+
+  /** True once login said the password is temporary: the form asks for the person's own. */
+  readonly choosing = signal(false);
   readonly submitting = signal(false);
   readonly error = signal<ApiError | null>(null);
   readonly baseUrl = this.config.baseUrl;
+
+  newInvalid(name: keyof NewPasswordForm): boolean {
+    const control = this.newPassword.controls[name];
+    const mismatch = name === 'repeat' && this.newPassword.hasError('mismatch');
+    return (control.invalid || mismatch) && control.touched;
+  }
 
   isInvalid(name: keyof LoginForm): boolean {
     const control = this.form.controls[name];
@@ -218,15 +282,47 @@ export class LoginPage {
     const { email, password } = this.form.getRawValue();
 
     this.auth.login(email, password).subscribe({
-      next: () => {
+      next: () => this.signedIn(),
+      error: (err: unknown) => {
         this.submitting.set(false);
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/my-token';
-        this.router.navigateByUrl(returnUrl);
+        const apiError = err instanceof AppHttpError ? err.apiError : null;
+        if (asksForNewPassword(apiError)) {
+          this.newPassword.reset();
+          this.choosing.set(true);
+          return;
+        }
+        this.error.set(apiError);
       },
+    });
+  }
+
+  /** The temporary password and the new one, together: the server swaps them and signs in. */
+  choose(): void {
+    if (this.newPassword.invalid || this.submitting()) {
+      this.newPassword.markAllAsTouched();
+      return;
+    }
+    this.submitting.set(true);
+    this.error.set(null);
+    const { email, password } = this.form.getRawValue();
+    this.auth.changePassword(email, password, this.newPassword.getRawValue().password).subscribe({
+      next: () => this.signedIn(),
       error: (err: unknown) => {
         this.submitting.set(false);
         this.error.set(err instanceof AppHttpError ? err.apiError : null);
       },
     });
+  }
+
+  backToSignIn(): void {
+    this.choosing.set(false);
+    this.error.set(null);
+    this.form.controls.password.reset();
+  }
+
+  private signedIn(): void {
+    this.submitting.set(false);
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/my-token';
+    this.router.navigateByUrl(returnUrl);
   }
 }

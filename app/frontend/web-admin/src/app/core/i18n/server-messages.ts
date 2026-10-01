@@ -55,6 +55,16 @@ export const SERVER_MESSAGES = [
   /* i18n */ 'must not be null',
   /* i18n */ 'must not be empty',
   /* i18n */ 'must be a well-formed email address',
+  /* i18n */ 'This password is temporary: choose a new one to sign in',
+  /* i18n */ 'Required: the password is temporary. Send it with a new one to POST /auth/password',
+  /* i18n */ 'The new password must differ from the current one',
+  /* i18n */ 'Must differ from the current password',
+  /* i18n */ 'An account can be created as a student or a professor',
+  /* i18n */ 'ROLE_STUDENT or ROLE_PROFESSOR',
+  /* i18n */ 'must be ROLE_STUDENT or ROLE_PROFESSOR',
+  /* i18n */ 'A student account requires studentCode and programCode',
+  /* i18n */ 'Required for a student',
+  /* i18n */ 'This account signs in through the university, not with a password',
 ];
 
 /** A service's message in the portal's language, when the portal knows it. */

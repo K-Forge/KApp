@@ -4,8 +4,7 @@ import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { TokenStore } from '../../../core/auth/token.store';
-import { InvitationCodesService } from '../invitation-codes/invitation-codes.service';
-import type { InvitationCodeRequest } from '../invitation-codes/invitation-code.model';
+import { AccountsService, type AccountRequest } from './accounts.service';
 import { UsersPage } from './users.page';
 import type { UserProfile } from './user.model';
 
@@ -26,9 +25,15 @@ function profile(id: string): UserProfile {
 
 describe('UsersPage', () => {
   let page: UsersPage;
-  const create = vi.fn((request: InvitationCodeRequest) =>
-    of({ code: 'KL-7K2M-QX9P', role: request.role, maxUses: request.maxUses, timesUsed: 0, active: true, expiresAt: request.expiresAt ?? null, notes: request.notes ?? null }),
-  );
+  const issued = (email: string, role: string) => ({
+    userId: 'u-1',
+    email,
+    role,
+    temporaryPassword: 'K7QM-X2RP-94TB',
+    expiresAt: '2026-10-08T15:00:00Z',
+  });
+  const create = vi.fn((request: AccountRequest) => of(issued(request.email, request.role)));
+  const issueTemporaryPassword = vi.fn(() => of(issued('pepita@kforge.dev', 'ROLE_STUDENT')));
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -40,14 +45,14 @@ describe('UsersPage', () => {
           provide: TokenStore,
           useValue: { decoded: () => ({ claims: { sub: 'me' } }) },
         },
-        { provide: InvitationCodesService, useValue: { create } },
+        { provide: AccountsService, useValue: { create, issueTemporaryPassword } },
       ],
     }).compileComponents();
     page = TestBed.createComponent(UsersPage).componentInstance;
   });
 
-  // Deactivating now genuinely removes access, and an invitation is a code rather than an
-  // account, so switching your own account off means editing MongoDB by hand to get back in.
+  // Deactivating now genuinely removes access, so switching your own account off means editing
+  // MongoDB by hand to get back in.
   it('will not let you switch off your own account', () => {
     expect(page.isSelf(profile('me'))).toBe(true);
   });
@@ -56,30 +61,34 @@ describe('UsersPage', () => {
     expect(page.isSelf(profile('someone-else'))).toBe(false);
   });
 
-  it('invites one person with a code that creates one account, written down as theirs', () => {
-    page.inviteForm.setValue({ name: ' Ana Ruiz ', email: 'ana.ruiz@konradlorenz.edu.co', role: 'ROLE_PROFESSOR', days: 7 });
-    const before = Date.now();
+  it('creates a professor account and shows its temporary password, with the message to send', () => {
+    page.createForm.setValue({ firstName: ' Ana ', lastName: 'Ruiz', email: 'ana.ruiz@konradlorenz.edu.co', role: 'ROLE_PROFESSOR', studentCode: '', programCode: '' });
 
-    page.sendInvite();
+    page.createAccount();
 
-    const request = create.mock.calls.at(-1)![0];
-    expect(request).toMatchObject({ role: 'ROLE_PROFESSOR', maxUses: 1, notes: 'For Ana Ruiz <ana.ruiz@konradlorenz.edu.co>' });
-    const days = (new Date(request.expiresAt!).getTime() - before) / 86_400_000;
-    expect(days).toBeGreaterThan(6.99);
-    expect(days).toBeLessThan(7.01);
-    expect(page.invited()).toMatchObject({ code: 'KL-7K2M-QX9P', name: 'Ana Ruiz', role: 'ROLE_PROFESSOR' });
-    expect(page.message()).toContain('KL-7K2M-QX9P');
-    expect(page.message()).toContain('Ana Ruiz');
+    expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'ana.ruiz@konradlorenz.edu.co', firstName: 'Ana', lastName: 'Ruiz', role: 'ROLE_PROFESSOR' });
+    expect(page.issued()).toMatchObject({ name: 'Ana Ruiz', created: true, password: { temporaryPassword: 'K7QM-X2RP-94TB' } });
+    expect(page.message()).toContain('K7QM-X2RP-94TB');
+    expect(page.message()).toContain('ana.ruiz@konradlorenz.edu.co');
   });
 
-  it('asks for a name and a real e-mail before inviting', () => {
+  it('asks a student account for its two codes before creating it', () => {
     create.mockClear();
-    page.inviteForm.setValue({ name: '', email: 'not an e-mail', role: 'ROLE_STUDENT', days: 14 });
+    page.createForm.setValue({ firstName: 'Pepito', lastName: 'Perez', email: 'pepito@konradlorenz.edu.co', role: 'ROLE_STUDENT', studentCode: '', programCode: '' });
 
-    page.sendInvite();
-
+    page.createAccount();
     expect(create).not.toHaveBeenCalled();
-    expect(page.invalid('name')).toBe(true);
-    expect(page.invalid('email')).toBe(true);
+    expect(page.invalid('studentCode')).toBe(true);
+
+    page.createForm.patchValue({ studentCode: '506999999', programCode: '506' });
+    page.createAccount();
+    expect(create.mock.calls.at(-1)![0]).toMatchObject({ role: 'ROLE_STUDENT', studentCode: '506999999', programCode: '506' });
+  });
+
+  it('gives somebody else a new temporary password once it is confirmed', () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    page.newTemporaryPassword(profile('someone-else'));
+    expect(issueTemporaryPassword).toHaveBeenCalledWith('someone-else');
+    expect(page.issued()).toMatchObject({ created: false });
   });
 });

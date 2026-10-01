@@ -28,6 +28,17 @@ export class AuthService {
   }
 
   /**
+   * A temporary password an administrator issued, swapped for the person's own: the server
+   * answers as login does, so the session starts with the new password.
+   */
+  changePassword(email: string, currentPassword: string, newPassword: string): Observable<TokenResponse> {
+    return this.http.post<TokenResponse>(`${this.config.baseUrl()}/auth/password`, { email, currentPassword, newPassword }).pipe(
+      tap((response) => this.tokenStore.set(response.accessToken)),
+      catchError((err) => throwError(() => new AppHttpError(parseApiError(err)))),
+    );
+  }
+
+  /**
    * Clears the session and leaves the portal.
    *
    * <p>The fallback is not defensive padding. `/login` is a lazily loaded route, and its chunk
