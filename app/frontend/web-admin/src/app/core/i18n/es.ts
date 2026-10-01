@@ -781,6 +781,11 @@ export const ES: Record<string, string> = {
   'to take again': 'por revisar',
   // features/data/survey/survey.page.ts
   'Survey': 'Levantamiento',
+  'The block from outside, measured on site: each number is one distance to take, with a tape or the iPhone’s Measure.': 'La manzana por fuera, medida en sitio: cada número es una distancia por tomar, con cinta o con Medidas del iPhone.',
+  'Take the distances in order and type each one': 'Tomar las distancias en orden y escribir cada una',
+  'Mark one to take again': 'Marcar una para volver a tomarla',
+  'Zoom the sketch with a pinch, or Ctrl/⌘ and the wheel': 'Acercar el croquis pellizcando, o con Ctrl/⌘ y la rueda',
+  'It saves as you type. What you measure on site wins over the model’s figure.': 'Se guarda mientras escribe. Lo que mida en sitio manda sobre la cifra del modelo.',
   'Block {block} · the Edificio Central and what stands round it, from outside ·': 'Manzana {block} · el Edificio Central y lo que lo rodea, por fuera ·',
   'reshape by hand': 'ajustar a mano',
   '1 to take again': '1 por revisar',
@@ -963,9 +968,10 @@ export const ES: Record<string, string> = {
   'yes': 'sí',
   'no': 'no',
   'check manually': 'revisar a mano',
-  // layout/shell/shell.component.ts
+  // layout/nav.ts
   'People and access': 'Personas y acceso',
   'Inspect': 'Inspeccionar',
+  // layout/shell/shell.component.ts
   'Skip to content': 'Saltar al contenido',
   'Hide the menu': 'Ocultar el menú',
   'Show the menu': 'Mostrar el menú',

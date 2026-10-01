@@ -40,9 +40,21 @@ const BY_NAME = new Intl.Collator('es', { sensitivity: 'base', numeric: true });
       >
       </app-page-intro>
 
-      <nav class="tabs" [attr.aria-label]="'Spaces and their types' | t">
-        <a routerLink="." [queryParams]="{}" [class.on]="tab() !== 'types'" [attr.aria-current]="tab() !== 'types' ? 'page' : null">{{ 'Spaces' | t }}</a>
-        <a routerLink="." [queryParams]="{ tab: 'types' }" [class.on]="tab() === 'types'" [attr.aria-current]="tab() === 'types' ? 'page' : null">{{ 'Types of space' | t }}</a>
+      <nav class="page-tabs" [attr.aria-label]="'Spaces and their types' | t">
+        <a routerLink="." [queryParams]="{}" [class.on]="tab() !== 'types'" [attr.aria-current]="tab() !== 'types' ? 'page' : null">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" /></svg>
+          {{ 'Spaces' | t }}
+          @if (tab() !== 'types' && result(); as r) {
+            <span class="tab-count">{{ r.totalElements }}</span>
+          }
+        </a>
+        <a routerLink="." [queryParams]="{ tab: 'types' }" [class.on]="tab() === 'types'" [attr.aria-current]="tab() === 'types' ? 'page' : null">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V4a1 1 0 011-1h8l9 9-9 9-9-9zM7.5 7.5h.01" /></svg>
+          {{ 'Types of space' | t }}
+          @if (types().length) {
+            <span class="tab-count">{{ types().length }}</span>
+          }
+        </a>
       </nav>
 
       @if (tab() === 'types') {

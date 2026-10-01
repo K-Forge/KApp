@@ -930,6 +930,15 @@ body::after {
 details.help {
   margin-top: 0.45rem;
 }
+/* In the page intro's row of help, side by side: open, one grows under its own pill and the
+   others wait beside it, at the same height. */
+.help-row > details.help {
+  margin-top: 0;
+}
+.help-row > details.help[open] {
+  flex: 1 1 26rem;
+  max-width: 72ch;
+}
 details.help > summary {
   display: inline-flex;
   align-items: center;
@@ -1028,25 +1037,74 @@ details.help .help-note {
   margin-left: auto;
 }
 
-/* Two or three views of one section, as tabs: the one shown underlined in the brand's teal. */
-.tabs {
-  display: flex;
-  gap: 0.25rem;
-  border-bottom: 1px solid var(--border);
+/* Two or three views of one section, as a segmented bar under the title: each with its icon and
+   how many it holds, the one shown lifted onto a card in the selected section's violet. Big
+   enough to see as the way between the two, not a line of links under the heading. */
+.page-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--bg-elevated) 55%, transparent);
+  box-shadow: var(--shadow-sm);
 }
-.tabs a {
-  padding: 0.5rem 0.9rem;
-  margin-bottom: -1px;
-  border-bottom: 2px solid transparent;
-  color: var(--text);
-  text-decoration: none;
+.page-tabs a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.75rem;
+  padding: 0.45rem 1.1rem 0.45rem 0.9rem;
+  border-radius: 0.65rem;
+  color: var(--text-muted);
+  font-size: 0.975rem;
   font-weight: 600;
-  font-size: 0.9rem;
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
-.tabs a:hover {
-  border-bottom-color: var(--border-strong);
+.page-tabs a svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
-.tabs a.on {
-  border-bottom-color: var(--brand-teal);
+.page-tabs a:hover {
+  background: var(--bg-hover);
+  color: var(--text);
 }
+.page-tabs a.on {
+  background: var(--nav-active-bg);
+  color: var(--nav-active-text);
+  box-shadow: var(--shadow-sm);
+}
+.page-tabs a:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.tab-count {
+  min-width: 1.6rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 480px) {
+  .page-tabs {
+    display: flex;
+  }
+  .page-tabs a {
+    flex: 1 1 0;
+    justify-content: center;
+    padding-inline: 0.6rem;
+  }
+}
+
 

@@ -1,3 +1,4 @@
+import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, HostListener, Injector, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin, map, switchMap } from 'rxjs';
@@ -35,28 +36,28 @@ const CLOSEST = 4;
  */
 @Component({
   selector: 'app-survey-page',
-  imports: [TranslatePipe, RouterLink, ApiErrorBannerComponent, PinchZoomDirective],
+  imports: [TranslatePipe, RouterLink, ApiErrorBannerComponent, PinchZoomDirective, PageIntroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="survey">
-      <header class="head">
-        <div>
-          <h1>{{ 'Survey' | t }}</h1>
-          <p class="text-muted small">
-            {{ 'Block {block} · the Edificio Central and what stands round it, from outside ·' | t: { block: block } }}
-            <a [routerLink]="['/data/blocks', block]">{{ 'reshape by hand' | t }}</a>
-          </p>
-        </div>
-        <div class="status">
+      <app-page-intro
+        [title]="'Survey' | t"
+        [what]="'The block from outside, measured on site: each number is one distance to take, with a tape or the iPhone’s Measure.' | t"
+        [can]="[('Take the distances in order and type each one' | t), ('Mark one to take again' | t), ('Zoom the sketch with a pinch, or Ctrl/⌘ and the wheel' | t)]"
+        [note]="'It saves as you type. What you measure on site wins over the model’s figure.' | t"
+      >
+        <p lede class="text-muted lede">
+          {{ 'Block {block} · the Edificio Central and what stands round it, from outside ·' | t: { block: block } }}
+          <a [routerLink]="['/data/blocks', block]">{{ 'reshape by hand' | t }}</a>
+        </p>
+        <div actions class="status">
           <span class="badge badge-neutral">{{ done() }} / {{ plan.length }}</span>
           @if (toReview()) {
             <span class="badge review-badge">{{ toReview() === 1 ? ('1 to take again' | t) : ('{n} to take again' | t: { n: toReview() }) }}</span>
           }
           <span class="badge" [class]="stateBadge()">{{ stateText() }}</span>
         </div>
-      </header>
-      <app-api-error-banner [error]="error()" />
-      <details class="help how">
+      <details help class="help how">
         <summary>
           <svg class="help-icon" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
             <path d="M2 11.5 11.5 2l2.5 2.5L4.5 14H2z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" />
@@ -81,8 +82,10 @@ const CLOSEST = 4;
               <li>{{ n | t }}</li>
             }
           </ul>
-              </div>
+        </div>
       </details>
+      </app-page-intro>
+      <app-api-error-banner [error]="error()" />
 
       <div class="work">
         <section class="card sketch-card">
@@ -235,8 +238,8 @@ const CLOSEST = 4;
   `,
   styles: `
     .survey { display: grid; gap: 0.9rem; }
-    .head { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; justify-content: space-between; align-items: flex-start; }
-    h1 { margin: 0; }
+    .survey app-page-intro { display: block; margin-bottom: -1rem; }
+    .lede { margin: 0.1rem 0 0; font-size: 0.8125rem; }
     .status, .steps, .value { display: flex; gap: 0.5rem; flex-wrap: wrap; }
     .how p { margin: 0.35rem 0; }
     .how ul { margin: 0.35rem 0; padding-left: 1.2rem; }

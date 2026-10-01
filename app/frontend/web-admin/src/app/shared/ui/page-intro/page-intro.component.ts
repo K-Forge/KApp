@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { Router } from '@angular/router';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { navEntryFor } from '../../../layout/nav';
 
 /**
  * The heading of a screen, plus a straight answer to "what is this for and what can I do here".
@@ -10,7 +12,11 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
  * component so the shape cannot drift from screen to screen.
  *
  * <p>All of it but the title sits behind "What can I do here?", closed: open on every page it
- * pushed the work below the first screen. The survey's "How to measure" folds the same way.
+ * pushed the work below the first screen. A page with more to explain - the survey's "How to
+ * measure" - puts its own folded help beside it, in the same row, as `[help]`.
+ *
+ * <p>The title carries the sidebar's icon for its section and the group it sits in, so the page
+ * says where you are the way the menu does, and the top of the screen is not one lonely word.
  *
  * @param what  one sentence: what this screen is for. Not a description of the UI
  * @param can   what you can actually do here, one line each. Empty when a screen is read-only,
@@ -25,9 +31,23 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
   template: `
     <div class="page-intro">
       <div class="page-intro-head">
-        <h1>{{ title() }}</h1>
-        <ng-content select="[actions]" />
+        @if (entry; as e) {
+          <span class="page-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path [attr.d]="e.link.icon" /></svg>
+          </span>
+        }
+        <div class="page-title">
+          @if (entry; as e) {
+            <span class="page-group">{{ e.group.title | t }}</span>
+          }
+          <h1>{{ title() }}</h1>
+          <ng-content select="[lede]" />
+        </div>
+        <div class="page-actions">
+          <ng-content select="[actions]" />
+        </div>
       </div>
+      <div class="help-row">
       <!-- Closed until somebody wants it: open, it pushed every page's work below the first screen. -->
       <details class="help">
         <summary>
@@ -55,6 +75,8 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
           }
         </div>
       </details>
+      <ng-content select="[help]" />
+      </div>
     </div>
   `,
   styles: `
@@ -64,16 +86,70 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
     .page-intro-head {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
+      gap: 0.5rem 0.9rem;
       flex-wrap: wrap;
     }
-    .page-intro-head h1 {
+    /* The sidebar's glyph, larger, on a tile of the selected section's colour. */
+    .page-icon {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.9rem;
+      background: var(--nav-active-bg);
+      color: var(--nav-active-text);
+      box-shadow: 0 1px 0 color-mix(in srgb, var(--bg-elevated) 70%, transparent) inset, var(--shadow-sm);
+    }
+    .page-icon svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .page-title {
+      flex: 1 1 14rem;
+      min-width: 0;
+    }
+    .page-group {
+      display: block;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .page-title h1 {
       margin: 0;
+      line-height: 1.15;
+    }
+    .page-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .page-actions:empty {
+      display: none;
+    }
+    /* The help a page folds away, side by side: open, one grows under its own pill and the others
+       wait beside it, at the same height. */
+    .help-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
     }
   `,
 })
 export class PageIntroComponent {
+  /** The sidebar entry this page lives under, for its icon and its group; none for a page off the menu. */
+  protected readonly entry = navEntryFor(inject(Router).url);
+
   readonly title = input.required<string>();
   readonly what = input.required<string>();
   readonly can = input<string[]>([]);
