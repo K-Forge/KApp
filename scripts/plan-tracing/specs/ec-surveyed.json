@@ -6,8 +6,8 @@
   "x why": "The Calle 63 wall of the ground floor (survey 56-62: 5.95 to 6.64 m from the curb; the second floor's rooms start 42 units before it on their plan, the 1.2 m the wing is carried out over the street). The north wing's inner wall, 5.39 m along the Carrera 9 Bis from the corner. The end of the north connection, 6.22 m further. The tower's east face, which did not move.",
   "fit": true,
   "fit why": "Until the architectural plans arrive, the drawings follow the building: every room a wall (0.3 m) inside the floor's margin - the building's parts on that floor, as surveyed - and clear of the stairs and lifts that climb it.",
-  "keep slanted": ["P1-AUD*", "P1-20", "P1-23", "P1-PATIO-CUBIERTO", "P2-16"],
-  "keep slanted why": "Brian: the auditorium keeps the shape its own plan draws, and it stands slanted, along the Carrera 9 Bis; so does the patio behind it, along the lot line with the Casa de Francisco de Paula Velez. Every other room is square, as the building is.",
+  "keep slanted": ["P1-AUD*", "P1-20", "P1-23", "P1-26", "P1-27", "P1-28", "P1-29", "P1-PATIO-CUBIERTO", "P2-AUD*"],
+  "keep slanted why": "Brian: the auditorium keeps the shape its own plan draws, and it stands slanted, along the Carrera 9 Bis; so do the rooms he outlined in it and the patio behind it, along the lot line with the Casa de Francisco de Paula Velez. Every other room is square, as the building is.",
   "stack": {
     "central lifts": {
       "shape": [[929, 479], [1009, 479], [1009, 721], [929, 721]],
@@ -55,38 +55,44 @@
       "y why": "The plan's first row of rooms goes a wall inside the tower's front on the Carrera 9 Bis, and its last a wall inside the back wall, 5.48 m from the Carrera 9A curb (survey 53). The plan's depth between the two, 1643 units, is the measured one, 1638: the plan was only laid 3 m too far back, onto the cadastre's lot line.",
       "groups": [
         {
-          "spaces": ["P1-AUD-VESTIBULO"],
-          "onto": {
-            "from": [[1316, 806], [1513, 819], [1477, 1100], [1303, 1100]],
-            "to": [[1374, 678], [1560, 678], [1505, 1010], [1374, 1010]]
-          },
-          "why": "The lobby is the south connection's ground floor, square with the tower. Its plan leaves a walkway between it and the tower's east face, 144 units wide on the drawing: the way from the public entrance (survey 15, 6.30 m) through to the passage behind. So it goes from that walkway's edge to a wall short of the hall, and from the front to a wall short of the open passage. Its four corners on the plan go to those four."
+          "spaces": ["P1-AUD-TAQUILLA", "P1-AUD-ANTESALA-N"],
+          "x": [[1302, 1462], [1491, 1621]],
+          "y": [[805, 680], [1100, 1001]],
+          "why": "Between the lobby and the hall the plan is square with the tower. Along the street it goes from the end of the public entrance, where the ticket office starts (survey 15, 25), to the hall's north wall; across, from a wall inside the ticket office's glass to the hall's back corner. Brian: the strip the plan draws beside them, with the first-aid sign, is a thick wall and not a room."
         },
         {
-          "spaces": ["P1-AUD*", "P1-20", "P1-23"],
+          "spaces": ["P1-AUDITORIO-SONIA", "P1-AUD-ESCENARIO", "P1-AUD-AUDIOVISUALES", "P1-AUD-ESCALERA", "P1-AUD-UTILERIA", "P1-AUD-SALIDA-SUR", "P1-20", "P1-23", "P1-26", "P1-27", "P1-28", "P1-29"],
           "onto": {
             "from": [[1565, 723], [2157, 912], [2144, 1273], [1477, 1100]],
-            "to": [[1647, 578], [2343, 778], [2343, 1171], [1518, 996]]
+            "to": [[1704, 595], [2343, 779], [2340, 1165], [1622, 1001]]
           },
-          "why": "The auditorium keeps its plan's shape (Brian) and goes where the tape puts it: its front along the blue wall, from the green column (survey 29, 30, 74) to the neighbour's building, and its back along the south wing's, a wall inside both. The four corners are the hall's corner by the lobby, the far end of its front, the far end of its back and the near end of its back."
+          "why": "The auditorium keeps its plan's shape (Brian), so the plan is not stretched: it is turned 1.7 degrees and made 7% larger, which lays its front on the blue wall end to end, from the angle where the slanted wall beside the ticket office meets it (survey 26, 74) to the neighbour's building (survey 24, 65, 66), a wall inside. The four corners are that angle, the far end of the front, and the two ends of the plan's back wall taken along. The back then stands 0.5 to 1.3 m short of the lot line the cadastre gives the south wing: nobody has measured the patio behind it."
         }
       ],
       "limits": [
         {
-          "space": "P1-AUDITORIO-SONIA",
-          "carve": [[1470, 678], [1647, 678], [1647, 576]],
-          "why": "The ticket office stands in front of the hall, between the public entrance and the green column: the building's front is 3.06 m further back there (survey 29, 30). The plan draws that step as a slanted corner; the hall goes round it, a wall inside."
-        },
-        {
           "space": "P1-AUD-SALIDA-SUR",
           "side": [[2234, 790], [2343, 821]],
           "of": [2300, 1000],
-          "why": "Past the blue wall the front steps in 1.2 m and runs grey to the neighbour's building, with the south exit's door on it (survey 24, 33, 34). The plan draws one straight front; the exit's stops a wall inside the grey stretch."
+          "why": "Past the blue wall the front steps in 1.2 m and runs grey to the neighbour's building, with the south exit's door on it (survey 65-67). The plan draws one straight front; the room stops a wall inside the grey stretch."
         },
         {
-          "space": "P1-AUD-VESTIBULO",
-          "below": 1010,
-          "why": "The lobby ends a wall short of the open passage."
+          "space": "P1-29",
+          "side": [[2234, 790], [2343, 821]],
+          "of": [2300, 1000],
+          "why": "Past the blue wall the front steps in 1.2 m and runs grey to the neighbour's building, with the south exit's door on it (survey 65-67). The plan draws one straight front; the room stops a wall inside the grey stretch."
+        },
+        {
+          "space": "P1-AUDITORIO-SONIA",
+          "side": [[1643, 680], [1704, 595]],
+          "of": [1800, 800],
+          "why": "Brian: between the ticket office and the blue wall the front is one slanted wall, the angle at survey 26, and not the square corner drawn before. The room stops a wall inside it."
+        },
+        {
+          "space": "P1-26",
+          "side": [[1643, 680], [1704, 595]],
+          "of": [1800, 800],
+          "why": "Brian: between the ticket office and the blue wall the front is one slanted wall, the angle at survey 26, and not the square corner drawn before. The room stops a wall inside it."
         }
       ],
       "corridors": [
@@ -101,26 +107,32 @@
           "code": "PAS-TRANSVERSAL",
           "name": "Pasillo transversal",
           "color": "#5B8DEF",
-          "path": [[115, 858], [1238, 858]],
-          "why": "The PE's route from the exit on the Calle 63, under the north stair and the central lifts and stairs, to the walkway beside the auditorium's lobby."
+          "path": [[115, 858], [1172, 858]],
+          "why": "The PE's route from the exit on the Calle 63, under the north stair and the central lifts and stairs, to the door of the auditorium's lobby."
         },
         {
           "code": "PAS-SALIDA-9A",
           "name": "Paso a la salida de la Carrera 9A",
           "color": "#5B8DEF",
           "placed": true,
-          "path": [[1315, 760], [1315, 1880], [1448, 1880], [1448, 2150]],
-          "why": "The PE's route down the walkway beside the lobby and the open passage beside the Casa de Francisco de Paula Velez, drawn where the survey found the way out: round the central wing's one-floor piece and through the gate between the booth at its corner and the casa's wall (survey 69-71)."
+          "path": [[1357, 1012], [1357, 1880], [1448, 1880], [1448, 2150]],
+          "why": "The PE's route from the lobby's back door down the open passage beside the Casa de Francisco de Paula Velez, drawn where the survey found the way out: round the central wing's one-floor piece and through the gate between the booth at its corner and the casa's wall (survey 69-71)."
         },
         {
           "code": "PAS-SALON",
           "name": "Paso por el salon central",
           "color": "#5B8DEF",
-          "path": [[966, 2086], [966, 1310], [1238, 1310]],
+          "path": [[966, 2086], [966, 1310], [1282, 1310]],
           "why": "The PE's route across the central hall, out to the passage."
         }
       ],
       "add": [
+        {
+          "code": "P1-AUD-VESTIBULO",
+          "shape": [[1257, 678], [1450, 678], [1450, 1010], [1257, 1010]],
+          "doors": [[[1257, 740], [1257, 780]], [[1317, 678], [1397, 678]], [[1337, 1010], [1377, 1010]], [[1450, 782], [1450, 822]]],
+          "why": "Brian: the lobby is the south connection's whole ground floor. The auditorium's plan does not draw it; he sketched it above the plan with its four doors: to the central wing, the public entrance on the Carrera 9 Bis (survey 15, 6.30 m of front), one at the back and the one through the thick wall to the north anteroom, beside the ticket office. A wall inside the connection, as surveyed; where on each wall a door stands is as he sketched it, not measured."
+        },
         {
           "code": "P1-PATIO-CUBIERTO",
           "name": "Patio cubierto",
@@ -137,12 +149,12 @@
       "y why": "This plan was laid in the frame higher than P1's: its first row goes a wall inside the tower's front, and the long room at the back of the tower a wall inside the back wall. Its depth comes out 5% smaller, the same 5% the plans' widths do.",
       "groups": [
         {
-          "spaces": ["P2-16"],
+          "spaces": ["P2-AUD*"],
           "onto": {
-            "from": [[1564, 530], [2175, 739], [2170, 1146], [1491, 957]],
-            "to": [[1647, 578], [2343, 778], [2343, 1171], [1518, 996]]
+            "from": [[1565, 723], [2157, 912], [2144, 1273], [1477, 1100]],
+            "to": [[1704, 595], [2343, 779], [2340, 1165], [1622, 1001]]
           },
-          "why": "The auditorium rises through P1 and P2: the plan paints its silhouette here, and it goes onto the same four corners as the hall below."
+          "why": "The two blocks of seats Brian marked as repeated on the second floor, on the same four corners as the hall below."
         }
       ],
       "limits": [
@@ -150,16 +162,6 @@
           "space": "P2-15",
           "left of": 646,
           "why": "Brian: the reception rises through P1 and P2. P2 has no room over it, the tower's front; the box keeps the north connection's part, which ends 6.22 m from the north wing."
-        },
-        {
-          "space": "P2-16",
-          "carve": [[1470, 678], [1647, 678], [1647, 576]],
-          "why": "The ticket office stands in front of the hall, between the public entrance and the green column: the building's front is 3.06 m further back there (survey 29, 30). The plan draws that step as a slanted corner; the hall goes round it, a wall inside."
-        },
-        {
-          "space": "P2-16",
-          "carve": [[2231, 670], [2234, 790], [2372, 830]],
-          "why": "Past the blue wall the front steps in 1.2 m and runs grey to the neighbour's building (survey 33, 34). The plan draws one straight front; the silhouette goes round the step, a wall inside."
         },
         {
           "space": "P2-23",
@@ -171,7 +173,11 @@
           "below": 2034,
           "why": "It reaches from the north connection a hand into the north wing, and the connection's back wall stands 2.1 m behind the wing's, behind its planters, as Brian set it: the room ends with the connection."
         }
-      ]
+      ],
+      "drop": {
+        "P2-16": "The plan paints the auditorium's whole silhouette on the second floor. Brian: the hall rises through both floors, and only two blocks of seats are repeated up here; those are drawn instead."
+      }
     }
-  }
+  },
+  "marked": "traced/ec-{floor}-auditorio.json"
 }

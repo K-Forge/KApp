@@ -27,6 +27,12 @@ The spec:
                                            from there again, so a floor registered once can be
                                            registered anew when the building is measured. Without
                                            it the floor in the seed is what moves
+     "marked": "traced/ec-{floor}-auditorio.json",
+                                           rooms somebody outlined by hand over the plan's photo
+                                           (strokes.py), in the drawing's units too: laid over the
+                                           traced floor before anything moves. A room it names
+                                           takes its outline, name and doors from there; one it
+                                           gives no outline ("shape": null) is left for "add"
      "floors": {"P1": {
         "y": [[574, 479], [2217, 2107]],   this floor's own pairs, when its plan was laid in the
                                            frame apart from the others' ("x" likewise)
@@ -65,7 +71,7 @@ The spec:
                                            evacuation plans paint them as green arrows; with
                                            "placed": true the path is where the route is already
         "add": [{"code": "P3-JARDIN-INTERNO", "name": "...", "typeCode": "TERRACE", "wing": "N",
-                 "shape": [[458, 474], ...], "why": "..."}]
+                 "shape": [[458, 474], ...], "doors": [[[458, 500], [458, 540]]], "why": "..."}]
                                            a space the plan does not draw and somebody saw on
                                            site, where the spec puts it; for an inventoried space
                                            the plan leaves unplaced, its code and shape only
@@ -130,7 +136,7 @@ def onto(corners, places):
     return move
 
 
-def start_over(floor, traced, added):
+def start_over(floor, traced, added, marked=None):
     """The floor's rooms as they were traced, before any registration: shapes and doors from
     `traced`, by code. A room an earlier fit left out comes back; one the spec adds, or that nobody
     drew, has no shape again. Names, types, wings and doors' codes stay as the floor has them."""
@@ -143,13 +149,25 @@ def start_over(floor, traced, added):
             if source.get("doors"):
                 sp["doors"] = source["doors"]
         elif sp.get("shape"):
-            if sp["code"] not in added:
+            if sp["code"] not in added and sp["code"] not in {m["code"] for m in (marked or {}).get("spaces", [])}:
                 sys.exit(f"{floor['code']}: {sp['code']} is drawn and is neither traced nor added by the spec")
             sp["shape"], sp["doors"] = None, []
     floor["spaces"] += list(drawn.values())
-    floor["spaces"].sort(key=lambda sp: sp["code"])
     floor["width"], floor["height"] = traced["width"], traced["height"]
     floor.pop("corridors", None)
+    # What somebody marked on the plan by hand comes over the tracing: outlines, names, new rooms.
+    for mark in (marked or {}).get("spaces", []):
+        sp = next((x for x in floor["spaces"] if x["code"] == mark["code"]), None)
+        if sp is None:
+            floor["spaces"].append(dict(mark))
+            continue
+        sp.update({k: v for k, v in mark.items() if k not in ("shape", "doors")})
+        if "shape" in mark:
+            sp["shape"] = mark["shape"]
+            sp.pop("doors", None)
+            if mark.get("doors"):
+                sp["doors"] = mark["doors"]
+    floor["spaces"].sort(key=lambda sp: sp["code"])
     return sorted(drawn)
 
 
@@ -376,6 +394,7 @@ def fit(spec, rules, building, floor, code):
         shape = tidy(cut)
         sp["shape"] = [{"x": x, "y": y} for x, y in shape]
         sp["doors"] = [d for d in sp.get("doors") or [] if on_edge(shape, (d["from"]["x"], d["from"]["y"]), (d["to"]["x"], d["to"]["y"]))]
+        notes.append(f"  {sp['code']} cut to the margin")
     if gone:
         notes.append(f"  outside the building, dropped: {', '.join(gone)}")
     if unplaced:
@@ -437,7 +456,12 @@ def main():
     if spec.get("traced"):
         source = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
                               spec["traced"].format(floor=args.floor.lower()))
-        back = start_over(floor, json.load(open(source)), {a["code"] for a in rules.get("add", [])})
+        marks = None
+        if spec.get("marked"):
+            path_of_marks = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
+                                         spec["marked"].format(floor=args.floor.lower()))
+            marks = json.load(open(path_of_marks)) if os.path.exists(path_of_marks) else None
+        back = start_over(floor, json.load(open(source)), {a["code"] for a in rules.get("add", [])}, marks)
     elif width and floor["width"] == width:
         sys.exit(f"{args.floor} is {width} wide already: it has been registered")
 
@@ -555,12 +579,13 @@ def main():
         known = next((sp for sp in floor["spaces"] if sp["code"] == added["code"]), None)
         if known and known.get("shape"):
             sys.exit(f"{args.floor} has {added['code']} drawn already")
+        doors = [{"from": {"x": a[0], "y": a[1]}, "to": {"x": b[0], "y": b[1]}} for a, b in added.get("doors", [])]
         if known:
-            known["shape"], known["doors"] = shape, []
+            known["shape"], known["doors"] = shape, doors
             moved.append(f"  {added['code']} placed")
             continue
         floor["spaces"].append({"code": added["code"], "wing": added["wing"], "name": added["name"],
-                                "typeCode": added["typeCode"], "aliases": [], "shape": shape, "doors": []})
+                                "typeCode": added["typeCode"], "aliases": [], "shape": shape, "doors": doors})
         moved.append(f"  added {added['code']}")
     # In the order scripts/export-map-snapshot.py writes a floor, so an export changes nothing.
     order = ["code", "level", "name", "status", "accessibility", "note", "width", "height", "top",

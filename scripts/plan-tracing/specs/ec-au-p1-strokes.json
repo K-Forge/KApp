@@ -1,0 +1,312 @@
+{
+ "frame": "ec-au-p1-pe.json",
+ "out": "../traced/ec-p1-auditorio.json",
+ "building": "EC",
+ "floor": "P1",
+ "why": "The auditorium as Brian outlined it by hand over its evacuation plan on 2026-10-02 (EC-AU-P1-PE.HEIC now carries his strokes): a loop round every room and its name inside. In the drawing's units, before register.py moves anything. He added by word: the strip with the first-aid sign between the lobby and the north anteroom is a thick wall, not a room, with one door through it beside the ticket office; S.I. is a space he could not identify, which may be empty or a column.",
+ "rooms": [
+  {
+   "code": "P1-AUD-TAQUILLA",
+   "wing": "S",
+   "name": "Taquilla del auditorio",
+   "typeCode": "ADMIN_OFFICE",
+   "aliases": [
+    "taquilla"
+   ],
+   "strokes": [
+    "green"
+   ],
+   "at": [
+    0.4525,
+    0.2482
+   ],
+   "within": [
+    [
+     0.431,
+     0.1907
+    ],
+    [
+     0.482,
+     0.2627
+    ]
+   ]
+  },
+  {
+   "code": "P1-AUD-ANTESALA-N",
+   "wing": "S",
+   "name": "Antesala norte del auditorio",
+   "typeCode": "CORRIDOR",
+   "aliases": [
+    "antesala"
+   ],
+   "strokes": [
+    "orange"
+   ],
+   "at": [
+    0.3499,
+    0.2934
+   ],
+   "less": [
+    "P1-AUD-TAQUILLA"
+   ],
+   "doors": [
+    [
+     0.4225,
+     0.244
+    ],
+    [
+     0.404,
+     0.31
+    ],
+    [
+     0.333,
+     0.2787
+    ]
+   ]
+  },
+  {
+   "code": "P1-AUDITORIO-SONIA",
+   "wing": "S",
+   "name": "Auditorio Sonia Fajardo Forero",
+   "typeCode": "AUDITORIUM",
+   "aliases": [
+    "auditorio",
+    "Sonia Fajardo Forero"
+   ],
+   "strokes": [
+    "cyan"
+   ],
+   "at": [
+    0.4001,
+    0.3732
+   ],
+   "less": [
+    "P1-AUD-ESCENARIO"
+   ],
+   "doors": [
+    [
+     0.404,
+     0.3153
+    ],
+    [
+     0.306,
+     0.6567
+    ]
+   ],
+   "level": 0
+  },
+  {
+   "code": "P1-AUD-AUDIOVISUALES",
+   "wing": "S",
+   "name": "Audiovisuales del auditorio",
+   "typeCode": "IT_ROOM",
+   "aliases": [
+    "audiovisuales"
+   ],
+   "strokes": [
+    "blue"
+   ],
+   "at": [
+    0.4762,
+    0.5047
+   ],
+   "level": 0
+  },
+  {
+   "code": "P1-AUD-ESCALERA",
+   "wing": "S",
+   "name": "Escalera del auditorio",
+   "typeCode": "STAIRS",
+   "aliases": [],
+   "strokes": [
+    "blue",
+    "orange",
+    "purple"
+   ],
+   "at": [
+    0.3702,
+    0.7453
+   ],
+   "as": "inside",
+   "letters": 10,
+   "level": 0
+  },
+  {
+   "code": "P1-AUD-UTILERIA",
+   "wing": "S",
+   "name": "Utilería del auditorio",
+   "typeCode": "STORAGE",
+   "aliases": [
+    "utilería"
+   ],
+   "strokes": [
+    "purple"
+   ],
+   "at": [
+    0.2562,
+    0.6907
+   ],
+   "doors": [
+    [
+     0.2465,
+     0.7333
+    ]
+   ],
+   "level": 0
+  },
+  {
+   "code": "P1-AUD-SALIDA-SUR",
+   "wing": "S",
+   "name": "Antesala sur del auditorio",
+   "typeCode": "CORRIDOR",
+   "aliases": [
+    "antesala",
+    "salida sur del auditorio"
+   ],
+   "strokes": [
+    "orange"
+   ],
+   "at": [
+    0.3882,
+    0.7089
+   ],
+   "less": [
+    "P1-AUD-ESCALERA"
+   ],
+   "doors": [
+    [
+     0.306,
+     0.6693
+    ],
+    [
+     0.416,
+     0.7267
+    ]
+   ],
+   "level": 0
+  },
+  {
+   "code": "P1-26",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "close": 1,
+   "at": [
+    0.4982,
+    0.3738
+   ],
+   "pen": 3,
+   "level": 0
+  },
+  {
+   "code": "P1-27",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "close": 1,
+   "at": [
+    0.4859,
+    0.4525
+   ],
+   "pen": 3,
+   "level": 0
+  },
+  {
+   "code": "P1-28",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "close": 1,
+   "at": [
+    0.467,
+    0.5739
+   ],
+   "pen": 3,
+   "level": 0
+  },
+  {
+   "code": "P1-29",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "close": 1,
+   "at": [
+    0.4291,
+    0.6843
+   ],
+   "pen": 3,
+   "level": 0
+  },
+  {
+   "code": "P1-20",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "close": 1,
+   "pen": 3,
+   "at": [
+    0.3363,
+    0.3439
+   ],
+   "level": 0
+  },
+  {
+   "code": "P1-23",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "close": 3,
+   "pen": 3,
+   "at": [
+    0.2808,
+    0.6215
+   ],
+   "level": 0
+  }
+ ],
+ "named": [
+  {
+   "code": "P1-AUD-VESTIBULO",
+   "name": "Lobby del auditorio",
+   "aliases": [
+    "lobby",
+    "vestíbulo del auditorio",
+    "foyer del auditorio"
+   ],
+   "shape": null
+  },
+  {
+   "code": "P1-AUD-ESCENARIO",
+   "name": "Tarima del auditorio",
+   "aliases": [
+    "tarima",
+    "escenario",
+    "escenario del auditorio"
+   ]
+  }
+ ],
+ "given": {
+  "file": "../traced/ec-p1.json",
+  "codes": [
+   "P1-AUD-ESCENARIO"
+  ]
+ }
+}

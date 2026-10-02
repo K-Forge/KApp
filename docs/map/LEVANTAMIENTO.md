@@ -92,6 +92,21 @@ Brian lo estableció en sitio, y las fotos lo confirman:
   - La escalera norte queda al frente del ala norte, sobre la Carrera 9 Bis. La escalera principal
     queda tan honda como los ascensores, como la dibujan esos dos planos.
   - **Falta:** del P3 al P8 siguen sobre el catastro, con la escalera norte donde él ponía el ala.
+- **El auditorio, como Brian lo marcó a mano** sobre su PE (2 de octubre; la foto
+  `EC-AU-P1-PE.HEIC` lleva sus trazos). `scripts/plan-tracing/strokes.py` lee cada contorno que
+  dibujó, color por color, y `specs/ec-au-p1-strokes.json` dice cuál es cuál.
+  - De norte a sur: el **lobby** (toda la conexión sur; el PE no lo dibuja), un **muro grueso** con
+    el botiquín pegado y una sola puerta, la **taquilla** en ese muro sobre la calle, la **antesala
+    norte**, la sala con su **tarima**, **audiovisuales**, la **antesala sur** con la escalera y la
+    puerta del tramo gris, y **utilería** al fondo. Los "S.I." son espacios sin identificar: pueden
+    ser vacíos o columnas.
+  - **En el P2** solo se repiten dos bloques de sillas; el resto de la sala sube los dos pisos.
+  - **La esquina junto a la taquilla es un muro en ángulo**, no una esquina cuadrada: va del final
+    de la taquilla al comienzo del muro azul. Las medidas 26 y 74 son sus dos catetos.
+  - El PE del auditorio no se estira: se gira 1,7° y se agranda 7 % para que su frente caiga sobre
+    el muro azul medido. Así el fondo queda entre 0,5 y 1,3 m antes del lindero que el catastro le
+    da al ala sur; el patio cubierto puede ser ese tanto más ancho. La medida 83 lo resuelve.
+  - Dónde queda cada puerta del lobby en su muro es como él la dibujó, no medido.
 - **Atrás, sobre la Carrera 9A, solo salen el ala norte y la torre.** La conexión norte queda
   detrás de unas materas elevadas cuyo frente sigue el de las alas: por eso la cinta dio una línea
   recta. Street View (2023), desde tres puntos de la calle, pone su muro a 1,5 m del frente de la

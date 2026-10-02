@@ -175,8 +175,11 @@ BLUE = lambda y: SC + 3.06 + SLOPE * (y - TICKET[1])
 down = lambda p, d: (p[0] + SLOPE * d / ALONG, p[1] + d / ALONG)  # d metres south along the blue wall's line
 FROM_BLUE = (1, -SLOPE)  # straight out from the blue wall, towards the curb
 INWARD = (-1 / ALONG, SLOPE / ALONG)
-COLUMN = (BLUE(TICKET[1]), TICKET[1])  # the green column's corner, where the wall comes out
-AU = {1: down(COLUMN, 1.87)}  # the blue wall's north end, past the column
+# Brian, 2026-10-02, on the auditorium's own plan: from the end of the ticket office the front goes
+# out to the blue wall in one slanted wall, an angle and not a square corner. COLUMN is where the blue
+# wall's line meets the ticket office's end: no wall stands there, 26 and 74 are that slant's two legs.
+COLUMN = (BLUE(TICKET[1]), TICKET[1])
+AU = {1: down(COLUMN, 1.87)}  # the blue wall's north end, where the slanted wall meets it
 AU[2] = down(AU[1], 16.76)
 AU[3] = (AU[2][0] + 1.20 * INWARD[0], AU[2][1] + 1.20 * INWARD[1])  # the grey stretch's corner
 grey = lambda d: down(AU[3], d)  # d metres along the grey stretch
@@ -192,7 +195,7 @@ length('bis-33', B, AU[3], AU[4], "The grey stretch past the blue wall, its whol
 length('bis-34', B, AU[3], grey(1.35), "The grey stretch's door: its width, from the step in the wall")
 length('bis-29', B, K[7], TICKET, "The auditorium's ticket office: its width, from the public entrance to the green column")
 length('bis-30', B, TICKET, COLUMN, "How far the auditorium's blue wall stands out past the ticket office")
-length('bis-36', B, COLUMN, AU[1], "The green column: its width on the street, from the ticket office to the blue wall")
+length('bis-36', B, COLUMN, AU[1], "The slanted wall between the ticket office and the blue wall: how far it runs along the street")
 length('bis-31', B, AU[4], (-19.11, 68.59), "How far the neighbour's building comes out past the auditorium")
 
 # ---- Calle 62: the neighbour's curved corner, then the Tienda K.
@@ -277,6 +280,9 @@ length('in-04', IN, TALL, END, "The tall building's wall along the passage: from
 length('in-05', IN, (-50.0, 36.29), (-50.0, casa(-50.0)), "The passage's width near the exit: from the tall building's wall to the casa's wall")
 length('in-06', IN, (-35.0, 36.30), (-35.0, casa(-35.0)), "The passage's width near its far end: from the tall building's wall to the casa's wall")
 length('in-07', IN, END, (-29.77, 43.80), "The wall that closes the passage's far end: from the tall building to its other corner")
+# The auditorium's plan, laid on the blue wall without stretching it, ends 0.5 to 1.3 m short of the lot
+# line the cadastre gives the south wing: the patio behind it may be that much wider than drawn.
+length('in-08', IN, (-32.23, 55.31), (-35.36, 55.31), "The covered patio behind the auditorium: its width, from the auditorium's back wall to the casa's wall")
 
 # ---- Calle 63, east, back to the start: the north wing's front, from the corner to the admissions
 # door, past the door to the stairs, and past the stairs to the corner on the plaza.
@@ -300,7 +306,7 @@ NUMBERED = ['bis-01', 'bis-02', 'bis-03', 'bis-04', 'bis-05', 'bis-06', 'bis-07'
             'a-06', 'a-07', 'a-08', 'a-09', 'a-10', 'a-11', 'a-12', 'a-13', 'a-14', 'a-15', 'a-16', 'a-17', 'a-18',
             'a-19', 'c63-01', 'c63-02', 'c63-03', 'c63-04', 'c63-05', 'c63-06', 'c63-07', 'c63-08', 'c63-09',
             'bis-32', 'bis-33', 'bis-34', 'bis-35', 'a-20', 'a-21', 'a-22', 'a-23', 'a-24', 'bis-36', 'a-25',
-            'in-01', 'in-02', 'in-03', 'in-04', 'in-05', 'in-06', 'in-07']
+            'in-01', 'in-02', 'in-03', 'in-04', 'in-05', 'in-06', 'in-07', 'in-08']
 # The numbers people wrote down on site: a distance taken off the plan leaves its number unused, and a
 # new one is added at the end of this list, never in between.
 for d in PLAN:
@@ -312,12 +318,13 @@ assert len({d['id'] for d in PLAN}) == len(PLAN)
 HINTS = {
     'bis-17': "The auditorium's public entrance: from the south connection to the ticket office.",
     'bis-19': 'Street View (2025): the ticket office is the glass on a few steps beside the lime-green panel. Measure from its glass, past the steps.',
-    'bis-36': 'New: the lime-green column between the ticket office and the blue wall. The lengths taken either side of it leave it about 1.9 m.',
+    'bis-36': 'The front goes from the end of the ticket office out to the blue wall in one slanted wall. 26 is how far out it comes; this is how far it runs along the street, and the lengths taken either side leave it about 1.9 m.',
     'a-18': 'Street View (2023): raised planters run along this corner. Measure along the wall behind them.',
     'a-19': 'Street View (2023): raised planters stand between the wall and the sidewalk. Measure from the wall, behind them.',
     'a-20': 'Street View (2023): a small white booth with a window, against the central wing, beside the gate.',
     'a-25': "New: the wall with the two rows of windows between the north wing and the parking entrance stands behind the planters. Measure from the planters' front, in line with the parking entrance's column, straight back to that wall. The outline draws it 2.1 m.",
     'c63-01': 'Street View (2023): the planters wrap round the corner. Measure from the wall, behind them.',
+    'in-08': 'New, and inside: the patio with the sliding roof, behind the auditorium. Nobody has measured where the auditorium ends and the patio starts. Measure straight across the patio, anywhere along it.',
     'in-01': 'New, and inside: walk in through the gate on Cra 9A. 76 to 82 are taken in the open passage between the building and the casa. If a wall is not where the sketch draws it, say so in the note.',
 }
 for d in PLAN:

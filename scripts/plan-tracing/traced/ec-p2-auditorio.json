@@ -1,0 +1,9 @@
+{
+ "building": "EC",
+ "floor": "P2",
+ "why": "What of the auditorium there is on the second floor, as Brian marked it on the first floor's evacuation plan on 2026-10-02: two blocks of seats that he wrote are repeated on the second floor. The rest of the hall rises through both floors. In the drawing's units of the first floor's plan, before register.py moves anything.",
+ "spaces": [
+  {"code": "P2-AUD-NIVEL-2-N", "wing": "S", "name": "Auditorio Sonia Fajardo Forero, segundo nivel (norte)", "typeCode": "AUDITORIUM", "aliases": ["auditorio, segundo nivel"], "shape": [{"x": 1514, "y": 880}, {"x": 1528, "y": 821}, {"x": 1575, "y": 800}, {"x": 1659, "y": 786}, {"x": 1670, "y": 812}, {"x": 1730, "y": 817}, {"x": 1730, "y": 866}, {"x": 1600, "y": 867}, {"x": 1600, "y": 877}, {"x": 1516, "y": 909}]},
+  {"code": "P2-AUD-NIVEL-2-S", "wing": "S", "name": "Auditorio Sonia Fajardo Forero, segundo nivel (sur)", "typeCode": "AUDITORIUM", "aliases": ["auditorio, segundo nivel"], "shape": [{"x": 1852, "y": 845}, {"x": 1881, "y": 860}, {"x": 1944, "y": 855}, {"x": 2024, "y": 941}, {"x": 2002, "y": 997}, {"x": 1985, "y": 1019}, {"x": 1854, "y": 899}, {"x": 1829, "y": 894}]}
+ ]
+}
