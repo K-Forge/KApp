@@ -133,8 +133,13 @@ B = 'Carrera 9 Bis'
 # The first floor's corners, as Brian measured them on 2026-09-29 and the outline now draws them:
 # the north wing, stepped in to the north connection, the central wing's whole front, stepped in to
 # the south connection, then the south wing over the auditorium.
-K = {1: (-12.37, 7.20), 2: (-12.37, 12.59), 3: (-13.75, 12.59), 4: (-13.76, 17.97), 5: (-13.59, 36.15),
-     6: (-17.96, 36.20), 7: (-17.97, 43.67)}
+# On 2026-10-01 he took every distance. The north connection's front is 6.22 m and the central
+# wing's 17.05 m, on one line. The south connection stands 6.09 m behind that line, not 4.37, and is
+# 6.30 m wide to the ticket office, whose glass is 9.06 m from the curb: its line is the one that
+# fits both, 5.85 m behind.
+SC = -19.44  # the south connection's front and the ticket office's glass, one line
+K = {1: (-12.37, 7.20), 2: (-12.37, 12.59), 3: (-13.75, 12.59), 4: (-13.76, 18.81), 5: (-13.59, 36.15),
+     6: (SC, 36.20), 7: (SC, 42.50)}
 setback('bis-01', B, K[1], NORTH, 'North wing, corner with Calle 63: to the Calle 63 curb')
 setback('bis-02', B, K[1], EAST, 'North wing, corner with Calle 63: to the Cra 9 Bis curb')
 length('bis-03', B, K[1], K[2], 'North wing, its end on Cra 9 Bis: from the corner to where it steps in')
@@ -158,44 +163,52 @@ length('bis-15', B, K[5], K[6], 'How far the wall steps back')
 # behind glass beside the green column, then the blue wall (Brian, 2026-10-01).
 length('bis-17', B, K[6], K[7], "The auditorium's public entrance, on the plaza: its front")
 setback('bis-18', B, K[7], EAST, 'End of that front, where it steps back again')
-# The auditorium, as the street shows it: past the south connection a glass entrance stands in beside
-# a green column, then one flat blue wall runs along Cra 9 Bis, parallel to its curb; before the
-# neighbour's, the wall steps in to a grey stretch with a door, a small window over it and a stair.
-# Until it is measured, the blue wall is the straight line that best fits what the cadastre drew as
-# steps, and the grey stretch a metre behind it, four before the neighbour.
+# The auditorium, as measured: past the south connection its ticket office, 5.15 m of glass; then a
+# green column and one flat blue wall, 16.76 m, standing out past the glass (2.87 m by the tape, 3.06
+# here, to fit its 4.9 m to the curb too) and parallel to the curb; then the wall steps in 1.20 m to a grey stretch, 3.41 m to the neighbour's, whose door
+# starts at the step. Those lengths end 1.9 m short of the neighbour's wall: the green column's own
+# width, which no distance took, so it is asked for (74).
 SLOPE = -0.288  # the curb's, in x per metre south
-BLUE = lambda y: -16.92 + SLOPE * (y - 46.0)
 ALONG = math.hypot(1, SLOPE)
+TICKET = (SC, K[7][1] + 5.15)  # where the ticket office ends, at the green column
+BLUE = lambda y: SC + 3.06 + SLOPE * (y - TICKET[1])
+down = lambda p, d: (p[0] + SLOPE * d / ALONG, p[1] + d / ALONG)  # d metres south along the blue wall's line
 FROM_BLUE = (1, -SLOPE)  # straight out from the blue wall, towards the curb
 INWARD = (-1 / ALONG, SLOPE / ALONG)
-AU = {1: (BLUE(46.0), 46.0), 2: (BLUE(64.5), 64.5)}
-AU[3] = (AU[2][0] + INWARD[0], AU[2][1] + INWARD[1])  # the grey stretch's corner, a metre in
-AU[4] = (AU[3][0] + SLOPE * (68.5 - AU[3][1]), 68.5)  # its end at the neighbour's wall
-grey = lambda d: (AU[3][0] + SLOPE * d / ALONG, AU[3][1] + d / ALONG)  # d metres along the grey stretch
-setback('bis-19', B, (-17.96, 44.85), EAST, "The auditorium's ticket office, at its glass: to the curb")
+COLUMN = (BLUE(TICKET[1]), TICKET[1])  # the green column's corner, where the wall comes out
+AU = {1: down(COLUMN, 1.87)}  # the blue wall's north end, past the column
+AU[2] = down(AU[1], 16.76)
+AU[3] = (AU[2][0] + 1.20 * INWARD[0], AU[2][1] + 1.20 * INWARD[1])  # the grey stretch's corner
+grey = lambda d: down(AU[3], d)  # d metres along the grey stretch
+AU[4] = grey((68.50 - AU[3][1]) * ALONG)  # its end at the neighbour's wall, which the cadastre has at 68.5
+setback('bis-19', B, (SC, 45.0), EAST, "The auditorium's ticket office, at its glass: to the curb")
 for i in range(3):
-    y = 46.0 + 5 * (i + 1) / ALONG
-    setback(f'bis-{21 + i}', B, (BLUE(y), y), FROM_BLUE, f"Auditorium's blue wall, {5 * (i + 1)} m from its north end: to the curb")
-setback('bis-24', B, grey(2.0), FROM_BLUE, "The grey stretch past the blue wall, at its door: to the curb")
+    setback(f'bis-{21 + i}', B, down(AU[1], 5 * (i + 1)), FROM_BLUE, f"Auditorium's blue wall, {5 * (i + 1)} m from its north end: to the curb")
+setback('bis-24', B, grey(0.7), FROM_BLUE, "The grey stretch past the blue wall, at its door: to the curb")
 length('bis-28', B, AU[1], AU[2], "Auditorium's blue wall, its whole length, from the green column to where it steps in")
 length('bis-32', B, AU[2], AU[3], 'How far the wall steps in after the blue wall')
 length('bis-33', B, AU[3], AU[4], "The grey stretch past the blue wall, its whole front, to the neighbour's wall")
-length('bis-35', B, AU[3], grey(0.8), "The grey stretch's door: from the blue wall's corner to the door's nearest edge")
-length('bis-34', B, grey(0.8), grey(2.6), "The grey stretch's door: its width")
-length('bis-29', B, K[7], (-17.96, 46.0), "The auditorium's ticket office: its width, from the public entrance to the green column")
-length('bis-30', B, (-17.96, 46.0), AU[1], "How far the auditorium's blue wall stands out past the ticket office")
+# The door starts where the wall steps in: 68 asked for a space before it that is not there.
+length('bis-34', B, AU[3], grey(1.35), "The grey stretch's door: its width, from the step in the wall")
+length('bis-29', B, K[7], TICKET, "The auditorium's ticket office: its width, from the public entrance to the green column")
+length('bis-30', B, TICKET, COLUMN, "How far the auditorium's blue wall stands out past the ticket office")
+length('bis-36', B, COLUMN, AU[1], "The green column: its width on the street, from the ticket office to the blue wall")
 length('bis-31', B, AU[4], (-19.11, 68.59), "How far the neighbour's building comes out past the auditorium")
 
 # ---- Calle 62: the neighbour's curved corner, then the Tienda K.
 C62 = 'Calle 62'
 setback('c62-01', C62, (-19.11, 68.53), EAST, "Neighbour's building, its corner beside the south wing", 'Vecino')
 setback('c62-02', C62, (-21.58, 73.01), (0.8, 0.6), "Neighbour's curved front, a third of the way round", 'Vecino')
-setback('c62-03', C62, (-24.62, 76.52), (0.6, 0.8), "Neighbour's curved front, two thirds of the way round", 'Vecino')
+setback('c62-03', C62, (-30.70, 81.21), (0.55, 0.83), "Neighbour's curved front, near where it ends on Calle 62", 'Vecino')
 setback('c62-04', C62, (-35.86, 83.94), (0.25, 0.97), "Neighbour's front on Calle 62, where it ends", 'Vecino')
-T = {1: (-38.04, 82.68), 2: (-56.12, 87.53), 3: (-59.79, 72.75)}
+# The Tienda K's porch, as measured: its corner 4.63 m from the Cra 9A curb and 3.80 m from the Calle
+# 62 curb, 19.68 m along Calle 62 to a corner 4.44 m from the curb, and 14.47 m along Cra 9A to one
+# 4.84 m from the curb. Solved against the curbs; the brick wall to the casa (40) then comes to 4.75 m,
+# and the tape said 4.80.
+T = {1: (-37.72, 82.11), 2: (-56.90, 86.50), 3: (-60.82, 72.57)}
 length('c62-05', C62, (-35.86, 83.94), T[1], 'From the neighbour to the Tienda K', 'TK')
 setback('c62-06', C62, T[1], (0.26, 0.97), 'Tienda K, its first corner on Calle 62', 'TK')
-setback('c62-07', C62, (-47.08, 85.10), (0.26, 0.97), 'Tienda K, halfway along its front on Calle 62', 'TK')
+setback('c62-07', C62, (-47.31, 84.30), (0.26, 0.97), 'Tienda K, halfway along its front on Calle 62', 'TK')
 length('c62-08', C62, T[1], T[2], 'Tienda K, its whole front on Calle 62', 'TK')
 setback('c62-09', C62, T[2], (0.26, 0.97), 'Tienda K, corner with Cra 9A: to the Calle 62 curb', 'TK')
 
@@ -204,12 +217,11 @@ A = 'Carrera 9A'
 setback('a-01', A, T[2], (-0.97, 0.24), 'Tienda K, corner with Cra 9A: to the Cra 9A curb', 'TK')
 length('a-02', A, T[2], T[3], 'Tienda K, its front on Cra 9A', 'TK')
 setback('a-03', A, T[3], (-0.97, 0.1), 'Tienda K, its far corner on Cra 9A', 'TK')
-# The casa's front on Cra 9A. At its south corner, where the brick wall from the Tienda K's far
-# corner meets it (40 ends where 41 is taken), an old door stands set in; then the house's balcony
-# comes out almost to the sidewalk, and its garden wall follows on that line to the exit. The door's
-# stretch and how far it is set in are not measured yet: 41 at 2.61 m and 42 at 0.88 m say about
-# 1.7 m (Brian, 2026-10-01; Street View, 2023).
-G = {2: (-64.50, 66.00), 'door': (-64.50, 63.40), 'balcony': (-66.23, 63.40), 3: (-66.24, 45.42)}
+# The casa's front on Cra 9A, 24.5 m as measured twice. At its south corner, where the brick wall
+# from the Tienda K's far corner meets it (40 ends where 41 is taken), an old door stands 3.77 m
+# long and 1.47 m in; then the house's balcony comes out almost to the sidewalk, and its garden wall
+# follows on that line, 20.73 m to its north end.
+G = {2: (-64.76, 69.92), 'door': (-64.76, 66.15), 'balcony': (-66.23, 66.15), 3: (-66.24, 45.42)}
 length('a-04', A, T[3], G[2], "From the Tienda K to the casa's corner, along the brick wall", 'Casa')
 setback('a-05', A, G[2], WEST, "The casa's south corner, at its old door: to the curb", 'Casa')
 length('a-23', A, G[2], G['door'], "The casa's old door: its stretch, from the corner to the balcony", 'Casa')
@@ -217,41 +229,44 @@ length('a-24', A, G['door'], G['balcony'], "How far the casa's balcony comes out
 setback('a-06', A, (-66.23, 56.0), WEST, "The casa's front, halfway", 'Casa')
 setback('a-07', A, G[3], WEST, 'Garden wall, its north end', 'Casa')
 length('a-08', A, G['balcony'], G[3], "The casa's front, from its balcony to the end of its garden wall", 'Casa')
-# The exit, as the street shows it: from the pillar that ends the casa's garden wall, the gate,
-# set back inside, as wide as the opening (46); then the guard's booth, against the central wing's
-# corner, where its front on Cra 9A (53) starts. 48 and 49 measured the gate a second time and are
-# off the plan. The booth's size is not measured yet: 46 at 4.02 m leaves it 3.3 m.
-E = {1: (-64.48, 43.59), 2: (-61.63, 36.29)}
-BOOTH = {1: (-62.90, 36.29), 2: (-62.90, 39.57), 3: (-61.40, 39.57)}  # its front's ends, and its back by the gate
-GATE = -61.52  # the gate's line, inside the opening
+# The exit, as measured: the central wing's front on Cra 9A (53, 26.35 m) reaches further south than
+# the cadastre drew it, to the guard's booth against its corner, 1.52 m wide and 7.38 m from the
+# curb; then the gate, 8.27 m from the curb and as wide as the opening (46, 2.53 m), to the pillar
+# that ends the casa's garden wall.
+E = {1: (-64.48, 43.59), 2: (-61.63, 39.30)}
+BOOTH = {1: (-59.70, 39.30), 2: (-59.70, 40.82), 3: (-58.01, 40.82)}  # its front's ends, and its back by the gate
+GATE = -58.81  # the gate's line, inside the opening
 length('a-09', A, G[3], E[1], 'From the garden wall to the exit')
 length('a-10', A, E[1], BOOTH[2], "The exit: its width on the street, from the garden wall's pillar to the guard's booth",
        along=(0, 1), through=(-63.6, 0))
-setback('a-11', A, (GATE, 41.58), WEST, 'The exit: from the curb to its gate, inside, at its middle')
+setback('a-11', A, (GATE, 42.20), WEST, 'The exit: from the curb to its gate, inside, at its middle')
 length('a-20', A, BOOTH[1], BOOTH[2], "The guard's booth, against the central wing: its front on the street")
-setback('a-21', A, (BOOTH[1][0], 37.90), WEST, "The guard's booth: from the curb to its front")
+setback('a-21', A, (BOOTH[1][0], 40.06), WEST, "The guard's booth: from the curb to its front")
 length('a-22', A, BOOTH[2], BOOTH[3], "The guard's booth: how far it goes in, along its side by the gate")
 setback('a-14', A, E[2], WEST, 'Central wing, its corner beside the exit')
-setback('a-15', A, (-61.63, 26.3), WEST, 'About 10 m past the exit, towards Calle 63')
-setback('a-16', A, (-61.70, 16.3), WEST, 'About 20 m past the exit, towards Calle 63')
-length('a-17', A, E[2], (-61.70, 12.59), "Central wing's front on Cra 9A, along the small garden, from the exit to the north wing")
-length('a-18', A, (-62.35, 12.59), (-62.35, 7.20), 'North wing, its end on Cra 9A, to the corner with Calle 63')
-setback('a-19', A, (-62.35, 7.20), WEST, 'North wing, corner with Calle 63: to the Cra 9A curb')
+setback('a-15', A, (-61.63, 29.3), WEST, 'About 10 m past the exit, towards Calle 63')
+setback('a-16', A, (-61.63, 19.3), WEST, 'About 20 m past the exit, towards Calle 63')
+length('a-17', A, E[2], (-61.63, 12.59), "Central wing's front on Cra 9A, along the small garden, from the exit to the north wing")
+# The north wing's end on Cra 9A is 5.80 m from the curb: in line with the central wing's front. From
+# that corner the four lengths along Calle 63 end at the corner with Cra 9 Bis, to the centimetre.
+NW = -61.58
+length('a-18', A, (NW, 12.59), (NW, 7.20), 'North wing, its end on Cra 9A, to the corner with Calle 63')
+setback('a-19', A, (NW, 7.20), WEST, 'North wing, corner with Calle 63: to the Cra 9A curb')
 
 # ---- Calle 63, east, back to the start: the north wing's front, from the corner to the admissions
 # door, past the door to the stairs, and past the stairs to the corner on the plaza.
 C63 = 'Calle 63'
 W = 7.20  # the first floor's wall, 30 cm behind the shrubs Brian's tape stopped at
-setback('c63-01', C63, (-62.35, W), NORTH, 'North wing, corner with Cra 9A: to the Calle 63 curb')
-door, past, stairs, top = (-33.61, W), (-30.64, W), (-21.11, W), (-13.19, W)
-length('c63-02', C63, (-62.35, W), door, 'North wing on Calle 63: from the corner with Cra 9A to the admissions door')
+setback('c63-01', C63, (NW, W), NORTH, 'North wing, corner with Cra 9A: to the Calle 63 curb')
+door, past, stairs, top = (NW + 28.74, W), (NW + 31.71, W), (NW + 41.24, W), (NW + 49.16, W)
+length('c63-02', C63, (NW, W), door, 'North wing on Calle 63: from the corner with Cra 9A to the admissions door')
 setback('c63-03', C63, door, NORTH, 'North wing, at the admissions door')
 length('c63-04', C63, door, past, 'The admissions door on Calle 63: its width')
 setback('c63-05', C63, past, NORTH, 'North wing, past the admissions door')
 length('c63-06', C63, past, stairs, 'North wing on Calle 63: from the admissions door to the stairs')
 setback('c63-07', C63, stairs, NORTH, 'North wing, where the stairs start')
 length('c63-08', C63, stairs, top, 'The stairs on Calle 63: their width')
-length('c63-09', C63, top, K[1], 'North wing on Calle 63: from the stairs to the corner with Cra 9 Bis')
+# The stairs end at the corner with Cra 9 Bis: 64 asked for what was left, which is the wall's width.
 
 NUMBERED = ['bis-01', 'bis-02', 'bis-03', 'bis-04', 'bis-05', 'bis-06', 'bis-07', 'bis-08', 'bis-10', 'bis-11',
             'bis-12', 'bis-13', 'bis-14', 'bis-15', 'bis-17', 'bis-18', 'bis-19', 'bis-21', 'bis-22', 'bis-23',
@@ -259,7 +274,7 @@ NUMBERED = ['bis-01', 'bis-02', 'bis-03', 'bis-04', 'bis-05', 'bis-06', 'bis-07'
             'c62-04', 'c62-05', 'c62-06', 'c62-07', 'c62-08', 'c62-09', 'a-01', 'a-02', 'a-03', 'a-04', 'a-05',
             'a-06', 'a-07', 'a-08', 'a-09', 'a-10', 'a-11', 'a-12', 'a-13', 'a-14', 'a-15', 'a-16', 'a-17', 'a-18',
             'a-19', 'c63-01', 'c63-02', 'c63-03', 'c63-04', 'c63-05', 'c63-06', 'c63-07', 'c63-08', 'c63-09',
-            'bis-32', 'bis-33', 'bis-34', 'bis-35', 'a-20', 'a-21', 'a-22', 'a-23', 'a-24']
+            'bis-32', 'bis-33', 'bis-34', 'bis-35', 'a-20', 'a-21', 'a-22', 'a-23', 'a-24', 'bis-36']
 # The numbers people wrote down on site: a distance taken off the plan leaves its number unused, and a
 # new one is added at the end of this list, never in between.
 for d in PLAN:
@@ -271,11 +286,7 @@ assert len({d['id'] for d in PLAN}) == len(PLAN)
 HINTS = {
     'bis-17': "The auditorium's public entrance: from the south connection to the ticket office.",
     'bis-19': 'Street View (2025): the ticket office is the glass on a few steps beside the lime-green panel. Measure from its glass, past the steps.',
-    'a-04': 'Retake: the sketch changed here. Along the brick wall, from the Tienda K to the corner where 41 is taken.',
-    'a-05': 'Retake: the sketch changed here. The corner where the old door stands, set in from the balcony.',
-    'a-08': 'Retake: the sketch changed here. From where the balcony starts to the pillar beside the exit.',
-    'a-10': "Retake: the sketch changed here. From the garden wall's pillar to the guard's booth: the gate's width.",
-    'a-11': 'Retake: the sketch changed here. The gate stands inside, behind the line of the wall: measure to the gate.',
+    'bis-36': 'New: the lime-green column between the ticket office and the blue wall. The lengths taken either side of it leave it about 1.9 m.',
     'a-18': 'Street View (2023): raised planters run along this corner. Measure along the wall behind them.',
     'a-19': 'Street View (2023): raised planters stand between the wall and the sidewalk. Measure from the wall, behind them.',
     'a-20': 'Street View (2023): a small white booth with a window, against the central wing, beside the gate.',

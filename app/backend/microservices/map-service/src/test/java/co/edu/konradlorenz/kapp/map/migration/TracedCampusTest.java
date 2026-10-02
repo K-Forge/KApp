@@ -488,7 +488,8 @@ class TracedCampusTest {
         CampusStructuresDocument now = mongo.findById(id, CampusStructuresDocument.class);
         Structure seeded = now.structures().stream().filter(s -> V012_CasaOnItsWall.CASA_LOT.equals(s.lot())).findFirst().orElseThrow();
         // A fresh database gets the seed's casa, on its wall with its door and balcony, straight away.
-        assertThat(seeded.ring()).isNotEqualTo(V012_CasaOnItsWall.SEEDED).isNotEqualTo(V013_CasaDoorAndBalcony.FROM_V012).hasSize(8);
+        assertThat(seeded.ring()).isNotEqualTo(V012_CasaOnItsWall.SEEDED).isNotEqualTo(V013_CasaDoorAndBalcony.FROM_V012)
+                .isNotEqualTo(V014_CasaFromTheSurvey.FROM_V013).hasSize(10);
 
         // One V010 seeded before: redrawn, the version moved on, the other structures kept.
         List<Structure> cadastre = now.structures().stream()
@@ -507,6 +508,14 @@ class TracedCampusTest {
                 .toList();
         mongo.save(new CampusStructuresDocument(id, now.campus(), straight, 8, Instant.now()));
         assertThat(V012_CasaOnItsWall.redraw(mongo, V010_CampusStructures.load(), Instant.now(), V013_CasaDoorAndBalcony.FROM_V012)).isEqualTo(1);
+        assertThat(mongo.findById(id, CampusStructuresDocument.class).structures()).contains(seeded);
+
+        // And one V013 left, with the corner too far north: moved to where the survey has it.
+        List<Structure> v013 = now.structures().stream()
+                .map(s -> V012_CasaOnItsWall.CASA_LOT.equals(s.lot()) ? new Structure(s.name(), s.floors(), s.basements(), s.lot(), V014_CasaFromTheSurvey.FROM_V013) : s)
+                .toList();
+        mongo.save(new CampusStructuresDocument(id, now.campus(), v013, 8, Instant.now()));
+        assertThat(V012_CasaOnItsWall.redraw(mongo, V010_CampusStructures.load(), Instant.now(), V014_CasaFromTheSurvey.FROM_V013)).isEqualTo(1);
         assertThat(mongo.findById(id, CampusStructuresDocument.class).structures()).contains(seeded);
 
         // One somebody corrected in the portal: theirs.
