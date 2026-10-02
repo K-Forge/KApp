@@ -194,10 +194,13 @@ export function outlineOf(rings: readonly Coordinate[][]): Coordinate[][] {
       }
     });
   }
+  // An edge two overlapping parts both walk the same way is left as many times as it was walked:
+  // counted once, the walk below runs out of edges at its far end and closes the outline with a
+  // wall that is not there.
   const leaving = new Map<string, Coordinate[]>();
-  for (const { from, to } of edges.values()) {
+  for (const { from, to, count } of edges.values()) {
     const at = `${from[0]},${from[1]}`;
-    leaving.set(at, [...(leaving.get(at) ?? []), to]);
+    leaving.set(at, [...(leaving.get(at) ?? []), ...Array<Coordinate>(count).fill(to)]);
   }
   const outlines: Coordinate[][] = [];
   for (const [start, next] of leaving) {

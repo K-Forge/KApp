@@ -95,6 +95,17 @@ describe('ground', () => {
     expect(corners(outline)).toEqual(['0,0', '0,4', '4,0', '4,4']);
   });
 
+  // Two parts that overlap walk a stretch of wall the same way. Counted once, the walk ran out of
+  // wall there and closed the outline straight across the floor: the Edificio Central's south
+  // connection showed as a triangle in the floor editor.
+  it('walks a wall two overlapping parts share as many times as they do', () => {
+    const [outline, ...rest] = outlineOf([square(2, 0, 2, 3), square(2, 1, 1, 1)]);
+    expect(rest).toEqual([]);
+    // Back at its start along the wall it left by: the corner before the first is the last.
+    expect(outline[0]).toEqual([2, 0]);
+    expect(outline[outline.length - 1]).toEqual([2, 1]);
+  });
+
   it('keeps parts that do not touch apart', () => {
     expect(outlineOf([square(0, 0, 1, 1), square(5, 5, 1, 1)]).length).toBe(2);
   });

@@ -253,8 +253,9 @@ setback('a-16', A, (-61.63, 19.3), WEST, 'About 20 m past the exit, towards Call
 length('a-17', A, E[2], (-61.63, 12.59), "Central wing's front on Cra 9A, along the small garden, from the exit to the north wing")
 # Between the central wing and the north wing the north connection stands back, behind raised planters
 # whose front runs on with the wings': that front is what 53 was taken along. Street View from three
-# places on the street puts its wall about 1.5 m behind the central wing's front.
-RECESS = -60.13
+# places on the street put its wall about 1.5 m behind the central wing's front; Brian then set it by
+# hand in the block editor, 2.1 m behind, nearly in line with the low building's wall by the exit.
+RECESS = -59.50
 length('a-25', A, (-61.63, 15.3), (RECESS, 15.3), "North connection, behind its planters: from the planters' front back to its wall")
 # The north wing's end on Cra 9A is 5.80 m from the curb: in line with the central wing's front. From
 # that corner the four lengths along Calle 63 end at the corner with Cra 9 Bis, to the centimetre.
@@ -315,7 +316,7 @@ HINTS = {
     'a-18': 'Street View (2023): raised planters run along this corner. Measure along the wall behind them.',
     'a-19': 'Street View (2023): raised planters stand between the wall and the sidewalk. Measure from the wall, behind them.',
     'a-20': 'Street View (2023): a small white booth with a window, against the central wing, beside the gate.',
-    'a-25': "New: the wall with the two rows of windows between the north wing and the parking entrance stands behind the planters. Measure from the planters' front, in line with the parking entrance's column, straight back to that wall. Street View puts it about 1.5 m.",
+    'a-25': "New: the wall with the two rows of windows between the north wing and the parking entrance stands behind the planters. Measure from the planters' front, in line with the parking entrance's column, straight back to that wall. The outline draws it 2.1 m.",
     'c63-01': 'Street View (2023): the planters wrap round the corner. Measure from the wall, behind them.',
     'in-01': 'New, and inside: walk in through the gate on Cra 9A. 76 to 82 are taken in the open passage between the building and the casa. If a wall is not where the sketch draws it, say so in the note.',
 }

@@ -95,7 +95,8 @@ Brian lo estableció en sitio, y las fotos lo confirman:
 - **Atrás, sobre la Carrera 9A, solo salen el ala norte y la torre.** La conexión norte queda
   detrás de unas materas elevadas cuyo frente sigue el de las alas: por eso la cinta dio una línea
   recta. Street View (2023), desde tres puntos de la calle, pone su muro a 1,5 m del frente de la
-  torre; la medida 75 del levantamiento lo confirma en sitio.
+  torre; Brian lo dejó a mano a 2,1 m, casi en línea con el muro del cuerpo de un piso. La medida 75
+  del levantamiento lo confirma en sitio.
   - **De la entrada del parqueadero a la salida también es jardín** (Brian, 2 de octubre). Detrás
     de las materas está el muro del cuerpo de un piso, con baranda encima, en línea con el frente
     de la caseta. La medida 50 (5,48 m) es la esquina de las materas y la 70 (7,38 m) es el muro:
