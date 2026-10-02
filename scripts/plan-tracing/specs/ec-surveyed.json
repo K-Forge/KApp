@@ -165,6 +165,11 @@
           "space": "P2-23",
           "below": 1903,
           "why": "The tower's east half is its seven-floor part, which ends 6 m short of the back wall; past it P1 has the one-floor piece by the exit, and P2 nothing."
+        },
+        {
+          "space": "P2-26",
+          "below": 2056,
+          "why": "It reaches from the north connection a hand into the north wing, and the connection's back wall stands 1.5 m behind the wing's, behind its planters: the room ends with the connection."
         }
       ]
     }

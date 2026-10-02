@@ -92,6 +92,13 @@ Brian lo estableció en sitio, y las fotos lo confirman:
   - La escalera norte queda al frente del ala norte, sobre la Carrera 9 Bis. La escalera principal
     queda tan honda como los ascensores, como la dibujan esos dos planos.
   - **Falta:** del P3 al P8 siguen sobre el catastro, con la escalera norte donde él ponía el ala.
+- **Atrás, sobre la Carrera 9A, solo salen el ala norte y la torre.** La conexión norte queda
+  detrás de unas materas elevadas cuyo frente sigue el de las alas: por eso la cinta dio una línea
+  recta. Street View (2023), desde tres puntos de la calle, pone su muro a 1,5 m del frente de la
+  torre; la medida 75 del levantamiento lo confirma en sitio.
+  - Los pisos altos no vuelan sobre el andén de la Carrera 9A. Las partes "desde el piso 2" que
+    llegaban 3 m más afuera venían del contorno dibujado sobre la foto aérea, que inclina los
+    techos altos, y se quitaron.
 - **Los pisos altos del EC, según Brian.** El catastro se quedaba corto y ya está corregido en la
   huella:
   - **Ala norte:** aulas hasta el P5; el P6 es terraza.

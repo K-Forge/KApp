@@ -247,6 +247,11 @@ setback('a-14', A, E[2], WEST, 'Central wing, its corner beside the exit')
 setback('a-15', A, (-61.63, 29.3), WEST, 'About 10 m past the exit, towards Calle 63')
 setback('a-16', A, (-61.63, 19.3), WEST, 'About 20 m past the exit, towards Calle 63')
 length('a-17', A, E[2], (-61.63, 12.59), "Central wing's front on Cra 9A, along the small garden, from the exit to the north wing")
+# Between the central wing and the north wing the north connection stands back, behind raised planters
+# whose front runs on with the wings': that front is what 53 was taken along. Street View from three
+# places on the street puts its wall about 1.5 m behind the central wing's front.
+RECESS = -60.13
+length('a-25', A, (-61.63, 15.3), (RECESS, 15.3), "North connection, behind its planters: from the planters' front back to its wall")
 # The north wing's end on Cra 9A is 5.80 m from the curb: in line with the central wing's front. From
 # that corner the four lengths along Calle 63 end at the corner with Cra 9 Bis, to the centimetre.
 NW = -61.58
@@ -274,7 +279,7 @@ NUMBERED = ['bis-01', 'bis-02', 'bis-03', 'bis-04', 'bis-05', 'bis-06', 'bis-07'
             'c62-04', 'c62-05', 'c62-06', 'c62-07', 'c62-08', 'c62-09', 'a-01', 'a-02', 'a-03', 'a-04', 'a-05',
             'a-06', 'a-07', 'a-08', 'a-09', 'a-10', 'a-11', 'a-12', 'a-13', 'a-14', 'a-15', 'a-16', 'a-17', 'a-18',
             'a-19', 'c63-01', 'c63-02', 'c63-03', 'c63-04', 'c63-05', 'c63-06', 'c63-07', 'c63-08', 'c63-09',
-            'bis-32', 'bis-33', 'bis-34', 'bis-35', 'a-20', 'a-21', 'a-22', 'a-23', 'a-24', 'bis-36']
+            'bis-32', 'bis-33', 'bis-34', 'bis-35', 'a-20', 'a-21', 'a-22', 'a-23', 'a-24', 'bis-36', 'a-25']
 # The numbers people wrote down on site: a distance taken off the plan leaves its number unused, and a
 # new one is added at the end of this list, never in between.
 for d in PLAN:
@@ -290,6 +295,7 @@ HINTS = {
     'a-18': 'Street View (2023): raised planters run along this corner. Measure along the wall behind them.',
     'a-19': 'Street View (2023): raised planters stand between the wall and the sidewalk. Measure from the wall, behind them.',
     'a-20': 'Street View (2023): a small white booth with a window, against the central wing, beside the gate.',
+    'a-25': "New: the wall with the two rows of windows between the north wing and the parking entrance stands behind the planters. Measure from the planters' front, in line with the parking entrance's column, straight back to that wall. Street View puts it about 1.5 m.",
     'c63-01': 'Street View (2023): the planters wrap round the corner. Measure from the wall, behind them.',
 }
 for d in PLAN:
