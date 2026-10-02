@@ -1,0 +1,172 @@
+{
+  "building": "ec",
+  "why": "The floors of the Edificio Central registered against the building as Brian measured it with a tape (docs/map/survey), not as the cadastre draws it. ec-register.json laid the plans on the cadastre, whose north wing reaches the Calle 63 curb and whose lot runs to the Carrera 9A: the survey found the wall 6 m back from that curb and the building 3 m shorter behind. Against the measured walls the evacuation plans turn out to be in proportion: once the Calle 63 wall is where it is, the north wing's inner wall and the end of the north connection fall within 0.3 m of where the tape puts them. Each pair is one wall: where the plan puts the rooms against it, then where the rooms go, a wall's thickness (10 units, 0.3 m) inside the measured face.",
+  "traced": "traced/ec-{floor}.json",
+  "x": [[105, 257], [297, 433], [534, 646], [1156, 1237]],
+  "x why": "The Calle 63 wall of the ground floor (survey 56-62: 5.95 to 6.64 m from the curb; the second floor's rooms start 42 units before it on their plan, the 1.2 m the wing is carried out over the street). The north wing's inner wall, 5.39 m along the Carrera 9 Bis from the corner. The end of the north connection, 6.22 m further. The tower's east face, which did not move.",
+  "fit": true,
+  "fit why": "Until the architectural plans arrive, the drawings follow the building: every room a wall (0.3 m) inside the floor's margin - the building's parts on that floor, as surveyed - and clear of the stairs and lifts that climb it.",
+  "keep slanted": ["P1-AUD*", "P1-20", "P1-23", "P1-PATIO-CUBIERTO", "P2-16"],
+  "keep slanted why": "Brian: the auditorium keeps the shape its own plan draws, and it stands slanted, along the Carrera 9 Bis; so does the patio behind it, along the lot line with the Casa de Francisco de Paula Velez. Every other room is square, as the building is.",
+  "stack": {
+    "central lifts": {
+      "shape": [[929, 479], [1009, 479], [1009, 721], [929, 721]],
+      "spaces": {
+        "P1": "P1-ASC-CENTRAL",
+        "P2": "P2-ASC-CENTRAL"
+      },
+      "why": "As ec-register.json stacks them on every floor: the tower did not move."
+    },
+    "main stair": {
+      "shape": [[1081, 479], [1237, 479], [1237, 721], [1081, 721]],
+      "spaces": {
+        "P1": "P1-ESC-PRINCIPAL",
+        "P2": "P2-ESC-PRINCIPAL"
+      },
+      "why": "Beside the central lifts and as deep as they are, as these two floors' plans draw it (5.9 and 6.7 m), which leaves the corridor that runs under both. ec-register.json stacks it 2.8 m deeper from P3 up, as those plans draw it, until they are registered against the survey too."
+    },
+    "lifts by the toilets": {
+      "shape": [[911, 826], [1014, 826], [1014, 1019], [911, 1019]],
+      "spaces": {
+        "P2": "P2-ASC-BANOS"
+      },
+      "why": "As ec-register.json stacks them from P2 up."
+    },
+    "emergency stair": {
+      "shape": [[647, 1773], [783, 1773], [783, 1943], [647, 1943]],
+      "spaces": {
+        "P2": "P2-ESC-EMERGENCIA"
+      },
+      "why": "As ec-register.json stacks it from P2 up."
+    },
+    "north stair": {
+      "shape": [[257, 435], [423, 435], [423, 680], [257, 680]],
+      "spaces": {
+        "P1": "P1-12",
+        "P2": "P2-14"
+      },
+      "why": "Where P1's plan puts it once the plan is on the measured walls: at the front of the north wing on the Carrera 9 Bis, as wide as the wing's ground floor (5.39 m), a wall inside it. P3 to P5 still stack it where the cadastre had the wing, until they are registered against the survey too."
+    }
+  },
+  "floors": {
+    "P1": {
+      "width": 2400,
+      "y": [[574, 479], [2217, 2107]],
+      "y why": "The plan's first row of rooms goes a wall inside the tower's front on the Carrera 9 Bis, and its last a wall inside the back wall, 5.48 m from the Carrera 9A curb (survey 53). The plan's depth between the two, 1643 units, is the measured one, 1638: the plan was only laid 3 m too far back, onto the cadastre's lot line.",
+      "groups": [
+        {
+          "spaces": ["P1-AUD-VESTIBULO"],
+          "onto": {
+            "from": [[1316, 806], [1513, 819], [1477, 1100], [1303, 1100]],
+            "to": [[1374, 678], [1560, 678], [1505, 1010], [1374, 1010]]
+          },
+          "why": "The lobby is the south connection's ground floor, square with the tower. Its plan leaves a walkway between it and the tower's east face, 144 units wide on the drawing: the way from the public entrance (survey 15, 6.30 m) through to the passage behind. So it goes from that walkway's edge to a wall short of the hall, and from the front to a wall short of the open passage. Its four corners on the plan go to those four."
+        },
+        {
+          "spaces": ["P1-AUD*", "P1-20", "P1-23"],
+          "onto": {
+            "from": [[1565, 723], [2157, 912], [2144, 1273], [1477, 1100]],
+            "to": [[1647, 578], [2343, 778], [2343, 1171], [1518, 996]]
+          },
+          "why": "The auditorium keeps its plan's shape (Brian) and goes where the tape puts it: its front along the blue wall, from the green column (survey 29, 30, 74) to the neighbour's building, and its back along the south wing's, a wall inside both. The four corners are the hall's corner by the lobby, the far end of its front, the far end of its back and the near end of its back."
+        }
+      ],
+      "limits": [
+        {
+          "space": "P1-AUDITORIO-SONIA",
+          "carve": [[1470, 678], [1647, 678], [1647, 576]],
+          "why": "The ticket office stands in front of the hall, between the public entrance and the green column: the building's front is 3.06 m further back there (survey 29, 30). The plan draws that step as a slanted corner; the hall goes round it, a wall inside."
+        },
+        {
+          "space": "P1-AUD-SALIDA-SUR",
+          "side": [[2234, 790], [2343, 821]],
+          "of": [2300, 1000],
+          "why": "Past the blue wall the front steps in 1.2 m and runs grey to the neighbour's building, with the south exit's door on it (survey 24, 33, 34). The plan draws one straight front; the exit's stops a wall inside the grey stretch."
+        },
+        {
+          "space": "P1-AUD-VESTIBULO",
+          "below": 1010,
+          "why": "The lobby ends a wall short of the open passage."
+        }
+      ],
+      "corridors": [
+        {
+          "code": "PAS-CENTRAL",
+          "name": "Eje central",
+          "color": "#5B8DEF",
+          "path": [[660, 585], [660, 1870]],
+          "why": "The PE's green route from the entrance on the Carrera 9 Bis, by the reception, down the food court to the ramp."
+        },
+        {
+          "code": "PAS-TRANSVERSAL",
+          "name": "Pasillo transversal",
+          "color": "#5B8DEF",
+          "path": [[115, 858], [1238, 858]],
+          "why": "The PE's route from the exit on the Calle 63, under the north stair and the central lifts and stairs, to the walkway beside the auditorium's lobby."
+        },
+        {
+          "code": "PAS-SALIDA-9A",
+          "name": "Paso a la salida de la Carrera 9A",
+          "color": "#5B8DEF",
+          "placed": true,
+          "path": [[1315, 760], [1315, 1880], [1448, 1880], [1448, 2150]],
+          "why": "The PE's route down the walkway beside the lobby and the open passage beside the Casa de Francisco de Paula Velez, drawn where the survey found the way out: round the central wing's one-floor piece and through the gate between the booth at its corner and the casa's wall (survey 69-71)."
+        },
+        {
+          "code": "PAS-SALON",
+          "name": "Paso por el salon central",
+          "color": "#5B8DEF",
+          "path": [[966, 2086], [966, 1310], [1238, 1310]],
+          "why": "The PE's route across the central hall, out to the passage."
+        }
+      ],
+      "add": [
+        {
+          "code": "P1-PATIO-CUBIERTO",
+          "name": "Patio cubierto",
+          "typeCode": "SOCIAL_AREA",
+          "wing": "S",
+          "shape": [[1516, 1008], [2340, 1183], [2340, 1302], [1516, 1114]],
+          "why": "Brian: behind the auditorium, between it and the Casa de Francisco de Paula Velez, a patio with a sliding roof and tables runs from the tower to the neighbours' building. One floor. It is the surveyed part behind the south wing: from the auditorium's back wall to a wall inside the lot line with the casa, which it follows."
+        }
+      ]
+    },
+    "P2": {
+      "width": 2400,
+      "y": [[395, 479], [2124, 2107]],
+      "y why": "This plan was laid in the frame higher than P1's: its first row goes a wall inside the tower's front, and the long room at the back of the tower a wall inside the back wall. Its depth comes out 5% smaller, the same 5% the plans' widths do.",
+      "groups": [
+        {
+          "spaces": ["P2-16"],
+          "onto": {
+            "from": [[1564, 530], [2175, 739], [2170, 1146], [1491, 957]],
+            "to": [[1647, 578], [2343, 778], [2343, 1171], [1518, 996]]
+          },
+          "why": "The auditorium rises through P1 and P2: the plan paints its silhouette here, and it goes onto the same four corners as the hall below."
+        }
+      ],
+      "limits": [
+        {
+          "space": "P2-15",
+          "left of": 646,
+          "why": "Brian: the reception rises through P1 and P2. P2 has no room over it, the tower's front; the box keeps the north connection's part, which ends 6.22 m from the north wing."
+        },
+        {
+          "space": "P2-16",
+          "carve": [[1470, 678], [1647, 678], [1647, 576]],
+          "why": "The ticket office stands in front of the hall, between the public entrance and the green column: the building's front is 3.06 m further back there (survey 29, 30). The plan draws that step as a slanted corner; the hall goes round it, a wall inside."
+        },
+        {
+          "space": "P2-16",
+          "carve": [[2231, 670], [2234, 790], [2372, 830]],
+          "why": "Past the blue wall the front steps in 1.2 m and runs grey to the neighbour's building (survey 33, 34). The plan draws one straight front; the silhouette goes round the step, a wall inside."
+        },
+        {
+          "space": "P2-23",
+          "below": 1903,
+          "why": "The tower's east half is its seven-floor part, which ends 6 m short of the back wall; past it P1 has the one-floor piece by the exit, and P2 nothing."
+        }
+      ]
+    }
+  }
+}

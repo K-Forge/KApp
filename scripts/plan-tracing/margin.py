@@ -26,9 +26,11 @@ M_LON = 111320.0
 
 def reaches(part, level):
     """As the portal says it: a part reaches the floor at `level` if it rises that high, or, below
-    the street, goes that deep."""
+    the street, goes that deep. A part the upper floors carry out over the street is in none of the
+    floors below its lowest."""
     if level >= 0:
-        return part["floors"] >= max(1, math.ceil(level))
+        floor = max(1, math.ceil(level))
+        return part["floors"] >= floor and (part.get("lowestFloor") or 1) <= floor
     return part["basements"] >= -math.floor(level)
 
 
@@ -110,6 +112,20 @@ class Raster:
                     out.cells[j * w + i] = 1
         return out
 
+    def grown(self, r):
+        """The cells with a set cell in their (2r+1)-cell square: the set grown by r cells."""
+        out = Raster.__new__(Raster)
+        out.ox, out.oy, out.w, out.h = self.ox, self.oy, self.w, self.h
+        out.cells = bytearray(1 if not c else 0 for c in self.cells)
+        hollow = out.eroded(r)
+        out.cells = bytearray(1 if not c else 0 for c in hollow.cells)
+        return out
+
+    def sealed(self, r=2):
+        """The set with every slit up to 2r cells wide filled, and nothing else changed: grown by
+        r and shrunk back."""
+        return self.grown(r).eroded(r)
+
     def get(self, i, j):
         return 0 <= i < self.w and 0 <= j < self.h and self.cells[j * self.w + i]
 
@@ -122,6 +138,9 @@ def floor_margin(building, width, height, level, ground=None):
     for part in building.get("footprint") or []:
         if reaches(part, level):
             r.paint([convert(c) for c in part["ring"][:-1]])
+    # Two parts that share a wall are drawn a centimetre or two apart in places. That hairline is
+    # no gap in the building, and shrunk by a wall it would cut every room across it in two.
+    r = r.sealed()
     if ground:
         for walk in ground.get("sidewalks", []):
             r.paint([convert(c) for c in walk], 0)

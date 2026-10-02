@@ -22,7 +22,14 @@ The spec:
      "fit": true,                          every room a wall inside the floor's margin (margin.py),
                                            and square
      "keep slanted": ["P1-AUD*"],          rooms that keep the slanted walls their plan draws
+     "traced": "traced/ec-{floor}.json",   the floor as build-floor.py wrote it, before anything
+                                           moved it, beside the specs' folder: every room starts
+                                           from there again, so a floor registered once can be
+                                           registered anew when the building is measured. Without
+                                           it the floor in the seed is what moves
      "floors": {"P1": {
+        "y": [[574, 479], [2217, 2107]],   this floor's own pairs, when its plan was laid in the
+                                           frame apart from the others' ("x" likewise)
         "place": {"x": [0.76, 480], "y": [0.91, 211], "why": "..."},
                                            a floor whose plan was laid into the frame out of place:
                                            x -> 0.76 x + 480 before anything else, and y likewise
@@ -32,19 +39,31 @@ The spec:
         "width": 2400,                     the floor's new width, when the stretched floor needs
                                            more room; a floor already this wide is taken as
                                            registered, and refused
-        "groups": [{"spaces": ["P1-AUD*"], "y": [[723, 590], ...], "why": "..."}],
+        "groups": [{"spaces": ["P1-AUD*"], "y": [[723, 590], ...], "why": "..."},
+                   {"spaces": ["P1-AUD*"], "onto": {"from": [[x, y] * 4], "to": [[x, y] * 4]}}],
                                            a part of the floor the plan draws out of proportion
-                                           with the rest: its own y (or x) pairs
+                                           with the rest: its own y (or x) pairs; or, for a part
+                                           that stands slanted to the rest, four corners of it on
+                                           the drawing and where each one is, and everything in
+                                           between goes along, straight walls staying straight
         "limits": [{"space": "P1-24", "below": 2120, "why": "..."},
-                   {"space": "P1-24", "notch": [986, 1911], "why": "..."}]
+                   {"space": "P1-24", "notch": [986, 1911], "why": "..."},
+                   {"space": "P1-AUD*", "carve": [[1470, 678], [1647, 678], [1647, 576]]},
+                   {"space": "P1-AUD-SALIDA-SUR", "side": [[2234, 790], [2343, 821]], "of": [2300, 1000]}]
                                            after moving: a room cut off past y = 2120 ("below", or
                                            "above"), x ("left of", "right of"), or a rectangle with
                                            its corner beyond (986, 1911) taken out ("notch"); a
-                                           door on a wall that moves in goes with it
+                                           door on a wall that moves in goes with it. "carve" takes
+                                           a corner out of rooms of any shape: what lies between
+                                           the two walls that run from the middle point towards the
+                                           other two, where the building steps in. "side" cuts
+                                           a room along a slanted wall: it keeps the side of the
+                                           line through the two points that the point "of" is on
         "corridors": [{"code": "PAS-CENTRAL", "name": "...", "color": "#5B8DEF",
                        "path": [[660, 540], [660, 1870]]}]
                                            walkable routes to add, in the drawing's units - the
-                                           evacuation plans paint them as green arrows
+                                           evacuation plans paint them as green arrows; with
+                                           "placed": true the path is where the route is already
         "add": [{"code": "P3-JARDIN-INTERNO", "name": "...", "typeCode": "TERRACE", "wing": "N",
                  "shape": [[458, 474], ...], "why": "..."}]
                                            a space the plan does not draw and somebody saw on
@@ -59,6 +78,7 @@ keeps its status: it is still drawn from photos. Standard library only.
 import argparse
 import fnmatch
 import json
+import math
 import os
 import re
 import sys
@@ -83,6 +103,54 @@ def stretch(pairs, v):
     i = min(max(bisect_right(keys, v) - 1, 0), len(pairs) - 2)
     (a, fa), (b, fb) = pairs[i], pairs[i + 1]
     return fa + (v - a) * (fb - fa) / (b - a)
+
+
+def onto(corners, places):
+    """The map that takes four corners to four places and keeps every straight line straight (a
+    homography): solved from the eight equations the four pairs give."""
+    rows = []
+    for (x, y), (u, v) in zip(corners, places):
+        rows.append([x, y, 1, 0, 0, 0, -u * x, -u * y, u])
+        rows.append([0, 0, 0, x, y, 1, -v * x, -v * y, v])
+    n = 8
+    for i in range(n):
+        pivot = max(range(i, n), key=lambda r: abs(rows[r][i]))
+        if abs(rows[pivot][i]) < 1e-12:
+            sys.exit(f"onto: the four corners {corners} do not make a quadrilateral")
+        rows[i], rows[pivot] = rows[pivot], rows[i]
+        for r in range(n):
+            if r != i:
+                k = rows[r][i] / rows[i][i]
+                rows[r] = [a - k * b for a, b in zip(rows[r], rows[i])]
+    h = [rows[i][n] / rows[i][i] for i in range(n)]
+
+    def move(p):
+        w = h[6] * p[0] + h[7] * p[1] + 1
+        return ((h[0] * p[0] + h[1] * p[1] + h[2]) / w, (h[3] * p[0] + h[4] * p[1] + h[5]) / w)
+    return move
+
+
+def start_over(floor, traced, added):
+    """The floor's rooms as they were traced, before any registration: shapes and doors from
+    `traced`, by code. A room an earlier fit left out comes back; one the spec adds, or that nobody
+    drew, has no shape again. Names, types, wings and doors' codes stay as the floor has them."""
+    drawn = {sp["code"]: sp for sp in traced["spaces"] if sp.get("shape")}
+    for sp in floor["spaces"]:
+        source = drawn.pop(sp["code"], None)
+        if source:
+            sp["shape"] = source["shape"]
+            sp.pop("doors", None)
+            if source.get("doors"):
+                sp["doors"] = source["doors"]
+        elif sp.get("shape"):
+            if sp["code"] not in added:
+                sys.exit(f"{floor['code']}: {sp['code']} is drawn and is neither traced nor added by the spec")
+            sp["shape"], sp["doors"] = None, []
+    floor["spaces"] += list(drawn.values())
+    floor["spaces"].sort(key=lambda sp: sp["code"])
+    floor["width"], floor["height"] = traced["width"], traced["height"]
+    floor.pop("corridors", None)
+    return sorted(drawn)
 
 
 def split(poly, xs, ys):
@@ -123,6 +191,62 @@ def notch(poly, corner):
     return [(x0, y0), (x1, y0), (x1, cy), (cx, cy), (cx, y1), (x0, y1)]
 
 
+def carve(poly, wedge):
+    """The polygon without the corner between the two walls that run from the wedge's middle point
+    towards its first and last: where the room reaches into that corner, its outline follows the
+    two walls round it instead. A room that stays out of the corner is left as it is."""
+    first, apex, last = (tuple(p) for p in wedge)
+    side = lambda a, b, p: (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0])
+    turn = side(apex, first, last)
+    # In the corner: on the other wall's side of each wall. A point on a wall is not.
+    gone = lambda p: side(apex, first, p) * turn > 1e-6 and side(apex, last, p) * -turn > 1e-6
+
+    def along(end, p):
+        """Whether p is on the wall that runs from the corner towards `end`."""
+        length = math.dist(apex, end)
+        reach = ((p[0] - apex[0]) * (end[0] - apex[0]) + (p[1] - apex[1]) * (end[1] - apex[1])) / length
+        return abs(side(apex, end, p)) / length < 1e-6 and reach >= -1e-6
+
+    # A corner on the outline wherever it crosses either wall.
+    cut = []
+    for i, p in enumerate(poly):
+        q = poly[(i + 1) % len(poly)]
+        cut.append(p)
+        ts = []
+        for end in (first, last):
+            dp, dq = side(apex, end, p), side(apex, end, q)
+            if dp * dq < 0:
+                t = dp / (dp - dq)
+                x = (p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1]))
+                if along(end, x):
+                    ts.append((t, x))
+        cut += [x for _, x in sorted(ts)]
+    n = len(cut)
+    mid = lambda i: ((cut[i][0] + cut[(i + 1) % n][0]) / 2, (cut[i][1] + cut[(i + 1) % n][1]) / 2)
+    inside = [gone(mid(i)) for i in range(n)]     # edge i runs from cut[i] to cut[i + 1]
+    if not any(inside):
+        return poly
+    if all(inside):
+        sys.exit(f"carve: the corner at {apex} takes the whole of {poly}")
+    start = next(i for i in range(n) if inside[i - 1] and not inside[i])
+    out, entered = [], None
+    for k in range(n):
+        i = (start + k) % n
+        if inside[i - 1] and inside[i]:
+            continue
+        if inside[i - 1] and not inside[i] and entered is not None:
+            # Out of the corner again: round it, if the way in was across the other wall.
+            if not any(along(end, entered) and along(end, cut[i]) for end in (first, last)):
+                out.append(apex)
+        if not inside[i - 1] and inside[i]:
+            entered = cut[i]
+        out.append(cut[i])
+    # The walk started on the way out of a visit to the corner that its last edges went into.
+    if entered is not None and not any(along(end, entered) and along(end, cut[start]) for end in (first, last)):
+        out.append(apex)
+    return out
+
+
 def on_edge(poly, a, b, tolerance=1.5):
     """Whether segment a-b lies along one of the polygon's edges."""
     def near(p, q, r):
@@ -134,6 +258,19 @@ def on_edge(poly, a, b, tolerance=1.5):
         return cross <= tolerance and -0.01 <= t <= 1.01
     return any(near(a, poly[i], poly[(i + 1) % len(poly)]) and near(b, poly[i], poly[(i + 1) % len(poly)])
                for i in range(len(poly)))
+
+
+def hung(poly, a, b):
+    """A door's two jambs put on the wall they are nearest to, in whole units. Moving a room
+    rounds its corners and its doors apart, and the load takes a door only within a unit of
+    the outline."""
+    def off(p, q, r):
+        dx, dy = r[0] - q[0], r[1] - q[1]
+        t = max(0.0, min(1.0, ((p[0] - q[0]) * dx + (p[1] - q[1]) * dy) / ((dx * dx + dy * dy) or 1e-9)))
+        return math.hypot(p[0] - q[0] - t * dx, p[1] - q[1] - t * dy), (q[0] + t * dx, q[1] + t * dy)
+    q, r = min(((poly[i], poly[(i + 1) % len(poly)]) for i in range(len(poly))),
+               key=lambda edge: max(off(a, *edge)[0], off(b, *edge)[0]))
+    return tuple((round(x), round(y)) for x, y in (off(a, q, r)[1], off(b, q, r)[1]))
 
 
 def tidy(poly):
@@ -296,7 +433,12 @@ def main():
         sys.exit(f"{spec['building']} has no floor {args.floor}")
     rules = spec["floors"].get(args.floor, {})
     width = rules.get("width")
-    if width and floor["width"] == width:
+    back = []
+    if spec.get("traced"):
+        source = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
+                              spec["traced"].format(floor=args.floor.lower()))
+        back = start_over(floor, json.load(open(source)), {a["code"] for a in rules.get("add", [])})
+    elif width and floor["width"] == width:
         sys.exit(f"{args.floor} is {width} wide already: it has been registered")
 
     def group(code):
@@ -335,20 +477,27 @@ def main():
         for k in ("doorCode", "wing"):
             sp.pop(k, None)
 
-    moved = [f"  dropped {code}" for code in sorted(dropped)]
+    moved = [f"  {code} is back, as traced" for code in back]
+    moved += [f"  dropped {code}" for code in sorted(dropped)]
     moved += [f"  {code} is a box again" for code in rules.get("unname", {})]
     moved += [f"  {traced} is {named}" for traced, named in rules.get("becomes", {}).items()]
+    floor_x, floor_y = rules.get("x", spec.get("x", [])), rules.get("y", spec.get("y", []))
     for space in floor["spaces"]:
         g = group(space["code"])
-        fx, fy = g.get("x", spec.get("x", [])), g.get("y", spec.get("y", []))
+        fx, fy = g.get("x", floor_x), g.get("y", floor_y)
         move = lambda p: (stretch(fx, p[0]), stretch(fy, p[1]))
         if not space.get("shape"):
             continue
         before = [(p["x"], p["y"]) for p in space["shape"]]
-        shape = [move(p) for p in split([place(p) for p in before], [a for a, _ in fx], [a for a, _ in fy])]
+        if "onto" in g:
+            # A part that stands slanted to the rest goes by its four corners, and has no breakpoints.
+            move = onto(g["onto"]["from"], g["onto"]["to"])
+            shape = [move(place(p)) for p in before]
+        else:
+            shape = [move(p) for p in split([place(p) for p in before], [a for a, _ in fx], [a for a, _ in fy])]
         doors = [(move(place((d["from"]["x"], d["from"]["y"]))), move(place((d["to"]["x"], d["to"]["y"]))))
                  for d in space.get("doors") or []]
-        for limit in (lm for lm in rules.get("limits", []) if lm["space"] == space["code"]):
+        for limit in (lm for lm in rules.get("limits", []) if fnmatch.fnmatch(space["code"], lm["space"])):
             # A wall moved in takes its doors with it.
             if "below" in limit:
                 v = limit["below"]
@@ -368,6 +517,13 @@ def main():
                 doors = [tuple((max(x, v), y) for x, y in d) for d in doors]
             if "notch" in limit:
                 shape = notch(tidy(shape), limit["notch"])
+            if "carve" in limit:
+                shape = carve(shape, limit["carve"])
+            if "side" in limit:
+                (ax, ay), (bx, by) = limit["side"]
+                across = lambda p: (bx - ax) * (p[1] - ay) - (by - ay) * (p[0] - ax)
+                kept = 1 if across(limit["of"]) > 0 else -1
+                shape = clip(shape, lambda p: kept * across(p))
         shape = tidy(shape)
         kept = [d for d in doors if on_edge(shape, *d)]
         space["shape"] = [{"x": x, "y": y} for x, y in shape]
@@ -379,17 +535,17 @@ def main():
                      f" y {min(p[1] for p in before):>5}-{max(p[1] for p in before):<5} -> {min(ys):>5}-{max(ys):<5}"
                      + (f"  ({len(doors) - len(kept)} door(s) dropped)" if len(kept) < len(doors) else ""))
     # The floor's corridors move with it, and the spec's are added, drawn on the plan as they are.
-    def carry(path):
-        pts = [move(place(p)) for p in path]
+    def carry(path, placed=False):
+        pts = path if placed else [move(place(p)) for p in path]
         return [{"x": round(x), "y": round(y)} for x, y in pts]
-    fx, fy = spec.get("x", []), spec.get("y", [])
+    fx, fy = floor_x, floor_y
     move = lambda p: (stretch(fx, p[0]), stretch(fy, p[1]))
     corridors = [dict(c, path=carry([(p["x"], p["y"]) for p in c["path"]])) for c in floor.get("corridors") or []]
     have = {c["code"] for c in corridors}
     for c in rules.get("corridors", []):
         if c["code"] not in have:
             corridors.append({"code": c["code"], "name": c["name"], "color": c.get("color", "#5B8DEF"),
-                              "path": carry([tuple(p) for p in c["path"]])})
+                              "path": carry([tuple(p) for p in c["path"]], c.get("placed", False))})
             moved.append(f"  corridor {c['code']:<15} {len(c['path'])} points")
     if corridors:
         floor["corridors"] = corridors
@@ -422,6 +578,9 @@ def main():
     settled = settle([[(p["x"], p["y"]) for p in s["shape"]] for s in drawn])
     for space, shape in zip(drawn, settled):
         space["shape"] = [{"x": x, "y": y} for x, y in shape]
+        if space.get("doors"):
+            jambs = [hung(shape, (d["from"]["x"], d["from"]["y"]), (d["to"]["x"], d["to"]["y"])) for d in space["doors"]]
+            space["doors"] = [{"from": {"x": a[0], "y": a[1]}, "to": {"x": b[0], "y": b[1]}} for a, b in jambs if a != b]
     everything = [p for s in floor["spaces"] for p in s.get("shape") or []] + [p for c in corridors for p in c["path"]]
     widest = max((p["x"] for p in everything), default=0)
     tallest = max((p["y"] for p in everything), default=0)

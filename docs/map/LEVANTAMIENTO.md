@@ -79,6 +79,19 @@ Brian lo estableció en sitio, y las fotos lo confirman:
     y el catastro comparten.
   - `specs/ec-register.json` dice cuáles son esas paredes y por qué se eligieron.
   - Los ocho pisos del EC ya están corregidos.
+- **Con cinta, el P1 y el P2 del EC resultan proporcionados.** El levantamiento de la manzana
+  (`docs/map/survey/`) midió la pared de la Calle 63 a 6 m del sardinel, no sobre él, y el fondo
+  del edificio 3 m más corto que el lote. Puestos sobre esas paredes, los PE de los dos primeros
+  pisos caen solos: la pared interior del ala norte y el final de la conexión norte quedan a menos
+  de 0,3 m de donde los pone la cinta.
+  - `specs/ec-surveyed.json` tiene las paredes medidas de esos dos pisos, y `traced/` los pisos
+    como salieron del trazado, de donde `register.py` vuelve a partir cada vez que el edificio se
+    mide de nuevo.
+  - El auditorio va por sus cuatro esquinas: el frente sobre el muro azul, desde la columna verde
+    hasta el vecino, y el fondo sobre el del ala sur. Rodea la taquilla y el tramo gris.
+  - La escalera norte queda al frente del ala norte, sobre la Carrera 9 Bis. La escalera principal
+    queda tan honda como los ascensores, como la dibujan esos dos planos.
+  - **Falta:** del P3 al P8 siguen sobre el catastro, con la escalera norte donde él ponía el ala.
 - **Los pisos altos del EC, según Brian.** El catastro se quedaba corto y ya está corregido en la
   huella:
   - **Ala norte:** aulas hasta el P5; el P6 es terraza.
