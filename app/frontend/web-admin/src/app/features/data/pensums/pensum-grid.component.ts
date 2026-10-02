@@ -8,6 +8,8 @@ import {
   type PensumArea,
   type PensumCourse,
 } from './pensum.model';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 
@@ -32,6 +34,7 @@ interface GridRow {
  */
 @Component({
   selector: 'app-pensum-grid',
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (!hasCredits() || !hasHours()) {
@@ -41,18 +44,16 @@ interface GridRow {
     }
     @if (!hasOfficialCodes()) {
       <p class="hint missing">
-        This plan publishes no course codes. KApp gives each item an internal identifier so the
-        system can tell them apart; it is not an institutional code, so it is not shown here and
-        never reaches a student. Prerequisites are named instead.
+        {{ 'This plan publishes no course codes. KApp gives each item an internal identifier so the system can tell them apart; it is not an institutional code, so it is not shown here and never reaches a student. Prerequisites are named instead.' | t }}
       </p>
     }
     <div class="scroll-x">
       <!-- No table roles: the table view beside this is the accessible, exact form of the same
            data, and ARIA rows on display:contents elements are unreliable across browsers. -->
       <section class="grid" [style.--levels]="pensum().levels"
-               [attr.aria-label]="pensum().programName + ' ' + pensum().pensumCode + ', by area and level'">
+               [attr.aria-label]="pensum().programName + ' ' + pensum().pensumCode + (', by area and level' | t)">
         <div class="row-group">
-          <div class="corner">Area</div>
+          <div class="corner">{{ 'Area' | t }}</div>
           @for (label of levelLabels(); track $index) {
             <div class="level-head">{{ label }}</div>
           }
@@ -63,7 +64,7 @@ interface GridRow {
             <div class="area" [style.--area]="row.area.color">
               <span class="area-name">{{ row.area.name }}</span>
               @if (hasCredits()) {
-                <span class="area-meta">{{ row.credits }} credits</span>
+                <span class="area-meta">{{ '{credits} credits' | t: { credits: row.credits } }}</span>
               }
             </div>
             @for (cell of row.cells; track $index) {
@@ -78,7 +79,7 @@ interface GridRow {
                           <span class="mono code">{{ code }}</span>
                         }
                         @if (item.isElectiveSlot) {
-                          <span class="tag">elective</span>
+                          <span class="tag">{{ 'elective' | t }}</span>
                         }
                       </div>
                     }
@@ -87,8 +88,8 @@ interface GridRow {
                       <div class="item-meta">{{ figures(item.credits, item.weeklyHours) }}</div>
                     }
                     @if (item.prerequisites.length) {
-                      <div class="item-pre" [title]="'Prerequisites: ' + prerequisites(item).join(', ')">
-                        needs <span [class.mono]="hasOfficialCodes()">{{ prerequisites(item).join(', ') }}</span>
+                      <div class="item-pre" [title]="('Prerequisites: ' | t) + prerequisites(item).join(', ')">
+                        {{ 'needs' | t }} <span [class.mono]="hasOfficialCodes()">{{ prerequisites(item).join(', ') }}</span>
                       </div>
                     }
                   </article>
@@ -99,9 +100,9 @@ interface GridRow {
         }
 
         <div class="row-group totals">
-          <div class="corner">Per level</div>
+          <div class="corner">{{ 'Per level' | t }}</div>
           @for (total of levelTotals(); track $index) {
-            <div class="level-total">{{ figures(total.credits, total.hours) || (total.items === 1 ? '1 course' : total.items + ' courses') }}</div>
+            <div class="level-total">{{ figures(total.credits, total.hours) || (total.items === 1 ? ('1 course' | t) : ('{count} courses' | t: { count: total.items })) }}</div>
           }
         </div>
       </section>
@@ -245,12 +246,16 @@ export class PensumGridComponent {
   readonly missingNote = computed(() => {
     const total = this.pensum().totalCredits;
     if (!this.hasCredits() && !this.hasHours()) {
-      return `The published plan prints neither credits nor weekly hours per course${total ? ` — only a total of ${total} credits` : ''}.`;
+      return total
+        ? t('The published plan prints neither credits nor weekly hours per course — only a total of {total} credits.', { total })
+        : t('The published plan prints neither credits nor weekly hours per course.');
     }
     if (!this.hasCredits()) {
-      return `The published plan prints no credits per course${total ? ` — only a total of ${total}` : ''}.`;
+      return total
+        ? t('The published plan prints no credits per course — only a total of {total}.', { total })
+        : t('The published plan prints no credits per course.');
     }
-    return 'The published plan prints no weekly hours per course.';
+    return t('The published plan prints no weekly hours per course.');
   });
 
   readonly levelLabels = computed(() =>
@@ -296,7 +301,7 @@ export class PensumGridComponent {
 
   /** "3 cr · 4 h", leaving out whichever figure the plan does not publish. */
   figures(credits: number, hours: number): string {
-    return [this.hasCredits() ? `${credits} cr` : '', this.hasHours() ? `${hours} h` : '']
+    return [this.hasCredits() ? t('{credits} cr', { credits }) : '', this.hasHours() ? `${hours} h` : '']
       .filter(Boolean)
       .join(' · ');
   }

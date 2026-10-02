@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild, computed, effect, inject, input, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { forkJoin, of, switchMap, map } from 'rxjs';
 import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
 import type { PageResponse } from '../../../core/http/page-response.model';
@@ -11,69 +13,108 @@ import { BuildingsService } from '../buildings/buildings.service';
 import { SpaceFormComponent } from './space-form.component';
 import { CATEGORY_LABELS, SPACE_CATEGORIES, shownCode, type Space, type SpaceCategory, type SpaceRequest, type SpaceType } from './space.model';
 import { SpaceTypesService } from './space-types.service';
+import { SpaceTypesPage } from './space-types.page';
 import { SpacesService } from './spaces.service';
+import { SortHeaderComponent, compareText, sortRows, type Sort } from '../../../shared/ui/sort-header/sort-header.component';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 const PAGE_SIZE = 20;
 const MIN_QUERY_LENGTH = 2;
+/** The most the server gives in one page: the whole list comes in as few requests as that allows. */
+const FETCH_SIZE = 100;
+/** What each column sorts by. "On the plan" runs from not drawn, through drawn, to most doors. */
+const SORT_VALUE: Record<string, (space: Space) => string | number | null | undefined> = {
+  code: (s) => shownCode(s),
+  name: (s) => s.name,
+  type: (s) => s.typeName ?? s.typeCode,
+  building: (s) => (s.buildingCode ? `${s.buildingCode} ${s.wing ?? ''}` : null),
+  floor: (s) => s.floorCode,
+  plan: (s) => (s.shape ? 1 + (s.doors?.length ?? 0) : 0),
+  capacity: (s) => s.capacity,
+};
+/** Two spaces equal in the column go by name, then by door. */
+const byNameThenDoor = (a: Space, b: Space) => compareText(a.name, b.name) || compareText(shownCode(a), shownCode(b));
 
 /** Full-text search plus CRUD over /api/map/spaces - the "find a room" screen turned inside out. */
 @Component({
   selector: 'app-spaces-page',
-  imports: [DataTableComponent, ApiErrorBannerComponent, ModalComponent, SpaceFormComponent, PageIntroComponent],
+  imports: [TranslatePipe, RouterLink, DataTableComponent, ApiErrorBannerComponent, ModalComponent, SpaceFormComponent, PageIntroComponent, SpaceTypesPage, SortHeaderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
-        title="Spaces"
-        what="Every room, office, bathroom, lift and stairwell the map can point at - placed on the grid of its floor, or only inventoried until somebody places it."
-        [can]="['Create a space, with or without a place on the grid', 'Edit what it is called, what it is and how to reach it', 'Delete one', 'Search by door number, name or other name', 'List a building, a floor or a category']"
-        note="The code shown is the one on the door, and a space whose door has no number shows a dash: its internal code is never shown, because a made-up code on screen looks exactly like a real one. Reached via has to name a lift, stairs or entrance of the same building, or the save is refused."
+        [title]="'Spaces' | t"
+        [what]="'Every room, office, bathroom, lift and stair the map can show.' | t"
+        [can]="[('Create, edit and delete spaces' | t), ('Find one by door number or name' | t), ('Filter by building, floor or category' | t), ('Create, rename and delete the types of space' | t)]"
+        [note]="'The code shown is the one on the door; a door with no number shows a dash.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">New space</button>
       </app-page-intro>
 
+      <nav class="page-tabs" [attr.aria-label]="'Spaces and their types' | t">
+        <a routerLink="." [queryParams]="{}" [class.on]="tab() !== 'types'" [attr.aria-current]="tab() !== 'types' ? 'page' : null">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" /></svg>
+          {{ 'Spaces' | t }}
+          @if (tab() !== 'types' && result(); as r) {
+            <span class="tab-count">{{ r.totalElements }}</span>
+          }
+        </a>
+        <a routerLink="." [queryParams]="{ tab: 'types' }" [class.on]="tab() === 'types'" [attr.aria-current]="tab() === 'types' ? 'page' : null">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V4a1 1 0 011-1h8l9 9-9 9-9-9zM7.5 7.5h.01" /></svg>
+          {{ 'Types of space' | t }}
+          @if (types().length) {
+            <span class="tab-count">{{ types().length }}</span>
+          }
+        </a>
+      </nav>
+
+      @if (tab() === 'types') {
+        <app-space-types-page [embedded]="true" />
+      } @else {
+
       <div class="card stack">
-        <div class="row spread">
+        <div class="work-bar">
           <div class="field" style="flex: 1 1 14rem; margin-bottom: 0">
-            <label for="q">Search</label>
-            <input id="q" type="text" placeholder="door number, name or other name (min 2 characters)" (input)="onQueryInput($event)" />
+            <label for="q">{{ 'Search' | t }}</label>
+            <input id="q" type="text" [placeholder]="'door number, name or other name (min 2 characters)' | t" (input)="onQueryInput($event)" />
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="category">Category</label>
+            <label for="category">{{ 'Category' | t }}</label>
             <select id="category" (change)="onCategoryChange($event)">
-              <option value="">All categories</option>
+              <option value="">{{ 'All categories' | t }}</option>
               @for (category of categories; track category) {
-                <option [value]="category">{{ categoryLabels[category] }}</option>
+                <option [value]="category">{{ categoryLabels[category] | t }}</option>
               }
             </select>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="type">Type</label>
+            <label for="type">{{ 'Type' | t }}</label>
             <select id="type" [value]="type()" (change)="onTypeChange($event)">
-              <option value="">All types</option>
+              <option value="">{{ 'All types' | t }}</option>
               @for (option of typeOptions(); track option.code) {
                 <option [value]="option.code">{{ option.name }}</option>
               }
             </select>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="building">Building</label>
+            <label for="building">{{ 'Building' | t }}</label>
             <select id="building" (change)="onBuildingChange($event)">
-              <option value="">All buildings</option>
+              <option value="">{{ 'All buildings' | t }}</option>
               @for (building of buildings(); track building.code) {
                 <option [value]="building.code">{{ building.code }}</option>
               }
             </select>
           </div>
           <div class="field" style="margin-bottom: 0">
-            <label for="floor">Floor</label>
+            <label for="floor">{{ 'Floor' | t }}</label>
             <select id="floor" [value]="floor()" [disabled]="!floorOptions().length" (change)="onFloorChange($event)">
-              <option value="">All floors</option>
+              <option value="">{{ 'All floors' | t }}</option>
               @for (option of floorOptions(); track option.code) {
                 <option [value]="option.code">{{ option.code }}</option>
               }
             </select>
           </div>
+          <button type="button" class="btn btn-primary work-create" (click)="openCreate()">{{ 'New space' | t }}</button>
         </div>
 
         <app-api-error-banner [error]="error()" />
@@ -81,8 +122,7 @@ const MIN_QUERY_LENGTH = 2;
         @if (nothingAsked()) {
           <div class="empty-state">
             <p>
-              Search by door number, name or other name — at least {{ minQueryLength }} characters —
-              or pick a building, a category or a type to list what is there.
+              {{ 'Search by door number, name or other name — at least {minQueryLength} characters — or pick a building, a category or a type to list what is there.' | t: { minQueryLength: minQueryLength } }}
             </p>
           </div>
         } @else {
@@ -97,13 +137,13 @@ const MIN_QUERY_LENGTH = 2;
           >
             <thead>
               <tr>
-                <th>Door</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Building</th>
-                <th>Floor</th>
-                <th>On the grid</th>
-                <th>Capacity</th>
+                <th appSort="code" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'Door' | t }}</th>
+                <th appSort="name" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'Name' | t }}</th>
+                <th appSort="type" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'Type' | t }}</th>
+                <th appSort="building" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'Building' | t }}</th>
+                <th appSort="floor" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'Floor' | t }}</th>
+                <th appSort="plan" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'On the plan' | t }}</th>
+                <th appSort="capacity" [sort]="sort()" (sortChange)="sortBy($event)">{{ 'Capacity' | t }}</th>
                 <th></th>
               </tr>
             </thead>
@@ -115,23 +155,23 @@ const MIN_QUERY_LENGTH = 2;
                   <td>
                     {{ space.typeName ?? space.typeCode }}
                     @if (space.category; as category) {
-                      <span class="badge badge-neutral">{{ categoryLabels[category] }}</span>
+                      <span class="badge badge-neutral">{{ categoryLabels[category] | t }}</span>
                     }
                   </td>
                   <td>{{ space.buildingCode }}{{ space.wing ? ' · ' + space.wing : '' }}</td>
                   <td>{{ space.floorCode }}</td>
                   <td>
-                    @if (space.gridRow != null && space.gridColumn != null) {
-                      <span class="text-muted">{{ space.gridRow }}, {{ space.gridColumn }}</span>
+                    @if (space.shape) {
+                      <span class="text-muted">{{ !space.doors?.length ? ('Drawn' | t) : space.doors.length === 1 ? ('Drawn · 1 door' | t) : ('Drawn · {doors} doors' | t: { doors: space.doors.length }) }}</span>
                     } @else {
-                      <span class="badge badge-warning">Not placed</span>
+                      <span class="badge badge-warning">{{ 'Not drawn' | t }}</span>
                     }
                   </td>
                   <td class="text-muted">{{ space.capacity ?? '—' }}</td>
                   <td class="row">
-                    <button type="button" class="btn btn-sm" (click)="openEdit(space)">Edit</button>
+                    <button type="button" class="btn btn-sm" (click)="openEdit(space)">{{ 'Edit' | t }}</button>
                     <button type="button" class="btn btn-sm btn-danger" [disabled]="deletingId() === space.id" (click)="remove(space)">
-                      Delete
+                      {{ 'Delete' | t }}
                     </button>
                   </td>
                 </tr>
@@ -140,9 +180,10 @@ const MIN_QUERY_LENGTH = 2;
           </app-data-table>
         }
       </div>
+      }
     </div>
 
-    <app-modal #formModal [title]="editingSpace() ? 'Edit space' : 'New space'" (closed)="formError.set(null)">
+    <app-modal #formModal [title]="editingSpace() ? ('Edit space' | t) : ('New space' | t)" (closed)="formError.set(null)">
       <app-api-error-banner [error]="formError()" />
       <app-space-form
         [initial]="editingSpace()"
@@ -176,7 +217,6 @@ export class SpacesPage {
 
   readonly loading = signal(false);
   readonly error = signal<ApiError | null>(null);
-  readonly result = signal<PageResponse<Space> | null>(null);
   readonly buildings = signal<Building[]>([]);
   readonly types = signal<SpaceType[]>([]);
 
@@ -197,16 +237,49 @@ export class SpacesPage {
   /** Searching and listing fail differently, and saying "no match" to a listing is wrong. */
   readonly emptyMessage = computed(() =>
     this.query().trim().length > 0
-      ? 'No spaces match this search.'
-      : 'Nothing here yet. Create a space, or widen the filter.',
+      ? t('No spaces match this search.')
+      : t('Nothing here yet. Create a space, or widen the filter.'),
   );
 
   /** True while the screen has been given neither a usable term nor a filter to list by. */
   readonly nothingAsked = computed(() => {
     const q = this.query().trim();
-    if (q.length >= MIN_QUERY_LENGTH) return false;
-    if (q.length > 0) return true;
-    return !this.category() && !this.type() && !this.buildingCodeFilter();
+    return q.length > 0 && q.length < MIN_QUERY_LENGTH;
+  });
+
+  /** `?tab=types` opens the types of space; anything else, the spaces. */
+  readonly tab = input<string | undefined>(undefined);
+
+  /** Every space the filters and the search allow, in the server's order: by relevance when searching. */
+  private readonly listed = signal<Space[] | null>(null);
+
+  /** The column the table is sorted by. By name to start with; a search keeps its relevance until a column is picked. */
+  readonly sort = signal<Sort>({ key: 'name', dir: 1 });
+  private readonly sortPicked = signal(false);
+
+  readonly sorted = computed<Space[] | null>(() => {
+    const all = this.listed();
+    if (!all) return null;
+    if (this.query().trim().length > 0 && !this.sortPicked()) return all;
+    const { key, dir } = this.sort();
+    return sortRows(all, SORT_VALUE[key] ?? SORT_VALUE['name'], dir, byNameThenDoor);
+  });
+
+  /** A page of the sorted list: the whole of it is here, so any column orders all of it. */
+  readonly result = computed<PageResponse<Space> | null>(() => {
+    const all = this.sorted();
+    if (!all) return null;
+    const page = this.page();
+    const totalPages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
+    return {
+      content: all.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE),
+      page,
+      size: PAGE_SIZE,
+      totalElements: all.length,
+      totalPages,
+      first: page === 0,
+      last: page >= totalPages - 1,
+    };
   });
 
   @ViewChild('formModal') private formModal?: ModalComponent;
@@ -219,47 +292,44 @@ export class SpacesPage {
     const type = this.type();
     const buildingCode = this.buildingCodeFilter();
     const floor = this.floor();
-    const page = this.page();
     this.refreshTick();
+    const filters = {
+      category: category || undefined,
+      type: type || undefined,
+      buildingCode: buildingCode || undefined,
+      floor: floor || undefined,
+    };
 
-    // A term shorter than the minimum is a half-typed search, not a request to list the
-    // campus - so it waits. A filter with no term at all is a different question entirely:
-    // "what is in building A". The server answers that now, and without it this screen could
-    // not show you the space you had just created, and the building and type dropdowns did
-    // nothing on their own.
-    const searching = q.length > 0;
-    const filtering = !!category || !!type || !!buildingCode;
-
-    if (searching && q.length < MIN_QUERY_LENGTH) {
-      this.result.set(null);
+    // A term shorter than the minimum is a half-typed search: it waits.
+    if (q.length > 0 && q.length < MIN_QUERY_LENGTH) {
+      this.listed.set(null);
       return;
     }
-    if (!searching && !filtering) {
-      this.result.set(null);
-      return;
-    }
-
     this.loading.set(true);
     this.error.set(null);
+    const failed = (err: unknown) => {
+      this.loading.set(false);
+      this.error.set(err instanceof AppHttpError ? err.apiError : null);
+    };
+
+    // All of it, every page, so any column can sort the whole list: a search's matches are few.
+    const term = q.length > 0 ? { q } : {};
     this.spacesService
-      .search({
-        q: searching ? q : undefined,
-        page,
-        size: PAGE_SIZE,
-        category: category || undefined,
-        type: type || undefined,
-        buildingCode: buildingCode || undefined,
-        floor: floor || undefined,
-      })
+      .search({ ...term, page: 0, size: FETCH_SIZE, ...filters })
+      .pipe(
+        switchMap((first) =>
+          first.totalPages <= 1
+            ? of([first])
+            : forkJoin([of(first), ...Array.from({ length: first.totalPages - 1 }, (_, i) => this.spacesService.search({ ...term, page: i + 1, size: FETCH_SIZE, ...filters }))]),
+        ),
+        map((pages) => pages.flatMap((p) => p.content)),
+      )
       .subscribe({
-        next: (page) => {
-          this.result.set(page);
+        next: (all) => {
+          this.listed.set(all);
           this.loading.set(false);
         },
-        error: (err: unknown) => {
-          this.loading.set(false);
-          this.error.set(err instanceof AppHttpError ? err.apiError : null);
-        },
+        error: failed,
       });
   });
 
@@ -302,6 +372,12 @@ export class SpacesPage {
     this.floor.set((event.target as HTMLSelectElement).value);
   }
 
+  sortBy(sort: Sort): void {
+    this.sort.set(sort);
+    this.sortPicked.set(true);
+    this.page.set(0);
+  }
+
   onPageChange(page: number): void {
     this.page.set(page);
   }
@@ -339,7 +415,7 @@ export class SpacesPage {
 
   remove(space: Space): void {
     const label = shownCode(space) ? `${shownCode(space)} — ${space.name}` : space.name;
-    if (!window.confirm(`Delete ${label} (${space.buildingCode} ${space.floorCode})? This cannot be undone.`)) {
+    if (!window.confirm(t('Delete {label} ({building} {floor})? This cannot be undone.', { label, building: space.buildingCode, floor: space.floorCode }))) {
       return;
     }
     this.deletingId.set(space.id);

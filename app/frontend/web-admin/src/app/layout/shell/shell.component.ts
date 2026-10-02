@@ -1,69 +1,27 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
+import { isTokenExpired } from '../../core/auth/jwt.util';
 import { TokenStore } from '../../core/auth/token.store';
+import { ClockService } from '../../core/clock/clock.service';
 import { ApiConfigService } from '../../core/config/api-config.service';
 import { ThemeService } from '../../core/theme/theme.service';
+import { I18nService } from '../../core/i18n/i18n.service';
 import { TokenCountdownComponent } from '../../shared/ui/token-countdown/token-countdown.component';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { NAV_GROUPS } from '../nav';
 
-interface NavLink {
-  path: string;
-  label: string;
-  /** Inline SVG path data, 24x24. Emoji render differently on every platform and read as
-      decoration; a stroked glyph reads as an icon and inherits the current text colour. */
-  icon: string;
-}
-
-interface NavGroup {
-  title: string;
-  links: NavLink[];
-}
-
-// Grouped because eleven flat entries is a list to read, not a menu to use. The three groups
-// are the three reasons somebody opens this portal: to check who they are, to look after the
-// data, or to inspect how the API behaves.
-const NAV_GROUPS: NavGroup[] = [
-  {
-    title: 'Academic',
-    links: [
-      { path: '/data/programs', label: 'Programs', icon: 'M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4' },
-      { path: '/data/pensums', label: 'Pensums', icon: 'M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2zM8 7h8M8 11h8M8 15h5' },
-    ],
-  },
-  {
-    title: 'Campus',
-    links: [
-      { path: '/data/buildings', label: 'Buildings', icon: 'M3 21h18M5 21V5a2 2 0 012-2h6a2 2 0 012 2v16M9 7h2M9 11h2M9 15h2M15 21v-8h4v8' },
-      { path: '/data/floors', label: 'Floor editor', icon: 'M3 3h18v18H3zM3 9h18M9 9v12M15 15h6' },
-      { path: '/data/spaces', label: 'Spaces', icon: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z' },
-      { path: '/data/space-types', label: 'Space types', icon: 'M7 7h.01M3 11l8-8h8a2 2 0 012 2v8l-8 8a2 2 0 01-2.83 0l-5.17-5.17a2 2 0 010-2.83z' },
-    ],
-  },
-  {
-    title: 'People and access',
-    links: [
-      { path: '/data/users', label: 'Users', icon: 'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 21v-2a4 4 0 00-3-3.87' },
-      { path: '/data/invitation-codes', label: 'Invitation codes', icon: 'M15 7a4 4 0 11-5.66 5.66L3 19v2h2l6.34-6.34A4 4 0 0115 7zM16 8h.01' },
-      { path: '/data/visitor-passes', label: 'Visitor passes', icon: 'M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2zM3 11h18M7 15h4' },
-    ],
-  },
-  {
-    title: 'Inspect',
-    links: [
-      { path: '/my-token', label: 'My token', icon: 'M12 2l8 4v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6l8-4zM9 12l2 2 4-4' },
-      { path: '/who-can-do-what', label: 'Who can do what', icon: 'M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11' },
-      { path: '/api-console', label: 'API console', icon: 'M8 9l-4 3 4 3M16 9l4 3-4 3M13 5l-2 14' },
-    ],
-  },
-];
 
 /** Nav + header shared by every authenticated screen. Login stays outside so it renders alone. */
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TokenCountdownComponent],
+  host: { '(document:keydown.escape)': 'onEscape()' },
+  imports: [TranslatePipe, RouterOutlet, RouterLink, RouterLinkActive, TokenCountdownComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="shell">
+    <div class="shell" [class.nav-hidden]="navHidden()" [class.drawer-open]="drawerOpen()">
       <!--
         First stop in the tab order, invisible until it is focused. Without it a keyboard user
         walks the whole sidebar - fourteen stops - before reaching the page's own first control,
@@ -74,18 +32,44 @@ const NAV_GROUPS: NavGroup[] = [
         that changes the page is worse than no skip link. The href stays so it still reads as a
         link and works if scripting is off.
       -->
-      <a class="skip-link" href="#shell-content" (click)="skipToContent($event)">Skip to content</a>
+      <a class="skip-link" href="#shell-content" (click)="skipToContent($event)">{{ 'Skip to content' | t }}</a>
 
       <header class="shell-header">
-        <!-- The API console, not the token screen: the console is where somebody spends the
-             session, and the token is one click away from it anyway. -->
-        <a class="brand" routerLink="/api-console">
-          <img src="/konrad-logo.png" alt="Fundación Universitaria Konrad Lorenz" width="34" height="34" />
-          <span class="brand-text">
-            <strong>KApp</strong>
-            <span class="brand-sub">Admin Portal</span>
-          </span>
-        </a>
+        <div class="header-start">
+          <!-- Hides the sidebar on a tablet, where the plan wants the width, and opens it as a
+               drawer on a phone, where it has no room to stay open at all. -->
+          <button
+            type="button"
+            class="icon-btn nav-toggle"
+            (click)="toggleNav()"
+            aria-controls="shell-nav"
+            [attr.aria-expanded]="navShown()"
+            [title]="navShown() ? ('Hide the menu' | t) : ('Show the menu' | t)"
+            [attr.aria-label]="navShown() ? ('Hide the menu' | t) : ('Show the menu' | t)"
+          >
+            <!-- A window with its side panel, and which way pressing it moves the panel: clearer than
+                 three lines, which say "menu" without saying it is the panel beside the page. -->
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="16" rx="2.5" />
+              <path d="M9 4v16" />
+              @if (navShown()) {
+                <path d="m16 9-3 3 3 3" />
+              } @else {
+                <path d="m13 9 3 3-3 3" />
+              }
+            </svg>
+          </button>
+
+          <!-- The API console, not the token screen: the console is where somebody spends the
+               session, and the token is one click away from it anyway. -->
+          <a class="brand" routerLink="/api-console">
+            <img class="logo-tile" src="/konrad-logo.png" [alt]="'Fundación Universitaria Konrad Lorenz' | t" width="34" height="34" />
+            <span class="brand-text">
+              <strong>{{ 'KApp' | t }}</strong>
+              <span class="brand-sub">{{ 'Admin Portal' | t }}</span>
+            </span>
+          </a>
+        </div>
 
         <div class="header-actions">
           <app-token-countdown />
@@ -94,8 +78,8 @@ const NAV_GROUPS: NavGroup[] = [
             type="button"
             class="icon-btn"
             (click)="editBaseUrl()"
-            [title]="'Gateway: ' + baseUrl() + ' — click to change'"
-            aria-label="Change the gateway address"
+            [title]="'Gateway: {url} — click to change' | t: { url: baseUrl() }"
+            [attr.aria-label]="'Change the gateway address' | t"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 2a10 10 0 100 20 10 10 0 000-20zM2 12h20M12 2a15 15 0 010 20 15 15 0 010-20" />
@@ -107,8 +91,8 @@ const NAV_GROUPS: NavGroup[] = [
             type="button"
             class="icon-btn"
             (click)="cycleTheme()"
-            [title]="'Theme: ' + theme.preference() + ' — click to change'"
-            [attr.aria-label]="'Theme: ' + theme.preference()"
+            [title]="'Theme: {theme} — click to change' | t: { theme: (theme.preference() | t) }"
+            [attr.aria-label]="'Theme: {theme}' | t: { theme: (theme.preference() | t) }"
           >
             @if (theme.preference() === 'dark') {
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" /></svg>
@@ -123,22 +107,38 @@ const NAV_GROUPS: NavGroup[] = [
                 <path d="M8 21h8M12 18v3" />
               </svg>
             }
-            <span class="icon-btn-label">{{ theme.preference() }}</span>
+            <span class="icon-btn-label">{{ theme.preference() | t }}</span>
           </button>
 
-          <button type="button" class="icon-btn danger" (click)="logout()" title="Sign out">
+          <button
+            type="button"
+            class="icon-btn"
+            (click)="cycleLanguage()"
+            [title]="'Language: {language} — click to change' | t: { language: languageName() }"
+            [attr.aria-label]="'Language: {language}' | t: { language: languageName() }"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 5h9M8.5 3v2M10.5 5c-.7 4.2-3.3 7.6-6.5 9.5M6 9c1.3 2.3 3.2 4 5.5 5M13 21l4-9 4 9M14.3 18h5.4" />
+            </svg>
+            <span class="icon-btn-label keep">{{ languageLabel() }}</span>
+          </button>
+
+          <button type="button" class="icon-btn danger" (click)="logout()" [title]="'Sign out' | t">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
             </svg>
-            <span class="icon-btn-label">Sign out</span>
+            <span class="icon-btn-label">{{ 'Sign out' | t }}</span>
           </button>
         </div>
       </header>
 
       <div class="shell-body">
-        <nav class="shell-nav" aria-label="Sections">
+        @if (drawerOpen()) {
+          <div class="nav-backdrop" (click)="closeDrawer()" aria-hidden="true"></div>
+        }
+        <nav id="shell-nav" class="shell-nav" [attr.aria-label]="'Sections' | t">
           @for (group of groups; track group.title) {
-            <p class="nav-group-title">{{ group.title }}</p>
+            <p class="nav-group-title">{{ group.title | t }}</p>
             @for (link of group.links; track link.path) {
               <a
                 [routerLink]="link.path"
@@ -149,7 +149,7 @@ const NAV_GROUPS: NavGroup[] = [
                 <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path [attr.d]="link.icon" />
                 </svg>
-                {{ link.label }}
+                {{ link.label | t }}
               </a>
             }
           }
@@ -172,33 +172,6 @@ const NAV_GROUPS: NavGroup[] = [
        A tinted band rather than another white strip. The three institutional
        hues run along the bottom edge as a hairline, which is where the brand
        belongs in a tool: present, not shouting. */
-    /*
-     * Off-screen until focused, then pinned over the header. Not display:none - that would
-     * take it out of the tab order, which is the one thing it exists for.
-     */
-    .skip-link {
-      /* fixed, not absolute: it must sit over the header wherever the shell is scrolled to,
-         and it does not depend on an ancestor happening to be positioned. */
-      position: fixed;
-      left: 0.5rem;
-      top: -3rem;
-      z-index: 100;
-      padding: 0.5rem 0.85rem;
-      background: var(--bg-elevated);
-      color: var(--text);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-sm);
-      font-size: 0.8125rem;
-      text-decoration: none;
-      transition: top var(--transition-fast);
-    }
-    /* :focus, not :focus-visible. A skip link is only ever reached by keyboard, and
-       :focus-visible is a heuristic that does not fire when focus is moved by script - which
-       would leave the element focused and invisible, the worst of both. */
-    .skip-link:focus {
-      top: 0.5rem;
-    }
-
     .shell-header {
       display: flex;
       align-items: center;
@@ -207,7 +180,11 @@ const NAV_GROUPS: NavGroup[] = [
       padding: 0.6rem 1.25rem;
       background: var(--header-bg);
       border-bottom: 1px solid var(--border);
-      position: relative;
+      /* Pinned, so the menu button is within reach from the bottom of a long page too. Sticky
+         also positions it, which the strip drawn under it needs. */
+      position: sticky;
+      top: 0;
+      z-index: 40;
     }
     .shell-header::after {
       content: '';
@@ -216,20 +193,14 @@ const NAV_GROUPS: NavGroup[] = [
       right: 0;
       bottom: -1px;
       height: 2px;
-      background: linear-gradient(
-        90deg,
-        var(--brand-teal) 0%,
-        var(--brand-teal) 33%,
-        var(--brand-pink) 33%,
-        var(--brand-pink) 66%,
-        var(--brand-green) 66%
-      );
+      background: var(--brand-strip);
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: 0.6rem;
+      min-width: 0;
       text-decoration: none;
       color: inherit;
       border-radius: var(--radius-md);
@@ -247,27 +218,47 @@ const NAV_GROUPS: NavGroup[] = [
       flex: 0 0 auto;
       display: block;
     }
+    .header-start {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      min-width: 0;
+    }
+    .nav-toggle {
+      padding: 0.45rem;
+    }
+    .icon-btn.nav-toggle svg {
+      width: 20px;
+      height: 20px;
+    }
+    /* One line each, cut short rather than wrapped: wrapped, the name ran under the countdown. */
     .brand-text {
       display: flex;
       flex-direction: column;
-      line-height: 1.1;
+      min-width: 0;
+      line-height: 1.2;
+      white-space: nowrap;
     }
     .brand strong {
       font-size: 1.0625rem;
       letter-spacing: -0.01em;
     }
     .brand-sub {
+      overflow: hidden;
+      text-overflow: ellipsis;
       font-size: 0.75rem;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
 
+    /* One row, always: wrapping dropped the sign-out button under the rest on a phone. The
+       brand gives way instead, since the actions are what the header is for. */
     .header-actions {
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      flex-wrap: wrap;
+      flex-shrink: 0;
     }
 
     /* An icon with its label beside it: recognisable at a glance, unambiguous
@@ -410,7 +401,7 @@ const NAV_GROUPS: NavGroup[] = [
     .nav-link.active {
       background: var(--nav-active-bg);
       color: var(--nav-active-text);
-      border-left-color: var(--brand-teal);
+      border-left-color: var(--nav-active-edge);
       font-weight: 600;
     }
     .nav-link.active:hover {
@@ -423,60 +414,163 @@ const NAV_GROUPS: NavGroup[] = [
 
     .shell-content {
       flex: 1;
+      min-width: 0;
       overflow-y: auto;
       padding: 1.5rem;
     }
 
-    @media (max-width: 720px) {
-      .shell-body {
-        flex-direction: column;
+    /*
+     * Hidden, the sidebar slides out past the left edge instead of vanishing, and the page
+     * takes its width back. On an iPad drawing a floor, that width is the plan's.
+     */
+    @media (min-width: 721px) {
+      .shell.nav-hidden .shell-nav {
+        margin-left: -15rem;
+        visibility: hidden;
       }
-      /* One scrolling strip rather than a wrapped block. Wrapped, eleven links
-         took four rows and a third of a phone screen before any content. */
+    }
+    /* One transition for both: the wide screen slides the margin, the phone the drawer. */
+    @media (prefers-reduced-motion: no-preference) {
       .shell-nav {
-        width: 100%;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        gap: 0.25rem;
-        padding: 0.5rem;
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-        scrollbar-width: none;
+        transition: margin-left 180ms ease, transform 200ms ease, visibility 200ms;
       }
-      .shell-nav::-webkit-scrollbar {
-        display: none;
+    }
+
+    /*
+     * A phone has no room for a sidebar, and the strip of links that stood in for one ate a row
+     * of the screen while showing three of its eleven entries. The menu is a drawer there: out
+     * of the way until the button in the header asks for it, and gone again once a section is
+     * picked.
+     */
+    @media (max-width: 720px) {
+      .shell-nav {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 60;
+        width: min(18rem, 86vw);
+        padding: 1rem 0.75rem calc(1rem + env(safe-area-inset-bottom));
+        background-color: var(--bg-elevated);
+        transform: translateX(-100%);
+        visibility: hidden;
       }
-      /* Group headings are a vertical device; in a horizontal strip they would
-         be eleven more things to scroll past. */
-      .nav-group-title {
-        display: none;
+      .shell.drawer-open .shell-nav {
+        transform: none;
+        visibility: visible;
+        box-shadow: var(--shadow-md);
       }
-      .nav-link {
-        white-space: nowrap;
-        flex: 0 0 auto;
-        border-left: none;
-        border-bottom: 3px solid transparent;
-      }
-      .nav-link.active {
-        border-left-color: transparent;
-        border-bottom-color: var(--brand-teal);
+      .nav-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 55;
+        background: var(--scrim);
       }
       .shell-content {
         padding: 1rem;
       }
       .shell-header {
-        flex-wrap: wrap;
         gap: 0.5rem;
-        padding: 0.6rem 1rem;
+        padding: 0.5rem 0.75rem;
+      }
+      .header-actions {
+        gap: 0.15rem;
+      }
+      .icon-btn:not(.nav-toggle) {
+        padding: 0.4rem;
       }
       /* The labels are the first thing to go; the icons still say what each does. */
-      .icon-btn-label {
+      .icon-btn-label,
+      .brand-sub {
+        display: none;
+      }
+    }
+    /* Between a tablet and a wide screen the five labels, in Spanish, take the brand's room: the
+       icons and their titles carry them, and the language keeps its two letters, which no icon
+       says. */
+    @media (min-width: 721px) and (max-width: 1180px) {
+      .icon-btn-label:not(.keep) {
+        display: none;
+      }
+    }
+    /* The mark alone says whose portal this is; the name gives its room to the countdown. */
+    @media (max-width: 400px) {
+      .brand-text {
         display: none;
       }
     }
   `})
 export class ShellComponent {
+  private readonly router = inject(Router);
+
+  /** Below this width the sidebar is a drawer, the same breakpoint the styles switch on. */
+  private readonly narrowQuery = matchNarrow();
+  readonly narrow = signal(this.narrowQuery?.matches ?? false);
+
+  /** On a wide screen: whether the sidebar has been put away. Remembered on this device. */
+  readonly navHidden = signal(readNavHidden());
+
+  /** On a phone: whether the drawer is out. Never remembered - it opens only when asked. */
+  readonly drawerOpen = signal(false);
+
+  readonly navShown = computed(() => (this.narrow() ? this.drawerOpen() : !this.navHidden()));
+
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    const query = this.narrowQuery;
+    if (query) {
+      const onChange = (event: MediaQueryListEvent) => {
+        this.narrow.set(event.matches);
+        this.drawerOpen.set(false);
+      };
+      query.addEventListener('change', onChange);
+      destroyRef.onDestroy(() => query.removeEventListener('change', onChange));
+    }
+    // Picking a section is what the drawer was opened for; leaving it over the page after
+    // that would make every visit two taps.
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(destroyRef),
+      )
+      .subscribe(() => this.drawerOpen.set(false));
+
+    // The token's deadline is the session's. The shell is on screen exactly while somebody is
+    // signed in, so it watches the clock and signs out the second the token runs out.
+    const clock = inject(ClockService);
+    effect(() => {
+      const claims = this.tokenStore.decoded()?.claims;
+      if (claims && isTokenExpired(claims, clock.now())) {
+        untracked(() => this.auth.expire());
+      }
+    });
+  }
+
+  toggleNav(): void {
+    if (this.narrow()) {
+      this.drawerOpen.update((open) => !open);
+      return;
+    }
+    const hidden = !this.navHidden();
+    this.navHidden.set(hidden);
+    try {
+      localStorage.setItem(NAV_HIDDEN_KEY, hidden ? 'true' : 'false');
+    } catch {
+      // Non-fatal: the sidebar just comes back on the next visit.
+    }
+  }
+
+  closeDrawer(): void {
+    this.drawerOpen.set(false);
+  }
+
+  /** Escape puts the drawer away and hands focus back to the button that opened it. */
+  onEscape(): void {
+    if (this.drawerOpen()) {
+      this.drawerOpen.set(false);
+      document.querySelector<HTMLElement>('.nav-toggle')?.focus();
+    }
+  }
 
   /**
    * Moves focus into the page body without navigating.
@@ -494,6 +588,7 @@ export class ShellComponent {
   private readonly config = inject(ApiConfigService);
   protected readonly tokenStore = inject(TokenStore);
   protected readonly theme = inject(ThemeService);
+  private readonly i18n = inject(I18nService);
 
   readonly groups = NAV_GROUPS;
 
@@ -512,6 +607,23 @@ export class ShellComponent {
     return this.themeIcons[this.theme.preference()] ?? '';
   }
 
+  /** "ES" or "EN", and "auto" while it follows the system's. */
+  languageLabel(): string {
+    const code = this.i18n.language().toUpperCase();
+    return this.i18n.preference() === 'system' ? `${code} · auto` : code;
+  }
+
+  languageName(): string {
+    const name = this.i18n.language() === 'es' ? 'Español' : 'English';
+    return this.i18n.preference() === 'system' ? this.i18n.t('{language}, as the system', { language: name }) : name;
+  }
+
+  /** The system's language, then Spanish, then English, as the theme cycles. */
+  cycleLanguage(): void {
+    const order = ['system', 'es', 'en'] as const;
+    this.i18n.set(order[(order.indexOf(this.i18n.preference()) + 1) % order.length]);
+  }
+
   cycleTheme(): void {
     const order = ['system', 'light', 'dark'] as const;
     const next = order[(order.indexOf(this.theme.preference()) + 1) % order.length];
@@ -519,7 +631,7 @@ export class ShellComponent {
   }
 
   editBaseUrl(): void {
-    const next = window.prompt('Gateway base URL', this.baseUrl());
+    const next = window.prompt(this.i18n.t('Gateway base URL'), this.baseUrl());
     if (next) {
       this.config.setBaseUrl(next);
     }
@@ -528,4 +640,20 @@ export class ShellComponent {
   logout(): void {
     this.auth.logout();
   }
+}
+
+const NAV_HIDDEN_KEY = 'kapp-admin:nav-hidden';
+
+function readNavHidden(): boolean {
+  try {
+    return localStorage.getItem(NAV_HIDDEN_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function matchNarrow(): MediaQueryList | null {
+  return typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+    ? window.matchMedia('(max-width: 720px)')
+    : null;
 }

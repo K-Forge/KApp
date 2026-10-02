@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.map.web.dto;
 
 import co.edu.konradlorenz.kapp.map.domain.Accessibility;
+import co.edu.konradlorenz.kapp.map.domain.Compass;
 import co.edu.konradlorenz.kapp.map.domain.FloorStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -23,8 +24,8 @@ import java.util.List;
  * layout endpoint alone.
  */
 @Schema(name = "Floor",
-        description = "One floor of a building, described as a grid the client draws rather than "
-                + "as a plan image it overlays.")
+        description = "One floor of a building, described as a drawing the client renders - rooms "
+                + "as polygons, corridors as lines - rather than as a plan image it overlays.")
 public record FloorDto(
         @Schema(description = "Identifier within the building, and the path segment the API uses: "
                 + "S1 for a basement, P0, P1, MEZZ for a mezzanine, T for a terrace.",
@@ -55,13 +56,23 @@ public record FloorDto(
         @Size(max = 300)
         String note,
 
-        @Schema(description = "Rows in this floor's grid.", example = "12")
-        @NotNull @Min(1) @Max(60)
-        Integer gridRows,
+        @Schema(description = "Width of the floor's drawing, in its own units. Every point on the "
+                + "floor lies within it.", example = "1640")
+        @NotNull @Min(1) @Max(20000)
+        Integer width,
 
-        @Schema(description = "Columns in this floor's grid.", example = "16")
-        @NotNull @Min(1) @Max(60)
-        Integer gridColumns,
+        @Schema(description = "Height of the floor's drawing, in its own units.", example = "590")
+        @NotNull @Min(1) @Max(20000)
+        Integer height,
+
+        @Schema(description = "The direction on the ground the drawing's top edge faces. Absent until "
+                + "somebody says: the posted plans are not drawn north up.", example = "EAST")
+        Compass top,
+
+        @Schema(description = "The building's walls around this floor, corners in order. Empty until "
+                + "traced.")
+        @Size(max = 400)
+        List<@NotNull @Valid PointDto> outline,
 
         @Schema(description = "Walkable routes across this floor.")
         @Valid List<CorridorDto> corridors,
@@ -74,5 +85,9 @@ public record FloorDto(
     /** Never null, so callers do not have to keep checking. */
     public List<CorridorDto> corridorsOrEmpty() {
         return corridors == null ? List.of() : corridors;
+    }
+
+    public List<PointDto> outlineOrEmpty() {
+        return outline == null ? List.of() : outline;
     }
 }

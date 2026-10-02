@@ -9,6 +9,7 @@ import {
   inject,
   input,
 } from '@angular/core';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 /**
  * The one table shell every entity list uses: a loading row, an empty-state row, and paging
@@ -20,6 +21,7 @@ import {
  */
 @Component({
   selector: 'app-data-table',
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="data-table">
@@ -30,7 +32,7 @@ import {
             <tbody>
               <tr>
                 <td [attr.colspan]="100">
-                  <div class="empty-state">Loading…</div>
+                  <div class="empty-state">{{ 'Loading…' | t }}</div>
                 </td>
               </tr>
             </tbody>
@@ -38,7 +40,7 @@ import {
             <tbody>
               <tr>
                 <td [attr.colspan]="100">
-                  <div class="empty-state">{{ emptyMessage() }}</div>
+                  <div class="empty-state">{{ emptyMessage() | t }}</div>
                 </td>
               </tr>
             </tbody>
@@ -51,14 +53,14 @@ import {
       @if (totalPages() > 1) {
         <div class="row-between pagination">
           <span class="text-muted">
-            Page {{ page() + 1 }} of {{ totalPages() }}
+            {{ 'Page {value} of {totalPages}' | t: { value: page() + 1, totalPages: totalPages() } }}
             @if (totalItems() !== null) {
-              · {{ totalItems() }} total
+              {{ '· {totalItems} total' | t: { totalItems: totalItems() } }}
             }
           </span>
           <div class="row">
             <button type="button" class="btn btn-sm" [disabled]="page() === 0 || loading()" (click)="pageChange.emit(page() - 1)">
-              Previous
+              {{ 'Previous' | t }}
             </button>
             <button
               type="button"
@@ -66,7 +68,7 @@ import {
               [disabled]="page() >= totalPages() - 1 || loading()"
               (click)="pageChange.emit(page() + 1)"
             >
-              Next
+              {{ 'Next' | t }}
             </button>
           </div>
         </div>
@@ -137,7 +139,7 @@ export class DataTableComponent implements AfterViewInit, OnDestroy {
 
   readonly loading = input(false);
   readonly empty = input(false);
-  readonly emptyMessage = input('No results.');
+  readonly emptyMessage = input(/* i18n */ 'No results.');
   readonly totalItems = input<number | null>(null);
   readonly page = input(0);
   readonly totalPages = input(0);

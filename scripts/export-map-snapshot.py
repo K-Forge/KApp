@@ -8,8 +8,13 @@ Writes the campus map, as the API serves it, into the snapshot a fresh database 
 
 One file per building under
 app/backend/microservices/map-service/src/main/resources/db/seed/map/, in the shape
-V005_SurveyedCampus reads. Commit them: the M0 cluster keeps no backups, so what is drawn in the
+V007_TracedCampus reads, and one per campus with what else stands on its blocks under
+db/seed/structures/, in the shape V010_CampusStructures reads. Commit them: the M0 cluster keeps no backups, so what is drawn in the
 floor editor exists only in Atlas until it is exported and committed.
+
+The distances taken on site with the portal's survey sheet go to docs/map/survey/, one file per
+campus: they are not loaded into a fresh database, but they are what the outlines are drawn from,
+and the record of when each was taken.
 
 Why the API and not mongoexport: no database credential leaves the services, which is the rule
 for every database here, and the files keep the contract's shape rather than the storage's. Any
@@ -23,6 +28,7 @@ import argparse
 import getpass
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.parse
@@ -31,6 +37,8 @@ import urllib.request
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_OUT = os.path.join(REPO, "app", "backend", "microservices", "map-service", "src", "main",
                            "resources", "db", "seed", "map")
+STRUCTURES_OUT = os.path.join(os.path.dirname(DEFAULT_OUT), "structures")
+SURVEY_OUT = os.path.join(REPO, "docs", "map", "survey")
 
 
 def fetch(gateway, token, path):
@@ -60,20 +68,31 @@ def number(value):
     return int(value) if float(value).is_integer() else value
 
 
+def snapshot_json(data):
+    """Two spaces of indent, as every snapshot file is, but a [lon, lat] pair on one line: an
+    outline of forty corners is forty lines to review, not a hundred and sixty."""
+    text = json.dumps(data, ensure_ascii=False, indent=2)
+    return re.sub(r"\[\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)\s*\]", r"[\1, \2]", text) + "\n"
+
+
 def building_file(building, floors):
-    out = pick(building, ["code", "name", "campus", "description", "aliases"], always=["aliases"])
+    out = pick(building, ["code", "name", "campus", "description", "address", "aliases"], always=["aliases"])
     out["wings"] = [pick(w, ["code", "name", "doorSuffix", "note"]) for w in building.get("wings", [])]
+    if present(building.get("placement")):
+        out["placement"] = building["placement"]
+    if present(building.get("footprint")):
+        out["footprint"] = [pick(p, ["lot", "floors", "lowestFloor", "basements", "wing", "ring"]) for p in building["footprint"]]
     out["floors"] = []
     for floor in sorted(floors, key=lambda f: f["level"]):
         f = pick(floor, ["code"])
         f["level"] = number(floor["level"])
-        f.update(pick(floor, ["name", "status", "accessibility", "note", "gridRows", "gridColumns"]))
+        f.update(pick(floor, ["name", "status", "accessibility", "note", "width", "height", "top", "outline"]))
         if present(floor.get("corridors")):
             f["corridors"] = [pick(c, ["code", "name", "color", "path"]) for c in floor["corridors"]]
         f["spaces"] = [
-            pick(s, ["code", "doorCode", "wing", "name", "typeCode", "aliases", "gridRow", "gridColumn",
-                     "rowSpan", "colSpan", "accessVia", "accessibility", "note", "capacity"],
-                 always=["rowSpan", "colSpan"])
+            pick(s, ["code", "doorCode", "wing", "name", "typeCode", "aliases", "shape", "doors",
+                     "accessVia", "accessibility", "note", "capacity"],
+                 always=["aliases"])
             for s in sorted(floor.get("spaces", []), key=lambda s: s["code"])
         ]
         out["floors"].append(f)
@@ -83,6 +102,10 @@ def building_file(building, floors):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[1].strip())
     parser.add_argument("--out", default=DEFAULT_OUT, help="directory to write into (default: the seed)")
+    parser.add_argument("--structures-out", default=STRUCTURES_OUT,
+                        help="directory to write each campus's structures into (default: the seed's)")
+    parser.add_argument("--survey-out", default=SURVEY_OUT,
+                        help="directory to write each campus's survey into (default: docs/map/survey)")
     args = parser.parse_args()
 
     gateway = os.environ.get("KAPP_GATEWAY", "http://localhost:8080")
@@ -101,17 +124,42 @@ def main():
                   for f in building.get("floors", [])]
         name = code.lower() + ".json"
         with open(os.path.join(args.out, name), "w", encoding="utf-8") as out:
-            json.dump(building_file(building, floors), out, ensure_ascii=False, indent=2)
-            out.write("\n")
+            out.write(snapshot_json(building_file(building, floors)))
         written.add(name)
-        placed = sum(1 for f in floors for s in f.get("spaces", []) if s.get("gridRow") is not None)
+        placed = sum(1 for f in floors for s in f.get("spaces", []) if s.get("shape"))
         total = sum(len(f.get("spaces", [])) for f in floors)
-        print(f"  {code:6} {len(floors)} floor(s), {total} space(s), {placed} placed")
+        print(f"  {code:6} {len(floors)} floor(s), {total} space(s), {placed} drawn")
 
     # A building deleted in the portal must not come back in the next fresh database.
     for stale in sorted(set(n for n in os.listdir(args.out) if n.endswith(".json")) - written):
         os.remove(os.path.join(args.out, stale))
         print(f"  removed {stale}: the building no longer exists")
+
+    # What else stands on each campus's blocks, as the block editor left it.
+    os.makedirs(args.structures_out, exist_ok=True)
+    for campus in sorted({b["campus"] for b in buildings}):
+        listed = fetch(gateway, token, "/api/map/campuses/{}/structures".format(urllib.parse.quote(campus, safe="")))
+        if not listed.get("structures"):
+            continue
+        slug = re.sub(r"[^a-z0-9]+", "-", campus.lower()).strip("-")
+        with open(os.path.join(args.structures_out, slug + ".json"), "w", encoding="utf-8") as out:
+            out.write(snapshot_json({"campus": listed["campus"],
+                                     "structures": [pick(x, ["name", "floors", "basements", "lot", "ring"], always=["floors", "basements"])
+                                                    for x in listed["structures"]]}))
+        print(f"  {campus}: {len(listed['structures'])} structure(s)")
+
+    # The distances taken round the blocks, with when each was taken.
+    for campus in sorted({b["campus"] for b in buildings}):
+        survey = fetch(gateway, token, "/api/map/campuses/{}/survey".format(urllib.parse.quote(campus, safe="")))
+        if not survey.get("measures"):
+            continue
+        os.makedirs(args.survey_out, exist_ok=True)
+        slug = re.sub(r"[^a-z0-9]+", "-", campus.lower()).strip("-")
+        with open(os.path.join(args.survey_out, slug + ".json"), "w", encoding="utf-8") as out:
+            out.write(snapshot_json({"campus": survey["campus"], "version": survey["version"],
+                                     "measures": [pick(m, ["id", "label", "text", "metres", "note", "recheck", "updatedAt"])
+                                                  for m in survey["measures"]]}))
+        print(f"  {campus}: {len(survey['measures'])} distance(s) of the survey")
 
     where = os.path.relpath(args.out, REPO) if os.path.abspath(args.out).startswith(REPO + os.sep) else args.out
     print(f"\n{len(written)} building(s) written to {where}")

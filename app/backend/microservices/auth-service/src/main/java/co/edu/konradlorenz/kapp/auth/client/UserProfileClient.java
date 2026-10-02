@@ -2,12 +2,14 @@ package co.edu.konradlorenz.kapp.auth.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * The one Feign edge out of auth-service: creating the profile that matches a new
- * credential.
+ * credential, and removing it with the account.
  *
  * <p>Resolved through Eureka by service name. {@code url} is left bindable so a test or a
  * local run can point it at a stub; blank means "use discovery", which is the production
@@ -30,4 +32,8 @@ public interface UserProfileClient {
      */
     @PostMapping(value = "/internal/users", consumes = MediaType.APPLICATION_JSON_VALUE)
     UserProfileView upsert(@RequestBody InternalUserUpsert body);
+
+    /** The profile of an account an administrator deleted. Idempotent: 204 whether it was there or not. */
+    @DeleteMapping("/internal/users/{id}")
+    void delete(@PathVariable("id") String id);
 }

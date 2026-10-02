@@ -1,4 +1,5 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, type Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
 
 // Grows one feature at a time as each is built (see AGENTS commit history) - a route is only
@@ -27,6 +28,23 @@ export const routes: Routes = [
         loadComponent: () => import('./features/data/users/users.page').then((m) => m.UsersPage),
       },
       {
+        path: 'data/campus',
+        loadComponent: () => import('./features/data/campus/campus-map.page').then((m) => m.CampusMapPage),
+      },
+      {
+        path: 'data/survey',
+        loadComponent: () => import('./features/data/survey/survey.page').then((m) => m.SurveyPage),
+      },
+      {
+        path: 'data/blocks',
+        loadComponent: () => import('./features/data/blocks/block-editor.page').then((m) => m.BlockEditorPage),
+      },
+      {
+        path: 'data/blocks/:block',
+        loadComponent: () => import('./features/data/blocks/block-editor.page').then((m) => m.BlockEditorPage),
+        canDeactivate: [(page: { canLeave(): boolean }) => page.canLeave()],
+      },
+      {
         path: 'data/buildings',
         loadComponent: () => import('./features/data/buildings/buildings.page').then((m) => m.BuildingsPage),
       },
@@ -45,10 +63,8 @@ export const routes: Routes = [
         // noticing them is how a floor stays unsaved for a week.
         canDeactivate: [(page: { canLeave(): boolean }) => page.canLeave()],
       },
-      {
-        path: 'data/space-types',
-        loadComponent: () => import('./features/data/spaces/space-types.page').then((m) => m.SpaceTypesPage),
-      },
+      // Types of space are a tab of Spaces now; an old link still lands on them.
+      { path: 'data/space-types', redirectTo: () => inject(Router).parseUrl('/data/spaces?tab=types') },
       {
         path: 'data/programs',
         loadComponent: () => import('./features/data/programs/programs.page').then((m) => m.ProgramsPage),

@@ -3,10 +3,50 @@
   "name": "Casa Medio Universitario",
   "campus": "Sede Principal",
   "description": "Casa antigua de tres niveles: el Servicio Médico a nivel de la calle y las oficinas de Medio Universitario arriba, a las que se sube por una escalera exterior.",
+  "address": "Cl. 62 # 9-65",
   "aliases": [
-    "Medio Universitario"
+    "Medio Universitario",
+    "Casita blanca"
   ],
   "wings": [],
+  "placement": {
+    "origin": {
+      "lat": 4.6479425,
+      "lon": -74.061666
+    },
+    "bearing": 76.0,
+    "metresPerUnit": 0.01118
+  },
+  "footprint": [
+    {
+      "lot": "008213025008",
+      "floors": 3,
+      "basements": 0,
+      "ring": [
+        [-74.0616302, 4.6478217],
+        [-74.0616316, 4.6478275],
+        [-74.0616584, 4.6479366],
+        [-74.0617139, 4.6479225],
+        [-74.0617118, 4.6479138],
+        [-74.0616854, 4.6478076],
+        [-74.0616302, 4.6478217]
+      ]
+    },
+    {
+      "lot": "008213025008",
+      "floors": 1,
+      "basements": 0,
+      "ring": [
+        [-74.06165, 4.6477735],
+        [-74.0616247, 4.6477993],
+        [-74.0616302, 4.6478217],
+        [-74.0616854, 4.6478076],
+        [-74.061678, 4.6477779],
+        [-74.0616715, 4.6477516],
+        [-74.06165, 4.6477735]
+      ]
+    }
+  ],
   "floors": [
     {
       "code": "P0",
@@ -15,43 +55,413 @@
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
       "note": "A nivel de la calle: lo primero que se ve al entrar.",
-      "gridRows": 8,
-      "gridColumns": 28,
-      "corridors": [
+      "width": 1830,
+      "height": 500,
+      "top": "EAST",
+      "spaces": [
         {
-          "code": "PAS-P0",
-          "name": "Pasillo",
-          "color": "#5B8DEF",
-          "path": [
+          "code": "P0-01",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
             {
-              "row": 2,
-              "col": 8
+              "x": 1105,
+              "y": 8
             },
             {
-              "row": 2,
-              "col": 21
+              "x": 1500,
+              "y": 8
+            },
+            {
+              "x": 1815,
+              "y": 492
+            },
+            {
+              "x": 1440,
+              "y": 492
+            },
+            {
+              "x": 1440,
+              "y": 222
+            },
+            {
+              "x": 1196,
+              "y": 222
+            },
+            {
+              "x": 1196,
+              "y": 203
+            },
+            {
+              "x": 1105,
+              "y": 203
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 1440,
+                "y": 455
+              },
+              "to": {
+                "x": 1440,
+                "y": 490
+              }
+            },
+            {
+              "from": {
+                "x": 1105,
+                "y": 129
+              },
+              "to": {
+                "x": 1105,
+                "y": 164
+              }
+            },
+            {
+              "from": {
+                "x": 1105,
+                "y": 172
+              },
+              "to": {
+                "x": 1105,
+                "y": 197
+              }
             }
           ]
-        }
-      ],
-      "spaces": [
+        },
+        {
+          "code": "P0-02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 808,
+              "y": 15
+            },
+            {
+              "x": 949,
+              "y": 15
+            },
+            {
+              "x": 949,
+              "y": 123
+            },
+            {
+              "x": 808,
+              "y": 123
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 838,
+                "y": 123
+              },
+              "to": {
+                "x": 877,
+                "y": 123
+              }
+            },
+            {
+              "from": {
+                "x": 893,
+                "y": 123
+              },
+              "to": {
+                "x": 923,
+                "y": 123
+              }
+            },
+            {
+              "from": {
+                "x": 808,
+                "y": 29
+              },
+              "to": {
+                "x": 808,
+                "y": 59
+              }
+            }
+          ]
+        },
+        {
+          "code": "P0-03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 949,
+              "y": 19
+            },
+            {
+              "x": 1104,
+              "y": 19
+            },
+            {
+              "x": 1104,
+              "y": 123
+            },
+            {
+              "x": 949,
+              "y": 123
+            }
+          ]
+        },
+        {
+          "code": "P0-04",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 4,
+              "y": 20
+            },
+            {
+              "x": 268,
+              "y": 20
+            },
+            {
+              "x": 268,
+              "y": 91
+            },
+            {
+              "x": 4,
+              "y": 91
+            }
+          ]
+        },
+        {
+          "code": "P0-05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 532,
+              "y": 25
+            },
+            {
+              "x": 586,
+              "y": 25
+            },
+            {
+              "x": 586,
+              "y": 102
+            },
+            {
+              "x": 532,
+              "y": 102
+            }
+          ]
+        },
+        {
+          "code": "P0-06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 587,
+              "y": 25
+            },
+            {
+              "x": 733,
+              "y": 25
+            },
+            {
+              "x": 733,
+              "y": 116
+            },
+            {
+              "x": 587,
+              "y": 116
+            }
+          ]
+        },
+        {
+          "code": "P0-07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 736,
+              "y": 25
+            },
+            {
+              "x": 807,
+              "y": 25
+            },
+            {
+              "x": 807,
+              "y": 123
+            },
+            {
+              "x": 736,
+              "y": 123
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 740,
+                "y": 123
+              },
+              "to": {
+                "x": 807,
+                "y": 123
+              }
+            }
+          ]
+        },
+        {
+          "code": "P0-08",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 15,
+              "y": 92
+            },
+            {
+              "x": 326,
+              "y": 92
+            },
+            {
+              "x": 326,
+              "y": 405
+            },
+            {
+              "x": 15,
+              "y": 405
+            }
+          ]
+        },
+        {
+          "code": "P0-09",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 902,
+              "y": 220
+            },
+            {
+              "x": 968,
+              "y": 220
+            },
+            {
+              "x": 968,
+              "y": 369
+            },
+            {
+              "x": 902,
+              "y": 369
+            }
+          ]
+        },
+        {
+          "code": "P0-10",
+          "name": "Escalera por identificar",
+          "typeCode": "STAIRS",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1100,
+              "y": 220
+            },
+            {
+              "x": 1184,
+              "y": 220
+            },
+            {
+              "x": 1184,
+              "y": 312
+            },
+            {
+              "x": 1100,
+              "y": 312
+            }
+          ]
+        },
+        {
+          "code": "P0-11",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1051,
+              "y": 397
+            },
+            {
+              "x": 1115,
+              "y": 397
+            },
+            {
+              "x": 1115,
+              "y": 480
+            },
+            {
+              "x": 1051,
+              "y": 480
+            }
+          ]
+        },
         {
           "code": "P0-BANO",
           "name": "Baño",
           "typeCode": "RESTROOM",
-          "gridRow": 6,
-          "gridColumn": 16,
-          "rowSpan": 2,
-          "colSpan": 2
+          "aliases": [],
+          "shape": [
+            {
+              "x": 988,
+              "y": 387
+            },
+            {
+              "x": 1050,
+              "y": 387
+            },
+            {
+              "x": 1050,
+              "y": 472
+            },
+            {
+              "x": 988,
+              "y": 472
+            }
+          ]
         },
         {
           "code": "P0-BANO-ACCESIBLE",
           "name": "Baño accesible",
           "typeCode": "RESTROOM",
-          "gridRow": 0,
-          "gridColumn": 6,
-          "rowSpan": 3,
-          "colSpan": 2
+          "aliases": [],
+          "shape": [
+            {
+              "x": 361,
+              "y": 23
+            },
+            {
+              "x": 530,
+              "y": 23
+            },
+            {
+              "x": 530,
+              "y": 218
+            },
+            {
+              "x": 361,
+              "y": 218
+            }
+          ]
         },
         {
           "code": "P0-CONSULTORIO",
@@ -60,37 +470,168 @@
           "aliases": [
             "Servicio Médico"
           ],
-          "gridRow": 4,
-          "gridColumn": 19,
-          "rowSpan": 4,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 1124,
+              "y": 315
+            },
+            {
+              "x": 1190,
+              "y": 315
+            },
+            {
+              "x": 1190,
+              "y": 235
+            },
+            {
+              "x": 1425,
+              "y": 235
+            },
+            {
+              "x": 1425,
+              "y": 492
+            },
+            {
+              "x": 1124,
+              "y": 492
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 1190,
+                "y": 283
+              },
+              "to": {
+                "x": 1190,
+                "y": 315
+              }
+            },
+            {
+              "from": {
+                "x": 1124,
+                "y": 320
+              },
+              "to": {
+                "x": 1124,
+                "y": 345
+              }
+            },
+            {
+              "from": {
+                "x": 1124,
+                "y": 354
+              },
+              "to": {
+                "x": 1124,
+                "y": 383
+              }
+            }
+          ]
         },
         {
           "code": "P0-ENFERMERIA",
           "name": "Enfermería",
           "typeCode": "NURSING",
-          "gridRow": 3,
-          "gridColumn": 12,
-          "rowSpan": 4,
-          "colSpan": 4
+          "aliases": [],
+          "shape": [
+            {
+              "x": 747,
+              "y": 219
+            },
+            {
+              "x": 902,
+              "y": 219
+            },
+            {
+              "x": 902,
+              "y": 369
+            },
+            {
+              "x": 988,
+              "y": 369
+            },
+            {
+              "x": 988,
+              "y": 478
+            },
+            {
+              "x": 747,
+              "y": 478
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 902,
+                "y": 222
+              },
+              "to": {
+                "x": 902,
+                "y": 257
+              }
+            }
+          ]
         },
         {
           "code": "P0-ENTRADA",
           "name": "Entrada",
           "typeCode": "ENTRANCE",
-          "gridRow": 6,
-          "gridColumn": 5,
-          "rowSpan": 2,
-          "colSpan": 1
+          "aliases": [],
+          "shape": [
+            {
+              "x": 10,
+              "y": 406
+            },
+            {
+              "x": 330,
+              "y": 406
+            },
+            {
+              "x": 330,
+              "y": 480
+            },
+            {
+              "x": 10,
+              "y": 480
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 10,
+                "y": 410
+              },
+              "to": {
+                "x": 10,
+                "y": 475
+              }
+            }
+          ]
         },
         {
           "code": "P0-ESC",
           "name": "Escalera interior",
           "typeCode": "STAIRS",
-          "gridRow": 3,
-          "gridColumn": 17,
-          "rowSpan": 2,
-          "colSpan": 2
+          "aliases": [],
+          "shape": [
+            {
+              "x": 610,
+              "y": 210
+            },
+            {
+              "x": 740,
+              "y": 210
+            },
+            {
+              "x": 740,
+              "y": 375
+            },
+            {
+              "x": 610,
+              "y": 375
+            }
+          ]
         },
         {
           "code": "P0-RECEPCION",
@@ -99,10 +640,24 @@
           "aliases": [
             "Servicio Médico"
           ],
-          "gridRow": 3,
-          "gridColumn": 6,
-          "rowSpan": 4,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 364,
+              "y": 226
+            },
+            {
+              "x": 610,
+              "y": 226
+            },
+            {
+              "x": 610,
+              "y": 479
+            },
+            {
+              "x": 364,
+              "y": 479
+            }
+          ]
         }
       ]
     },
@@ -113,124 +668,617 @@
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
       "note": "Se sube por la escalera exterior, del lado oeste.",
-      "gridRows": 8,
-      "gridColumns": 28,
-      "corridors": [
+      "width": 1830,
+      "height": 500,
+      "top": "EAST",
+      "spaces": [
         {
-          "code": "PAS-P1",
-          "name": "Hall",
-          "color": "#5B8DEF",
-          "path": [
+          "code": "P1-09",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
             {
-              "row": 4,
-              "col": 5
+              "x": 583,
+              "y": 7
             },
             {
-              "row": 4,
-              "col": 19
+              "x": 655,
+              "y": 7
+            },
+            {
+              "x": 655,
+              "y": 187
+            },
+            {
+              "x": 583,
+              "y": 187
             }
           ]
-        }
-      ],
-      "spaces": [
+        },
+        {
+          "code": "P1-10",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 787,
+              "y": 7
+            },
+            {
+              "x": 938,
+              "y": 7
+            },
+            {
+              "x": 938,
+              "y": 189
+            },
+            {
+              "x": 787,
+              "y": 189
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 787,
+                "y": 141
+              },
+              "to": {
+                "x": 787,
+                "y": 187
+              }
+            }
+          ]
+        },
+        {
+          "code": "P1-11",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 8,
+              "y": 9
+            },
+            {
+              "x": 261,
+              "y": 9
+            },
+            {
+              "x": 261,
+              "y": 81
+            },
+            {
+              "x": 8,
+              "y": 81
+            }
+          ]
+        },
+        {
+          "code": "P1-28",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 345,
+              "y": 17
+            },
+            {
+              "x": 573,
+              "y": 17
+            },
+            {
+              "x": 573,
+              "y": 195
+            },
+            {
+              "x": 345,
+              "y": 195
+            }
+          ]
+        },
+        {
+          "code": "P1-29",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 660,
+              "y": 22
+            },
+            {
+              "x": 776,
+              "y": 22
+            },
+            {
+              "x": 776,
+              "y": 188
+            },
+            {
+              "x": 660,
+              "y": 188
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 660,
+                "y": 188
+              },
+              "to": {
+                "x": 707,
+                "y": 188
+              }
+            }
+          ]
+        },
+        {
+          "code": "P1-30",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 13,
+              "y": 95
+            },
+            {
+              "x": 264,
+              "y": 95
+            },
+            {
+              "x": 264,
+              "y": 395
+            },
+            {
+              "x": 13,
+              "y": 395
+            }
+          ]
+        },
+        {
+          "code": "P1-31",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 350,
+              "y": 200
+            },
+            {
+              "x": 986,
+              "y": 200
+            },
+            {
+              "x": 986,
+              "y": 284
+            },
+            {
+              "x": 948,
+              "y": 284
+            },
+            {
+              "x": 948,
+              "y": 475
+            },
+            {
+              "x": 930,
+              "y": 475
+            },
+            {
+              "x": 930,
+              "y": 320
+            },
+            {
+              "x": 760,
+              "y": 320
+            },
+            {
+              "x": 760,
+              "y": 473
+            },
+            {
+              "x": 350,
+              "y": 473
+            }
+          ]
+        },
+        {
+          "code": "P1-32",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 6,
+              "y": 396
+            },
+            {
+              "x": 316,
+              "y": 396
+            },
+            {
+              "x": 316,
+              "y": 472
+            },
+            {
+              "x": 6,
+              "y": 472
+            }
+          ]
+        },
         {
           "code": "P1-BANO",
           "name": "Baño",
           "typeCode": "RESTROOM",
-          "gridRow": 3,
-          "gridColumn": 16,
-          "rowSpan": 1,
-          "colSpan": 2
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1013,
+              "y": 203
+            },
+            {
+              "x": 1173,
+              "y": 203
+            },
+            {
+              "x": 1173,
+              "y": 285
+            },
+            {
+              "x": 1013,
+              "y": 285
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 1013,
+                "y": 205
+              },
+              "to": {
+                "x": 1013,
+                "y": 230
+              }
+            }
+          ]
         },
         {
           "code": "P1-CAFE",
           "name": "Café",
           "typeCode": "SOCIAL_AREA",
-          "gridRow": 6,
-          "gridColumn": 19,
-          "rowSpan": 2,
-          "colSpan": 1
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1160,
+              "y": 390
+            },
+            {
+              "x": 1282,
+              "y": 390
+            },
+            {
+              "x": 1282,
+              "y": 463
+            },
+            {
+              "x": 1160,
+              "y": 463
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 1282,
+                "y": 390
+              },
+              "to": {
+                "x": 1282,
+                "y": 463
+              }
+            }
+          ]
         },
         {
           "code": "P1-ESC",
           "name": "Escalera interior",
           "typeCode": "STAIRS",
-          "gridRow": 5,
-          "gridColumn": 12,
-          "rowSpan": 2,
-          "colSpan": 2
+          "aliases": [],
+          "shape": [
+            {
+              "x": 760,
+              "y": 320
+            },
+            {
+              "x": 930,
+              "y": 320
+            },
+            {
+              "x": 930,
+              "y": 478
+            },
+            {
+              "x": 760,
+              "y": 478
+            }
+          ]
         },
         {
           "code": "P1-ESC-EXTERIOR",
           "name": "Escalera exterior",
           "typeCode": "STAIRS",
-          "gridRow": 1,
-          "gridColumn": 4,
-          "rowSpan": 3,
-          "colSpan": 1
+          "aliases": [],
+          "shape": [
+            {
+              "x": 265,
+              "y": 40
+            },
+            {
+              "x": 330,
+              "y": 40
+            },
+            {
+              "x": 330,
+              "y": 270
+            },
+            {
+              "x": 265,
+              "y": 270
+            }
+          ]
         },
         {
           "code": "P1-OFICINA-1",
           "name": "Oficina 1",
           "typeCode": "OFFICE",
-          "gridRow": 0,
-          "gridColumn": 19,
-          "rowSpan": 3,
-          "colSpan": 3
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1180,
+              "y": 8
+            },
+            {
+              "x": 1340,
+              "y": 8
+            },
+            {
+              "x": 1340,
+              "y": 191
+            },
+            {
+              "x": 1180,
+              "y": 191
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 1340,
+                "y": 8
+              },
+              "to": {
+                "x": 1340,
+                "y": 34
+              }
+            },
+            {
+              "from": {
+                "x": 1340,
+                "y": 120
+              },
+              "to": {
+                "x": 1340,
+                "y": 190
+              }
+            },
+            {
+              "from": {
+                "x": 1192,
+                "y": 191
+              },
+              "to": {
+                "x": 1240,
+                "y": 191
+              }
+            }
+          ]
         },
         {
           "code": "P1-OFICINA-2",
           "name": "Oficina 2",
           "typeCode": "OFFICE",
-          "gridRow": 0,
-          "gridColumn": 22,
-          "rowSpan": 3,
-          "colSpan": 2
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1354,
+              "y": 7
+            },
+            {
+              "x": 1506,
+              "y": 7
+            },
+            {
+              "x": 1622,
+              "y": 191
+            },
+            {
+              "x": 1354,
+              "y": 191
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 1495,
+                "y": 191
+              },
+              "to": {
+                "x": 1544,
+                "y": 191
+              }
+            }
+          ]
         },
         {
           "code": "P1-OFICINA-3",
           "name": "Oficina 3",
           "typeCode": "OFFICE",
-          "gridRow": 5,
-          "gridColumn": 23,
-          "rowSpan": 3,
-          "colSpan": 1
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1519,
+              "y": 299
+            },
+            {
+              "x": 1570,
+              "y": 299
+            },
+            {
+              "x": 1570,
+              "y": 475
+            },
+            {
+              "x": 1519,
+              "y": 475
+            }
+          ]
         },
         {
           "code": "P1-OFICINA-4",
           "name": "Oficina 4",
           "typeCode": "OFFICE",
-          "gridRow": 5,
-          "gridColumn": 20,
-          "rowSpan": 3,
-          "colSpan": 3
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1282,
+              "y": 305
+            },
+            {
+              "x": 1514,
+              "y": 305
+            },
+            {
+              "x": 1514,
+              "y": 475
+            },
+            {
+              "x": 1282,
+              "y": 475
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 1440,
+                "y": 305
+              },
+              "to": {
+                "x": 1495,
+                "y": 305
+              }
+            }
+          ]
         },
         {
           "code": "P1-OFICINA-SIN",
           "name": "Oficina sin nombre (1)",
           "typeCode": "OFFICE",
-          "gridRow": 0,
-          "gridColumn": 15,
-          "rowSpan": 3,
-          "colSpan": 4
+          "aliases": [],
+          "shape": [
+            {
+              "x": 944,
+              "y": 8
+            },
+            {
+              "x": 1167,
+              "y": 8
+            },
+            {
+              "x": 1167,
+              "y": 191
+            },
+            {
+              "x": 944,
+              "y": 191
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 958,
+                "y": 191
+              },
+              "to": {
+                "x": 1004,
+                "y": 191
+              }
+            }
+          ]
         },
         {
           "code": "P1-OFICINA-SIN-2",
           "name": "Oficina sin nombre (2)",
           "typeCode": "OFFICE",
-          "gridRow": 4,
-          "gridColumn": 24,
-          "rowSpan": 4,
-          "colSpan": 3
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1580,
+              "y": 253
+            },
+            {
+              "x": 1651,
+              "y": 253
+            },
+            {
+              "x": 1800,
+              "y": 476
+            },
+            {
+              "x": 1580,
+              "y": 476
+            }
+          ]
         },
         {
           "code": "P1-POCETA",
           "name": "Poceta",
           "typeCode": "CLEANING_ROOM",
-          "gridRow": 6,
-          "gridColumn": 17,
-          "rowSpan": 2,
-          "colSpan": 1
+          "aliases": [],
+          "shape": [
+            {
+              "x": 1112,
+              "y": 390
+            },
+            {
+              "x": 1160,
+              "y": 390
+            },
+            {
+              "x": 1160,
+              "y": 462
+            },
+            {
+              "x": 1112,
+              "y": 462
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 1112,
+                "y": 390
+              },
+              "to": {
+                "x": 1142,
+                "y": 390
+              }
+            }
+          ]
         },
         {
           "code": "P1-RACK",
@@ -239,10 +1287,24 @@
           "aliases": [
             "cuarto de TI"
           ],
-          "gridRow": 6,
-          "gridColumn": 15,
-          "rowSpan": 2,
-          "colSpan": 1
+          "shape": [
+            {
+              "x": 969,
+              "y": 359
+            },
+            {
+              "x": 1065,
+              "y": 359
+            },
+            {
+              "x": 1065,
+              "y": 459
+            },
+            {
+              "x": 969,
+              "y": 459
+            }
+          ]
         }
       ]
     },
@@ -252,38 +1314,45 @@
       "name": "Piso 2",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 9,
-      "gridColumns": 28,
-      "corridors": [
-        {
-          "code": "PAS-P2",
-          "name": "Hall",
-          "color": "#5B8DEF",
-          "path": [
-            {
-              "row": 3,
-              "col": 7
-            },
-            {
-              "row": 6,
-              "col": 7
-            },
-            {
-              "row": 6,
-              "col": 8
-            }
-          ]
-        }
-      ],
+      "width": 1830,
+      "height": 500,
+      "top": "EAST",
       "spaces": [
         {
           "code": "P2-BANO",
           "name": "Baño",
           "typeCode": "RESTROOM",
-          "gridRow": 0,
-          "gridColumn": 7,
-          "rowSpan": 3,
-          "colSpan": 2
+          "aliases": [],
+          "shape": [
+            {
+              "x": 675,
+              "y": 5
+            },
+            {
+              "x": 800,
+              "y": 5
+            },
+            {
+              "x": 800,
+              "y": 165
+            },
+            {
+              "x": 675,
+              "y": 165
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 682,
+                "y": 165
+              },
+              "to": {
+                "x": 730,
+                "y": 165
+              }
+            }
+          ]
         },
         {
           "code": "P2-DIRECCION",
@@ -292,38 +1361,149 @@
           "aliases": [
             "Dirección de Medio Universitario"
           ],
-          "gridRow": 0,
-          "gridColumn": 12,
-          "rowSpan": 5,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 980,
+              "y": 10
+            },
+            {
+              "x": 1210,
+              "y": 10
+            },
+            {
+              "x": 1210,
+              "y": 300
+            },
+            {
+              "x": 980,
+              "y": 300
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 980,
+                "y": 222
+              },
+              "to": {
+                "x": 980,
+                "y": 295
+              }
+            }
+          ]
         },
         {
           "code": "P2-ESC",
           "name": "Escalera interior",
           "typeCode": "STAIRS",
-          "gridRow": 6,
-          "gridColumn": 9,
-          "rowSpan": 3,
-          "colSpan": 3
+          "aliases": [],
+          "shape": [
+            {
+              "x": 795,
+              "y": 312
+            },
+            {
+              "x": 955,
+              "y": 312
+            },
+            {
+              "x": 955,
+              "y": 495
+            },
+            {
+              "x": 795,
+              "y": 495
+            }
+          ]
         },
         {
           "code": "P2-SALA-COMPUTO-1",
           "name": "Sala de cómputo 1",
           "typeCode": "COMPUTER_LAB",
-          "gridRow": 0,
-          "gridColumn": 0,
-          "rowSpan": 4,
-          "colSpan": 6,
+          "aliases": [],
+          "shape": [
+            {
+              "x": 325,
+              "y": 5
+            },
+            {
+              "x": 662,
+              "y": 5
+            },
+            {
+              "x": 662,
+              "y": 160
+            },
+            {
+              "x": 628,
+              "y": 160
+            },
+            {
+              "x": 628,
+              "y": 240
+            },
+            {
+              "x": 325,
+              "y": 240
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 628,
+                "y": 168
+              },
+              "to": {
+                "x": 628,
+                "y": 238
+              }
+            }
+          ],
           "capacity": 5
         },
         {
           "code": "P2-SALA-COMPUTO-2",
           "name": "Sala de cómputo 2",
           "typeCode": "COMPUTER_LAB",
-          "gridRow": 4,
-          "gridColumn": 0,
-          "rowSpan": 4,
-          "colSpan": 6,
+          "aliases": [],
+          "shape": [
+            {
+              "x": 325,
+              "y": 242
+            },
+            {
+              "x": 628,
+              "y": 242
+            },
+            {
+              "x": 628,
+              "y": 312
+            },
+            {
+              "x": 662,
+              "y": 312
+            },
+            {
+              "x": 662,
+              "y": 495
+            },
+            {
+              "x": 325,
+              "y": 495
+            }
+          ],
+          "doors": [
+            {
+              "from": {
+                "x": 628,
+                "y": 245
+              },
+              "to": {
+                "x": 628,
+                "y": 308
+              }
+            }
+          ],
           "capacity": 5
         }
       ]

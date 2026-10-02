@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import type { Corridor } from '../buildings/building.model';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 /**
  * The corridors of the floor: the routes people walk, in the colour the building paints them.
@@ -7,6 +8,7 @@ import type { Corridor } from '../buildings/building.model';
  */
 @Component({
   selector: 'app-corridors-panel',
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
@@ -17,53 +19,53 @@ import type { Corridor } from '../buildings/building.model';
               type="color"
               class="swatch"
               [value]="corridor.color"
-              [attr.aria-label]="'Colour of ' + corridor.name"
+              [attr.aria-label]="('Colour of ' | t) + corridor.name"
               (change)="changed.emit({ index: i, patch: { color: value($event) } })"
             />
             <input
               type="text"
               [value]="corridor.name"
-              [attr.aria-label]="'Name of corridor ' + (i + 1)"
+              [attr.aria-label]="('Name of corridor ' | t) + (i + 1)"
               (change)="changed.emit({ index: i, patch: { name: value($event).trim() } })"
             />
           </div>
           <div class="row-between">
-            <span class="text-faint small">{{ corridor.code }} · {{ corridor.path.length }} cell{{ corridor.path.length === 1 ? '' : 's' }}</span>
+            <span class="text-faint small">{{ corridor.code }} · {{ corridor.path.length === 1 ? ('1 point' | t) : ('{points} points' | t: { points: corridor.path.length }) }}</span>
             <div class="row">
               <button type="button" class="btn btn-sm" [class.btn-primary]="i === active()" (click)="activate.emit(i === active() ? null : i)">
-                {{ i === active() ? 'Done' : 'Draw' }}
+                {{ i === active() ? ('Done' | t) : ('Draw' | t) }}
               </button>
-              <button type="button" class="btn btn-sm btn-danger" (click)="remove.emit(i)">Delete</button>
+              <button type="button" class="btn btn-sm btn-danger" (click)="remove.emit(i)">{{ 'Delete' | t }}</button>
             </div>
           </div>
         </div>
       } @empty {
-        <p class="text-muted small" style="margin:0">No corridors on this floor yet.</p>
+        <p class="text-muted small" style="margin:0">{{ 'No corridors on this floor yet.' | t }}</p>
       }
 
       @if (active() !== null) {
-        <p class="small hint-active">Tap the cells it runs through, in walking order. Tap one again to take it out.</p>
+        <p class="small hint-active">{{ 'Tap the cells it runs through, in walking order. Tap one again to take it out.' | t }}</p>
       }
 
       <details>
-        <summary>New corridor</summary>
+        <summary>{{ 'New corridor' | t }}</summary>
         <div class="stack add">
           <div class="row spread">
             <div class="field" style="flex: 1 1 7rem">
-              <label for="c-code">Code</label>
+              <label for="c-code">{{ 'Code' | t }}</label>
               <input id="c-code" type="text" [value]="code()" placeholder="PAS-CENTRAL" (input)="code.set(value($event))" />
             </div>
             <div class="field" style="flex: 2 1 9rem">
-              <label for="c-name">Name</label>
-              <input id="c-name" type="text" [value]="name()" placeholder="Pasillo central" (input)="name.set(value($event))" />
+              <label for="c-name">{{ 'Name' | t }}</label>
+              <input id="c-name" type="text" [value]="name()" [placeholder]="'Pasillo central' | t" (input)="name.set(value($event))" />
             </div>
             <div class="field" style="flex: 0 0 4rem">
-              <label for="c-color">Colour</label>
+              <label for="c-color">{{ 'Colour' | t }}</label>
               <input id="c-color" type="color" class="swatch" [value]="color()" (input)="color.set(value($event))" />
             </div>
           </div>
           <button type="button" class="btn btn-sm" [disabled]="!code().trim() || !name().trim()" (click)="submit()">
-            Create and start drawing
+            {{ 'Create and start drawing' | t }}
           </button>
         </div>
       </details>

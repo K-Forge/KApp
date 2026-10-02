@@ -23,6 +23,8 @@ import {
   type PensumHeader,
   type PastedRow,
 } from './paste-pensum.model';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 /**
  * Build a pensum by pasting the table straight out of its PDF, correcting it in place, and
@@ -46,21 +48,20 @@ import {
  */
 @Component({
   selector: 'app-paste-pensum',
-  imports: [FormsModule, ApiErrorBannerComponent],
+  imports: [TranslatePipe, FormsModule, ApiErrorBannerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <!-- ── 1. The pensum itself ───────────────────────────────────────── -->
       <section class="card stack">
-        <h3 class="step"><span class="step-n">1</span> The pensum</h3>
+        <h3 class="step"><span class="step-n">1</span> {{ 'The pensum' | t }}</h3>
         <p class="text-muted" style="margin:0">
-          Typed once. Every row of the CSV repeats it, which is how a spreadsheet works and how
-          the import checks the rows agree with each other.
+          {{ 'Typed once. Every row of the CSV repeats it, which is how a spreadsheet works and how the import checks the rows agree with each other.' | t }}
         </p>
 
         <div class="grid-3">
           <div class="field">
-            <label for="pp-pcode">Program code <span class="req" aria-hidden="true">*</span></label>
+            <label for="pp-pcode">{{ 'Program code' | t }} <span class="req" aria-hidden="true">*</span></label>
             <input
               id="pp-pcode"
               list="pp-program-codes"
@@ -75,13 +76,13 @@ import {
             </datalist>
           </div>
           <div class="field" style="grid-column: span 2">
-            <label for="pp-pname">Program name <span class="req" aria-hidden="true">*</span></label>
+            <label for="pp-pname">{{ 'Program name' | t }} <span class="req" aria-hidden="true">*</span></label>
             <input
               id="pp-pname"
               list="pp-program-names"
               [ngModel]="header().programName"
               (ngModelChange)="patch('programName', $event)"
-              placeholder="Ingeniería de Sistemas"
+              [placeholder]="'Ingeniería de Sistemas' | t"
             />
             <datalist id="pp-program-names">
               @for (p of programs(); track p.code) {
@@ -90,13 +91,13 @@ import {
             </datalist>
           </div>
           <div class="field" style="grid-column: span 2">
-            <label for="pp-fac">Faculty <span class="req" aria-hidden="true">*</span></label>
+            <label for="pp-fac">{{ 'Faculty' | t }} <span class="req" aria-hidden="true">*</span></label>
             <input
               id="pp-fac"
               list="pp-faculties"
               [ngModel]="header().faculty"
               (ngModelChange)="patch('faculty', $event)"
-              placeholder="Facultad de Matemáticas e Ingenierías"
+              [placeholder]="'Facultad de Matemáticas e Ingenierías' | t"
             />
             <datalist id="pp-faculties">
               @for (f of faculties(); track f) {
@@ -105,7 +106,7 @@ import {
             </datalist>
           </div>
           <div class="field">
-            <label for="pp-plevel">Level</label>
+            <label for="pp-plevel">{{ 'Level' | t }}</label>
             <select id="pp-plevel" [ngModel]="header().programLevel" (ngModelChange)="patch('programLevel', $event)">
               @for (l of programLevels; track l) {
                 <option [value]="l">{{ l }}</option>
@@ -113,7 +114,7 @@ import {
             </select>
           </div>
           <div class="field">
-            <label for="pp-code">Pensum code <span class="req" aria-hidden="true">*</span></label>
+            <label for="pp-code">{{ 'Pensum code' | t }} <span class="req" aria-hidden="true">*</span></label>
             <input
               id="pp-code"
               list="pp-pensum-codes"
@@ -128,11 +129,11 @@ import {
             </datalist>
           </div>
           <div class="field">
-            <label for="pp-reform">Reform <span class="req" aria-hidden="true">*</span></label>
-            <input id="pp-reform" [ngModel]="header().reform" (ngModelChange)="patch('reform', $event)" placeholder="Reforma 2018" />
+            <label for="pp-reform">{{ 'Reform' | t }} <span class="req" aria-hidden="true">*</span></label>
+            <input id="pp-reform" [ngModel]="header().reform" (ngModelChange)="patch('reform', $event)" [placeholder]="'Reforma 2018' | t" />
           </div>
           <div class="field">
-            <label for="pp-status">Status</label>
+            <label for="pp-status">{{ 'Status' | t }}</label>
             <select id="pp-status" [ngModel]="header().pensumStatus" (ngModelChange)="patch('pensumStatus', $event)">
               @for (st of statuses; track st) {
                 <option [value]="st">{{ st }}</option>
@@ -140,40 +141,34 @@ import {
             </select>
           </div>
           <div class="field">
-            <label for="pp-dc">Declared credits</label>
+            <label for="pp-dc">{{ 'Declared credits' | t }}</label>
             <input id="pp-dc" type="number" [ngModel]="header().declaredCredits" (ngModelChange)="patch('declaredCredits', $event)" />
           </div>
           <div class="field">
-            <label for="pp-dh">Declared weekly hours</label>
+            <label for="pp-dh">{{ 'Declared weekly hours' | t }}</label>
             <!-- step, because a plan may declare a half: Marketing's own hours end in one. -->
             <input id="pp-dh" type="number" step="0.5" [ngModel]="header().declaredHours" (ngModelChange)="patch('declaredHours', $event)" />
           </div>
           <div class="field">
-            <label for="pp-lv">Levels</label>
+            <label for="pp-lv">{{ 'Levels' | t }}</label>
             <input id="pp-lv" type="number" [ngModel]="header().levels" (ngModelChange)="patch('levels', $event)" [placeholder]="defaultLevels() || 9" />
           </div>
         </div>
         @if (replacingExisting(); as existing) {
           <p class="warn">
-            <strong>{{ existing.pensumCode }} already exists</strong> — {{ existing.programName }},
-            {{ existing.courses }} courses. Importing for real replaces it entirely. If you meant a
-            new pensum, give it a different code.
+            <strong>{{ '{pensumCode} already exists' | t: { pensumCode: existing.pensumCode } }}</strong> {{ '— {programName}, {courses} courses. Importing for real replaces it entirely. If you meant a new pensum, give it a different code.' | t: { programName: existing.programName, courses: existing.courses } }}
           </p>
         }
         <p class="hint" style="margin:0">
-          Declared credits and hours are what the official document says. They are checked
-          against the rows below, not trusted — that check is how we found the seeded plan
-          declaring 142 credits where its courses give 144.
+          {{ 'Declared credits and hours are what the official document says. They are checked against the rows below, not trusted — that check is how we found the seeded plan declaring 142 credits where its courses give 144.' | t }}
         </p>
       </section>
 
       <!-- ── 2. The paste ───────────────────────────────────────────────── -->
       <section class="card stack">
-        <h3 class="step"><span class="step-n">2</span> Paste the table</h3>
+        <h3 class="step"><span class="step-n">2</span> {{ 'Paste the table' | t }}</h3>
         <p id="pp-paste-hint" class="text-muted" style="margin:0">
-          Select the course table in the PDF, copy, and paste here. Tabs or runs of spaces both
-          work — one row per line. A heading line is recognised and left out; other page
-          furniture you delete in step 3.
+          {{ 'Select the course table in the PDF, copy, and paste here. Tabs or runs of spaces both work — one row per line. A heading line is recognised and left out; other page furniture you delete in step 3.' | t }}
         </p>
         <!-- The only control in the portal that had no label: a screen reader announced it as
              "edit text, blank", and the placeholder is a row of tab-separated numbers. -->
@@ -182,8 +177,8 @@ import {
              it. Out here it stays while you work. -->
         <div class="example">
           <p class="example-title">
-            One line per course. Columns separated by tabs, or by two or more spaces.
-            <strong>The order does not matter</strong> — you say which column is which in step 3.
+            {{ 'One line per course. Columns separated by tabs, or by two or more spaces.' | t }}
+            <strong>{{ 'The order does not matter' | t }}</strong> {{ '— you say which column is which in step 3.' | t }}
           </p>
           <div class="scroll-x">
             <table class="example-grid">
@@ -191,7 +186,7 @@ import {
                 <tr>
                   @for (f of fields; track f.key) {
                     <th [class.example-required]="f.required">
-                      {{ f.label }}{{ f.required ? ' *' : '' }}
+                      {{ f.label | t }}{{ f.required ? ' *' : '' }}
                     </th>
                   }
                 </tr>
@@ -207,21 +202,21 @@ import {
           </div>
         </div>
 
-        <label for="pp-paste" class="sr-only">The pensum table, pasted from the PDF</label>
+        <label for="pp-paste" class="sr-only">{{ 'The pensum table, pasted from the PDF' | t }}</label>
         <textarea
           id="pp-paste"
           rows="8"
           [value]="pasted()"
           (input)="onPaste($event)"
           aria-describedby="pp-paste-hint"
-          placeholder="Paste the rows here."
+          [placeholder]="'Paste the rows here.' | t"
         ></textarea>
         <div class="row">
           <button type="button" class="btn btn-primary" [disabled]="!pasted().trim()" (click)="parse()">
-            Parse into rows
+            {{ 'Parse into rows' | t }}
           </button>
           @if (rows().length) {
-            <button type="button" class="btn" (click)="clear()">Clear</button>
+            <button type="button" class="btn" (click)="clear()">{{ 'Clear' | t }}</button>
           }
         </div>
       </section>
@@ -229,24 +224,21 @@ import {
       <!-- ── 3. Correct it ──────────────────────────────────────────────── -->
       @if (rows().length) {
         <section class="card stack">
-          <h3 class="step"><span class="step-n">3</span> Say what each column is, then fix what is wrong</h3>
+          <h3 class="step"><span class="step-n">3</span> {{ 'Say what each column is, then fix what is wrong' | t }}</h3>
 
           <!-- What the parse decided on its own. Both of these change what gets imported, so
                neither one happens silently. -->
           @if (headingRow(); as heading) {
             <p class="did">
-              The first line looked like a heading and was <strong>not</strong> imported as a
-              course: <em>{{ heading.join(' · ') }}</em>. The columns below are named after it.
+              {{ 'The first line looked like a heading and was' | t }} <strong>{{ 'not' | t }}</strong> {{ 'imported as a course:' | t }} <em>{{ heading.join(' · ') }}</em>{{ '. The columns below are named after it.' | t }}
               <button type="button" class="btn btn-sm" (click)="keepHeadingAsRow()">
-                No — it is a course, put it back
+                {{ 'No — it is a course, put it back' | t }}
               </button>
             </p>
           }
           @if (itemCodeFromCourseCode()) {
             <p class="did">
-              No item-code column, so each course's <strong>own code is used as its item
-              code</strong> — it only has to be unique inside this pensum. Elective slots have no
-              course code, so those rows stay flagged until you type one.
+              {{ 'No item-code column, so each course’s' | t }} <strong>{{ 'own code is used as its item code' | t }}</strong> {{ '— it only has to be unique inside this pensum. Elective slots have no course code, so those rows stay flagged until you type one.' | t }}
             </p>
           }
 
@@ -262,10 +254,10 @@ import {
                            guessed mapping existed but showed as blank - which reads as "it
                            detected nothing". -->
                       <select (change)="mapColumn(c, $event)">
-                        <option value="" [selected]="!mapping()[c]">— ignore —</option>
+                        <option value="" [selected]="!mapping()[c]">{{ '— ignore —' | t }}</option>
                         @for (f of fields; track f.key) {
                           <option [value]="f.key" [selected]="mapping()[c] === f.key">
-                            {{ f.label }}{{ f.required ? ' *' : '' }}
+                            {{ f.label | t }}{{ f.required ? ' *' : '' }}
                           </option>
                         }
                       </select>
@@ -297,7 +289,7 @@ import {
                       </td>
                     }
                     <td>
-                      <button type="button" class="btn btn-sm btn-danger" (click)="removeRow(r)">Drop</button>
+                      <button type="button" class="btn btn-sm btn-danger" (click)="removeRow(r)">{{ 'Drop' | t }}</button>
                     </td>
                   </tr>
                 }
@@ -308,87 +300,79 @@ import {
           <!-- The arithmetic, while you are still looking at the rows that produce it. -->
           <div class="totals">
             <div class="total" [class.total-bad]="creditsMismatch()">
-              <span class="total-label">Credits</span>
+              <span class="total-label">{{ 'Credits' | t }}</span>
               <span class="total-value">{{ totals().credits }}</span>
               @if (header().declaredCredits !== null) {
-                <span class="total-vs">declared {{ header().declaredCredits }}</span>
+                <span class="total-vs">{{ 'declared {value}' | t: { value: header().declaredCredits } }}</span>
               }
             </div>
             <div class="total" [class.total-bad]="hoursMismatch()">
-              <span class="total-label">Weekly hours</span>
+              <span class="total-label">{{ 'Weekly hours' | t }}</span>
               <span class="total-value">{{ totals().hours }}</span>
               @if (header().declaredHours !== null) {
-                <span class="total-vs">declared {{ header().declaredHours }}</span>
+                <span class="total-vs">{{ 'declared {value}' | t: { value: header().declaredHours } }}</span>
               }
             </div>
             <div class="total">
-              <span class="total-label">Rows</span>
+              <span class="total-label">{{ 'Rows' | t }}</span>
               <span class="total-value">{{ rows().length }}</span>
               @if (badRowCount()) {
-                <span class="total-vs total-bad">{{ badRowCount() }} with problems</span>
+                <span class="total-vs total-bad">{{ '{badRowCount} with problems' | t: { badRowCount: badRowCount() } }}</span>
               }
             </div>
           </div>
 
           @if (raggedRows().length) {
             <p class="warn">
-              <strong>Rows {{ raggedRows().join(', ') }} have a different number of columns</strong>
-              than the rest. Copying from a PDF does this whenever a cell's own text contains
-              what looked like a column break — a course name with two spaces in it, or a number
-              sitting right after the name with only one space before it. Their values are
-              shifted, so check them before anything else.
+              <strong>{{ 'Rows {value} have a different number of columns' | t: { value: raggedRows().join(', ') } }}</strong>
+              {{ 'than the rest. Copying from a PDF does this whenever a cell’s own text contains what looked like a column break — a course name with two spaces in it, or a number sitting right after the name with only one space before it. Their values are shifted, so check them before anything else.' | t }}
             </p>
           }
           @if (unknownPrerequisites().length) {
             <p class="warn">
-              Prerequisites that name nothing in this paste:
-              <strong>{{ unknownPrerequisites().join(', ') }}</strong>. The import refuses these,
-              so fix the code or drop it.
+              {{ 'Prerequisites that name nothing in this paste:' | t }}
+              <strong>{{ unknownPrerequisites().join(', ') }}</strong>{{ '. The import refuses these, so fix the code or drop it.' | t }}
             </p>
           }
           @if (missingHeaderFields().length) {
             <p class="warn">
-              The import needs these before it will accept the file:
-              <strong>{{ missingHeaderFields().join(', ') }}</strong> — in step 1 above. The
-              server rejects a file that is missing any of them, and one missing field there
-              used to be reported as a fault on every row.
+              {{ 'The import needs these before it will accept the file:' | t }}
+              <strong>{{ missingHeaderFields().join(', ') }}</strong> {{ '— in step 1 above. The server rejects a file that is missing any of them, and one missing field there used to be reported as a fault on every row.' | t }}
             </p>
           }
           @if (missingRequired().length) {
             <p class="warn">
-              Not assigned to any column yet: <strong>{{ missingRequired().join(', ') }}</strong>.
+              {{ 'Not assigned to any column yet:' | t }} <strong>{{ missingRequired().join(', ') }}</strong>.
             </p>
           }
         </section>
 
         <!-- ── 4. Out ───────────────────────────────────────────────────── -->
         <section class="card stack">
-          <h3 class="step"><span class="step-n">4</span> Check it, then import</h3>
+          <h3 class="step"><span class="step-n">4</span> {{ 'Check it, then import' | t }}</h3>
           <div class="row">
             <button type="button" class="btn btn-primary" [disabled]="!ready() || busy()" (click)="send(true)">
-              {{ busy() && dryRun() ? 'Checking…' : 'Check — writes nothing' }}
+              {{ busy() && dryRun() ? ('Checking…' | t) : ('Check — writes nothing' | t) }}
             </button>
             <button type="button" class="btn" [disabled]="!ready() || busy()" (click)="send(false)">
-              {{ busy() && !dryRun() ? 'Importing…' : 'Import for real' }}
+              {{ busy() && !dryRun() ? ('Importing…' | t) : ('Import for real' | t) }}
             </button>
             <button type="button" class="btn" [disabled]="!ready()" (click)="download()">
-              Download the CSV
+              {{ 'Download the CSV' | t }}
             </button>
           </div>
           <p class="hint" style="margin:0">
-            Keep the CSV. It is what goes in <code>docs/templates/pensums/</code>, and with no
-            backups on the cluster it is the only copy that survives a mistake.
+            {{ 'Keep the CSV. It is what goes in' | t }} <code>{{ 'docs/templates/pensums/' | t }}</code>{{ ', and with no backups on the cluster it is the only copy that survives a mistake.' | t }}
           </p>
 
           <app-api-error-banner [error]="error()" />
 
           @if (report(); as r) {
             <div class="card stack" style="border-color: var(--success)">
-              <strong>{{ r.dryRun ? 'Valid — nothing was written' : 'Imported' }}</strong>
+              <strong>{{ r.dryRun ? ('Valid — nothing was written' | t) : ('Imported' | t) }}</strong>
               @for (c of r.pensums; track c.pensumCode) {
                 <p style="margin:0" class="text-muted">
-                  {{ c.pensumCode }} · {{ c.programName }} — {{ c.courses }} courses,
-                  {{ c.computedCredits }} credits, {{ c.computedHours }} weekly hours.
+                  {{ '{pensumCode} · {programName} — {courses} courses, {computedCredits} credits, {computedHours} weekly hours.' | t: { pensumCode: c.pensumCode, programName: c.programName, courses: c.courses, computedCredits: c.computedCredits, computedHours: c.computedHours } }}
                 </p>
               }
             </div>
@@ -856,7 +840,7 @@ export class PastePensumComponent {
   }
 
   readonly missingRequired = computed(() =>
-    ITEM_FIELDS.filter((f) => f.required && !this.hasSource(f.key)).map((f) => f.label),
+    ITEM_FIELDS.filter((f) => f.required && !this.hasSource(f.key)).map((f) => t(f.label)),
   );
 
   readonly rowProblems = computed(() =>
@@ -865,20 +849,20 @@ export class PastePensumComponent {
       for (const f of ITEM_FIELDS) {
         if (!f.required) continue;
         if (!this.hasSource(f.key)) continue;
-        if (!this.valueOf(row, f.key)) problems.push(`${f.label} is empty`);
+        if (!this.valueOf(row, f.key)) problems.push(t('{field} is empty', { field: t(f.label) }));
       }
       for (const numeric of ['courseLevel', 'credits'] as const) {
         const v = this.valueOf(row, numeric);
-        if (v && !/^\d+$/.test(v)) problems.push(`${numeric} is not a whole number`);
+        if (v && !/^\d+$/.test(v)) problems.push(t('{field} is not a whole number', { field: numeric }));
       }
       const hours = this.valueOf(row, 'weeklyHours');
       if (hours && Number.isNaN(parseHours(hours))) {
-        problems.push('weeklyHours is not a whole number of hours or a half');
+        problems.push(t('weeklyHours is not a whole number of hours or a half'));
       }
       // An elective slot has no course code; anything else must have one.
       const elective = looksTrue(this.valueOf(row, 'isElectiveSlot'));
       const code = this.valueOf(row, 'courseCode');
-      if (elective && code) problems.push('an elective slot must not carry a course code');
+      if (elective && code) problems.push(t('an elective slot must not carry a course code'));
       return problems;
     }),
   );
@@ -961,15 +945,15 @@ export class PastePensumComponent {
     const h = this.header();
     return (
       [
-        ['Program code', h.programCode],
-        ['Program name', h.programName],
-        ['Faculty', h.faculty],
-        ['Pensum code', h.pensumCode],
-        ['Reform', h.reform],
+        [/* i18n */ 'Program code', h.programCode],
+        [/* i18n */ 'Program name', h.programName],
+        [/* i18n */ 'Faculty', h.faculty],
+        [/* i18n */ 'Pensum code', h.pensumCode],
+        [/* i18n */ 'Reform', h.reform],
       ] as const
     )
       .filter(([, value]) => !value.trim())
-      .map(([label]) => label);
+      .map(([label]) => t(label));
   });
 
   /** The highest level in the paste — what `levels` means, so it does not have to be typed. */
@@ -1037,7 +1021,7 @@ export class PastePensumComponent {
   }
 
   send(dryRun: boolean): void {
-    if (!dryRun && !window.confirm(`Import pensum ${this.header().pensumCode} for real? An existing one with the same code is replaced.`)) {
+    if (!dryRun && !window.confirm(t('Import pensum {code} for real? An existing one with the same code is replaced.', { code: this.header().pensumCode }))) {
       return;
     }
     this.busy.set(true);

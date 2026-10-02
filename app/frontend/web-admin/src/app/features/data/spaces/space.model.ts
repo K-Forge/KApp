@@ -1,4 +1,4 @@
-import type { Accessibility } from '../buildings/building.model';
+import type { Accessibility, Point } from '../buildings/building.model';
 
 /**
  * Mirrors SpaceCategory: the fixed family a type belongs to. Clients draw by category, which is
@@ -16,13 +16,13 @@ export const SPACE_CATEGORIES = [
 export type SpaceCategory = (typeof SPACE_CATEGORIES)[number];
 
 export const CATEGORY_LABELS: Record<SpaceCategory, string> = {
-  TEACHING: 'Teaching',
-  PUBLIC_SERVICE: 'Public service',
-  OFFICE: 'Office',
-  SOCIAL: 'Social and wellbeing',
-  FACILITIES: 'Facilities',
-  CIRCULATION: 'Circulation',
-  OTHER: 'Not identified yet',
+  TEACHING: /* i18n */ 'Teaching',
+  PUBLIC_SERVICE: /* i18n */ 'Public service',
+  OFFICE: /* i18n */ 'Office',
+  SOCIAL: /* i18n */ 'Social and wellbeing',
+  FACILITIES: /* i18n */ 'Facilities',
+  CIRCULATION: /* i18n */ 'Circulation',
+  OTHER: /* i18n */ 'Not identified yet',
 };
 
 /**
@@ -44,6 +44,20 @@ export interface SpaceType {
   code: string;
   name: string;
   category: SpaceCategory;
+}
+
+/** Mirrors Door: the stretch of a space's outline its door takes up, jamb to jamb. */
+export interface Door {
+  from: Point;
+  to: Point;
+}
+
+/** Mirrors Bounds: the rectangle around a shape. */
+export interface Bounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 /**
@@ -69,11 +83,12 @@ export interface Space {
   floorCode: string;
   floorLevel: number;
   aliases: string[];
-  /** Absent while the space is inventoried but not placed on the grid. */
-  gridRow?: number | null;
-  gridColumn?: number | null;
-  rowSpan: number;
-  colSpan: number;
+  /** Corners of its outline on the floor, in order. Absent while it is only inventoried. */
+  shape?: Point[] | null;
+  /** The rectangle around the shape. Absent with it. */
+  bounds?: Bounds | null;
+  /** Its ways in, each on the shape's outline. */
+  doors?: Door[];
   accessVia?: string | null;
   /** The space's own value; absent when it takes the floor's. */
   accessibility?: Accessibility | null;
@@ -92,10 +107,8 @@ export interface SpaceRequest {
   buildingCode: string;
   floorCode: string;
   aliases: string[];
-  gridRow?: number | null;
-  gridColumn?: number | null;
-  rowSpan?: number;
-  colSpan?: number;
+  shape?: Point[] | null;
+  doors?: Door[];
   accessVia?: string | null;
   accessibility?: Accessibility | null;
   note?: string | null;

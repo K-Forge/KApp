@@ -11,38 +11,43 @@
 :root {
   color-scheme: light;
 
-  /* Paper, but not a blank sheet. #f5f7f6 read as "too white"; this carries enough of the
-     institutional teal to look like a surface rather than an absence. */
-  --bg: #dfeae7;
+  /* Paper, but not a blank sheet: a violet, OKLCH hue 298. At the lightness a light theme needs,
+     the dark theme's own hue (316) reads lilac-pink, and Brian wanted violet and no pink at all, so
+     the day turns a little toward blue. The orchid it started as, drawn from the K's pink, is kept
+     for the mobile apps' personalisation (docs/design/orchid-palette.md). */
+  --bg: #dbd1f5;
   --bg-elevated: #ffffff;
-  --bg-inset: #e8eeec;
-  --bg-hover: #dde5e3;
-  --border: #cbd6d3;
-  --border-strong: #a7b6b2;
+  --bg-inset: #ede8fc;
+  --bg-hover: #d5c9f4;
+  --border: #ccc4e0;
+  --border-strong: #9789b8;
 
-  --text: #16211f;
-  --text-muted: #52625e;
-  /* 4.83:1 on a card, where #7c8b87 was 3.56 - under the 4.5 minimum for body text.
-     Five pieces of real copy were below it, including the empty state that tells you
-     what to type. Still clearly softer than --text-muted (6.43), so the hierarchy
-     survives; the dark theme's own value measured fine and is left alone. */
-  --text-faint: #5f6e6a;
+  --text: #1c142b;
+  --text-muted: #534a68;
+  /* 6.8:1 on a card and 4.70 on the ground - over the 4.5 minimum for body text, and still
+     clearly softer than --text-muted (8.24), so the hierarchy survives. */
+  --text-faint: #5f5675;
   --text-on-accent: #ffffff;
 
-  --primary: #3a6f6e;
-  --primary-strong: #285352;
+  /* A shade deeper than the brand teal's own text tone, so a link still clears 4.5:1 on the
+     violet ground (5.02). */
+  --primary: #2f5e5d;
+  --primary-strong: #244847;
   --primary-bg: #e2efee;
   --primary-brand: #539392;
 
-  --danger: #b8115a;
-  --danger-strong: #8f0d46;
-  --danger-bg: #fbe7ee;
+  /* A red, not the crimson it was: on a violet ground a crimson reads as pink. 4.52:1 on the
+     ground, 6.57 on a card. */
+  --danger: #b42318;
+  --danger-strong: #912018;
+  --danger-bg: #fdecea;
 
-  --success: #2f6f5e;
+  --success: #285e51;
   --success-strong: #1f5044;
   --success-bg: #dcefe8;
 
-  --warning: #92620a;
+  /* Darker than it was: on a tinted ground #92620a measured under 4.5:1 (5.41 now). */
+  --warning: #704a06;
   --warning-bg: #faedd3;
 
   --focus-ring: #539392;
@@ -54,29 +59,53 @@
   --brand-teal: #539392;
   --brand-pink: #D51A65;
   --brand-green: #C9D329;
+  /* The institutional three in equal thirds: every strip in the portal is this one, so the
+     ceiling, the header and the sign-in card line up. */
+  --brand-strip: linear-gradient(
+    90deg,
+    var(--brand-teal) 0 33.333%,
+    var(--brand-pink) 33.333% 66.667%,
+    var(--brand-green) 66.667% 100%
+  );
 
   /* The header and sidebar are tinted rather than white. Three stacked white
-     planes read as flat; a faint wash of the institutional teal separates the
-     chrome from the content without drawing attention to itself. */
-  --header-bg: #e0ebe9;
-  --nav-bg: #eaf0ee;
+     planes read as flat; a lighter wash of the ground's violet separates the chrome
+     from the content without drawing attention to itself. */
+  --header-bg: #e9e2fb;
+  --nav-bg: #ede7fd;
+  /* The K's lime green fades on the violet: by day the mark sits on a white tile. */
+  --logo-tile: #ffffff;
+  --logo-tile-edge: #d9d0f2;
 
-  /* The selected section: a real step, not a slab.
-     #e2efee on #e8efed was two percent of lightness apart - invisible. Filling it with the
-     solid teal fixed that and overshot: a dark block in a pale sidebar is the loudest thing
-     on the screen and the eye goes there instead of to the content. Seven points of
-     lightness, a full-strength edge and bold text carry it without shouting. */
-  --nav-active-bg: #c9e0de;
-  --nav-active-text: #1d3a39;
+  /* The selected section: a real step, not a slab. A solid fill is the loudest thing on the
+     screen and the eye goes there instead of to the content; a deeper violet, a full-strength
+     violet edge and bold text carry it without shouting. 7.1:1. */
+  --nav-active-bg: #c9b6f6;
+  --nav-active-text: #3f1e6e;
+  --nav-active-edge: #7e35d8;
+
+  /* Behind a drawer or a dialog: the ground's ink, not a neutral grey. */
+  --scrim: rgb(28 20 43 / 0.45);
+  /* A building's margin on the floor plans: one family of greens and blues, a shade per wing. */
+  --margin-n: #0e7490;
+  --margin-c: #0f766e;
+  --margin-s: #047857;
+  --margin-other: #0369a1;
 
   /* How much of each hue reaches the page ground.
      The green was off in this theme for a while, because at sixteen percent spread thin over
      a grey base it read as a stain rather than as a colour. The fix was not less of it but
      more: a wash that faint is dirt, and a wash this strong is a light. Mixed in oklab rather
      than srgb, which is what keeps a teal from going grey on its way to transparent. */
-  --wash-strength: 52%;
-  --wash-green: 44%;
-  --wash-accent: 44%;
+  /* The teal and the green were set against a teal-grey ground. Over the violet they mix
+     toward a grey, so they come down to where they still read as light of their own colour.
+     The middle light is the ground's own violet by day; at night it stays the K's pink. */
+  --light-mid: #9762ec;
+  --wash-strength: 34%;
+  /* The green is violet's opposite: where the two meet they mix to a grey that reads dusty pink,
+     so by day it is a hint at the corner rather than a light. */
+  --wash-green: 18%;
+  --wash-accent: 50%;
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
@@ -110,7 +139,7 @@
     ),
     radial-gradient(
     64rem 32rem at 49.5% -6%,
-    color-mix(in oklab, var(--brand-pink) var(--wash-accent), transparent) 0%,
+    color-mix(in oklab, var(--light-mid) var(--wash-accent), transparent) 0%,
     transparent 55%
     ),
     radial-gradient(
@@ -125,7 +154,7 @@
     ),
     radial-gradient(
     64rem 32rem at 49.5% 106%,
-    color-mix(in oklab, var(--brand-pink) var(--wash-accent), transparent) 0%,
+    color-mix(in oklab, var(--light-mid) var(--wash-accent), transparent) 0%,
     transparent 55%
     ),
     radial-gradient(
@@ -141,16 +170,18 @@
   :root:not([data-theme='light']) {
     color-scheme: dark;
 
-    --bg: #08201a;
-    --bg-elevated: #12241f;
-    --bg-inset: #162b25;
-    --bg-hover: #1d352e;
-    --border: #2e3b39;
-    --border-strong: #445250;
+    /* A deep purple, the institutional pink at night. It was a green so deep it read as black
+       with a cast, and the cast was the wrong colour. */
+    --bg: #1a1020;
+    --bg-elevated: #251a2c;
+    --bg-inset: #2d2135;
+    --bg-hover: #372a40;
+    --border: #45374f;
+    --border-strong: #5f4f69;
 
-    --text: #eaf1ef;
-    --text-muted: #a8b8b4;
-    --text-faint: #8b9a96;
+    --text: #f3edf6;
+    --text-muted: #c4b6cb;
+    --text-faint: #a898b0;
     /* Dark ink, not white: the accent is a LIGHT teal in this theme, so white on
        it measured 2.02:1 - the most prominent button in the portal, well under
        the 4.5 minimum. Against #7fc2c0 this is about 9:1. */
@@ -178,10 +209,19 @@
     --brand-pink: #e8578f;
     --brand-green: #c9d329;
 
-    --header-bg: #102019;
-    --nav-bg: #0e1c17;
-    --nav-active-bg: #1c4238;
-    --nav-active-text: #bfe8e6;
+    --header-bg: #1e1325;
+    --nav-bg: #170d1c;
+    --nav-active-bg: #452252;
+    --nav-active-text: #f2d9fa;
+    --nav-active-edge: #e8578f;
+    --light-mid: var(--brand-pink);
+    --logo-tile: #2d2135;
+    --logo-tile-edge: #45374f;
+    --scrim: rgb(8 2 6 / 0.6);
+    --margin-n: #22d3ee;
+    --margin-c: #2dd4bf;
+    --margin-s: #34d399;
+    --margin-other: #38bdf8;
     --wash-strength: 54%;
     /* 40, not 46. The contrast sweep reads text against --bg, which is the ground BEFORE the
        glows are composited over it - so it cannot see this case. Worked out by hand: body text
@@ -197,16 +237,18 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --bg: #08201a;
-  --bg-elevated: #12241f;
-  --bg-inset: #162b25;
-  --bg-hover: #1d352e;
-  --border: #2e3b39;
-  --border-strong: #445250;
+  /* A deep purple, the institutional pink at night. It was a green so deep it read as black
+     with a cast, and the cast was the wrong colour. */
+  --bg: #1a1020;
+  --bg-elevated: #251a2c;
+  --bg-inset: #2d2135;
+  --bg-hover: #372a40;
+  --border: #45374f;
+  --border-strong: #5f4f69;
 
-  --text: #eaf1ef;
-  --text-muted: #a8b8b4;
-  --text-faint: #8b9a96;
+  --text: #f3edf6;
+  --text-muted: #c4b6cb;
+  --text-faint: #a898b0;
   /* Dark ink, not white: the accent is a LIGHT teal in this theme, so white on
      it measured 2.02:1 - the most prominent button in the portal, well under
      the 4.5 minimum. Against #7fc2c0 this is about 9:1. */
@@ -234,10 +276,19 @@
   --brand-pink: #e8578f;
   --brand-green: #c9d329;
 
-  --header-bg: #102019;
-  --nav-bg: #0e1c17;
-  --nav-active-bg: #1c4238;
-  --nav-active-text: #bfe8e6;
+  --header-bg: #1e1325;
+  --nav-bg: #170d1c;
+  --nav-active-bg: #452252;
+  --nav-active-text: #f2d9fa;
+  --nav-active-edge: #e8578f;
+  --light-mid: var(--brand-pink);
+  --logo-tile: #2d2135;
+  --logo-tile-edge: #45374f;
+  --scrim: rgb(8 2 6 / 0.6);
+  --margin-n: #22d3ee;
+  --margin-c: #2dd4bf;
+  --margin-s: #34d399;
+  --margin-other: #38bdf8;
   --wash-strength: 54%;
   --wash-green: 40%;
   --wash-accent: 48%;
@@ -316,7 +367,8 @@ pre {
   margin-bottom: 1rem;
 }
 
-.field label {
+.field label,
+.field .label {
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--text-muted);
@@ -342,6 +394,14 @@ textarea {
   border-radius: var(--radius-sm);
   padding: 0.5rem 0.625rem;
   width: 100%;
+}
+
+/* A slider is not a text box: no frame around its track, and the portal's colour on it. */
+input[type='range'] {
+  padding: 0;
+  border: 0;
+  background: none;
+  accent-color: var(--primary);
 }
 
 textarea {
@@ -561,12 +621,41 @@ dialog {
 }
 
 dialog::backdrop {
-  background: rgb(10 15 14 / 0.45);
+  background: var(--scrim);
 }
 
 /* ---------------------------------------------------------------------------------------------
  * Utility
  * ------------------------------------------------------------------------------------------- */
+
+/*
+ * The shell's first stop in the tab order: off-screen until focused, then pinned over the header.
+ * Not display:none - that would take it out of the tab order, which is the one thing it exists
+ * for. Here rather than in the shell's own styles, which it pushed over their budget.
+ */
+.skip-link {
+  /* fixed, not absolute: it must sit over the header wherever the shell is scrolled to,
+     and it does not depend on an ancestor happening to be positioned. */
+  position: fixed;
+  left: 0.5rem;
+  top: -3rem;
+  z-index: 100;
+  padding: 0.5rem 0.85rem;
+  background: var(--bg-elevated);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  text-decoration: none;
+  transition: top var(--transition-fast);
+}
+/* :focus, not :focus-visible. A skip link is only ever reached by keyboard, and
+   :focus-visible is a heuristic that does not fire when focus is moved by script - which
+   would leave the element focused and invisible, the worst of both. */
+.skip-link:focus {
+  top: 0.5rem;
+}
+
 .text-muted {
   color: var(--text-muted);
 }
@@ -631,7 +720,11 @@ dialog::backdrop {
    DataTableComponent rather than written by hand on every page.
    ───────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .scroll-x {
+  /* Only a data table's scroller stands down, because its rows become cards that fit. The
+     other grids - a pensum's semesters, the paste example, the console's fields - stay grids
+     and keep scrolling inside their card. Released as well, they pushed the whole page six
+     hundred pixels wider than the phone. */
+  .data-table .scroll-x {
     overflow-x: visible;
     padding: 0;
     margin: 0;
@@ -661,11 +754,11 @@ dialog::backdrop {
     border-radius: 8px;
     padding: 0.5rem 0.25rem;
     margin-bottom: 0.75rem;
-    background: var(--panel);
+    background: var(--bg-elevated);
   }
 
   .data-table tbody tr:hover {
-    background: var(--panel);
+    background: var(--bg-elevated);
   }
 
   .data-table td {
@@ -734,6 +827,12 @@ dialog::backdrop {
     font-size: 1.375rem;
   }
 
+  /* A card inside a card, a row card inside that: at 1.25rem a side each, a phone lost a
+     quarter of its width to padding before any value was drawn. */
+  .card {
+    padding: 1rem;
+  }
+
   .row-between {
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -790,14 +889,7 @@ body::before {
   height: 2px;
   z-index: 0;
   pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    var(--brand-teal) 0%,
-    var(--brand-teal) 33%,
-    var(--brand-pink) 33%,
-    var(--brand-pink) 66%,
-    var(--brand-green) 66%
-  );
+  background: var(--brand-strip);
 }
 
 /*
@@ -814,14 +906,15 @@ body::after {
   height: 2px;
   z-index: 5;
   pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    var(--brand-teal) 0%,
-    var(--brand-teal) 33%,
-    var(--brand-pink) 33%,
-    var(--brand-pink) 66%,
-    var(--brand-green) 66%
-  );
+  background: var(--brand-strip);
+}
+/* Not on a phone. Safari there pins "the bottom of the viewport" above its own toolbar, which
+   slides in and out as the page scrolls, so the strip hung in mid-air over the content instead
+   of sitting on the edge of anything. Landscape phones included, by their height. */
+@media (max-width: 720px), (max-height: 500px) {
+  body::after {
+    display: none;
+  }
 }
 
 /* A card has to lift off that ground rather than blend into it. */
@@ -837,3 +930,226 @@ body::after {
 .badge-neutral {
   border-color: var(--border-strong);
 }
+
+/* ------------------------------------------------------------------ help that folds away
+   "What can I do here?" under each page's title, and the survey's "How to measure": a small pill,
+   closed until somebody needs it, opening onto a card. */
+details.help {
+  margin-top: 0.45rem;
+}
+/* In the page intro's row of help, side by side: open, one grows under its own pill and the
+   others wait beside it, at the same height. */
+.help-row > details.help {
+  margin-top: 0;
+}
+.help-row > details.help[open] {
+  flex: 1 1 26rem;
+  max-width: 72ch;
+}
+details.help > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.7rem 0.28rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-elevated) 70%, transparent);
+  /* Body colour: the pill sits on the lit ground, where muted text loses contrast. */
+  color: var(--text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+details.help > summary::-webkit-details-marker {
+  display: none;
+}
+details.help > summary:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+}
+details.help > summary:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+details.help .help-icon {
+  color: var(--brand-teal);
+}
+details.help .help-chevron {
+  transition: transform 0.15s ease;
+}
+details.help[open] .help-chevron {
+  transform: rotate(180deg);
+}
+details.help .help-body {
+  margin-top: 0.55rem;
+  padding: 0.75rem 1rem;
+  max-width: 72ch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  font-size: 0.875rem;
+}
+details.help .help-body > :first-child {
+  margin-top: 0;
+}
+details.help .help-body > :last-child {
+  margin-bottom: 0;
+}
+details.help .help-what {
+  margin: 0 0 0.5rem;
+}
+details.help .help-can {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.3rem;
+}
+details.help .help-can li {
+  position: relative;
+  padding-left: 1.2rem;
+}
+/* A tick rather than a bullet: these are things you can do, not things to read. */
+details.help .help-can li::before {
+  content: '';
+  position: absolute;
+  left: 0.1rem;
+  top: 0.42em;
+  width: 0.5rem;
+  height: 0.28rem;
+  border-left: 2px solid var(--brand-teal);
+  border-bottom: 2px solid var(--brand-teal);
+  transform: rotate(-45deg);
+}
+details.help .help-note {
+  margin: 0.65rem 0 0;
+  padding: 0.45rem 0.7rem;
+  border-left: 3px solid var(--brand-green);
+  background: var(--bg-inset);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.8125rem;
+}
+
+/* The K on the header, on a tile: white by day, so its lime green does not fade into the violet;
+   at night a step lighter than the dark header, with the theme's own edge. */
+.logo-tile {
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--logo-tile);
+  box-shadow: 0 0 0 1px var(--logo-tile-edge);
+}
+
+/* Inside a folded help with a list of its own, such as the survey's "How to measure". */
+details.help .help-body ul {
+  margin: 0.35rem 0;
+  padding-left: 1.2rem;
+}
+details.help .help-body ul.keys {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+/* Small rounded choices to tap, such as the survey's note examples. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+}
+.chip {
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-muted);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+/* The row a work area opens with: its filters, and the button that adds to what it lists, where
+   the list is rather than up by the page's title. On a phone the button takes its own line. */
+.work-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+}
+.work-bar > .work-create {
+  margin-left: auto;
+}
+
+/* Two or three views of one section, as a segmented bar under the title: each with its icon and
+   how many it holds, the one shown lifted onto a card in the selected section's violet. Big
+   enough to see as the way between the two, not a line of links under the heading. */
+.page-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--bg-elevated) 55%, transparent);
+  box-shadow: var(--shadow-sm);
+}
+.page-tabs a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.75rem;
+  padding: 0.45rem 1.1rem 0.45rem 0.9rem;
+  border-radius: 0.65rem;
+  color: var(--text-muted);
+  font-size: 0.975rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.page-tabs a svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.page-tabs a:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.page-tabs a.on {
+  background: var(--nav-active-bg);
+  color: var(--nav-active-text);
+  box-shadow: var(--shadow-sm);
+}
+.page-tabs a:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.tab-count {
+  min-width: 1.6rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 480px) {
+  .page-tabs {
+    display: flex;
+  }
+  .page-tabs a {
+    flex: 1 1 0;
+    justify-content: center;
+    padding-inline: 0.6rem;
+  }
+}
+
+

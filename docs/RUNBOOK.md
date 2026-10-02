@@ -231,6 +231,12 @@ debugging, go through the container:
 docker compose exec api-gateway wget -qO- http://auth-service:8081/auth/health
 ```
 
+**A dev server** runs the portal and the map's services with no laptop on. It follows one branch
+and picks up each push by itself, about ten minutes later. `.github/workflows/dev-images.yml`
+publishes each service's image to GHCR for the branch, and the server's agent pulls it. How to
+set one up on any host, and what a push can and cannot change there, is in
+[`deploy/dev-server/README.md`](../deploy/dev-server/README.md).
+
 ---
 
 ## Local accounts
@@ -425,14 +431,68 @@ scripts/export-map-snapshot.py
 ```
 
 It asks for a token — the one on the portal's *My token* screen — and rewrites one JSON file per
-building under `map-service/src/main/resources/db/seed/map/`. Review the diff and open a PR with
-it, like any other change.
+building under `map-service/src/main/resources/db/seed/map/`, and one per campus under
+`db/seed/structures/` with what else stands on its blocks. Review the diff and open a PR with it,
+like any other change.
 
-Those files are also what a fresh database starts from: `V005_SurveyedCampus` loads them in place
-of the placeholder campus, and never over a building that already exists. The first version came
-from the campus survey — every floor undrawn, every space waiting in the editor's inventory. CI
-loads whatever is committed and saves every floor back through the floor editor's endpoint, so a
-snapshot the editor would refuse fails the build rather than the next database.
+The portal's *Block editor* (`/data/blocks`) reshapes a city block: the parts of the university's
+buildings on it, which it saves into each building's `footprint`, and what else stands there, a
+neighbour's building or a heritage house and its garden, which it saves into the campus's
+structures. The floor editor draws its margins from those footprints. A load keeps a footprint
+somebody changed in the portal, and `V010_CampusStructures` only seeds a campus that has no
+structures yet, so after surveying a block, export and commit as above.
+
+On site, select an outline to check it against a tape or the phone's Measure app. Each wall shows
+its length, and a dashed line gives the setback from the wall to the sidewalk in front of it, up
+to 12 m. There is no setback where another building stands in between.
+
+Reshaping by hand is slow, so a block is measured first. The portal's *Survey* (`/data/survey`)
+walks round the Edificio Central's block one distance at a time, on a sketch zoomed to each, in
+the order you walk it. There are two kinds of distance:
+
+- **setbacks**, from a wall straight out to the curb, which say where the building stands;
+- **lengths**, along a wall or across a door, which say how wide it is.
+
+Longer ones are typed in pieces (`4,80 + 3,25`), since the Measure app drifts past 5 m. What is
+typed is saved as it is typed (`/api/map/campuses/{campus}/survey`) and kept on the phone until the
+server has it. The export above writes it to `docs/map/survey/`.
+
+The plan itself comes from `scripts/survey-plan.py`, which lays it on the seed's outlines and the
+city's curbs. The model's figure beside each distance is there to catch a slip on site. Change the
+plan there and rerun the script. The distances already taken are saved under their ids, so never
+renumber one.
+
+The script also lays the sketch out the way a plan is dimensioned. Each length is drawn beside its
+wall on the building's side, the partial ones nearer and the overall ones further out. Setbacks
+that would only repeat others on the same line are left out. It refuses to write a plan with two
+lines on top of each other or two numbers touching, and a test in the portal checks the same.
+
+Those files are also what every database is drawn from. `V007_TracedCampus` loads them again at
+the first start after they change:
+
+- A floor nobody has touched is replaced.
+- A floor somebody saved in the portal keeps their work. The names they gave, what they typed and
+  the rooms they redrew are carried onto the new drawing, and the floor as it was is kept whole in
+  `map_replaced_floors` first.
+- If the two do not fit together, for example two rooms sharing floor, the floor is left as it is
+  and the log says so.
+
+It can tell what somebody changed because each load records what it wrote, in
+`map_snapshot_bases`. CI loads whatever is committed and saves every floor back through the floor
+editor's endpoint, so a snapshot the editor would refuse fails the build rather than the next
+database.
+
+The streets around the campus are not drawn by hand: they are the city's. To refresh them, or to
+take in a building further out, cut them again from Bogotá's reference map (IDECA, CC BY 4.0):
+
+```bash
+scripts/map-ground.py --radius 350
+```
+
+It rewrites `map-service/src/main/resources/db/ground/sede-principal.json`, which the service
+serves as `GET /api/map/campuses/{campus}/ground`. It also takes the cadastre's lots of every block
+a building of the campus stands on, read from the buildings' footprints in the seed.
+`--lots-only` takes them again and leaves the rest of the file as it is.
 
 ---
 

@@ -3,6 +3,7 @@
   "name": "Bienestar Institucional",
   "campus": "Sede Principal",
   "description": "Dos alas unidas por el piso 1 y la terraza: la occidental es la de bienestar (juegos, música, danza, gimnasio y terraza); la oriental, de salones y laboratorios.",
+  "address": "Cl. 62 # 9-81",
   "aliases": [
     "Bienestar"
   ],
@@ -18,6 +19,146 @@
       "note": "Salones y laboratorios. Se cruza desde el ala occidental por el piso 1 y por la terraza."
     }
   ],
+  "placement": {
+    "origin": {
+      "lat": 4.6479329,
+      "lon": -74.0621487
+    },
+    "bearing": 294.25,
+    "metresPerUnit": 0.0219
+  },
+  "footprint": [
+    {
+      "lot": "008213025004",
+      "floors": 4,
+      "basements": 0,
+      "wing": "O",
+      "ring": [
+        [-74.0620687, 4.6479949],
+        [-74.0621136, 4.6480179],
+        [-74.0621227, 4.6479876],
+        [-74.0621467, 4.648],
+        [-74.0621567, 4.6479665],
+        [-74.0621666, 4.6479709],
+        [-74.0621734, 4.6479481],
+        [-74.0621092, 4.6479196],
+        [-74.0620845, 4.6479086],
+        [-74.0620736, 4.6479305],
+        [-74.0620712, 4.6479353],
+        [-74.0620709, 4.647936],
+        [-74.06206, 4.647958],
+        [-74.0620808, 4.6479686],
+        [-74.0620687, 4.6479949]
+      ]
+    },
+    {
+      "lot": "008213025005",
+      "floors": 4,
+      "basements": 0,
+      "wing": "O",
+      "ring": [
+        [-74.0619923, 4.6479576],
+        [-74.0620687, 4.6479949],
+        [-74.0620808, 4.6479686],
+        [-74.06206, 4.647958],
+        [-74.0620709, 4.647936],
+        [-74.0620712, 4.6479353],
+        [-74.0620736, 4.6479305],
+        [-74.0620845, 4.6479086],
+        [-74.0620713, 4.6479026],
+        [-74.0620648, 4.6478996],
+        [-74.0620495, 4.6479293],
+        [-74.0620151, 4.6479134],
+        [-74.0619923, 4.6479576]
+      ]
+    },
+    {
+      "lot": "008213025006",
+      "floors": 4,
+      "basements": 0,
+      "wing": "E",
+      "ring": [
+        [-74.0618836, 4.6479106],
+        [-74.0619915, 4.6479592],
+        [-74.0619923, 4.6479576],
+        [-74.0620151, 4.6479134],
+        [-74.0620304, 4.6478837],
+        [-74.0619967, 4.6478685],
+        [-74.0619188, 4.6478333],
+        [-74.0619057, 4.6478621],
+        [-74.0618836, 4.6479106]
+      ]
+    },
+    {
+      "lot": "008213025004",
+      "floors": 3,
+      "basements": 0,
+      "wing": "O",
+      "ring": [
+        [-74.0620664, 4.6479998],
+        [-74.0621121, 4.6480231],
+        [-74.0621136, 4.6480179],
+        [-74.0620687, 4.6479949],
+        [-74.0620683, 4.6479957],
+        [-74.0620664, 4.6479998]
+      ]
+    },
+    {
+      "lot": "008213025004",
+      "floors": 3,
+      "basements": 0,
+      "wing": "O",
+      "ring": [
+        [-74.0621666, 4.6479709],
+        [-74.0621716, 4.6479731],
+        [-74.0621784, 4.6479503],
+        [-74.0621734, 4.6479481],
+        [-74.0621666, 4.6479709]
+      ]
+    },
+    {
+      "lot": "008213025005",
+      "floors": 3,
+      "basements": 0,
+      "wing": "O",
+      "ring": [
+        [-74.0619898, 4.6479624],
+        [-74.0620664, 4.6479998],
+        [-74.0620683, 4.6479957],
+        [-74.0620687, 4.6479949],
+        [-74.0619923, 4.6479576],
+        [-74.0619915, 4.6479592],
+        [-74.0619898, 4.6479624]
+      ]
+    },
+    {
+      "lot": "008213025006",
+      "floors": 3,
+      "basements": 0,
+      "wing": "E",
+      "ring": [
+        [-74.0618814, 4.6479155],
+        [-74.061989, 4.647964],
+        [-74.0619898, 4.6479624],
+        [-74.0619915, 4.6479592],
+        [-74.0618836, 4.6479106],
+        [-74.0618814, 4.6479155]
+      ]
+    },
+    {
+      "lot": "008213025004",
+      "floors": 1,
+      "basements": 0,
+      "wing": "O",
+      "ring": [
+        [-74.0621136, 4.6480179],
+        [-74.0621377, 4.6480303],
+        [-74.0621467, 4.648],
+        [-74.0621227, 4.6479876],
+        [-74.0621136, 4.6480179]
+      ]
+    }
+  ],
   "floors": [
     {
       "code": "P1",
@@ -25,59 +166,282 @@
       "name": "Piso 1",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 16,
-      "gridColumns": 8,
-      "corridors": [
+      "width": 629,
+      "height": 1110,
+      "top": "WEST",
+      "spaces": [
         {
-          "code": "PAS-P1",
-          "name": "Salida",
-          "color": "#5B8DEF",
-          "path": [
+          "code": "P1-02",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
             {
-              "row": 9,
-              "col": 6
+              "x": 433,
+              "y": 209
             },
             {
-              "row": 11,
-              "col": 6
+              "x": 588,
+              "y": 209
             },
             {
-              "row": 11,
-              "col": 1
+              "x": 588,
+              "y": 264
+            },
+            {
+              "x": 433,
+              "y": 264
             }
           ]
-        }
-      ],
-      "spaces": [
+        },
+        {
+          "code": "P1-03",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 396,
+              "y": 213
+            },
+            {
+              "x": 423,
+              "y": 213
+            },
+            {
+              "x": 423,
+              "y": 262
+            },
+            {
+              "x": 396,
+              "y": 262
+            }
+          ]
+        },
+        {
+          "code": "P1-04",
+          "name": "Escalera por identificar",
+          "typeCode": "STAIRS",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 223,
+              "y": 460
+            },
+            {
+              "x": 284,
+              "y": 460
+            },
+            {
+              "x": 284,
+              "y": 793
+            },
+            {
+              "x": 223,
+              "y": 793
+            }
+          ]
+        },
+        {
+          "code": "P1-05",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 139,
+              "y": 501
+            },
+            {
+              "x": 139,
+              "y": 557
+            },
+            {
+              "x": 126,
+              "y": 557
+            },
+            {
+              "x": 126,
+              "y": 642
+            },
+            {
+              "x": 27,
+              "y": 642
+            },
+            {
+              "x": 27,
+              "y": 501
+            }
+          ]
+        },
+        {
+          "code": "P1-06",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 132,
+              "y": 653
+            },
+            {
+              "x": 132,
+              "y": 712
+            },
+            {
+              "x": 121,
+              "y": 712
+            },
+            {
+              "x": 121,
+              "y": 774
+            },
+            {
+              "x": 28,
+              "y": 774
+            },
+            {
+              "x": 28,
+              "y": 653
+            }
+          ]
+        },
+        {
+          "code": "P1-07",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 130,
+              "y": 717
+            },
+            {
+              "x": 168,
+              "y": 717
+            },
+            {
+              "x": 168,
+              "y": 795
+            },
+            {
+              "x": 130,
+              "y": 795
+            }
+          ]
+        },
+        {
+          "code": "P1-08",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 176,
+              "y": 720
+            },
+            {
+              "x": 206,
+              "y": 720
+            },
+            {
+              "x": 206,
+              "y": 793
+            },
+            {
+              "x": 176,
+              "y": 793
+            }
+          ]
+        },
+        {
+          "code": "P1-26",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 121,
+              "y": 783
+            },
+            {
+              "x": 121,
+              "y": 802
+            },
+            {
+              "x": 276,
+              "y": 802
+            },
+            {
+              "x": 276,
+              "y": 1080
+            },
+            {
+              "x": 28,
+              "y": 1080
+            },
+            {
+              "x": 28,
+              "y": 783
+            }
+          ]
+        },
         {
           "code": "P1-ASC",
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
-          "gridRow": 13,
-          "gridColumn": 4,
-          "rowSpan": 2,
-          "colSpan": 2
+          "aliases": [],
+          "shape": [
+            {
+              "x": 199,
+              "y": 41
+            },
+            {
+              "x": 288,
+              "y": 41
+            },
+            {
+              "x": 288,
+              "y": 158
+            },
+            {
+              "x": 199,
+              "y": 158
+            }
+          ]
         },
         {
           "code": "P1-BANOS",
           "wing": "O",
           "name": "Baños",
           "typeCode": "RESTROOM",
-          "gridRow": 15,
-          "gridColumn": 5,
-          "rowSpan": 1,
-          "colSpan": 3
+          "aliases": [],
+          "shape": [
+            {
+              "x": 24,
+              "y": 24
+            },
+            {
+              "x": 193,
+              "y": 24
+            },
+            {
+              "x": 193,
+              "y": 63
+            },
+            {
+              "x": 24,
+              "y": 63
+            }
+          ]
         },
         {
           "code": "P1-ENTRADA",
           "wing": "O",
           "name": "Entrada",
           "typeCode": "ENTRANCE",
-          "gridRow": 11,
-          "gridColumn": 0,
-          "rowSpan": 1,
-          "colSpan": 1,
+          "aliases": [],
           "note": "Sale al oeste, a la Calle 62."
         },
         {
@@ -85,10 +449,25 @@
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
-          "gridRow": 13,
-          "gridColumn": 0,
-          "rowSpan": 3,
-          "colSpan": 4
+          "aliases": [],
+          "shape": [
+            {
+              "x": 300,
+              "y": 36
+            },
+            {
+              "x": 611,
+              "y": 36
+            },
+            {
+              "x": 611,
+              "y": 194
+            },
+            {
+              "x": 300,
+              "y": 194
+            }
+          ]
         },
         {
           "code": "P1-JUEGOS-MESA",
@@ -100,55 +479,96 @@
             "zona de ajedrez",
             "Dance Revolution"
           ],
-          "gridRow": 0,
-          "gridColumn": 0,
-          "rowSpan": 11,
-          "colSpan": 4
-        },
-        {
-          "code": "P1-C01",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 4,
-          "rowSpan": 4,
-          "colSpan": 4
-        },
-        {
-          "code": "P1-C02",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 5,
-          "gridColumn": 6,
-          "rowSpan": 2,
-          "colSpan": 2
-        },
-        {
-          "code": "P1-C03",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 7,
-          "gridColumn": 6,
-          "rowSpan": 2,
-          "colSpan": 2
-        },
-        {
-          "code": "P1-C04",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 4,
-          "gridColumn": 4,
-          "rowSpan": 5,
-          "colSpan": 2
-        },
-        {
-          "code": "P1-C05",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 12,
-          "gridColumn": 0,
-          "rowSpan": 1,
-          "colSpan": 4
+          "shape": [
+            {
+              "x": 24,
+              "y": 63
+            },
+            {
+              "x": 193,
+              "y": 63
+            },
+            {
+              "x": 193,
+              "y": 165
+            },
+            {
+              "x": 296,
+              "y": 165
+            },
+            {
+              "x": 296,
+              "y": 196
+            },
+            {
+              "x": 390,
+              "y": 196
+            },
+            {
+              "x": 390,
+              "y": 268
+            },
+            {
+              "x": 592,
+              "y": 268
+            },
+            {
+              "x": 592,
+              "y": 196
+            },
+            {
+              "x": 611,
+              "y": 196
+            },
+            {
+              "x": 611,
+              "y": 1085
+            },
+            {
+              "x": 276,
+              "y": 1085
+            },
+            {
+              "x": 276,
+              "y": 802
+            },
+            {
+              "x": 284,
+              "y": 802
+            },
+            {
+              "x": 284,
+              "y": 460
+            },
+            {
+              "x": 223,
+              "y": 460
+            },
+            {
+              "x": 223,
+              "y": 716
+            },
+            {
+              "x": 132,
+              "y": 716
+            },
+            {
+              "x": 132,
+              "y": 647
+            },
+            {
+              "x": 139,
+              "y": 647
+            },
+            {
+              "x": 139,
+              "y": 501
+            },
+            {
+              "x": 24,
+              "y": 501
+            }
+          ]
         }
       ]
     },
@@ -158,69 +578,304 @@
       "name": "Piso 2",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 16,
-      "gridColumns": 8,
-      "corridors": [
+      "width": 629,
+      "height": 1110,
+      "top": "WEST",
+      "spaces": [
         {
-          "code": "PAS-P2",
-          "name": "Pasillo",
-          "color": "#5B8DEF",
-          "path": [
+          "code": "P2-11",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
             {
-              "row": 1,
-              "col": 4
+              "x": 20,
+              "y": 24
             },
             {
-              "row": 11,
-              "col": 4
+              "x": 177,
+              "y": 24
+            },
+            {
+              "x": 177,
+              "y": 242
+            },
+            {
+              "x": 20,
+              "y": 242
             }
           ]
-        }
-      ],
-      "spaces": [
+        },
+        {
+          "code": "P2-12",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 20,
+              "y": 246
+            },
+            {
+              "x": 270,
+              "y": 246
+            },
+            {
+              "x": 270,
+              "y": 103
+            },
+            {
+              "x": 349,
+              "y": 103
+            },
+            {
+              "x": 349,
+              "y": 240
+            },
+            {
+              "x": 373,
+              "y": 240
+            },
+            {
+              "x": 373,
+              "y": 313
+            },
+            {
+              "x": 545,
+              "y": 313
+            },
+            {
+              "x": 545,
+              "y": 240
+            },
+            {
+              "x": 613,
+              "y": 240
+            },
+            {
+              "x": 613,
+              "y": 1085
+            },
+            {
+              "x": 20,
+              "y": 1085
+            },
+            {
+              "x": 20,
+              "y": 819
+            },
+            {
+              "x": 222,
+              "y": 819
+            },
+            {
+              "x": 222,
+              "y": 789
+            },
+            {
+              "x": 262,
+              "y": 789
+            },
+            {
+              "x": 262,
+              "y": 729
+            },
+            {
+              "x": 222,
+              "y": 729
+            },
+            {
+              "x": 222,
+              "y": 655
+            },
+            {
+              "x": 230,
+              "y": 655
+            },
+            {
+              "x": 230,
+              "y": 538
+            },
+            {
+              "x": 20,
+              "y": 538
+            }
+          ]
+        },
+        {
+          "code": "P2-13",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 405,
+              "y": 254
+            },
+            {
+              "x": 542,
+              "y": 254
+            },
+            {
+              "x": 542,
+              "y": 312
+            },
+            {
+              "x": 405,
+              "y": 312
+            }
+          ]
+        },
+        {
+          "code": "P2-29",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 375,
+              "y": 256
+            },
+            {
+              "x": 394,
+              "y": 256
+            },
+            {
+              "x": 394,
+              "y": 306
+            },
+            {
+              "x": 375,
+              "y": 306
+            }
+          ]
+        },
+        {
+          "code": "P2-30",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 20,
+              "y": 538
+            },
+            {
+              "x": 230,
+              "y": 538
+            },
+            {
+              "x": 230,
+              "y": 655
+            },
+            {
+              "x": 222,
+              "y": 655
+            },
+            {
+              "x": 222,
+              "y": 819
+            },
+            {
+              "x": 20,
+              "y": 819
+            }
+          ]
+        },
+        {
+          "code": "P2-31",
+          "name": "Escalera por identificar",
+          "typeCode": "STAIRS",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 222,
+              "y": 729
+            },
+            {
+              "x": 262,
+              "y": 729
+            },
+            {
+              "x": 262,
+              "y": 789
+            },
+            {
+              "x": 222,
+              "y": 789
+            }
+          ]
+        },
         {
           "code": "P2-ASC",
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
-          "gridRow": 13,
-          "gridColumn": 5,
-          "rowSpan": 2,
-          "colSpan": 1
+          "aliases": [],
+          "shape": [
+            {
+              "x": 188,
+              "y": 79
+            },
+            {
+              "x": 267,
+              "y": 79
+            },
+            {
+              "x": 267,
+              "y": 246
+            },
+            {
+              "x": 188,
+              "y": 246
+            }
+          ]
         },
         {
           "code": "P2-BILLAR",
           "wing": "O",
           "name": "Billar",
           "typeCode": "GAME_ROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P2-COORDINACION",
           "wing": "O",
           "name": "Coordinación de Bienestar Estudiantil",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P2-ESC",
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
-          "gridRow": 12,
-          "gridColumn": 0,
-          "rowSpan": 3,
-          "colSpan": 4
+          "aliases": [],
+          "shape": [
+            {
+              "x": 349,
+              "y": 103
+            },
+            {
+              "x": 562,
+              "y": 103
+            },
+            {
+              "x": 562,
+              "y": 238
+            },
+            {
+              "x": 349,
+              "y": 238
+            }
+          ]
         },
         {
           "code": "P2-FUTBOLIN",
           "wing": "O",
           "name": "Futbolín",
           "typeCode": "GAME_ROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P2-PING-PONG",
@@ -230,9 +885,7 @@
           "aliases": [
             "Ping - Pong",
             "tenis de mesa"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P2-SALAS-XBOX",
@@ -241,36 +894,7 @@
           "typeCode": "GAME_ROOM",
           "aliases": [
             "xbox"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
-        },
-        {
-          "code": "P2-C01",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 12,
-          "gridColumn": 6,
-          "rowSpan": 4,
-          "colSpan": 2
-        },
-        {
-          "code": "P2-C02",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 11,
-          "gridColumn": 1,
-          "rowSpan": 1,
-          "colSpan": 3
-        },
-        {
-          "code": "P2-C03",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 4,
-          "gridColumn": 5,
-          "rowSpan": 5,
-          "colSpan": 3
+          ]
         }
       ]
     },
@@ -280,28 +904,687 @@
       "name": "Piso 3",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 16,
-      "gridColumns": 8,
+      "width": 629,
+      "height": 1110,
+      "top": "WEST",
       "spaces": [
+        {
+          "code": "P3-34",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 176,
+              "y": 23
+            },
+            {
+              "x": 176,
+              "y": 237
+            },
+            {
+              "x": 94,
+              "y": 237
+            },
+            {
+              "x": 94,
+              "y": 335
+            },
+            {
+              "x": 26,
+              "y": 335
+            },
+            {
+              "x": 26,
+              "y": 23
+            }
+          ]
+        },
+        {
+          "code": "P3-35",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 94,
+              "y": 242
+            },
+            {
+              "x": 274,
+              "y": 242
+            },
+            {
+              "x": 274,
+              "y": 103
+            },
+            {
+              "x": 349,
+              "y": 103
+            },
+            {
+              "x": 349,
+              "y": 240
+            },
+            {
+              "x": 373,
+              "y": 240
+            },
+            {
+              "x": 373,
+              "y": 313
+            },
+            {
+              "x": 545,
+              "y": 313
+            },
+            {
+              "x": 545,
+              "y": 240
+            },
+            {
+              "x": 613,
+              "y": 240
+            },
+            {
+              "x": 613,
+              "y": 711
+            },
+            {
+              "x": 556,
+              "y": 711
+            },
+            {
+              "x": 556,
+              "y": 721
+            },
+            {
+              "x": 267,
+              "y": 721
+            },
+            {
+              "x": 216,
+              "y": 721
+            },
+            {
+              "x": 216,
+              "y": 633
+            },
+            {
+              "x": 222,
+              "y": 633
+            },
+            {
+              "x": 222,
+              "y": 531
+            },
+            {
+              "x": 273,
+              "y": 531
+            },
+            {
+              "x": 273,
+              "y": 333
+            },
+            {
+              "x": 94,
+              "y": 333
+            }
+          ]
+        },
+        {
+          "code": "P3-36",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 418,
+              "y": 255
+            },
+            {
+              "x": 542,
+              "y": 255
+            },
+            {
+              "x": 542,
+              "y": 308
+            },
+            {
+              "x": 418,
+              "y": 308
+            }
+          ]
+        },
+        {
+          "code": "P3-37",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 377,
+              "y": 257
+            },
+            {
+              "x": 393,
+              "y": 257
+            },
+            {
+              "x": 393,
+              "y": 302
+            },
+            {
+              "x": 377,
+              "y": 302
+            }
+          ]
+        },
+        {
+          "code": "P3-38",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 146,
+              "y": 333
+            },
+            {
+              "x": 146,
+              "y": 446
+            },
+            {
+              "x": 26,
+              "y": 446
+            },
+            {
+              "x": 26,
+              "y": 345
+            },
+            {
+              "x": 103,
+              "y": 345
+            },
+            {
+              "x": 103,
+              "y": 333
+            }
+          ]
+        },
+        {
+          "code": "P3-39",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 204,
+              "y": 333
+            },
+            {
+              "x": 204,
+              "y": 342
+            },
+            {
+              "x": 272,
+              "y": 342
+            },
+            {
+              "x": 272,
+              "y": 442
+            },
+            {
+              "x": 158,
+              "y": 442
+            },
+            {
+              "x": 158,
+              "y": 333
+            }
+          ]
+        },
+        {
+          "code": "P3-40",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 225,
+              "y": 452
+            },
+            {
+              "x": 270,
+              "y": 452
+            },
+            {
+              "x": 270,
+              "y": 530
+            },
+            {
+              "x": 225,
+              "y": 530
+            }
+          ]
+        },
+        {
+          "code": "P3-41",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 214,
+              "y": 455
+            },
+            {
+              "x": 214,
+              "y": 531
+            },
+            {
+              "x": 221,
+              "y": 533
+            },
+            {
+              "x": 221,
+              "y": 582
+            },
+            {
+              "x": 210,
+              "y": 582
+            },
+            {
+              "x": 210,
+              "y": 622
+            },
+            {
+              "x": 107,
+              "y": 622
+            },
+            {
+              "x": 107,
+              "y": 587
+            },
+            {
+              "x": 105,
+              "y": 587
+            },
+            {
+              "x": 105,
+              "y": 536
+            },
+            {
+              "x": 112,
+              "y": 536
+            },
+            {
+              "x": 112,
+              "y": 455
+            }
+          ]
+        },
+        {
+          "code": "P3-42",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 105,
+              "y": 587
+            },
+            {
+              "x": 97,
+              "y": 587
+            },
+            {
+              "x": 97,
+              "y": 627
+            },
+            {
+              "x": 26,
+              "y": 627
+            },
+            {
+              "x": 26,
+              "y": 457
+            },
+            {
+              "x": 102,
+              "y": 457
+            },
+            {
+              "x": 102,
+              "y": 536
+            },
+            {
+              "x": 105,
+              "y": 536
+            }
+          ]
+        },
+        {
+          "code": "P3-43",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 208,
+              "y": 637
+            },
+            {
+              "x": 208,
+              "y": 670
+            },
+            {
+              "x": 216,
+              "y": 670
+            },
+            {
+              "x": 216,
+              "y": 722
+            },
+            {
+              "x": 204,
+              "y": 722
+            },
+            {
+              "x": 204,
+              "y": 727
+            },
+            {
+              "x": 145,
+              "y": 727
+            },
+            {
+              "x": 145,
+              "y": 726
+            },
+            {
+              "x": 139,
+              "y": 726
+            },
+            {
+              "x": 139,
+              "y": 727
+            },
+            {
+              "x": 25,
+              "y": 727
+            },
+            {
+              "x": 25,
+              "y": 638
+            },
+            {
+              "x": 95,
+              "y": 638
+            },
+            {
+              "x": 95,
+              "y": 676
+            },
+            {
+              "x": 105,
+              "y": 676
+            },
+            {
+              "x": 105,
+              "y": 637
+            }
+          ]
+        },
+        {
+          "code": "P3-44",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 607,
+              "y": 711
+            },
+            {
+              "x": 607,
+              "y": 1085
+            },
+            {
+              "x": 253,
+              "y": 1085
+            },
+            {
+              "x": 253,
+              "y": 1070
+            },
+            {
+              "x": 260,
+              "y": 1070
+            },
+            {
+              "x": 260,
+              "y": 997
+            },
+            {
+              "x": 267,
+              "y": 978
+            },
+            {
+              "x": 267,
+              "y": 721
+            },
+            {
+              "x": 556,
+              "y": 721
+            },
+            {
+              "x": 556,
+              "y": 711
+            }
+          ]
+        },
+        {
+          "code": "P3-45",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 215,
+              "y": 722
+            },
+            {
+              "x": 261,
+              "y": 722
+            },
+            {
+              "x": 261,
+              "y": 785
+            },
+            {
+              "x": 215,
+              "y": 785
+            }
+          ]
+        },
+        {
+          "code": "P3-46",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 91,
+              "y": 727
+            },
+            {
+              "x": 91,
+              "y": 729
+            },
+            {
+              "x": 83,
+              "y": 729
+            },
+            {
+              "x": 83,
+              "y": 795
+            },
+            {
+              "x": 25,
+              "y": 795
+            },
+            {
+              "x": 25,
+              "y": 727
+            }
+          ]
+        },
+        {
+          "code": "P3-47",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 91,
+              "y": 727
+            },
+            {
+              "x": 139,
+              "y": 727
+            },
+            {
+              "x": 139,
+              "y": 792
+            },
+            {
+              "x": 100,
+              "y": 792
+            },
+            {
+              "x": 100,
+              "y": 729
+            },
+            {
+              "x": 91,
+              "y": 729
+            }
+          ]
+        },
+        {
+          "code": "P3-51",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 204,
+              "y": 727
+            },
+            {
+              "x": 204,
+              "y": 805
+            },
+            {
+              "x": 145,
+              "y": 805
+            },
+            {
+              "x": 145,
+              "y": 727
+            }
+          ]
+        },
+        {
+          "code": "P3-52",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 25,
+              "y": 808
+            },
+            {
+              "x": 267,
+              "y": 808
+            },
+            {
+              "x": 267,
+              "y": 978
+            },
+            {
+              "x": 260,
+              "y": 997
+            },
+            {
+              "x": 260,
+              "y": 1070
+            },
+            {
+              "x": 253,
+              "y": 1070
+            },
+            {
+              "x": 253,
+              "y": 1085
+            },
+            {
+              "x": 25,
+              "y": 1085
+            }
+          ]
+        },
         {
           "code": "P3-ASC",
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
-          "gridRow": 13,
-          "gridColumn": 5,
-          "rowSpan": 2,
-          "colSpan": 1
+          "aliases": [],
+          "shape": [
+            {
+              "x": 185,
+              "y": 108
+            },
+            {
+              "x": 267,
+              "y": 108
+            },
+            {
+              "x": 267,
+              "y": 197
+            },
+            {
+              "x": 185,
+              "y": 197
+            }
+          ]
         },
         {
           "code": "P3-ESC",
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
-          "gridRow": 12,
-          "gridColumn": 0,
-          "rowSpan": 3,
-          "colSpan": 4
+          "aliases": [],
+          "shape": [
+            {
+              "x": 349,
+              "y": 103
+            },
+            {
+              "x": 562,
+              "y": 103
+            },
+            {
+              "x": 562,
+              "y": 238
+            },
+            {
+              "x": 349,
+              "y": 238
+            }
+          ]
         },
         {
           "code": "P3-PING-PONG",
@@ -310,25 +1593,21 @@
           "typeCode": "GAME_ROOM",
           "aliases": [
             "tenis de mesa"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P3-SALA-DANZA",
           "wing": "O",
           "name": "Sala de Danza",
           "typeCode": "ARTS_ROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-SALA-MUSICA",
           "wing": "O",
           "name": "Sala de Música",
           "typeCode": "ARTS_ROOM",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-SALAS-KARAOKE",
@@ -337,90 +1616,7 @@
           "typeCode": "ARTS_ROOM",
           "aliases": [
             "karaoke"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
-        },
-        {
-          "code": "P3-C01",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 1,
-          "gridColumn": 0,
-          "rowSpan": 5,
-          "colSpan": 4
-        },
-        {
-          "code": "P3-C02",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 5,
-          "gridColumn": 4,
-          "rowSpan": 2,
-          "colSpan": 2
-        },
-        {
-          "code": "P3-C03",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 5,
-          "gridColumn": 6,
-          "rowSpan": 2,
-          "colSpan": 2
-        },
-        {
-          "code": "P3-C04",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 7,
-          "gridColumn": 4,
-          "rowSpan": 2,
-          "colSpan": 2
-        },
-        {
-          "code": "P3-C05",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 7,
-          "gridColumn": 6,
-          "rowSpan": 2,
-          "colSpan": 2
-        },
-        {
-          "code": "P3-C06",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 9,
-          "gridColumn": 4,
-          "rowSpan": 2,
-          "colSpan": 2
-        },
-        {
-          "code": "P3-C07",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 9,
-          "gridColumn": 6,
-          "rowSpan": 2,
-          "colSpan": 2
-        },
-        {
-          "code": "P3-C08",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 11,
-          "gridColumn": 6,
-          "rowSpan": 5,
-          "colSpan": 2
-        },
-        {
-          "code": "P3-C09",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 11,
-          "gridColumn": 1,
-          "rowSpan": 1,
-          "colSpan": 3
+          ]
         }
       ]
     },
@@ -430,28 +1626,131 @@
       "name": "Piso 4",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 16,
-      "gridColumns": 8,
+      "width": 629,
+      "height": 1110,
+      "top": "WEST",
       "spaces": [
+        {
+          "code": "P4-35",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 405,
+              "y": 255
+            },
+            {
+              "x": 543,
+              "y": 255
+            },
+            {
+              "x": 543,
+              "y": 310
+            },
+            {
+              "x": 405,
+              "y": 310
+            }
+          ]
+        },
+        {
+          "code": "P4-36",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 376,
+              "y": 257
+            },
+            {
+              "x": 393,
+              "y": 257
+            },
+            {
+              "x": 393,
+              "y": 300
+            },
+            {
+              "x": 376,
+              "y": 300
+            }
+          ]
+        },
+        {
+          "code": "P4-42",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 20,
+              "y": 820
+            },
+            {
+              "x": 262,
+              "y": 812
+            },
+            {
+              "x": 262,
+              "y": 1086
+            },
+            {
+              "x": 20,
+              "y": 1086
+            }
+          ]
+        },
         {
           "code": "P4-ASC",
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
-          "gridRow": 13,
-          "gridColumn": 5,
-          "rowSpan": 2,
-          "colSpan": 1
+          "aliases": [],
+          "shape": [
+            {
+              "x": 185,
+              "y": 111
+            },
+            {
+              "x": 268,
+              "y": 111
+            },
+            {
+              "x": 268,
+              "y": 199
+            },
+            {
+              "x": 185,
+              "y": 199
+            }
+          ]
         },
         {
           "code": "P4-ESC",
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
-          "gridRow": 12,
-          "gridColumn": 0,
-          "rowSpan": 3,
-          "colSpan": 4
+          "aliases": [],
+          "shape": [
+            {
+              "x": 349,
+              "y": 103
+            },
+            {
+              "x": 562,
+              "y": 103
+            },
+            {
+              "x": 562,
+              "y": 238
+            },
+            {
+              "x": 349,
+              "y": 238
+            }
+          ]
         },
         {
           "code": "P4-GIMNASIO",
@@ -461,28 +1760,72 @@
           "aliases": [
             "gym"
           ],
-          "gridRow": 0,
-          "gridColumn": 0,
-          "rowSpan": 11,
-          "colSpan": 5
-        },
-        {
-          "code": "P4-C01",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 0,
-          "gridColumn": 5,
-          "rowSpan": 4,
-          "colSpan": 3
-        },
-        {
-          "code": "P4-C02",
-          "name": "Sin identificar",
-          "typeCode": "OTHER",
-          "gridRow": 11,
-          "gridColumn": 1,
-          "rowSpan": 1,
-          "colSpan": 3
+          "shape": [
+            {
+              "x": 20,
+              "y": 15
+            },
+            {
+              "x": 183,
+              "y": 15
+            },
+            {
+              "x": 183,
+              "y": 246
+            },
+            {
+              "x": 274,
+              "y": 246
+            },
+            {
+              "x": 274,
+              "y": 103
+            },
+            {
+              "x": 349,
+              "y": 103
+            },
+            {
+              "x": 349,
+              "y": 240
+            },
+            {
+              "x": 373,
+              "y": 240
+            },
+            {
+              "x": 373,
+              "y": 313
+            },
+            {
+              "x": 545,
+              "y": 313
+            },
+            {
+              "x": 545,
+              "y": 240
+            },
+            {
+              "x": 613,
+              "y": 240
+            },
+            {
+              "x": 613,
+              "y": 1086
+            },
+            {
+              "x": 262,
+              "y": 1086
+            },
+            {
+              "x": 262,
+              "y": 812
+            },
+            {
+              "x": 20,
+              "y": 820
+            }
+          ]
         }
       ]
     },
@@ -492,18 +1835,58 @@
       "name": "Terraza",
       "status": "DRAFT",
       "accessibility": "UNKNOWN",
-      "gridRows": 16,
-      "gridColumns": 8,
+      "width": 629,
+      "height": 1110,
+      "top": "WEST",
       "spaces": [
+        {
+          "code": "P5-50",
+          "name": "Sin identificar",
+          "typeCode": "OTHER",
+          "aliases": [],
+          "shape": [
+            {
+              "x": 24,
+              "y": 816
+            },
+            {
+              "x": 259,
+              "y": 816
+            },
+            {
+              "x": 259,
+              "y": 1086
+            },
+            {
+              "x": 24,
+              "y": 1086
+            }
+          ]
+        },
         {
           "code": "P5-ASC",
           "wing": "O",
           "name": "Ascensor",
           "typeCode": "ELEVATOR",
-          "gridRow": 13,
-          "gridColumn": 5,
-          "rowSpan": 2,
-          "colSpan": 1
+          "aliases": [],
+          "shape": [
+            {
+              "x": 211,
+              "y": 85
+            },
+            {
+              "x": 279,
+              "y": 85
+            },
+            {
+              "x": 279,
+              "y": 194
+            },
+            {
+              "x": 211,
+              "y": 194
+            }
+          ]
         },
         {
           "code": "P5-CAFE",
@@ -512,19 +1895,32 @@
           "typeCode": "CAFETERIA",
           "aliases": [
             "café de la terraza"
-          ],
-          "rowSpan": 1,
-          "colSpan": 1
+          ]
         },
         {
           "code": "P5-ESC",
           "wing": "O",
           "name": "Escalera",
           "typeCode": "STAIRS",
-          "gridRow": 12,
-          "gridColumn": 1,
-          "rowSpan": 3,
-          "colSpan": 3
+          "aliases": [],
+          "shape": [
+            {
+              "x": 349,
+              "y": 103
+            },
+            {
+              "x": 559,
+              "y": 103
+            },
+            {
+              "x": 559,
+              "y": 246
+            },
+            {
+              "x": 349,
+              "y": 246
+            }
+          ]
         },
         {
           "code": "P5-TERRAZA",
@@ -534,10 +1930,56 @@
           "aliases": [
             "terraza café"
           ],
-          "gridRow": 0,
-          "gridColumn": 0,
-          "rowSpan": 12,
-          "colSpan": 8
+          "shape": [
+            {
+              "x": 24,
+              "y": 24
+            },
+            {
+              "x": 190,
+              "y": 24
+            },
+            {
+              "x": 190,
+              "y": 313
+            },
+            {
+              "x": 349,
+              "y": 313
+            },
+            {
+              "x": 349,
+              "y": 246
+            },
+            {
+              "x": 559,
+              "y": 246
+            },
+            {
+              "x": 559,
+              "y": 230
+            },
+            {
+              "x": 613,
+              "y": 230
+            },
+            {
+              "x": 613,
+              "y": 1086
+            },
+            {
+              "x": 259,
+              "y": 1086
+            },
+            {
+              "x": 259,
+              "y": 816
+            },
+            {
+              "x": 24,
+              "y": 816
+            }
+          ]
         }
       ]
     }

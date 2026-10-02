@@ -2,16 +2,17 @@ openapi: 3.1.0
 
 info:
   title: KApp Map API
-  version: 2.0.0
+  version: 3.5.0
   summary: Schematic campus map and space search for Fundacion Universitaria Konrad Lorenz.
   description: |
     Digital campus map for Fundacion Universitaria Konrad Lorenz (Bogota, Colombia).
 
     ## What this service is (and is not)
 
-    This map is deliberately **not** geospatial. There is no basemap, no GPS, no external map
-    provider and no latitude/longitude anywhere in this contract. It is not a set of floor plan
-    images either: a floor is described as data and drawn by the client.
+    This map is **not** a geospatial service. There is no basemap, no GPS and no external map
+    provider, and a floor is never positioned by coordinates: it is a drawing, described as data
+    and drawn by the client, not a set of floor plan images either. What version 3.1 adds is the
+    ground a campus stands on - see below.
 
     ## Version 2: what the campus survey changed
 
@@ -23,19 +24,105 @@ info:
     | A mezzanine between the first and second floors; an entrance at `P0`; a terrace numbered 5 | Floors addressed by an integer `level` | Floors addressed by a **`code`** (`S1`, `P0`, `P1`, `MEZZ`, `T`); `level` is a decimal that only orders them |
     | Bienestar's wings are west and east, and its doors carry no wing mark | A closed `NORTE`/`SUR`/`CENTRAL` enum, guessed from a `-N`/`-S`/`-C` suffix | **Wings declared per building**, each with the suffix its doors carry, if any |
     | Most dependencies have nothing on their door | Every space has a door code | **`doorCode`** apart from **`code`**; only `doorCode` is ever shown |
-    | Plaques list what is on a floor, not where | Every space needs a grid cell | **`gridRow` and `gridColumn` are optional**: a space may be inventoried before it is placed |
+    | Plaques list what is on a floor, not where | Every space needs a grid cell | **A space may be inventoried before it is drawn** |
     | Kinds of room nobody listed in advance | A closed `SpaceType` enum | A **type catalogue** the portal edits, each type in one of seven fixed **categories** |
 
     It also adds **accessibility** - whether a floor or a space is reachable without stairs,
     `UNKNOWN` until someone checks - and a floor **status**: `UNMAPPED`, `DRAFT` (drawn from
     photographs of posted plans) or `VERIFIED` (walked).
 
+    ## Version 3: rooms as the plans draw them
+
+    Version 2 drew each floor on a grid of cells, and the drafts drawn on it did not look like the
+    evacuation plans on the walls: a room in L, a slanted wall or a room half a cell wide cannot be
+    said in cells. Version 3 describes a floor as a drawing, traced from those plans:
+
+    | Version 2 | Version 3 |
+    | --- | --- |
+    | `gridRows` x `gridColumns` cells | A drawing **`width`** x **`height`** units, and the building's **`outline`** |
+    | A space is `gridRow`, `gridColumn`, `rowSpan`, `colSpan` | A space is a **`shape`**: the corners of its outline, in order |
+    | Corridors through cell centres (`row`, `col`) | Corridors through points (`x`, `y`) |
+    | - | Each space's **`doors`**, as stretches of its outline |
+
+    ## Version 3.1: the ground under the buildings
+
+    The plans on the walls draw each building's streets, but not to scale, and a campus spread
+    over several blocks had no map at all. Version 3.1 lays the drawings on the ground, without
+    changing them:
+
+    - A building may carry a **`placement`**: where its drawing's top-left corner is, the
+      **`bearing`** its top edge faces and how many **`metresPerUnit`** one unit of it is. Every
+      floor of a building shares one drawing, so one placement lays them all.
+    - **`GET /api/map/campuses/{campus}/ground`** returns the city around a campus - its
+      **blocks**, **sidewalks**, **roadways**, **medians** and named **streets** - cut from the
+      city's own reference map and shipped with the service. It is reference data, credited in
+      its `source`, and read-only.
+
+    - A building may also carry its **`footprint`**: the building from above, part by part, as the
+      city's cadastre records it - each part's outline, how many floors it rises and, when known,
+      the wing it belongs to. A building nobody has drawn yet still has its true shape on a map.
+
+    With these, a client draws the block, the sidewalk and the streets a building meets under any
+    of its floors, or every building of a campus on one aerial map. For a point `(x, y)`
+    of a drawing, the offset from `origin` is `east = m (x cos b - y sin b)` and
+    `north = -m (x sin b + y cos b)`, with `m = metresPerUnit` and `b = bearing`; a campus is
+    small enough for the plane through its middle to stand in for the earth.
+
+    ## Version 3.3: the rest of the block
+
+    A building stands among others that are not the university's, and a block is surveyed whole.
+    Version 3.3 adds, without changing anything else:
+
+    - **`lots`** in the ground: the cadastral lots of the blocks the university's buildings
+      stand on, each with its code - whose land is whose. Read-only, like the rest of the ground.
+    - **`GET /api/map/campuses/{campus}/structures`**: everything on a campus's blocks that is
+      not the university's - a neighbour's building, a heritage house with its garden - each with
+      its outline and floors, for drawing around the buildings. **`PUT`** saves the list whole,
+      with the `version` it was read at, and is refused with `409` when somebody saved it since.
+
+    ## Version 3.4: the survey
+
+    The outlines are drawn from distances taken on site, round the block, with a tape or a phone's
+    Measure app. Version 3.4 adds, without changing anything else:
+
+    - **`GET /api/map/campuses/{campus}/survey`**: every distance taken round a campus's blocks,
+      each under the id of the portal's survey plan it answers (or its own, for one the plan
+      missed), as it was typed - `4,80 + 3,25` when taken in pieces - with its total in metres, a
+      note, and when it was taken. **`PUT`** saves them whole with the `version` they were read at,
+      `409` when they were saved from somewhere else since; a distance keeps the time it was taken
+      until it changes.
+
+    ## Version 3.5: floors that stand out over the street
+
+    The cadastre sees a building from above, so where the upper floors come out over a portico or
+    a sidewalk it draws them as if they reached the ground. Version 3.5 adds, without changing
+    anything else, **`FootprintPart.lowestFloor`**: the lowest floor above the street a part takes
+    in, when it is not the first. A part that stands on the street leaves it out, as every part did
+    before. The ground floor is the parts that reach it, and the floors above add those that start
+    higher.
+
+    It also adds **`Building.address`**, the street address as people write it, and
+    **`SurveyMeasure.recheck`**: a distance asked to be taken again keeps what was
+    typed, for reference, and the time it was taken, until it is taken again.
+
     ## Coordinate model
 
-    A floor is a **grid**. It declares `gridRows` and `gridColumns`; every placed space occupies a
-    rectangle of cells given by `gridRow`, `gridColumn`, `rowSpan` and `colSpan`, zero-based with
-    row 0 at the top of the floor as drawn. Corridors are polylines through the same grid,
-    carrying the colour the wing is actually painted.
+    A floor is a **drawing in its own units**, `width` by `height`, with the origin at the top-left
+    corner as the plan hangs: `x` grows to the right and `y` down. A floor traced from a photograph
+    of its evacuation plan is in that photograph's pixels; one drawn by hand in whatever the person
+    drawing chose. Units are not metres and differ from floor to floor: scale the drawing to the
+    screen, never compare two floors' numbers.
+
+    Every placed space has a **`shape`**: three or more corners, in order, on the drawing. It encloses
+    some area, never crosses itself and never overlaps another space's shape - two rooms that share
+    a wall share the edge, and that is not an overlap. `bounds`, in responses, is the rectangle
+    around the shape, for labels and hit tests. A space without `shape` is on the floor but not
+    drawn yet: list it beside the drawing rather than dropping it.
+
+    **`doors`** are the stretches of a space's outline its doors take up, jamb to jamb; both ends of
+    each lie on the space's shape. A door between two rooms is on both. Corridors are polylines
+    through points on the same drawing, carrying the colour the wing is actually painted, and the
+    floor's `outline`, when traced, is the building's walls around it.
 
     ## Codes: what identifies a space, and what is shown
 
@@ -102,7 +189,7 @@ tags:
   - name: Space types
     description: The catalogue of kinds of space, each in a fixed category.
   - name: Campuses
-    description: The list of campuses (Sedes) known to the map.
+    description: The list of campuses (Sedes) known to the map, the ground around each, and what else stands on its blocks.
 
 paths:
   /api/map/buildings:
@@ -163,8 +250,8 @@ paths:
                 - { code: OCC, name: Ala occidental, note: 'Bienestar: juegos, gimnasio, terraza.' }
                 - { code: OR, name: Ala oriental, note: Salones y laboratorios. Se cruza por el P1 o la terraza. }
               floors:
-                - { code: P1, level: 1, name: Piso 1, gridRows: 12, gridColumns: 16 }
-                - { code: T, level: 5, name: Terraza, gridRows: 12, gridColumns: 16 }
+                - { code: P1, level: 1, name: Piso 1, width: 640, height: 480 }
+                - { code: T, level: 5, name: Terraza, width: 640, height: 480 }
       responses:
         '201':
           description: The building was created.
@@ -262,9 +349,10 @@ paths:
       operationId: getFloor
       summary: Get a floor and every space on it
       description: |
-        The call that draws a floor: a `gridRows` x `gridColumns` grid, each placed space in its
-        cells, the corridors along their paths. Spaces without `gridRow` are on the floor but not
-        placed yet - list them beside the grid rather than dropping them. The building's wings
+        The call that draws a floor: a drawing `width` x `height` units, origin at the top left,
+        with the building's `outline`, each space as the polygon in its `shape` with its `doors`
+        on it, and the corridors along their paths. Spaces without `shape` are on the floor but not
+        drawn yet - list them beside the drawing rather than dropping them. The building's wings
         come along so each space's `wing` code can be shown by name.
 
         Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
@@ -296,7 +384,7 @@ paths:
         What the floor editor sends after someone walks a floor. `spaces` is the **complete**
         list: a space of this floor missing from it is deleted, a new one is created, the rest are
         replaced. **All or nothing** - if any space is wrong, nothing is written and every problem
-        is reported against its position (`spaces[3].gridRow`).
+        is reported against its position (`spaces[3].shape`).
 
         `version` is the floor's version as the editor loaded it. When someone saved the floor
         since, the save is refused with `409` rather than silently replacing their work; reload
@@ -313,8 +401,8 @@ paths:
             schema: { $ref: '#/components/schemas/FloorLayoutRequest' }
             example:
               version: 0
-              gridRows: 6
-              gridColumns: 10
+              width: 400
+              height: 240
               status: VERIFIED
               accessibility: STAIRS_ONLY
               note: Solo por la escalera, desde la recepción.
@@ -324,10 +412,8 @@ paths:
                   name: Laboratorio de Interactividad
                   typeCode: LAB
                   aliases: [interactividad]
-                  gridRow: 2
-                  gridColumn: 2
-                  rowSpan: 2
-                  colSpan: 4
+                  shape: [{ x: 80, y: 80 }, { x: 240, y: 80 }, { x: 240, y: 160 }, { x: 80, y: 160 }]
+                  doors: [{ from: { x: 140, y: 160 }, to: { x: 160, y: 160 } }]
                   accessVia: B-ESC
                 - code: B-MEZZ-02
                   name: Sala MAC
@@ -420,9 +506,9 @@ paths:
       operationId: createSpace
       summary: Create a space
       description: |
-        Adds one space to a floor. Omit `gridRow` and `gridColumn` to inventory it without placing
-        it; send both or neither. A space that lands on a cell another space holds is refused with
-        `409`; every other mistake is a `400`.
+        Adds one space to a floor. Omit `shape` to inventory it without drawing it. A space whose
+        shape covers part of another space's is refused with `409`; every other mistake - a shape
+        off the floor, with no area or crossing itself, a door off its outline - is a `400`.
 
         Allowed roles: `ROLE_ADMIN` only.
       tags: [Spaces]
@@ -439,9 +525,8 @@ paths:
               typeCode: CLASSROOM
               buildingCode: EC
               floorCode: P5
-              gridRow: 8
-              gridColumn: 3
-              colSpan: 2
+              shape: [{ x: 120, y: 320 }, { x: 200, y: 320 }, { x: 200, y: 360 }, { x: 120, y: 360 }]
+              doors: [{ from: { x: 130, y: 320 }, to: { x: 150, y: 320 } }]
               accessVia: ASC-SUR
               capacity: 40
       responses:
@@ -673,6 +758,204 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
+  /api/map/campuses/{campus}/ground:
+
+    get:
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      operationId: getCampusGround
+      summary: The ground around a campus
+      description: |
+        The city around a campus - its blocks, sidewalks, roadways, medians and named streets, and
+        the lots of the blocks the university's buildings stand on - from the city's reference
+        map, for drawing under the buildings. Coordinates are
+        `[lon, lat]` in WGS 84; lay a building's drawing on them with its `placement`. The campus
+        name matches ignoring case and accents. `404` for a campus with no ground yet.
+
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+      tags: [Campuses]
+      parameters:
+        - name: campus
+          in: path
+          required: true
+          schema: { type: string, maxLength: 120 }
+          example: Sede Principal
+      responses:
+        '200':
+          description: The ground.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ground' }
+              example:
+                campus: Sede Principal
+                source: 'Mapa de Referencia para Bogotá D.C., IDECA - UAECD, IDU y otras entidades. CC BY 4.0.'
+                retrieved: '2026-09-27'
+                blocks:
+                  - [[-74.0612, 4.6485], [-74.0616, 4.6489], [-74.0619, 4.6486], [-74.0612, 4.6485]]
+                sidewalks: []
+                roadways: []
+                medians: []
+                streets:
+                  - { name: Calle 63, label: CL 63, path: [[-74.0617, 4.6491], [-74.0611, 4.6486]] }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/map/campuses/{campus}/structures:
+
+    parameters:
+      - name: campus
+        in: path
+        required: true
+        schema: { type: string, maxLength: 120 }
+        example: Sede Principal
+
+    get:
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      operationId: getCampusStructures
+      summary: What else stands on a campus's blocks
+      description: |
+        Everything on the campus's blocks that is not the university's - a neighbour's building,
+        a heritage house with its garden - for drawing around the buildings. An empty list, at
+        version `0`, while nothing has been saved. The campus name matches ignoring case and
+        accents.
+
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+      tags: [Campuses]
+      responses:
+        '200':
+          description: The campus's structures.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Structures' }
+              example:
+                campus: Sede Principal
+                version: 1
+                updatedAt: '2026-09-28T20:00:00Z'
+                structures:
+                  - name: Vecino, Calle 62 # 9-46 a 9-60
+                    floors: 5
+                    basements: 0
+                    lot: '008213024001'
+                    ring: [[-74.0618, 4.6481], [-74.0617, 4.6483], [-74.0615, 4.6482], [-74.0618, 4.6481]]
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+    put:
+      x-roles: [ROLE_ADMIN]
+      operationId: saveCampusStructures
+      summary: Replace what else stands on a campus's blocks
+      description: |
+        The **complete** list, as the portal's block editor saves it: a structure missing from it
+        is gone. `version` is the list's version as it was read, `0` while nothing has been saved;
+        when somebody saved it since, the save is refused with `409` and nothing changes - reload
+        and reapply. Every outline must close, `400` otherwise.
+
+        Allowed roles: `ROLE_ADMIN` only.
+      tags: [Campuses]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StructuresRequest' }
+            example:
+              version: 1
+              structures:
+                - name: Casa de Francisco de Paula Vélez
+                  floors: 1
+                  basements: 0
+                  lot: '008213024004'
+                  ring: [[-74.0620, 4.6484], [-74.0619, 4.6486], [-74.0617, 4.6485], [-74.0620, 4.6484]]
+      responses:
+        '200':
+          description: The list as saved, with its next version.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Structures' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/map/campuses/{campus}/survey:
+
+    parameters:
+      - name: campus
+        in: path
+        required: true
+        schema: { type: string, maxLength: 120 }
+        example: Sede Principal
+
+    get:
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      operationId: getCampusSurvey
+      summary: The distances taken round a campus's blocks
+      description: |
+        Where each wall stands from the curb and how long it is, as taken on site with the portal's
+        survey sheet. None, at version `0`, while nothing has been saved. The campus name matches
+        ignoring case and accents.
+
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+      tags: [Campuses]
+      responses:
+        '200':
+          description: The campus's survey.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Survey' }
+              example:
+                campus: Sede Principal
+                version: 4
+                updatedAt: '2026-09-29T15:10:00Z'
+                measures:
+                  - id: bis-09
+                    text: '4,80 + 4,96'
+                    metres: 9.76
+                    note: Planters in the way, measured round them
+                    updatedAt: '2026-09-29T15:02:11Z'
+                  - id: extra-1
+                    label: Gate on Cra 9A, its width
+                    text: '3,10'
+                    metres: 3.1
+                    updatedAt: '2026-09-29T15:09:40Z'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+    put:
+      x-roles: [ROLE_ADMIN]
+      operationId: saveCampusSurvey
+      summary: Save the distances taken round a campus's blocks
+      description: |
+        The **complete** list: a distance missing from it is gone. `version` is the survey's
+        version as it was read, `0` while nothing has been saved; when it was saved from somewhere
+        else since, the save is refused with `409` and nothing changes - read it again and lay the
+        changes over it. Two distances with one id, or a negative one, are `400`. `updatedAt` is
+        the server's: a distance keeps the time it was taken until its text, total, note or label
+        changes.
+
+        Allowed roles: `ROLE_ADMIN` only.
+      tags: [Campuses]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SurveyRequest' }
+            example:
+              version: 4
+              measures:
+                - id: bis-09
+                  text: '4,80 + 4,96'
+                  metres: 9.76
+      responses:
+        '200':
+          description: The survey as saved, with its next version.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Survey' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -706,7 +989,7 @@ components:
         details:
           description: |
             Field-by-field reasons. `field` names what was wrong - in a layout save, with the
-            position of the space: `spaces[3].gridRow` - and `issue` says what about it.
+            position of the space: `spaces[3].shape` - and `issue` says what about it.
           type: array
           items:
             type: object
@@ -766,17 +1049,233 @@ components:
         name: { type: string, minLength: 1, maxLength: 60, example: Sala de lactancia }
         category: { $ref: '#/components/schemas/SpaceCategory' }
 
-    GridPoint:
+    Point:
       type: object
-      description: One cell of a floor's grid, zero-based, row first.
-      required: [row, col]
+      description: |
+        A point on a floor's drawing, in the floor's own units. Origin at the top-left corner as
+        the plan hangs; `x` to the right, `y` down.
+      required: [x, y]
       properties:
-        row: { type: integer, minimum: 0, example: 5 }
-        col: { type: integer, minimum: 0, example: 3 }
+        x: { type: integer, minimum: 0, example: 120 }
+        y: { type: integer, minimum: 0, example: 48 }
+
+    Door:
+      type: object
+      description: |
+        A way into a space: the stretch of its outline the door takes up, jamb to jamb. Both ends
+        lie on the space's `shape`, along one of its edges.
+      required: [from, to]
+      properties:
+        from: { $ref: '#/components/schemas/Point' }
+        to: { $ref: '#/components/schemas/Point' }
+
+    Compass:
+      type: string
+      enum: [NORTH, EAST, SOUTH, WEST]
+      description: |
+        A direction on the ground. A floor's `top` says which one its drawing's top edge faces, so a
+        client can turn the floor north up or draw a compass that points the right way. Turning a
+        drawing a quarter turn clockwise brings what was on its left to the top.
+      example: EAST
+
+    GeoPoint:
+      type: object
+      description: A point on the earth, in degrees of WGS 84.
+      required: [lat, lon]
+      properties:
+        lat: { type: number, minimum: -90, maximum: 90, example: 4.6485322 }
+        lon: { type: number, minimum: -180, maximum: 180, example: -74.0611553 }
+
+    Placement:
+      type: object
+      description: |
+        Where a building's drawing lies on the ground: its top-left corner, the bearing its top
+        edge faces and how long one unit of it is. Its floors' `top` is the same bearing to the
+        nearest quarter turn.
+      required: [origin, bearing, metresPerUnit]
+      properties:
+        origin: { $ref: '#/components/schemas/GeoPoint' }
+        bearing:
+          type: number
+          minimum: 0
+          exclusiveMaximum: 360
+          description: Degrees clockwise from true north that the drawing's top edge faces.
+          example: 127.8
+        metresPerUnit:
+          type: number
+          exclusiveMinimum: 0
+          description: How long one unit of the drawing is on the ground, in metres.
+          example: 0.02951
+
+    FootprintPart:
+      type: object
+      description: |
+        One part of a building from above, as the city's cadastre records it or, where the
+        cadastre falls short, as it was found on site. A building is seldom one block - the
+        Edificio Central is a strip of five floors along the Calle 63, a core of eight and a south
+        wing over its auditorium - and each part rises its own number of floors.
+      required: [floors, basements, ring]
+      properties:
+        lot: { type: string, maxLength: 30, description: "The cadastral lot the part stands on. Absent for a part the cadastre does not record, found on site.", example: '008213024019' }
+        floors: { type: integer, minimum: 0, maximum: 200, description: "How many floors it rises above the street: the cadastre's count, unless checked on site.", example: 8 }
+        lowestFloor: { type: integer, minimum: 1, maximum: 200, description: "The lowest floor above the street it takes in, when it is not the first: 2 for what the upper floors carry out over a portico or a sidewalk, which the cadastre, seeing from above, draws as if it reached the ground. Absent for a part that stands on the street.", example: 2 }
+        basements: { type: integer, minimum: 0, maximum: 20, description: How many it goes below., example: 2 }
+        wing: { type: string, maxLength: 10, description: "The code of the building's wing it belongs to, when known.", example: C }
+        ring: { $ref: '#/components/schemas/Ring' }
+
+    Coordinate:
+      type: array
+      description: A point as GeoJSON writes it, `[lon, lat]`.
+      minItems: 2
+      maxItems: 2
+      items: { type: number }
+      example: [-74.0615, 4.6486]
+
+    Ring:
+      type: array
+      description: The outline of an area, closed - its first point repeated at the end.
+      minItems: 4
+      items: { $ref: '#/components/schemas/Coordinate' }
+
+    Street:
+      type: object
+      required: [name, label, path]
+      properties:
+        name: { type: string, example: Carrera 9 Bis }
+        label: { type: string, description: The name as the street signs abbreviate it., example: KR 9BIS }
+        path:
+          type: array
+          description: The street's axis.
+          minItems: 2
+          items: { $ref: '#/components/schemas/Coordinate' }
+
+    Ground:
+      type: object
+      description: The city around a campus, from the city's reference map.
+      required: [campus, source, retrieved, blocks, sidewalks, roadways, medians, streets]
+      properties:
+        campus: { type: string, example: Sede Principal }
+        source: { type: string, description: "Where the data comes from, to credit wherever it is shown." }
+        retrieved: { type: string, format: date, description: The day it was taken from the source. }
+        blocks:
+          type: array
+          description: The city blocks (manzanas) - where private land meets the sidewalk.
+          items: { $ref: '#/components/schemas/Ring' }
+        sidewalks:
+          type: array
+          description: The sidewalks (andenes).
+          items: { $ref: '#/components/schemas/Ring' }
+        roadways:
+          type: array
+          description: The roadways (calzadas), where cars go.
+          items: { $ref: '#/components/schemas/Ring' }
+        medians:
+          type: array
+          description: The medians (separadores) between roadways.
+          items: { $ref: '#/components/schemas/Ring' }
+        streets:
+          type: array
+          items: { $ref: '#/components/schemas/Street' }
+        lots:
+          type: array
+          description: The cadastral lots of the blocks the university's buildings stand on - whose land is whose, for surveying a block.
+          items: { $ref: '#/components/schemas/Lot' }
+
+    Lot:
+      type: object
+      description: A cadastral lot.
+      required: [code, ring]
+      properties:
+        code: { type: string, description: "The cadastre's code: the block's nine digits, then the lot's three.", example: '008213024019' }
+        ring: { $ref: '#/components/schemas/Ring' }
+
+    Structure:
+      type: object
+      description: |
+        Something on a campus's blocks that is not the university's - a neighbour's building, a
+        heritage house with its garden - drawn around the buildings so they read in their place.
+      required: [name, floors, basements, ring]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120, description: "What it is called, or what it is.", example: Casa de Francisco de Paula Vélez }
+        floors: { type: integer, minimum: 0, maximum: 200, description: "How many floors it rises above the street; 0 for ground, like a garden.", example: 1 }
+        basements: { type: integer, minimum: 0, maximum: 20, description: How many it goes below., example: 0 }
+        lot: { type: string, maxLength: 30, description: "The cadastral lot it stands on, when known.", example: '008213024004' }
+        ring: { $ref: '#/components/schemas/Ring' }
+
+    Structures:
+      type: object
+      description: Everything on a campus's blocks that is not the university's.
+      required: [campus, structures, version]
+      properties:
+        campus: { type: string, example: Sede Principal }
+        structures:
+          type: array
+          items: { $ref: '#/components/schemas/Structure' }
+        version: { type: integer, format: int64, description: Bumped by every save. Send it back with the next one., example: 1 }
+        updatedAt: { type: string, format: date-time, description: "When it was last saved; absent while nothing has been." }
+
+    StructuresRequest:
+      type: object
+      description: The whole list, with the version it was read at.
+      required: [version, structures]
+      properties:
+        version: { type: integer, format: int64, minimum: 0, description: "The version the list was read at; 0 while nothing has been saved.", example: 1 }
+        structures:
+          type: array
+          maxItems: 500
+          items: { $ref: '#/components/schemas/Structure' }
+
+    SurveyMeasure:
+      type: object
+      description: |
+        One distance taken on site round a campus's blocks, with a tape or a phone's Measure app:
+        how far a wall stands from the curb, or how long it is.
+      required: [id]
+      properties:
+        id: { type: string, pattern: '^[a-z0-9][a-z0-9-]{0,39}$', description: "Which distance of the portal's survey plan it is, or an extra one's own id.", example: bis-09 }
+        label: { type: string, maxLength: 200, description: "What an extra distance is of; absent for one the plan names.", example: 'Gate on Cra 9A, its width' }
+        text: { type: string, maxLength: 120, description: "What was typed, as it was typed: pieces joined with +.", example: '4,80 + 4,96' }
+        metres: { type: number, format: double, minimum: 0, maximum: 1000, description: "The total the portal read from the text; absent while it reads none.", example: 9.76 }
+        note: { type: string, maxLength: 500, description: "What was seen on site that the sketch does not show.", example: 'Planters in the way, measured round them' }
+        recheck: { type: boolean, description: "True while it is asked to be taken again: what was typed stays, for reference, until it is. Absent otherwise.", example: true }
+        updatedAt: { type: string, format: date-time, readOnly: true, description: "When it was last changed. Set by the server; ignored in a request." }
+
+    Survey:
+      type: object
+      description: The distances taken on site round a campus's blocks.
+      required: [campus, measures, version]
+      properties:
+        campus: { type: string, example: Sede Principal }
+        measures:
+          type: array
+          items: { $ref: '#/components/schemas/SurveyMeasure' }
+        version: { type: integer, format: int64, description: Bumped by every save. Send it back with the next one., example: 4 }
+        updatedAt: { type: string, format: date-time, description: "When it was last saved; absent while nothing has been." }
+
+    SurveyRequest:
+      type: object
+      description: Every distance taken, the whole list, with the version it was read at.
+      required: [version, measures]
+      properties:
+        version: { type: integer, format: int64, minimum: 0, description: "The version the survey was read at; 0 while nothing has been saved.", example: 4 }
+        measures:
+          type: array
+          maxItems: 500
+          items: { $ref: '#/components/schemas/SurveyMeasure' }
+
+    Bounds:
+      type: object
+      description: The rectangle around a shape, in the floor's units.
+      required: [x, y, width, height]
+      properties:
+        x: { type: integer, example: 80 }
+        y: { type: integer, example: 80 }
+        width: { type: integer, example: 160 }
+        height: { type: integer, example: 80 }
 
     Corridor:
       type: object
-      description: A walkable route across a floor, drawn as a coloured line through the grid.
+      description: A walkable route across a floor, drawn as a coloured line.
       required: [code, name, color, path]
       properties:
         code: { type: string, maxLength: 30, example: PAS-CENTRAL }
@@ -788,9 +1287,9 @@ components:
           example: '#5B8DEF'
         path:
           type: array
-          description: The cells the corridor runs through, in walking order. Must stay on the grid.
+          description: The points the corridor runs through, in walking order. Must stay on the floor.
           minItems: 1
-          items: { $ref: '#/components/schemas/GridPoint' }
+          items: { $ref: '#/components/schemas/Point' }
 
     Wing:
       type: object
@@ -812,8 +1311,8 @@ components:
 
     Floor:
       type: object
-      description: One floor of a building, described as a grid the client draws.
-      required: [code, level, name, gridRows, gridColumns]
+      description: One floor of a building, described as a drawing the client scales and draws.
+      required: [code, level, name, width, height]
       properties:
         code:
           type: string
@@ -836,8 +1335,21 @@ components:
           maxLength: 300
           description: How to get here when it is not obvious.
           example: Solo por la escalera, desde la recepción.
-        gridRows: { type: integer, minimum: 1, maximum: 60, example: 6 }
-        gridColumns: { type: integer, minimum: 1, maximum: 60, example: 10 }
+        width:
+          type: integer
+          minimum: 1
+          maximum: 20000
+          description: The drawing's width, in its own units. Every point on the floor lies within it.
+          example: 1640
+        height: { type: integer, minimum: 1, maximum: 20000, example: 590 }
+        top:
+          $ref: '#/components/schemas/Compass'
+          description: The direction on the ground the drawing's top edge faces. Absent until somebody says - the posted plans are not drawn north up.
+        outline:
+          type: array
+          maxItems: 400
+          description: The building's walls around this floor, corners in order. Empty until traced.
+          items: { $ref: '#/components/schemas/Point' }
         corridors:
           type: array
           items: { $ref: '#/components/schemas/Corridor' }
@@ -868,6 +1380,14 @@ components:
           type: array
           description: Ordered by ascending level.
           items: { $ref: '#/components/schemas/Floor' }
+        placement:
+          $ref: '#/components/schemas/Placement'
+          description: Where the building's drawing lies on the ground. Absent until somebody lays it.
+        footprint:
+          type: array
+          description: The building from above, part by part, as the cadastre records it. Empty until somebody takes it from there.
+          items: { $ref: '#/components/schemas/FootprintPart' }
+        address: { type: string, maxLength: 200, description: "Its street address as people write it. Absent when nobody has said.", example: 'Cra. 9 Bis # 62-43' }
 
     BuildingSummary:
       type: object
@@ -904,11 +1424,19 @@ components:
           type: array
           minItems: 1
           items: { $ref: '#/components/schemas/Floor' }
+        placement:
+          $ref: '#/components/schemas/Placement'
+          description: Where the building's drawing lies on the ground. Omitted on `PUT`, the stored one is kept.
+        footprint:
+          type: array
+          description: The building from above, part by part. Omitted on `PUT`, the stored one is kept; a part's `wing` must be one of the building's.
+          items: { $ref: '#/components/schemas/FootprintPart' }
+        address: { type: string, maxLength: 200, description: "Its street address as people write it. Omitted on PUT, the stored one is kept; empty clears it.", example: 'Cra. 9 Bis # 62-43' }
 
     Space:
       type: object
       required: [id, code, name, typeCode, buildingId, buildingCode, campus, floorCode, floorLevel,
-                 aliases, rowSpan, colSpan, effectiveAccessibility]
+                 aliases, doors, effectiveAccessibility]
       properties:
         id: { type: string }
         code:
@@ -939,14 +1467,19 @@ components:
         aliases:
           type: array
           items: { type: string }
-        gridRow:
-          type: integer
-          minimum: 0
-          description: Top-left cell. Absent while the space is inventoried but not placed.
-          example: 5
-        gridColumn: { type: integer, minimum: 0, example: 7 }
-        rowSpan: { type: integer, minimum: 1, example: 2 }
-        colSpan: { type: integer, minimum: 1, example: 3 }
+        shape:
+          type: array
+          minItems: 3
+          description: The room's walls, corners in order, in the floor's units. Absent while the space is inventoried but not drawn.
+          items: { $ref: '#/components/schemas/Point' }
+          example: [{ x: 280, y: 200 }, { x: 400, y: 200 }, { x: 400, y: 280 }, { x: 280, y: 280 }]
+        bounds:
+          $ref: '#/components/schemas/Bounds'
+          description: The box around `shape`, for lists and search results that only need a position. Absent with `shape`.
+        doors:
+          type: array
+          description: Openings on the room's walls. Empty when none is drawn yet.
+          items: { $ref: '#/components/schemas/Door' }
         accessVia:
           type: string
           description: Code of the lift, staircase or entrance that serves this space - "sube por el ascensor central".
@@ -976,7 +1509,7 @@ components:
     FloorDetail:
       type: object
       description: Everything needed to draw one floor in a single call.
-      required: [code, level, name, status, accessibility, gridRows, gridColumns, corridors, version,
+      required: [code, level, name, status, accessibility, width, height, outline, corridors, version,
                  buildingId, buildingCode, buildingName, campus, wings, spaces]
       properties:
         code: { type: string, example: MEZZ }
@@ -985,8 +1518,12 @@ components:
         status: { $ref: '#/components/schemas/FloorStatus' }
         accessibility: { $ref: '#/components/schemas/Accessibility' }
         note: { type: string }
-        gridRows: { type: integer }
-        gridColumns: { type: integer }
+        width: { type: integer }
+        height: { type: integer }
+        top: { $ref: '#/components/schemas/Compass' }
+        outline:
+          type: array
+          items: { $ref: '#/components/schemas/Point' }
         corridors:
           type: array
           items: { $ref: '#/components/schemas/Corridor' }
@@ -1021,10 +1558,17 @@ components:
         aliases:
           type: array
           items: { type: string, minLength: 1, maxLength: 120 }
-        gridRow: { type: integer, minimum: 0, description: Omit with gridColumn to inventory without placing. }
-        gridColumn: { type: integer, minimum: 0 }
-        rowSpan: { type: integer, minimum: 1, maximum: 60, default: 1 }
-        colSpan: { type: integer, minimum: 1, maximum: 60, default: 1 }
+        shape:
+          type: array
+          minItems: 3
+          maxItems: 200
+          description: Omit to inventory without drawing. Inside the floor, not crossing itself, not overlapping another space.
+          items: { $ref: '#/components/schemas/Point' }
+        doors:
+          type: array
+          maxItems: 12
+          description: Each on one wall of `shape`. Needs a shape.
+          items: { $ref: '#/components/schemas/Door' }
         accessVia: { type: string, maxLength: 20 }
         accessibility:
           $ref: '#/components/schemas/Accessibility'
@@ -1045,10 +1589,15 @@ components:
         aliases:
           type: array
           items: { type: string, minLength: 1, maxLength: 120 }
-        gridRow: { type: integer, minimum: 0 }
-        gridColumn: { type: integer, minimum: 0 }
-        rowSpan: { type: integer, minimum: 1, maximum: 60 }
-        colSpan: { type: integer, minimum: 1, maximum: 60 }
+        shape:
+          type: array
+          minItems: 3
+          maxItems: 200
+          items: { $ref: '#/components/schemas/Point' }
+        doors:
+          type: array
+          maxItems: 12
+          items: { $ref: '#/components/schemas/Door' }
         accessVia: { type: string, maxLength: 20 }
         accessibility: { $ref: '#/components/schemas/Accessibility' }
         note: { type: string, maxLength: 300 }
@@ -1057,15 +1606,22 @@ components:
     FloorLayoutRequest:
       type: object
       description: Everything drawn on one floor, saved at once.
-      required: [version, gridRows, gridColumns, spaces]
+      required: [version, width, height, spaces]
       properties:
         version:
           type: integer
           format: int64
           minimum: 0
           description: The floor's version as the editor loaded it.
-        gridRows: { type: integer, minimum: 1, maximum: 60 }
-        gridColumns: { type: integer, minimum: 1, maximum: 60 }
+        width: { type: integer, minimum: 1, maximum: 20000 }
+        height: { type: integer, minimum: 1, maximum: 20000 }
+        top:
+          $ref: '#/components/schemas/Compass'
+          description: Omit to keep the floor's.
+        outline:
+          type: array
+          maxItems: 400
+          items: { $ref: '#/components/schemas/Point' }
         status: { $ref: '#/components/schemas/FloorStatus' }
         accessibility: { $ref: '#/components/schemas/Accessibility' }
         note: { type: string, maxLength: 300 }
@@ -1176,10 +1732,10 @@ components:
           aliases: [Bloque de psicología]
           wings: []
           floors:
-            - { code: P1, level: 1, name: Piso 1, status: DRAFT, accessibility: STEP_FREE, gridRows: 11, gridColumns: 16, corridors: [], version: 0 }
-            - { code: MEZZ, level: 1.5, name: Mezzanine, status: DRAFT, accessibility: STAIRS_ONLY, note: 'Solo por la escalera, desde la recepción.', gridRows: 6, gridColumns: 10, corridors: [], version: 0 }
-            - { code: P2, level: 2, name: Piso 2, status: DRAFT, accessibility: STEP_FREE, gridRows: 11, gridColumns: 16, corridors: [], version: 0 }
-            - { code: P3, level: 3, name: Piso 3, status: UNMAPPED, accessibility: UNKNOWN, gridRows: 11, gridColumns: 16, corridors: [], version: 0 }
+            - { code: P1, level: 1, name: Piso 1, status: DRAFT, accessibility: STEP_FREE, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+            - { code: MEZZ, level: 1.5, name: Mezzanine, status: DRAFT, accessibility: STAIRS_ONLY, note: 'Solo por la escalera, desde la recepción.', width: 400, height: 240, outline: [], corridors: [], version: 0 }
+            - { code: P2, level: 2, name: Piso 2, status: DRAFT, accessibility: STEP_FREE, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+            - { code: P3, level: 3, name: Piso 3, status: UNMAPPED, accessibility: UNKNOWN, width: 640, height: 440, outline: [], corridors: [], version: 0 }
 
     BloqueB:
       summary: A building with a mezzanine reachable only by stairs, and an alias
@@ -1192,10 +1748,10 @@ components:
         aliases: [Bloque de psicología]
         wings: []
         floors:
-          - { code: P1, level: 1, name: Piso 1, status: DRAFT, accessibility: STEP_FREE, gridRows: 11, gridColumns: 16, corridors: [], version: 0 }
-          - { code: MEZZ, level: 1.5, name: Mezzanine, status: DRAFT, accessibility: STAIRS_ONLY, note: 'Solo por la escalera, desde la recepción.', gridRows: 6, gridColumns: 10, corridors: [], version: 0 }
-          - { code: P2, level: 2, name: Piso 2, status: DRAFT, accessibility: STEP_FREE, gridRows: 11, gridColumns: 16, corridors: [], version: 0 }
-          - { code: P3, level: 3, name: Piso 3, status: UNMAPPED, accessibility: UNKNOWN, gridRows: 11, gridColumns: 16, corridors: [], version: 0 }
+          - { code: P1, level: 1, name: Piso 1, status: DRAFT, accessibility: STEP_FREE, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+          - { code: MEZZ, level: 1.5, name: Mezzanine, status: DRAFT, accessibility: STAIRS_ONLY, note: 'Solo por la escalera, desde la recepción.', width: 400, height: 240, outline: [], corridors: [], version: 0 }
+          - { code: P2, level: 2, name: Piso 2, status: DRAFT, accessibility: STEP_FREE, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+          - { code: P3, level: 3, name: Piso 3, status: UNMAPPED, accessibility: UNKNOWN, width: 640, height: 440, outline: [], corridors: [], version: 0 }
 
     MezzanineFloor:
       summary: A floor with a dependency that has nothing on its door
@@ -1206,8 +1762,9 @@ components:
         status: DRAFT
         accessibility: STAIRS_ONLY
         note: Solo por la escalera, desde la recepción.
-        gridRows: 6
-        gridColumns: 10
+        width: 400
+        height: 240
+        outline: []
         corridors: []
         version: 0
         buildingId: 7c4b0a18-5e93-4a6f-8b21-9d0c5e7f1a34
@@ -1228,10 +1785,9 @@ components:
             floorCode: MEZZ
             floorLevel: 1.5
             aliases: [interactividad]
-            gridRow: 2
-            gridColumn: 2
-            rowSpan: 2
-            colSpan: 4
+            shape: [{ x: 80, y: 80 }, { x: 240, y: 80 }, { x: 240, y: 160 }, { x: 80, y: 160 }]
+            bounds: { x: 80, y: 80, width: 160, height: 80 }
+            doors: [{ from: { x: 140, y: 160 }, to: { x: 160, y: 160 } }]
             accessVia: B-ESC
             effectiveAccessibility: STAIRS_ONLY
 
@@ -1254,10 +1810,9 @@ components:
             floorCode: P3
             floorLevel: 3
             aliases: [sala de sistemas, lab 302, laboratorio 302]
-            gridRow: 5
-            gridColumn: 7
-            rowSpan: 2
-            colSpan: 3
+            shape: [{ x: 280, y: 200 }, { x: 400, y: 200 }, { x: 400, y: 280 }, { x: 280, y: 280 }]
+            bounds: { x: 280, y: 200, width: 120, height: 80 }
+            doors: [{ from: { x: 280, y: 230 }, to: { x: 280, y: 250 } }]
             accessVia: ASC-CENTRAL
             effectiveAccessibility: STEP_FREE
             capacity: 25

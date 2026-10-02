@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal } f
 import type { Wing } from '../buildings/building.model';
 import { CATEGORY_LABELS, SPACE_CATEGORIES, type SpaceType } from '../spaces/space.model';
 import { label, type DraftSpace, type RangeRequest } from './floor-draft';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 export interface OneSpace {
   doorCode: string;
@@ -19,11 +20,12 @@ export interface OneSpace {
  */
 @Component({
   selector: 'app-inventory-tray',
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       @if (spaces().length) {
-        <ul class="tray" aria-label="Spaces not on the grid yet">
+        <ul class="tray" [attr.aria-label]="'Spaces not on the grid yet' | t">
           @for (space of spaces(); track space.key) {
             <li>
               <button
@@ -42,30 +44,30 @@ export interface OneSpace {
             </li>
           }
         </ul>
-        <p class="text-faint note">Tap one, then tap a cell - or select an empty box and say which of these it is.</p>
+        <p class="text-faint note">{{ 'Tap one, then tap a cell - or select an empty box and say which of these it is.' | t }}</p>
       } @else {
-        <p class="text-muted note">Everything on this floor has a place on the grid.</p>
+        <p class="text-muted note">{{ 'Everything on this floor has a place on the grid.' | t }}</p>
       }
 
       <details [open]="!spaces().length">
-        <summary>Add one space</summary>
+        <summary>{{ 'Add one space' | t }}</summary>
         <div class="stack add">
           <div class="row spread">
             <div class="field" style="flex: 1 1 6rem">
-              <label for="t-door">Number on the door</label>
+              <label for="t-door">{{ 'Number on the door' | t }}</label>
               <input id="t-door" type="text" placeholder="503-S" [value]="oneDoor()" (input)="oneDoor.set(value($event))" />
             </div>
             <div class="field" style="flex: 2 1 9rem">
-              <label for="t-name">Name</label>
-              <input id="t-name" type="text" placeholder="Aula 503" [value]="oneName()" (input)="oneName.set(value($event))" />
+              <label for="t-name">{{ 'Name' | t }}</label>
+              <input id="t-name" type="text" [placeholder]="'Aula 503' | t" [value]="oneName()" (input)="oneName.set(value($event))" />
             </div>
           </div>
           <div class="row spread">
             <div class="field" style="flex: 2 1 9rem">
-              <label for="t-type">Type</label>
+              <label for="t-type">{{ 'Type' | t }}</label>
               <select id="t-type" (change)="oneType.set(value($event))">
                 @for (group of typeGroups(); track group.category) {
-                  <optgroup [label]="group.label">
+                  <optgroup [label]="group.label | t">
                     @for (type of group.types; track type.code) {
                       <option [value]="type.code" [selected]="type.code === oneType()">{{ type.name }}</option>
                     }
@@ -75,9 +77,9 @@ export interface OneSpace {
             </div>
             @if (wings().length) {
               <div class="field" style="flex: 1 1 6rem">
-                <label for="t-wing">Wing</label>
+                <label for="t-wing">{{ 'Wing' | t }}</label>
                 <select id="t-wing" (change)="oneWing.set(value($event))">
-                  <option value="">No wing</option>
+                  <option value="">{{ 'No wing' | t }}</option>
                   @for (wing of wings(); track wing.code) {
                     <option [value]="wing.code" [selected]="wing.code === oneWing()">{{ wing.name }}</option>
                   }
@@ -86,29 +88,29 @@ export interface OneSpace {
             }
           </div>
           <button type="button" class="btn btn-sm" [disabled]="!oneName().trim() && !oneDoor().trim()" (click)="submitOne()">
-            Add to the inventory
+            {{ 'Add to the inventory' | t }}
           </button>
         </div>
       </details>
 
       <details>
-        <summary>Add a range from a plaque</summary>
+        <summary>{{ 'Add a range from a plaque' | t }}</summary>
         <div class="stack add">
-          <p class="text-faint note">For "401 a 410": ten spaces, 401 to 410, none of them placed yet.</p>
+          <p class="text-faint note">{{ 'For "401 a 410": ten spaces, 401 to 410, none of them placed yet.' | t }}</p>
           <div class="row spread">
             <div class="field" style="flex: 1 1 5rem">
-              <label for="r-from">From</label>
+              <label for="r-from">{{ 'From' | t }}</label>
               <input id="r-from" type="number" min="0" [value]="rangeFrom()" (input)="rangeFrom.set(number($event))" />
             </div>
             <div class="field" style="flex: 1 1 5rem">
-              <label for="r-to">To</label>
+              <label for="r-to">{{ 'To' | t }}</label>
               <input id="r-to" type="number" min="0" [value]="rangeTo()" (input)="rangeTo.set(number($event))" />
             </div>
             @if (wings().length) {
               <div class="field" style="flex: 1 1 7rem">
-                <label for="r-wing">Wing</label>
+                <label for="r-wing">{{ 'Wing' | t }}</label>
                 <select id="r-wing" (change)="rangeWing.set(value($event))">
-                  <option value="">No wing</option>
+                  <option value="">{{ 'No wing' | t }}</option>
                   @for (wing of wings(); track wing.code) {
                     <option [value]="wing.code" [selected]="wing.code === rangeWing()">{{ wing.name }}{{ wing.doorSuffix ? ' (' + wing.doorSuffix + ')' : '' }}</option>
                   }
@@ -118,15 +120,15 @@ export interface OneSpace {
           </div>
           <div class="row spread">
             <div class="field" style="flex: 2 1 9rem">
-              <label for="r-name">Name</label>
+              <label for="r-name">{{ 'Name' | t }}</label>
               <input id="r-name" type="text" [value]="rangeName()" (input)="rangeName.set(value($event))" />
-              <span class="hint">{{ '{' }}n{{ '}' }} is replaced by each number, without the wing's suffix.</span>
+              <span class="hint">{{ '{value}n{value2} is replaced by each number, without the wing’s suffix.' | t: { value: '{', value2: '}' } }}</span>
             </div>
             <div class="field" style="flex: 2 1 9rem">
-              <label for="r-type">Type</label>
+              <label for="r-type">{{ 'Type' | t }}</label>
               <select id="r-type" (change)="rangeType.set(value($event))">
                 @for (group of typeGroups(); track group.category) {
-                  <optgroup [label]="group.label">
+                  <optgroup [label]="group.label | t">
                     @for (type of group.types; track type.code) {
                       <option [value]="type.code" [selected]="type.code === rangeType()">{{ type.name }}</option>
                     }
@@ -137,9 +139,9 @@ export interface OneSpace {
           </div>
           <button type="button" class="btn btn-sm" [disabled]="rangeCount() < 1 || rangeCount() > 100" (click)="submitRange()">
             @if (rangeCount() > 100) {
-              At most 100 at once
+              {{ 'At most 100 at once' | t }}
             } @else {
-              Add {{ rangeCount() }} space{{ rangeCount() === 1 ? '' : 's' }}: {{ rangePreview() }}
+              {{ rangeCount() === 1 ? ('Add 1 space: {rangePreview}' | t: { rangePreview: rangePreview() }) : ('Add {rangeCount} spaces: {rangePreview}' | t: { rangeCount: rangeCount(), rangePreview: rangePreview() }) }}
             }
           </button>
         </div>

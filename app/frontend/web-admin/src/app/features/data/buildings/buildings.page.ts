@@ -9,45 +9,43 @@ import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 import { BuildingFormComponent } from './building-form.component';
 import { FLOOR_STATUS_LABELS, type Building, type BuildingRequest, type FloorStatus } from './building.model';
 import { BuildingsService } from './buildings.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 /** Full CRUD over /api/map/buildings - the smaller of the two map entities, so no server paging. */
 @Component({
   selector: 'app-buildings-page',
-  imports: [RouterLink, DataTableComponent, ApiErrorBannerComponent, ModalComponent, BuildingFormComponent, PageIntroComponent],
+  imports: [TranslatePipe, RouterLink, DataTableComponent, ApiErrorBannerComponent, ModalComponent, BuildingFormComponent, PageIntroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
-        title="Buildings"
-        what="The buildings of a campus, the wings they are split into and the floors inside each one - with how far each floor is from being trusted."
-        [can]="['Create a building with its wings and floors', 'Edit its names, its wings or a floor', 'Delete one that has no spaces on it', 'Find one by code, name or any other name']"
-        note="A floor is known by its code - S1, P0, P1, MEZZ, T - and its level only orders them, so a mezzanine is 1.5. A floor or a wing that still has spaces cannot be removed - the save is refused naming it - and a building that still has spaces cannot be deleted."
+        [title]="'Buildings' | t"
+        [what]="'Each building of the university, with its address, wings and floors.' | t"
+        [can]="[('Create, edit and delete buildings' | t), ('Edit their wings and floors' | t), ('Find one by code or name' | t)]"
+        [note]="'A floor, a wing or a building that still has spaces cannot be removed.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">New building</button>
       </app-page-intro>
 
       <div class="card stack">
-        <div class="row spread">
+        <div class="work-bar">
           <div class="field" style="margin-bottom: 0; flex: 1 1 14rem">
-            <label for="q">Search</label>
-            <input id="q" type="text" placeholder="code, name or other name" (input)="onQueryInput($event)" />
+            <label for="q">{{ 'Search' | t }}</label>
+            <input id="q" type="text" [placeholder]="'code, name or other name' | t" (input)="onQueryInput($event)" />
           </div>
-          <div class="field" style="margin-bottom: 0; flex: 1 1 14rem">
-            <label for="campus">Campus</label>
-            <input id="campus" type="text" placeholder="filter by campus" (input)="onCampusInput($event)" />
-          </div>
+          <button type="button" class="btn btn-primary work-create" (click)="openCreate()">{{ 'New building' | t }}</button>
         </div>
 
         <app-api-error-banner [error]="error()" />
 
-        <app-data-table [loading]="loading()" [empty]="!loading() && !error() && buildings().length === 0" emptyMessage="No buildings yet.">
+        <app-data-table [loading]="loading()" [empty]="!loading() && !error() && buildings().length === 0" [emptyMessage]="'No buildings yet.' | t">
           <thead>
             <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Campus</th>
-              <th>Wings</th>
-              <th>Floors</th>
+              <th>{{ 'Code' | t }}</th>
+              <th>{{ 'Name' | t }}</th>
+              <th>{{ 'Address' | t }}</th>
+              <th>{{ 'Wings' | t }}</th>
+              <th>{{ 'Floors' | t }}</th>
               <th></th>
             </tr>
           </thead>
@@ -61,7 +59,7 @@ import { BuildingsService } from './buildings.service';
                     <div class="text-faint">{{ building.aliases.join(' · ') }}</div>
                   }
                 </td>
-                <td>{{ building.campus }}</td>
+                <td class="text-muted">{{ building.address || '—' }}</td>
                 <td class="text-muted">{{ wingNames(building) }}</td>
                 <td style="min-width: 10rem">
                   <div class="row" style="flex-wrap: wrap; gap: 0.25rem">
@@ -69,7 +67,7 @@ import { BuildingsService } from './buildings.service';
                       <a
                         [class]="statusBadge(floor.status)"
                         [routerLink]="['/data/floors', building.code, floor.code]"
-                        [title]="'Draw ' + floor.name + ' (' + statusLabels[floor.status ?? 'UNMAPPED'] + ')'"
+                        [title]="'Draw {floor} ({status})' | t: { floor: floor.name, status: (statusLabels[floor.status ?? 'UNMAPPED'] | t) }"
                       >
                         {{ floor.code }}
                       </a>
@@ -77,9 +75,9 @@ import { BuildingsService } from './buildings.service';
                   </div>
                 </td>
                 <td class="row">
-                  <button type="button" class="btn btn-sm" (click)="openEdit(building)">Edit</button>
+                  <button type="button" class="btn btn-sm" (click)="openEdit(building)">{{ 'Edit' | t }}</button>
                   <button type="button" class="btn btn-sm btn-danger" [disabled]="deletingCode() === building.code" (click)="remove(building)">
-                    Delete
+                    {{ 'Delete' | t }}
                   </button>
                 </td>
               </tr>
@@ -89,7 +87,7 @@ import { BuildingsService } from './buildings.service';
       </div>
     </div>
 
-    <app-modal #formModal [title]="editingBuilding() ? 'Edit building' : 'New building'" (closed)="formError.set(null)">
+    <app-modal #formModal [title]="editingBuilding() ? ('Edit building' | t) : ('New building' | t)" (closed)="formError.set(null)">
       <app-api-error-banner [error]="formError()" />
       <app-building-form
         [initial]="editingBuilding()"
@@ -116,7 +114,6 @@ export class BuildingsPage {
 
   @ViewChild('formModal') private formModal?: ModalComponent;
 
-  private campus = '';
   private query = '';
   private debounceHandle?: ReturnType<typeof setTimeout>;
 
@@ -127,7 +124,7 @@ export class BuildingsPage {
   private fetch(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.buildingsService.list(this.campus.trim() || undefined, this.query.trim() || undefined).subscribe({
+    this.buildingsService.list(undefined, this.query.trim() || undefined).subscribe({
       next: (buildings) => {
         this.buildings.set(buildings);
         this.loading.set(false);
@@ -137,11 +134,6 @@ export class BuildingsPage {
         this.error.set(err instanceof AppHttpError ? err.apiError : null);
       },
     });
-  }
-
-  onCampusInput(event: Event): void {
-    this.campus = (event.target as HTMLInputElement).value;
-    this.fetchSoon();
   }
 
   onQueryInput(event: Event): void {
@@ -202,7 +194,7 @@ export class BuildingsPage {
   }
 
   remove(building: Building): void {
-    if (!window.confirm(`Delete building ${building.code} — ${building.name}? This cannot be undone.`)) {
+    if (!window.confirm(t('Delete building {code} — {name}? This cannot be undone.', { code: building.code, name: building.name }))) {
       return;
     }
     this.deletingCode.set(building.code);

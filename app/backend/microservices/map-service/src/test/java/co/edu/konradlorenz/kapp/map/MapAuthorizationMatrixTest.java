@@ -102,7 +102,7 @@ class MapAuthorizationMatrixTest {
     }
 
     private void saveSpace(BuildingDocument building, String code) {
-        spaces.save(MapFixtures.space(building, code, "P1", 1, 1));
+        spaces.save(MapFixtures.space(building, code, "P1", 40, 40));
     }
 
     private static final String NEW_BUILDING_JSON = """
@@ -111,7 +111,7 @@ class MapAuthorizationMatrixTest {
               "name": "Auth Matrix Building",
               "campus": "Sede Test",
               "floors": [
-                {"code": "P1", "level": 1, "name": "Piso 1", "gridRows": 10, "gridColumns": 10}
+                {"code": "P1", "level": 1, "name": "Piso 1", "width": 400, "height": 400}
               ]
             }
             """;
@@ -123,7 +123,7 @@ class MapAuthorizationMatrixTest {
                   "name": "Renamed fixture",
                   "campus": "Sede Test",
                   "floors": [
-                    {"code": "P1", "level": 1, "name": "Piso 1", "gridRows": 10, "gridColumns": 10}
+                    {"code": "P1", "level": 1, "name": "Piso 1", "width": 400, "height": 400}
                   ]
                 }
                 """.formatted(code);
@@ -138,8 +138,7 @@ class MapAuthorizationMatrixTest {
                   "buildingCode": "A",
                   "floorCode": "P1",
                   "aliases": [],
-                  "gridRow": 1,
-                  "gridColumn": 1
+                  "shape": [{"x": 40, "y": 40}, {"x": 80, "y": 40}, {"x": 80, "y": 80}, {"x": 40, "y": 80}]
                 }
                 """.formatted(code);
     }
@@ -153,8 +152,7 @@ class MapAuthorizationMatrixTest {
                   "buildingCode": "A",
                   "floorCode": "P1",
                   "aliases": [],
-                  "gridRow": 2,
-                  "gridColumn": 2
+                  "shape": [{"x": 80, "y": 80}, {"x": 120, "y": 80}, {"x": 120, "y": 120}, {"x": 80, "y": 120}]
                 }
                 """.formatted(code);
     }
@@ -395,7 +393,7 @@ class MapAuthorizationMatrixTest {
     void saveLayout_authorizationMatrix() throws Exception {
         buildings.save(MapFixtures.building("ZL1"));
         String body = """
-                {"version": 0, "gridRows": 10, "gridColumns": 10, "spaces": []}
+                {"version": 0, "width": 400, "height": 400, "spaces": []}
                 """;
         mockMvc.perform(put("/api/map/buildings/ZL1/floors/P1/layout").with(guest())
                 .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isForbidden());

@@ -41,6 +41,11 @@ import java.util.List;
  *                                   name {@code verificationToken}, which
  *                                   {@code V001_AuthIndexes} already indexes.
  * @param verificationTokenExpiresAt when that token stops being accepted
+ * @param passwordChangeRequired     true while the password is a temporary one an administrator
+ *                                   issued: sign-in refuses it until the person sets their own.
+ *                                   Null on every account older than temporary passwords, which
+ *                                   reads as false
+ * @param temporaryPasswordExpiresAt when that temporary password stops being accepted at all
  */
 @Document(collection = "credentials")
 public record Credential(
@@ -55,7 +60,9 @@ public record Credential(
         @Field("verificationToken") String verificationTokenHash,
         Instant verificationTokenExpiresAt,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        Boolean passwordChangeRequired,
+        Instant temporaryPasswordExpiresAt
 ) {
 
     public enum Status {
@@ -80,6 +87,28 @@ public record Credential(
         return status == Status.ACTIVE;
     }
 
+    /** Whether the password is a temporary one, to be replaced before it signs anybody in. */
+    public boolean mustChangePassword() {
+        return Boolean.TRUE.equals(passwordChangeRequired);
+    }
+
+    /** A temporary password past its expiry: it no longer proves anything. */
+    public boolean temporaryPasswordExpired(Instant now) {
+        return mustChangePassword() && temporaryPasswordExpiresAt != null && now.isAfter(temporaryPasswordExpiresAt);
+    }
+
+    /** A temporary password an administrator issued, replacing whatever the account had. */
+    public Credential withTemporaryPassword(String hash, Instant expiresAt, Instant now) {
+        return new Credential(id, userId, email, hash, roles, status, emailVerified, provider,
+                verificationTokenHash, verificationTokenExpiresAt, createdAt, now, true, expiresAt);
+    }
+
+    /** The person's own password: whatever was temporary about the last one is over. */
+    public Credential withPassword(String hash, Instant now) {
+        return new Credential(id, userId, email, hash, roles, status, emailVerified, provider,
+                verificationTokenHash, verificationTokenExpiresAt, createdAt, now, null, null);
+    }
+
     /**
      * Suspends or restores the account, for an administrator's deactivation.
      *
@@ -101,7 +130,8 @@ public record Credential(
             return this;
         }
         return new Credential(id, userId, email, passwordHash, roles, target, emailVerified,
-                provider, verificationTokenHash, verificationTokenExpiresAt, createdAt, now);
+                provider, verificationTokenHash, verificationTokenExpiresAt, createdAt, now,
+                passwordChangeRequired, temporaryPasswordExpiresAt);
     }
 
     /**
@@ -114,6 +144,6 @@ public record Credential(
     public static Credential newLocalAccount(String userId, String email, String passwordHash,
                                              List<String> roles, Status status, Instant now) {
         return new Credential(null, userId, email, passwordHash, roles, status, false,
-                Provider.LOCAL, null, null, now, now);
+                Provider.LOCAL, null, null, now, now, null, null);
     }
 }
