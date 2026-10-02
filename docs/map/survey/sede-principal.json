@@ -1,6 +1,6 @@
 {
   "campus": "Sede Principal",
-  "version": 2724,
+  "version": 2852,
   "measures": [
     {
       "id": "bis-01",
@@ -45,50 +45,44 @@
     },
     {
       "id": "bis-11",
-      "text": "16.56",
-      "metres": 16.56,
+      "text": "17,05",
+      "metres": 17.05,
       "note": "Esta medida la tome del ancho completo del ala central,incluyendo muros y puerta.",
-      "recheck": true,
-      "updatedAt": "2026-09-30T00:19:06.262Z"
+      "updatedAt": "2026-10-01T22:59:25.684Z"
     },
     {
       "id": "bis-12",
-      "text": "5.45",
-      "metres": 5.45,
-      "recheck": true,
-      "updatedAt": "2026-09-29T22:44:34.206Z"
+      "text": "5.55",
+      "metres": 5.55,
+      "updatedAt": "2026-10-01T23:00:01.167Z"
     },
     {
       "id": "bis-13",
-      "text": "7.73",
-      "metres": 7.73,
+      "text": "7.78",
+      "metres": 7.78,
       "note": "Este fue el ancho de la entrada incluyendo las puertas y cristales, prácticamente es el ancho de la recepción.",
-      "recheck": true,
-      "updatedAt": "2026-09-30T00:28:08.852Z"
+      "updatedAt": "2026-10-01T23:00:52.553Z"
     },
     {
       "id": "bis-15",
-      "text": "2.96",
-      "metres": 2.96,
+      "text": "6,09",
+      "metres": 6.09,
       "note": "Esta medida la tome de la esquina del ala central hasta el inicio de la conexión sur.",
-      "recheck": true,
-      "updatedAt": "2026-09-30T00:25:37.472Z"
+      "updatedAt": "2026-10-01T23:30:56.528Z"
     },
     {
       "id": "bis-18",
-      "text": "8.8",
-      "metres": 8.8,
-      "note": "Desde el fin de la conexión sur hasta el borde del andén.",
-      "recheck": true,
-      "updatedAt": "2026-09-30T02:12:56.308Z"
+      "text": "3,15",
+      "metres": 3.15,
+      "note": "Hay arbustos",
+      "updatedAt": "2026-10-01T23:04:26.873Z"
     },
     {
       "id": "bis-17",
-      "text": "7.31 + 0.88",
-      "metres": 8.19,
-      "note": "Esto fue todo el ancho de la conexión sur. La medida 7.31 corresponde al ancho del 3er piso para arriba. El 0.88, es el extra que tiene en el 1er y 2do piso.",
-      "recheck": true,
-      "updatedAt": "2026-09-30T00:24:09.870Z"
+      "text": "6,3",
+      "metres": 6.3,
+      "note": "Esta medida fue todo el ancho de la conexión sur, hasta la taquilla.",
+      "updatedAt": "2026-10-02T02:07:46.064Z"
     },
     {
       "id": "c62-05",
@@ -166,9 +160,9 @@
     },
     {
       "id": "a-08",
-      "text": "24.44",
-      "metres": 24.44,
-      "updatedAt": "2026-09-29T23:05:27.824Z"
+      "text": "20,73",
+      "metres": 20.73,
+      "updatedAt": "2026-10-02T02:16:53.287Z"
     },
     {
       "id": "a-09",
@@ -178,29 +172,15 @@
     },
     {
       "id": "a-10",
-      "text": "4.02",
-      "metres": 4.02,
-      "recheck": true,
-      "updatedAt": "2026-09-29T23:06:59.077Z"
+      "text": "2,53",
+      "metres": 2.53,
+      "updatedAt": "2026-10-01T23:45:19.917Z"
     },
     {
       "id": "a-11",
-      "text": "7.37",
-      "metres": 7.37,
-      "recheck": true,
-      "updatedAt": "2026-09-29T23:07:55.221Z"
-    },
-    {
-      "id": "a-12",
-      "text": "2.51",
-      "metres": 2.51,
-      "updatedAt": "2026-09-29T23:08:40.599Z"
-    },
-    {
-      "id": "a-13",
-      "text": "1.49",
-      "metres": 1.49,
-      "updatedAt": "2026-09-29T23:08:50.676Z"
+      "text": "8,27",
+      "metres": 8.27,
+      "updatedAt": "2026-10-01T23:46:40.964Z"
     },
     {
       "id": "a-14",
@@ -222,32 +202,28 @@
     },
     {
       "id": "a-17",
-      "text": "26.32",
-      "metres": 26.32,
-      "recheck": true,
-      "updatedAt": "2026-09-29T23:12:39.154Z"
+      "text": "26.35",
+      "metres": 26.35,
+      "updatedAt": "2026-10-01T23:50:15.154Z"
     },
     {
       "id": "a-18",
-      "text": "5.48",
-      "metres": 5.48,
-      "recheck": true,
-      "updatedAt": "2026-09-29T23:14:24.681Z"
+      "text": "4,93",
+      "metres": 4.93,
+      "updatedAt": "2026-10-01T23:51:02.934Z"
     },
     {
       "id": "a-19",
-      "text": "5.03",
-      "metres": 5.03,
-      "recheck": true,
-      "updatedAt": "2026-09-29T23:14:47.029Z"
+      "text": "5.8",
+      "metres": 5.8,
+      "updatedAt": "2026-10-01T23:51:35.297Z"
     },
     {
       "id": "c63-01",
-      "text": "6.64",
-      "metres": 6.64,
+      "text": "7,07",
+      "metres": 7.07,
       "note": "Hay materas",
-      "recheck": true,
-      "updatedAt": "2026-09-29T23:15:33.726Z"
+      "updatedAt": "2026-10-01T23:52:06.098Z"
     },
     {
       "id": "c63-02",
@@ -294,6 +270,150 @@
       "metres": 7.92,
       "note": "Escaleras.",
       "updatedAt": "2026-09-30T01:25:45.815Z"
+    },
+    {
+      "id": "bis-22",
+      "text": "0,40+1,27 + 3,3",
+      "metres": 4.97,
+      "updatedAt": "2026-10-01T23:12:53.172Z"
+    },
+    {
+      "id": "bis-23",
+      "text": "0,40 + 1,2 +3,14",
+      "metres": 4.74,
+      "updatedAt": "2026-10-01T23:17:03.143Z"
+    },
+    {
+      "id": "bis-28",
+      "text": "16,76",
+      "metres": 16.76,
+      "updatedAt": "2026-10-01T23:15:36.832Z"
+    },
+    {
+      "id": "bis-24",
+      "text": "2,09 +0,15 +2,97",
+      "metres": 5.21,
+      "updatedAt": "2026-10-01T23:19:36.893Z"
+    },
+    {
+      "id": "bis-32",
+      "text": "1,2",
+      "metres": 1.2,
+      "updatedAt": "2026-10-01T23:20:21.138Z"
+    },
+    {
+      "id": "bis-33",
+      "text": "3,41",
+      "metres": 3.41,
+      "updatedAt": "2026-10-01T23:22:32.989Z"
+    },
+    {
+      "id": "bis-34",
+      "text": "1,35",
+      "metres": 1.35,
+      "note": "Conecta con 65 no con 68, 68 no existe.",
+      "updatedAt": "2026-10-02T00:57:37.991Z"
+    },
+    {
+      "id": "bis-19",
+      "text": "9,06",
+      "metres": 9.06,
+      "updatedAt": "2026-10-01T23:31:59.319Z"
+    },
+    {
+      "id": "c62-01",
+      "text": "1,88",
+      "metres": 1.88,
+      "updatedAt": "2026-10-01T23:36:57.017Z"
+    },
+    {
+      "id": "c62-02",
+      "text": "2,01",
+      "metres": 2.01,
+      "updatedAt": "2026-10-01T23:38:40.174Z"
+    },
+    {
+      "id": "c62-03",
+      "text": "2,16",
+      "metres": 2.16,
+      "note": "fue tomada mas cerca al 31 que al 29.",
+      "updatedAt": "2026-10-02T01:48:52.998Z"
+    },
+    {
+      "id": "c62-04",
+      "text": "2,51",
+      "metres": 2.51,
+      "updatedAt": "2026-10-01T23:40:02.918Z"
+    },
+    {
+      "id": "a-23",
+      "text": "3,77",
+      "metres": 3.77,
+      "updatedAt": "2026-10-01T23:42:21.862Z"
+    },
+    {
+      "id": "a-24",
+      "text": "1,47",
+      "metres": 1.47,
+      "updatedAt": "2026-10-01T23:42:39.703Z"
+    },
+    {
+      "id": "a-20",
+      "text": "1,52",
+      "metres": 1.52,
+      "updatedAt": "2026-10-01T23:44:29.366Z"
+    },
+    {
+      "id": "a-21",
+      "text": "7,38",
+      "metres": 7.38,
+      "updatedAt": "2026-10-01T23:45:54.723Z"
+    },
+    {
+      "id": "a-22",
+      "text": "1,69",
+      "metres": 1.69,
+      "note": "La caseta de seguridad debe ir alineada, con el edificio central,",
+      "updatedAt": "2026-10-02T00:59:46.472Z"
+    },
+    {
+      "id": "bis-35",
+      "text": "0",
+      "metres": 0.0,
+      "note": "no existe ese espacio, despues del punto 65, empieza la puerta directamente.",
+      "updatedAt": "2026-10-02T00:57:22.531Z"
+    },
+    {
+      "id": "bis-29",
+      "text": "5,15",
+      "metres": 5.15,
+      "updatedAt": "2026-10-02T02:08:37.280Z"
+    },
+    {
+      "id": "bis-30",
+      "text": "2,87",
+      "metres": 2.87,
+      "updatedAt": "2026-10-02T02:09:17.420Z"
+    },
+    {
+      "id": "bis-21",
+      "text": "0,39 + 4,56",
+      "metres": 4.95,
+      "updatedAt": "2026-10-02T02:10:36.791Z"
+    },
+    {
+      "id": "bis-31",
+      "text": "2,57 +0,15 +1,43",
+      "metres": 4.15,
+      "note": "Al ojo, no se pudo medir bien hay arbustos.",
+      "updatedAt": "2026-10-02T02:14:28.046Z"
+    },
+    {
+      "id": "c63-09",
+      "text": "0",
+      "metres": 0.0,
+      "note": "Esto es como practicamente el ancho del muro. No tengo como medirlo.",
+      "updatedAt": "2026-10-02T02:26:55.108Z"
     }
   ]
 }
