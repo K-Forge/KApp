@@ -96,6 +96,13 @@ Brian lo estableció en sitio, y las fotos lo confirman:
   detrás de unas materas elevadas cuyo frente sigue el de las alas: por eso la cinta dio una línea
   recta. Street View (2023), desde tres puntos de la calle, pone su muro a 1,5 m del frente de la
   torre; la medida 75 del levantamiento lo confirma en sitio.
+  - **De la entrada del parqueadero a la salida también es jardín** (Brian, 2 de octubre). Detrás
+    de las materas está el muro del cuerpo de un piso, con baranda encima, en línea con el frente
+    de la caseta. La medida 50 (5,48 m) es la esquina de las materas y la 70 (7,38 m) es el muro:
+    el jardín tiene 1,9 m de fondo, y la caseta queda alineada con el edificio.
+  - **El paso junto a la casa no se ha medido.** Las medidas 76 a 82 del levantamiento se toman
+    adentro, entrando por la reja: los lados del cuerpo de un piso, el muro del edificio alto, el
+    ancho del paso en dos puntos y el muro del fondo.
   - Los pisos altos no vuelan sobre el andén de la Carrera 9A. Las partes "desde el piso 2" que
     llegaban 3 m más afuera venían del contorno dibujado sobre la foto aérea, que inclina los
     techos altos, y se quitaron.

@@ -233,6 +233,10 @@ length('a-08', A, G['balcony'], G[3], "The casa's front, from its balcony to the
 # the cadastre drew it, to the guard's booth against its corner, 1.52 m wide and 7.38 m from the
 # curb; then the gate, 8.27 m from the curb and as wide as the opening (46, 2.53 m), to the pillar
 # that ends the casa's garden wall.
+# Brian, 2026-10-02: the stretch of that front from the parking entrance to the exit is garden too.
+# Street View shows it: raised planters, and behind them the wall of the one-floor piece with a railing
+# on top, in line with the booth's front. So 50's 5.48 m is the planters' corner, 70's 7.38 m is the
+# wall, and the garden between them is 1.9 m deep. The booth is aligned with the building, as he said.
 E = {1: (-64.48, 43.59), 2: (-61.63, 39.30)}
 BOOTH = {1: (-59.70, 39.30), 2: (-59.70, 40.82), 3: (-58.01, 40.82)}  # its front's ends, and its back by the gate
 GATE = -58.81  # the gate's line, inside the opening
@@ -258,6 +262,21 @@ NW = -61.58
 length('a-18', A, (NW, 12.59), (NW, 7.20), 'North wing, its end on Cra 9A, to the corner with Calle 63')
 setback('a-19', A, (NW, 7.20), WEST, 'North wing, corner with Calle 63: to the Cra 9A curb')
 
+# ---- Inside, through the exit on Cra 9A: the open passage between the building and the casa. Nothing
+# here was ever measured; the corners are the outline's. Brian asked for distances he can take inside.
+IN = 'Inside, by the Cra 9A exit'
+LOW = (-55.62, 39.30)     # the one-floor piece's corner on the passage
+TALL = (-55.70, 36.28)    # where the tall building's wall starts, behind it
+END = (-29.95, 36.30)     # that wall's far end, where the lobby's back wall crosses
+casa = lambda x: E[1][1] + (x - E[1][0]) * (43.27 - E[1][1]) / (-32.68 - E[1][0])  # the casa's wall, at x
+length('in-01', IN, BOOTH[3], (BOOTH[3][0], casa(BOOTH[3][0])), "Just inside the gate: from the booth's back corner across to the casa's wall")
+length('in-02', IN, (BOOTH[3][0], BOOTH[1][1]), LOW, 'The low building by the exit, its side on the passage: from the booth to its corner')
+length('in-03', IN, LOW, TALL, "The low building by the exit: from that corner in to the tall building's wall")
+length('in-04', IN, TALL, END, "The tall building's wall along the passage: from the low building to the wall that closes the far end")
+length('in-05', IN, (-50.0, 36.29), (-50.0, casa(-50.0)), "The passage's width near the exit: from the tall building's wall to the casa's wall")
+length('in-06', IN, (-35.0, 36.30), (-35.0, casa(-35.0)), "The passage's width near its far end: from the tall building's wall to the casa's wall")
+length('in-07', IN, END, (-29.77, 43.80), "The wall that closes the passage's far end: from the tall building to its other corner")
+
 # ---- Calle 63, east, back to the start: the north wing's front, from the corner to the admissions
 # door, past the door to the stairs, and past the stairs to the corner on the plaza.
 C63 = 'Calle 63'
@@ -279,7 +298,8 @@ NUMBERED = ['bis-01', 'bis-02', 'bis-03', 'bis-04', 'bis-05', 'bis-06', 'bis-07'
             'c62-04', 'c62-05', 'c62-06', 'c62-07', 'c62-08', 'c62-09', 'a-01', 'a-02', 'a-03', 'a-04', 'a-05',
             'a-06', 'a-07', 'a-08', 'a-09', 'a-10', 'a-11', 'a-12', 'a-13', 'a-14', 'a-15', 'a-16', 'a-17', 'a-18',
             'a-19', 'c63-01', 'c63-02', 'c63-03', 'c63-04', 'c63-05', 'c63-06', 'c63-07', 'c63-08', 'c63-09',
-            'bis-32', 'bis-33', 'bis-34', 'bis-35', 'a-20', 'a-21', 'a-22', 'a-23', 'a-24', 'bis-36', 'a-25']
+            'bis-32', 'bis-33', 'bis-34', 'bis-35', 'a-20', 'a-21', 'a-22', 'a-23', 'a-24', 'bis-36', 'a-25',
+            'in-01', 'in-02', 'in-03', 'in-04', 'in-05', 'in-06', 'in-07']
 # The numbers people wrote down on site: a distance taken off the plan leaves its number unused, and a
 # new one is added at the end of this list, never in between.
 for d in PLAN:
@@ -297,6 +317,7 @@ HINTS = {
     'a-20': 'Street View (2023): a small white booth with a window, against the central wing, beside the gate.',
     'a-25': "New: the wall with the two rows of windows between the north wing and the parking entrance stands behind the planters. Measure from the planters' front, in line with the parking entrance's column, straight back to that wall. Street View puts it about 1.5 m.",
     'c63-01': 'Street View (2023): the planters wrap round the corner. Measure from the wall, behind them.',
+    'in-01': 'New, and inside: walk in through the gate on Cra 9A. 76 to 82 are taken in the open passage between the building and the casa. If a wall is not where the sketch draws it, say so in the note.',
 }
 for d in PLAN:
     if d['id'] in HINTS:

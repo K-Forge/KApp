@@ -154,7 +154,7 @@ const CLOSEST = 4;
               <div>
                 <strong>{{ c.text | t }}</strong>
                 <div class="text-muted small">
-                  {{ c.street }} · {{ c.kind === 'setback' ? ('wall → curb, straight out' | t) : c.kind === 'length' ? ('along the wall' | t) : ('your own' | t) }}
+                  {{ c.street | t }} · {{ c.kind === 'setback' ? ('wall → curb, straight out' | t) : c.kind === 'length' ? ('along the wall' | t) : ('your own' | t) }}
                   @if (c.expected) {
                     {{ '· model {value}{value2}' | t: { value: metres(c.expected), value2: c.expected > pieceMetres ? (', in pieces' | t) : '' } }}
                   }
@@ -207,7 +207,7 @@ const CLOSEST = 4;
                 <span class="text-muted">{{ 'Then' | t }}</span>
                 <span class="title">
                   <span class="num" [class]="u.kind">{{ u.n }}</span>
-                  <span>{{ u.text | t }} <span class="text-muted">· {{ u.street }}</span></span>
+                  <span>{{ u.text | t }} <span class="text-muted">· {{ u.street | t }}</span></span>
                 </span>
               </button>
             }
@@ -216,7 +216,7 @@ const CLOSEST = 4;
 
         <section class="card list" #listBox>
         @for (g of groups(); track g.street) {
-          <h2 class="h">{{ g.street }}</h2>
+          <h2 class="h">{{ g.street | t }}</h2>
           <ol>
             @for (d of g.items; track d.id) {
               <li [class.on]="d.id === current().id" (click)="select(d.id, true)">
