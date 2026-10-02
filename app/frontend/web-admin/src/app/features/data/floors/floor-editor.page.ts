@@ -1053,7 +1053,7 @@ export class FloorEditorPage {
           : t('Pick or create a corridor under Corridors to draw it.');
       }
       default:
-        return t('Tap a room to edit it: drag it, or drag its corners. Use Draw rooms to outline new ones.');
+        return t('Tap a room to edit it. Drag it, a corner, or the square on a wall to push the wall out; double-tap a corner to take it away, a wall’s square to add one.');
     }
   });
 

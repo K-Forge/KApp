@@ -12,6 +12,7 @@ import {
   translate,
   withInsertedVertex,
   withVertex,
+  withWallMoved,
   type DraftSpace,
 } from './floor-draft';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
@@ -22,13 +23,13 @@ export type EditorMode = 'select' | 'box' | 'corridor' | 'door' | 'split';
 const TAP_SLOP = 8;
 /** A corner dragged this close to another corner's line, in pixels, lines up with it. */
 const SNAP_PX = 7;
-/** Two taps on one corner within this long remove it. */
+/** Two taps on one corner within this long remove it; on a wall's square, add one. */
 const DOUBLE_TAP_MS = 400;
 
 type Gesture =
   | { kind: 'tap'; key: string | null }
   | { kind: 'vertex'; key: string; index: number }
-  | { kind: 'insert'; key: string; edge: number }
+  | { kind: 'wall'; key: string; edge: number }
   | { kind: 'move'; key: string }
   | { kind: 'box' };
 
@@ -39,10 +40,11 @@ let uid = 0;
  * treads, the building's walls around them and the corridors between.
  *
  * <p>Drawn in the floor's own units and scaled to the screen, so a floor traced from a plan keeps
- * its proportions at any zoom. The selected room can be dragged whole, reshaped by its corners
- * - dragging a small dot between two corners adds one, a double tap on a corner removes it - and
- * a corner let go near another room's corner line lines up with it, so two rooms sharing a wall
- * share it exactly.
+ * its proportions at any zoom. The selected room can be dragged whole and reshaped as an outline is
+ * in the block editor, gesture for gesture: a corner is dragged, the square on a wall pushes the
+ * wall out, a double tap on that square adds a corner there and a double tap on a corner removes
+ * it. A corner or a wall let go near another room's corner line lines up with it, so two rooms
+ * sharing a wall share it exactly.
  *
  * <p>Pointer Events rather than mouse or touch events, so a finger on the iPad, a pencil and a
  * mouse all go through the same code. Only what is being dragged takes the gesture over
@@ -230,7 +232,7 @@ let uid = 0;
 
         @if (handles(); as h) {
           @for (mid of h.mids; track $index) {
-            <circle class="mid" [attr.data-edge]="$index" [attr.cx]="mid.x" [attr.cy]="mid.y" [attr.r]="5 / scale()" />
+            <rect class="mid" [attr.data-edge]="$index" [attr.x]="mid.x - 5 / scale()" [attr.y]="mid.y - 5 / scale()" [attr.width]="10 / scale()" [attr.height]="10 / scale()" />
           }
           @for (corner of h.corners; track $index) {
             <circle class="handle" [attr.data-vertex]="$index" [attr.cx]="corner.x" [attr.cy]="corner.y" [attr.r]="8 / scale()" />
@@ -458,7 +460,7 @@ let uid = 0;
       stroke: #fff;
       stroke-width: 1.5;
       touch-action: none;
-      cursor: copy;
+      cursor: grab;
     }
     .preview {
       fill: color-mix(in srgb, var(--primary) 18%, transparent);
@@ -645,7 +647,7 @@ export class FloorPlanComponent {
 
   private gesture: Gesture | null = null;
   private start: { x: number; y: number; at: Point; pointerId: number } | null = null;
-  private lastCornerTap: { key: string; index: number; time: number } | null = null;
+  private lastTap: { what: string; time: number } | null = null;
 
   points(points: Point[]): string {
     return points.map((p) => `${p.x},${p.y}`).join(' ');
@@ -665,7 +667,7 @@ export class FloorPlanComponent {
     } else if (this.mode() === 'select' && selected && vertex != null) {
       this.gesture = { kind: 'vertex', key: selected, index: Number(vertex) };
     } else if (this.mode() === 'select' && selected && edge != null) {
-      this.gesture = { kind: 'insert', key: selected, edge: Number(edge) };
+      this.gesture = { kind: 'wall', key: selected, edge: Number(edge) };
     } else if (this.mode() === 'select' && selected && room === selected) {
       this.gesture = { kind: 'move', key: selected };
     } else {
@@ -695,8 +697,8 @@ export class FloorPlanComponent {
       case 'vertex':
         if (shape) this.dragged.set({ key: gesture.key, shape: withVertex(shape, gesture.index, this.snap(at, [gesture.key, gesture.index])) });
         break;
-      case 'insert':
-        if (shape) this.dragged.set({ key: gesture.key, shape: withInsertedVertex(shape, gesture.edge, this.snap(at, [gesture.key, -1])) });
+      case 'wall':
+        if (shape) this.dragged.set({ key: gesture.key, shape: withWallMoved(shape, gesture.edge, this.snap(at, [gesture.key, -1])) });
         break;
       case 'move':
         if (shape) {
@@ -731,19 +733,27 @@ export class FloorPlanComponent {
       return;
     }
 
-    // A tap.
-    if (gesture.kind === 'vertex') {
-      const last = this.lastCornerTap;
+    // A tap. Two on a corner take it away; two on a wall's square put a corner in its middle.
+    if (gesture.kind === 'vertex' || gesture.kind === 'wall') {
+      const what = `${gesture.kind}:${gesture.key}:${gesture.kind === 'vertex' ? gesture.index : gesture.edge}`;
       const now = Date.now();
-      if (last && last.key === gesture.key && last.index === gesture.index && now - last.time < DOUBLE_TAP_MS) {
-        this.lastCornerTap = null;
-        this.vertexRemoved.emit({ key: gesture.key, index: gesture.index });
-      } else {
-        this.lastCornerTap = { key: gesture.key, index: gesture.index, time: now };
+      if (!this.lastTap || this.lastTap.what !== what || now - this.lastTap.time >= DOUBLE_TAP_MS) {
+        this.lastTap = { what, time: now };
+        return;
       }
+      this.lastTap = null;
+      if (gesture.kind === 'vertex') {
+        this.vertexRemoved.emit({ key: gesture.key, index: gesture.index });
+        return;
+      }
+      const shape = this.shapeOf(gesture.key);
+      if (!shape) return;
+      const a = shape[gesture.edge];
+      const b = shape[(gesture.edge + 1) % shape.length];
+      const middle = { x: Math.round((a.x + b.x) / 2), y: Math.round((a.y + b.y) / 2) };
+      this.reshaped.emit({ key: gesture.key, shape: withInsertedVertex(shape, gesture.edge, middle) });
       return;
     }
-    if (gesture.kind === 'insert') return;
     const round = { x: Math.round(at.x), y: Math.round(at.y) };
     // A tap on a room is its click's to handle - the click is also what a screen reader sends -
     // except where the tap means a point: a corridor's corner, a door on a wall, a room drawn.

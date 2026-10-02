@@ -88,7 +88,7 @@ export interface CirculationOption {
             {{ s.doors.length === 1 ? ('{size} · {corners} corners · 1 door' | t: { size: size(), corners: s.shape?.length }) : ('{size} · {corners} corners · {doors} doors' | t: { size: size(), corners: s.shape?.length, doors: s.doors.length }) }}
           </span>
           <p class="hint">
-            {{ 'Drag it to move it. Drag a corner to reshape it, a dot between two corners to add one, and double-tap a corner to take it out.' | t }}
+            {{ 'Drag it to move it. Drag a corner, or the square on a wall to push the wall out; double-tap a corner to take it away, a wall’s square to add one.' | t }}
           </p>
           <div class="pads">
             <div class="pad" role="group" [attr.aria-label]="'Move' | t">

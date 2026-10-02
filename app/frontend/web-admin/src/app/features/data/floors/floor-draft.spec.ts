@@ -27,6 +27,7 @@ import {
   turn,
   turnUp,
   updateSpace,
+  withWallMoved,
   type DraftSpace,
   type FloorDraft,
   type ProblemContext,
@@ -135,6 +136,29 @@ describe('floor draft', () => {
   });
 
   describe('geometry', () => {
+    // The square on a wall pushes the whole wall, as in the block editor: both its corners go.
+    it('pushes a wall out and keeps a rectangle a rectangle', () => {
+      const room = rectangle({ x: 10, y: 10, width: 20, height: 10 });
+      // The right wall, dragged to x = 42 at any height.
+      expect(withWallMoved(room, 1, { x: 42, y: 3 })).toEqual([
+        { x: 10, y: 10 },
+        { x: 42, y: 10 },
+        { x: 42, y: 20 },
+        { x: 10, y: 20 },
+      ]);
+    });
+
+    it('pushes a slanted wall along its own square, in whole units', () => {
+      const slanted = [{ x: 0, y: 0 }, { x: 30, y: 0 }, { x: 20, y: 10 }, { x: 0, y: 10 }];
+      const pushed = withWallMoved(slanted, 1, { x: 40, y: 10 });
+      expect(pushed[0]).toEqual({ x: 0, y: 0 });
+      expect(pushed[3]).toEqual({ x: 0, y: 10 });
+      // Both corners moved the same way, and neither landed between units.
+      expect(pushed[1].x - 30).toBe(pushed[2].x - 20);
+      expect(pushed[1].y - 0).toBe(pushed[2].y - 10);
+      expect(pushed.every((p) => Number.isInteger(p.x) && Number.isInteger(p.y))).toBe(true);
+    });
+
     it('lets two rooms share a wall, and calls it an overlap once one reaches into the other', () => {
       expect(overlaps(box(0, 0, 100, 80), box(100, 0, 100, 80))).toBe(false);
       expect(overlaps(box(0, 0, 100, 80), box(90, 0, 100, 80))).toBe(true);

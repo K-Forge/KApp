@@ -499,6 +499,23 @@ export function withVertex(shape: Point[], index: number, p: Point): Point[] {
   return shape.map((q, i) => (i === index ? { x: p.x, y: p.y } : q));
 }
 
+/**
+ * The wall from corner `edge` to the next pushed across itself, parallel, until it passes through
+ * `to`: its two corners go together, so a rectangle stays a rectangle. In whole units.
+ */
+export function withWallMoved(shape: Point[], edge: number, to: Point): Point[] {
+  const a = shape[edge];
+  const b = shape[(edge + 1) % shape.length];
+  const length = Math.hypot(b.x - a.x, b.y - a.y);
+  if (length === 0) return copy(shape);
+  const nx = -(b.y - a.y) / length;
+  const ny = (b.x - a.x) / length;
+  const by = (to.x - a.x) * nx + (to.y - a.y) * ny;
+  return shape.map((p, i) =>
+    i === edge || i === (edge + 1) % shape.length ? { x: Math.round(p.x + by * nx), y: Math.round(p.y + by * ny) } : { x: p.x, y: p.y },
+  );
+}
+
 /** A new corner on the edge that starts at `edge`. */
 export function withInsertedVertex(shape: Point[], edge: number, p: Point): Point[] {
   return [...shape.slice(0, edge + 1), { x: p.x, y: p.y }, ...shape.slice(edge + 1)];
