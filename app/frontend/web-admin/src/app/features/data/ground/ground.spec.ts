@@ -134,6 +134,9 @@ describe('ground', () => {
     expect(surroundings(ground, EC, view, parts, 6, 5).footprint.map((p) => p.reaches)).toEqual([false]);
     expect(surroundings(ground, EC, view, parts, 7, 6).footprint).toEqual([]);
     expect(surroundings(ground, EC, view, parts, -1, -2).footprint).toEqual([]);
+    // Under the ground floor is the basement: a part that only goes down is not drawn on it.
+    const cellar = [{ lot: '1', floors: 0, basements: 2, ring }];
+    expect(surroundings(ground, EC, view, cellar, 1, -1).footprint).toEqual([]);
   });
 });
 

@@ -1,0 +1,18 @@
+{
+ "building": "EC",
+ "floor": "P1",
+ "why": "What Brian changed by hand in the floor editor on 2026-10-02, as the editor has it: the building's own units, after everything else. He made the food court one room, the Cafetería, over what the plan drew as two; moved the rooms round it onto their walls; and drew two boxes the plan leaves out.",
+ "removed": ["P1-24", "P1-CAFETERIA-NO-1"],
+ "spaces": [
+  {"code": "P1-01", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 883, "y": 982}, {"x": 980, "y": 982}, {"x": 980, "y": 1040}, {"x": 883, "y": 1041}]},
+  {"code": "P1-02", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 980, "y": 956}, {"x": 1017, "y": 957}, {"x": 1071, "y": 957}, {"x": 1071, "y": 987}, {"x": 1237, "y": 982}, {"x": 1237, "y": 1040}, {"x": 980, "y": 1040}]},
+  {"code": "P1-13", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 612, "y": 479}, {"x": 612, "y": 567}, {"x": 438, "y": 567}, {"x": 438, "y": 479}]},
+  {"code": "P1-14", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 438, "y": 578}, {"x": 612, "y": 578}, {"x": 612, "y": 678}, {"x": 438, "y": 678}]},
+  {"code": "P1-15", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 1237, "y": 856}, {"x": 1237, "y": 974}, {"x": 1134, "y": 978}, {"x": 1134, "y": 956}, {"x": 1017, "y": 956}, {"x": 1017, "y": 856}]},
+  {"code": "P1-16", "wing": "C", "name": "Cafetería", "typeCode": "CAFETERIA", "aliases": [], "shape": [{"x": 649, "y": 855}, {"x": 883, "y": 855}, {"x": 883, "y": 1041}, {"x": 1237, "y": 1041}, {"x": 1245, "y": 1910}, {"x": 980, "y": 1910}, {"x": 904, "y": 1910}, {"x": 904, "y": 1773}, {"x": 427, "y": 1773}, {"x": 427, "y": 1210}, {"x": 649, "y": 1210}]},
+  {"code": "P1-17", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 251, "y": 853}, {"x": 417, "y": 853}, {"x": 417, "y": 956}, {"x": 251, "y": 956}]},
+  {"code": "P1-19", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 883, "y": 855}, {"x": 980, "y": 855}, {"x": 980, "y": 982}, {"x": 883, "y": 982}]},
+  {"code": "P1-21", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 251, "y": 956}, {"x": 415, "y": 956}, {"x": 415, "y": 1209}, {"x": 251, "y": 1209}]},
+  {"code": "P1-TESORERIA", "wing": "C", "name": "Tesorería", "typeCode": "ADMIN_OFFICE", "aliases": [], "shape": [{"x": 548, "y": 855}, {"x": 646, "y": 855}, {"x": 646, "y": 1032}, {"x": 548, "y": 1032}]}
+ ]
+}

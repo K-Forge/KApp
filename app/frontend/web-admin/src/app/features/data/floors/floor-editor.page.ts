@@ -288,11 +288,11 @@ const MAX_ZOOM = 8;
                 }
                 @if (floorPlacement() && groundData() && showGround() && hasFootprint()) {
                   <button type="button" class="btn btn-sm layer" [class.on]="showCadastre()" [attr.aria-pressed]="showCadastre()"
-                          [title]="'The building’s outline as the cadastre records it, the pink lines' | t" (click)="toggleCadastre()">
+                          [title]="'The building’s outline part by part, the pink lines: the same outline as the margin, with the line between two parts of different height' | t" (click)="toggleCadastre()">
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
                       <path d="M4 4h10v6h6v10H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-dasharray="3 2.5" />
                     </svg>
-                    {{ 'Cadastre' | t }}
+                    {{ 'Parts' | t }}
                   </button>
                 }
                 @if (floorPlacement() && neighbourBuildings().length) {
@@ -906,7 +906,10 @@ export class FloorEditorPage {
     const placement = this.floorPlacement();
     const footprint = this.footprint();
     if (!placement || !footprint.length || !this.showMargin()) return null;
-    return { current: margins(footprint, placement, this.level()), below: margins(footprint, placement, this.levelBelow()) };
+    // The floor below shows, dotted, where this floor stands on it. The basement under the ground
+    // floor is not that: drawn there it read as a second outline of the building.
+    const below = this.levelBelow() >= 1 ? margins(footprint, placement, this.levelBelow()) : [];
+    return { current: margins(footprint, placement, this.level()), below };
   });
 
   /** The wings whose margin shows, named as the building names them, in its order. */

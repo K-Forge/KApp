@@ -3,47 +3,54 @@
  "out": "../traced/ec-p2-auditorio.json",
  "building": "EC",
  "floor": "P2",
- "why": "What of the auditorium there is on the second floor, as Brian marked it on the first floor's evacuation plan on 2026-10-02: two blocks of seats that he wrote are repeated on the second floor. The rest of the hall rises through both floors. In the drawing's units of the first floor's plan, before register.py moves anything.",
+ "why": "What of the auditorium there is on the second floor, as Brian marked it on the first floor's evacuation plan on 2026-10-02: two blocks of seats that he wrote are repeated on the second floor, and, as he said afterwards, the seats run on between them over the audiovisual booth: one gallery. The rest of the hall rises through both floors. In the drawing's units of the first floor's plan, before register.py moves anything.",
  "rooms": [
   {
-   "code": "P2-AUD-NIVEL-2-N",
+   "code": "P2-AUD-NIVEL-2",
    "wing": "S",
-   "name": "Auditorio Sonia Fajardo Forero, segundo nivel (norte)",
+   "name": "Auditorio Sonia Fajardo Forero, segundo nivel",
    "typeCode": "AUDITORIUM",
    "aliases": [
-    "auditorio, segundo nivel"
+    "auditorio, segundo nivel",
+    "galería del auditorio"
    ],
-   "strokes": [
-    "navy",
-    "cyan"
-   ],
-   "as": "inside",
-   "letters": 44,
-   "at": [
-    0.4621,
-    0.3985
-   ],
-   "level": 0
-  },
-  {
-   "code": "P2-AUD-NIVEL-2-S",
-   "wing": "S",
-   "name": "Auditorio Sonia Fajardo Forero, segundo nivel (sur)",
-   "typeCode": "AUDITORIUM",
-   "aliases": [
-    "auditorio, segundo nivel"
-   ],
-   "strokes": [
-    "navy",
-    "cyan"
-   ],
-   "as": "inside",
-   "letters": 24,
-   "at": [
-    0.4212,
-    0.6268
-   ],
-   "level": 0
+   "level": 0,
+   "join": 16,
+   "parts": [
+    {
+     "strokes": [
+      "navy",
+      "cyan"
+     ],
+     "as": "inside",
+     "letters": 44,
+     "at": [
+      0.4621,
+      0.3985
+     ]
+    },
+    {
+     "strokes": [
+      "blue"
+     ],
+     "at": [
+      0.4762,
+      0.5047
+     ]
+    },
+    {
+     "strokes": [
+      "navy",
+      "cyan"
+     ],
+     "as": "inside",
+     "letters": 24,
+     "at": [
+      0.4212,
+      0.6268
+     ]
+    }
+   ]
   }
  ]
 }

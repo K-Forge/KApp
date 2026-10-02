@@ -18,12 +18,12 @@
       "why": "As ec-register.json stacks them on every floor: the tower did not move."
     },
     "main stair": {
-      "shape": [[1081, 479], [1237, 479], [1237, 721], [1081, 721]],
+      "shape": [[1076, 479], [1232, 479], [1232, 721], [1076, 721]],
       "spaces": {
         "P1": "P1-ESC-PRINCIPAL",
         "P2": "P2-ESC-PRINCIPAL"
       },
-      "why": "Beside the central lifts and as deep as they are, as these two floors' plans draw it (5.9 and 6.7 m), which leaves the corridor that runs under both. ec-register.json stacks it 2.8 m deeper from P3 up, as those plans draw it, until they are registered against the survey too."
+      "why": "Beside the central lifts and as deep as they are, as these two floors' plans draw it, which leaves the corridor that runs under both; where Brian set it in the floor editor. ec-register.json stacks it 2.8 m deeper from P3 up, as those plans draw it, until they are registered against the survey too."
     },
     "lifts by the toilets": {
       "shape": [[911, 826], [1014, 826], [1014, 1019], [911, 1019]],
@@ -55,18 +55,12 @@
       "y why": "The plan's first row of rooms goes a wall inside the tower's front on the Carrera 9 Bis, and its last a wall inside the back wall, 5.48 m from the Carrera 9A curb (survey 53). The plan's depth between the two, 1643 units, is the measured one, 1638: the plan was only laid 3 m too far back, onto the cadastre's lot line.",
       "groups": [
         {
-          "spaces": ["P1-AUD-TAQUILLA", "P1-AUD-ANTESALA-N"],
-          "x": [[1302, 1462], [1491, 1621]],
-          "y": [[805, 680], [1100, 1001]],
-          "why": "Between the lobby and the hall the plan is square with the tower. Along the street it goes from the end of the public entrance, where the ticket office starts (survey 15, 25), to the hall's north wall; across, from a wall inside the ticket office's glass to the hall's back corner. Brian: the strip the plan draws beside them, with the first-aid sign, is a thick wall and not a room."
-        },
-        {
-          "spaces": ["P1-AUDITORIO-SONIA", "P1-AUD-ESCENARIO", "P1-AUD-AUDIOVISUALES", "P1-AUD-ESCALERA", "P1-AUD-UTILERIA", "P1-AUD-SALIDA-SUR", "P1-20", "P1-23", "P1-26", "P1-27", "P1-28", "P1-29"],
+          "spaces": ["P1-AUD-TAQUILLA", "P1-AUD-ANTESALA-N", "P1-AUDITORIO-SONIA", "P1-AUD-ESCENARIO", "P1-AUD-AUDIOVISUALES", "P1-AUD-ESCALERA", "P1-AUD-UTILERIA", "P1-AUD-SALIDA-SUR", "P1-20", "P1-23", "P1-26", "P1-27", "P1-28", "P1-29"],
           "onto": {
-            "from": [[1565, 723], [2157, 912], [2144, 1273], [1477, 1100]],
-            "to": [[1704, 595], [2343, 779], [2340, 1165], [1622, 1001]]
+            "from": [[1302, 795], [1565, 723], [2157, 912], [2144, 1273]],
+            "to": [[1462, 680], [1704, 595], [2343, 779], [2340, 1165]]
           },
-          "why": "The auditorium keeps its plan's shape (Brian), so the plan is not stretched: it is turned 1.7 degrees and made 7% larger, which lays its front on the blue wall end to end, from the angle where the slanted wall beside the ticket office meets it (survey 26, 74) to the neighbour's building (survey 24, 65, 66), a wall inside. The four corners are that angle, the far end of the front, and the two ends of the plan's back wall taken along. The back then stands 0.5 to 1.3 m short of the lot line the cadastre gives the south wing: nobody has measured the patio behind it."
+          "why": "Everything Brian outlined on the auditorium's plan moves as one sheet, so that rooms he drew sharing a wall still share it. Four of the plan's corners go where the tape puts them, a wall inside: the ticket office's corner at the end of the public entrance (survey 15, 25), the angle where the slanted wall meets the blue wall (survey 26, 74), the far end of the front at the neighbour's building (survey 24, 65, 66), and the far end of the back, taken from the blue wall's length without stretching the plan. The back then stands 0.6 to 2.2 m short of the lot line the cadastre gives the south wing: nobody has measured the patio behind it."
         }
       ],
       "limits": [
@@ -129,8 +123,8 @@
       "add": [
         {
           "code": "P1-AUD-VESTIBULO",
-          "shape": [[1257, 678], [1450, 678], [1450, 1010], [1257, 1010]],
-          "doors": [[[1257, 740], [1257, 780]], [[1317, 678], [1397, 678]], [[1337, 1010], [1377, 1010]], [[1450, 782], [1450, 822]]],
+          "shape": [[1257, 678], [1460, 678], [1460, 1010], [1257, 1010]],
+          "doors": [[[1257, 740], [1257, 780]], [[1317, 678], [1397, 678]], [[1337, 1010], [1377, 1010]], [[1460, 779], [1460, 819]]],
           "why": "Brian: the lobby is the south connection's whole ground floor. The auditorium's plan does not draw it; he sketched it above the plan with its four doors: to the central wing, the public entrance on the Carrera 9 Bis (survey 15, 6.30 m of front), one at the back and the one through the thick wall to the north anteroom, beside the ticket office. A wall inside the connection, as surveyed; where on each wall a door stands is as he sketched it, not measured."
         },
         {
@@ -151,10 +145,10 @@
         {
           "spaces": ["P2-AUD*"],
           "onto": {
-            "from": [[1565, 723], [2157, 912], [2144, 1273], [1477, 1100]],
-            "to": [[1704, 595], [2343, 779], [2340, 1165], [1622, 1001]]
+            "from": [[1302, 795], [1565, 723], [2157, 912], [2144, 1273]],
+            "to": [[1462, 680], [1704, 595], [2343, 779], [2340, 1165]]
           },
-          "why": "The two blocks of seats Brian marked as repeated on the second floor, on the same four corners as the hall below."
+          "why": "The gallery Brian marked on the first floor's plan - the seats repeated on the second floor, which he said run on over the audiovisual booth - on the same four corners as the hall below."
         }
       ],
       "limits": [
@@ -175,9 +169,10 @@
         }
       ],
       "drop": {
-        "P2-16": "The plan paints the auditorium's whole silhouette on the second floor. Brian: the hall rises through both floors, and only two blocks of seats are repeated up here; those are drawn instead."
+        "P2-16": "The plan paints the auditorium's whole silhouette on the second floor. Brian: the hall rises through both floors, and only the gallery of seats along the Carrera 9 Bis is up here; that is drawn instead."
       }
     }
   },
-  "marked": "traced/ec-{floor}-auditorio.json"
+  "marked": "traced/ec-{floor}-auditorio.json",
+  "by hand": "traced/ec-{floor}-a-mano.json"
 }

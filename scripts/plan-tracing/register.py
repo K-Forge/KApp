@@ -33,6 +33,11 @@ The spec:
                                            traced floor before anything moves. A room it names
                                            takes its outline, name and doors from there; one it
                                            gives no outline ("shape": null) is left for "add"
+     "by hand": "traced/ec-{floor}-a-mano.json",
+                                           what somebody changed in the floor editor afterwards,
+                                           in the building's own units: its "spaces" replace the
+                                           registered ones whole and its "removed" go, last of
+                                           all, so that registering a floor again keeps their work
      "floors": {"P1": {
         "y": [[574, 479], [2217, 2107]],   this floor's own pairs, when its plan was laid in the
                                            frame apart from the others' ("x" likewise)
@@ -461,7 +466,14 @@ def main():
             path_of_marks = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
                                          spec["marked"].format(floor=args.floor.lower()))
             marks = json.load(open(path_of_marks)) if os.path.exists(path_of_marks) else None
-        back = start_over(floor, json.load(open(source)), {a["code"] for a in rules.get("add", [])}, marks)
+        later = {a["code"] for a in rules.get("add", [])}
+        if spec.get("by hand"):
+            path_by_hand = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
+                                        spec["by hand"].format(floor=args.floor.lower()))
+            if os.path.exists(path_by_hand):
+                # Rooms the editor's own changes drew come back at the end, as the editor has them.
+                later |= {sp["code"] for sp in json.load(open(path_by_hand)).get("spaces", [])}
+        back = start_over(floor, json.load(open(source)), later, marks)
     elif width and floor["width"] == width:
         sys.exit(f"{args.floor} is {width} wide already: it has been registered")
 
@@ -606,6 +618,16 @@ def main():
         if space.get("doors"):
             jambs = [hung(shape, (d["from"]["x"], d["from"]["y"]), (d["to"]["x"], d["to"]["y"])) for d in space["doors"]]
             space["doors"] = [{"from": {"x": a[0], "y": a[1]}, "to": {"x": b[0], "y": b[1]}} for a, b in jambs if a != b]
+    if spec.get("by hand"):
+        by_hand = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
+                               spec["by hand"].format(floor=args.floor.lower()))
+        if os.path.exists(by_hand):
+            edits = json.load(open(by_hand))
+            gone = set(edits.get("removed", []))
+            mine = {sp["code"]: sp for sp in edits.get("spaces", [])}
+            floor["spaces"] = sorted([sp for sp in floor["spaces"] if sp["code"] not in gone and sp["code"] not in mine]
+                                     + list(mine.values()), key=lambda sp: sp["code"])
+            moved.append(f"  by hand: {len(mine)} room(s) as the editor has them, {len(gone)} removed")
     everything = [p for s in floor["spaces"] for p in s.get("shape") or []] + [p for c in corridors for p in c["path"]]
     widest = max((p["x"] for p in everything), default=0)
     tallest = max((p["y"] for p in everything), default=0)

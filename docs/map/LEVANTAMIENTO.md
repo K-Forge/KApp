@@ -100,12 +100,22 @@ Brian lo estableció en sitio, y las fotos lo confirman:
     norte**, la sala con su **tarima**, **audiovisuales**, la **antesala sur** con la escalera y la
     puerta del tramo gris, y **utilería** al fondo. Los "S.I." son espacios sin identificar: pueden
     ser vacíos o columnas.
-  - **En el P2** solo se repiten dos bloques de sillas; el resto de la sala sube los dos pisos.
+  - **En el P2** solo está la galería de sillas a lo largo de la Carrera 9 Bis, de un extremo al
+    otro y también sobre audiovisuales; el resto de la sala sube los dos pisos.
+  - Los espacios que dibujó uno junto a otro **comparten muro**: cada muro entre dos se dibuja una
+    sola vez y los dos lo toman, esquina por esquina.
   - **La esquina junto a la taquilla es un muro en ángulo**, no una esquina cuadrada: va del final
     de la taquilla al comienzo del muro azul. Las medidas 26 y 74 son sus dos catetos.
-  - El PE del auditorio no se estira: se gira 1,7° y se agranda 7 % para que su frente caiga sobre
-    el muro azul medido. Así el fondo queda entre 0,5 y 1,3 m antes del lindero que el catastro le
-    da al ala sur; el patio cubierto puede ser ese tanto más ancho. La medida 83 lo resuelve.
+  - Todo lo que marcó se mueve como una sola hoja, con cuatro esquinas puestas donde dice la
+    cinta: el comienzo de la taquilla, el ángulo con el muro azul, el final del frente junto al
+    vecino y el final del fondo. Así el fondo queda entre 0,6 y 2,2 m antes del lindero que el
+    catastro le da al ala sur; el patio cubierto puede ser ese tanto más ancho. La medida 83 lo
+    resuelve.
+  - **La línea entre la conexión sur y el auditorio** va derecha, perpendicular a la calle; la
+    diagonal que tenía era solo la unión de dos esquinas de dibujos distintos.
+  - **Lo que Brian cambia a mano en el editor de pisos** queda en `traced/ec-p1-a-mano.json` y se
+    pone de último, para que volver a registrar el piso no lo pierda: la Cafetería del P1 como un
+    solo espacio, los salones de alrededor sobre sus muros y dos cajas que el plano no trae.
   - Dónde queda cada puerta del lobby en su muro es como él la dibujó, no medido.
 - **Atrás, sobre la Carrera 9A, solo salen el ala norte y la torre.** La conexión norte queda
   detrás de unas materas elevadas cuyo frente sigue el de las alas: por eso la cinta dio una línea

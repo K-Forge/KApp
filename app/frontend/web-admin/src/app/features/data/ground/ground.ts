@@ -145,7 +145,9 @@ export function surroundings(
       .map((s) => ({ name: s.name, label: s.label, path: toDrawing(s.path) }))
       .filter((s) => within(s.path)),
     footprint: footprint
-      .filter((part) => part.lot && (reaches(part, level) || (level > 0 && reaches(part, below))))
+      // The floor below is drawn, dotted, only above the street: under the ground floor there is
+      // the basement, which is no outline a ground floor's rooms are drawn against.
+      .filter((part) => part.lot && (reaches(part, level) || (below >= 1 && reaches(part, below))))
       .map((part) => ({ outline: toDrawing(part.ring), reaches: reaches(part, level) })),
   };
 }

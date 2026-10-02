@@ -12,13 +12,15 @@ written inside - and this turns the loops into rooms, so nobody copies them by e
 A room is what its loop encloses: everything the photo's edge cannot reach without crossing the
 loop's ink, less the ink of the loop itself. The name written inside in the same pen is then no
 obstacle, and an arrow or a bracket hanging off the loop, thinner than the room, goes with the
-ink. The room stops at the inner edge of the pen, so two rooms drawn side by side come out a wall
-apart. A room closed by strokes of several loops - a stage between the hall's outline and the
+ink. A room closed by strokes of several loops - a stage between the hall's outline and the
 line that parts it from the seats - is instead what a flood from a point inside it reaches
-("as": "inside"), with the writing in it closed over. Its outline is
-then drawn in the drawing's units with as few corners as follow the pen to within a hand's width:
-a wall the pen meant level or plumb - within 9 degrees of the grid - is made so, a diagonal stays,
-and the wobble of a hand goes.
+("as": "inside"), with the writing in it closed over.
+
+The rooms are then put on one sheet. Each reaches the middle of its own pen, and two rooms drawn
+side by side - one wall, drawn once for each - are grown until they meet in the middle of it.
+A wall between two rooms is drawn once, with as few corners as follow the pen to within a hand's
+width, and both rooms take it: they share it corner for corner, as two rooms share a wall. A wall
+the pen meant level or plumb - within 9 degrees of the grid - is made so for every room on it.
 
 spec: {"frame": "ec-au-p1-pe.json",       the trace spec of the same photo: its "corners", "plaque"
                                           and "resample" say where the drawing lies in the photo
@@ -38,6 +40,10 @@ spec: {"frame": "ec-au-p1-pe.json",       the trace spec of the same photo: its 
                                            for a loop that another loop hangs off, like the
                                            arrows to a ticket office's windows
           "pen": 3,                        how wide this room's strokes are, in pixels (7)
+          "parts": [{"strokes": [...], "at": [...]}, ...], "join": 16,
+                                           a room marked as several loops that are one room:
+                                           each part read as a room is, then joined across gaps
+                                           up to twice "join" pixels wide
           "level": 0,                      within how many degrees of the grid a wall is made
                                            level or plumb (9); 0 for a room whose walls slant or
                                            curve, which keeps them as the pen drew them
@@ -70,6 +76,9 @@ WALL = 4                 # pixels left between a room and one drawn inside it
 DOOR = 34                # pixels a door is wide
 PEN = 7                  # pixels a stroke is wide: how much of a loop's inside is its own ink
 LETTER = 4               # half the width of a pen stroke of writing, in pixels: what is closed over
+GROW = 6                 # pixels from the inner edge of a loop to the middle of its pen
+MEET = 14                # how far a room is grown to meet one drawn beside it: half the widest wall
+EPS = 3.0                # pixels an outline may stray from the pen once drawn with few corners
 INKS = {
     "green": lambda h, s, v: 100 <= h < 150,
     "cyan": lambda h, s, v: 165 <= h < 195,
@@ -154,39 +163,6 @@ def largest(cells):
     return best
 
 
-def drawn(loop, eps=5.0, level=9.0, straight=10.0):
-    """The outline with few corners: those that keep it within `eps` units of the pen, less the
-    ones on a wall that runs on nearly `straight`, and with every wall within `level` degrees of
-    the grid put on it."""
-    n = len(loop)
-    far = max(range(n), key=lambda i: (loop[i][0] - loop[0][0]) ** 2 + (loop[i][1] - loop[0][1]) ** 2)
-    first, second = loop[:far + 1], loop[far:] + [loop[0]]
-    pts = [first[i] for i in T.rdp(first, eps)][:-1] + [second[i] for i in T.rdp(second, eps)][:-1]
-
-    def turn(a, b, c):
-        u, v = (b[0] - a[0], b[1] - a[1]), (c[0] - b[0], c[1] - b[1])
-        return abs(math.degrees(math.atan2(u[0] * v[1] - u[1] * v[0], u[0] * v[0] + u[1] * v[1])))
-    changed = True
-    while changed and len(pts) > 3:
-        changed = False
-        for i in range(len(pts)):
-            if turn(pts[i - 1], pts[i], pts[(i + 1) % len(pts)]) < straight:
-                del pts[i]
-                changed = True
-                break
-    pts = [list(p) for p in pts]
-    slope = math.tan(math.radians(level))
-    for _ in range(3):
-        for i in range(len(pts)):
-            a, b = pts[i], pts[(i + 1) % len(pts)]
-            dx, dy = b[0] - a[0], b[1] - a[1]
-            if abs(dx) <= slope * abs(dy):
-                a[0] = b[0] = (a[0] + b[0]) / 2
-            elif abs(dy) <= slope * abs(dx):
-                a[1] = b[1] = (a[1] + b[1]) / 2
-    return [(p[0], p[1]) for p in pts]
-
-
 def door_on(poly, at, width):
     """A door `width` long on the edge of `poly` nearest to `at`, centred where `at` falls on it."""
     best = None
@@ -254,11 +230,12 @@ def main():
                 for x0, x1 in zip(xs[0::2], xs[1::2]):
                     cells += [(x, y) for x in range(max(0, math.ceil(x0 - 0.5)), min(w, math.floor(x1 - 0.5) + 1))]
             regions[code] = cells
-    for room in spec["rooms"]:
+    def region_of(room, code):
+        """What one loop, or one flood, gives: the cells of the photo that are the room."""
         mask = bytearray(w * h)
         for colour in room["strokes"]:
             if colour not in pens:
-                sys.exit(f"{room['code']}: nothing on the photo is drawn in {colour}")
+                sys.exit(f"{code}: nothing on the photo is drawn in {colour}")
             for i, v in enumerate(pens[colour]):
                 if v:
                     mask[i] = 1
@@ -267,13 +244,13 @@ def main():
         seed = (round(room["at"][0] * w), round(room["at"][1] * h))
         whole = bytearray(w * h)
         if room.get("as") == "inside":
-            for x, y in inside(mask, w, h, seed, room["code"]):
+            for x, y in inside(mask, w, h, seed, code):
                 whole[y * w + x] = 1
             # The writing inside is ink too: what it cut out of the room is closed over.
             reach = max(2, round(room.get("letters", LETTER) * k))
             whole = T.erode(T.dilate(whole, w, h, reach), w, h, reach)
         else:
-            for x, y in enclosed(mask, w, h, seed, room["code"]):
+            for x, y in enclosed(mask, w, h, seed, code):
                 whole[y * w + x] = 1
             # Less the loop's own ink, and with it whatever thinner than the pen hangs off it.
             whole = T.erode(whole, w, h, close + max(1, round(room.get("pen", PEN) * k)))
@@ -282,36 +259,165 @@ def main():
             (u0, v0), (u1, v1) = room["within"]
             cells = [(x, y) for x, y in cells if u0 * w <= x <= u1 * w and v0 * h <= y <= v1 * h]
         if not cells:
-            sys.exit(f"{room['code']}: nothing is left inside its strokes")
-        regions[room["code"]] = largest(cells)
+            sys.exit(f"{code}: nothing is left inside its strokes")
+        return largest(cells)
+
+    for room in spec["rooms"]:
+        if "parts" not in room:
+            regions[room["code"]] = region_of(room, room["code"])
+            continue
+        # A room marked as several loops that are one room: joined across what parts them.
+        whole = bytearray(w * h)
+        for part in room["parts"]:
+            for x, y in region_of(part, room["code"]):
+                whole[y * w + x] = 1
+        reach = max(2, round(room.get("join", 12) * k))
+        whole = T.erode(T.dilate(whole, w, h, reach), w, h, reach)
+        regions[room["code"]] = largest([(i % w, i // w) for i, v in enumerate(whole) if v])
+
+    for room in spec["rooms"]:
+        if not room.get("less"):
+            continue
+        gone = bytearray(w * h)
+        for other in room["less"]:
+            for x, y in regions[other]:
+                gone[y * w + x] = 1
+        gap = max(1, round(WALL * k))
+        gone = T.dilate(gone, w, h, gap)
+        left = bytearray(w * h)
+        for x, y in regions[room["code"]]:
+            if not gone[y * w + x]:
+                left[y * w + x] = 1
+        # What is left along the edges of the room taken out, thinner than a wall, goes too.
+        left = T.erode(left, w, h, gap)
+        left = T.dilate(left, w, h, gap)
+        regions[room["code"]] = largest([(i % w, i // w) for i, v in enumerate(left) if v and not gone[i]])
+
+    # Every room on one sheet. Each is grown to the middle of its own pen, and two rooms whose
+    # strokes run side by side - one wall, drawn twice - are grown on until they meet in its middle:
+    # they share that wall then, corner for corner, instead of standing a gap apart.
+    order = list(regions)
+    lab = [0] * (w * h)
+    for number, code in enumerate(order, 1):
+        for x, y in regions[code]:
+            if not lab[y * w + x]:
+                lab[y * w + x] = number
+    own = max(1, round(GROW * k))
+    reach = max(own, round(MEET * k))
+    near, far = lab[:], bytearray(w * h)
+    cover = bytearray(w * h)
+    members = {}
+    for i, v in enumerate(lab):
+        if v:
+            members.setdefault(v, []).append(i)
+    for number in range(1, len(order) + 1):
+        front = members.get(number, [])
+        seen = set(front)
+        for step in range(reach):
+            grown = []
+            for i in front:
+                x, y = i % w, i // w
+                for j in (i - 1, i + 1, i - w, i + w, i - w - 1, i - w + 1, i + w - 1, i + w + 1):
+                    if 0 <= j < w * h and abs(j % w - x) <= 1 and j not in seen and lab[j] != number:
+                        seen.add(j)
+                        grown.append(j)
+                        cover[j] += 1
+                        if not lab[j] and (not near[j] or step + 1 < far[j]):
+                            near[j], far[j] = number, step + 1
+            front = grown
+    for i in range(w * h):
+        if not lab[i] and near[i] and (far[i] <= own or cover[i] >= 2):
+            lab[i] = near[i]
+    cells_of = {}
+    for i, v in enumerate(lab):
+        if v:
+            cells_of.setdefault(v, []).append((i % w, i // w))
+
+    def at_corner(x, y):
+        """How many rooms, the outside counted, meet at a corner of the lattice."""
+        around = {lab[yy * w + xx] if 0 <= xx < w and 0 <= yy < h else 0
+                  for xx, yy in ((x - 1, y - 1), (x, y - 1), (x - 1, y), (x, y))}
+        return len(around)
+
+    # A wall between two rooms is drawn once, between the corners where a third room or the
+    # outside begins, and both rooms take it: so no two rooms can come to overlap by a sliver.
+    walls, corners = {}, {}
+    outlines = {}
+    for number, code in enumerate(order, 1):
+        loop = T.outline(largest(cells_of[number]))
+        stops = [i for i, p in enumerate(loop) if at_corner(*p) >= 3]
+        if not stops:
+            far_i = max(range(len(loop)), key=lambda i: (loop[i][0] - loop[0][0]) ** 2 + (loop[i][1] - loop[0][1]) ** 2)
+            first, second = loop[:far_i + 1], loop[far_i:] + [loop[0]]
+            outlines[code] = [first[i] for i in T.rdp(first, EPS * k)][:-1] + [second[i] for i in T.rdp(second, EPS * k)][:-1]
+            continue
+        points = []
+        for a, b in zip(stops, stops[1:] + [stops[0] + len(loop)]):
+            chain = tuple(loop[i % len(loop)] for i in range(a, b + 1))
+            key = min(chain, chain[::-1])
+            if key not in walls:
+                walls[key] = [key[i] for i in T.rdp(list(key), EPS * k)]
+            points += (walls[key] if chain == key else walls[key][::-1])[:-1]
+        outlines[code] = points
+    for points in outlines.values():
+        for p in points:
+            corners.setdefault(p, list(to_drawing(p)))
+
+    # Walls meant level or plumb are made so, for every room that shares them at once.
+    rooms_by_code = {room["code"]: room for room in spec["rooms"]}
+    parent = {}
+
+    def find(v):
+        while parent.setdefault(v, v) != v:
+            parent[v] = parent[parent[v]]
+            v = parent[v]
+        return v
+    for code, points in outlines.items():
+        level = rooms_by_code.get(code, {}).get("level", 9.0)
+        if not level:
+            continue
+        slope = math.tan(math.radians(level))
+        for p, q in zip(points, points[1:] + points[:1]):
+            dx, dy = corners[q][0] - corners[p][0], corners[q][1] - corners[p][1]
+            if abs(dx) <= slope * abs(dy):
+                parent[find(("x", p))] = find(("x", q))
+            elif abs(dy) <= slope * abs(dx):
+                parent[find(("y", p))] = find(("y", q))
+    lines = {}
+    for axis, p in list(parent):
+        lines.setdefault(find((axis, p)), []).append(p)
+    for (axis, _), members in lines.items():
+        c = 0 if axis == "x" else 1
+        mean = sum(corners[p][c] for p in members) / len(members)
+        for p in members:
+            corners[p][c] = mean
 
     spaces = []
-    for room in spec["rooms"]:
-        cells = regions[room["code"]]
-        if room.get("less"):
-            gone = bytearray(w * h)
-            for other in room["less"]:
-                for x, y in regions[other]:
-                    gone[y * w + x] = 1
-            gap = max(1, round(WALL * k))
-            gone = T.dilate(gone, w, h, gap)
-            left = bytearray(w * h)
-            for x, y in cells:
-                if not gone[y * w + x]:
-                    left[y * w + x] = 1
-            # What is left along the edges of the room taken out, thinner than a wall, goes too.
-            left = T.dilate(T.erode(left, w, h, gap), w, h, gap)
-            cells = largest([(i % w, i // w) for i, v in enumerate(left) if v and not gone[i]])
-        fitted = drawn([to_drawing(p) for p in T.outline(cells)], level=room.get("level", 9.0))
-        if len(fitted) < 3 or not T.simple(fitted):
-            if "--draft" not in sys.argv:
-                sys.exit(f"{room['code']}: its outline crosses itself once drawn with few corners")
-            print(f"  {room['code']}: crosses itself")
+    for code in order:
+        room = rooms_by_code.get(code, {"code": code})
         shape = []
-        for x, y in fitted:
-            p = {"x": round(x), "y": round(y)}
-            if not shape or shape[-1] != p:
-                shape.append(p)
+        for p in outlines[code]:
+            q = {"x": round(corners[p][0]), "y": round(corners[p][1])}
+            if not shape or shape[-1] != q:
+                shape.append(q)
+        if len(shape) > 1 and shape[0] == shape[-1]:
+            shape.pop()
+        # Where two walls met raggedly the outline can run out along one and straight back: a spur
+        # with nothing inside it, which goes.
+        spur = True
+        while spur and len(shape) > 3:
+            spur = False
+            for i in range(len(shape)):
+                a, b, c = shape[i - 1], shape[i], shape[(i + 1) % len(shape)]
+                u, v = (a["x"] - b["x"], a["y"] - b["y"]), (c["x"] - b["x"], c["y"] - b["y"])
+                if u == (0, 0) or v == (0, 0) or abs(math.degrees(math.atan2(u[0] * v[1] - u[1] * v[0], u[0] * v[0] + u[1] * v[1]))) < 12:
+                    del shape[i]
+                    spur = True
+                    break
+        if len(shape) < 3 or not T.simple([(q["x"], q["y"]) for q in shape]):
+            if "--draft" not in sys.argv:
+                sys.exit(f"{code}: its outline crosses itself once drawn with few corners")
+            print(f"  {code}: crosses itself")
         space = {key: room[key] for key in ("code", "wing", "name", "typeCode", "aliases") if key in room}
         space["shape"] = shape
         doors = []
@@ -320,16 +426,22 @@ def main():
                            to_drawing((at[0] * w, at[1] * h)),
                            math.dist(to_drawing((0, 0)), to_drawing((DOOR * k, 0))))
             if door is None:
-                sys.exit(f"{room['code']}: no wall long enough for the door at {at}")
+                sys.exit(f"{code}: no wall long enough for the door at {at}")
             doors.append({"from": {"x": round(door[0][0]), "y": round(door[0][1])}, "to": {"x": round(door[1][0]), "y": round(door[1][1])}})
         if doors:
             space["doors"] = doors
         spaces.append(space)
         xs = [p["x"] for p in shape]
         ys = [p["y"] for p in shape]
-        print(f"  {room['code']:<24} {len(shape):>2} corners  x {min(xs):>5}-{max(xs):<5} y {min(ys):>5}-{max(ys):<5}  {len(doors)} door(s)")
+        print(f"  {code:<24} {len(shape):>2} corners  x {min(xs):>5}-{max(xs):<5} y {min(ys):>5}-{max(ys):<5}  {len(doors)} door(s)")
 
-    spaces += spec.get("named", [])
+    # What the marks say of a room they also outline goes with its outline.
+    drawn_codes = {space["code"]: space for space in spaces}
+    for named in spec.get("named", []):
+        if named["code"] in drawn_codes:
+            drawn_codes[named["code"]].update({key: v for key, v in named.items() if key != "shape"})
+        else:
+            spaces.append(named)
     out = os.path.normpath(os.path.join(here, spec["out"]))
     lines = ["{", f' "building": {json.dumps(spec["building"])},', f' "floor": {json.dumps(spec["floor"])},',
              f' "why": {json.dumps(spec["why"], ensure_ascii=False)},', ' "spaces": [']
