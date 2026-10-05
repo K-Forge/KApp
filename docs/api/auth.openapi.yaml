@@ -2,77 +2,80 @@ openapi: 3.1.0
 
 info:
   title: KApp Auth API
-  version: 0.3.0
-  summary: Credential and token service for the KApp platform.
+  version: 1.0.0
+  summary: Sign-in and token service for the KApp platform.
   description: |
     Authentication service for KApp, the mobile application of Fundación
     Universitaria Konrad Lorenz built by the K-Forge club.
 
     ## Service boundary
 
-    This service owns **credentials only**: e-mail, password hash, e-mail
-    verification state and role assignment. It never stores or returns profile
-    data (identification document, phone, avatar, academic record). Profile data
-    belongs to the User API and is created there through the internal upsert
-    endpoint that this service calls during registration.
+    This service owns **accounts and tokens**: who an account is at Microsoft, the roles it
+    holds, its refresh tokens, and the visitor passes reception issues. It stores no password for
+    a member of the university and returns no profile data: names and avatar belong to the User
+    API, which this service keeps up to date through its internal upsert.
+
+    ## Signing in
+
+    **Every member of the university signs in with Microsoft** (Entra ID), in the apps and in the
+    admin portal alike:
+
+    1. The client runs Microsoft's sign-in: OpenID Connect, authorization code with PKCE, through
+       MSAL or AppAuth.
+    2. It sends the **ID token** Microsoft returns to `POST /auth/microsoft`.
+    3. This service checks it against the university tenant's published keys — signature,
+       issuer, audience and expiry — and answers with KApp's own tokens.
+
+    Every other KApp service keeps validating KApp's tokens exactly as before. A visitor, who has
+    no university account, redeems a day pass instead.
 
     ## Tokens
 
-    Access tokens are JWTs signed with **RS256**. The public half of the signing
-    key is published at `/.well-known/jwks.json`; every other KApp service
-    validates incoming tokens against that document instead of sharing a secret.
-    Send the token as `Authorization: Bearer <accessToken>`.
-
-    Token claims: `sub` (user id), `email`, `roles`, `iss`, `iat`, `exp`.
+    - **The access token** is a JWT signed with **RS256**, valid for **one hour**. The public half
+      of the signing key is published at `/.well-known/jwks.json`, and every other KApp service
+      validates incoming tokens against it. Send it as `Authorization: Bearer <accessToken>`.
+      Claims: `sub` (user id), `email`, `roles`, `iss`, `iat`, `exp`.
+    - **The refresh token** is opaque, and renews the access token without asking anybody
+      anything: a client calls `POST /auth/refresh` shortly before `expiresIn` runs out.
+      - It **rotates**: every use returns a new one, and the one used stops working.
+      - Presenting one that was already used **revokes its whole family**, because somebody holds
+        a copy.
+      - In the apps it lasts **30 days from its last use**, so a person who opens the app at least
+        once a month never signs in again. In the portal it lasts a working day (12 hours).
+      - `POST /auth/logout` revokes it. Deactivating an account revokes all of its refresh tokens.
 
     ## Roles
 
-    | Role | Granted by |
-    |---|---|
-    | `ROLE_GUEST` | Guest registration. May only read the campus map. |
-    | `ROLE_STUDENT` | Institutional registration with a student intake code, or an account an administrator creates. |
-    | `ROLE_PROFESSOR` | Institutional registration with a staff invitation code, or an account an administrator creates. |
-    | `ROLE_ADMIN` | Assigned manually by the registrar, never through signup. |
+    A token carries one **profile role** and any number of **permissions**, together in `roles`.
+    The profile role decides what the app shows; a permission opens a part of the admin portal.
 
-    ## Accounts an administrator creates: temporary passwords
+    | Role | Kind | Granted by |
+    |---|---|---|
+    | `ROLE_STUDENT` | profile | The Microsoft directory |
+    | `ROLE_PROFESSOR` | profile | The Microsoft directory |
+    | `ROLE_STAFF` | profile | The Microsoft directory: an administrative employee |
+    | `ROLE_ADMIN` | permission | An administrator, in the portal |
+    | `ROLE_RECEPTION`, `ROLE_MAINTENANCE`, `ROLE_MODERATION`, `ROLE_WELLBEING` | permission | An administrator, in the portal |
+    | `ROLE_GUEST` | — | Redeeming a visitor day pass: the campus map only |
 
-    Until the university's own identity provider is available, an administrator can
-    create an account directly (`POST /auth/admin/accounts`). It is given a
-    **temporary password**, returned once to the administrator to hand over, and
-    valid for seven days. The person cannot use the API with it: `POST /auth/login`
-    answers `403` with an `ApiError` whose `details` name the field `newPassword`,
-    and the client asks for a password of their own and sends both to
-    `POST /auth/password`, which signs them in. A forgotten password is handled the
-    same way: an administrator issues a new temporary one.
+    - **The profile role comes from a claim of the Microsoft directory.** Which attribute the
+      university uses is agreed with its IT office and configured, not written in code.
+    - **An account the directory does not classify** signs in as `ROLE_STAFF`, which opens the
+      map and nothing academic, until an administrator sets its profile role.
+    - **The first administrators** come from configuration. Every later permission is granted
+      through `PUT /auth/admin/accounts/{userId}/roles`.
 
-    Since 0.2.0. Additive: nothing that worked before changes.
+    ## Development only
 
-    ## A client that takes only some accounts: `allowedRoles`
-
-    A client that serves only some roles names them in `allowedRoles` at login and
-    when replacing a password: the admin portal sends `[ROLE_ADMIN]`. An account
-    with none of them is refused with `403` and an issue for the field
-    `allowedRoles`, after its password is checked and **before anything else** - in
-    particular before a temporary password is offered for replacing, so a client for
-    one kind of account never sets another kind's password. Left out, any account.
-    Since 0.3.0, additive.
-
-    ## Deliberately deferred past the MVP
-
-    **Refresh tokens and logout are out of scope for this contract.** Access
-    tokens are short lived (one hour) and there is no refresh endpoint, no token
-    revocation list and no `POST /auth/logout`. Clients must treat a `401` as
-    "send the user back to the login screen" and must clear the token locally on
-    sign-out. Both flows are on the roadmap and will be added as a minor version
-    of this specification; do not design client state around their absence being
-    permanent.
+    Password sign-in and everything around it — registration, e-mail verification, invitation
+    codes, accounts an administrator creates with a temporary password — exist for development,
+    for CI and for the mocks. **They answer `404` unless the server runs with local sign-in
+    enabled**, which production never does. They keep the shapes they had in 0.3.0, so the
+    clients' development builds can still sign in to a development server.
 
     ## Conventions
 
-    - Institutional accounts must use the `@konradlorenz.edu.co` domain.
-    - Academic period strings across KApp match `^\d{4}[12]$`, where the trailing
-      digit is the semester: `"20262"` is 2026 semester 2. No field in this
-      service carries a period, but invitation codes are minted per period.
+    - Institutional accounts use the `@konradlorenz.edu.co` domain.
     - Errors share the `ApiError` shape across every KApp service.
   contact:
     name: K-Forge
@@ -86,116 +89,51 @@ security:
   - bearerAuth: []
 
 tags:
-  - name: Registration
-    description: Account creation for institutional members.
   - name: Authentication
-    description: Credential exchange for access tokens.
+    description: Signing in with Microsoft, renewing and ending a session.
   - name: Accounts
-    description: |
-      Accounts an administrator creates, each with a temporary password the person
-      replaces at first sign-in.
-  - name: Verification
-    description: E-mail ownership confirmation.
+    description: Roles and permissions, which an administrator manages.
   - name: Discovery
     description: Public key material consumed by the other KApp services.
   - name: Visitor passes
     description: |
       One-day passes reception issues to visitors. A pass is a token, not an account: no
       e-mail, no password, nothing that outlives the visit.
+  - name: Development
+    description: |
+      Password sign-in, registration, verification, invitation codes and temporary passwords.
+      `404` unless local sign-in is enabled: development, CI and the mocks only.
   - name: Health
     description: Liveness probe.
+  - name: Internal
+    description: Service-to-service endpoints, unreachable from outside the Docker network.
 
 paths:
-  /auth/register:
+  /auth/microsoft:
     post:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: []          # public - no token required
-      operationId: registerInstitutionalUser
-      summary: Register an institutional account
+      x-roles: []          # public - the Microsoft ID token is the proof
+      operationId: signInWithMicrosoft
+      summary: Sign in with Microsoft
       description: |
-        Creates a credential record for a member of the university and asks the
-        User API to create the matching profile.
+        Exchanges the ID token Microsoft issued for KApp's access and refresh tokens.
 
-        Public endpoint: no token required.
+        Public endpoint: no KApp token required. The ID token is the proof, and the gateway
+        rate-limits this like every credential endpoint.
 
-        Rules enforced:
+        The ID token must be signed by the university's tenant, issued to KApp's application
+        (`aud`), and unexpired. The account is created the first time its owner signs in, and its
+        names are refreshed from the token every time.
 
-        - `email` must end in one of the configured domains — `@konradlorenz.edu.co`
-          for institutional accounts, `@kforge.dev` for the team's own development
-          ones. Any other domain is rejected with `400`. **There is no guest
-          registration**: a visitor redeems a day pass instead, which creates no
-          account at all.
-        - `invitationCode` is mandatory and is what decides the role. A student
-          intake code yields `ROLE_STUDENT`, a staff code yields
-          `ROLE_PROFESSOR`. An unknown, spent or expired code is rejected with
-          `400`. `ROLE_ADMIN` is never granted through this endpoint.
-        - The account is created with `emailVerified: false` and a verification
-          e-mail is sent. Login is refused until the address is confirmed.
-      tags: [Registration]
-      security: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RegistrationRequest'
-            example:
-              email: pepito.perez@konradlorenz.edu.co
-              password: ExamplePassword123
-              firstName: Pepito
-              lastName: Perez Gomez
-              invitationCode: KL-7K2M-QX9P
-              studentCode: '506999999'
-              programCode: '506'
-      responses:
-        '201':
-          description: Account created, verification e-mail sent
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RegistrationResponse'
-              example:
-                userId: 3f8a1c2e-7b4d-4e5a-9c6f-2d1b8e0a4c73
-                email: pepito.perez@konradlorenz.edu.co
-                emailVerified: false
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '409':
-          $ref: '#/components/responses/Conflict'
-
-  /auth/login:
-    post:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: []          # public - no token required
-      operationId: login
-      summary: Exchange credentials for an access token
-      description: |
-        Verifies the e-mail and password pair and returns a signed RS256 access
-        token together with the roles the client should use to shape its
-        navigation.
-
-        Public endpoint: no token required.
+        `client` says which client is signing in. `PORTAL` requires a permission: an account with
+        none is refused with `403` and an issue for the field `client`, and nothing is issued.
 
         Outcomes:
 
-        - `200` credentials valid and the address is verified.
-        - `401` unknown e-mail or wrong password. The message is intentionally
-          identical for both so the response does not reveal which accounts
-          exist.
-        - `403` credentials are valid but the address has not been confirmed
-          yet. Clients should route the user to the "resend verification"
-          screen.
-        - `403` with an issue for the field `newPassword` in `details`: the
-          password is a temporary one an administrator issued. Clients ask for a
-          new password and send both to `POST /auth/password`.
-        - `401` as well for a temporary password past its expiry: an
-          administrator has to issue a new one.
-        - `403` with an issue for the field `allowedRoles`: the credentials are
-          valid, and the account has none of the roles the client named. Checked
-          before the temporary password.
-
-        There is no refresh token. When `expiresIn` elapses the client must
-        prompt for credentials again.
+        - `200` signed in.
+        - `401` the ID token is not valid: wrong signature, wrong tenant or audience, expired. One
+          message for all of them.
+        - `403` the account is deactivated, or it has no permission and `client` is `PORTAL`.
       tags: [Authentication]
       security: []
       requestBody:
@@ -203,21 +141,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginRequest'
+              $ref: '#/components/schemas/MicrosoftSignInRequest'
             example:
-              email: pepito.perez@konradlorenz.edu.co
-              password: ExamplePassword123
+              idToken: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Im1pY3Jvc29mdC1rZXkifQ.eyJhdWQiOiJrYXBwLWNsaWVudC1pZCJ9.signature
+              client: APP
       responses:
         '200':
-          description: Authentication succeeded
+          description: Signed in
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenResponse'
               example:
-                accessToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImthcHAtYXV0aC0yMDI2LTA4In0.eyJzdWIiOiIzZjhhMWMyZS03YjRkLTRlNWEtOWM2Zi0yZDFiOGUwYTRjNzMiLCJlbWFpbCI6InBlcGl0by5wZXJlekBrb25yYWRsb3JlbnouZWR1LmNvIiwicm9sZXMiOlsiUk9MRV9TVFVERU5UIl0sImlzcyI6Imh0dHBzOi8vYXV0aC5rYXBwLmtvbnJhZGxvcmVuei5lZHUuY28iLCJpYXQiOjE3ODc2NTQ0MDAsImV4cCI6MTc4NzY1ODAwMH0.Yx3nQK1pV9sM0bZrT8uLf2Hc7EjWd5AoXgN4iRySlPvCmUt6BqDkJhZ0wF3xO9aInGe1rMcT7yUvKpL5dQsRb2WjXhA8fZoNmE4gCtIuYlBvPkSxDqMrH6JaWnTcOe0
+                accessToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImV4YW1wbGUta2V5In0.eyJzdWIiOiIzZjhhMWMyZS03YjRkLTRlNWEtOWM2Zi0yZDFiOGUwYTRjNzMiLCJpc3MiOiJodHRwczovL2thcHAua29ucmFkbG9yZW56LmVkdS5jbyIsImlhdCI6MTc2ODQ4OTIwMCwiZXhwIjoxNzY4NDkyODAwLCJlbWFpbCI6InBlcGl0by5wZXJlekBrb25yYWRsb3JlbnouZWR1LmNvIiwicm9sZXMiOlsiUk9MRV9TVFVERU5UIl19.DbIGwPyHTgR3wlzHHuAzgqSYybOA41FW7IkUBCjv5M4ndXLPkbr3OIwe604vUmkvr48ixeunege-L9ypBJJ5s1dig1NlMyDs0c3fxV75cwCoTCcdJiWBS7gmln9oMl1VITiPXg6T7-IJ8I5QD2Y6k6n3dhD8fkY59mdNAYXclVDOCQnyyDqKY9xkWjKWVo19i4wdVJMfai0KVST5ccGj0SmXnDNbgzgT0kLb7lxjS71_XUJsTZ_9TXiIvuWvQ7Ikoo4wnropg7EHtLb7dLBjY6Fo2Tab3alCP86aT10x5w6BgaSTT1LB3mVCc8o1IC3mY3CHqPk9iuaoMSWU7zsEPg
                 tokenType: Bearer
                 expiresIn: 3600
+                refreshToken: rt_7Qm2Xk9PzT4vB8nL1cR6sW3yH5dF0gJ
+                refreshExpiresIn: 2592000
                 userId: 3f8a1c2e-7b4d-4e5a-9c6f-2d1b8e0a4c73
                 roles: [ROLE_STUDENT]
         '400':
@@ -227,31 +167,28 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
 
-  /auth/password:
+  /auth/refresh:
     post:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: []          # public - no token required
-      operationId: changePassword
-      summary: Replace a password, and sign in with the new one
+      x-roles: []          # public - the refresh token is the proof
+      operationId: refreshTokens
+      summary: Renew the access token
       description: |
-        Sets a new password for an account, given the current one, and returns an
-        access token exactly as `POST /auth/login` does. It is how a temporary
-        password an administrator issued is replaced at first sign-in, and it works
-        for any password.
+        Exchanges a refresh token for a new access token **and a new refresh token**. The one sent
+        stops working at once.
 
-        Public endpoint: no token required. The current password is the proof, and
-        the gateway rate-limits it like login.
+        Public endpoint: no access token required, since the point is that it may have expired.
 
         Outcomes:
 
-        - `200` the new password is set and the token is for it.
-        - `400` the new password is under 10 characters, over 72, or the same as the
-          current one.
-        - `401` unknown e-mail, wrong current password, or a temporary password past
-          its expiry. One message for all of them, as with login.
-        - `403` the address has not been confirmed yet, or, with an issue for
-          `allowedRoles`, the account has none of the roles the client named. In
-          both cases nothing is changed.
+        - `200` renewed. Keep the new refresh token and forget the old one.
+        - `401` the refresh token is unknown, expired or revoked. The client signs in again.
+        - `401` as well when the refresh token **was already used**: somebody holds a copy, so its
+          whole family is revoked and every device holding one of them has to sign in again.
+        - `403` the account was deactivated.
+
+        The roles in the new tokens are the account's roles now, so a permission granted or taken
+        away reaches the client at its next renewal.
       tags: [Authentication]
       security: []
       requestBody:
@@ -259,18 +196,24 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PasswordChangeRequest'
+              $ref: '#/components/schemas/RefreshRequest'
             example:
-              email: pepito.perez@konradlorenz.edu.co
-              currentPassword: K7QM-X2RP-94TB
-              newPassword: ExamplePassword123
+              refreshToken: rt_7Qm2Xk9PzT4vB8nL1cR6sW3yH5dF0gJ
       responses:
         '200':
-          description: Password replaced; signed in with the new one
+          description: Renewed
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenResponse'
+              example:
+                accessToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImV4YW1wbGUta2V5In0.eyJzdWIiOiIzZjhhMWMyZS03YjRkLTRlNWEtOWM2Zi0yZDFiOGUwYTRjNzMiLCJpc3MiOiJodHRwczovL2thcHAua29ucmFkbG9yZW56LmVkdS5jbyIsImlhdCI6MTc2ODQ4OTIwMCwiZXhwIjoxNzY4NDkyODAwLCJlbWFpbCI6InBlcGl0by5wZXJlekBrb25yYWRsb3JlbnouZWR1LmNvIiwicm9sZXMiOlsiUk9MRV9TVFVERU5UIl19.DbIGwPyHTgR3wlzHHuAzgqSYybOA41FW7IkUBCjv5M4ndXLPkbr3OIwe604vUmkvr48ixeunege-L9ypBJJ5s1dig1NlMyDs0c3fxV75cwCoTCcdJiWBS7gmln9oMl1VITiPXg6T7-IJ8I5QD2Y6k6n3dhD8fkY59mdNAYXclVDOCQnyyDqKY9xkWjKWVo19i4wdVJMfai0KVST5ccGj0SmXnDNbgzgT0kLb7lxjS71_XUJsTZ_9TXiIvuWvQ7Ikoo4wnropg7EHtLb7dLBjY6Fo2Tab3alCP86aT10x5w6BgaSTT1LB3mVCc8o1IC3mY3CHqPk9iuaoMSWU7zsEPg
+                tokenType: Bearer
+                expiresIn: 3600
+                refreshToken: rt_Vb3Nq8Lw2Zx6Jk1Mp9Rt4Ys7Hc0Gd5F
+                refreshExpiresIn: 2592000
+                userId: 3f8a1c2e-7b4d-4e5a-9c6f-2d1b8e0a4c73
+                roles: [ROLE_STUDENT]
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -278,76 +221,32 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
 
-  /auth/verify:
+  /auth/logout:
     post:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: []          # public - no token required
-      operationId: verifyEmail
-      summary: Confirm an e-mail address
+      x-roles: []          # public - the refresh token is the proof
+      operationId: logout
+      summary: Sign out
       description: |
-        Consumes the single-use token delivered in the verification e-mail and
-        marks the address as confirmed. After a successful call the account can
-        log in.
+        Revokes the refresh token sent and its whole family, so no device holding one of them can
+        renew. The access token in hand keeps working until it expires, within the hour; the
+        client discards it.
 
-        Public endpoint: no token required. The `token` in the body is the
-        verification token from the e-mail link, not a JWT access token.
-
-        The token is single use: replaying it returns `400`, same as an expired
-        or malformed one. Clients should treat `400` as "ask the user to request
-        a new link" and call `POST /auth/verify/resend`.
-      tags: [Verification]
+        Public endpoint, and **always `204`**: signing out with a token that is already unknown or
+        revoked is not an error, so a client can always sign out.
+      tags: [Authentication]
       security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/VerificationRequest'
+              $ref: '#/components/schemas/RefreshRequest'
             example:
-              token: 8f14e45fceea167a5a36dedd4bea2543c1e9b1f0a7d24c5e
+              refreshToken: rt_Vb3Nq8Lw2Zx6Jk1Mp9Rt4Ys7Hc0Gd5F
       responses:
         '204':
-          description: Address confirmed, no content returned
-        '400':
-          $ref: '#/components/responses/BadRequest'
-
-  /auth/verify/resend:
-    post:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: []          # public - no token required
-      operationId: resendVerificationEmail
-      summary: Request a new verification e-mail
-      description: |
-        Issues a fresh verification token and sends it to the address supplied.
-
-        Public endpoint: no token required.
-
-        This endpoint **always answers `202`**, whether or not an account with
-        that address exists and whether or not it was already verified. That is
-        deliberate: a per-address distinction would turn this into an account
-        enumeration oracle. Clients must show the same neutral confirmation in
-        every case and must never infer account existence from the response.
-
-        Any previously issued verification token for the account is invalidated.
-      tags: [Verification]
-      security: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResendVerificationRequest'
-            example:
-              email: pepito.perez@konradlorenz.edu.co
-      responses:
-        '202':
-          description: Request accepted, delivery is not confirmed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AcceptedResponse'
-              example:
-                message: If an account exists for that address, a verification e-mail has been sent.
+          description: Signed out
         '400':
           $ref: '#/components/responses/BadRequest'
 
@@ -361,9 +260,8 @@ paths:
         Publishes the public half of the RS256 signing keys as a JWKS document.
 
         Public endpoint: no token required, and it is exposed unauthenticated on
-        purpose. Every other KApp service (gateway, user, course, assignment)
-        fetches this document, caches it by `kid`, and uses it to validate the
-        signature of incoming access tokens. No service holds the private key
+        purpose. Every other KApp service fetches this document, caches it by `kid`, and uses it
+        to validate the signature of incoming access tokens. No service holds the private key
         and no shared secret is distributed.
 
         More than one key may be present during a rotation: the retiring key
@@ -395,8 +293,7 @@ paths:
       operationId: getAuthHealth
       summary: Report service liveness
       description: |
-        Liveness probe used by Docker Compose, the Eureka registry and the
-        gateway circuit breaker.
+        Liveness probe used by Docker Compose, Kubernetes and the gateway circuit breaker.
 
         Public endpoint: no token required. It reports only whether the service
         process is answering; it deliberately exposes no build, dependency or
@@ -413,200 +310,69 @@ paths:
               example:
                 status: UP
 
-  /auth/admin/invitation-codes:
-    get:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      operationId: listInvitationCodes
-      summary: List invitation codes
-      description: |
-        Requires `ROLE_ADMIN`. Invitation codes are what gate institutional registration, so
-        being able to see which exist, how many uses each has left and which are still active
-        is the difference between managing access and guessing at it.
-      tags: [Invitation codes]
-      parameters:
-        - name: active
-          in: query
-          required: false
-          schema: { type: boolean }
-          description: >-
-            Filter by whether the code can still be redeemed **right now**, which is
-            narrower than its `active` flag: `true` returns codes that are active, not
-            expired and not spent, and `false` returns every code failing any one of
-            those. Omit it to list all codes. A code with `active: true` that has used
-            all of `maxUses` is therefore returned by `active=false`.
-      responses:
-        '200':
-          description: The codes
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/InvitationCode'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-    post:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      operationId: createInvitationCode
-      summary: Create an invitation code
-      description: |
-        Requires `ROLE_ADMIN`. The role a code grants is fixed at creation. `ROLE_ADMIN` is
-        never grantable this way: an administrator must be promoted deliberately, or anyone
-        holding a code could escalate.
-      tags: [Invitation codes]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvitationCodeRequest'
-      responses:
-        '201':
-          description: The created code
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InvitationCode'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-
-  /auth/admin/invitation-codes/{code}:
+  /auth/admin/accounts/{userId}/roles:
     parameters:
-      - name: code
-        in: path
-        required: true
-        schema: { type: string, maxLength: 40 }
-        example: KL-7K2M-QX9P
-    patch:
+      - $ref: '#/components/parameters/AccountIdPath'
+    put:
       # Authorization as the code enforces it, not as prose describes it.
       x-roles: [ROLE_ADMIN]
-      operationId: updateInvitationCode
-      summary: Activate or deactivate an invitation code
+      operationId: setAccountRoles
+      summary: Set an account's profile role and permissions
       description: |
-        Requires `ROLE_ADMIN`. Deactivating is the reversible way to stop a code being
-        redeemed, and it keeps the record of who used it.
-      tags: [Invitation codes]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [active]
-              properties:
-                active: { type: boolean }
-              additionalProperties: false
-      responses:
-        '200':
-          description: The updated code
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InvitationCode'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    delete:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      operationId: deleteInvitationCode
-      summary: Delete an invitation code
-      description: |
-        Requires `ROLE_ADMIN`. Prefer deactivating: deleting a code that has already been
-        redeemed discards the only record of how those accounts were created.
-      tags: [Invitation codes]
-      responses:
-        '204':
-          description: Deleted
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
+        Requires `ROLE_ADMIN`. Replaces the account's roles with exactly the ones sent: one
+        `profileRole` and any `permissions`. They reach the person's tokens at their next renewal,
+        within the hour.
 
-
-  /auth/admin/accounts:
-    post:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      operationId: createAccount
-      summary: Create an account with a temporary password
-      description: |
-        Requires `ROLE_ADMIN`. Creates the profile in the User API and the account
-        here, with a temporary password returned once in the response: hand it to
-        the person, who replaces it at first sign-in (`POST /auth/password`). It is
-        valid for seven days.
-
-        - `role` is `ROLE_STUDENT` or `ROLE_PROFESSOR`. `ROLE_ADMIN` is never granted
-          this way, as with invitation codes.
-        - A student needs `studentCode`. `programCode` may be left out: it is the
-          first three digits of the student code, as the university numbers them.
-        - `email` must use one of the configured domains, as in registration.
-        - The account may sign in at once: an administrator vouched for it. Its
-          address is still recorded as not verified.
+        - `profileRole` overrides what the Microsoft directory says, for an account it does not
+          classify or classifies wrong.
+        - `400` for a permission listed twice, or a profile role sent as a permission.
+        - `400` as well when an administrator would take `ROLE_ADMIN` away from themselves, so
+          the portal always keeps someone who can manage it.
       tags: [Accounts]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AccountRequest'
+              $ref: '#/components/schemas/AccountRolesRequest'
             example:
-              email: ana.ruiz@konradlorenz.edu.co
-              firstName: Ana
-              lastName: Ruiz
-              role: ROLE_PROFESSOR
+              profileRole: ROLE_STAFF
+              permissions: [ROLE_RECEPTION]
       responses:
-        '201':
-          description: The account, and its temporary password - shown this once
+        '200':
+          description: The account's roles now
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TemporaryPassword'
+                $ref: '#/components/schemas/AccountRoles'
+              example:
+                userId: 8e1c4f27-90ab-4d3e-b5f6-1a2b3c4d5e6f
+                roles: [ROLE_STAFF, ROLE_RECEPTION]
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /auth/admin/accounts/{userId}:
     parameters:
-      - name: userId
-        in: path
-        required: true
-        schema: { type: string, maxLength: 64 }
-        description: The account's id, the `sub` of its tokens.
+      - $ref: '#/components/parameters/AccountIdPath'
     delete:
       # Authorization as the code enforces it, not as prose describes it.
       x-roles: [ROLE_ADMIN]
       operationId: deleteAccount
       summary: Delete an account and its profile
       description: |
-        Requires `ROLE_ADMIN`. Removes the account's credential, then asks the User
-        API to remove its profile. Deleting again is safe: an account with no
-        credential left still has its profile removed. Never an administrator's
-        account, and never one's own: `400`. `503` when the profile could not be
-        removed yet; the account already signs nobody in, and deleting again
-        finishes it. Since 0.3.0.
+        Requires `ROLE_ADMIN`. Removes the account and its refresh tokens, then asks the User API
+        to remove its profile. Deleting again is safe: an account already gone still has its
+        profile removed. Never an administrator's account, and never one's own: `400`. `503` when
+        the profile could not be removed yet; the account already signs nobody in, and deleting
+        again finishes it.
+
+        Signing in with Microsoft again creates a new, empty account.
       tags: [Accounts]
       responses:
         '204':
@@ -617,37 +383,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-
-  /auth/admin/accounts/{userId}/temporary-password:
-    parameters:
-      - name: userId
-        in: path
-        required: true
-        schema: { type: string, maxLength: 64 }
-        description: The account's id, the `sub` of its tokens.
-    post:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      operationId: issueTemporaryPassword
-      summary: Give an account a new temporary password
-      description: |
-        Requires `ROLE_ADMIN`. For a person who forgot their password: the one they
-        had stops working at once, and the new temporary password, returned once
-        here, must be replaced at their next sign-in. Valid for seven days.
-      tags: [Accounts]
-      responses:
-        '200':
-          description: The new temporary password - shown this once
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TemporaryPassword'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
 
   /auth/visitor-passes/{code}/redeem:
     parameters:
@@ -666,11 +401,11 @@ paths:
       summary: Redeem a visitor day pass
       description: |
         Exchanges a pass for a token valid for **24 hours** that opens the campus map and
-        nothing else.
+        nothing else. There is no refresh token: a pass is for today.
 
         Public, necessarily: a visitor has no account and nothing to authenticate with. The
         code *is* the credential, which is why it is single-use, stops being redeemable 12
-        hours after it was issued, and is rate-limited at the gateway alongside `/auth/login`.
+        hours after it was issued, and is rate-limited at the gateway alongside the sign-in.
 
         The returned token carries `ROLE_GUEST` and no other role. That is not a special
         visitor permission — it is the role every other service already refuses everywhere
@@ -703,9 +438,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenResponse'
               example:
-                accessToken: eyJhbGciOiJSUzI1NiIsImtpZCI6ImthcHAtMjAyNjA5In0...
+                accessToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImV4YW1wbGUta2V5In0.eyJzdWIiOiJ2aXNpdG9yOjljMWYwYTcyLTRiM2UtNGQ1MS04YTIwLTc3ZTFiMmM5ZDY0MCIsImlzcyI6Imh0dHBzOi8va2FwcC5rb25yYWRsb3JlbnouZWR1LmNvIiwiaWF0IjoxNzY4NDg5MjAwLCJleHAiOjE3Njg1NzU2MDAsInJvbGVzIjpbIlJPTEVfR1VFU1QiXX0.LCpNu8-8A1jPqadvGGmjx_vjwLppk8ghjCZUQMfBRaT5x8DQEgcpZyYBWwKRcS2eFTWCPUXh1HC9lIEf6TAtOxl4KqjDHIu4ZKmPBqS8S8UnAOKE3X6z-vufmKMJ3yaNa_ij7l0ewsJU2DqN2KUwIGI0Qj6ksjnV_4aAnTpNUPOoF1G7oFg6-Z-Of3-W6KG0JEHpA2WJOd-eQKURUSu3FuQbabE77F_UgUvwaN_Tv0HRlfODzT-WbowcFjh4xAoXnMPpLkJ1MhrTI1GyLdri6FStUPdSoLj85dQSSjOINaRoAsJKrk-Y62jaGkZXOuNmRG4NnDreMKCYiZef8zYTPw
                 tokenType: Bearer
                 expiresIn: 86400
+                refreshToken: null
+                refreshExpiresIn: null
                 userId: visitor:9c1f0a72-4b3e-4d51-8a20-77e1b2c9d640
                 roles: [ROLE_GUEST]
         '400':
@@ -731,11 +468,11 @@ paths:
   /auth/admin/visitor-passes:
     get:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
+      x-roles: [ROLE_ADMIN, ROLE_RECEPTION]
       operationId: listVisitorPasses
       summary: Read the visitor register
       description: |
-        Requires `ROLE_ADMIN`. Newest first.
+        Requires `ROLE_RECEPTION` or `ROLE_ADMIN`. Newest first.
 
         **This returns personal data**: visitors' names and identity documents. That is the
         point of a register, and the reason it exists nowhere else in the API. Records are
@@ -763,11 +500,11 @@ paths:
           $ref: '#/components/responses/Forbidden'
     post:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
+      x-roles: [ROLE_ADMIN, ROLE_RECEPTION]
       operationId: createVisitorPass
       summary: Issue a visitor day pass
       description: |
-        Requires `ROLE_ADMIN`. Returns a code to read out to the visitor.
+        Requires `ROLE_RECEPTION` or `ROLE_ADMIN`. Returns a code to read out to the visitor.
 
         The code avoids `I`, `O`, `0` and `1`: it is read aloud across a counter and typed by
         somebody who has never seen it written down.
@@ -805,11 +542,11 @@ paths:
         example: KL-V-7K2M-QX9P
     delete:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
+      x-roles: [ROLE_ADMIN, ROLE_RECEPTION]
       operationId: deleteVisitorPass
       summary: Revoke an unredeemed pass
       description: |
-        Requires `ROLE_ADMIN`.
+        Requires `ROLE_RECEPTION` or `ROLE_ADMIN`.
 
         `409` for a pass that has already been redeemed. That row is no longer a pass, it is
         the record of a visit, and a register reception could quietly edit is not a register.
@@ -831,6 +568,457 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
 
+  /auth/login:
+    post:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: []          # public - no token required
+      x-development-only: true
+      operationId: login
+      summary: Sign in with a password (development only)
+      description: |
+        **Development only**: `404` unless local sign-in is enabled. Verifies an e-mail and
+        password pair and answers exactly as `POST /auth/microsoft` does, refresh token included.
+
+        Outcomes:
+
+        - `200` credentials valid and the address is verified.
+        - `401` unknown e-mail or wrong password. The message is intentionally
+          identical for both so the response does not reveal which accounts
+          exist.
+        - `403` credentials are valid but the address has not been confirmed
+          yet. Clients should route the user to the "resend verification"
+          screen.
+        - `403` with an issue for the field `newPassword` in `details`: the
+          password is a temporary one an administrator issued. Clients ask for a
+          new password and send both to `POST /auth/password`.
+        - `401` as well for a temporary password past its expiry: an
+          administrator has to issue a new one.
+        - `403` with an issue for the field `allowedRoles`: the credentials are
+          valid, and the account has none of the roles the client named. Checked
+          before the temporary password.
+      tags: [Development]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: pepito.perez@konradlorenz.edu.co
+              password: ExamplePassword123
+      responses:
+        '200':
+          description: Authentication succeeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+              example:
+                accessToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImV4YW1wbGUta2V5In0.eyJzdWIiOiIzZjhhMWMyZS03YjRkLTRlNWEtOWM2Zi0yZDFiOGUwYTRjNzMiLCJpc3MiOiJodHRwczovL2thcHAua29ucmFkbG9yZW56LmVkdS5jbyIsImlhdCI6MTc2ODQ4OTIwMCwiZXhwIjoxNzY4NDkyODAwLCJlbWFpbCI6InBlcGl0by5wZXJlekBrb25yYWRsb3JlbnouZWR1LmNvIiwicm9sZXMiOlsiUk9MRV9TVFVERU5UIl19.DbIGwPyHTgR3wlzHHuAzgqSYybOA41FW7IkUBCjv5M4ndXLPkbr3OIwe604vUmkvr48ixeunege-L9ypBJJ5s1dig1NlMyDs0c3fxV75cwCoTCcdJiWBS7gmln9oMl1VITiPXg6T7-IJ8I5QD2Y6k6n3dhD8fkY59mdNAYXclVDOCQnyyDqKY9xkWjKWVo19i4wdVJMfai0KVST5ccGj0SmXnDNbgzgT0kLb7lxjS71_XUJsTZ_9TXiIvuWvQ7Ikoo4wnropg7EHtLb7dLBjY6Fo2Tab3alCP86aT10x5w6BgaSTT1LB3mVCc8o1IC3mY3CHqPk9iuaoMSWU7zsEPg
+                tokenType: Bearer
+                expiresIn: 3600
+                refreshToken: rt_7Qm2Xk9PzT4vB8nL1cR6sW3yH5dF0gJ
+                refreshExpiresIn: 2592000
+                userId: 3f8a1c2e-7b4d-4e5a-9c6f-2d1b8e0a4c73
+                roles: [ROLE_STUDENT]
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /auth/password:
+    post:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: []          # public - no token required
+      x-development-only: true
+      operationId: changePassword
+      summary: Replace a password, and sign in with the new one (development only)
+      description: |
+        **Development only**: `404` unless local sign-in is enabled. Sets a new password for an
+        account, given the current one, and answers exactly as `POST /auth/login` does. It is how a
+        temporary password an administrator issued is replaced at first sign-in, and it works
+        for any password.
+
+        Outcomes:
+
+        - `200` the new password is set and the token is for it.
+        - `400` the new password is under 10 characters, over 72, or the same as the
+          current one.
+        - `401` unknown e-mail, wrong current password, or a temporary password past
+          its expiry. One message for all of them, as with login.
+        - `403` the address has not been confirmed yet, or, with an issue for
+          `allowedRoles`, the account has none of the roles the client named. In
+          both cases nothing is changed.
+      tags: [Development]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+            example:
+              email: pepito.perez@konradlorenz.edu.co
+              currentPassword: K7QM-X2RP-94TB
+              newPassword: ExamplePassword123
+      responses:
+        '200':
+          description: Password replaced; signed in with the new one
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /auth/register:
+    post:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: []          # public - no token required
+      x-development-only: true
+      operationId: registerInstitutionalUser
+      summary: Register an account with a password (development only)
+      description: |
+        **Development only**: `404` unless local sign-in is enabled. Creates an account with a
+        password and asks the User API to create the matching profile.
+
+        - `email` must end in one of the configured domains, or it is rejected with `400`.
+        - `invitationCode` is mandatory and decides the profile role. No code grants a
+          permission. An unknown, spent or expired code is rejected with `400`.
+        - The account is created with `emailVerified: false` and a verification e-mail is sent
+          where e-mail is configured. Sign-in is refused until the address is confirmed.
+      tags: [Development]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+            example:
+              email: pepito.perez@konradlorenz.edu.co
+              password: ExamplePassword123
+              firstName: Pepito
+              lastName: Perez Gomez
+              invitationCode: KL-7K2M-QX9P
+      responses:
+        '201':
+          description: Account created, verification e-mail sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponse'
+              example:
+                userId: 3f8a1c2e-7b4d-4e5a-9c6f-2d1b8e0a4c73
+                email: pepito.perez@konradlorenz.edu.co
+                emailVerified: false
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /auth/verify:
+    post:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: []          # public - no token required
+      x-development-only: true
+      operationId: verifyEmail
+      summary: Confirm an e-mail address (development only)
+      description: |
+        **Development only**: `404` unless local sign-in is enabled. Consumes the single-use token
+        delivered in the verification e-mail and marks the address as confirmed. After a
+        successful call the account can sign in with its password.
+
+        The token is single use: replaying it returns `400`, same as an expired
+        or malformed one. Clients should treat `400` as "ask the user to request
+        a new link" and call `POST /auth/verify/resend`.
+      tags: [Development]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerificationRequest'
+            example:
+              token: 8f14e45fceea167a5a36dedd4bea2543c1e9b1f0a7d24c5e
+      responses:
+        '204':
+          description: Address confirmed, no content returned
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /auth/verify/resend:
+    post:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: []          # public - no token required
+      x-development-only: true
+      operationId: resendVerificationEmail
+      summary: Request a new verification e-mail (development only)
+      description: |
+        **Development only**: `404` unless local sign-in is enabled. Issues a fresh verification
+        token and sends it to the address supplied.
+
+        This endpoint **always answers `202`**, whether or not an account with
+        that address exists and whether or not it was already verified. That is
+        deliberate: a per-address distinction would turn this into an account
+        enumeration oracle. Clients must show the same neutral confirmation in
+        every case and must never infer account existence from the response.
+
+        Any previously issued verification token for the account is invalidated.
+      tags: [Development]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationRequest'
+            example:
+              email: pepito.perez@konradlorenz.edu.co
+      responses:
+        '202':
+          description: Request accepted, delivery is not confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcceptedResponse'
+              example:
+                message: If an account exists for that address, a verification e-mail has been sent.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /auth/admin/invitation-codes:
+    get:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: [ROLE_ADMIN]
+      x-development-only: true
+      operationId: listInvitationCodes
+      summary: List invitation codes (development only)
+      description: |
+        **Development only**: `404` unless local sign-in is enabled. Requires `ROLE_ADMIN`.
+        Invitation codes gate password registration, so being able to see which exist, how many
+        uses each has left and which are still active is the difference between managing access
+        and guessing at it.
+      tags: [Development]
+      parameters:
+        - name: active
+          in: query
+          required: false
+          schema: { type: boolean }
+          description: >-
+            Filter by whether the code can still be redeemed **right now**, which is
+            narrower than its `active` flag: `true` returns codes that are active, not
+            expired and not spent, and `false` returns every code failing any one of
+            those. Omit it to list all codes. A code with `active: true` that has used
+            all of `maxUses` is therefore returned by `active=false`.
+      responses:
+        '200':
+          description: The codes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvitationCode'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: [ROLE_ADMIN]
+      x-development-only: true
+      operationId: createInvitationCode
+      summary: Create an invitation code (development only)
+      description: |
+        **Development only**: `404` unless local sign-in is enabled. Requires `ROLE_ADMIN`. The
+        profile role a code grants is fixed at creation. No code grants a permission: an
+        administrator is promoted deliberately, or anyone holding a code could escalate.
+      tags: [Development]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationCodeRequest'
+      responses:
+        '201':
+          description: The created code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationCode'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /auth/admin/invitation-codes/{code}:
+    parameters:
+      - name: code
+        in: path
+        required: true
+        schema: { type: string, maxLength: 40 }
+        example: KL-7K2M-QX9P
+    patch:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: [ROLE_ADMIN]
+      x-development-only: true
+      operationId: updateInvitationCode
+      summary: Activate or deactivate an invitation code (development only)
+      description: |
+        **Development only**: `404` unless local sign-in is enabled. Requires `ROLE_ADMIN`.
+        Deactivating is the reversible way to stop a code being redeemed, and it keeps the record
+        of who used it.
+      tags: [Development]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [active]
+              properties:
+                active: { type: boolean }
+              additionalProperties: false
+      responses:
+        '200':
+          description: The updated code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationCode'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: [ROLE_ADMIN]
+      x-development-only: true
+      operationId: deleteInvitationCode
+      summary: Delete an invitation code (development only)
+      description: |
+        **Development only**: `404` unless local sign-in is enabled. Requires `ROLE_ADMIN`.
+        Prefer deactivating: deleting a code that has already been redeemed discards the only
+        record of how those accounts were created.
+      tags: [Development]
+      responses:
+        '204':
+          description: Deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /auth/admin/accounts:
+    post:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: [ROLE_ADMIN]
+      x-development-only: true
+      operationId: createAccount
+      summary: Create an account with a temporary password (development only)
+      description: |
+        **Development only**: `404` unless local sign-in is enabled. Requires `ROLE_ADMIN`.
+        Creates the profile in the User API and the account here, with a temporary password
+        returned once in the response: hand it to the person, who replaces it at first sign-in
+        (`POST /auth/password`). It is valid for seven days.
+
+        - `profileRole` is the account's profile role. No permission is granted this way.
+        - `email` must use one of the configured domains, as in registration.
+        - The account may sign in at once: an administrator vouched for it. Its
+          address is still recorded as not verified.
+      tags: [Development]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRequest'
+            example:
+              email: ana.ruiz@konradlorenz.edu.co
+              firstName: Ana
+              lastName: Ruiz
+              profileRole: ROLE_PROFESSOR
+      responses:
+        '201':
+          description: The account, and its temporary password - shown this once
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemporaryPassword'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /auth/admin/accounts/{userId}/temporary-password:
+    parameters:
+      - $ref: '#/components/parameters/AccountIdPath'
+    post:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: [ROLE_ADMIN]
+      x-development-only: true
+      operationId: issueTemporaryPassword
+      summary: Give an account a new temporary password (development only)
+      description: |
+        **Development only**: `404` unless local sign-in is enabled. Requires `ROLE_ADMIN`. For a
+        person who forgot their password: the one they had stops working at once, and the new
+        temporary password, returned once here, must be replaced at their next sign-in. Valid for
+        seven days.
+      tags: [Development]
+      responses:
+        '200':
+          description: The new temporary password - shown this once
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemporaryPassword'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /internal/credentials/{userId}/status:
     # POST rather than PATCH, though a partial update is what it is: Feign's default client is
     # java.net.HttpURLConnection, which refuses PATCH outright. One caller, no public contract,
@@ -846,10 +1034,8 @@ paths:
         deactivates or reactivates an account, because whether somebody may sign
         in is decided here while the profile flag lives there.
 
-        Before this endpoint existed, "deactivate" wrote `active = false` on the
-        profile and nothing else. Sign-in only ever refuses a `SUSPENDED`
-        credential, and nothing in the product ever set `SUSPENDED` — so the
-        button claimed to remove access and the account kept working.
+        Suspending an account also **revokes all of its refresh tokens**, so its apps are signed
+        out at their next renewal, within the hour an access token lasts.
 
         **Not reachable from outside.** The API gateway does not route
         `/internal/**`; the path exists only on the auth-service port inside the
@@ -859,17 +1045,7 @@ paths:
         **Access: `X-Internal-Token` header only.** No bearer token is involved
         and no user role applies. A missing or wrong token gives `401`.
 
-        **A token already issued stays valid until it expires.** This stops the
-        next one being issued; it does not revoke one in flight. That is
-        inherent to stateless JWTs and it is why the access-token lifetime is an
-        hour.
-
-        Idempotent: setting the state the credential already holds answers `204`
-        and writes nothing. Restoring an account lands on `ACTIVE`, including one
-        that was suspended while its e-mail was unverified — verification is off
-        in the MVP, so every credential carries `emailVerified: false` and
-        treating that as "send it back to PENDING_VERIFICATION" would make
-        deactivation a one-way door.
+        Idempotent: setting the state the account already holds answers `204` and writes nothing.
       tags: [Internal]
       security:
         - internalToken: []
@@ -936,10 +1112,116 @@ components:
         injected as an environment variable in both the Auth and User services.
         It is not a JWT, it carries no user identity and it is never handed to a
         client application.
+
+  parameters:
+    AccountIdPath:
+      name: userId
+      in: path
+      required: true
+      schema: { type: string, maxLength: 64 }
+      description: The account's id, the `sub` of its tokens.
+
   schemas:
+    Role:
+      type: string
+      description: |
+        A role a token may carry. `ROLE_STUDENT`, `ROLE_PROFESSOR` and `ROLE_STAFF` are profile
+        roles, exactly one per account. `ROLE_ADMIN`, `ROLE_RECEPTION`, `ROLE_MAINTENANCE`,
+        `ROLE_MODERATION` and `ROLE_WELLBEING` are permissions, which add to it. `ROLE_GUEST` is
+        only ever alone, on a visitor's token.
+      enum:
+        - ROLE_STUDENT
+        - ROLE_PROFESSOR
+        - ROLE_STAFF
+        - ROLE_ADMIN
+        - ROLE_RECEPTION
+        - ROLE_MAINTENANCE
+        - ROLE_MODERATION
+        - ROLE_WELLBEING
+        - ROLE_GUEST
+      example: ROLE_STUDENT
+
+    ProfileRole:
+      type: string
+      description: The role that decides what the app shows. Exactly one per account.
+      enum: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF]
+      example: ROLE_STUDENT
+
+    Permission:
+      type: string
+      description: A role that opens a part of the admin portal, on top of the profile role.
+      enum: [ROLE_ADMIN, ROLE_RECEPTION, ROLE_MAINTENANCE, ROLE_MODERATION, ROLE_WELLBEING]
+      example: ROLE_RECEPTION
+
+    MicrosoftSignInRequest:
+      type: object
+      required: [idToken, client]
+      properties:
+        idToken:
+          type: string
+          minLength: 20
+          maxLength: 8192
+          description: |
+            The ID token Microsoft returned at the end of its sign-in, as it came. Not an access
+            token for Microsoft's own APIs.
+          example: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Im1pY3Jvc29mdC1rZXkifQ.eyJhdWQiOiJrYXBwLWNsaWVudC1pZCJ9.signature
+        client:
+          type: string
+          enum: [APP, PORTAL]
+          description: |
+            Which client is signing in. `PORTAL` requires a permission and gets a refresh token
+            of a working day; `APP` gets one of 30 days.
+          example: APP
+      additionalProperties: false
+
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          minLength: 16
+          maxLength: 256
+          description: The refresh token from the last sign-in or renewal.
+          example: rt_7Qm2Xk9PzT4vB8nL1cR6sW3yH5dF0gJ
+      additionalProperties: false
+
+    AccountRolesRequest:
+      type: object
+      required: [profileRole, permissions]
+      properties:
+        profileRole:
+          $ref: '#/components/schemas/ProfileRole'
+        permissions:
+          type: array
+          maxItems: 5
+          uniqueItems: true
+          description: Every permission the account should hold; none is an empty list.
+          items:
+            $ref: '#/components/schemas/Permission'
+          example: [ROLE_RECEPTION]
+      additionalProperties: false
+
+    AccountRoles:
+      type: object
+      required: [userId, roles]
+      properties:
+        userId:
+          type: string
+          maxLength: 64
+          description: The account's id, the `sub` of its tokens.
+          example: 8e1c4f27-90ab-4d3e-b5f6-1a2b3c4d5e6f
+        roles:
+          type: array
+          minItems: 1
+          description: The profile role first, then the permissions.
+          items:
+            $ref: '#/components/schemas/Role'
+          example: [ROLE_STAFF, ROLE_RECEPTION]
+
     InvitationCode:
       type: object
-      description: A code that permits one institutional registration, for a fixed role.
+      description: A code that permits one password registration, for a fixed profile role. Development only.
       required: [code, role, maxUses, timesUsed, active]
       properties:
         code:
@@ -951,12 +1233,7 @@ components:
           pattern: '^KL-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$'
           example: KL-7K2M-QX9P
         role:
-          type: string
-          enum: [ROLE_STUDENT, ROLE_PROFESSOR]
-          description: >-
-            The role a registration through this code receives. ROLE_ADMIN is deliberately
-            absent: it is granted by promotion, never by redeeming a code.
-          example: ROLE_STUDENT
+          $ref: '#/components/schemas/ProfileRole'
         maxUses:
           description: >-
             How many accounts this code may create in total, across everybody who uses it.
@@ -992,18 +1269,10 @@ components:
         What an administrator supplies to mint a code. **The code itself is not in here** — the
         server generates it and returns it, and a `code` sent anyway is ignored rather than
         honoured.
-
-        A code somebody chooses is either guessable, which is the whole problem —
-        `KL-20262-STUDENT` is one guess away from `KL-20262-STAFF` — or it is unreadable, and
-        the only feedback for getting the format wrong was a `400` quoting a regular expression.
       required: [role, maxUses]
       properties:
         role:
-          description: >-
-            The role a registration through this code receives. `ROLE_ADMIN` is refused.
-          type: string
-          enum: [ROLE_STUDENT, ROLE_PROFESSOR]
-          example: ROLE_STUDENT
+          $ref: '#/components/schemas/ProfileRole'
         maxUses:
           description: >-
             Total registrations this code may create. Capped at 10000: a code with no practical ceiling is
@@ -1066,18 +1335,15 @@ components:
     RegistrationRequest:
       type: object
       description: |
-        Institutional signup payload. `studentCode` and `programCode` are
-        supplied for student intakes and omitted for staff invitations, so they
-        are optional; `invitationCode` is always required and determines which
-        role the account receives.
+        Password registration payload. Development only. `invitationCode` decides the profile role
+        the account receives.
       required: [email, password, firstName, lastName, invitationCode]
       properties:
         email:
           type: string
           format: email
           maxLength: 100
-          pattern: '^[A-Za-z0-9._%+-]+@konradlorenz\.edu\.co$'
-          description: Institutional address. Must use the `@konradlorenz.edu.co` domain.
+          description: An address in one of the configured domains.
           example: pepito.perez@konradlorenz.edu.co
         password:
           type: string
@@ -1093,38 +1359,20 @@ components:
           type: string
           minLength: 1
           maxLength: 50
-          description: Given names as printed on the identity document.
           example: Pepito
         lastName:
           type: string
           minLength: 1
           maxLength: 50
-          description: Family names as printed on the identity document.
           example: Perez Gomez
         invitationCode:
           type: string
           minLength: 6
           maxLength: 32
           description: |
-            Single-use code issued by the registrar for an intake. It carries the
-            role the account will receive. Rejected with `400` when unknown,
-            already spent or expired.
+            Code issued for an intake. It carries the profile role the account will receive.
+            Rejected with `400` when unknown, already spent or expired.
           example: KL-7K2M-QX9P
-        studentCode:
-          type: string
-          pattern: '^\d{6,20}$'
-          description: |
-            University student code. Required for student intakes, absent for
-            staff invitations.
-          example: '506999999'
-        programCode:
-          type: string
-          pattern: '^\d{1,10}$'
-          description: |
-            Academic program code the student is enrolled in. `506` is
-            Ingeniería de Sistemas. Optional since 0.3.0: left out, it is the first
-            three digits of `studentCode`, as the university numbers them.
-          example: '506'
 
     VisitorPassRequest:
       type: object
@@ -1177,7 +1425,7 @@ components:
       type: object
       description: |
         A pass as reception sees it, including who redeemed it. Returned only to
-        `ROLE_ADMIN`, and only from `/auth/admin/**`.
+        `ROLE_RECEPTION` and `ROLE_ADMIN`, and only from `/auth/admin/**`.
       required: [code, issuedBy, createdAt, redeemableUntil, redeemed]
       properties:
         code:
@@ -1188,7 +1436,7 @@ components:
           example: KL-V-7K2M-QX9P
         issuedBy:
           type: string
-          description: The administrator who minted it, so a pass traces back to a person.
+          description: The person who issued it, so a pass traces back to somebody.
           example: 8f2c1d40-9a77-4e15-b3c8-2d6e05f1a9b3
         notes:
           description: >-
@@ -1267,7 +1515,7 @@ components:
           type: string
           format: email
           maxLength: 100
-          description: Institutional or personal address used at registration.
+          description: The address the account was created with.
           example: pepito.perez@konradlorenz.edu.co
         password:
           description: >-
@@ -1279,14 +1527,13 @@ components:
           example: ExamplePassword123
         allowedRoles:
           type: array
-          maxItems: 4
+          maxItems: 8
           description: |
-            The roles the client takes, any one of them: the admin portal sends `[ROLE_ADMIN]`.
+            The roles the client takes, any one of them: the admin portal sends its permissions.
             An account with none of them is refused with `403`, before a temporary password is
             offered for replacing. Left out, any account.
           items:
-            type: string
-            enum: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+            $ref: '#/components/schemas/Role'
           example: [ROLE_ADMIN]
 
     PasswordChangeRequest:
@@ -1315,22 +1562,18 @@ components:
           example: ExamplePassword123
         allowedRoles:
           type: array
-          maxItems: 4
+          maxItems: 8
           description: |
             The roles the client takes, any one of them. An account with none of them is
             refused with `403` before anything changes. Left out, any account.
           items:
-            type: string
-            enum: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+            $ref: '#/components/schemas/Role'
           example: [ROLE_ADMIN]
 
     AccountRequest:
       type: object
-      description: |
-        An account an administrator creates. A student needs `studentCode`; its
-        `programCode` is read from the code's first three digits when left out. Both
-        are ignored for a professor.
-      required: [email, firstName, lastName, role]
+      description: An account an administrator creates with a temporary password. Development only.
+      required: [email, firstName, lastName, profileRole]
       properties:
         email:
           type: string
@@ -1342,38 +1585,22 @@ components:
           type: string
           minLength: 1
           maxLength: 50
-          description: Given names as printed on the identity document.
           example: Ana
         lastName:
           type: string
           minLength: 1
           maxLength: 50
-          description: Family names as printed on the identity document.
           example: Ruiz
-        role:
-          type: string
-          enum: [ROLE_STUDENT, ROLE_PROFESSOR]
-          description: The role the account receives. Never `ROLE_ADMIN`.
-          example: ROLE_PROFESSOR
-        studentCode:
-          type: string
-          pattern: '^\d{6,20}$'
-          description: University student code. Required for a student.
-          example: '506999999'
-        programCode:
-          type: string
-          pattern: '^\d{1,10}$'
-          description: |
-            Academic program code the student is enrolled in. Optional: left out, it is the
-            first three digits of `studentCode` - 506232730 is a 506, Ingeniería de Sistemas.
-          example: '506'
+        profileRole:
+          $ref: '#/components/schemas/ProfileRole'
+      additionalProperties: false
 
     TemporaryPassword:
       type: object
       description: |
         A temporary password, returned once: it is stored only as a hash. The person
         replaces it at first sign-in with `POST /auth/password`.
-      required: [userId, email, role, temporaryPassword, expiresAt]
+      required: [userId, email, roles, temporaryPassword, expiresAt]
       properties:
         userId:
           type: string
@@ -1385,11 +1612,13 @@ components:
           format: email
           description: The account's address.
           example: ana.ruiz@konradlorenz.edu.co
-        role:
-          type: string
-          enum: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
-          description: The account's role.
-          example: ROLE_PROFESSOR
+        roles:
+          type: array
+          minItems: 1
+          description: The account's roles.
+          items:
+            $ref: '#/components/schemas/Role'
+          example: [ROLE_PROFESSOR]
         temporaryPassword:
           type: string
           minLength: 14
@@ -1406,17 +1635,16 @@ components:
     TokenResponse:
       type: object
       description: |
-        Signed access token and the minimum context a client needs to render the
-        right navigation without an extra profile call. No refresh token is
-        issued.
-      required: [accessToken, tokenType, expiresIn, userId, roles]
+        KApp's tokens and the minimum context a client needs to render the right navigation
+        without an extra profile call.
+      required: [accessToken, tokenType, expiresIn, refreshToken, refreshExpiresIn, userId, roles]
       properties:
         accessToken:
           type: string
           description: |
             RS256 JWT. Send it as `Authorization: Bearer <accessToken>`. Validate
             it against `/.well-known/jwks.json` using the `kid` in its header.
-          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImthcHAtYXV0aC0yMDI2LTA4In0.eyJzdWIiOiIzZjhhMWMyZS03YjRkLTRlNWEtOWM2Zi0yZDFiOGUwYTRjNzMiLCJlbWFpbCI6InBlcGl0by5wZXJlekBrb25yYWRsb3JlbnouZWR1LmNvIiwicm9sZXMiOlsiUk9MRV9TVFVERU5UIl0sImlzcyI6Imh0dHBzOi8vYXV0aC5rYXBwLmtvbnJhZGxvcmVuei5lZHUuY28iLCJpYXQiOjE3ODc2NTQ0MDAsImV4cCI6MTc4NzY1ODAwMH0.Yx3nQK1pV9sM0bZrT8uLf2Hc7EjWd5AoXgN4iRySlPvCmUt6BqDkJhZ0wF3xO9aInGe1rMcT7yUvKpL5dQsRb2WjXhA8fZoNmE4gCtIuYlBvPkSxDqMrH6JaWnTcOe0
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImV4YW1wbGUta2V5In0.eyJzdWIiOiIzZjhhMWMyZS03YjRkLTRlNWEtOWM2Zi0yZDFiOGUwYTRjNzMiLCJpc3MiOiJodHRwczovL2thcHAua29ucmFkbG9yZW56LmVkdS5jbyIsImlhdCI6MTc2ODQ4OTIwMCwiZXhwIjoxNzY4NDkyODAwLCJlbWFpbCI6InBlcGl0by5wZXJlekBrb25yYWRsb3JlbnouZWR1LmNvIiwicm9sZXMiOlsiUk9MRV9TVFVERU5UIl19.DbIGwPyHTgR3wlzHHuAzgqSYybOA41FW7IkUBCjv5M4ndXLPkbr3OIwe604vUmkvr48ixeunege-L9ypBJJ5s1dig1NlMyDs0c3fxV75cwCoTCcdJiWBS7gmln9oMl1VITiPXg6T7-IJ8I5QD2Y6k6n3dhD8fkY59mdNAYXclVDOCQnyyDqKY9xkWjKWVo19i4wdVJMfai0KVST5ccGj0SmXnDNbgzgT0kLb7lxjS71_XUJsTZ_9TXiIvuWvQ7Ikoo4wnropg7EHtLb7dLBjY6Fo2Tab3alCP86aT10x5w6BgaSTT1LB3mVCc8o1IC3mY3CHqPk9iuaoMSWU7zsEPg
         tokenType:
           type: string
           enum: [Bearer]
@@ -1427,9 +1655,25 @@ components:
           format: int32
           minimum: 1
           description: |
-            Token lifetime in seconds from issuance. One hour for an account; 24 hours for a
-            redeemed visitor pass.
+            Access-token lifetime in seconds from issuance. One hour for an account; 24 hours for
+            a redeemed visitor pass.
           example: 3600
+        refreshToken:
+          type: [string, 'null']
+          maxLength: 256
+          description: |
+            Opaque. Renews the session through `POST /auth/refresh`, and is replaced by a new one
+            every time. Keep it where the platform keeps secrets: the Keychain on iOS, encrypted
+            storage on Android. `null` for a visitor pass, which does not renew.
+          example: rt_7Qm2Xk9PzT4vB8nL1cR6sW3yH5dF0gJ
+        refreshExpiresIn:
+          type: [integer, 'null']
+          format: int32
+          minimum: 1
+          description: |
+            Seconds the refresh token lasts if it is not used: 30 days in the apps, 12 hours in
+            the portal. `null` with no refresh token.
+          example: 2592000
         userId:
           type: string
           maxLength: 64
@@ -1445,12 +1689,11 @@ components:
           type: array
           minItems: 1
           description: |
-            Roles granted to the account, mirroring the `roles` claim. Clients
-            use these to hide interface they cannot reach, but authorization is
-            always re-checked server side.
+            The profile role and the permissions of the account, mirroring the `roles` claim.
+            Clients use these to hide interface they cannot reach, but authorization is always
+            re-checked server side.
           items:
-            type: string
-            enum: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+            $ref: '#/components/schemas/Role'
           example: [ROLE_STUDENT]
 
     VerificationRequest:

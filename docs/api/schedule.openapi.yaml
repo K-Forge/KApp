@@ -2,44 +2,47 @@ openapi: 3.1.0
 
 info:
   title: KApp Schedule API
-  version: 1.0.0
-  summary: A student's weekly class timetable for one academic period.
+  version: 2.0.0
+  summary: A person's class timetable for one academic period, read from SINU.
   description: |
-    Holds the class timetable of a student at Fundación Universitaria Konrad Lorenz.
+    The class timetable of a student, or of a professor, at Fundación Universitaria Konrad Lorenz,
+    **read from SINU**. KApp shows it and never changes it: choosing courses, changing a group or a
+    room is done in SINU, through the university, and shows up here on its own. Nothing in this
+    API writes.
+
+    Until the university opens SINU, a test adapter serves invented timetables of the same shape,
+    and `source` says so on every schedule.
 
     ## Model
 
-    The shape is modelled directly on the university's own SINU report (report id `PACR42_GWT`),
-    so that a future automatic sync against SINU needs no data migration.
+    The shape is SINU's own, as its timetable report (`PACR42_GWT`) prints it.
 
-    A weekly class slot is **not** one continuous date range. A single course meeting such as
-    "Mondays 18:15-20:30" is taught across several **disjoint** date ranges, each with its own
-    classroom, and some of those ranges have no classroom assigned at all. The model therefore
-    nests three levels:
+    A weekly class slot is **not** one continuous date range. A single meeting such as "Mondays
+    18:15-20:30" is taught across several **disjoint** date ranges, each with its own classroom,
+    and some of those ranges have no classroom assigned at all. The model therefore nests three
+    levels:
 
     ```
-    Schedule      one per student per academic period
-      └─ Enrollment   a course the student takes
-           └─ Meeting      a weekly day + time slot
+    Schedule        one per person per academic period
+      └─ Section        a course and the group the person is in (or teaches)
+           └─ Meeting       a weekly day + time slot
                 └─ MeetingPeriod   a date range, with the room in force during it
     ```
 
-    A real example from the source report — Estadística Descriptiva, Mondays 18:15-20:30:
+    For example, a Monday 18:15-20:30 class:
 
-    | Date range            | Room  |
-    |-----------------------|-------|
-    | 2026-07-27 → 2026-08-10 | 302 |
-    | 2026-08-24 → 2026-09-14 | 302 |
+    | Date range              | Room   |
+    |-------------------------|--------|
+    | 2026-07-27 → 2026-08-10 | 405    |
+    | 2026-08-24 → 2026-09-14 | 405    |
     | 2026-09-21 → 2026-09-28 | *none* |
-    | 2026-10-19 → 2026-10-26 | 302 |
-    | 2026-11-09 → 2026-11-09 | 302 (single day) |
-    | 2026-11-23 → 2026-11-30 | 302 |
+    | 2026-10-19 → 2026-11-30 | 405    |
 
-    In the MVP the student types their schedule in by hand, which produces exactly **one**
-    `MeetingPeriod` covering the whole semester. The extra level costs nothing today and avoids a
-    migration when the SINU sync lands. The `Schedule` example in this document deliberately shows
-    both: two hand-entered enrollments with a single period each, and one SINU-shaped enrollment
-    with six periods, one of which has no room.
+    ## Blocks
+
+    SINU schedules in **blocks of 45 minutes**, always. Every meeting lasts a whole number of
+    blocks, and `blocks` says how many: 18:15-21:15 is four. SINU's hours are these blocks too, so
+    a course of four blocks a week has `totalHours` 64 over its 16 weeks.
 
     ## Resolved views
 
@@ -49,58 +52,31 @@ info:
     render the home screen and the day / 2-day / week views straight from these, and never have to
     reimplement the resolution themselves.
 
-    ## Write-time snapshots
+    ## Rooms and buildings
 
-    `courseName`, `credits`, `professor` (and the other course-describing fields on an enrollment)
-    are **snapshots taken at write time, not live references**. A timetable entry is a historical
-    record: if a course is renamed, re-credited or reassigned to another professor later, the
-    entries already stored must not change.
+    SINU names a room by its number (`"302"`) and the building by its *sede*: in SINU each
+    building is a sede. The same number exists in more than one building — the Edificio Central
+    and Bienestar Institucional both have a `301` — so a room is only identified by the two
+    together.
 
-    ## Rooms
-
-    `room` values look like `"708"`, `"302"`, `"612"`, `"710"`; the first digit is the floor. These
-    are the same space codes the KApp map service uses, so a client can send the viewer from a class
-    straight to its classroom on the floor plan.
-
-    ## Overlap rule
-
-    Two meetings **conflict** when all three of the following hold:
-
-    1. they share the same `dayOfWeek`; **and**
-    2. their time ranges intersect, treating each range as half-open `[startTime, endTime)` — so a
-       class ending at `20:30` and one starting at `20:30` do **not** conflict; **and**
-    3. at least one `MeetingPeriod` of the first intersects at least one `MeetingPeriod` of the
-       second, treating each date range as closed `[from, to]` — both endpoints inclusive.
-
-    Formally, meetings `A` and `B` conflict iff:
-
-    ```
-    A.dayOfWeek == B.dayOfWeek
-      AND A.startTime < B.endTime AND B.startTime < A.endTime
-      AND EXISTS p IN A.periods, q IN B.periods : p.from <= q.to AND q.from <= p.to
-    ```
-
-    Two classes on the same weekday at the same hour whose date ranges do **not** overlap are
-    therefore perfectly legal, and are common in this university's calendar.
-
-    Any write that would introduce a conflict is rejected with `409 Conflict`. The body is an
-    `ApiError` whose `details[]` names the enrollment and the meeting that were conflicted with.
+    Each section carries the `sede` as SINU writes it and the KApp `buildingCode` it maps to, and
+    each date range its `room`. With both a client opens the classroom on the map:
+    `GET /api/map/spaces/{room}?buildingCode={buildingCode}`. `buildingCode` is `null` for a sede
+    nobody has mapped to a building yet, in the portal (`Building.sinuSedes`).
 
     ## Explicit nulls
 
-    Fields that may be null (`subgroup`, `room`) are **always present** in responses, and are
-    **required** in `POST` bodies — send an explicit `null` rather than omitting the key, so that
-    "no room assigned" is never confused with "room unknown". `PATCH` bodies are the one exception:
-    there, an absent key means "leave unchanged" and an explicit `null` means "clear this field".
+    Fields that may be null (`subgroup`, `room`, `buildingCode`) are **always present**, so that
+    "no room assigned" is never confused with "room unknown".
 
     ## Access control
 
-    Every operation requires a valid JWT. Allowed roles are `ROLE_STUDENT`, `ROLE_PROFESSOR` and
-    `ROLE_ADMIN`; the `/api/schedule/me` family always resolves to the caller's own schedule, and
-    `GET /api/schedule/{userId}` is `ROLE_ADMIN` only.
+    Every operation requires a valid JWT and reads the caller's own timetable: a student's, the
+    sections they take; a professor's, the sections they teach. Allowed roles are `ROLE_STUDENT`
+    and `ROLE_PROFESSOR`. No route reads somebody else's timetable, administrators included.
 
-    **`ROLE_GUEST` is forbidden everywhere in this service.** Guests may only read the campus map;
-    any guest token presented to any operation here is rejected with `403 Forbidden`.
+    **`ROLE_STAFF` and `ROLE_GUEST` are forbidden everywhere in this service**: they take and teach
+    no classes. Any such token is rejected with `403 Forbidden`.
 
 servers:
   - url: http://localhost:8080
@@ -111,28 +87,20 @@ security:
 
 tags:
   - name: Schedule
-    description: The per-period schedule container.
-  - name: Enrollments
-    description: Courses inside a schedule.
-  - name: Meetings
-    description: Weekly day + time slots inside an enrollment.
+    description: The caller's timetable for one period, as SINU has it.
   - name: Agenda
     description: Resolved day and week views, with the room in force on each date.
-  - name: Admin
-    description: Administrative read access to any student's schedule.
 
 paths:
   /api/schedule/me:
     get:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR]
       operationId: getMySchedule
       summary: Get the caller's schedule for a period
       description: |
-        Returns the caller's schedule, with every enrollment, meeting and meeting period nested
-        inside it. When `period` is omitted the active schedule is returned.
-
-        Roles: `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+        Returns the caller's timetable as SINU has it, with every section, meeting and meeting
+        period nested inside it. When `period` is omitted the current period is returned.
       tags: [Schedule]
       parameters:
         - $ref: '#/components/parameters/PeriodQueryOptional'
@@ -151,14 +119,14 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
-          description: The student has no schedule for that period
+          description: SINU has no timetable for the caller in that period
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
               examples:
                 noScheduleForPeriod:
-                  summary: No schedule stored for the requested period
+                  summary: No timetable in the requested period
                   value:
                     timestamp: '2026-09-21T18:20:11.482Z'
                     status: 404
@@ -166,98 +134,15 @@ paths:
                     message: No schedule found for period 20261
                     path: /api/schedule/me
 
-    post:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
-      operationId: createMySchedule
-      summary: Create the caller's schedule for a period
-      description: |
-        Creates an empty schedule for one academic period. Courses are added afterwards through
-        `POST /api/schedule/me/enrollments`.
-
-        A student may hold at most one schedule per period.
-
-        Roles: `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags: [Schedule]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateScheduleRequest'
-            examples:
-              secondSemester2026:
-                summary: Second semester of 2026, systems engineering, level 8
-                value:
-                  period: '20262'
-                  programCode: '506'
-                  pensumCode: '1015'
-                  level: 8
-      responses:
-        '201':
-          description: The created schedule, with no enrollments yet
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Schedule'
-              examples:
-                created:
-                  summary: Freshly created, still empty
-                  value:
-                    id: 3f2a9c14-7b5e-4d81-9a63-0c1e5f8b2d47
-                    userId: '507f1f77bcf86cd799439011'
-                    period: '20262'
-                    programCode: '506'
-                    pensumCode: '1015'
-                    level: 8
-                    active: true
-                    enrollments: []
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
-
-    delete:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
-      operationId: deleteMySchedule
-      summary: Delete the caller's schedule for a period
-      description: |
-        Deletes the schedule for the given period together with all of its enrollments, meetings
-        and meeting periods. `period` is required: there is no "delete whatever is active" shortcut,
-        because the operation is destructive.
-
-        Roles: `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags: [Schedule]
-      parameters:
-        - $ref: '#/components/parameters/PeriodQueryRequired'
-      responses:
-        '204':
-          description: Deleted; no content returned
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
   /api/schedule/me/periods:
     get:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR]
       operationId: listMySchedulePeriods
       summary: List the periods the caller has a schedule for
       description: |
-        Returns one entry per stored schedule, newest period first. Clients use it to populate the
-        period switcher without downloading every schedule.
-
-        Roles: `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+        Returns one entry per period SINU has a timetable for, newest period first. Clients use it
+        to populate the period switcher without downloading every schedule.
       tags: [Schedule]
       responses:
         '200':
@@ -270,467 +155,26 @@ paths:
                   $ref: '#/components/schemas/SchedulePeriodSummary'
               examples:
                 threePeriods:
-                  summary: One active period and two past ones
+                  summary: The current period and two past ones
                   value:
                     - period: '20262'
                       active: true
-                      enrollmentCount: 3
+                      sectionCount: 6
                     - period: '20261'
                       active: false
-                      enrollmentCount: 5
+                      sectionCount: 6
                     - period: '20252'
                       active: false
-                      enrollmentCount: 5
+                      sectionCount: 5
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-
-  /api/schedule/me/enrollments:
-    post:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
-      operationId: addEnrollment
-      summary: Add a course to the caller's schedule
-      description: |
-        Adds one course, together with its weekly meetings, to the caller's active schedule.
-
-        Every meeting in `meetings[]` is checked against every meeting already stored in the
-        schedule, and against the other meetings in the same request, using the overlap rule
-        described at the top of this document. If any of them conflicts, nothing is written and the
-        request fails with `409`.
-
-        Roles: `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags: [Enrollments]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateEnrollmentRequest'
-            examples:
-              handEnteredSingleRange:
-                summary: MVP hand entry — one period covering the whole semester
-                value:
-                  courseCode: '59035'
-                  pensumItemCode: '2033'
-                  courseName: DESARROLLO DE APLICACIONES MÓVILES
-                  level: 8
-                  credits: 3
-                  totalHours: 64
-                  group: '51'
-                  subgroup: null
-                  professor: MORALES SUAREZ ANDRES CAMILO
-                  campus: Sede Principal
-                  startDate: '2026-07-31'
-                  endDate: '2026-11-27'
-                  color: '#C9D329'
-                  meetings:
-                    - dayOfWeek: FRIDAY
-                      startTime: '18:15'
-                      endTime: '21:15'
-                      periods:
-                        - from: '2026-07-31'
-                          to: '2026-11-27'
-                          room: '709'
-              sinuShapedMultipleRanges:
-                summary: SINU-shaped — six disjoint ranges, one of them with no room
-                value:
-                  courseCode: '17080'
-                  pensumItemCode: '2018'
-                  courseName: ESTADÍSTICA DESCRIPTIVA
-                  level: 6
-                  credits: 3
-                  totalHours: 48
-                  group: '51'
-                  subgroup: null
-                  professor: CAMPOS AVENDANO GUSTAVO ANDRES
-                  campus: Sede Principal
-                  startDate: '2026-07-27'
-                  endDate: '2026-11-30'
-                  color: '#539392'
-                  meetings:
-                    - dayOfWeek: MONDAY
-                      startTime: '18:15'
-                      endTime: '20:30'
-                      periods:
-                        - from: '2026-07-27'
-                          to: '2026-08-10'
-                          room: '302'
-                        - from: '2026-08-24'
-                          to: '2026-09-14'
-                          room: '302'
-                        - from: '2026-09-21'
-                          to: '2026-09-28'
-                          room: null
-                        - from: '2026-10-19'
-                          to: '2026-10-26'
-                          room: '302'
-                        - from: '2026-11-09'
-                          to: '2026-11-09'
-                          room: '302'
-                        - from: '2026-11-23'
-                          to: '2026-11-30'
-                          room: '302'
-      responses:
-        '201':
-          description: The created enrollment, with server-assigned identifiers
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Enrollment'
-              examples:
-                created:
-                  summary: Desarrollo de Aplicaciones Móviles, Fridays in room 709
-                  value:
-                    enrollmentId: 9c1d4e77-2f83-4a19-b6c5-8e0a7d3f1b52
-                    courseCode: '59035'
-                    pensumItemCode: '2033'
-                    courseName: DESARROLLO DE APLICACIONES MÓVILES
-                    level: 8
-                    credits: 3
-                    totalHours: 64
-                    group: '51'
-                    subgroup: null
-                    professor: MORALES SUAREZ ANDRES CAMILO
-                    campus: Sede Principal
-                    startDate: '2026-07-31'
-                    endDate: '2026-11-27'
-                    color: '#C9D329'
-                    meetings:
-                      - meetingId: a1f6c28d-4e70-4b93-8c25-7d0f1a6e39b4
-                        dayOfWeek: FRIDAY
-                        startTime: '18:15'
-                        endTime: '21:15'
-                        periods:
-                          - from: '2026-07-31'
-                            to: '2026-11-27'
-                            room: '709'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          description: The caller has no active schedule to add the course to
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-              examples:
-                noActiveSchedule:
-                  summary: No active schedule
-                  value:
-                    timestamp: '2026-09-21T18:20:11.482Z'
-                    status: 404
-                    error: Not Found
-                    message: No active schedule found; create one first
-                    path: /api/schedule/me/enrollments
-        '409':
-          $ref: '#/components/responses/MeetingOverlapConflict'
-
-  /api/schedule/me/enrollments/{enrollmentId}:
-    parameters:
-      - $ref: '#/components/parameters/EnrollmentIdPath'
-    patch:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
-      operationId: updateEnrollment
-      summary: Partially update an enrollment
-      description: |
-        Updates the enrollment's own fields. Only the keys present in the body are changed; an
-        explicit `null` clears a nullable field (`subgroup`).
-
-        Meetings are **not** editable here — the body rejects a `meetings` key with `400`. Use the
-        `/meetings` sub-resource instead. Because nothing about the weekly slots can change through
-        this operation, it can never produce an overlap.
-
-        Roles: `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags: [Enrollments]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateEnrollmentRequest'
-            examples:
-              recolour:
-                summary: Recolour the course in the timetable UI
-                value:
-                  color: '#522567'
-              professorChanged:
-                summary: Correct the professor snapshot and the subgroup
-                value:
-                  professor: CAMPOS AVENDANO GUSTAVO ANDRES
-                  subgroup: '02'
-      responses:
-        '200':
-          description: The updated enrollment
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Enrollment'
-              examples:
-                updated:
-                  summary: Estadística Descriptiva after recolouring
-                  value:
-                    enrollmentId: 5b8e2a41-6c07-4f3d-8e19-a2d7c4b90f63
-                    courseCode: '17080'
-                    pensumItemCode: '2018'
-                    courseName: ESTADÍSTICA DESCRIPTIVA
-                    level: 6
-                    credits: 3
-                    totalHours: 48
-                    group: '51'
-                    subgroup: null
-                    professor: CAMPOS AVENDANO GUSTAVO ANDRES
-                    campus: Sede Principal
-                    startDate: '2026-07-27'
-                    endDate: '2026-11-30'
-                    color: '#522567'
-                    meetings:
-                      - meetingId: 7d2b5f91-8a34-4c60-b1e7-3f9c0d84a256
-                        dayOfWeek: MONDAY
-                        startTime: '18:15'
-                        endTime: '20:30'
-                        periods:
-                          - from: '2026-07-27'
-                            to: '2026-08-10'
-                            room: '302'
-                          - from: '2026-08-24'
-                            to: '2026-09-14'
-                            room: '302'
-                          - from: '2026-09-21'
-                            to: '2026-09-28'
-                            room: null
-                          - from: '2026-10-19'
-                            to: '2026-10-26'
-                            room: '302'
-                          - from: '2026-11-09'
-                            to: '2026-11-09'
-                            room: '302'
-                          - from: '2026-11-23'
-                            to: '2026-11-30'
-                            room: '302'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
-    delete:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
-      operationId: deleteEnrollment
-      summary: Remove a course from the caller's schedule
-      description: |
-        Deletes the enrollment together with all of its meetings and meeting periods.
-
-        Roles: `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags: [Enrollments]
-      responses:
-        '204':
-          description: Deleted; no content returned
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
-  /api/schedule/me/enrollments/{enrollmentId}/meetings:
-    parameters:
-      - $ref: '#/components/parameters/EnrollmentIdPath'
-    post:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
-      operationId: addMeeting
-      summary: Add a weekly slot to an enrollment
-      description: |
-        Adds one weekly day + time slot, with its date ranges and rooms, to an existing enrollment.
-
-        The new meeting is checked against every other meeting in the caller's schedule using the
-        overlap rule described at the top of this document; on conflict nothing is written and the
-        request fails with `409`.
-
-        Roles: `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags: [Meetings]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateMeetingRequest'
-            examples:
-              wholeSemesterSingleRange:
-                summary: Wednesdays 18:15-21:15 in room 710, all semester
-                value:
-                  dayOfWeek: WEDNESDAY
-                  startTime: '18:15'
-                  endTime: '21:15'
-                  periods:
-                    - from: '2026-07-29'
-                      to: '2026-11-25'
-                      room: '710'
-              splitRangesWithGap:
-                summary: Two ranges with a gap, the second one without a room yet
-                value:
-                  dayOfWeek: THURSDAY
-                  startTime: '16:00'
-                  endTime: '18:00'
-                  periods:
-                    - from: '2026-07-30'
-                      to: '2026-09-17'
-                      room: '612'
-                    - from: '2026-10-15'
-                      to: '2026-11-26'
-                      room: null
-      responses:
-        '201':
-          description: The created meeting, with server-assigned identifiers
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Meeting'
-              examples:
-                created:
-                  summary: Wednesdays 18:15-21:15 in room 710
-                  value:
-                    meetingId: c30e97a5-1d46-482b-9f57-2b8a6e045c1d
-                    dayOfWeek: WEDNESDAY
-                    startTime: '18:15'
-                    endTime: '21:15'
-                    periods:
-                      - from: '2026-07-29'
-                        to: '2026-11-25'
-                        room: '710'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/MeetingOverlapConflict'
-
-  /api/schedule/me/enrollments/{enrollmentId}/meetings/{meetingId}:
-    parameters:
-      - $ref: '#/components/parameters/EnrollmentIdPath'
-      - $ref: '#/components/parameters/MeetingIdPath'
-    patch:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
-      operationId: updateMeeting
-      summary: Partially update a weekly slot
-      description: |
-        Updates a weekly slot. Only the keys present in the body are changed.
-
-        `periods` is replaced wholesale when present: send the complete list of date ranges you want
-        the meeting to end up with, not a delta. This keeps the disjoint-ranges list unambiguous.
-
-        The resulting meeting is re-checked against every other meeting in the caller's schedule
-        using the overlap rule described at the top of this document; on conflict nothing is written
-        and the request fails with `409`.
-
-        Roles: `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags: [Meetings]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateMeetingRequest'
-            examples:
-              shiftEndTime:
-                summary: The class now finishes 15 minutes earlier
-                value:
-                  endTime: '20:15'
-              reassignRooms:
-                summary: Replace the whole list of date ranges
-                value:
-                  periods:
-                    - from: '2026-07-27'
-                      to: '2026-09-14'
-                      room: '302'
-                    - from: '2026-09-21'
-                      to: '2026-11-30'
-                      room: '612'
-      responses:
-        '200':
-          description: The updated meeting
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Meeting'
-              examples:
-                updated:
-                  summary: Mondays, now finishing at 20:15
-                  value:
-                    meetingId: 7d2b5f91-8a34-4c60-b1e7-3f9c0d84a256
-                    dayOfWeek: MONDAY
-                    startTime: '18:15'
-                    endTime: '20:15'
-                    periods:
-                      - from: '2026-07-27'
-                        to: '2026-08-10'
-                        room: '302'
-                      - from: '2026-08-24'
-                        to: '2026-09-14'
-                        room: '302'
-                      - from: '2026-09-21'
-                        to: '2026-09-28'
-                        room: null
-                      - from: '2026-10-19'
-                        to: '2026-10-26'
-                        room: '302'
-                      - from: '2026-11-09'
-                        to: '2026-11-09'
-                        room: '302'
-                      - from: '2026-11-23'
-                        to: '2026-11-30'
-                        room: '302'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/MeetingOverlapConflict'
-
-    delete:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
-      operationId: deleteMeeting
-      summary: Remove a weekly slot from an enrollment
-      description: |
-        Deletes the meeting together with all of its date ranges. The enrollment itself is kept even
-        if this was its last meeting, so that a slot can be re-entered without retyping the course.
-
-        Roles: `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags: [Meetings]
-      responses:
-        '204':
-          description: Deleted; no content returned
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
 
   /api/schedule/me/day:
     get:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR]
       operationId: getMyDay
       summary: Get the caller's classes on one date
       description: |
@@ -743,8 +187,6 @@ paths:
         The result is sorted by `startTime` ascending. An empty array means no classes that day.
 
         **This is the endpoint the mobile home screen calls.**
-
-        Roles: `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
       tags: [Agenda]
       parameters:
         - $ref: '#/components/parameters/DateQueryRequired'
@@ -759,28 +201,36 @@ paths:
                   $ref: '#/components/schemas/ClassOccurrence'
               examples:
                 classWithRoom:
-                  summary: Monday 2026-08-24 — resolves to room 302
+                  summary: Monday 2026-08-24 — resolves to room 405 of the Edificio Central
                   value:
-                    - enrollmentId: 5b8e2a41-6c07-4f3d-8e19-a2d7c4b90f63
-                      courseCode: '17080'
-                      courseName: ESTADÍSTICA DESCRIPTIVA
-                      professor: CAMPOS AVENDANO GUSTAVO ANDRES
+                    - sectionCode: '4127'
+                      sinuCode: '59035'
+                      pensumItemCode: '59035'
+                      courseName: DESARROLLO DE APLICACIONES MÓVILES
+                      group: '51'
+                      professor: GÓMEZ RESTREPO LAURA MARCELA
                       startTime: '18:15'
                       endTime: '20:30'
-                      room: '302'
-                      campus: Sede Principal
+                      blocks: 3
+                      sede: Sede Principal
+                      buildingCode: EC
+                      room: '405'
                       color: '#539392'
                 classWithoutRoom:
                   summary: Monday 2026-09-21 — same class, but that range has no room
                   value:
-                    - enrollmentId: 5b8e2a41-6c07-4f3d-8e19-a2d7c4b90f63
-                      courseCode: '17080'
-                      courseName: ESTADÍSTICA DESCRIPTIVA
-                      professor: CAMPOS AVENDANO GUSTAVO ANDRES
+                    - sectionCode: '4127'
+                      sinuCode: '59035'
+                      pensumItemCode: '59035'
+                      courseName: DESARROLLO DE APLICACIONES MÓVILES
+                      group: '51'
+                      professor: GÓMEZ RESTREPO LAURA MARCELA
                       startTime: '18:15'
                       endTime: '20:30'
+                      blocks: 3
+                      sede: Sede Principal
+                      buildingCode: EC
                       room: null
-                      campus: Sede Principal
                       color: '#539392'
                 noClasses:
                   summary: A date inside a gap between two ranges
@@ -792,14 +242,14 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
-          description: The caller has no active schedule
+          description: SINU has no timetable for the caller in the current period
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
               examples:
                 noActiveSchedule:
-                  summary: No active schedule
+                  summary: No timetable this period
                   value:
                     timestamp: '2026-09-21T06:02:44.117Z'
                     status: 404
@@ -810,7 +260,7 @@ paths:
   /api/schedule/me/week:
     get:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR]
       operationId: getMyWeek
       summary: Get the caller's classes for one week
       description: |
@@ -824,8 +274,6 @@ paths:
         day's classes are sorted by `startTime` ascending. `weekStart` and `weekEnd` tell the client
         which calendar dates the seven buckets correspond to, so day, 2-day and week views can all
         be rendered from a single call.
-
-        Roles: `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
       tags: [Agenda]
       parameters:
         - $ref: '#/components/parameters/DateQueryOptional'
@@ -844,38 +292,50 @@ paths:
                     weekEnd: '2026-09-27'
                     days:
                       MONDAY:
-                        - enrollmentId: 5b8e2a41-6c07-4f3d-8e19-a2d7c4b90f63
-                          courseCode: '17080'
-                          courseName: ESTADÍSTICA DESCRIPTIVA
-                          professor: CAMPOS AVENDANO GUSTAVO ANDRES
+                        - sectionCode: '4127'
+                          sinuCode: '59035'
+                          pensumItemCode: '59035'
+                          courseName: DESARROLLO DE APLICACIONES MÓVILES
+                          group: '51'
+                          professor: GÓMEZ RESTREPO LAURA MARCELA
                           startTime: '18:15'
                           endTime: '20:30'
+                          blocks: 3
+                          sede: Sede Principal
+                          buildingCode: EC
                           room: null
-                          campus: Sede Principal
                           color: '#539392'
                       TUESDAY: []
                       WEDNESDAY:
-                        - enrollmentId: e47a1c60-93b2-4d58-a71f-6c0b85d2e394
-                          courseCode: '48022'
+                        - sectionCode: '4133'
+                          sinuCode: '48022'
+                          pensumItemCode: '48022'
                           courseName: INGENIERÍA DE SOFTWARE II
-                          professor: LOPEZ OSPINA CARLOS ANDRES
+                          group: '51'
+                          professor: MARTÍNEZ ACOSTA JORGE ENRIQUE
                           startTime: '18:15'
                           endTime: '21:15'
-                          room: '710'
-                          campus: Sede Principal
-                          color: '#D51A65'
-                      THURSDAY: []
-                      FRIDAY:
-                        - enrollmentId: 9c1d4e77-2f83-4a19-b6c5-8e0a7d3f1b52
-                          courseCode: '59035'
-                          courseName: DESARROLLO DE APLICACIONES MÓVILES
-                          professor: MORALES SUAREZ ANDRES CAMILO
-                          startTime: '18:15'
-                          endTime: '21:15'
-                          room: '709'
-                          campus: Sede Principal
+                          blocks: 4
+                          sede: Sede Principal
+                          buildingCode: EC
+                          room: '508'
                           color: '#C9D329'
-                      SATURDAY: []
+                      THURSDAY: []
+                      FRIDAY: []
+                      SATURDAY:
+                        - sectionCode: '4140'
+                          sinuCode: '56201'
+                          pensumItemCode: '56201'
+                          courseName: METODOLOGÍA DE INVESTIGACIÓN
+                          group: '51'
+                          professor: RAMÍREZ SALAZAR DIANA PATRICIA
+                          startTime: '07:00'
+                          endTime: '08:30'
+                          blocks: 2
+                          sede: Bienestar Institucional
+                          buildingCode: BI
+                          room: '301'
+                          color: '#522567'
                       SUNDAY: []
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -884,71 +344,20 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
-          description: The caller has no active schedule
+          description: SINU has no timetable for the caller in the current period
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
               examples:
                 noActiveSchedule:
-                  summary: No active schedule
+                  summary: No timetable this period
                   value:
                     timestamp: '2026-09-21T06:02:44.117Z'
                     status: 404
                     error: Not Found
                     message: No active schedule found
                     path: /api/schedule/me/week
-
-  /api/schedule/{userId}:
-    get:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      operationId: getScheduleByUserId
-      summary: Get any student's schedule
-      description: |
-        Administrative read access to another user's schedule. The payload is identical to
-        `GET /api/schedule/me`. When `period` is omitted the user's active schedule is returned.
-
-        The literal path `/api/schedule/me` always wins over this template, so `me` can never be
-        read as a user id.
-
-        Roles: `ROLE_ADMIN` only. Every other role, including `ROLE_STUDENT` asking for their own
-        id, is rejected with `403`; students use the `/me` family instead.
-      tags: [Admin]
-      parameters:
-        - $ref: '#/components/parameters/UserIdPath'
-        - $ref: '#/components/parameters/PeriodQueryOptional'
-      responses:
-        '200':
-          description: The requested user's schedule for the requested period
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Schedule'
-              examples:
-                semester20262:
-                  $ref: '#/components/examples/FullSchedule'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          description: No such user, or that user has no schedule for the period
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-              examples:
-                noScheduleForUser:
-                  summary: User exists but has no schedule for the period
-                  value:
-                    timestamp: '2026-09-21T18:20:11.482Z'
-                    status: 404
-                    error: Not Found
-                    message: No schedule found for user 1042 in period 20262
-                    path: /api/schedule/1042
 
 components:
   securitySchemes:
@@ -1018,14 +427,14 @@ components:
     RoomCode:
       type: [string, 'null']
       description: |
-        A classroom code, whose first digit is the floor: `"302"` is on the third floor. These are
-        the same space codes the KApp map service uses, so a client can jump from a class to its
-        classroom on the floor plan.
+        The room, as SINU names it — usually a number whose first digit is the floor: `"302"` is on
+        the third floor. It identifies a room only together with the section's building: the same
+        number exists in more than one building.
 
         `null` means no classroom has been assigned for that stretch of the semester. It is a real,
-        common state in the source report, not a missing value, and clients must render it.
-      pattern: '^[0-9]{3,4}$'
-      example: '302'
+        common state in SINU, not a missing value, and clients must render it.
+      maxLength: 20
+      example: '405'
 
     MeetingPeriod:
       type: object
@@ -1033,7 +442,7 @@ components:
         One contiguous stretch of the semester during which a weekly meeting is taught in a given
         room. Both endpoints are **inclusive**, and a single-day range has `from` equal to `to`.
 
-        A meeting's periods are disjoint and must not overlap each other; the gaps between them are
+        A meeting's periods are disjoint and never overlap each other; the gaps between them are
         the weeks the class does not meet.
       required: [from, to, room]
       properties:
@@ -1055,16 +464,10 @@ components:
     Meeting:
       type: object
       description: |
-        One weekly day + time slot of a course, together with the date ranges over which it is
+        One weekly day + time slot of a section, together with the date ranges over which it is
         actually taught and the room in force during each of them.
-      required: [meetingId, dayOfWeek, startTime, endTime, periods]
+      required: [dayOfWeek, startTime, endTime, blocks, periods]
       properties:
-        meetingId:
-          type: string
-          format: uuid
-          readOnly: true
-          description: Server-assigned identifier of the weekly slot.
-          example: 7d2b5f91-8a34-4c60-b1e7-3f9c0d84a256
         dayOfWeek:
           $ref: '#/components/schemas/DayOfWeek'
         startTime:
@@ -1074,31 +477,29 @@ components:
         endTime:
           allOf:
             - $ref: '#/components/schemas/LocalTime'
-          description: |
-            When the class ends. Exclusive for overlap purposes, so a class ending at `20:30` does
-            not conflict with one starting at `20:30`. Always later than `startTime`.
+          description: When the class ends. Always later than `startTime`.
+        blocks:
+          type: integer
+          minimum: 1
+          description: How many 45-minute blocks the class lasts, which is how SINU schedules it.
+          example: 3
         periods:
           type: array
           description: |
             The disjoint date ranges over which this weekly slot is taught, in ascending order of
-            `from`. Hand-entered schedules carry exactly one range covering the whole semester;
-            SINU-synced schedules carry several.
+            `from`.
           minItems: 1
           items:
             $ref: '#/components/schemas/MeetingPeriod'
 
-    Enrollment:
+    Section:
       type: object
       description: |
-        One course the student takes during the period, with its weekly meetings.
-
-        `courseName`, `credits`, `professor`, `totalHours`, `level`, `group`, `subgroup` and
-        `campus` are **snapshots taken when the enrollment was written, not live references to the
-        course catalogue**. A timetable entry is a historical record: renaming a course, changing
-        its credits or reassigning its professor later must not alter entries already stored.
+        One course the person takes, or teaches, during the period, in one group, with its weekly
+        meetings — what SINU's report lists as an *asignatura* with its *grupo*.
       required:
-        - enrollmentId
-        - courseCode
+        - sectionCode
+        - sinuCode
         - pensumItemCode
         - courseName
         - level
@@ -1107,49 +508,57 @@ components:
         - group
         - subgroup
         - professor
-        - campus
+        - sede
+        - buildingCode
         - startDate
         - endDate
         - color
         - meetings
       properties:
-        enrollmentId:
+        sectionCode:
           type: string
-          format: uuid
-          readOnly: true
-          description: Server-assigned identifier of the enrollment.
-          example: 5b8e2a41-6c07-4f3d-8e19-a2d7c4b90f63
-        courseCode:
+          description: SINU's identifier of this course and group in the period — the report's `Cod.`.
+          maxLength: 20
+          example: '4127'
+        sinuCode:
           type: string
-          description: The university's course code, as printed on the SINU report.
-          example: '17080'
+          description: |
+            The course code as SINU carries it. The same `sinuCode` the semáforo shows, so a client
+            can tell which item of the student's semáforo this class is.
+          maxLength: 20
+          example: '59035'
         pensumItemCode:
-          type: string
-          description: Code of the matching item in the study plan (pensum).
-          example: '2018'
+          type: [string, 'null']
+          description: |
+            The matching item of the student's pensum, as the semáforo addresses it. `null` for a
+            course outside the student's pensum, and always for a professor's timetable.
+          maxLength: 30
+          example: '59035'
         courseName:
           type: string
-          description: Course name at write time. Snapshot, not a live reference.
-          example: ESTADÍSTICA DESCRIPTIVA
+          description: The course name, as SINU writes it.
+          example: DESARROLLO DE APLICACIONES MÓVILES
         level:
           type: integer
           description: The semester the course belongs to in the study plan.
           minimum: 1
           maximum: 12
-          example: 6
+          example: 8
         credits:
           type: integer
-          description: Academic credits at write time. Snapshot, not a live reference.
+          description: Academic credits.
           minimum: 0
           example: 3
         totalHours:
           type: integer
-          description: Total hours of the course over the semester, as printed on the report.
+          description: |
+            Total hours of the course over the semester, as SINU prints them. A SINU hour is a
+            45-minute block: weekly blocks times 16.
           minimum: 0
           example: 48
         group:
           type: string
-          description: Group code the student is enrolled in.
+          description: The group code.
           example: '51'
         subgroup:
           type: [string, 'null']
@@ -1158,102 +567,115 @@ components:
         professor:
           type: string
           description: |
-            Professor's full name at write time, in the report's own uppercase surname-first form.
-            Snapshot, not a live reference.
-          example: CAMPOS AVENDANO GUSTAVO ANDRES
-        campus:
+            The professor's full name, in SINU's own uppercase surname-first form. On a professor's
+            own timetable, their own name.
+          example: GÓMEZ RESTREPO LAURA MARCELA
+        sede:
           type: string
-          description: Campus the course is taught at.
+          description: The sede as SINU writes it. In SINU each building is a sede.
           example: Sede Principal
+        buildingCode:
+          type: [string, 'null']
+          description: |
+            The KApp building that sede maps to, for the map. `null` when nobody has mapped that
+            sede to a building yet.
+          example: EC
         startDate:
           type: string
           format: date
           description: |
             First day of the course over the whole semester, inclusive. Equal to the earliest
-            `from` across all of this enrollment's meeting periods.
+            `from` across all of this section's meeting periods.
           example: '2026-07-27'
         endDate:
           type: string
           format: date
           description: |
             Last day of the course over the whole semester, inclusive. Equal to the latest `to`
-            across all of this enrollment's meeting periods.
+            across all of this section's meeting periods.
           example: '2026-11-30'
         color:
           type: string
-          description: Colour the client paints this course with in the timetable, as `#RRGGBB`.
+          description: |
+            The colour the client paints this course with, as `#RRGGBB`. KApp assigns it from the
+            six non-pink colours of the palette, and a course keeps its colour from one period to
+            the next.
           pattern: '^#[0-9A-Fa-f]{6}$'
           example: '#539392'
         meetings:
           type: array
-          description: The weekly slots this course is taught in. May be empty.
+          description: The weekly slots this course is taught in.
           items:
             $ref: '#/components/schemas/Meeting'
 
     Schedule:
       type: object
       description: |
-        A student's whole timetable for one academic period. There is at most one schedule per
-        student per period.
-      required: [id, userId, period, programCode, pensumCode, level, active, enrollments]
+        A person's whole timetable for one academic period, as SINU has it.
+      required: [userId, period, programCode, pensumCode, level, active, source, readAt, sections]
       properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-          description: Server-assigned identifier of the schedule.
-          example: 3f2a9c14-7b5e-4d81-9a63-0c1e5f8b2d47
         userId:
           type: string
           description: >-
-            Identifier of the KApp user, taken from the JWT `sub` claim. An opaque
-            string, not a number: it is a MongoDB ObjectId and must never be parsed
-            as an integer.
+            Identifier of the KApp user, taken from the JWT `sub` claim. An opaque string, never
+            parsed as a number.
           example: '507f1f77bcf86cd799439011'
         period:
           $ref: '#/components/schemas/AcademicPeriod'
         programCode:
-          type: string
-          description: Code of the academic program the student is enrolled in.
+          type: [string, 'null']
+          description: Code of the student's academic program. `null` on a professor's timetable.
           example: '506'
         pensumCode:
-          type: string
-          description: Code of the study plan (pensum) version the student follows.
+          type: [string, 'null']
+          description: The study plan (pensum) the student follows. `null` on a professor's timetable.
           example: '1015'
         level:
-          type: integer
-          description: The semester the student is in during this period.
+          type: [integer, 'null']
+          description: The semester the student is in during this period. `null` on a professor's timetable.
           minimum: 1
           maximum: 12
           example: 8
         active:
           type: boolean
           description: |
-            Whether this is the student's current schedule. Exactly one schedule is active at a
-            time; it is the one served when `period` is omitted.
+            Whether this is the current period: the one served when `period` is omitted.
           example: true
-        enrollments:
+        source:
+          type: string
+          enum: [SINU, TEST]
+          description: |
+            Where this came from. `TEST` is the adapter that serves invented timetables while the
+            university has not opened SINU; a client shows that the data is not real.
+          example: SINU
+        readAt:
+          type: string
+          format: date-time
+          description: When this was read from SINU. KApp keeps it for a few minutes at most.
+          example: '2026-10-05T14:32:11Z'
+        sections:
           type: array
-          description: The courses the student takes during this period. Empty right after creation.
+          description: The courses the person takes, or teaches, during this period.
           items:
-            $ref: '#/components/schemas/Enrollment'
+            $ref: '#/components/schemas/Section'
 
     SchedulePeriodSummary:
       type: object
       description: One row of the period switcher.
-      required: [period, active, enrollmentCount]
+      required: [period, active, sectionCount]
       properties:
         period:
           $ref: '#/components/schemas/AcademicPeriod'
         active:
           type: boolean
-          description: Whether this is the student's current period.
+          description: Whether this is the current period.
           example: true
-        enrollmentCount:
+        sectionCount:
           type: integer
-          description: How many courses the schedule for that period holds.
+          description: How many courses the timetable for that period holds.
           minimum: 0
-          example: 3
+          example: 6
+
     ClassOccurrence:
       type: object
       description: |
@@ -1261,42 +683,60 @@ components:
         meeting matched the date's weekday, one of its periods contained the date, and `room` is the
         room in force during that period.
       required:
-        - enrollmentId
-        - courseCode
+        - sectionCode
+        - sinuCode
+        - pensumItemCode
         - courseName
+        - group
         - professor
         - startTime
         - endTime
+        - blocks
+        - sede
+        - buildingCode
         - room
-        - campus
         - color
       properties:
-        enrollmentId:
+        sectionCode:
           type: string
-          format: uuid
-          description: The enrollment this class belongs to, for drilling into the course detail.
-          example: 5b8e2a41-6c07-4f3d-8e19-a2d7c4b90f63
-        courseCode:
+          description: The section this class belongs to, for drilling into the course detail.
+          example: '4127'
+        sinuCode:
           type: string
-          example: '17080'
+          example: '59035'
+        pensumItemCode:
+          type: [string, 'null']
+          example: '59035'
         courseName:
           type: string
-          example: ESTADÍSTICA DESCRIPTIVA
+          example: DESARROLLO DE APLICACIONES MÓVILES
+        group:
+          type: string
+          example: '51'
         professor:
           type: string
-          example: CAMPOS AVENDANO GUSTAVO ANDRES
+          example: GÓMEZ RESTREPO LAURA MARCELA
         startTime:
           $ref: '#/components/schemas/LocalTime'
         endTime:
           $ref: '#/components/schemas/LocalTime'
-        room:
-          $ref: '#/components/schemas/RoomCode'
-        campus:
+        blocks:
+          type: integer
+          minimum: 1
+          description: How many 45-minute blocks the class lasts.
+          example: 3
+        sede:
           type: string
           example: Sede Principal
+        buildingCode:
+          type: [string, 'null']
+          description: The KApp building of the sede, or `null` while the sede is not mapped.
+          example: EC
+        room:
+          $ref: '#/components/schemas/RoomCode'
         color:
           description: >-
-            RGB hex the client draws this class in, chosen by the student so their week is readable at a
+            RGB hex the client draws this class in, assigned by KApp so a week is readable at a
             glance.
           type: string
           pattern: '^#[0-9A-Fa-f]{6}$'
@@ -1354,236 +794,13 @@ components:
               items:
                 $ref: '#/components/schemas/ClassOccurrence'
 
-    CreateScheduleRequest:
-      type: object
-      description: Body of `POST /api/schedule/me`.
-      required: [period, programCode, pensumCode, level]
-      additionalProperties: false
-      properties:
-        period:
-          $ref: '#/components/schemas/AcademicPeriod'
-        programCode:
-          type: string
-          example: '506'
-        pensumCode:
-          type: string
-          example: '1015'
-        level:
-          type: integer
-          minimum: 1
-          maximum: 12
-          example: 8
-
-    CreateMeetingRequest:
-      type: object
-      description: |
-        Body of `POST /api/schedule/me/enrollments/{enrollmentId}/meetings`, and the shape of each
-        entry of `meetings[]` in `POST /api/schedule/me/enrollments`.
-      required: [dayOfWeek, startTime, endTime, periods]
-      additionalProperties: false
-      properties:
-        dayOfWeek:
-          $ref: '#/components/schemas/DayOfWeek'
-        startTime:
-          $ref: '#/components/schemas/LocalTime'
-        endTime:
-          allOf:
-            - $ref: '#/components/schemas/LocalTime'
-          description: Must be later than `startTime`.
-        periods:
-          type: array
-          description: |
-            The disjoint date ranges this slot is taught over. Hand entry sends a single range
-            covering the whole semester. Every `from` and `to` must fall on `dayOfWeek`, ranges must
-            not overlap each other, and `room` must be sent explicitly — use `null` for "no room".
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/MeetingPeriod'
-
-    CreateEnrollmentRequest:
-      type: object
-      description: Body of `POST /api/schedule/me/enrollments`.
-      required:
-        - courseCode
-        - pensumItemCode
-        - courseName
-        - level
-        - credits
-        - totalHours
-        - group
-        - subgroup
-        - professor
-        - campus
-        - startDate
-        - endDate
-        - color
-        - meetings
-      additionalProperties: false
-      properties:
-        courseCode:
-          type: string
-          example: '59035'
-        pensumItemCode:
-          type: string
-          example: '2033'
-        courseName:
-          type: string
-          description: Stored as a write-time snapshot.
-          example: DESARROLLO DE APLICACIONES MÓVILES
-        level:
-          type: integer
-          minimum: 1
-          maximum: 12
-          example: 8
-        credits:
-          type: integer
-          description: Stored as a write-time snapshot.
-          minimum: 0
-          example: 3
-        totalHours:
-          description: >-
-            Contact hours for the whole term, as the pensum states them. Not hours per week.
-          type: integer
-          minimum: 0
-          example: 64
-        group:
-          description: >-
-            Which group of the course - the same course runs several, with different professors and times.
-          type: string
-          example: '51'
-        subgroup:
-          type: [string, 'null']
-          description: Send `null` explicitly when the group is not subdivided.
-          example: null
-        professor:
-          type: string
-          description: Stored as a write-time snapshot.
-          example: MORALES SUAREZ ANDRES CAMILO
-        campus:
-          type: string
-          example: Sede Principal
-        startDate:
-          type: string
-          format: date
-          example: '2026-07-31'
-        endDate:
-          type: string
-          format: date
-          description: Must not be earlier than `startDate`.
-          example: '2026-11-27'
-        color:
-          type: string
-          pattern: '^#[0-9A-Fa-f]{6}$'
-          example: '#C9D329'
-        meetings:
-          type: array
-          description: |
-            The weekly slots of this course. May be empty, in which case the course is stored with
-            no timetable presence and slots can be added later.
-          items:
-            $ref: '#/components/schemas/CreateMeetingRequest'
-
-    UpdateEnrollmentRequest:
-      type: object
-      description: |
-        Body of `PATCH /api/schedule/me/enrollments/{enrollmentId}`. Only the keys present are
-        changed; at least one must be sent.
-
-        There is deliberately no `meetings` key: weekly slots are managed through the `/meetings`
-        sub-resource, and sending `meetings` here is rejected with `400`.
-      minProperties: 1
-      additionalProperties: false
-      properties:
-        courseCode:
-          type: string
-          example: '17080'
-        pensumItemCode:
-          type: string
-          example: '2018'
-        courseName:
-          type: string
-          example: ESTADÍSTICA DESCRIPTIVA
-        level:
-          type: integer
-          minimum: 1
-          maximum: 12
-          example: 6
-        credits:
-          type: integer
-          minimum: 0
-          example: 3
-        totalHours:
-          type: integer
-          minimum: 0
-          example: 48
-        group:
-          type: string
-          example: '51'
-        subgroup:
-          type: [string, 'null']
-          description: Send `null` to clear the subgroup.
-          example: '02'
-        professor:
-          type: string
-          example: CAMPOS AVENDANO GUSTAVO ANDRES
-        campus:
-          type: string
-          example: Sede Principal
-        startDate:
-          type: string
-          format: date
-          example: '2026-07-27'
-        endDate:
-          type: string
-          format: date
-          example: '2026-11-30'
-        color:
-          type: string
-          pattern: '^#[0-9A-Fa-f]{6}$'
-          example: '#522567'
-
-    UpdateMeetingRequest:
-      type: object
-      description: |
-        Body of `PATCH /api/schedule/me/enrollments/{enrollmentId}/meetings/{meetingId}`. Only the
-        keys present are changed; at least one must be sent.
-
-        When `periods` is present it **replaces** the whole list, so send every range the meeting
-        should end up with.
-      minProperties: 1
-      additionalProperties: false
-      properties:
-        dayOfWeek:
-          $ref: '#/components/schemas/DayOfWeek'
-        startTime:
-          $ref: '#/components/schemas/LocalTime'
-        endTime:
-          $ref: '#/components/schemas/LocalTime'
-        periods:
-          description: >-
-            The weekly slots this class meets in. Replacing the list replaces the whole timetable for the
-            enrolment.
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/MeetingPeriod'
-
   parameters:
     PeriodQueryOptional:
       name: period
       in: query
       required: false
       description: |
-        Academic period to read. When omitted, the active schedule is returned.
-      schema:
-        $ref: '#/components/schemas/AcademicPeriod'
-      example: '20262'
-
-    PeriodQueryRequired:
-      name: period
-      in: query
-      required: true
-      description: Academic period to delete. Required, because the operation is destructive.
+        Academic period to read. When omitted, the current period is returned.
       schema:
         $ref: '#/components/schemas/AcademicPeriod'
       example: '20262'
@@ -1610,37 +827,6 @@ components:
         format: date
       example: '2026-09-21'
 
-    EnrollmentIdPath:
-      name: enrollmentId
-      in: path
-      required: true
-      description: Identifier of the enrollment, as returned in `Enrollment.enrollmentId`.
-      schema:
-        type: string
-        format: uuid
-      example: 5b8e2a41-6c07-4f3d-8e19-a2d7c4b90f63
-
-    MeetingIdPath:
-      name: meetingId
-      in: path
-      required: true
-      description: Identifier of the weekly slot, as returned in `Meeting.meetingId`.
-      schema:
-        type: string
-        format: uuid
-      example: 7d2b5f91-8a34-4c60-b1e7-3f9c0d84a256
-
-    UserIdPath:
-      name: userId
-      in: path
-      required: true
-      description: Identifier of the student whose schedule is being read.
-      schema:
-        type: integer
-        format: int64
-        minimum: 1
-      example: 1042
-
   responses:
     BadRequest:
       description: Validation failed
@@ -1651,141 +837,102 @@ components:
     Forbidden:
       description: Authenticated but not allowed
       content: { application/json: { schema: { $ref: '#/components/schemas/ApiError' } } }
-    NotFound:
-      description: Resource not found
-      content: { application/json: { schema: { $ref: '#/components/schemas/ApiError' } } }
-    Conflict:
-      description: Conflicts with current state
-      content: { application/json: { schema: { $ref: '#/components/schemas/ApiError' } } }
-
-    MeetingOverlapConflict:
-      description: |
-        A meeting in the request conflicts with one already stored. Two meetings conflict when they
-        share a `dayOfWeek`, their `[startTime, endTime)` ranges intersect, and at least one of
-        their `[from, to]` date ranges intersects. Nothing was written.
-
-        `details[]` carries one entry per conflicting meeting in the request. `field` points at the
-        offending element of the request body, and `issue` names the enrollment and meeting that
-        were conflicted with, plus the date range where they collide.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ApiError'
-          examples:
-            overlapsExistingMeeting:
-              summary: A new Monday evening class collides with Estadística Descriptiva
-              value:
-                timestamp: '2026-09-21T18:20:11.482Z'
-                status: 409
-                error: Conflict
-                message: The meeting conflicts with a class already in the schedule
-                path: /api/schedule/me/enrollments
-                details:
-                  - field: meetings[0]
-                    issue: >-
-                      Conflicts with enrollment 5b8e2a41-6c07-4f3d-8e19-a2d7c4b90f63 (course 17080
-                      ESTADÍSTICA DESCRIPTIVA), meeting 7d2b5f91-8a34-4c60-b1e7-3f9c0d84a256 on
-                      MONDAY 18:15-20:30; the requested 19:00-21:00 overlaps it, and the date ranges
-                      2026-08-24..2026-09-14 and 2026-08-24..2026-09-14 intersect
 
   examples:
     FullSchedule:
-      summary: A level-8 systems engineering timetable for 2026-2
+      summary: A level-8 Ingeniería de Sistemas timetable for 2026-2
       description: |
-        Three real courses. Desarrollo de Aplicaciones Móviles and Ingeniería de Software II were
-        hand-entered and therefore carry a single period covering the whole semester. Estadística
-        Descriptiva carries the six disjoint ranges exactly as the SINU report prints them,
-        including the 2026-09-21 to 2026-09-28 stretch that has no room assigned.
+        Invented sections on the real plan. Desarrollo de Aplicaciones Móviles is taught across
+        four disjoint ranges, one of them with no room. Metodología de Investigación is taught in
+        Bienestar Institucional, whose room 301 is not the Edificio Central's.
       value:
-        id: 3f2a9c14-7b5e-4d81-9a63-0c1e5f8b2d47
         userId: '507f1f77bcf86cd799439011'
         period: '20262'
         programCode: '506'
         pensumCode: '1015'
         level: 8
         active: true
-        enrollments:
-          - enrollmentId: 9c1d4e77-2f83-4a19-b6c5-8e0a7d3f1b52
-            courseCode: '59035'
-            pensumItemCode: '2033'
+        source: SINU
+        readAt: '2026-10-05T14:32:11Z'
+        sections:
+          - sectionCode: '4127'
+            sinuCode: '59035'
+            pensumItemCode: '59035'
             courseName: DESARROLLO DE APLICACIONES MÓVILES
             level: 8
-            credits: 3
-            totalHours: 64
-            group: '51'
-            subgroup: null
-            professor: MORALES SUAREZ ANDRES CAMILO
-            campus: Sede Principal
-            startDate: '2026-07-31'
-            endDate: '2026-11-27'
-            color: '#C9D329'
-            meetings:
-              - meetingId: a1f6c28d-4e70-4b93-8c25-7d0f1a6e39b4
-                dayOfWeek: FRIDAY
-                startTime: '18:15'
-                endTime: '21:15'
-                periods:
-                  - from: '2026-07-31'
-                    to: '2026-11-27'
-                    room: '709'
-          - enrollmentId: 5b8e2a41-6c07-4f3d-8e19-a2d7c4b90f63
-            courseCode: '17080'
-            pensumItemCode: '2018'
-            courseName: ESTADÍSTICA DESCRIPTIVA
-            level: 6
             credits: 3
             totalHours: 48
             group: '51'
             subgroup: null
-            professor: CAMPOS AVENDANO GUSTAVO ANDRES
-            campus: Sede Principal
+            professor: GÓMEZ RESTREPO LAURA MARCELA
+            sede: Sede Principal
+            buildingCode: EC
             startDate: '2026-07-27'
             endDate: '2026-11-30'
             color: '#539392'
             meetings:
-              - meetingId: 7d2b5f91-8a34-4c60-b1e7-3f9c0d84a256
-                dayOfWeek: MONDAY
+              - dayOfWeek: MONDAY
                 startTime: '18:15'
                 endTime: '20:30'
+                blocks: 3
                 periods:
                   - from: '2026-07-27'
                     to: '2026-08-10'
-                    room: '302'
+                    room: '405'
                   - from: '2026-08-24'
                     to: '2026-09-14'
-                    room: '302'
+                    room: '405'
                   - from: '2026-09-21'
                     to: '2026-09-28'
                     room: null
                   - from: '2026-10-19'
-                    to: '2026-10-26'
-                    room: '302'
-                  - from: '2026-11-09'
-                    to: '2026-11-09'
-                    room: '302'
-                  - from: '2026-11-23'
                     to: '2026-11-30'
-                    room: '302'
-          - enrollmentId: e47a1c60-93b2-4d58-a71f-6c0b85d2e394
-            courseCode: '48022'
-            pensumItemCode: '2027'
+                    room: '405'
+          - sectionCode: '4133'
+            sinuCode: '48022'
+            pensumItemCode: '48022'
             courseName: INGENIERÍA DE SOFTWARE II
             level: 7
             credits: 3
             totalHours: 64
             group: '51'
             subgroup: null
-            professor: LOPEZ OSPINA CARLOS ANDRES
-            campus: Sede Principal
+            professor: MARTÍNEZ ACOSTA JORGE ENRIQUE
+            sede: Sede Principal
+            buildingCode: EC
             startDate: '2026-07-29'
             endDate: '2026-11-25'
-            color: '#D51A65'
+            color: '#C9D329'
             meetings:
-              - meetingId: c30e97a5-1d46-482b-9f57-2b8a6e045c1d
-                dayOfWeek: WEDNESDAY
+              - dayOfWeek: WEDNESDAY
                 startTime: '18:15'
                 endTime: '21:15'
+                blocks: 4
                 periods:
                   - from: '2026-07-29'
                     to: '2026-11-25'
-                    room: '710'
+                    room: '508'
+          - sectionCode: '4140'
+            sinuCode: '56201'
+            pensumItemCode: '56201'
+            courseName: METODOLOGÍA DE INVESTIGACIÓN
+            level: 8
+            credits: 2
+            totalHours: 32
+            group: '51'
+            subgroup: null
+            professor: RAMÍREZ SALAZAR DIANA PATRICIA
+            sede: Bienestar Institucional
+            buildingCode: BI
+            startDate: '2026-08-01'
+            endDate: '2026-11-28'
+            color: '#522567'
+            meetings:
+              - dayOfWeek: SATURDAY
+                startTime: '07:00'
+                endTime: '08:30'
+                blocks: 2
+                periods:
+                  - from: '2026-08-01'
+                    to: '2026-11-28'
+                    room: '301'
