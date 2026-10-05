@@ -16,8 +16,8 @@ const BLOQUE_A: Building = {
     { code: 'S', name: 'Ala sur', doorSuffix: '-S' },
   ],
   floors: [
-    { code: 'P5', level: 5, name: 'Piso 5', gridRows: 6, gridColumns: 10, accessibility: 'STEP_FREE' },
-    { code: 'P6', level: 6, name: 'Piso 6', gridRows: 6, gridColumns: 10 },
+    { code: 'P5', level: 5, name: 'Piso 5', width: 400, height: 240, accessibility: 'STEP_FREE' },
+    { code: 'P6', level: 6, name: 'Piso 6', width: 400, height: 240 },
   ],
 };
 
@@ -28,7 +28,7 @@ const BLOQUE_B: Building = {
   campus: 'Sede Principal',
   aliases: [],
   wings: [],
-  floors: [{ code: 'P1', level: 1, name: 'Piso 1', gridRows: 4, gridColumns: 8 }],
+  floors: [{ code: 'P1', level: 1, name: 'Piso 1', width: 320, height: 160 }],
 };
 
 const AULA_503: Space = {
@@ -44,10 +44,13 @@ const AULA_503: Space = {
   floorCode: 'P5',
   floorLevel: 5,
   aliases: ['S-503'],
-  gridRow: 1,
-  gridColumn: 2,
-  rowSpan: 1,
-  colSpan: 2,
+  shape: [
+    { x: 80, y: 40 },
+    { x: 160, y: 40 },
+    { x: 160, y: 80 },
+    { x: 80, y: 80 },
+  ],
+  doors: [{ from: { x: 100, y: 80 }, to: { x: 120, y: 80 } }],
   accessVia: 'ASC-C',
   effectiveAccessibility: 'STEP_FREE',
 };
@@ -101,30 +104,33 @@ describe('SpaceFormComponent', () => {
     expect(form.circulation().map((s) => s.code)).toEqual(['ASC-C', 'ESC-N']);
   });
 
-  it('refuses half a position: a row with no column is neither placed nor inventoried', () => {
+  it('keeps the outline and doors drawn on its floor, and lets them go when it moves to another', () => {
     edit(AULA_503);
     circulationRequest().flush({ content: [], page: 0, size: 100, totalElements: 0, totalPages: 0 });
 
-    form.form.controls.gridColumn.setValue(null);
+    form.submit();
+    form.form.controls.floorCode.setValue('P6');
+    form.onFloorChange();
     form.submit();
 
-    expect(form.form.hasError('halfPlaced')).toBe(true);
-    expect(emitted).toEqual([]);
+    expect(emitted).toHaveLength(2);
+    expect(emitted[0].shape).toEqual(AULA_503.shape);
+    expect(emitted[0].doors).toEqual(AULA_503.doors);
+    expect(emitted[1].shape).toBeNull();
+    expect(emitted[1].doors).toEqual([]);
   });
 
   it('sends an empty field as absent, so the server reads it as not set rather than set to empty', () => {
     edit(AULA_503);
     circulationRequest().flush({ content: [], page: 0, size: 100, totalElements: 0, totalPages: 0 });
 
-    form.form.patchValue({ doorCode: '  ', wing: '', gridRow: null, gridColumn: null, accessVia: '', accessibility: '', note: ' ' });
+    form.form.patchValue({ doorCode: '  ', wing: '', accessVia: '', accessibility: '', note: ' ' });
     form.submit();
 
     expect(emitted).toHaveLength(1);
     const [request] = emitted;
     expect(request.doorCode).toBeNull();
     expect(request.wing).toBeNull();
-    expect(request.gridRow).toBeNull();
-    expect(request.gridColumn).toBeNull();
     expect(request.accessVia).toBeNull();
     expect(request.accessibility).toBeNull();
     expect(request.note).toBeNull();

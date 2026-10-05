@@ -15,6 +15,7 @@ import co.edu.konradlorenz.kapp.map.web.dto.BuildingResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.CampusSummaryResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.FloorDetailResponse;
 import co.edu.konradlorenz.kapp.map.web.dto.FloorDto;
+import co.edu.konradlorenz.kapp.map.web.dto.FootprintPartDto;
 import co.edu.konradlorenz.kapp.map.web.dto.WingDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,10 +98,13 @@ public class BuildingService {
                 request.description(),
                 cleanAliases(request.aliasesOrEmpty()),
                 request.wingsOrEmpty().stream().map(MapMapper::toWing).toList(),
-                request.floors().stream().map(floor -> MapMapper.toFloor(floor, 0)).toList(),
+                request.floors().stream().map(floor -> MapMapper.toFloor(floor, null)).toList(),
                 false,
                 now,
-                now));
+                now,
+                MapMapper.toPlacement(request.placement(), null),
+                MapMapper.toFootprint(request.footprint(), null),
+                request.address()));
 
         log.info("Created building {} on campus {} with {} floors",
                 saved.code(), saved.campus(), saved.floors().size());
@@ -129,8 +133,7 @@ public class BuildingService {
         }
 
         List<Floor> floors = request.floors().stream()
-                .map(dto -> MapMapper.toFloor(dto,
-                        existing.floor(dto.code()).map(Floor::version).orElse(0L)))
+                .map(dto -> MapMapper.toFloor(dto, existing.floor(dto.code()).orElse(null)))
                 .toList();
         List<Wing> wings = request.wingsOrEmpty().stream().map(MapMapper::toWing).toList();
         rejectRemovingOccupied(existing, floors, wings);
@@ -146,7 +149,11 @@ public class BuildingService {
                 floors,
                 existing.placeholder(),
                 existing.createdAt(),
-                Instant.now()));
+                Instant.now(),
+                MapMapper.toPlacement(request.placement(), existing.placement()),
+                MapMapper.toFootprint(request.footprint(), existing.footprint()),
+                // Left out, the address stays; sent empty, it goes.
+                request.address() == null ? existing.address() : request.address()));
 
         propagateToSpaces(saved);
         return MapMapper.toBuildingResponse(saved);
@@ -224,8 +231,8 @@ public class BuildingService {
             if (!levels.add(floor.level())) {
                 issues.add(new ApiError.FieldIssue("floors", "Two floors at level " + floor.level()));
             }
-            issues.addAll(SpaceRules.checkCorridors(floor.gridRows(), floor.gridColumns(),
-                    floor.corridorsOrEmpty()).stream()
+            issues.addAll(SpaceRules.checkFloorDrawing(floor.width(), floor.height(),
+                    floor.outlineOrEmpty(), floor.corridorsOrEmpty()).stream()
                     .map(i -> new ApiError.FieldIssue("floors[" + floor.code() + "]." + i.field(), i.issue()))
                     .toList());
         }
@@ -235,9 +242,33 @@ public class BuildingService {
                 issues.add(new ApiError.FieldIssue("wings", "Duplicate wing code: " + wing.code()));
             }
         }
+        if (request.footprint() != null) {
+            for (int i = 0; i < request.footprint().size(); i++) {
+                FootprintPartDto part = request.footprint().get(i);
+                if (part.wing() != null && !part.wing().isBlank() && !wingCodes.contains(part.wing().trim())) {
+                    issues.add(new ApiError.FieldIssue("footprint[" + i + "].wing",
+                            "No wing " + part.wing() + " in this building"));
+                }
+                if (part.lowestFloor() != null && part.floors() != null && part.lowestFloor() > Math.max(1, part.floors())) {
+                    issues.add(new ApiError.FieldIssue("footprint[" + i + "].lowestFloor",
+                            "A part cannot start above its top floor, " + part.floors()));
+                }
+                if (!closedRingOnEarth(part.ring())) {
+                    issues.add(new ApiError.FieldIssue("footprint[" + i + "].ring",
+                            "An outline is [lon, lat] points on the earth, the first repeated at the end"));
+                }
+            }
+        }
         if (!issues.isEmpty()) {
             throw new BusinessRuleException("The building's floors or wings are inconsistent", issues);
         }
+    }
+
+    /** An outline of [lon, lat] points on the earth, the first repeated at the end. */
+    static boolean closedRingOnEarth(List<List<Double>> ring) {
+        boolean onEarth = ring.stream().allMatch(p -> p.get(0) >= -180 && p.get(0) <= 180
+                && p.get(1) >= -90 && p.get(1) <= 90);
+        return onEarth && ring.size() >= 4 && ring.get(0).equals(ring.get(ring.size() - 1));
     }
 
     private void rejectRemovingOccupied(BuildingDocument existing, List<Floor> floors, List<Wing> wings) {
@@ -287,8 +318,7 @@ public class BuildingService {
                         space.wing(), space.name(), space.typeCode(), space.buildingId(),
                         building.code(), building.campus(), space.floorCode(),
                         levels.getOrDefault(space.floorCode(), space.floorLevel()),
-                        space.aliases(), space.gridRow(), space.gridColumn(), space.rowSpan(),
-                        space.colSpan(), space.accessVia(), space.accessibility(), space.note(),
+                        space.aliases(), space.shape(), space.doors(), space.accessVia(), space.accessibility(), space.note(),
                         space.capacity(), space.placeholder(), space.createdAt(), Instant.now()))
                 .toList();
 

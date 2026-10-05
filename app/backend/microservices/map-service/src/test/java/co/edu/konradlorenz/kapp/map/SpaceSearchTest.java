@@ -72,12 +72,12 @@ class SpaceSearchTest {
         BuildingDocument rankBuilding = buildings.save(MapFixtures.building("RANK"));
 
         // Matches "999" through its door code (text index weight 5).
-        SpaceDocument exact = MapFixtures.space(rankBuilding, RANK_CODE_EXACT, "P1", 1, 1);
+        SpaceDocument exact = MapFixtures.space(rankBuilding, RANK_CODE_EXACT, "P1", 40, 40);
         spaces.save(renamed(exact, "Cuarto generico"));
 
         // Matches "999" only because its NAME happens to mention the other room (weight 3),
         // never through its own door code. Ranking must still put RANK_CODE_EXACT first.
-        SpaceDocument mention = MapFixtures.space(rankBuilding, RANK_CODE_MENTION, "P1", 2, 2);
+        SpaceDocument mention = MapFixtures.space(rankBuilding, RANK_CODE_MENTION, "P1", 120, 40);
         spaces.save(renamed(mention, "Ver salon 999 para informacion"));
     }
 
@@ -85,8 +85,7 @@ class SpaceSearchTest {
         return new SpaceDocument(space.id(), space.code(), space.doorCode(), space.baseCode(),
                 space.wing(), name, "OTHER", space.buildingId(), space.buildingCode(),
                 space.campus(), space.floorCode(), space.floorLevel(), space.aliases(),
-                space.gridRow(), space.gridColumn(), space.rowSpan(), space.colSpan(), null,
-                null, null, null, false, space.createdAt(), space.updatedAt());
+                space.shape(), space.doors(), null, null, null, null, false, space.createdAt(), space.updatedAt());
     }
 
     private static org.springframework.test.web.servlet.request.RequestPostProcessor guest() {

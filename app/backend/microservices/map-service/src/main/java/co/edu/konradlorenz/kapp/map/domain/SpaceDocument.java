@@ -30,8 +30,8 @@ import java.util.List;
  *
  * <h2>Placed, or only inventoried</h2>
  * A floor's information plaque says what is on it long before anybody draws where. Those spaces
- * are stored with no grid position - {@code gridRow} and {@code gridColumn} both null - and are
- * placed when someone walks the floor. The search finds them either way.
+ * are stored with no {@code shape} and are placed when someone matches them with a room on the
+ * floor. The search finds them either way.
  *
  * @param code          identifier within the building. Equal to {@code doorCode} for a numbered
  *                      room, generated for everything else. This is also the key
@@ -52,6 +52,9 @@ import java.util.List;
  *                      floor whose central wing has lifts, and is only reachable by a staircase
  * @param note          how to get there, when {@code accessVia} is not enough - "solo por la
  *                      escalera norte, desde el P5"
+ * @param shape         the room's outline on its floor, corners in order, or null while it is only
+ *                      inventoried; see {@link Shape}
+ * @param doors         its ways in, each on its outline; empty until somebody marks them
  */
 @Document(collection = "spaces")
 public record SpaceDocument(
@@ -68,10 +71,8 @@ public record SpaceDocument(
         String floorCode,
         double floorLevel,
         List<String> aliases,
-        Integer gridRow,
-        Integer gridColumn,
-        int rowSpan,
-        int colSpan,
+        List<Point> shape,
+        List<Door> doors,
         String accessVia,
         Accessibility accessibility,
         String note,
@@ -83,8 +84,8 @@ public record SpaceDocument(
 
     public SpaceDocument {
         aliases = aliases == null ? List.of() : List.copyOf(aliases);
-        rowSpan = rowSpan < 1 ? 1 : rowSpan;
-        colSpan = colSpan < 1 ? 1 : colSpan;
+        shape = shape == null || shape.isEmpty() ? null : List.copyOf(shape);
+        doors = doors == null ? List.of() : List.copyOf(doors);
     }
 
     /**
@@ -110,25 +111,14 @@ public record SpaceDocument(
         return doorCode;
     }
 
-    /** @return true when the space has a cell on the grid, false while it is only inventoried */
+    /** @return true when the space has a shape on the floor, false while it is only inventoried */
     public boolean isPlaced() {
-        return gridRow != null && gridColumn != null;
+        return shape != null;
     }
 
-    /** The last cell the space covers, inclusive. Only meaningful for a placed space. */
-    public int lastRow() {
-        return gridRow + rowSpan - 1;
-    }
-
-    public int lastColumn() {
-        return gridColumn + colSpan - 1;
-    }
-
-    /** Two spaces overlap only when both are placed and their rectangles share a cell. */
+    /** Two spaces overlap only when both are placed and they share some floor, not just a wall. */
     public boolean overlaps(SpaceDocument other) {
-        return isPlaced() && other.isPlaced()
-                && gridRow <= other.lastRow() && other.gridRow <= lastRow()
-                && gridColumn <= other.lastColumn() && other.gridColumn <= lastColumn();
+        return isPlaced() && other.isPlaced() && Shape.overlap(shape, other.shape);
     }
 
     /** @return this space's own accessibility, or the floor's when it does not state one */

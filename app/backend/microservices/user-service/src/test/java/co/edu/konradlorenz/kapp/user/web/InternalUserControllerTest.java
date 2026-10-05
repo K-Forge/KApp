@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -137,5 +138,19 @@ class InternalUserControllerTest extends AbstractUserServiceTest {
                                  "role": "ROLE_STUDENT", "academic": null}"""))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.details[0].field").value("academic"));
+    }
+
+    @Test
+    @DisplayName("deleting a profile needs the token, and is the same 204 whether it existed or not")
+    void delete_isGuardedAndIdempotent() throws Exception {
+        save(student("to-delete", "borrar.esto@konradlorenz.edu.co", "Borrar", "Esto"));
+
+        mockMvc.perform(delete("/internal/users/to-delete"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(delete("/internal/users/to-delete").header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN))
+                .andExpect(status().isNoContent());
+        assertThat(mongoTemplate.findById("to-delete", UserProfile.class)).isNull();
+        mockMvc.perform(delete("/internal/users/to-delete").header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN))
+                .andExpect(status().isNoContent());
     }
 }

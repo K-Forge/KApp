@@ -82,8 +82,8 @@ class MapBusinessRulesTest {
                 .andExpect(jsonPath("$.buildingCode").value("A"))
                 .andExpect(jsonPath("$.floor.code").value("P7"))
                 .andExpect(jsonPath("$.floorCode").value("P7"))
-                .andExpect(jsonPath("$.floor.gridRows").value(11))
-                .andExpect(jsonPath("$.floor.gridColumns").value(16))
+                .andExpect(jsonPath("$.floor.width").value(640))
+                .andExpect(jsonPath("$.floor.height").value(440))
                 .andExpect(jsonPath("$.building.code").value("A"))
                 .andExpect(jsonPath("$.building.name").value("Bloque A"));
     }
@@ -107,7 +107,7 @@ class MapBusinessRulesTest {
     void droppingOccupiedFloorIsConflict() throws Exception {
         BuildingDocument occupied = buildings.save(MapFixtures.building("OCC", List.of(),
                 MapFixtures.floor("P1", 1), MapFixtures.floor("P2", 2)));
-        spaces.save(MapFixtures.space(occupied, "OCCSP", "P2", 1, 1));
+        spaces.save(MapFixtures.space(occupied, "OCCSP", "P2", 40, 40));
 
         String bodyDroppingFloor2 = """
                 {
@@ -115,7 +115,7 @@ class MapBusinessRulesTest {
                   "name": "Occupied Floor Fixture",
                   "campus": "Sede Test",
                   "floors": [
-                    {"code": "P1", "level": 1, "name": "Piso 1", "gridRows": 10, "gridColumns": 10}
+                    {"code": "P1", "level": 1, "name": "Piso 1", "width": 400, "height": 400}
                   ]
                 }
                 """;
@@ -135,8 +135,8 @@ class MapBusinessRulesTest {
     void ambiguousRoomCodeListsCandidates() throws Exception {
         BuildingDocument amb1 = buildings.save(MapFixtures.building("AMB1"));
         BuildingDocument amb2 = buildings.save(MapFixtures.building("AMB2"));
-        spaces.save(MapFixtures.space(amb1, "AMB", "P1", 1, 1));
-        spaces.save(MapFixtures.space(amb2, "AMB", "P1", 1, 1));
+        spaces.save(MapFixtures.space(amb1, "AMB", "P1", 40, 40));
+        spaces.save(MapFixtures.space(amb2, "AMB", "P1", 40, 40));
 
         mockMvc.perform(get("/api/map/spaces/AMB").with(guest()))
                 .andExpect(status().isConflict())
@@ -168,8 +168,7 @@ class MapBusinessRulesTest {
                                   "typeCode": "STORAGE",
                                   "buildingCode": "SOT",
                                   "floorCode": "S1",
-                                  "gridRow": 0,
-                                  "gridColumn": 0
+                                  "shape": [{"x": 0, "y": 0}, {"x": 40, "y": 0}, {"x": 40, "y": 40}, {"x": 0, "y": 40}]
                                 }
                                 """))
                 .andExpect(status().isCreated());
@@ -215,29 +214,28 @@ class MapBusinessRulesTest {
     // ── The schematic model's own rules ────────────────────────────────────────────
 
     @Test
-    @DisplayName("a space that would not fit on its floor's grid is refused with 400")
-    void spaceOutsideTheGridIsRejected() throws Exception {
-        // Floor 3 of Bloque A is 11 x 16, so column 20 does not exist.
+    @DisplayName("a space that would not fit on its floor is refused with 400")
+    void spaceOutsideTheFloorIsRejected() throws Exception {
+        // Floor 3 of Bloque A is 640 x 440 units, so x = 800 is off the drawing.
         mockMvc.perform(post("/api/map/spaces").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "code": "OUT-1",
-                                  "name": "Fuera de la rejilla",
+                                  "name": "Fuera del piso",
                                   "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
                                   "floorCode": "P3",
-                                  "gridRow": 2,
-                                  "gridColumn": 20
+                                  "shape": [{"x": 800, "y": 80}, {"x": 840, "y": 80}, {"x": 840, "y": 120}, {"x": 800, "y": 120}]
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.details[0].field").value("gridRow"));
+                .andExpect(jsonPath("$.details[0].field").value("shape"));
     }
 
     @Test
-    @DisplayName("a space whose span runs off the edge is refused, not silently clipped")
-    void spanRunningOffTheEdgeIsRejected() throws Exception {
+    @DisplayName("a space that runs off the edge is refused, not silently clipped")
+    void shapeRunningOffTheEdgeIsRejected() throws Exception {
         mockMvc.perform(post("/api/map/spaces").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -247,18 +245,16 @@ class MapBusinessRulesTest {
                                   "typeCode": "AUDITORIUM",
                                   "buildingCode": "A",
                                   "floorCode": "P3",
-                                  "gridRow": 2,
-                                  "gridColumn": 14,
-                                  "colSpan": 6
+                                  "shape": [{"x": 560, "y": 80}, {"x": 800, "y": 80}, {"x": 800, "y": 120}, {"x": 560, "y": 120}]
                                 }
                                 """))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    @DisplayName("two spaces cannot occupy the same cell: the second would be invisible, not obviously wrong")
+    @DisplayName("two spaces cannot cover the same area: the second would be hidden, not obviously wrong")
     void overlappingSpacesAreRefused() throws Exception {
-        // Room 301 sits at row 5, columns 4-5 of floor 3.
+        // Room 301 covers x 160-240, y 200-240 of floor 3.
         mockMvc.perform(post("/api/map/spaces").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -268,8 +264,7 @@ class MapBusinessRulesTest {
                                   "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
                                   "floorCode": "P3",
-                                  "gridRow": 5,
-                                  "gridColumn": 5
+                                  "shape": [{"x": 200, "y": 200}, {"x": 240, "y": 200}, {"x": 240, "y": 240}, {"x": 200, "y": 240}]
                                 }
                                 """))
                 .andExpect(status().isConflict())
@@ -277,8 +272,8 @@ class MapBusinessRulesTest {
     }
 
     @Test
-    @DisplayName("the same cell on a different floor is fine")
-    void sameCellOnAnotherFloorIsAllowed() throws Exception {
+    @DisplayName("the same place on a different floor is fine")
+    void samePlaceOnAnotherFloorIsAllowed() throws Exception {
         mockMvc.perform(post("/api/map/spaces").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -288,9 +283,7 @@ class MapBusinessRulesTest {
                                   "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
                                   "floorCode": "P2",
-                                  "gridRow": 5,
-                                  "gridColumn": 4,
-                                  "colSpan": 2
+                                  "shape": [{"x": 160, "y": 200}, {"x": 240, "y": 200}, {"x": 240, "y": 240}, {"x": 160, "y": 240}]
                                 }
                                 """))
                 .andExpect(status().isCreated());
@@ -308,8 +301,7 @@ class MapBusinessRulesTest {
                                   "typeCode": "OTHER",
                                   "buildingCode": "A",
                                   "floorCode": "S1",
-                                  "gridRow": 0,
-                                  "gridColumn": 0
+                                  "shape": [{"x": 0, "y": 0}, {"x": 40, "y": 0}, {"x": 40, "y": 40}, {"x": 0, "y": 40}]
                                 }
                                 """))
                 .andExpect(status().isCreated())
@@ -330,8 +322,7 @@ class MapBusinessRulesTest {
                                   "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
                                   "floorCode": "P2",
-                                  "gridRow": 1,
-                                  "gridColumn": 8
+                                  "shape": [{"x": 320, "y": 40}, {"x": 360, "y": 40}, {"x": 360, "y": 80}, {"x": 320, "y": 80}]
                                 }
                                 """))
                 .andExpect(status().isCreated())
@@ -353,8 +344,7 @@ class MapBusinessRulesTest {
                                   "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
                                   "floorCode": "P2",
-                                  "gridRow": 8,
-                                  "gridColumn": 8
+                                  "shape": [{"x": 320, "y": 320}, {"x": 360, "y": 320}, {"x": 360, "y": 360}, {"x": 320, "y": 360}]
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
@@ -373,8 +363,7 @@ class MapBusinessRulesTest {
                                   "typeCode": "OFFICE",
                                   "buildingCode": "A",
                                   "floorCode": "P2",
-                                  "gridRow": 9,
-                                  "gridColumn": 12
+                                  "shape": [{"x": 480, "y": 360}, {"x": 520, "y": 360}, {"x": 520, "y": 400}, {"x": 480, "y": 400}]
                                 }
                                 """))
                 .andExpect(status().isCreated())
@@ -406,7 +395,7 @@ class MapBusinessRulesTest {
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.gridRow").doesNotExist());
+                .andExpect(jsonPath("$.shape").doesNotExist());
 
         mockMvc.perform(get("/api/map/spaces/search").param("q", "formacion cientifica").with(guest()))
                 .andExpect(status().isOk())
@@ -415,22 +404,22 @@ class MapBusinessRulesTest {
     }
 
     @Test
-    @DisplayName("half a position is refused: a space is placed with both coordinates or with neither")
-    void halfAPositionIsRefused() throws Exception {
+    @DisplayName("a shape of fewer than three corners is refused: it has no area to draw")
+    void shapeWithoutAreaIsRefused() throws Exception {
         mockMvc.perform(post("/api/map/spaces").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "code": "HALF-1",
-                                  "name": "Medio ubicado",
+                                  "code": "LINE-1",
+                                  "name": "Solo una línea",
                                   "typeCode": "OFFICE",
                                   "buildingCode": "A",
                                   "floorCode": "P2",
-                                  "gridRow": 3
+                                  "shape": [{"x": 40, "y": 40}, {"x": 80, "y": 40}]
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.details[0].field").value("gridColumn"));
+                .andExpect(jsonPath("$.details[0].field").value("shape"));
     }
 
     @Test
@@ -475,12 +464,11 @@ class MapBusinessRulesTest {
     void droppingOccupiedWingIsConflict() throws Exception {
         BuildingDocument winged = buildings.save(MapFixtures.building("WNG",
                 List.of(new Wing("E", "Ala oriental", null, null)), MapFixtures.floor("P1", 1)));
-        var space = MapFixtures.space(winged, "WNG-1", "P1", 1, 1);
+        var space = MapFixtures.space(winged, "WNG-1", "P1", 40, 40);
         spaces.save(new co.edu.konradlorenz.kapp.map.domain.SpaceDocument(space.id(), space.code(),
                 space.doorCode(), space.baseCode(), "E", space.name(), space.typeCode(),
                 space.buildingId(), space.buildingCode(), space.campus(), space.floorCode(),
-                space.floorLevel(), space.aliases(), space.gridRow(), space.gridColumn(),
-                space.rowSpan(), space.colSpan(), null, null, null, null, false,
+                space.floorLevel(), space.aliases(), space.shape(), space.doors(), null, null, null, null, false,
                 space.createdAt(), space.updatedAt()));
 
         mockMvc.perform(put("/api/map/buildings/WNG").with(admin())
@@ -491,7 +479,7 @@ class MapBusinessRulesTest {
                                   "name": "Sin alas",
                                   "campus": "Sede Test",
                                   "floors": [
-                                    {"code": "P1", "level": 1, "name": "Piso 1", "gridRows": 10, "gridColumns": 10}
+                                    {"code": "P1", "level": 1, "name": "Piso 1", "width": 400, "height": 400}
                                   ]
                                 }
                                 """))
@@ -510,8 +498,7 @@ class MapBusinessRulesTest {
                                   "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
                                   "floorCode": "P2",
-                                  "gridRow": 0,
-                                  "gridColumn": 0,
+                                  "shape": [{"x": 0, "y": 0}, {"x": 40, "y": 0}, {"x": 40, "y": 40}, {"x": 0, "y": 40}],
                                   "accessVia": "ASC-QUE-NO-EXISTE"
                                 }
                                 """))
@@ -531,8 +518,7 @@ class MapBusinessRulesTest {
                                   "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
                                   "floorCode": "P2",
-                                  "gridRow": 0,
-                                  "gridColumn": 2,
+                                  "shape": [{"x": 80, "y": 0}, {"x": 120, "y": 0}, {"x": 120, "y": 40}, {"x": 80, "y": 40}],
                                   "accessVia": "302"
                                 }
                                 """))
@@ -552,8 +538,7 @@ class MapBusinessRulesTest {
                                   "typeCode": "CLASSROOM",
                                   "buildingCode": "A",
                                   "floorCode": "P2",
-                                  "gridRow": 0,
-                                  "gridColumn": 4,
+                                  "shape": [{"x": 160, "y": 0}, {"x": 200, "y": 0}, {"x": 200, "y": 40}, {"x": 160, "y": 40}],
                                   "accessVia": "ASC-CENTRAL"
                                 }
                                 """))

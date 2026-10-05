@@ -69,16 +69,15 @@ class FloorLayoutTest {
     private static final String TWO_ROOMS = """
             {
               "version": %d,
-              "gridRows": 10,
-              "gridColumns": 10,
+              "width": 400, "height": 400,
               "status": "VERIFIED",
               "accessibility": "STEP_FREE",
               "corridors": [{"code": "PAS", "name": "Pasillo", "color": "#5B8DEF",
-                             "path": [{"row": 5, "col": 0}, {"row": 5, "col": 9}]}],
+                             "path": [{"x": 20, "y": 220}, {"x": 380, "y": 220}]}],
               "spaces": [
-                {"code": "ASC", "name": "Ascensor", "typeCode": "ELEVATOR", "gridRow": 4, "gridColumn": 0},
+                {"code": "ASC", "name": "Ascensor", "typeCode": "ELEVATOR", "shape": [{"x": 0, "y": 160}, {"x": 40, "y": 160}, {"x": 40, "y": 200}, {"x": 0, "y": 200}]},
                 {"code": "101", "doorCode": "101", "name": "Aula 101", "typeCode": "CLASSROOM",
-                 "gridRow": 1, "gridColumn": 1, "colSpan": 2, "accessVia": "ASC"},
+                 "shape": [{"x": 40, "y": 40}, {"x": 120, "y": 40}, {"x": 120, "y": 80}, {"x": 40, "y": 80}], "accessVia": "ASC"},
                 {"code": "L1-DEP", "name": "Dirección de Investigaciones", "typeCode": "OFFICE"}
               ]
             }
@@ -100,6 +99,33 @@ class FloorLayoutTest {
     }
 
     @Test
+    @DisplayName("the direction a floor's drawing faces is saved with its layout, and a save that leaves it out keeps it")
+    void theDrawingsDirectionIsKept() throws Exception {
+        buildings.save(MapFixtures.building("LAY9"));
+
+        save("LAY9", """
+                {"version": 0, "width": 400, "height": 400, "top": "EAST", "spaces": []}
+                """, status().isOk());
+        save("LAY9", """
+                {"version": 1, "width": 400, "height": 400, "spaces": []}
+                """, status().isOk());
+        // Renaming the building, from a form that does not show the direction.
+        mockMvc.perform(put("/api/map/buildings/LAY9").with(admin())
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"code": "LAY9", "name": "Renamed", "campus": "Sede Test",
+                                 "floors": [{"code": "P1", "level": 1, "name": "Piso 1", "width": 400, "height": 400}]}
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/map/buildings/LAY9/floors/P1").with(admin()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.top").value("EAST"));
+        mockMvc.perform(get("/api/map/buildings/LAY9").with(admin()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.floors[0].top").value("EAST"));
+    }
+
+    @Test
     @DisplayName("a save against an old version is refused with 409 and changes nothing")
     void staleVersionIsRefused() throws Exception {
         buildings.save(MapFixtures.building("LAY2"));
@@ -107,7 +133,7 @@ class FloorLayoutTest {
 
         // Someone else's editor still thinks the floor is at version 0.
         save("LAY2", """
-                {"version": 0, "gridRows": 10, "gridColumns": 10, "spaces": []}
+                {"version": 0, "width": 400, "height": 400, "spaces": []}
                 """, status().isConflict());
 
         String buildingId = buildings.findByCode("LAY2").orElseThrow().id();
@@ -123,11 +149,11 @@ class FloorLayoutTest {
 
         save("LAY3", """
                 {
-                  "version": 1, "gridRows": 10, "gridColumns": 10,
+                  "version": 1, "width": 400, "height": 400,
                   "spaces": [
-                    {"code": "ASC", "name": "Ascensor", "typeCode": "ELEVATOR", "gridRow": 4, "gridColumn": 0},
+                    {"code": "ASC", "name": "Ascensor", "typeCode": "ELEVATOR", "shape": [{"x": 0, "y": 160}, {"x": 40, "y": 160}, {"x": 40, "y": 200}, {"x": 0, "y": 200}]},
                     {"code": "102", "doorCode": "102", "name": "Aula 102", "typeCode": "CLASSROOM",
-                     "gridRow": 7, "gridColumn": 7, "accessVia": "ASC"}
+                     "shape": [{"x": 280, "y": 280}, {"x": 320, "y": 280}, {"x": 320, "y": 320}, {"x": 280, "y": 320}], "accessVia": "ASC"}
                   ]
                 }
                 """, status().isOk());
@@ -139,16 +165,16 @@ class FloorLayoutTest {
     }
 
     @Test
-    @DisplayName("a drawing with two rooms in one cell is refused whole: nothing is written")
+    @DisplayName("a drawing with one room on top of another is refused whole: nothing is written")
     void overlappingDrawingIsRefusedWhole() throws Exception {
         buildings.save(MapFixtures.building("LAY4"));
 
         save("LAY4", """
                 {
-                  "version": 0, "gridRows": 10, "gridColumns": 10,
+                  "version": 0, "width": 400, "height": 400,
                   "spaces": [
-                    {"code": "A", "doorCode": "A", "name": "Uno", "typeCode": "OFFICE", "gridRow": 1, "gridColumn": 1},
-                    {"code": "B", "doorCode": "B", "name": "Dos", "typeCode": "OFFICE", "gridRow": 1, "gridColumn": 1}
+                    {"code": "A", "doorCode": "A", "name": "Uno", "typeCode": "OFFICE", "shape": [{"x": 40, "y": 40}, {"x": 80, "y": 40}, {"x": 80, "y": 80}, {"x": 40, "y": 80}]},
+                    {"code": "B", "doorCode": "B", "name": "Dos", "typeCode": "OFFICE", "shape": [{"x": 40, "y": 40}, {"x": 80, "y": 40}, {"x": 80, "y": 80}, {"x": 40, "y": 80}]}
                   ]
                 }
                 """, status().isBadRequest());
@@ -160,6 +186,56 @@ class FloorLayoutTest {
     }
 
     @Test
+    @DisplayName("rooms that share a wall do not overlap, and a room in L is kept exactly as drawn")
+    void sharedWallsAndLShapes() throws Exception {
+        buildings.save(MapFixtures.building("LAY7"));
+
+        // 701 is an L: 200 wide along the top, 80 wide down the left. 702 fills the corner the L
+        // leaves, sharing two walls with it.
+        save("LAY7", """
+                {
+                  "version": 0, "width": 400, "height": 400,
+                  "outline": [{"x": 0, "y": 0}, {"x": 400, "y": 0}, {"x": 400, "y": 400}, {"x": 0, "y": 400}],
+                  "spaces": [
+                    {"code": "701", "doorCode": "701", "name": "Aula 701", "typeCode": "CLASSROOM",
+                     "shape": [{"x": 0, "y": 0}, {"x": 200, "y": 0}, {"x": 200, "y": 80},
+                               {"x": 80, "y": 80}, {"x": 80, "y": 200}, {"x": 0, "y": 200}]},
+                    {"code": "702", "doorCode": "702", "name": "Aula 702", "typeCode": "CLASSROOM",
+                     "shape": [{"x": 80, "y": 80}, {"x": 200, "y": 80}, {"x": 200, "y": 200}, {"x": 80, "y": 200}]}
+                  ]
+                }
+                """, status().isOk());
+
+        mockMvc.perform(get("/api/map/buildings/LAY7/floors/P1").with(admin()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.outline.length()").value(4))
+                .andExpect(jsonPath("$.spaces[?(@.code == '701')].shape.length()").value(6))
+                .andExpect(jsonPath("$.spaces[?(@.code == '701')].shape[3].x").value(80))
+                .andExpect(jsonPath("$.spaces[?(@.code == '701')].bounds.width").value(200))
+                .andExpect(jsonPath("$.spaces[?(@.code == '701')].bounds.height").value(200));
+    }
+
+    @Test
+    @DisplayName("a shape whose edges cross each other is refused: it has no inside to draw")
+    void selfCrossingShapeIsRefused() throws Exception {
+        buildings.save(MapFixtures.building("LAY8"));
+
+        mockMvc.perform(put("/api/map/buildings/LAY8/floors/P1/layout").with(admin())
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {
+                                  "version": 0, "width": 400, "height": 400,
+                                  "spaces": [
+                                    {"code": "BOW", "name": "Moño", "typeCode": "OFFICE",
+                                     "shape": [{"x": 0, "y": 0}, {"x": 100, "y": 0}, {"x": 0, "y": 100}, {"x": 40, "y": 100}]}
+                                  ]
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[?(@.field == 'spaces[0].shape')].issue")
+                        .value(org.hamcrest.Matchers.hasItem(org.hamcrest.Matchers.containsString("crosses itself"))));
+    }
+
+    @Test
     @DisplayName("every problem in a drawing is reported at once, each against its space")
     void everyProblemIsReported() throws Exception {
         buildings.save(MapFixtures.building("LAY5"));
@@ -167,16 +243,16 @@ class FloorLayoutTest {
         mockMvc.perform(put("/api/map/buildings/LAY5/floors/P1/layout").with(admin())
                         .contentType(MediaType.APPLICATION_JSON).content("""
                                 {
-                                  "version": 0, "gridRows": 10, "gridColumns": 10,
+                                  "version": 0, "width": 400, "height": 400,
                                   "spaces": [
-                                    {"code": "X", "name": "Fuera", "typeCode": "OFFICE", "gridRow": 1, "gridColumn": 12},
+                                    {"code": "X", "name": "Fuera", "typeCode": "OFFICE", "shape": [{"x": 480, "y": 40}, {"x": 520, "y": 40}, {"x": 520, "y": 80}, {"x": 480, "y": 80}]},
                                     {"code": "Y", "name": "Tipo raro", "typeCode": "NO_EXISTE"},
                                     {"code": "Z", "name": "Por un salón", "typeCode": "OFFICE", "accessVia": "X"}
                                   ]
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.details[?(@.field == 'spaces[0].gridRow')]").exists())
+                .andExpect(jsonPath("$.details[?(@.field == 'spaces[0].shape')]").exists())
                 .andExpect(jsonPath("$.details[?(@.field == 'spaces[1].typeCode')]").exists())
                 .andExpect(jsonPath("$.details[?(@.field == 'spaces[2].accessVia')]").exists());
     }
@@ -190,17 +266,17 @@ class FloorLayoutTest {
         mockMvc.perform(put("/api/map/buildings/LAY6/floors/P2/layout").with(admin())
                         .contentType(MediaType.APPLICATION_JSON).content("""
                                 {
-                                  "version": 0, "gridRows": 10, "gridColumns": 10,
+                                  "version": 0, "width": 400, "height": 400,
                                   "spaces": [
                                     {"code": "201", "doorCode": "201", "name": "Aula 201", "typeCode": "CLASSROOM",
-                                     "gridRow": 1, "gridColumn": 1, "accessVia": "ASC"}
+                                     "shape": [{"x": 40, "y": 40}, {"x": 80, "y": 40}, {"x": 80, "y": 80}, {"x": 40, "y": 80}], "accessVia": "ASC"}
                                   ]
                                 }
                                 """))
                 .andExpect(status().isOk());
 
         save("LAY6", """
-                {"version": 1, "gridRows": 10, "gridColumns": 10, "spaces": []}
+                {"version": 1, "width": 400, "height": 400, "spaces": []}
                 """, status().isConflict());
     }
 }

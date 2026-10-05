@@ -5,7 +5,6 @@ import co.edu.konradlorenz.kapp.map.domain.BuildingDocument;
 import co.edu.konradlorenz.kapp.map.domain.Corridor;
 import co.edu.konradlorenz.kapp.map.domain.Floor;
 import co.edu.konradlorenz.kapp.map.domain.FloorStatus;
-import co.edu.konradlorenz.kapp.map.domain.GridPoint;
 import co.edu.konradlorenz.kapp.map.domain.SpaceCategory;
 import co.edu.konradlorenz.kapp.map.domain.SpaceDocument;
 import co.edu.konradlorenz.kapp.map.domain.SpaceTypeDocument;
@@ -58,6 +57,10 @@ import java.util.UUID;
  * <p>Re-running it is harmless: the catalogue is only added to, converted documents are skipped
  * because they already have the new fields, and the placeholder campus is removed before it is
  * written.
+ *
+ * <p>The placeholder campus is written in the model the code has today, rooms as polygons, since
+ * it only ever runs on a fresh database. Where it ran when rooms were grid cells,
+ * {@code V006_PolygonShapes} converts what it wrote.
  */
 @ChangeUnit(id = "map-model-v2-v004", order = "004", author = "kapp")
 public class V004_MapModelV2 {
@@ -285,10 +288,11 @@ public class V004_MapModelV2 {
                 List.of(),
                 List.of(floor("P1", 1, "Piso 1"),
                         new Floor("MEZZ", 1.5, "Mezzanine", FloorStatus.DRAFT, Accessibility.STAIRS_ONLY,
-                                "Solo por la escalera, desde la recepción.", 6, 10, List.of(), 0),
+                                "Solo por la escalera, desde la recepción.", 10 * GridCells.CELL, 6 * GridCells.CELL,
+                                List.of(), List.of(), 0),
                         floor("P2", 2, "Piso 2"),
                         new Floor("P3", 3, "Piso 3", FloorStatus.UNMAPPED, Accessibility.UNKNOWN,
-                                null, 11, 16, List.of(), 0)),
+                                null, 16 * GridCells.CELL, 11 * GridCells.CELL, List.of(), List.of(), 0)),
                 true, now, now));
 
         // ── Circulation first: everything else points at it through accessVia ─────────────
@@ -326,7 +330,7 @@ public class V004_MapModelV2 {
         space(mongo, bloqueA, "711", "711", "C", "Aula 711", "CLASSROOM", "P7",
                 List.of("sala 711", "salon 711"), 7, 7, 1, 2, "ASC-CENTRAL", 28, now);
 
-        // A room that spans several cells, so the client honours rowSpan and colSpan.
+        // A room bigger than the rest, so the client draws each room at its own size.
         space(mongo, bloqueA, "310", "310", "C", "Auditorio Konrad Lorenz", "AUDITORIUM", "P3",
                 List.of("auditorio"), 7, 11, 3, 4, "ASC-CENTRAL", 180, now);
 
@@ -353,27 +357,33 @@ public class V004_MapModelV2 {
                 List.of("bienestar", "psicologia"), 4, 3, 1, 2, "B-ASC", null, now);
         space(mongo, bloqueB, "210", "210", null, "Terraza", "TERRACE", "P2",
                 List.of("terraza"), 1, 7, 2, 3, "B-ASC", null, now);
-        // Known to be on the floor from its plaque, not yet placed on the grid.
+        // Known to be on the floor from its plaque, not yet placed.
         space(mongo, bloqueB, "B-P3-01", null, null, "Sala de juntas", "MEETING_ROOM", "P3",
                 List.of(), null, null, 1, 1, "B-ASC", null, now);
     }
 
     private static Floor basement() {
-        return new Floor("S1", -1, "Sótano", FloorStatus.DRAFT, Accessibility.STEP_FREE, null, 10, 10,
+        return new Floor("S1", -1, "Sótano", FloorStatus.DRAFT, Accessibility.STEP_FREE, null,
+                10 * GridCells.CELL, 10 * GridCells.CELL, List.of(),
                 List.of(new Corridor("PAS-S-CENTRAL", "Pasillo sótano", CENTRAL_COLOR,
-                        List.of(new GridPoint(6, 0), new GridPoint(6, 9)))), 0);
+                        List.of(GridCells.centre(6, 0), GridCells.centre(6, 9)))), 0);
     }
 
     private static Floor floor(String code, double level, String name) {
-        return new Floor(code, level, name, FloorStatus.DRAFT, Accessibility.STEP_FREE, null, 11, 16, List.of(
+        return new Floor(code, level, name, FloorStatus.DRAFT, Accessibility.STEP_FREE, null,
+                16 * GridCells.CELL, 11 * GridCells.CELL, List.of(), List.of(
                 new Corridor("PAS-CENTRAL", "Pasillo central", CENTRAL_COLOR,
-                        List.of(new GridPoint(5, 0), new GridPoint(5, 15))),
+                        List.of(GridCells.centre(5, 0), GridCells.centre(5, 15))),
                 new Corridor("PAS-NORTE", "Pasillo norte", NORTE_COLOR,
-                        List.of(new GridPoint(5, 3), new GridPoint(1, 3), new GridPoint(1, 15))),
+                        List.of(GridCells.centre(5, 3), GridCells.centre(1, 3), GridCells.centre(1, 15))),
                 new Corridor("PAS-SUR", "Pasillo sur", SUR_COLOR,
-                        List.of(new GridPoint(5, 3), new GridPoint(9, 3), new GridPoint(9, 15)))), 0);
+                        List.of(GridCells.centre(5, 3), GridCells.centre(9, 3), GridCells.centre(9, 15)))), 0);
     }
 
+    /**
+     * One placeholder space, placed by the grid cells it was first written in: a room keeps the
+     * rectangle it had, now in the floor's units - see {@link GridCells}.
+     */
     private static void space(MongoTemplate mongo, BuildingDocument building, String code, String doorCode,
                               String wing, String name, String typeCode, String floorCode,
                               List<String> aliases, Integer gridRow, Integer gridColumn,
@@ -383,7 +393,8 @@ public class V004_MapModelV2 {
                 UUID.randomUUID().toString(), code, doorCode,
                 SpaceDocument.baseCodeOf(doorCode, building.wings()),
                 wing, name, typeCode, building.id(), building.code(), building.campus(),
-                floorCode, floor.level(), aliases, gridRow, gridColumn, rowSpan, colSpan,
+                floorCode, floor.level(), aliases,
+                gridRow == null ? null : GridCells.rectangle(gridRow, gridColumn, rowSpan, colSpan), List.of(),
                 accessVia, null, null, capacity, true, now, now));
     }
 

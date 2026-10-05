@@ -3,8 +3,102 @@
   "name": "Edificio Administrativo",
   "campus": "Sede Principal",
   "description": "Oficinas administrativas: contabilidad, recursos humanos, nómina, planta física, TIC y direcciones de investigación y prácticas.",
-  "aliases": [],
+  "address": "Cra. 9A # 62-27",
+  "aliases": [
+    "Edificio Luna"
+  ],
   "wings": [],
+  "placement": {
+    "origin": {
+      "lat": 4.6487922,
+      "lon": -74.0620839
+    },
+    "bearing": 12.1,
+    "metresPerUnit": 0.03333
+  },
+  "footprint": [
+    {
+      "lot": "008213015038",
+      "floors": 4,
+      "basements": 0,
+      "ring": [
+        [-74.061942, 4.6486612],
+        [-74.061973, 4.6486839],
+        [-74.0619759, 4.648686],
+        [-74.0619475, 4.648726],
+        [-74.0619859, 4.64874],
+        [-74.0619939, 4.6487429],
+        [-74.0620495, 4.648667],
+        [-74.0620197, 4.648645],
+        [-74.0620374, 4.648621],
+        [-74.0620931, 4.6486621],
+        [-74.0620935, 4.6486599],
+        [-74.0620951, 4.6486525],
+        [-74.0620966, 4.6486457],
+        [-74.0620993, 4.648633],
+        [-74.0621023, 4.6486187],
+        [-74.0621119, 4.6485736],
+        [-74.0621, 4.6485712],
+        [-74.0620818, 4.6485578],
+        [-74.06211, 4.6485193],
+        [-74.0621216, 4.6485279],
+        [-74.0621324, 4.6484774],
+        [-74.0621152, 4.6484648],
+        [-74.0621026, 4.6484556],
+        [-74.0620223, 4.6485584],
+        [-74.0620135, 4.6485697],
+        [-74.061942, 4.6486612]
+      ]
+    },
+    {
+      "lot": "008213015038",
+      "floors": 3,
+      "basements": 0,
+      "ring": [
+        [-74.061942, 4.6486612],
+        [-74.0620135, 4.6485697],
+        [-74.0620223, 4.6485584],
+        [-74.0621026, 4.6484556],
+        [-74.0620985, 4.6484526],
+        [-74.0620958, 4.6484506],
+        [-74.0619367, 4.6486572],
+        [-74.061942, 4.6486612]
+      ]
+    },
+    {
+      "lot": "008213015038",
+      "floors": 2,
+      "basements": 0,
+      "ring": [
+        [-74.0621216, 4.6485279],
+        [-74.06211, 4.6485193],
+        [-74.0620818, 4.6485578],
+        [-74.0621, 4.6485712],
+        [-74.0621119, 4.6485736],
+        [-74.062112, 4.6485732],
+        [-74.0621173, 4.6485482],
+        [-74.0621216, 4.6485279]
+      ]
+    },
+    {
+      "lot": "008213015038",
+      "floors": 2,
+      "basements": 0,
+      "ring": [
+        [-74.06207, 4.6487707],
+        [-74.0620762, 4.6487418],
+        [-74.06209, 4.6486763],
+        [-74.0620931, 4.6486621],
+        [-74.0620374, 4.648621],
+        [-74.0620197, 4.648645],
+        [-74.0620495, 4.648667],
+        [-74.0619939, 4.6487429],
+        [-74.0619952, 4.6487434],
+        [-74.0620237, 4.6487538],
+        [-74.06207, 4.6487707]
+      ]
+    }
+  ],
   "floors": [
     {
       "code": "P1",
@@ -12,8 +106,9 @@
       "name": "Piso 1",
       "status": "UNMAPPED",
       "accessibility": "UNKNOWN",
-      "gridRows": 12,
-      "gridColumns": 20,
+      "width": 633,
+      "height": 1176,
+      "top": "NORTH",
       "spaces": []
     },
     {
@@ -22,71 +117,63 @@
       "name": "Piso 2",
       "status": "UNMAPPED",
       "accessibility": "UNKNOWN",
-      "gridRows": 12,
-      "gridColumns": 20,
+      "width": 633,
+      "height": 1176,
+      "top": "NORTH",
       "spaces": [
         {
           "code": "P2-ASESOR-JURIDICO",
           "name": "Asesor Jurídico",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P2-ASISTENTE",
           "name": "Asistente Administrativo",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P2-COMPRAS",
           "name": "Compras",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P2-DEPARTAMENTO",
           "name": "Departamento de Contabilidad",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P2-DIRECTOR",
           "name": "Director Administrativo y Financiero",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P2-DIRECTORA",
           "name": "Directora de Servicios Administrativos",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P2-FONDO-EMPLEADOS",
           "name": "Fondo de Empleados",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P2-PLANTA-FISICA",
           "name": "Planta Física",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P2-SECRETARIA",
           "name": "Secretaría",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         }
       ]
     },
@@ -96,155 +183,135 @@
       "name": "Piso 3",
       "status": "UNMAPPED",
       "accessibility": "UNKNOWN",
-      "gridRows": 12,
-      "gridColumns": 20,
+      "width": 633,
+      "height": 1176,
+      "top": "NORTH",
       "spaces": [
         {
           "code": "P3-ARCHIVO",
           "name": "Archivo",
           "typeCode": "ARCHIVE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-ASISTENTE",
           "name": "Asistente de Coordinación de Prácticas",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-AUXILIAR",
           "name": "Auxiliar Departamento de Aseguramiento de la Calidad Académica",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-COORDINADOR",
           "name": "Coordinador de Práctica Clínica Psicología",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-COORDINADOR-2",
           "name": "Coordinador de Prácticas Matemáticas e Ingenierías",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-COORDINADORA",
           "name": "Coordinadora de Prácticas Electivas Psicología",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-COORDINADORA-2",
           "name": "Coordinadora de Prácticas Escuela de Negocios",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-DIRECCION",
           "name": "Dirección Especialización Forense",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-DIRECCION-CENTRO",
           "name": "Dirección Centro de Medición y Evaluación",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-DIRECCION-REVISTA",
           "name": "Dirección Revista Suma de Negocios",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-DIRECTOR-CENTRO",
           "name": "Director Centro de Investigaciones Matemáticas e Ingenierías CIMI",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-DIRECTORA",
           "name": "Directora Especialización Recursos Humanos",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-DIRECTORA-CENTR-2",
           "name": "Directora Centro de Investigaciones de Psicología CIP",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-DIRECTORA-CENTRO",
           "name": "Directora Centro de Investigaciones Escuela de Negocios CIEN",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-INVESTIGADORES",
           "name": "Investigadores CIEN",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-INVESTIGADORES-2",
           "name": "Investigadores CIP",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-JEFE-OFICINA",
           "name": "Jefe Oficina de Información y Evaluación",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-JEFE-OFICINA-2",
           "name": "Jefe de Oficina de Autoevaluación y Acreditación",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-POSGRADO",
           "name": "Posgrado Psicología Clínica Doctorado",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-SECRETARIA-CENT-2",
           "name": "Secretaría Centro Docente de Prácticas Psicología",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P3-SECRETARIA-CENTRO",
           "name": "Secretaría Centro de Investigaciones",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         }
       ]
     },
@@ -254,71 +321,63 @@
       "name": "Piso 4",
       "status": "UNMAPPED",
       "accessibility": "UNKNOWN",
-      "gridRows": 12,
-      "gridColumns": 20,
+      "width": 633,
+      "height": 1176,
+      "top": "NORTH",
       "spaces": [
         {
           "code": "P4-COMUNICACIONES",
           "name": "Comunicaciones",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P4-DEPARTAMENTO",
           "name": "Departamento Virtual y Web-Master",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P4-DEPARTAMENTO-2",
           "name": "Departamento de Seguridad y Salud en el Trabajo",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P4-DEPARTAMENTO-3",
           "name": "Departamento de Nómina",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P4-DEPARTAMENTO-TIC",
           "name": "Departamento de TIC'S",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P4-DIRECCION",
           "name": "Dirección de Recursos Humanos",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P4-OFICINA",
           "name": "Oficina de Optimización y Mejoramiento",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P4-OFICINA-SEGURIDAD",
           "name": "Oficina de Seguridad",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         },
         {
           "code": "P4-SERVICIOS",
           "name": "Servicios Generales y Eventos",
           "typeCode": "OFFICE",
-          "rowSpan": 1,
-          "colSpan": 1
+          "aliases": []
         }
       ]
     }

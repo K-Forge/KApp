@@ -2,13 +2,16 @@ package co.edu.konradlorenz.kapp.map.service;
 
 import co.edu.konradlorenz.kapp.common.error.ApiError;
 import co.edu.konradlorenz.kapp.map.domain.BuildingDocument;
+import co.edu.konradlorenz.kapp.map.domain.Door;
 import co.edu.konradlorenz.kapp.map.domain.Floor;
+import co.edu.konradlorenz.kapp.map.domain.Point;
+import co.edu.konradlorenz.kapp.map.domain.Shape;
 import co.edu.konradlorenz.kapp.map.domain.SpaceCategory;
 import co.edu.konradlorenz.kapp.map.domain.SpaceDocument;
 import co.edu.konradlorenz.kapp.map.domain.SpaceTypeDocument;
 import co.edu.konradlorenz.kapp.map.web.dto.CorridorDto;
-import co.edu.konradlorenz.kapp.map.web.dto.GridPointDto;
 import co.edu.konradlorenz.kapp.map.web.dto.LayoutSpaceDto;
+import co.edu.konradlorenz.kapp.map.web.dto.PointDto;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +29,7 @@ import java.util.Objects;
  * sent. A rule written once cannot pass on one path and fail on the other.
  *
  * <p>Every rule is here because breaking it is invisible on screen rather than obviously wrong: a
- * room outside the grid simply does not render, two rooms in one cell draw one on top of the
+ * room outside the floor simply does not render, two overlapping rooms draw one on top of the
  * other, and an {@code accessVia} that names nothing makes the app quietly say nothing about how
  * to get there.
  */
@@ -35,8 +38,8 @@ final class SpaceRules {
     /**
      * What a check found.
      *
-     * @param invalid  mistakes in what was sent: a missing type, a room off the grid
-     * @param overlaps two placed spaces sharing a cell. Reported apart because on the
+     * @param invalid  mistakes in what was sent: a missing type, a room off the floor
+     * @param overlaps two placed spaces covering the same area. Reported apart because on the
      *                 single-space endpoints it is a conflict with what is already stored (409),
      *                 while in a layout save it is a mistake in the drawing itself (400)
      */
@@ -134,8 +137,8 @@ final class SpaceRules {
             for (int j = i + 1; j < spaces.size(); j++) {
                 if ((reportable.contains(i) || reportable.contains(j))
                         && overlap(spaces.get(i), spaces.get(j))) {
-                    overlaps.add(issue(labels.get(reportable.contains(i) ? i : j), "gridRow",
-                            "'%s' and '%s' would share a cell"
+                    overlaps.add(issue(labels.get(reportable.contains(i) ? i : j), "shape",
+                            "'%s' and '%s' would overlap"
                             .formatted(spaces.get(i).code(), spaces.get(j).code())));
                 }
             }
@@ -144,15 +147,27 @@ final class SpaceRules {
         return new Findings(invalid, overlaps);
     }
 
-    /** Corridors have to stay on the grid too, or they are drawn off the edge of the floor. */
-    static List<ApiError.FieldIssue> checkCorridors(int gridRows, int gridColumns, List<CorridorDto> corridors) {
+    /**
+     * The floor's own drawing - its outline and its corridors - has to stay on the floor, or it is
+     * drawn off the edge; an outline also has to close without crossing itself.
+     */
+    static List<ApiError.FieldIssue> checkFloorDrawing(int width, int height, List<PointDto> outline,
+                                                        List<CorridorDto> corridors) {
         List<ApiError.FieldIssue> issues = new ArrayList<>();
+        if (!outline.isEmpty()) {
+            List<Point> points = MapMapper.toPoints(outline);
+            if (points.size() < 3 || !Shape.within(points, width, height) || !Shape.isSimple(points)
+                    || Shape.area(points) == 0) {
+                issues.add(new ApiError.FieldIssue("outline",
+                        "the outline must be a closed shape of three or more corners, inside the %d x %d floor, "
+                                .formatted(width, height) + "that does not cross itself"));
+            }
+        }
         for (int i = 0; i < corridors.size(); i++) {
-            for (GridPointDto point : corridors.get(i).path()) {
-                if (point.row() >= gridRows || point.col() >= gridColumns) {
+            for (PointDto point : corridors.get(i).path()) {
+                if (point.x() > width || point.y() > height) {
                     issues.add(new ApiError.FieldIssue("corridors[%d].path".formatted(i),
-                            "(%d, %d) is outside the %d x %d grid"
-                                    .formatted(point.row(), point.col(), gridRows, gridColumns)));
+                            "(%d, %d) is outside the %d x %d floor".formatted(point.x(), point.y(), width, height)));
                     break;
                 }
             }
@@ -160,24 +175,38 @@ final class SpaceRules {
         return issues;
     }
 
+    /**
+     * A placed space's outline: three or more corners, all on the floor, enclosing some area and
+     * never crossing itself. A shape that folds over itself has no inside a client could fill.
+     */
     private static void checkPlacement(Floor floor, LayoutSpaceDto space, String at,
                                        List<ApiError.FieldIssue> invalid) {
-        boolean hasRow = space.gridRow() != null;
-        boolean hasColumn = space.gridColumn() != null;
-        if (hasRow != hasColumn) {
-            invalid.add(issue(at, hasRow ? "gridColumn" : "gridRow",
-                    "a space is either placed, with both gridRow and gridColumn, or not placed, with neither"));
+        if (space.shape() == null) {
+            if (!space.doorsOrEmpty().isEmpty()) {
+                invalid.add(issue(at, "doors", "'%s' has doors but no shape to put them on"
+                        .formatted(space.code())));
+            }
             return;
         }
-        if (!hasRow) {
-            return;
-        }
-        int lastRow = space.gridRow() + space.rowSpanOrOne() - 1;
-        int lastColumn = space.gridColumn() + space.colSpanOrOne() - 1;
-        if (lastRow >= floor.gridRows() || lastColumn >= floor.gridColumns()) {
-            invalid.add(issue(at, "gridRow", "'%s' would occupy rows %d-%d and columns %d-%d of a %d x %d grid"
-                    .formatted(space.code(), space.gridRow(), lastRow, space.gridColumn(), lastColumn,
-                            floor.gridRows(), floor.gridColumns())));
+        List<Point> points = MapMapper.toPoints(space.shape());
+        if (!Shape.within(points, floor.width(), floor.height())) {
+            invalid.add(issue(at, "shape", "'%s' reaches outside the %d x %d floor"
+                    .formatted(space.code(), floor.width(), floor.height())));
+        } else if (Shape.area(points) == 0) {
+            invalid.add(issue(at, "shape", "'%s' encloses no area".formatted(space.code())));
+        } else if (!Shape.isSimple(points)) {
+            invalid.add(issue(at, "shape", "'%s' crosses itself".formatted(space.code())));
+        } else {
+            List<Door> doors = MapMapper.toDoors(space.doorsOrEmpty());
+            for (int i = 0; i < doors.size(); i++) {
+                Door door = doors.get(i);
+                if (door.from().equals(door.to())) {
+                    invalid.add(issue(at, "doors[%d]".formatted(i), "a door has two jambs, not one point"));
+                } else if (!Shape.onOutline(points, door.from(), door.to())) {
+                    invalid.add(issue(at, "doors[%d]".formatted(i), "a door of '%s' is not on its outline"
+                            .formatted(space.code())));
+                }
+            }
         }
     }
 
@@ -219,15 +248,8 @@ final class SpaceRules {
     }
 
     private static boolean overlap(LayoutSpaceDto a, LayoutSpaceDto b) {
-        if (a.gridRow() == null || a.gridColumn() == null || b.gridRow() == null || b.gridColumn() == null) {
-            return false;
-        }
-        int aLastRow = a.gridRow() + a.rowSpanOrOne() - 1;
-        int aLastColumn = a.gridColumn() + a.colSpanOrOne() - 1;
-        int bLastRow = b.gridRow() + b.rowSpanOrOne() - 1;
-        int bLastColumn = b.gridColumn() + b.colSpanOrOne() - 1;
-        return a.gridRow() <= bLastRow && b.gridRow() <= aLastRow
-                && a.gridColumn() <= bLastColumn && b.gridColumn() <= aLastColumn;
+        return a.shape() != null && b.shape() != null
+                && Shape.overlap(MapMapper.toPoints(a.shape()), MapMapper.toPoints(b.shape()));
     }
 
     private static ApiError.FieldIssue issue(String at, String field, String message) {
@@ -237,9 +259,9 @@ final class SpaceRules {
     /** The shape the rules check, from a stored space. */
     static LayoutSpaceDto asLayout(SpaceDocument space) {
         return new LayoutSpaceDto(space.code(), space.doorCode(), space.wing(), space.name(),
-                space.typeCode(), space.aliases(), space.gridRow(), space.gridColumn(),
-                space.rowSpan(), space.colSpan(), space.accessVia(), space.accessibility(),
-                space.note(), space.capacity());
+                space.typeCode(), space.aliases(), MapMapper.toPointDtos(space.shape()),
+                MapMapper.toDoorDtos(space.doors()), space.accessVia(),
+                space.accessibility(), space.note(), space.capacity());
     }
 
     static boolean sameCode(LayoutSpaceDto a, SpaceDocument b) {

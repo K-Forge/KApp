@@ -2,9 +2,10 @@ package co.edu.konradlorenz.kapp.map.web.dto;
 
 import co.edu.konradlorenz.kapp.map.domain.Accessibility;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Max;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -55,20 +56,14 @@ public record SpaceRequest(
         @Schema(description = "Other names people search for.")
         List<@NotBlank @Size(max = 120) String> aliases,
 
-        @Schema(description = "Top-left cell, zero-based. Omit both gridRow and gridColumn for a "
-                + "space that is known to be on the floor but not yet drawn.", example = "4")
-        @Min(0) Integer gridRow,
+        @Schema(description = "The space's outline on its floor, corners in order, in the floor's "
+                + "units. Omit it for a space known to be on the floor but not drawn yet.")
+        @Size(min = 3, max = 200)
+        List<@NotNull @Valid PointDto> shape,
 
-        @Schema(example = "9")
-        @Min(0) Integer gridColumn,
-
-        @Schema(example = "1")
-        @Min(1) @Max(60)
-        Integer rowSpan,
-
-        @Schema(example = "2")
-        @Min(1) @Max(60)
-        Integer colSpan,
+        @Schema(description = "Its ways in, each on the shape's outline. Only with a shape.")
+        @Size(max = 12)
+        List<@NotNull @Valid DoorDto> doors,
 
         @Schema(description = "Code of the lift, staircase or entrance that serves this space.",
                 example = "ASC-CENTRAL")
@@ -89,7 +84,7 @@ public record SpaceRequest(
 ) {
 
     public LayoutSpaceDto toLayoutSpace() {
-        return new LayoutSpaceDto(code, doorCode, wing, name, typeCode, aliases, gridRow,
-                gridColumn, rowSpan, colSpan, accessVia, accessibility, note, capacity);
+        return new LayoutSpaceDto(code, doorCode, wing, name, typeCode, aliases, shape, doors, accessVia,
+                accessibility, note, capacity);
     }
 }

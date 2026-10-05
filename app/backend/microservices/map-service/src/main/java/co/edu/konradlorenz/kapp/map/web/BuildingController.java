@@ -98,9 +98,10 @@ public class BuildingController {
 
     @GetMapping("/{code}/floors/{floorCode}")
     @Operation(summary = "Get a floor and every space on it",
-            description = "The call that renders a floor: draw a gridRows x gridColumns grid, "
-                    + "place each space in its cell, and draw the corridors along their paths. "
-                    + "Spaces with no gridRow are on the floor but not yet placed. "
+            description = "The call that renders a floor: a drawing width x height units, origin at "
+                    + "the top left, with the building's outline, each space as the polygon in its "
+                    + "shape and the corridors along their paths. "
+                    + "Spaces with no shape are on the floor but not yet placed. "
                     + "Allowed roles: ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN.")
     public FloorDetailResponse floor(@PathVariable @Size(min = 1, max = 10) String code,
                                      @PathVariable @Pattern(regexp = "^[A-Z0-9]{1,8}$") String floorCode) {

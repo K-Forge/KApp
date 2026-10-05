@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, ViewChild, input } from '@angular/core';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 /**
  * Thin wrapper around the native <dialog> element: free focus trap, Escape-to-close and a
@@ -8,12 +9,13 @@ import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Output, V
  */
 @Component({
   selector: 'app-modal',
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <dialog #dialogEl (close)="closed.emit()" (cancel)="closed.emit()">
       <div class="modal-header">
         <h2>{{ title() }}</h2>
-        <button type="button" class="btn btn-ghost btn-sm" (click)="close()" aria-label="Close">✕</button>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="close()" [attr.aria-label]="'Close' | t">✕</button>
       </div>
       <div class="modal-body">
         <ng-content />

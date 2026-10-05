@@ -62,6 +62,9 @@ public class AuthSecurityConfig {
      */
     static final String[] PUBLIC_AUTH_PATHS = {
             "/auth/login",
+            // A temporary password is replaced before it signs anybody in: the current
+            // password in the body is the proof, as at login.
+            "/auth/password",
             "/auth/register",
             "/auth/verify",
             "/auth/verify/resend",

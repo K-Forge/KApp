@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { CopyButtonComponent } from '../../../shared/ui/copy-button/copy-button.component';
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { AppHttpError } from '../../../core/http/api-http-error';
@@ -7,6 +7,9 @@ import { ApiErrorBannerComponent } from '../../../shared/ui/api-error-banner/api
 import { DataTableComponent } from '../../../shared/ui/data-table/data-table.component';
 import type { VisitorPass } from './visitor-pass.model';
 import { VisitorPassesService } from './visitor-passes.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
+import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
 
 /**
  * The reception counter: issuing day passes and reading the register of who used them.
@@ -20,40 +23,44 @@ import { VisitorPassesService } from './visitor-passes.service';
  */
 @Component({
   selector: 'app-visitor-passes-page',
-  imports: [DataTableComponent, ApiErrorBannerComponent, DatePipe, PageIntroComponent],
+  imports: [TranslatePipe, LocalDatePipe, DataTableComponent, ApiErrorBannerComponent, PageIntroComponent, CopyButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
-        title="Visitor passes"
-        what="A one-day pass reception hands to somebody visiting campus. They redeem it, get 24 hours of map access, and no account is ever created."
-        [can]="['Issue a pass and read the code out', 'See who redeemed each one', 'Revoke a pass nobody has used yet']"
-        note="Not the same thing as an invitation code. A code creates a permanent account for a student or a professor; this creates nothing — it is a token that expires. The register below holds visitors&#39; identity documents, which is the point of keeping it, and it deletes itself 30 days after each visit."
+        [title]="'Visitor passes' | t"
+        [what]="'One-day passes for visitors: 24 hours of map access, and no account.' | t"
+        [can]="[('Issue a pass' | t), ('See who used each one' | t), ('Revoke one nobody has used' | t)]"
+        [note]="'The register keeps visitors’ identity documents, and deletes them 30 days after each visit.' | t"
       >
-          <button actions type="button" class="btn btn-primary" [disabled]="issuing()" (click)="issue()">
-            {{ issuing() ? 'Issuing…' : 'Issue a pass' }}
-          </button>
       </app-page-intro>
 
       @if (justIssued(); as pass) {
         <div class="card issued" role="status">
-          <p style="margin:0 0 0.25rem">Read this out to the visitor:</p>
-          <p class="issued-code mono">{{ pass.code }}</p>
+          <p style="margin:0 0 0.25rem">{{ 'Read this out to the visitor:' | t }}</p>
+          <div class="issued-row">
+            <p class="issued-code mono">{{ pass.code }}</p>
+            <app-copy-button [text]="pass.code" />
+          </div>
           <p class="text-muted" style="margin:0">
-            Redeemable until {{ pass.redeemableUntil | date: 'dd MMM y, HH:mm' }}. They need an identity
-            document to redeem it.
+            {{ 'Redeemable until {value}. They need an identity document to redeem it.' | t: { value: (pass.redeemableUntil | localDate) } }}
           </p>
         </div>
       }
 
       <div class="card stack">
+        <div class="work-bar">
         <div class="field" style="margin-bottom:0; max-width: 14rem">
-          <label for="vp-filter">Show</label>
+          <label for="vp-filter">{{ 'Show' | t }}</label>
           <select id="vp-filter" (change)="onFilter($event)">
-            <option value="">All passes</option>
-            <option value="true">Redeemed (the register)</option>
-            <option value="false">Issued, not yet used</option>
+            <option value="">{{ 'All passes' | t }}</option>
+            <option value="true">{{ 'Redeemed (the register)' | t }}</option>
+            <option value="false">{{ 'Issued, not yet used' | t }}</option>
           </select>
+        </div>
+          <button type="button" class="btn btn-primary work-create" [disabled]="issuing()" (click)="issue()">
+            {{ issuing() ? ('Issuing…' | t) : ('Issue a pass' | t) }}
+          </button>
         </div>
 
         <app-api-error-banner [error]="error()" />
@@ -61,16 +68,16 @@ import { VisitorPassesService } from './visitor-passes.service';
         <app-data-table
           [loading]="loading()"
           [empty]="!loading() && !error() && passes().length === 0"
-          emptyMessage="No passes. Issue one when somebody arrives at reception."
+          [emptyMessage]="'No passes. Issue one when somebody arrives at reception.' | t"
         >
           <thead>
             <tr>
-              <th>Code</th>
-              <th>Issued</th>
-              <th>Visitor</th>
-              <th>Document</th>
-              <th>Access until</th>
-              <th>Notes</th>
+              <th>{{ 'Code' | t }}</th>
+              <th>{{ 'Issued' | t }}</th>
+              <th>{{ 'Visitor' | t }}</th>
+              <th>{{ 'Document' | t }}</th>
+              <th>{{ 'Access until' | t }}</th>
+              <th>{{ 'Notes' | t }}</th>
               <th></th>
             </tr>
           </thead>
@@ -78,19 +85,19 @@ import { VisitorPassesService } from './visitor-passes.service';
             @for (pass of passes(); track pass.code) {
               <tr>
                 <td class="mono">{{ pass.code }}</td>
-                <td class="text-muted">{{ pass.createdAt | date: 'dd MMM y, HH:mm' }}</td>
+                <td class="text-muted">{{ pass.createdAt | localDate }}</td>
                 <td>
                   @if (pass.redeemed) {
                     {{ pass.visitorName }}
                   } @else {
-                    <span class="badge badge-neutral">not used</span>
+                    <span class="badge badge-neutral">{{ 'not used' | t }}</span>
                   }
                 </td>
                 <td class="mono text-muted">
                   {{ pass.redeemed ? pass.documentType + ' ' + pass.documentNumber : '—' }}
                 </td>
                 <td class="text-muted">
-                  {{ pass.redeemed ? (pass.accessExpiresAt | date: 'dd MMM y, HH:mm') : ('expires ' + (pass.redeemableUntil | date: 'HH:mm')) }}
+                  {{ pass.redeemed ? (pass.accessExpiresAt | localDate) : ('expires {time}' | t: { time: (pass.redeemableUntil | localDate: 'HH:mm') }) }}
                 </td>
                 <td class="text-muted">{{ pass.notes ?? '—' }}</td>
                 <td>
@@ -101,11 +108,11 @@ import { VisitorPassesService } from './visitor-passes.service';
                       [disabled]="busyCode() === pass.code"
                       (click)="revoke(pass)"
                     >
-                      Revoke
+                      {{ 'Revoke' | t }}
                     </button>
                   } @else {
-                    <span class="text-faint" title="A redeemed pass is a visit record. It is deleted automatically after 30 days.">
-                      kept 30 days
+                    <span class="text-faint" [title]="'A redeemed pass is a visit record. It is deleted automatically after 30 days.' | t">
+                      {{ 'kept 30 days' | t }}
                     </span>
                   }
                 </td>
@@ -118,7 +125,13 @@ import { VisitorPassesService } from './visitor-passes.service';
   `,
   styles: `
     .issued {
-      border-color: var(--accent);
+      border-color: var(--primary-brand);
+    }
+    .issued-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.25rem 0.75rem;
     }
     .issued-code {
       font-size: 1.75rem;
@@ -182,7 +195,7 @@ export class VisitorPassesPage {
   }
 
   revoke(pass: VisitorPass): void {
-    if (!window.confirm(`Revoke pass ${pass.code}? Whoever is holding it will not be able to use it.`)) {
+    if (!window.confirm(t('Revoke pass {code}? Whoever is holding it will not be able to use it.', { code: pass.code }))) {
       return;
     }
     this.busyCode.set(pass.code);

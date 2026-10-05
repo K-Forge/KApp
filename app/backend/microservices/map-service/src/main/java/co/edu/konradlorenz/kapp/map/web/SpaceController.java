@@ -100,8 +100,8 @@ public class SpaceController {
 
     @PutMapping("/{code}")
     @Operation(summary = "Update a space",
-            description = "Moving a space is done here, by sending a new building, floor or grid "
-                    + "cell. Allowed roles: ROLE_ADMIN only.")
+            description = "Moving a space is done here, by sending a new building, floor or "
+                    + "shape. Allowed roles: ROLE_ADMIN only.")
     public SpaceResponse update(
             @PathVariable @Size(min = 1, max = 20) String code,
             @RequestParam(required = false) @Size(min = 1, max = 10) String buildingCode,
