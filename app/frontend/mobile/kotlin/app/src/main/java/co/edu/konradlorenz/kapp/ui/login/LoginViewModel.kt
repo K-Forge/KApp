@@ -1,118 +1,139 @@
 package co.edu.konradlorenz.kapp.ui.login
 
-import android.util.Log
+import android.app.Activity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import co.edu.konradlorenz.kapp.BuildConfig
-import co.edu.konradlorenz.kapp.data.network.checkMockConnection
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import co.edu.konradlorenz.kapp.KAppApplication
+import co.edu.konradlorenz.kapp.data.auth.MicrosoftSignIn
+import co.edu.konradlorenz.kapp.data.auth.MicrosoftUnreachableException
+import co.edu.konradlorenz.kapp.data.auth.SignInCancelledException
+import co.edu.konradlorenz.kapp.data.auth.SignInNotConfiguredException
+import co.edu.konradlorenz.kapp.data.network.UserApi
+import co.edu.konradlorenz.kapp.data.session.SessionManager
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
+import kotlin.coroutines.cancellation.CancellationException
 
-/** The only domain KApp accounts use. Institutional sign-in is the whole point of the screen. */
-const val INSTITUTIONAL_DOMAIN = "@konradlorenz.edu.co"
+/** What the sign-in can end in, short of getting in. Each one has its own message. */
+enum class SignInError {
+    /** `401` from `/auth/microsoft`: KApp did not accept the ID token. */
+    Rejected,
 
-/**
- * Builds the address the API expects out of whatever the student typed.
- *
- * The field prints the domain in grey after the cursor, so the usual input is just the local part
- * ("pepito.perez"). Pasting the whole address must not produce a doubled domain - the frozen web
- * client had the same rule, in app/frontend/web/login.html.
- *
- * Returns an empty string for an empty field rather than a bare domain.
- */
-fun institutionalEmail(typed: String): String {
-    val localPart = typed.trim().substringBefore('@')
-    return if (localPart.isEmpty()) "" else localPart + INSTITUTIONAL_DOMAIN
+    /** `403`: the account exists and is deactivated. */
+    Deactivated,
+
+    /** Nothing answered: no network, or the server is down. */
+    Offline,
+
+    /** A release build with no Microsoft tenant configured. */
+    NotConfigured,
+
+    /** Microsoft refused, or KApp answered something it should not have. */
+    Failed,
 }
 
 /**
- * Holds what the login screen has on it. There is no sign-in yet, so this class cannot fail and has
- * no error state to expose.
- *
- * The one call it makes is the debug build's connection check on submit (see [signIn]). The real
- * sign-in is Microsoft's, issue #46: the submit path grows a result state here, and the screen grows
- * the cases drawn in docs/design/mobile/EstadosLogin.dc.html. Nothing above this class has to move
- * for that.
+ * The profile a debug build asks the mocks for: one of the named examples of `GET /api/users/me`
+ * in docs/api/user.openapi.yaml. It is how the tabs of a professor or of staff can be seen without
+ * an account of each kind (issue #46, "Done when").
  */
-class LoginViewModel : ViewModel() {
+enum class MockProfile(val example: String) {
+    Student("student"),
+    Professor("professor"),
+    StaffAdmin("staffAdmin"),
+}
 
-    /** What the student typed, without the domain. */
-    var emailLocalPart by mutableStateOf("")
+/**
+ * The sign-in of issue #46: Microsoft's sign-in, its ID token to `POST /auth/microsoft`, then the
+ * profile, whose roles decide the tabs.
+ *
+ * There are no fields to hold: the address and the password are typed into Microsoft's page, never
+ * into KApp's (auth.openapi.yaml: "It stores no password for a member of the university").
+ */
+class LoginViewModel(
+    private val microsoft: MicrosoftSignIn,
+    private val session: SessionManager,
+    private val users: UserApi,
+) : ViewModel() {
+
+    var signingIn by mutableStateOf(false)
         private set
 
-    var password by mutableStateOf("")
+    /** The last attempt's failure, until the next one starts. */
+    var error by mutableStateOf<SignInError?>(null)
         private set
 
-    var passwordVisible by mutableStateOf(false)
+    /** Only offered when the sign-in is the debug build's fake, which is when the mocks answer. */
+    val offersMockProfiles: Boolean
+        get() = microsoft.isFake
+
+    var mockProfile by mutableStateOf(MockProfile.Student)
         private set
 
-    /**
-     * The mockup ships this switch on, so it starts on.
-     *
-     * It only holds interface state today. There is no token to keep without a backend, and the
-     * contract could not keep one for long anyway: it has no refresh token and expiresIn is an
-     * hour for everybody. See "Pendientes de backend" in docs/design/mobile/README.md.
-     */
-    var keepSignedIn by mutableStateOf(true)
-        private set
+    fun onMockProfileChange(profile: MockProfile) {
+        mockProfile = profile
+    }
 
-    /** True while the debug build's connection check runs, so the button cannot fire twice. */
-    var checkingConnection by mutableStateOf(false)
-        private set
-
-    /** The address POST /auth/login will receive once there is a network layer to send it. */
-    val email: String
-        get() = institutionalEmail(emailLocalPart)
-
-    /**
-     * Both fields filled. This is the only validation the screen does: the server is the one that
-     * knows whether the credentials are good, and inventing a client-side verdict it cannot back
-     * would be a message we would have to take away later.
-     */
-    val canSubmit: Boolean
-        get() = emailLocalPart.isNotBlank() && password.isNotBlank()
-
-    /**
-     * Lets the student in. The fields are not sent anywhere yet.
-     *
-     * A debug build first walks health, `POST /auth/microsoft` and `GET /api/users/me` against
-     * BuildConfig.API_BASE_URL and logs the outcome under the tag `KApp.api`, then lets the student
-     * in whatever it was, so a developer without the mocks running is not locked out. A release
-     * build calls nothing: there is no server to call.
-     */
-    fun signIn(onSignedIn: () -> Unit) {
-        if (!BuildConfig.DEBUG) {
-            onSignedIn()
-            return
-        }
-        if (checkingConnection) return
-        checkingConnection = true
+    fun signIn(activity: Activity, onSignedIn: () -> Unit) {
+        if (signingIn) return
+        signingIn = true
+        error = null
         viewModelScope.launch {
-            Log.i(API_LOG_TAG, checkMockConnection())
-            checkingConnection = false
-            onSignedIn()
+            try {
+                session.signIn(microsoft.idToken(activity))
+                loadProfileRoles()
+                onSignedIn()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: SignInCancelledException) {
+                // Backing out of Microsoft's page is a choice, not a failure: nothing to show.
+            } catch (e: Exception) {
+                error = classify(e)
+            } finally {
+                signingIn = false
+            }
         }
     }
 
-    fun onEmailChange(value: String) {
-        // The domain is painted after the field and cannot be typed into it. Dropping everything
-        // from the "@" on means a pasted full address lands correctly instead of showing twice.
-        emailLocalPart = value.substringBefore('@').trim()
+    /**
+     * The tabs follow the profile's roles. If the profile cannot be read now, the token's roles
+     * stand in - signing in worked, and refusing entry over a profile call would be worse than
+     * showing the tabs the token says.
+     */
+    private suspend fun loadProfileRoles() {
+        val prefer = if (microsoft.isFake) "example=${mockProfile.example}" else null
+        try {
+            session.setProfileRoles(users.me(prefer).roles)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+        }
     }
 
-    fun onPasswordChange(value: String) {
-        password = value
+    private fun classify(e: Exception): SignInError = when (e) {
+        is HttpException -> when (e.code()) {
+            401 -> SignInError.Rejected
+            403 -> SignInError.Deactivated
+            else -> SignInError.Failed
+        }
+        is IOException, is MicrosoftUnreachableException -> SignInError.Offline
+        is SignInNotConfiguredException -> SignInError.NotConfigured
+        else -> SignInError.Failed
     }
 
-    fun onPasswordVisibilityToggle() {
-        passwordVisible = !passwordVisible
-    }
-
-    fun onKeepSignedInChange(value: Boolean) {
-        keepSignedIn = value
+    companion object {
+        val Factory = viewModelFactory {
+            initializer {
+                val container = (this[APPLICATION_KEY] as KAppApplication).container
+                LoginViewModel(container.microsoft, container.session, container.api.users)
+            }
+        }
     }
 }
-
-private const val API_LOG_TAG = "KApp.api"

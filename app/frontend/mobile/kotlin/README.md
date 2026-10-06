@@ -5,12 +5,21 @@ Native Android client, Kotlin and Jetpack Compose. This is the product, not a pr
 
 ## State
 
-**Login** and **Inicio** are built, as interfaces only. They match
-[`LoginAndroid.dc.html`](../../../../docs/design/mobile/LoginAndroid.dc.html) and
-[`HomeAndroid.dc.html`](../../../../docs/design/mobile/HomeAndroid.dc.html), and they go nowhere:
-nothing they show comes from the API yet. Pressing **Ingresar** with both fields filled navigates
-to Inicio; in a debug build it first checks the connection to the API (see "Running against the
-mocks").
+**Sign-in and the session** are built (issue #46): **Ingresar con Microsoft** runs Microsoft's
+sign-in, sends its ID token to `POST /auth/microsoft`, reads `GET /api/users/me` and opens Inicio
+with the tabs of the account's profile role. The session is kept encrypted, renewed before it
+expires and on a `401`, and ended with **Cerrar sesión** on Perfil. A saved session opens straight
+on Inicio. See "Microsoft sign-in" below.
+
+**Inicio** is built as an interface only: it matches
+[`HomeAndroid.dc.html`](../../../../docs/design/mobile/HomeAndroid.dc.html), and nothing it shows
+comes from the API yet.
+
+The login keeps the band, crest, stripe and footer of
+[`LoginAndroid.dc.html`](../../../../docs/design/mobile/LoginAndroid.dc.html), but not its fields:
+the address and password are typed into Microsoft's page, never into KApp's, and "Mantener la
+sesión iniciada" is gone because every session now lasts 30 days from its last use. The mockups
+still draw the fields; updating them is pending in `docs/design/mobile/`.
 
 Inicio is drawn from a state, not from constants, so the three cases in
 [`EstadosHome.dc.html`](../../../../docs/design/mobile/EstadosHome.dc.html) are already there:
@@ -26,12 +35,17 @@ they open is `PlaceholderScreen` — the same band and card as Inicio, with the 
 fill that screen printed on it. One placeholder for the four of them: there is nothing to tell
 apart yet, and four identical files would only be four files to delete.
 
-The five tabs sit side by side rather than stacking. Every move pops back to Inicio first, so the
+The bar shows the tabs of the profile role, as issue #46's table has it: a student sees all five,
+a professor has no Semáforo, staff have neither Semáforo nor Horario. Inicio leaves out the cards
+of the screens the role does not have. The rule is `destinationsFor` in `KAppDestination.kt`.
+
+The tabs sit side by side rather than stacking. Every move pops back to Inicio first, so the
 bar never builds a history of itself and Back from any tab leaves for Inicio instead of retracing
 which ones were visited; `saveState` and `restoreState` keep what a tab had on it.
 
-`InvitationScreen` is still a stub, so the login's second exit has somewhere to land. It and the
-login are outside the bar: it would offer four destinations to somebody who has not signed in.
+`InvitationScreen` is still a stub, and its link is drawn in debug builds only: invitation codes
+are development-only in auth 1.0.0. It and the login are outside the bar: it would offer four
+destinations to somebody who has not signed in.
 
 ## Running it
 
@@ -68,32 +82,70 @@ curl http://localhost:4000/auth/health    # {"status":"UP"}
 The mocks speak plain HTTP. Only the debug build allows it, and only for `10.0.2.2` and
 `localhost`: `src/debug/res/xml/network_security_config.xml`, merged by `src/debug/AndroidManifest.xml`.
 
-To check the whole path from a device, press **Ingresar** in a debug build and read Logcat under
-the tag `KApp.api`. The build calls `GET /auth/health`, signs in with `POST /auth/microsoft` using
-a fake ID token (the mocks accept any of 20 characters or more) and calls `GET /api/users/me` with
-the token it got back:
+A debug build with no Microsoft tenant configured (see below) signs in with a fake ID token, which
+the mocks accept, so pressing **Ingresar con Microsoft** goes straight in. Under the button it
+offers **Perfil de prueba en los mocks**: Estudiante, Profesor or Administrativo picks the named
+example `GET /api/users/me` answers (`Prefer: example=student`, `professor` or `staffAdmin`), and
+with it the tabs. The token is a student's whatever is picked; only the profile changes.
 
-```
-auth UP, signed in as [ROLE_STUDENT], /api/users/me is Pepito Perez Gomez
-```
-
-It lets you in whatever the outcome, so the app still opens with the mocks stopped. How the mocks
-answer, the `Prefer` header for other states, and troubleshooting:
+How the mocks answer, the `Prefer` header for other states, and troubleshooting:
 [`app/backend/microservices/mock/README.md`](../../../backend/microservices/mock/README.md).
+
+## Microsoft sign-in
+
+Through MSAL, in single-account mode ([ADR 0003](../../../../docs/adr/0003-oidc-over-saml-for-mobile-authentication.md)).
+It needs three values from the university's app registration (issue #62), read from Gradle
+properties so none of them is committed. Put them in `~/.gradle/gradle.properties`:
+
+```properties
+kapp.msal.clientId=<application (client) id>
+kapp.msal.tenantId=<directory (tenant) id>
+kapp.msal.signatureHash=<base64 SHA-1 of the signing certificate>
+```
+
+The signature hash is per signing key, so every developer's debug keystore needs its own entry in
+the registration's Android redirect URIs, `msauth://co.edu.konradlorenz.kapp/<hash>`:
+
+```bash
+keytool -exportcert -alias androiddebugkey -keystore ~/.android/debug.keystore -storepass android \
+  | openssl sha1 -binary | openssl base64
+```
+
+| Build | No client id | With a client id |
+|---|---|---|
+| Debug | Fake ID token, accepted by the mocks only | Microsoft's sign-in |
+| Release | "todavía no tiene configurado el ingreso con Microsoft" | Microsoft's sign-in |
+
+The session, in `data/session/`:
+
+- **Stored** encrypted with AES-256-GCM under a key that never leaves the Android Keystore
+  (`KeystoreSessionStore`), and excluded from backups: a copy restored elsewhere could not be
+  decrypted anyway.
+- **Renewed** two minutes before the access token expires, and once on a `401`. The refresh token
+  rotates and reusing one revokes its whole family, so renewals are serialised, and a request that
+  waited behind one uses the token it produced instead of renewing again (`SessionManager`).
+- **Ended** when a renewal answers `401` or `403`: the app goes back to the login. With no network
+  the session survives and the old token is tried.
+- **Signed out** with `POST /auth/logout`, then both tokens are forgotten even if the server could
+  not be reached.
 
 ## Previews
 
 Every `@Preview` renders at 360x800, which is the size the mockups are drawn at, so the two can be
 compared side by side without a device. `HomeScreen.kt` has four — the screen and the three states
-of `EstadosHome.dc.html` — and `PlaceholderScreen.kt` one.
+of `EstadosHome.dc.html` — `LoginScreen.kt` two, as a release build and as a debug build with an
+error showing, and `PlaceholderScreen.kt` one.
 
 ## Layout
 
 ```
 app/src/main/java/co/edu/konradlorenz/kapp/
 ├── MainActivity.kt              edge-to-edge, hosts the NavHost
+├── KAppApplication.kt           AppContainer: the one session, the one API client, the sign-in
 ├── data/
-│   └── network/                 KAppApi (Retrofit), the contract models, the debug connection check
+│   ├── network/                 KAppApi (Retrofit), the contract models
+│   ├── auth/                    Microsoft's sign-in: MSAL, or the fake in debug
+│   └── session/                 SessionManager, its encrypted store, the profile role
 └── ui/
     ├── theme/                   the palette, the type scale, the Material scheme
     ├── common/                  the brand band, shared by every screen inside the bar
@@ -104,9 +156,9 @@ app/src/main/java/co/edu/konradlorenz/kapp/
     └── invitation/              stub
 ```
 
-`KAppDestination` is the one list of the five tabs — route, icon, label and colour. The bar
-iterates it and Inicio's shortcuts pick four entries out of it, so a destination cannot be added
-to one and forgotten in the other.
+`KAppDestination` is the one list of the five tabs — route, icon, label and colour — and
+`destinationsFor` picks a role's tabs out of it. The bar and Inicio's shortcuts both draw that
+pick, so a destination cannot be added to one and forgotten in the other.
 
 ## Colour
 
@@ -121,14 +173,14 @@ names that sheet assigns. Two rules worth not rediscovering:
 
 | Missing | Why |
 |---|---|
-| Microsoft sign-in and keeping the session | Issue #46. The debug connection check signs in with a fake ID token and keeps nothing |
-| The four states in `EstadosLogin.dc.html` | Sending, 401, 403 unverified and offline. All four are answers the server gives; there is nothing to render them from yet |
-| `POST /auth/verify/resend` | Reached only from the 403 state above |
-| Session persistence | "Mantener la sesión iniciada" holds interface state only. auth 1.0.0 now has refresh tokens; storing and renewing them is issue #46 |
+| A tenant to sign in against | The university's app registration is issue #62. Until it exists a debug build signs in with the fake |
+| The login's mockup with Microsoft | The mockups still draw the address and password. The button and its error line follow the mockup's sizes and colours, and the copy of `EstadosLogin.dc.html` where it still applies |
+| `POST /auth/verify/resend` | E-mail verification is development-only in auth 1.0.0; Microsoft accounts need none |
+| Visitor passes | `ROLE_GUEST` and `POST /auth/visitor-passes/{code}/redeem`. No issue asks for them in the app yet |
 | Hilt | It earns its place when there are two implementations to swap, not before |
 | A monochrome launcher icon | Themed icons need a single-colour version of the crest, which is a design asset we do not have |
 | `GET /api/schedule/me/day` and `GET /api/semaphore/me/summary` | What Inicio is drawn from. `HomeViewModel` already has the two states they fill; what neither contract has a picture for is the failure case, so that is the first thing to design |
-| Semáforo, Horario, Mapa and Perfil | Four routes that reach `PlaceholderScreen`. Each is replaced by editing its entry in `KAppNavHost`; nothing else has to move |
+| Semáforo, Horario, Mapa and Perfil | Four routes that reach `PlaceholderScreen`; Perfil's carries **Cerrar sesión** until #47 builds it. Each is replaced by editing its entry in `KAppNavHost`; nothing else has to move |
 | The block a class is in | `ClassOccurrence` carries `room` and `campus`; the mockup prints "Salón 401 · Bloque B". The block comes from map-service or it is a field `schedule.openapi.yaml` grows |
 | The number of courses in progress | `ProgressSummary` counts credits, not courses, so "5 materias en curso" needs a second call to `GET /api/semaphore/me` or a new field |
 

@@ -10,6 +10,7 @@ junit = "4.13.2"
 retrofit = "3.0.0"
 okhttp = "4.12.0"
 kotlinxSerialization = "1.9.0"
+msal = "8.5.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -32,6 +33,9 @@ retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = 
 retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+
+# Microsoft sign-in (ADR 0003): OIDC, authorization code with PKCE, against the university tenant.
+msal = { group = "com.microsoft.identity.client", name = "msal", version.ref = "msal" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 

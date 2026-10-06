@@ -55,18 +55,23 @@ val BarContentPadding = BarHeight + BarBottomInset + 14.dp
  * scrolls under it. Login and the invitation code are outside this: they are not places the bar
  * can take you, and showing it there would offer four destinations to somebody who has not signed
  * in yet.
+ *
+ * [destinations] are the tabs the profile role sees (destinationsFor), so a professor's bar has
+ * four and staff's three. The tabs share the width, so fewer tabs are wider, not gapped.
  */
 @Composable
 fun MainShell(
     current: KAppDestination,
     onSelect: (KAppDestination) -> Unit,
     modifier: Modifier = Modifier,
+    destinations: List<KAppDestination> = KAppDestination.entries,
     content: @Composable () -> Unit,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         content()
         KAppBottomBar(
             current = current,
+            destinations = destinations,
             onSelect = onSelect,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
@@ -76,6 +81,7 @@ fun MainShell(
 @Composable
 private fun KAppBottomBar(
     current: KAppDestination,
+    destinations: List<KAppDestination>,
     onSelect: (KAppDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -92,7 +98,7 @@ private fun KAppBottomBar(
             .padding(start = 4.dp, end = 4.dp, top = 6.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        KAppDestination.entries.forEach { destination ->
+        destinations.forEach { destination ->
             Tab(
                 destination = destination,
                 active = destination == current,

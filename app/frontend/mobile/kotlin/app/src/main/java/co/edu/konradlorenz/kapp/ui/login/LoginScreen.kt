@@ -1,33 +1,27 @@
 package co.edu.konradlorenz.kapp.ui.login
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,22 +29,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import co.edu.konradlorenz.kapp.BuildConfig
 import co.edu.konradlorenz.kapp.R
 import co.edu.konradlorenz.kapp.ui.theme.Brand
-import co.edu.konradlorenz.kapp.ui.theme.DomainSuffix
 import co.edu.konradlorenz.kapp.ui.theme.InProgress
 import co.edu.konradlorenz.kapp.ui.theme.KAppTheme
 import co.edu.konradlorenz.kapp.ui.theme.OnBrandSoft
@@ -61,23 +52,58 @@ import co.edu.konradlorenz.kapp.ui.theme.Subject
 // 360x800 canvas. The pixels there are dp here.
 private val BandHeight = 356.dp
 private val SheetTop = 328.dp
-private val FieldHeight = 52.dp
-private val FieldShape = RoundedCornerShape(12.dp)
+private val ButtonHeight = 52.dp
 private val SheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
 
+/** The only domain KApp accounts use. Not a string resource: one starting with "@" reads as a reference. */
+const val INSTITUTIONAL_DOMAIN = "@konradlorenz.edu.co"
+
 /**
- * Sign-in.
+ * Sign-in: one button that opens Microsoft's sign-in (issue #46).
  *
- * The screen checks no credentials yet: [onSignIn] fires once both fields have content, after the
- * debug build's connection check (LoginViewModel.signIn). The real sign-in, and with it the cases
- * drawn in docs/design/mobile/EstadosLogin.dc.html, arrive with issue #46.
+ * The band, the crest, the stripe and the footer are LoginAndroid.dc.html's. The fields it draws -
+ * address, password, "Mantener la sesion iniciada" - are gone: the address and password are typed
+ * into Microsoft's page, and the session now lasts 30 days from its last use for everybody, so the
+ * switch had nothing left to switch. The mockup still draws them; updating it is pending in
+ * docs/design/mobile/.
+ *
+ * The invitation code is development-only in auth 1.0.0 ("Do not build them into the product"), so
+ * its link is drawn in debug builds alone.
  */
 @Composable
 fun LoginScreen(
     onSignIn: () -> Unit,
     onUseInvitationCode: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = viewModel(),
+    viewModel: LoginViewModel = viewModel(factory = LoginViewModel.Factory),
+) {
+    val activity = LocalActivity.current
+    LoginContent(
+        signingIn = viewModel.signingIn,
+        error = viewModel.error,
+        onSubmit = { activity?.let { viewModel.signIn(it, onSignIn) } },
+        mockProfile = viewModel.mockProfile.takeIf { viewModel.offersMockProfiles },
+        onMockProfileChange = viewModel::onMockProfileChange,
+        onUseInvitationCode = onUseInvitationCode.takeIf { BuildConfig.DEBUG },
+        modifier = modifier,
+    )
+}
+
+/**
+ * The screen without its view model, so the previews can draw every state.
+ *
+ * [mockProfile] is `null` unless the sign-in is the debug build's fake, and [onUseInvitationCode]
+ * is `null` outside debug builds; each row is drawn only when it has something to do.
+ */
+@Composable
+private fun LoginContent(
+    signingIn: Boolean,
+    error: SignInError?,
+    onSubmit: () -> Unit,
+    mockProfile: MockProfile?,
+    onMockProfileChange: (MockProfile) -> Unit,
+    onUseInvitationCode: (() -> Unit)?,
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier
@@ -107,11 +133,7 @@ fun LoginScreen(
                     spotColor = Brand,
                 )
                 .clip(SheetShape)
-                .background(MaterialTheme.colorScheme.surface)
-                // With the keyboard open the sheet lifts and its contents scroll, so the Ingresar
-                // button is never covered. The mockup cannot show this; the design note says in so
-                // many words that it is solved in code.
-                .imePadding(),
+                .background(MaterialTheme.colorScheme.surface),
         ) {
             TricolourStripe()
 
@@ -122,25 +144,13 @@ fun LoginScreen(
                     .padding(start = 24.dp, end = 24.dp, top = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
-                EmailField(
-                    value = viewModel.emailLocalPart,
-                    onValueChange = viewModel::onEmailChange,
-                )
-                PasswordField(
-                    value = viewModel.password,
-                    onValueChange = viewModel::onPasswordChange,
-                    visible = viewModel.passwordVisible,
-                    onVisibilityToggle = viewModel::onPasswordVisibilityToggle,
-                )
-                KeepSignedInRow(
-                    checked = viewModel.keepSignedIn,
-                    onCheckedChange = viewModel::onKeepSignedInChange,
-                )
-                SignInButton(
-                    enabled = viewModel.canSubmit && !viewModel.checkingConnection,
-                    onClick = { viewModel.signIn(onSignIn) },
-                )
-                InvitationRow(onClick = onUseInvitationCode)
+                Intro()
+                SignInButton(signingIn = signingIn, onClick = onSubmit)
+                if (error != null) ErrorMessage(error)
+                if (mockProfile != null) {
+                    MockProfileRow(selected = mockProfile, onSelect = onMockProfileChange)
+                }
+                if (onUseInvitationCode != null) InvitationRow(onClick = onUseInvitationCode)
             }
 
             Footer()
@@ -204,171 +214,35 @@ private fun TricolourStripe() {
     }
 }
 
-/**
- * Caption, then the filled box that every field shares on both platforms.
- *
- * [endPadding] exists because the password field puts a 48 dp button against that edge and needs
- * less padding of its own to keep the glyph level with everything else.
- */
+/** What the button does, and with which account, above it. */
 @Composable
-private fun Field(
-    label: String,
-    endPadding: Dp = 16.dp,
-    content: @Composable RowScope.() -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun Intro() {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(FieldHeight)
-                .clip(FieldShape)
-                .background(MaterialTheme.colorScheme.background)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, FieldShape)
-                .padding(start = 16.dp, end = endPadding),
-            verticalAlignment = Alignment.CenterVertically,
-            content = content,
-        )
-    }
-}
-
-/**
- * The student types "pepito.perez" and the domain is printed after it in grey, unedited and
- * unerasable. The student code that used to sit beside this field is gone: institutional e-mail
- * only.
- */
-@Composable
-private fun EmailField(value: String, onValueChange: (String) -> Unit) {
-    Field(label = stringResource(R.string.login_email_label)) {
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            // fill = false lets the field shrink to what was typed, so the domain sits right
-            // against it instead of being pushed to the far edge.
-            modifier = Modifier.weight(1f, fill = false),
-            singleLine = true,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(
-                color = MaterialTheme.colorScheme.onSurface,
-            ),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next,
-            ),
-            decorationBox = { innerTextField ->
-                Box {
-                    if (value.isEmpty()) {
-                        Text(
-                            text = stringResource(R.string.login_email_placeholder),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Placeholder,
-                        )
-                    }
-                    innerTextField()
-                }
-            },
-        )
-        Text(
-            text = INSTITUTIONAL_DOMAIN,
-            style = MaterialTheme.typography.bodyLarge,
-            color = DomainSuffix,
-            maxLines = 1,
-        )
-    }
-}
-
-@Composable
-private fun PasswordField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    visible: Boolean,
-    onVisibilityToggle: () -> Unit,
-) {
-    // 3 dp of field padding plus half the slack inside the 48 dp button puts the glyph 16 dp from
-    // the edge, level with every other field.
-    Field(label = stringResource(R.string.login_password_label), endPadding = 3.dp) {
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.weight(1f),
-            singleLine = true,
-            textStyle = if (visible) {
-                MaterialTheme.typography.bodyLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            } else {
-                // The dots are set larger and spread apart, as the mockup draws them.
-                MaterialTheme.typography.bodyLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 18.sp,
-                    letterSpacing = 3.sp,
-                )
-            },
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            visualTransformation = if (visible) {
-                VisualTransformation.None
-            } else {
-                PasswordVisualTransformation()
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done,
-            ),
-        )
-        // 48 dp is the Android touch target from Tokens.dc.html; the glyph itself stays at 22 dp.
-        IconButton(onClick = onVisibilityToggle, modifier = Modifier.size(48.dp)) {
-            Icon(
-                painter = painterResource(
-                    if (visible) R.drawable.ic_eye_off else R.drawable.ic_eye,
-                ),
-                contentDescription = stringResource(
-                    if (visible) R.string.login_password_hide else R.string.login_password_show,
-                ),
-                modifier = Modifier.size(22.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-@Composable
-private fun KeepSignedInRow(checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(44.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(
-            text = stringResource(R.string.login_keep_signed_in),
-            style = MaterialTheme.typography.bodyLarge,
+            text = stringResource(R.string.login_intro_title),
+            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
         )
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                checkedTrackColor = MaterialTheme.colorScheme.primary,
-                checkedBorderColor = MaterialTheme.colorScheme.primary,
-            ),
+        Text(
+            text = stringResource(R.string.login_intro_body, INSTITUTIONAL_DOMAIN),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
+/**
+ * The size and colours of the mockup's "Ingresar". While a sign-in is under way it says so and
+ * cannot fire twice - EstadosLogin.dc.html's "Enviando".
+ */
 @Composable
-private fun SignInButton(enabled: Boolean, onClick: () -> Unit) {
+private fun SignInButton(signingIn: Boolean, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        enabled = enabled,
+        enabled = !signingIn,
         modifier = Modifier
             .fillMaxWidth()
-            .height(FieldHeight),
+            .height(ButtonHeight),
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
@@ -377,10 +251,66 @@ private fun SignInButton(enabled: Boolean, onClick: () -> Unit) {
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
     ) {
         Text(
-            text = stringResource(R.string.login_submit),
+            text = stringResource(if (signingIn) R.string.login_signing_in else R.string.login_submit),
             fontSize = 17.sp,
             fontWeight = FontWeight.SemiBold,
         )
+    }
+}
+
+/**
+ * One line under the button, in the error colour. TalkBack reads it out as soon as it appears,
+ * since focus is still on the button it answers.
+ */
+@Composable
+private fun ErrorMessage(error: SignInError) {
+    Text(
+        text = stringResource(
+            when (error) {
+                SignInError.Rejected -> R.string.login_error_rejected
+                SignInError.Deactivated -> R.string.login_error_deactivated
+                SignInError.Offline -> R.string.login_error_offline
+                SignInError.NotConfigured -> R.string.login_error_not_configured
+                SignInError.Failed -> R.string.login_error_failed
+            },
+        ),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.error,
+        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+    )
+}
+
+/**
+ * Debug builds against the mocks only: which named example `GET /api/users/me` answers, and with
+ * it which tabs appear.
+ */
+@Composable
+private fun MockProfileRow(selected: MockProfile, onSelect: (MockProfile) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = stringResource(R.string.login_mock_profile_label),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MockProfile.entries.forEach { profile ->
+                FilterChip(
+                    selected = profile == selected,
+                    onClick = { onSelect(profile) },
+                    label = {
+                        Text(
+                            stringResource(
+                                when (profile) {
+                                    MockProfile.Student -> R.string.login_mock_student
+                                    MockProfile.Professor -> R.string.login_mock_professor
+                                    MockProfile.StaffAdmin -> R.string.login_mock_staff
+                                },
+                            ),
+                        )
+                    },
+                )
+            }
+        }
     }
 }
 
@@ -426,6 +356,28 @@ private fun ColumnScope.Footer() {
 @Composable
 private fun LoginScreenPreview() {
     KAppTheme {
-        LoginScreen(onSignIn = {}, onUseInvitationCode = {})
+        LoginContent(
+            signingIn = false,
+            error = null,
+            onSubmit = {},
+            mockProfile = null,
+            onMockProfileChange = {},
+            onUseInvitationCode = null,
+        )
+    }
+}
+
+@Preview(name = "Login · debug, sin conexión", showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+private fun LoginDebugOfflinePreview() {
+    KAppTheme {
+        LoginContent(
+            signingIn = false,
+            error = SignInError.Offline,
+            onSubmit = {},
+            mockProfile = MockProfile.Professor,
+            onMockProfileChange = {},
+            onUseInvitationCode = {},
+        )
     }
 }

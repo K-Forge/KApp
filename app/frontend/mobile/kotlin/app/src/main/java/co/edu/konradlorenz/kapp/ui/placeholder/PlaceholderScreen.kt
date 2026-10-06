@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -49,9 +50,12 @@ import co.edu.konradlorenz.kapp.ui.theme.KAppTheme
  * It borrows the band and the card of Inicio rather than inventing a look of its own: no mockup
  * covers these four, and a screen invented here would be one more thing to undo when one arrives.
  * The contract underneath is printed because it is the useful thing to know while it is empty.
+ *
+ * [onSignOut] puts "Cerrar sesion" under the card. Only Perfil passes it, and only until #47 builds
+ * that screen: signing out has to live somewhere, and the profile is where people look for it.
  */
 @Composable
-fun PlaceholderScreen(destination: KAppDestination) {
+fun PlaceholderScreen(destination: KAppDestination, onSignOut: (() -> Unit)? = null) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -111,6 +115,18 @@ fun PlaceholderScreen(destination: KAppDestination) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
+            }
+            if (onSignOut != null) {
+                Spacer(Modifier.height(16.dp))
+                OutlinedButton(
+                    onClick = onSignOut,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Text(text = stringResource(R.string.sign_out))
+                }
             }
         }
     }

@@ -44,8 +44,5 @@ val Pending = Color(0xFFE7E2EA)
 /** Hint text inside an empty field. */
 val Placeholder = Color(0xFFA29BA9)
 
-/** The fixed "@konradlorenz.edu.co" printed after what the student types. */
-val DomainSuffix = Color(0xFFC4BDCA)
-
 /** White at 74%, for the subtitle sitting on the purple band. */
 val OnBrandSoft = Color(0xBDFFFFFF)

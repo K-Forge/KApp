@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             KAppTheme {
-                KAppNavHost()
+                KAppNavHost(container = (application as KAppApplication).container)
             }
         }
     }

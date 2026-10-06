@@ -19,11 +19,14 @@ data class MicrosoftSignInRequest(
     val client: String = "APP",
 )
 
+/** `RefreshRequest` in auth.openapi.yaml. The body of both `POST /auth/refresh` and `/auth/logout`. */
+@Serializable
+data class RefreshRequest(val refreshToken: String)
+
 /**
  * `TokenResponse` in auth.openapi.yaml. What `POST /auth/microsoft` and `POST /auth/refresh` answer.
  *
- * Keeping the session - encrypted storage for [refreshToken], renewal before [expiresIn] runs out -
- * is #46. Nothing here stores anything.
+ * Kept by SessionManager, which is the only thing that should ever read [refreshToken].
  */
 @Serializable
 data class TokenResponse(
