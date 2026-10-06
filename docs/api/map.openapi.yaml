@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Map API
-  version: 3.5.0
+  version: 3.6.0
   summary: Schematic campus map and space search for Fundacion Universitaria Konrad Lorenz.
   description: |
     Digital campus map for Fundacion Universitaria Konrad Lorenz (Bogota, Colombia).
@@ -105,6 +105,20 @@ info:
     **`SurveyMeasure.recheck`**: a distance asked to be taken again keeps what was
     typed, for reference, and the time it was taken, until it is taken again.
 
+    ## Version 3.6: SINU's sedes, and reads a client can cache
+
+    Additive, like every 3.x:
+
+    - **`Building.sinuSedes`**: the names SINU gives the building. In SINU each building is a
+      *sede*, and its timetable names a class's room by sede and number. The schedule service maps
+      the sede to the building through this list, and a class then opens its room with
+      `GET /api/map/spaces/{code}?buildingCode=…`. The same room number exists in more than one
+      building, which is why the building has to be known.
+    - **`ETag` on the reads.** `GET` answers carry an `ETag`. A client that sends it back in
+      `If-None-Match` gets `304 Not Modified`, with no body, while nothing changed. There is no
+      offline package: the map is read online, and the `ETag` keeps it from being read twice.
+    - **`ROLE_STAFF`** reads the map like every other member of the university.
+
     ## Coordinate model
 
     A floor is a **drawing in its own units**, `width` by `height`, with the origin at the top-left
@@ -159,8 +173,8 @@ info:
 
     ## Campuses
 
-    The university's academic records carry a *Sede* field (for example "Sede Principal"), so
-    every building and space carries `campus`.
+    Every building and space carries `campus`: the university's site, "Sede Principal". SINU
+    uses *sede* for something narrower, the building; that is what `Building.sinuSedes` holds.
 
     ## Access control
 
@@ -168,7 +182,7 @@ info:
 
     | Operations | Allowed roles |
     | --- | --- |
-    | All read operations (`GET`) | `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN` |
+    | All read operations (`GET`) | `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN` |
     | All write operations (`POST`, `PUT`, `DELETE`) | `ROLE_ADMIN` only |
 
     Every request needs a valid JWT: a request without one is answered with `401`; a token whose
@@ -195,14 +209,14 @@ paths:
   /api/map/buildings:
 
     get:
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: listBuildings
       summary: List buildings
       description: |
         Every building with its wings and floors, ordered by code. `q` matches the code, the name
         and every alias, ignoring case and accents.
 
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
       tags: [Buildings]
       parameters:
         - $ref: '#/components/parameters/CampusQuery'
@@ -212,9 +226,12 @@ paths:
           description: Code, name or alias, ignoring case and accents.
           schema: { type: string, minLength: 1, maxLength: 120 }
           example: psicologia
+        - $ref: '#/components/parameters/IfNoneMatch'
       responses:
         '200':
           description: The buildings, ordered by code.
+          headers:
+            ETag: { $ref: '#/components/headers/ETag' }
           content:
             application/json:
               schema:
@@ -222,6 +239,7 @@ paths:
                 items: { $ref: '#/components/schemas/Building' }
               examples:
                 Buildings: { $ref: '#/components/examples/BuildingList' }
+        '304': { $ref: '#/components/responses/NotModified' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
@@ -274,20 +292,25 @@ paths:
       - $ref: '#/components/parameters/BuildingCodePath'
 
     get:
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: getBuildingByCode
       summary: Get a building by code
       description: |
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
       tags: [Buildings]
+      parameters:
+        - $ref: '#/components/parameters/IfNoneMatch'
       responses:
         '200':
           description: The building, its wings and its floors in vertical order.
+          headers:
+            ETag: { $ref: '#/components/headers/ETag' }
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Building' }
               examples:
                 BloqueB: { $ref: '#/components/examples/BloqueB' }
+        '304': { $ref: '#/components/responses/NotModified' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -345,7 +368,7 @@ paths:
       - $ref: '#/components/parameters/FloorCodePath'
 
     get:
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: getFloor
       summary: Get a floor and every space on it
       description: |
@@ -355,16 +378,21 @@ paths:
         drawn yet - list them beside the drawing rather than dropping them. The building's wings
         come along so each space's `wing` code can be shown by name.
 
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
       tags: [Buildings]
+      parameters:
+        - $ref: '#/components/parameters/IfNoneMatch'
       responses:
         '200':
           description: The floor and its spaces, ordered by code.
+          headers:
+            ETag: { $ref: '#/components/headers/ETag' }
           content:
             application/json:
               schema: { $ref: '#/components/schemas/FloorDetail' }
               examples:
                 Mezzanine: { $ref: '#/components/examples/MezzanineFloor' }
+        '304': { $ref: '#/components/responses/NotModified' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
@@ -433,7 +461,7 @@ paths:
   /api/map/spaces/search:
 
     get:
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: searchSpaces
       summary: Search or list spaces across the campus
       description: |
@@ -448,7 +476,7 @@ paths:
         `type` takes one type code; `category` takes a whole category. Unplaced spaces are
         included.
 
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
       tags: [Spaces]
       parameters:
         - name: q
@@ -553,14 +581,14 @@ paths:
       - $ref: '#/components/parameters/BuildingCodeDisambiguator'
 
     get:
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: getSpaceByCode
       summary: Resolve a code to its space, floor and building
       description: |
         The endpoint the schedule screen calls when a student taps a class: one round trip from
         the code to the space, its floor and a summary of its building.
 
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
       tags: [Spaces]
       responses:
         '200':
@@ -634,13 +662,13 @@ paths:
   /api/map/space-types:
 
     get:
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: listSpaceTypes
       summary: List space types
       description: |
         The whole catalogue, grouped by category in the category's declared order, then by name.
 
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
       tags: [Space types]
       responses:
         '200':
@@ -737,13 +765,13 @@ paths:
   /api/map/campuses:
 
     get:
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: listCampuses
       summary: List campuses
       description: |
         Every campus that has at least one building, with its building count.
 
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
       tags: [Campuses]
       responses:
         '200':
@@ -761,7 +789,7 @@ paths:
   /api/map/campuses/{campus}/ground:
 
     get:
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: getCampusGround
       summary: The ground around a campus
       description: |
@@ -771,7 +799,7 @@ paths:
         `[lon, lat]` in WGS 84; lay a building's drawing on them with its `placement`. The campus
         name matches ignoring case and accents. `404` for a campus with no ground yet.
 
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
       tags: [Campuses]
       parameters:
         - name: campus
@@ -779,9 +807,12 @@ paths:
           required: true
           schema: { type: string, maxLength: 120 }
           example: Sede Principal
+        - $ref: '#/components/parameters/IfNoneMatch'
       responses:
         '200':
           description: The ground.
+          headers:
+            ETag: { $ref: '#/components/headers/ETag' }
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Ground' }
@@ -796,6 +827,7 @@ paths:
                 medians: []
                 streets:
                   - { name: Calle 63, label: CL 63, path: [[-74.0617, 4.6491], [-74.0611, 4.6486]] }
+        '304': { $ref: '#/components/responses/NotModified' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -810,7 +842,7 @@ paths:
         example: Sede Principal
 
     get:
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: getCampusStructures
       summary: What else stands on a campus's blocks
       description: |
@@ -819,7 +851,7 @@ paths:
         version `0`, while nothing has been saved. The campus name matches ignoring case and
         accents.
 
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
       tags: [Campuses]
       responses:
         '200':
@@ -886,7 +918,7 @@ paths:
         example: Sede Principal
 
     get:
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: getCampusSurvey
       summary: The distances taken round a campus's blocks
       description: |
@@ -894,7 +926,7 @@ paths:
         survey sheet. None, at version `0`, while nothing has been saved. The campus name matches
         ignoring case and accents.
 
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
       tags: [Campuses]
       responses:
         '200':
@@ -1388,6 +1420,11 @@ components:
           description: The building from above, part by part, as the cadastre records it. Empty until somebody takes it from there.
           items: { $ref: '#/components/schemas/FootprintPart' }
         address: { type: string, maxLength: 200, description: "Its street address as people write it. Absent when nobody has said.", example: 'Cra. 9 Bis # 62-43' }
+        sinuSedes:
+          type: array
+          description: The names SINU gives this building as a sede, exactly as its timetable prints them. Empty until somebody maps them in the portal. Since 3.6.
+          items: { type: string, maxLength: 120 }
+          example: [Sede Principal]
 
     BuildingSummary:
       type: object
@@ -1405,6 +1442,10 @@ components:
         wings:
           type: array
           items: { $ref: '#/components/schemas/Wing' }
+        sinuSedes:
+          type: array
+          description: The names SINU gives this building as a sede. Since 3.6.
+          items: { type: string }
 
     BuildingRequest:
       type: object
@@ -1432,6 +1473,10 @@ components:
           description: The building from above, part by part. Omitted on `PUT`, the stored one is kept; a part's `wing` must be one of the building's.
           items: { $ref: '#/components/schemas/FootprintPart' }
         address: { type: string, maxLength: 200, description: "Its street address as people write it. Omitted on PUT, the stored one is kept; empty clears it.", example: 'Cra. 9 Bis # 62-43' }
+        sinuSedes:
+          type: array
+          description: The names SINU gives this building as a sede. Omitted on `PUT`, the stored ones are kept. A sede belongs to one building only; naming one another building has is a `409`. Since 3.6.
+          items: { type: string, minLength: 1, maxLength: 120 }
 
     Space:
       type: object
@@ -1657,7 +1702,22 @@ components:
         first: { type: boolean, example: true }
         last: { type: boolean, example: true }
 
+  headers:
+
+    ETag:
+      description: The version of this answer. Send it back in `If-None-Match` to be told when it changes. Since 3.6.
+      schema: { type: string }
+      example: '"3f2a9c14"'
+
   parameters:
+
+    IfNoneMatch:
+      name: If-None-Match
+      in: header
+      required: false
+      description: The `ETag` of the answer the client already has. When nothing changed since, the answer is `304` with no body. Since 3.6.
+      schema: { type: string }
+      example: '"3f2a9c14"'
 
     CampusQuery:
       name: campus
@@ -1824,6 +1884,9 @@ components:
         last: true
 
   responses:
+
+    NotModified:
+      description: Nothing changed since the `ETag` sent in `If-None-Match`. No body; keep using what you have.
     BadRequest:
       description: Validation failed
       content: { application/json: { schema: { $ref: '#/components/schemas/ApiError' } } }

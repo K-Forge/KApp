@@ -1,60 +1,61 @@
 openapi: 3.1.0
 info:
   title: KApp Semaphore API
-  version: 1.0.0
+  version: 2.0.0
   summary: Academic catalog and student pensum progress (semáforo) for Fundación Universitaria Konrad Lorenz.
   description: |
-    The Semaphore service owns both the **academic catalog** (programs and pensums) and each
-    student's **pensum progress**, because at Konrad Lorenz the pensum *is* the semáforo.
+    The Semaphore service serves the **academic catalog** (programs and pensums) and each
+    student's **semáforo**: their pensum with the status of every item. At Konrad Lorenz the
+    pensum *is* the semáforo.
 
     A *semáforo* renders a whole degree plan — the *malla curricular*, also called the *pensum* —
     as a grid: columns are levels (semesters, `1..9`), rows are knowledge areas, and every pensum
     item is coloured by its status. Hence "traffic light".
 
+    ## What comes from SINU, and the one thing a student writes
+
+    SINU is the university's academic record. KApp reads it, for the student signed in, and never
+    writes to it. **Everything below is read-only** — the catalog, the student's program, pensum
+    and level, the status, period and grade of every course, and the elective bank of each
+    semester — **except the student's plans**: their own arrangement of the courses still ahead.
+    A change to anything else is made in SINU, through the university, and shows up here on its
+    own.
+
+    Until the university opens SINU, a test adapter serves invented data of the same shape, and
+    `source` says so on every semáforo. The catalog keeps the 23 published plans as its backup.
+
     ## Conventions used across this API
 
-    - **Grades** are integers on the university's `0..50` scale (mirrors the `final_grade`
-      constraint in the KApp database). There are no decimals. The passing threshold is applied by
-      the registrar, not by this service; this service only stores and validates the range.
+    - **Statuses** are SINU's, in five values: `PASSED`, `IN_PROGRESS`, `PENDING` (not taken yet),
+      `FAILED` and `POSTPONED` (*aplazada*). `sinuStatus` carries the status exactly as SINU
+      writes it, so a client can still show one this list does not know.
+    - **Grades** are optional and read-only. When SINU provides one it is an integer on the
+      university's `0..50` scale; otherwise it is `null`. No client writes a grade.
     - **Periods** are the university's own academic-period strings: four digits for the year
       followed by `1` or `2` for the semester (`^\d{4}[12]$`). `"20262"` is the second semester of
       2026.
     - **Hours.** A course carries `weeklyHours` (contact hours per week) and, derived from it,
       `totalHours` for the full 16-week semester. The invariant is `weeklyHours * 16 == totalHours`.
       At *pensum* and *area* level, `totalHours` and `hours` are sums of **weekly** hours across
-      the plan (the Ingeniería de Sistemas plan totals 142 credits and 194 weekly hours).
+      the plan.
 
       `weeklyHours` is a **number, not an integer**: it may carry a half. Four items across the
       published plans print one — Psicología's two professional practices at 4,5 hours, and the
-      practices of Marketing and Negocios Internacionales at 1,5 — and rounding them up was what
-      made Psicología add up to 175 weekly hours against the 174 its own document prints. No
-      other fraction is accepted: a value that is neither a whole hour nor a half is rejected
-      with `400`.
-
-      **Whole hours are still written whole.** `4`, never `4.0`, so those four items are the only
-      place in the API where hours carry a decimal point — but a client that reads them into an
-      integer type breaks on exactly those four, and should read a decimal. `totalHours` stays an
-      integer everywhere: half an hour a week is eight whole hours a semester.
-    - **Elective slots are slots, not courses.** The Reforma 2018 plan carries six of them
-      (Electiva I..VI). A slot has credits and hours but no fixed content: its `code` is `null`,
-      `isElectiveSlot` is `true`, and it is addressed by its stable `pensumItemCode`
-      (for example `"ELECTIVA_VI"`). A student later *resolves* a slot to a real course.
-    - **Identifying a pensum item.** Regular items are addressed by their course `code`.
-      Elective slots have no `code`, so wherever this API takes or returns a course identifier —
-      path parameters and the `reconciliation` arrays included — a slot is represented by its
-      `pensumItemCode`.
-    - **Not every `code` is a real course code, and a made-up one must never be shown.** Only
-      four of the twenty-three published plans print course codes. The other nineteen are
-      brochures that print none, so KApp generates one per item (`MKT-101`) to tell them apart.
-      `sinuCode` is what separates the two: **it is present only where the code is the
-      university's own**. A client displays `sinuCode`, never `code` — a generated code looks
-      exactly like an institutional one, a student would quote it to the registrar, and every
-      one of them changes the day the real codes arrive. Use `code` and `pensumItemCode` to
-      address items, as above; show `sinuCode`, or nothing. Where a plan has none, show its
-      prerequisites by course `name` instead.
-    - **`BLOCKED` is not a stored status.** The five colours a client paints are `PASSED`,
-      `IN_PROGRESS`, `PENDING`, `FAILED` and *blocked*, but only the first four are persisted.
-      "Blocked" is derived: a `PENDING` item whose prerequisites are not all `PASSED`.
+      practices of Marketing and Negocios Internacionales at 1,5. A client that reads hours into
+      an integer type breaks on exactly those four, and should read a decimal. `totalHours` stays
+      an integer everywhere: half an hour a week is eight whole hours a semester.
+    - **Every item is addressed by its `pensumItemCode`** — fixed courses and elective slots
+      alike, in path parameters, prerequisites and placements. It is KApp's own identifier,
+      stable, and **never shown to a person**.
+    - **The code a client shows is `sinuCode`**, the course code the university itself uses,
+      present only where it is known. Where it is `null`, show the course by its name. KApp
+      never invents a code that looks institutional.
+    - **Elective slots are slots, not courses.** A pensum carries a number of them (Electiva I..VI
+      in Ingeniería de Sistemas). Which course filled a slot already taken comes from SINU
+      (`resolvedSinuCode`, `resolvedName`). For a semester still ahead, the student picks one from
+      that semester's elective bank, `GET /api/catalog/pensums/{pensumCode}/electives`, in a plan.
+    - **`BLOCKED` is not a status SINU has.** The colours a client paints are the five statuses
+      and *blocked*, which is derived: a `PENDING` item whose prerequisites are not all `PASSED`.
       `GET /api/semaphore/me/eligible` returns the complement of that set, so a client can paint
       the grid without re-implementing prerequisite resolution.
 
@@ -64,13 +65,14 @@ info:
 
     | Area | Read | Write |
     |---|---|---|
-    | `/api/catalog/**` | any authenticated role except `ROLE_GUEST` | `ROLE_ADMIN` |
-    | `/api/semaphore/me/**` | `ROLE_STUDENT` (the caller's own document) | `ROLE_STUDENT` |
+    | `/api/catalog/**` | any authenticated role except `ROLE_GUEST` | — |
+    | `POST /api/catalog/pensums/import` | — | `ROLE_ADMIN`, to load the backup |
+    | `/api/semaphore/me`, `/summary`, `/eligible` | `ROLE_STUDENT` (the caller's own) | — |
     | `/api/semaphore/me/plans/**` | `ROLE_STUDENT` (the caller's own plans) | `ROLE_STUDENT` |
-    | `/api/semaphore/{userId}` | `ROLE_ADMIN` | — |
 
-    `ROLE_PROFESSOR` reads the catalogue and nothing else here. A lecturer has no academic
-    record of their own, so every `/api/semaphore/**` route refuses them — including the plans.
+    `ROLE_PROFESSOR` and `ROLE_STAFF` read the catalog and nothing else here. Neither follows a
+    program, so every `/api/semaphore/**` route refuses them — including the plans. No route
+    reads another student's semáforo, administrators included.
 
     A caller who is authenticated but lacks the required role receives `403`, never `404`.
 
@@ -84,12 +86,12 @@ security:
 tags:
   - name: Catalog
     description: |
-      Programs and pensums (pensums). Readable by any authenticated role except `ROLE_GUEST`;
-      mutations require `ROLE_ADMIN`.
+      Programs, pensums and each semester's elective bank, as SINU publishes them. Read-only,
+      for any authenticated role except `ROLE_GUEST`.
   - name: Student Progress
     description: |
-      The student's semáforo: per-course status, derived summary, eligible courses, and elective
-      slot resolution.
+      The student's semáforo, read from SINU: per-course status, derived summary and eligible
+      courses.
   - name: Academic Plans
     description: |
       The student's own arrangements of their pensum. The pensum is immutable — the
@@ -100,7 +102,7 @@ paths:
   /api/catalog/programs:
     get:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: listPrograms
       summary: List academic programs
       description: |
@@ -128,42 +130,12 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
 
-    post:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      operationId: createProgram
-      summary: Create an academic program
-      description: |
-        Requires `ROLE_ADMIN`. The institutional code is supplied by the caller rather than
-        generated: it already identifies the program in the university's own records.
-      tags: [Catalog]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProgramRequest'
-      responses:
-        '201':
-          description: The created program
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Program'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
   /api/catalog/programs/{programCode}:
     parameters:
       - $ref: '#/components/parameters/ProgramCodePath'
     get:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: getProgram
       summary: Get one academic program
       description: Returns a single program by its institutional code.
@@ -188,70 +160,20 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-    put:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      operationId: replaceProgram
-      summary: Replace an academic program
-      description: Requires `ROLE_ADMIN`. The code in the path wins; a differing code in the body is a 400.
-      tags: [Catalog]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProgramRequest'
-      responses:
-        '200':
-          description: The updated program
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Program'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    delete:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      operationId: deleteProgram
-      summary: Delete an academic program
-      description: |
-        Requires `ROLE_ADMIN`. Refused with `409` while any pensum still references it:
-        removing the program would orphan every student following those pensums, and a
-        silent cascade is worse than an error a human can read.
-      tags: [Catalog]
-      responses:
-        '204':
-          description: Deleted
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
   /api/catalog/pensums/{pensumCode}:
     parameters:
       - $ref: '#/components/parameters/PensumCodePath'
     get:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: getPensum
       summary: Get a full pensum
       description: |
         Returns the whole pensum document: header, knowledge areas, and **every** pensum item
-        (roughly 51 for the Ingeniería de Sistemas Reforma 2018 plan), including the six elective
-        slots. This is the single call a client needs to render the semáforo grid.
+        (51 for the Ingeniería de Sistemas plan), including its elective slots. This is the single
+        call a client needs to render the semáforo grid.
 
-        The example below is a representative slice of the real plan — it spans levels 1 through 9
-        and all four areas — and is not the complete 51-item list.
+        The example below is a representative slice of the real plan, not the complete list.
       tags: [Catalog]
       responses:
         '200':
@@ -261,7 +183,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Pensum'
               examples:
-                ingenieriaDeSistemas2018:
+                ingenieriaDeSistemas:
                   $ref: '#/components/examples/Pensum1015'
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -269,40 +191,60 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-    put:
+
+  /api/catalog/pensums/{pensumCode}/courses:
+    parameters:
+      - $ref: '#/components/parameters/PensumCodePath'
+    get:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      operationId: replacePensum
-      summary: Replace a pensum
+      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
+      operationId: listPensumCourses
+      summary: List the items of a pensum
       description: |
-        Full replacement of an existing pensum. Requires `ROLE_ADMIN`.
+        Returns the pensum items of one pensum, optionally narrowed by level, knowledge area,
+        or elective-slot flag. Filters combine with AND. Omitting every filter returns the same
+        list as the `courses` array of `GET /api/catalog/pensums/{pensumCode}`.
 
-        The `pensumCode` in the body must equal the one in the path; a mismatch is rejected with
-        `400`.
-
-        Replacing a pensum does **not** rewrite the progress documents that pin it. Students
-        whose plan diverged learn about it through the `reconciliation` block on
-        `GET /api/semaphore/me`.
+        Useful for rendering one column of the grid (`?level=8`) or one row (`?area=ISA`), and for
+        listing a pensum's elective slots (`?isElectiveSlot=true`).
       tags: [Catalog]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Pensum'
-            examples:
-              ingenieriaDeSistemas2018:
-                $ref: '#/components/examples/Pensum1015'
+      parameters:
+        - name: level
+          in: query
+          required: false
+          description: Keep only items placed at this level (semester).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+          example: 8
+        - name: area
+          in: query
+          required: false
+          description: Keep only items of this knowledge area, by area code.
+          schema:
+            type: string
+            maxLength: 20
+          example: ISA
+        - name: isElectiveSlot
+          in: query
+          required: false
+          description: Keep only elective slots (`true`) or only fixed courses (`false`).
+          schema:
+            type: boolean
+          example: false
       responses:
         '200':
-          description: The stored pensum after replacement
+          description: The matching pensum items, ordered by level then name
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pensum'
+                type: array
+                items:
+                  $ref: '#/components/schemas/PensumCourse'
               examples:
-                ingenieriaDeSistemas2018:
-                  $ref: '#/components/examples/Pensum1015'
+                allItems:
+                  $ref: '#/components/examples/PensumCourseList'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -312,87 +254,58 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-    delete:
+  /api/catalog/pensums/{pensumCode}/electives:
+    parameters:
+      - $ref: '#/components/parameters/PensumCodePath'
+    get:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      operationId: deletePensum
-      summary: Delete a pensum
+      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
+      operationId: listPensumElectives
+      summary: List a semester's elective bank
       description: |
-        Requires `ROLE_ADMIN`. Refused with `409` while any student still follows it —
-        deleting it would leave their progress pointing at a pensum that no longer exists.
-      tags: [Catalog]
-      responses:
-        '204':
-          description: Deleted
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-  /api/catalog/pensums:
-    post:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      operationId: createPensum
-      summary: Create a pensum
-      description: |
-        Creates a new pensum. Requires `ROLE_ADMIN`.
+        The courses SINU offers in one period to fill the elective slots of this pensum. The bank
+        changes every semester, which is why it is read for a period and never stored.
 
-        Rejected with `400` when a course declares a prerequisite that is not itself a `code` in
-        the same document, when an elective slot carries a non-null `code`, when a non-slot item
-        carries a `null` code, when a course `area` is not one of the declared `areas`, or when a
-        supplied `totalHours` breaks the `weeklyHours * 16 == totalHours` invariant.
+        A plan uses it to say which course the student means to take in a slot
+        (`electiveSinuCode` on a placement). An offering fills any elective slot of the pensum
+        unless `slots` names the ones it fills.
 
-        Rejected with `409` when `pensumCode` already exists — use
-        `PUT /api/catalog/pensums/{pensumCode}` to replace it.
+        `404` when the pensum does not exist. A period SINU has not published yet answers an
+        empty list, not an error.
       tags: [Catalog]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Pensum'
-            examples:
-              ingenieriaDeSistemas2018:
-                $ref: '#/components/examples/Pensum1015'
+      parameters:
+        - $ref: '#/components/parameters/PeriodQuery'
       responses:
-        '201':
-          description: Pensum created
-          headers:
-            Location:
-              description: URI of the created pensum
-              schema:
-                type: string
-                example: /api/catalog/pensums/1015
+        '200':
+          description: The courses offered for the pensum's elective slots in that period
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pensum'
+                type: array
+                items:
+                  $ref: '#/components/schemas/ElectiveOffering'
               examples:
-                ingenieriaDeSistemas2018:
-                  $ref: '#/components/examples/Pensum1015'
+                bank20262:
+                  $ref: '#/components/examples/ElectiveBank'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /api/catalog/pensums/import:
     post:
       # Authorization as the code enforces it, not as prose describes it.
       x-roles: [ROLE_ADMIN]
       operationId: importPensums
-      summary: Import pensums in bulk from a CSV
+      summary: Load the catalog backup from a CSV
       description: |
-        Requires `ROLE_ADMIN`. Loads whole pensums from a spreadsheet export — 24 programs and
-        roughly 1200 rows is data-entry work, not programming, and this is what lets somebody do
-        it without touching code.
+        Requires `ROLE_ADMIN`. Loads whole pensums from a spreadsheet: the backup of the catalog,
+        for when SINU cannot be reached. It is the only write the catalog takes; programs and
+        pensums are otherwise SINU's.
 
         One row per pensum item. The columns before `pensumItemCode` describe the pensum and are
         repeated on every one of its rows; the import checks those repeated values agree with
@@ -400,14 +313,12 @@ paths:
         pensums.
 
         **Nothing is written unless the whole file validates.** A partial import would leave the
-        catalogue in a state nobody chose, so every problem is collected first and reported
+        catalog in a state nobody chose, so every problem is collected first and reported
         against the line number of the file.
 
         **Declared totals are checked, not trusted.** The import adds up the courses and compares
         against `declaredCredits` and `declaredHours` — the latter being the sum of *weekly*
-        hours, which is what a pensum's `totalHours` means. The seeded Ingeniería de Sistemas
-        plan declares 142 and 194 where its courses give 144 and 197; accepting that silently
-        would put the discrepancy in front of a student months later.
+        hours, which is what a pensum's `totalHours` means.
 
         **Hours may carry a half**, in either `4.5` or the Spanish `4,5` — the latter has to be
         quoted, or it is not one cell but two. Any other fraction is refused against its row.
@@ -455,68 +366,6 @@ paths:
         '413':
           description: The file is larger than 5 MB.
 
-  /api/catalog/pensums/{pensumCode}/courses:
-    parameters:
-      - $ref: '#/components/parameters/PensumCodePath'
-    get:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
-      operationId: listPensumCourses
-      summary: List the items of a pensum
-      description: |
-        Returns the pensum items of one pensum, optionally narrowed by level, knowledge area,
-        or elective-slot flag. Filters combine with AND. Omitting every filter returns the same
-        list as the `courses` array of `GET /api/catalog/pensums/{pensumCode}`.
-
-        Useful for rendering one column of the grid (`?level=8`) or one row (`?area=ISA`), and for
-        listing the elective slots a student still has to resolve (`?isElectiveSlot=true`).
-      tags: [Catalog]
-      parameters:
-        - name: level
-          in: query
-          required: false
-          description: Keep only items placed at this level (semester).
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 9
-          example: 8
-        - name: area
-          in: query
-          required: false
-          description: Keep only items of this knowledge area, by area code.
-          schema:
-            type: string
-            maxLength: 20
-          example: ISA
-        - name: isElectiveSlot
-          in: query
-          required: false
-          description: Keep only elective slots (`true`) or only fixed courses (`false`).
-          schema:
-            type: boolean
-          example: false
-      responses:
-        '200':
-          description: The matching pensum items, ordered by level then name
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PensumCourse'
-              examples:
-                allItems:
-                  $ref: '#/components/examples/PensumCourseList'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
   /api/semaphore/me:
     get:
       # Authorization as the code enforces it, not as prose describes it.
@@ -524,46 +373,25 @@ paths:
       operationId: getMySemaphore
       summary: Get the caller's semáforo
       description: |
-        Returns the authenticated student's progress document.
+        The authenticated student's semáforo, read from SINU: their program, pensum and level,
+        and one entry per item of that pensum with its status, period and, when SINU gives it,
+        its grade. Nothing here is stored by KApp or writable through it.
 
-        ## Lazily created on first call
+        Items SINU has no record of come back `PENDING`, so the list always mirrors the pensum
+        one to one.
 
-        A student never has to be provisioned. If no progress document exists yet, this call
-        resolves the `ACTIVE` pensum of the student's `programCode`, pins that `pensumCode` on a
-        new document, and materialises one entry per pensum item with status `PENDING`. The
-        document therefore always mirrors the pinned pensum one-to-one.
-
-        Because of that, **this endpoint does not return `404` for a student enrolled in a
-        program**. `404` is reserved for a caller who has no active program, or whose program has
-        no `ACTIVE` pensum to resolve.
-
-        ## Reconciliation
-
-        The document pins the `pensumCode` it was created from. If an administrator later edits
-        that pensum, the stored progress can diverge from it, so every response carries a
-        `reconciliation` block. Nothing is ever silently dropped or invented:
-
-        - `addedCourses` — pensum items present in the pensum but missing from the stored
-          document. They are materialised as `PENDING` and reported here, so the client can tell
-          the student their plan grew.
-        - `removedCourses` — stored entries whose pensum item no longer exists in the pensum.
-          They are **kept** in `courses` (a passed grade is never destroyed) and reported here, so
-          the client can show them as no longer counting toward the degree. They are excluded from
-          `GET /api/semaphore/me/summary`.
-        - `inSync` — `true` exactly when both arrays are empty.
-
-        Identifiers in both arrays are course `code`s, except for elective slots, which have no
-        `code` and are reported by `pensumItemCode`.
+        `404` when SINU has no program for the caller — someone who is not a student, or not yet
+        one.
       tags: [Student Progress]
       responses:
         '200':
-          description: The caller's semáforo, with its reconciliation status
+          description: The caller's semáforo
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StudentProgressWithReconciliation'
+                $ref: '#/components/schemas/StudentSemaphore'
               examples:
-                student506999999:
+                levelEightStudent:
                   $ref: '#/components/examples/MySemaphore'
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -580,17 +408,14 @@ paths:
       summary: Get the caller's progress summary
       description: |
         Credit totals derived from the caller's semáforo. **Never stored** — recomputed on every
-        call from the progress document and the pinned pensum, so it cannot drift from the
-        grid the student is looking at.
+        call, so it cannot drift from the grid the student is looking at.
 
         Counting rules:
 
         - `creditsPassed` counts items with status `PASSED`.
         - `creditsInProgress` counts items with status `IN_PROGRESS`.
-        - `creditsRemaining` is `totalCredits - creditsPassed - creditsInProgress`; `PENDING` and
-          `FAILED` items therefore both count as remaining.
-        - Entries reported in `reconciliation.removedCourses` are excluded from every figure, as
-          they no longer belong to the plan.
+        - `creditsRemaining` is `totalCredits - creditsPassed - creditsInProgress`; `PENDING`,
+          `FAILED` and `POSTPONED` items therefore all count as remaining.
         - `byArea` carries one row per area declared by the pensum, in the pensum's order.
       tags: [Student Progress]
       responses:
@@ -601,24 +426,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProgressSummary'
               example:
-                creditsPassed: 118
-                creditsInProgress: 3
-                creditsRemaining: 21
-                totalCredits: 142
-                percentComplete: 83.1
+                creditsPassed: 112
+                creditsInProgress: 8
+                creditsRemaining: 23
+                totalCredits: 143
+                percentComplete: 78.3
                 byArea:
                   - area: CB
-                    creditsPassed: 33
+                    creditsPassed: 30
                     creditsTotal: 36
                   - area: BIS
-                    creditsPassed: 28
-                    creditsTotal: 28
+                    creditsPassed: 22
+                    creditsTotal: 22
                   - area: ISA
                     creditsPassed: 48
-                    creditsTotal: 66
+                    creditsTotal: 67
                   - area: SI
-                    creditsPassed: 9
-                    creditsTotal: 12
+                    creditsPassed: 12
+                    creditsTotal: 18
                 currentLevel: 8
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -634,7 +459,7 @@ paths:
       operationId: listMyEligibleCourses
       summary: List the courses the caller can take next
       description: |
-        Returns the pensum items the student may enrol in right now: those whose prerequisites are
+        Returns the pensum items the student may take next: those whose prerequisites are
         **all** `PASSED` and whose own status is still `PENDING`. This is the computation the
         "traffic light" is named for — everything else `PENDING` is *blocked*, and a client can
         paint it as such by subtracting this list from the `PENDING` set.
@@ -642,12 +467,12 @@ paths:
         Notes:
 
         - Items with no prerequisites are eligible as soon as they are `PENDING`.
-        - `FAILED` items are **not** returned. They are retakes rather than new enrolments, and are
-          already identifiable by their status on the progress document.
-        - Unresolved elective slots are returned like any other item; resolve one with
-          `POST /api/semaphore/me/electives/{pensumItemCode}`.
+        - `FAILED` and `POSTPONED` items are **not** returned. They are taken again rather than
+          for the first time, and their status already says so.
+        - Elective slots are returned like any other item.
         - Items are returned in pensum form (`PensumCourse`), not progress form, so the
           client has credits, hours and area available without a second lookup.
+        - Taking a course is still done in SINU. This only says what the prerequisites allow.
       tags: [Student Progress]
       responses:
         '200':
@@ -659,214 +484,26 @@ paths:
                 items:
                   $ref: '#/components/schemas/PensumCourse'
               example:
-                - code: "56201"
-                  pensumItemCode: "1806"
-                  name: Metodología de la Investigación
-                  level: 8
-                  credits: 2
-                  weeklyHours: 3
-                  totalHours: 48
-                  area: SI
-                  isElectiveSlot: false
-                  prerequisites: []
-                  sinuCode: "56201"
-                - code: null
-                  pensumItemCode: ELECTIVA_VI
-                  name: Electiva VI
-                  level: 9
+                - pensumItemCode: "59085"
+                  sinuCode: "59085"
+                  name: Electiva III
+                  level: 7
                   credits: 3
                   weeklyHours: 3
                   totalHours: 48
                   area: ISA
                   isElectiveSlot: true
                   prerequisites: []
-                  sinuCode: null
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
-  /api/semaphore/me/courses/{code}:
-    parameters:
-      - $ref: '#/components/parameters/CourseCodePath'
-    put:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT]
-      operationId: updateMyCourseStatus
-      summary: Set the status of one course on the caller's semáforo
-      description: |
-        Sets `status`, `grade` and `period` for a single item of the caller's semáforo and returns
-        the updated entry. The whole entry is replaced: omitting `grade` or `period` clears them.
-
-        Validation — all rejected with `400`:
-
-        - `grade` outside the university's `0..50` scale.
-        - `status` of `PASSED` or `FAILED` without a `grade`. A settled course must carry the mark
-          it settled on.
-        - `grade` supplied with a `status` of `PENDING`. A course that has not been taken has no
-          mark.
-        - `period` that does not match `^\d{4}[12]$`.
-
-        `404` if the identifier does not name an item of the pensum pinned by the caller's
-        progress document.
-      tags: [Student Progress]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CourseProgressUpdateRequest'
-            examples:
-              passedWithGrade:
-                summary: Record a passed course
-                value:
-                  status: PASSED
-                  grade: 42
-                  period: "20261"
-              inProgress:
-                summary: Mark a course as currently being taken
-                value:
-                  status: IN_PROGRESS
-                  period: "20262"
-              failed:
-                summary: Record a failed course
-                value:
-                  status: FAILED
-                  grade: 24
-                  period: "20252"
-      responses:
-        '200':
-          description: The updated progress entry
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StudentProgressCourse'
-              example:
-                code: "48022"
-                pensumItemCode: "1703"
-                status: PASSED
-                period: "20261"
-                grade: 42
-                resolvedCode: null
-                resolvedName: null
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
-  /api/semaphore/me/electives/{pensumItemCode}:
-    parameters:
-      - $ref: '#/components/parameters/PensumItemCodePath'
-    post:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT]
-      operationId: resolveMyElectiveSlot
-      summary: Resolve an elective slot to a real course
-      description: |
-        Binds one of the caller's elective slots to the course the student actually took or
-        enrolled in. The slot keeps its credits, hours, area and level — only its content is
-        decided — so `resolvedCode` and `resolvedName` are recorded on the progress entry while the
-        pensum stays untouched.
-
-        Calling this on an already-resolved slot overwrites the previous resolution; use `DELETE`
-        to clear it instead.
-
-        `400` if `pensumItemCode` names an item that exists but is not an elective slot, or if
-        `resolvedCode` names a course already accounted for elsewhere on the semáforo.
-        `404` if the caller's pinned pensum has no such item.
-
-        Resolving a slot does not by itself set its status; follow with
-        `PUT /api/semaphore/me/courses/{code}` using the slot's `pensumItemCode`.
-      tags: [Student Progress]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ElectiveResolutionRequest'
-            example:
-              resolvedCode: "59035"
-              resolvedName: Desarrollo de Aplicaciones Móviles
-      responses:
-        '200':
-          description: The updated progress entry for the slot
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StudentProgressCourse'
-              example:
-                code: null
-                pensumItemCode: ELECTIVA_VI
-                status: PENDING
-                period: null
-                grade: null
-                resolvedCode: "59035"
-                resolvedName: Desarrollo de Aplicaciones Móviles
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    delete:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT]
-      operationId: clearMyElectiveSlot
-      summary: Clear an elective slot resolution
-      description: |
-        Returns the slot to an empty slot: `resolvedCode` and `resolvedName` go back to `null`.
-        The slot itself is never removed from the semáforo — it is part of the pensum.
-
-        Idempotent: clearing an already-empty slot also returns `204`.
-
-        `400` if `pensumItemCode` names an item that exists but is not an elective slot.
-        `404` if the caller's pinned pensum has no such item.
-      tags: [Student Progress]
-      responses:
-        '204':
-          description: Resolution cleared; no body
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
-  /api/semaphore/{userId}:
-    parameters:
-      - $ref: '#/components/parameters/UserIdPath'
-    get:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      operationId: getStudentSemaphore
-      summary: Get another student's semáforo
-      description: |
-        Administrative read of any student's progress document. Requires `ROLE_ADMIN`.
-
-        Unlike `GET /api/semaphore/me`, this call is a plain read: it never creates a document
-        lazily, and it carries no `reconciliation` block. `404` therefore means either that no such
-        user exists or that the student has never opened their semáforo.
-      tags: [Student Progress]
-      responses:
-        '200':
-          description: The student's semáforo
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StudentProgress'
-              examples:
-                student506999999:
-                  $ref: '#/components/examples/StudentSemaphore'
+                - pensumItemCode: "59088"
+                  sinuCode: "59088"
+                  name: Electiva IV
+                  level: 7
+                  credits: 3
+                  weeklyHours: 3
+                  totalHours: 48
+                  area: ISA
+                  isElectiveSlot: true
+                  prerequisites: []
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -896,6 +533,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AcademicPlan'
+              examples:
+                onePlan:
+                  $ref: '#/components/examples/MyPlans'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1016,10 +656,10 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /api/semaphore/me/plans/{planId}/placements/{code}:
+  /api/semaphore/me/plans/{planId}/placements/{pensumItemCode}:
     parameters:
       - $ref: '#/components/parameters/PlanIdPath'
-      - $ref: '#/components/parameters/CourseCodePath'
+      - $ref: '#/components/parameters/PensumItemCodePath'
     put:
       # Authorization as the code enforces it, not as prose describes it.
       x-roles: [ROLE_STUDENT]
@@ -1037,7 +677,12 @@ paths:
         There is **no cap on how many courses may sit at one level**. Students take more or
         fewer than the nominal six all the time, and a limit here would refuse a real timetable.
 
-        `400` when the course is not in the pensum, or when `plannedLevel` is outside 1–12.
+        For an elective slot, `electiveSinuCode` names the course from the elective bank the
+        student means to take in it. It is a plan, not an enrolment: the bank is checked when the
+        plan is read, not when it is saved, because it changes every semester.
+
+        `400` when the item is not in the pensum, when `plannedLevel` is outside 1–12, or when
+        `electiveSinuCode` is given for an item that is not an elective slot.
       tags: [Academic Plans]
       requestBody:
         required: true
@@ -1045,6 +690,16 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PlacementRequest'
+            examples:
+              moveACourse:
+                summary: Take a course a semester later
+                value:
+                  plannedLevel: 9
+              chooseAnElective:
+                summary: Plan an elective slot with a course from the bank
+                value:
+                  plannedLevel: 8
+                  electiveSinuCode: "59211"
       responses:
         '200':
           description: The plan, including the new placement
@@ -1067,7 +722,8 @@ paths:
       summary: Return a course to the level the pensum gives it
       description: |
         Requires `ROLE_STUDENT`. Removes the placement, so the course goes back to its published
-        level. `404` when the plan has no placement for that course — it was never moved.
+        level and an elective slot to no chosen course. `404` when the plan has no placement for
+        that item — it was never moved.
       tags: [Academic Plans]
       responses:
         '200':
@@ -1149,7 +805,7 @@ components:
           example: Facultad de Matemáticas e Ingenierías
         level:
           type: string
-          description: Academic level of the program, matching the KApp `program_level_enum`.
+          description: Academic level of the program.
           enum:
             - PREGRADO
             - POSGRADO
@@ -1161,9 +817,7 @@ components:
           example: PREGRADO
         activePensumCode:
           type: [string, "null"]
-          description: |
-            Code of the program's currently `ACTIVE` pensum, or `null` if it has none.
-            This is the pensum that `GET /api/semaphore/me` pins for new students.
+          description: Code of the program's currently `ACTIVE` pensum, or `null` if it has none.
           maxLength: 20
           example: "1015"
 
@@ -1191,15 +845,15 @@ components:
               pensumCode: { type: string, example: "1015" }
               programCode: { type: string, example: "506" }
               programName: { type: string, example: Ingeniería de Sistemas }
-              courses: { type: integer, example: 48 }
+              courses: { type: integer, example: 51 }
               declaredCredits:
                 type: integer
                 description: What the file states.
-                example: 142
+                example: 143
               computedCredits:
                 type: integer
                 description: What its courses actually add up to. Equal to `declaredCredits`, or the import would have failed.
-                example: 142
+                example: 143
               declaredHours: { type: integer, example: 194 }
               computedHours: { type: integer, example: 194 }
               programCreated:
@@ -1257,22 +911,34 @@ components:
 
     Placement:
       type: object
-      description: One course pinned to a level other than the pensum's.
-      required: [code, plannedLevel]
+      description: One course pinned to a level other than the pensum's, or an elective slot with a chosen course.
+      required: [pensumItemCode, plannedLevel, electiveSinuCode, electiveOffered]
       properties:
-        code:
+        pensumItemCode:
           type: string
           maxLength: 30
-          description: |
-            The course `code`, or an elective slot's `pensumItemCode` — the same identifier
-            `PUT /api/semaphore/me/courses/{code}` accepts.
-          example: "17085"
+          description: The item that moved, by its `pensumItemCode`.
+          example: "59098"
         plannedLevel:
           type: integer
           minimum: 1
           maximum: 12
           description: The level the student intends to take it in.
-          example: 7
+          example: 8
+        electiveSinuCode:
+          type: [string, "null"]
+          maxLength: 20
+          description: |
+            For an elective slot, the course from the elective bank the student means to take in
+            it. `null` for a fixed course, or for a slot with no course chosen.
+          example: "59211"
+        electiveOffered:
+          type: [boolean, "null"]
+          description: |
+            Whether `electiveSinuCode` is in the elective bank of the current period, checked when
+            the plan is read. `false` means the course is not offered this semester and the client
+            should say so. `null` when there is no `electiveSinuCode`.
+          example: true
 
     AcademicPlanRequest:
       type: object
@@ -1321,42 +987,21 @@ components:
           type: integer
           minimum: 1
           maximum: 12
-          example: 7
-      additionalProperties: false
-
-    ProgramRequest:
-      type: object
-      description: >-
-        The writable half of a program. `activePensumCode` is absent on purpose: it is
-        derived from whichever pensum is currently `ACTIVE`, so letting a caller set it
-        would allow the two to disagree.
-      required: [code, name, faculty, level]
-      properties:
-        code:
-          type: string
-          description: Institutional program code. Immutable once created.
+          example: 8
+        electiveSinuCode:
+          type: [string, "null"]
           maxLength: 20
-          example: "506"
-        name:
-          type: string
-          maxLength: 100
-          example: Ingeniería de Sistemas
-        faculty:
-          type: string
-          maxLength: 100
-          example: Facultad de Matemáticas e Ingenierías
-        level:
-          type: string
-          enum: [PREGRADO, POSGRADO, TECNOLOGIA, MAESTRIA, DOCTORADO,
-                 CURSOS_DIPLOMADOS, ESPECIALIZACION]
-          example: PREGRADO
+          description: |
+            Only for an elective slot: the `sinuCode` of a course from the elective bank. Omitted
+            or `null`, the slot keeps no chosen course.
+          example: "59211"
       additionalProperties: false
 
     PensumArea:
       type: object
       description: |
         A knowledge area — one row of the semáforo grid. Area codes are defined per pensum;
-        the Ingeniería de Sistemas Reforma 2018 plan uses `CB`, `BIS`, `ISA` and `SI`.
+        the Ingeniería de Sistemas plan uses `CB`, `BIS`, `ISA` and `SI`.
       required: [code, name, color, credits, hours]
       properties:
         code:
@@ -1392,31 +1037,26 @@ components:
       description: |
         One item of a pensum — a fixed course, or an elective slot with no fixed content.
 
-        For an elective slot, `code` is `null` and `isElectiveSlot` is `true`; the slot is
-        addressed by `pensumItemCode`. For a fixed course, `code` is always present.
-
-        **`code` is an identifier, `sinuCode` is what you display.** See "Not every `code` is a
-        real course code" above.
-      required: [code, pensumItemCode, name, level, credits, weeklyHours, area, isElectiveSlot, prerequisites]
+        **`pensumItemCode` addresses it, `sinuCode` is what you display.** See the conventions
+        above.
+      required: [pensumItemCode, sinuCode, name, level, credits, weeklyHours, totalHours, area, isElectiveSlot, prerequisites]
       properties:
-        code:
-          type: [string, "null"]
-          description: |
-            The code this item is addressed by. `null` for an elective slot, which has no fixed
-            content.
-
-            It is the institutional course code where the plan prints one, and a KApp-generated
-            placeholder where it does not — `sinuCode` says which. **Not for display**: put
-            `sinuCode` on screen, or nothing.
-          maxLength: 20
-          example: "59035"
         pensumItemCode:
           type: string
           description: |
-            Stable identifier of this item **within the pensum**. Unlike `code`, it is never
-            `null`, so it is what elective slots are addressed by (for example `"ELECTIVA_VI"`).
+            KApp's stable identifier of this item **within the pensum**, for fixed courses and
+            elective slots alike. Path parameters, prerequisites and placements use it. Never
+            shown to a person.
           maxLength: 30
-          example: "2033"
+          example: "59035"
+        sinuCode:
+          type: [string, "null"]
+          description: |
+            The course code as the university's own system (SINU) carries it, or `null` where it
+            is not known yet. **The only code a client shows**; where it is `null`, show the
+            name.
+          maxLength: 20
+          example: "59035"
         name:
           type: string
           maxLength: 120
@@ -1443,12 +1083,7 @@ components:
           example: 4
         totalHours:
           type: integer
-          description: |
-            Contact hours across the full 16-week semester. Derived: `weeklyHours * 16`.
-
-            Omit it on write and the server derives it; supply it and it must satisfy the
-            invariant or the request is rejected with `400`. It is always present on read, which
-            is why it is not in `required`.
+          description: 'Contact hours across the full 16-week semester: `weeklyHours * 16`.'
           minimum: 0
           example: 64
         area:
@@ -1456,32 +1091,20 @@ components:
           description: Code of the knowledge area this item belongs to — the grid row.
           maxLength: 20
           example: ISA
-        sinuCode:
-          type: [string, "null"]
-          description: |
-            The course code as the university's own system (SINU) carries it, or `null` where it
-            has not been confirmed.
-
-            This is the only field that says a code is real, and **the only one a client shows**.
-            Where it is `null`, the item's `code` is something KApp generated so the system could
-            tell the items apart; showing it would put an invented code in front of a student.
-          maxLength: 20
-          example: "59035"
         isElectiveSlot:
           type: boolean
           description: |
-            `true` when this item is a slot the student later resolves to a real course, rather
-            than a fixed course.
+            `true` when this item is a slot filled by a course of the elective bank, rather than a
+            fixed course.
           example: false
         prerequisites:
           type: array
           description: |
-            Codes of the courses that must all be `PASSED` before this item can be taken. Empty
-            when the item has none. Every entry must be the `code` of another item of the same
-            pensum.
+            The `pensumItemCode`s of the items that must all be `PASSED` before this one can be
+            taken. Empty when it has none.
           items:
             type: string
-            maxLength: 20
+            maxLength: 30
           example: ["48022"]
 
     Pensum:
@@ -1511,19 +1134,18 @@ components:
           type: string
           description: Name of the curricular reform this plan belongs to.
           maxLength: 100
-          example: Reforma del Plan de Estudios 2018
+          example: Plan de estudios 2019-1
         status:
           type: string
           description: |
-            Lifecycle state of the plan. Only an `ACTIVE` plan is pinned to new students by
-            `GET /api/semaphore/me`.
+            Lifecycle state of the plan. `ACTIVE` is the one a program's new students follow.
           enum: [ACTIVE, DRAFT, OBSOLETE]
           example: ACTIVE
         totalCredits:
           type: integer
           description: Sum of the credits of every item in the plan.
           minimum: 0
-          example: 142
+          example: 143
         totalHours:
           type: number
           description: |
@@ -1547,19 +1169,59 @@ components:
         courses:
           type: array
           description: |
-            Every item of the plan, fixed courses and elective slots alike. Roughly 51 items for
-            the Ingeniería de Sistemas Reforma 2018 plan.
+            Every item of the plan, fixed courses and elective slots alike. 51 items for the
+            Ingeniería de Sistemas plan.
           items:
             $ref: '#/components/schemas/PensumCourse'
+
+    ElectiveOffering:
+      type: object
+      description: A course SINU offers in one period to fill elective slots.
+      required: [sinuCode, name, credits, weeklyHours, slots]
+      properties:
+        sinuCode:
+          type: string
+          maxLength: 20
+          description: The course code, as SINU carries it. This is what a placement's `electiveSinuCode` names.
+          example: "59211"
+        name:
+          type: string
+          maxLength: 120
+          example: Computación en la Nube
+        credits:
+          type: integer
+          minimum: 0
+          example: 3
+        weeklyHours:
+          type: number
+          minimum: 0
+          multipleOf: 0.5
+          example: 3
+        slots:
+          type: array
+          description: |
+            The `pensumItemCode`s of the slots this course fills. Empty means any elective slot of
+            the pensum.
+          items:
+            type: string
+            maxLength: 30
+          example: []
 
     CourseStatus:
       type: string
       description: |
-        Stored status of one item on a student's semáforo.
+        The status of one item on a student's semáforo, normalised from SINU's.
 
-        Note that *blocked* is **not** a stored status: it is derived from prerequisites, and is
-        the complement of `GET /api/semaphore/me/eligible` within the `PENDING` set.
-      enum: [PASSED, IN_PROGRESS, PENDING, FAILED]
+        - `PASSED` — *aprobada*.
+        - `IN_PROGRESS` — being taken this period.
+        - `PENDING` — not taken yet.
+        - `FAILED` — *perdida*: the last attempt was not passed.
+        - `POSTPONED` — *aplazada*. How SINU uses it is to be confirmed with the university;
+          until then it counts like a course not passed.
+
+        *Blocked* is **not** a status: it is derived from prerequisites, and is the complement of
+        `GET /api/semaphore/me/eligible` within the `PENDING` set.
+      enum: [PASSED, IN_PROGRESS, PENDING, FAILED, POSTPONED]
       example: PASSED
 
     AcademicPeriod:
@@ -1567,15 +1229,16 @@ components:
       description: |
         Academic period in the university's own format: four-digit year followed by the semester,
         `1` or `2`. `"20262"` is the second semester of 2026. `null` when the item has not been
-        scheduled yet.
+        taken yet.
       pattern: '^\d{4}[12]$'
       example: "20262"
 
     Grade:
       type: [integer, "null"]
       description: |
-        Final mark on the university's `0..50` integer scale. `null` while the course has not
-        settled.
+        Final mark on the university's `0..50` integer scale, as SINU records it. Optional and
+        read-only: `null` while the course has not settled, and whenever SINU does not provide
+        grades.
       minimum: 0
       maximum: 50
       example: 42
@@ -1583,138 +1246,90 @@ components:
     StudentProgressCourse:
       type: object
       description: |
-        One item of a student's semáforo: the status of a single pensum item, plus the elective
-        resolution when the item is a slot.
-      required: [code, pensumItemCode, status, period, grade, resolvedCode, resolvedName]
+        One item of a student's semáforo: the status SINU gives a single pensum item, plus the
+        course that filled it when the item is an elective slot.
+      required: [pensumItemCode, status, sinuStatus, period, grade, resolvedSinuCode, resolvedName]
       properties:
-        code:
-          type: [string, "null"]
-          description: |
-            Course code of the pensum item. `null` for an elective slot — even a resolved one,
-            whose real course is carried by `resolvedCode`.
-          maxLength: 20
-          example: "48022"
         pensumItemCode:
           type: string
-          description: Identifier of the pensum item this entry tracks.
+          description: The pensum item this entry is about.
           maxLength: 30
-          example: "1703"
+          example: "48022"
         status:
           $ref: '#/components/schemas/CourseStatus'
+        sinuStatus:
+          type: [string, "null"]
+          description: |
+            The status exactly as SINU writes it, for a client to show when `status` alone does
+            not say enough, or when SINU uses one this API does not know yet. `null` for an item
+            SINU has no record of.
+          maxLength: 40
+          example: APROBADA
         period:
           $ref: '#/components/schemas/AcademicPeriod'
         grade:
           $ref: '#/components/schemas/Grade'
-        resolvedCode:
+        resolvedSinuCode:
           type: [string, "null"]
           description: |
-            Code of the real course this elective slot was resolved to. Always `null` for a fixed
-            course, and `null` for an unresolved slot.
+            For an elective slot, the code of the course that filled it, as SINU records it.
+            `null` for a fixed course, and for a slot SINU has not filled.
           maxLength: 20
           example: null
         resolvedName:
           type: [string, "null"]
           description: |
-            Name of the real course this elective slot was resolved to, denormalised so a client
-            can render the grid without a catalog lookup. Always `null` for a fixed course.
+            Name of the course that filled the elective slot, so a client can draw the grid
+            without another lookup. `null` whenever `resolvedSinuCode` is.
           maxLength: 120
           example: null
 
-    Reconciliation:
+    StudentSemaphore:
       type: object
       description: |
-        How the stored progress document compares with the pensum it pins, after an
-        administrator edited that pensum. Nothing is dropped or invented silently: every
-        divergence is reported here.
-
-        Identifiers are course `code`s, except for elective slots, which have no `code` and are
-        reported by `pensumItemCode`.
-      required: [addedCourses, removedCourses, inSync]
-      properties:
-        addedCourses:
-          type: array
-          description: |
-            Items the pensum now has and the document did not. They have been materialised as
-            `PENDING`.
-          items:
-            type: string
-            maxLength: 30
-          example: ["56201"]
-        removedCourses:
-          type: array
-          description: |
-            Entries the document holds whose pensum item no longer exists in the pensum. They
-            are kept in `courses` so no grade is lost, and are excluded from the summary.
-          items:
-            type: string
-            maxLength: 30
-          example: []
-        inSync:
-          type: boolean
-          description: '`true` exactly when both arrays are empty.'
-          example: false
-
-    StudentProgress:
-      type: object
-      description: |
-        A student's semáforo: one entry per item of the pinned pensum.
-      required: [userId, studentCode, programCode, pensumCode, currentLevel, courses, updatedAt]
+        A student's semáforo as SINU has it: one entry per item of their pensum.
+      required: [userId, programCode, pensumCode, currentLevel, source, readAt, courses]
       properties:
         userId:
           type: string
           description: >-
-            Identifier of the KApp user, taken from the JWT `sub` claim. An opaque
-            string, not a number: it is a MongoDB ObjectId and must never be parsed
-            as an integer.
+            Identifier of the KApp user, taken from the JWT `sub` claim. An opaque string, never
+            parsed as a number.
           example: '507f1f77bcf86cd799439011'
-        studentCode:
-          type: string
-          description: Institutional student code.
-          maxLength: 20
-          example: "506999999"
         programCode:
           type: string
           maxLength: 20
           example: "506"
         pensumCode:
           type: string
-          description: |
-            The pensum this document is pinned to. It does not follow later edits of that
-            pensum on its own — see the `reconciliation` block of `GET /api/semaphore/me`.
+          description: The pensum SINU has the student on.
           maxLength: 20
           example: "1015"
         currentLevel:
           type: integer
-          description: The level (semester) the student is currently in.
+          description: The level (semester) SINU has the student in.
           minimum: 1
           maximum: 12
           example: 8
+        source:
+          type: string
+          enum: [SINU, TEST]
+          description: |
+            Where this came from. `TEST` is the adapter that serves invented data while the
+            university has not opened SINU; a client shows that the data is not real.
+          example: SINU
+        readAt:
+          type: string
+          format: date-time
+          description: When this was read from SINU. KApp keeps it for a few minutes at most.
+          example: "2026-10-05T14:32:11Z"
         courses:
           type: array
           description: |
-            One entry per item of the pinned pensum, plus any entry retained from a removed item.
-            Roughly 51 entries for the Ingeniería de Sistemas Reforma 2018 plan; the examples in
-            this document show a representative slice.
+            One entry per item of the pensum, in the pensum's order. 51 entries for the Ingeniería
+            de Sistemas plan; the example in this document shows a representative slice.
           items:
             $ref: '#/components/schemas/StudentProgressCourse'
-        updatedAt:
-          type: string
-          format: date-time
-          description: When the document was last written.
-          example: "2026-08-20T14:32:11Z"
-
-    StudentProgressWithReconciliation:
-      allOf:
-        - $ref: '#/components/schemas/StudentProgress'
-        - type: object
-          required: [reconciliation]
-          properties:
-            reconciliation:
-              $ref: '#/components/schemas/Reconciliation'
-      description: |
-        A student's semáforo together with its reconciliation status. Returned by
-        `GET /api/semaphore/me`, which is the only caller that can reconcile the document against
-        its pensum on read.
 
     ProgressSummary:
       type: object
@@ -1727,30 +1342,30 @@ components:
             Credits the student has passed, across every knowledge area.
           type: integer
           minimum: 0
-          example: 118
+          example: 112
         creditsInProgress:
           description: >-
             Credits the student is enrolled in right now - neither passed nor still to take.
           type: integer
           minimum: 0
-          example: 3
+          example: 8
         creditsRemaining:
           type: integer
           description: '`totalCredits - creditsPassed - creditsInProgress`.'
           minimum: 0
-          example: 21
+          example: 23
         totalCredits:
           type: integer
-          description: Total credits of the pinned pensum.
+          description: Total credits of the student's pensum.
           minimum: 0
-          example: 142
+          example: 143
         percentComplete:
           type: number
           format: double
           description: '`creditsPassed / totalCredits * 100`, rounded to one decimal.'
           minimum: 0
           maximum: 100
-          example: 83.1
+          example: 78.3
         byArea:
           type: array
           description: One row per area of the pensum, in the pensum's order.
@@ -1758,8 +1373,7 @@ components:
             $ref: '#/components/schemas/AreaProgress'
         currentLevel:
           description: >-
-            The semester the student is counted as being in. Derived from what they have passed, not from
-            what they planned.
+            The semester SINU has the student in.
           type: integer
           minimum: 1
           maximum: 12
@@ -1773,7 +1387,7 @@ components:
         area:
           type: string
           description: Area code, as declared by the pensum.
-          maxLength: 10
+          maxLength: 20
           example: ISA
         creditsPassed:
           description: >-
@@ -1786,50 +1400,7 @@ components:
             Credits the area holds in total, which is what the progress bar fills against.
           type: integer
           minimum: 0
-          example: 66
-
-    CourseProgressUpdateRequest:
-      type: object
-      description: |
-        New state for one item of the caller's semáforo. The entry is replaced wholesale: omitting
-        `grade` or `period` clears the stored value.
-      required: [status]
-      properties:
-        status:
-          $ref: '#/components/schemas/CourseStatus'
-        grade:
-          type: [integer, "null"]
-          description: |
-            Final mark on the `0..50` scale. **Required** when `status` is `PASSED` or `FAILED`,
-            and rejected when `status` is `PENDING`.
-          minimum: 0
-          maximum: 50
-          example: 42
-        period:
-          type: [string, "null"]
-          description: |
-            Academic period the course was taken in, `^\d{4}[12]$`. Clear it by omitting it or
-            sending `null`.
-          pattern: '^\d{4}[12]$'
-          example: "20261"
-
-    ElectiveResolutionRequest:
-      type: object
-      description: The real course an elective slot is being resolved to.
-      required: [resolvedCode, resolvedName]
-      properties:
-        resolvedCode:
-          type: string
-          description: |
-            Institutional code of the real course taken for this slot. It does not have to belong
-            to the student's own pensum — electives are frequently taken from other programs.
-          maxLength: 20
-          example: "59035"
-        resolvedName:
-          type: string
-          description: Name of the real course, stored denormalised for display.
-          maxLength: 120
-          example: Desarrollo de Aplicaciones Móviles
+          example: 67
 
   parameters:
     ProgramCodePath:
@@ -1850,38 +1421,24 @@ components:
         type: string
         maxLength: 20
       example: "1015"
-    CourseCodePath:
-      name: code
-      in: path
-      required: true
-      description: |
-        Identifier of the pensum item. The course `code` for a fixed course, or — because an
-        elective slot has no `code` — the slot's `pensumItemCode`.
-      schema:
-        type: string
-        maxLength: 30
-      example: "48022"
     PensumItemCodePath:
       name: pensumItemCode
       in: path
       required: true
-      description: Stable identifier of the elective slot within the pensum.
+      description: The item's `pensumItemCode`, for a fixed course or an elective slot alike.
       schema:
         type: string
         maxLength: 30
-      example: ELECTIVA_VI
-    UserIdPath:
-      name: userId
-      in: path
-      required: true
-      description: |
-        Identifier of the KApp user whose semáforo is being read. This is the `sub` claim of
-        the access token — a UUID string, never a number. A client generated from an earlier
-        revision of this file typed it as `int64`, which no real identifier has ever matched.
+      example: "59098"
+    PeriodQuery:
+      name: period
+      in: query
+      required: false
+      description: The academic period, `^\d{4}[12]$`. The current one when omitted.
       schema:
         type: string
-        maxLength: 64
-      example: cb37abf3-7a85-49f4-8bd4-e00726630f53
+        pattern: '^\d{4}[12]$'
+      example: "20262"
     PlanIdPath:
       name: planId
       in: path
@@ -1894,13 +1451,13 @@ components:
 
   examples:
     PensumCourseList:
-      summary: Representative items of the Ingeniería de Sistemas Reforma 2018 plan
+      summary: Representative items of the Ingeniería de Sistemas plan
       description: |
-        A slice of the plan spanning levels 1 to 9 and all four areas, including one elective slot
-        and both real prerequisite chains.
+        A slice of plan 1015 spanning levels 1 to 8 and three areas, with two prerequisite chains
+        and an elective slot.
       value: &pensumCourses
-        - code: "10011"
-          pensumItemCode: "1001"
+        - pensumItemCode: "11015"
+          sinuCode: "11015"
           name: Precálculo
           level: 1
           credits: 3
@@ -1909,9 +1466,8 @@ components:
           area: CB
           isElectiveSlot: false
           prerequisites: []
-          sinuCode: "10011"
-        - code: "20015"
-          pensumItemCode: "1004"
+        - pensumItemCode: "41025"
+          sinuCode: "41025"
           name: Fundamentos de Programación
           level: 1
           credits: 3
@@ -1920,20 +1476,18 @@ components:
           area: BIS
           isElectiveSlot: false
           prerequisites: []
-          sinuCode: "20015"
-        - code: "10024"
-          pensumItemCode: "1102"
+        - pensumItemCode: "12015"
+          sinuCode: "12015"
           name: Cálculo I
           level: 2
-          credits: 4
-          weeklyHours: 5
-          totalHours: 80
+          credits: 3
+          weeklyHours: 4
+          totalHours: 64
           area: CB
           isElectiveSlot: false
-          prerequisites: ["10011"]
-          sinuCode: "10024"
-        - code: "20028"
-          pensumItemCode: "1105"
+          prerequisites: ["11015"]
+        - pensumItemCode: "31013"
+          sinuCode: "31013"
           name: Técnicas de Programación I
           level: 2
           credits: 3
@@ -1941,10 +1495,9 @@ components:
           totalHours: 64
           area: BIS
           isElectiveSlot: false
-          prerequisites: ["20015"]
-          sinuCode: "20028"
-        - code: "20037"
-          pensumItemCode: "1203"
+          prerequisites: ["41025"]
+        - pensumItemCode: "31014"
+          sinuCode: "31014"
           name: Técnicas de Programación II
           level: 3
           credits: 3
@@ -1952,21 +1505,9 @@ components:
           totalHours: 64
           area: BIS
           isElectiveSlot: false
-          prerequisites: ["20028"]
-          sinuCode: "20037"
-        - code: "17080"
-          pensumItemCode: "1602"
-          name: Estadística Descriptiva
-          level: 6
-          credits: 3
-          weeklyHours: 4
-          totalHours: 64
-          area: CB
-          isElectiveSlot: false
-          prerequisites: []
-          sinuCode: "17080"
-        - code: "46018"
-          pensumItemCode: "1604"
+          prerequisites: ["31013"]
+        - pensumItemCode: "47022"
+          sinuCode: "47022"
           name: Ingeniería de Software I
           level: 6
           credits: 3
@@ -1974,10 +1515,9 @@ components:
           totalHours: 64
           area: ISA
           isElectiveSlot: false
-          prerequisites: ["20037"]
-          sinuCode: "46018"
-        - code: "48022"
-          pensumItemCode: "1703"
+          prerequisites: ["31404"]
+        - pensumItemCode: "48022"
+          sinuCode: "48022"
           name: Ingeniería de Software II
           level: 7
           credits: 3
@@ -1985,10 +1525,9 @@ components:
           totalHours: 64
           area: ISA
           isElectiveSlot: false
-          prerequisites: ["46018"]
-          sinuCode: "48022"
-        - code: "59035"
-          pensumItemCode: "2033"
+          prerequisites: ["47022"]
+        - pensumItemCode: "59035"
+          sinuCode: "59035"
           name: Desarrollo de Aplicaciones Móviles
           level: 8
           credits: 3
@@ -1996,44 +1535,41 @@ components:
           totalHours: 64
           area: ISA
           isElectiveSlot: false
-          prerequisites: ["48022"]
-          sinuCode: "59035"
-        - code: "56201"
-          pensumItemCode: "1806"
-          name: Metodología de la Investigación
+          prerequisites: []
+        - pensumItemCode: "56201"
+          sinuCode: "56201"
+          name: Metodología de Investigación
           level: 8
           credits: 2
-          weeklyHours: 3
-          totalHours: 48
-          area: SI
+          weeklyHours: 2
+          totalHours: 32
+          area: ISA
           isElectiveSlot: false
           prerequisites: []
-          sinuCode: "56201"
-        - code: null
-          pensumItemCode: ELECTIVA_VI
+        - pensumItemCode: "59098"
+          sinuCode: "59098"
           name: Electiva VI
-          level: 9
+          level: 8
           credits: 3
           weeklyHours: 3
           totalHours: 48
           area: ISA
           isElectiveSlot: true
           prerequisites: []
-          sinuCode: null
 
     Pensum1015:
-      summary: Ingeniería de Sistemas, Reforma 2018 (pensum 1015)
+      summary: Ingeniería de Sistemas (pensum 1015)
       description: |
-        The active plan of program 506: 9 levels, 142 credits, 194 weekly hours, four knowledge
-        areas. The `courses` array is a representative slice of the roughly 51 real items.
+        The active plan of program 506: 9 levels, 143 credits, 194 weekly hours, four knowledge
+        areas. The `courses` array is a representative slice of the 51 real items.
       value:
         pensumCode: "1015"
         programCode: "506"
         programName: Ingeniería de Sistemas
         faculty: Facultad de Matemáticas e Ingenierías
-        reform: Reforma del Plan de Estudios 2018
+        reform: Plan de estudios 2019-1
         status: ACTIVE
-        totalCredits: 142
+        totalCredits: 143
         totalHours: 194
         levels: 9
         areas:
@@ -2045,130 +1581,178 @@ components:
           - code: BIS
             name: Básicas de Ingeniería de Sistemas
             color: "#522567"
-            credits: 28
-            hours: 40
+            credits: 22
+            hours: 29
           - code: ISA
-            name: Ingeniería de Sistemas Aplicada
+            name: Ingeniería de Sistemas Aplicadas
             color: "#C9D329"
-            credits: 66
+            credits: 67
             hours: 92
           - code: SI
             name: Sociedad e Interculturalidad
             color: "#D51A65"
-            credits: 12
-            hours: 18
+            credits: 18
+            hours: 29
         courses: *pensumCourses
 
-    MySemaphore:
-      summary: A level-8 student, one item behind and one plan change to report
+    ElectiveBank:
+      summary: The elective bank of 2026-2 for pensum 1015
       description: |
-        Student 506999999 of program 506, pinned to pensum 1015. Estadística Descriptiva was
-        failed and awaits a retake, Desarrollo de Aplicaciones Móviles is being taken this period,
-        and Metodología de la Investigación was added to the pensum after this document was
-        created — hence `inSync: false`.
+        Invented courses and codes, in the shape SINU's bank will have.
+      value:
+        - sinuCode: "59211"
+          name: Computación en la Nube
+          credits: 3
+          weeklyHours: 3
+          slots: []
+        - sinuCode: "59214"
+          name: Inteligencia Artificial Aplicada
+          credits: 3
+          weeklyHours: 3
+          slots: []
+        - sinuCode: "59217"
+          name: Seguridad de la Información
+          credits: 3
+          weeklyHours: 3
+          slots: ["59096", "59098"]
+
+    MySemaphore:
+      summary: A level-8 student of Ingeniería de Sistemas
+      description: |
+        Invented student, real plan. One course failed, one elective postponed, three being taken
+        this period, one elective already filled and two still ahead.
       value:
         userId: '507f1f77bcf86cd799439011'
-        studentCode: "506999999"
         programCode: "506"
         pensumCode: "1015"
         currentLevel: 8
-        courses: &studentProgressCourses
-          - code: "10011"
-            pensumItemCode: "1001"
+        source: SINU
+        readAt: "2026-10-05T14:32:11Z"
+        courses:
+          - pensumItemCode: "11015"
             status: PASSED
-            period: "20221"
+            sinuStatus: APROBADA
+            period: "20191"
             grade: 41
-            resolvedCode: null
+            resolvedSinuCode: null
             resolvedName: null
-          - code: "20015"
-            pensumItemCode: "1004"
+          - pensumItemCode: "41025"
             status: PASSED
-            period: "20221"
+            sinuStatus: APROBADA
+            period: "20191"
             grade: 47
-            resolvedCode: null
+            resolvedSinuCode: null
             resolvedName: null
-          - code: "10024"
-            pensumItemCode: "1102"
+          - pensumItemCode: "12015"
             status: PASSED
-            period: "20222"
+            sinuStatus: APROBADA
+            period: "20192"
             grade: 34
-            resolvedCode: null
+            resolvedSinuCode: null
             resolvedName: null
-          - code: "20028"
-            pensumItemCode: "1105"
+          - pensumItemCode: "31013"
             status: PASSED
-            period: "20222"
+            sinuStatus: APROBADA
+            period: "20192"
             grade: 45
-            resolvedCode: null
+            resolvedSinuCode: null
             resolvedName: null
-          - code: "20037"
-            pensumItemCode: "1203"
+          - pensumItemCode: "31014"
             status: PASSED
-            period: "20231"
+            sinuStatus: APROBADA
+            period: "20201"
             grade: 43
-            resolvedCode: null
+            resolvedSinuCode: null
             resolvedName: null
-          - code: "17080"
-            pensumItemCode: "1602"
-            status: FAILED
-            period: "20252"
-            grade: 24
-            resolvedCode: null
-            resolvedName: null
-          - code: "46018"
-            pensumItemCode: "1604"
+          - pensumItemCode: "47022"
             status: PASSED
+            sinuStatus: APROBADA
             period: "20252"
             grade: 44
-            resolvedCode: null
+            resolvedSinuCode: null
             resolvedName: null
-          - code: "48022"
-            pensumItemCode: "1703"
+          - pensumItemCode: "59075"
             status: PASSED
+            sinuStatus: APROBADA
+            period: "20252"
+            grade: 46
+            resolvedSinuCode: "59211"
+            resolvedName: Computación en la Nube
+          - pensumItemCode: "17070"
+            status: FAILED
+            sinuStatus: PERDIDA
+            period: "20261"
+            grade: 26
+            resolvedSinuCode: null
+            resolvedName: null
+          - pensumItemCode: "48022"
+            status: PASSED
+            sinuStatus: APROBADA
             period: "20261"
             grade: 42
-            resolvedCode: null
+            resolvedSinuCode: null
             resolvedName: null
-          - code: "59035"
-            pensumItemCode: "2033"
+          - pensumItemCode: "59085"
+            status: PENDING
+            sinuStatus: null
+            period: null
+            grade: null
+            resolvedSinuCode: null
+            resolvedName: null
+          - pensumItemCode: "59088"
+            status: PENDING
+            sinuStatus: null
+            period: null
+            grade: null
+            resolvedSinuCode: null
+            resolvedName: null
+          - pensumItemCode: "59096"
+            status: POSTPONED
+            sinuStatus: APLAZADA
+            period: "20261"
+            grade: null
+            resolvedSinuCode: null
+            resolvedName: null
+          - pensumItemCode: "59035"
             status: IN_PROGRESS
+            sinuStatus: EN CURSO
             period: "20262"
             grade: null
-            resolvedCode: null
+            resolvedSinuCode: null
             resolvedName: null
-          - code: "56201"
-            pensumItemCode: "1806"
-            status: PENDING
-            period: null
+          - pensumItemCode: "56201"
+            status: IN_PROGRESS
+            sinuStatus: EN CURSO
+            period: "20262"
             grade: null
-            resolvedCode: null
+            resolvedSinuCode: null
             resolvedName: null
-          - code: null
-            pensumItemCode: ELECTIVA_VI
-            status: PENDING
-            period: null
+          - pensumItemCode: "59098"
+            status: IN_PROGRESS
+            sinuStatus: EN CURSO
+            period: "20262"
             grade: null
-            resolvedCode: null
+            resolvedSinuCode: null
             resolvedName: null
-        updatedAt: "2026-08-20T14:32:11Z"
-        reconciliation:
-          addedCourses: ["56201"]
-          removedCourses: []
-          inSync: false
 
-    StudentSemaphore:
-      summary: The same student, read by an administrator
-      description: |
-        Identical document without the `reconciliation` block, which only `GET /api/semaphore/me`
-        computes.
+    MyPlans:
+      summary: One plan, with a course moved and an elective chosen
       value:
-        userId: '507f1f77bcf86cd799439011'
-        studentCode: "506999999"
-        programCode: "506"
-        pensumCode: "1015"
-        currentLevel: 8
-        courses: *studentProgressCourses
-        updatedAt: "2026-08-20T14:32:11Z"
+        - id: 66f0a1c2e4b0a91d3c5e7f21
+          name: Mi plan
+          pensumCode: "1015"
+          primary: true
+          placements:
+            - pensumItemCode: "17070"
+              plannedLevel: 9
+              electiveSinuCode: null
+              electiveOffered: null
+            - pensumItemCode: "59085"
+              plannedLevel: 9
+              electiveSinuCode: "59214"
+              electiveOffered: true
+          createdAt: "2026-09-02T21:10:00Z"
+          updatedAt: "2026-10-01T18:45:00Z"
 
   responses:
     BadRequest:
