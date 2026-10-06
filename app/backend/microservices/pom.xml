@@ -18,12 +18,6 @@
     <name>KApp Microservices</name>
     <description>Microservices backend for KApp - Konrad Lorenz</description>
 
-    <!--
-      MVP scope. course-service and assignment-service are frozen: their directories
-      remain in the tree but they are not built, not containerised and not in CI.
-      They target PostgreSQL/JPA and are not part of the MongoDB MVP.
-      See docs/PROGRESS.md.
-    -->
     <modules>
         <module>common</module>
         <module>api-gateway</module>
