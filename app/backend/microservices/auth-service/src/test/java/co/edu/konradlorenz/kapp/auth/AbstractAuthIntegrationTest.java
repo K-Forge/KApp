@@ -52,8 +52,6 @@ import static org.mockito.Mockito.when;
 @AutoConfigureMockMvc
 @Testcontainers
 @TestPropertySource(properties = {
-        "eureka.client.enabled=false",
-        "spring.cloud.discovery.enabled=false",
         // InternalUserClientConfig refuses a genuinely blank token at bean creation.
         // The Feign client this token would decorate is mocked below, so the value
         // itself is never sent anywhere; it only has to be non-blank for the context

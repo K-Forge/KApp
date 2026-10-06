@@ -4,7 +4,6 @@ import io.mongock.runner.springboot.EnableMongock;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
  * Owns user profiles: name, identification, contact details and, for members of the
@@ -28,7 +27,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 // Activates CredentialStatusClient: deactivating an account has to suspend the credential in
 // auth-service, because that is where sign-in is decided.
 @EnableFeignClients
-@EnableDiscoveryClient
 @EnableMongock
 public class UserServiceApplication {
 

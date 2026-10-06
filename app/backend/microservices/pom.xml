@@ -26,7 +26,6 @@
     -->
     <modules>
         <module>common</module>
-        <module>discovery-server</module>
         <module>api-gateway</module>
         <module>auth-service</module>
         <module>user-service</module>
