@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.ui.home
 
 import androidx.compose.ui.graphics.Color
+import co.edu.konradlorenz.kapp.data.network.UserProfile
 
 /**
  * What Inicio has on it.
@@ -11,11 +12,11 @@ import androidx.compose.ui.graphics.Color
  * would force the whole screen to wait for the slower of the two, which is the one thing the
  * mockups say not to do.
  *
- * The student is not a third state: the name is in the token, so the greeting is known before
- * either call returns.
+ * Who is being greeted comes from the profile (ProfileRepository), which is read once per session
+ * and usually here before Inicio is: [student] is `null` only in the moment it is not.
  */
 data class HomeUiState(
-    val student: Student,
+    val student: Student?,
     val day: DayState,
     val semester: SemesterState,
 )
@@ -24,10 +25,9 @@ data class HomeUiState(
  * Who is being greeted.
  *
  * [firstName] goes in the greeting and [initials] in the avatar, which is what the mockup draws in
- * place of a photo. `user.openapi.yaml` carries a full name and no picture, so there is nothing
- * else to put there.
+ * place of a photo. [programme] is `academic.programName`, which only a student has.
  */
-data class Student(val firstName: String, val initials: String)
+data class Student(val firstName: String, val initials: String, val programme: String? = null)
 
 /**
  * Builds the greeting and the avatar out of a full name.
@@ -40,6 +40,19 @@ fun student(fullName: String): Student {
     val firstName = words.firstOrNull().orEmpty()
     val initials = words.take(2).map { it.first().uppercaseChar() }.joinToString("")
     return Student(firstName = firstName, initials = initials)
+}
+
+/**
+ * The greeting out of a profile. Microsoft's given name can be two words - "Laura Marcela" - and
+ * the greeting takes the first; the initials are the first name's and the first surname's, which
+ * is what the person would write.
+ */
+fun UserProfile.toStudent(): Student {
+    val first = firstName.trim().split(Regex("\\s+")).firstOrNull().orEmpty()
+    val initials = listOf(firstName, lastName)
+        .mapNotNull { it.trim().firstOrNull()?.uppercaseChar() }
+        .joinToString("")
+    return Student(firstName = first, initials = initials, programme = academic?.programName)
 }
 
 /**

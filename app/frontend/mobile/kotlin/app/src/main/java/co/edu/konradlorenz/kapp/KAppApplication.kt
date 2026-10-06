@@ -4,16 +4,22 @@ import android.app.Application
 import android.content.Context
 import co.edu.konradlorenz.kapp.data.auth.MicrosoftSignIn
 import co.edu.konradlorenz.kapp.data.network.KAppApi
+import co.edu.konradlorenz.kapp.data.profile.MockProfilePreference
+import co.edu.konradlorenz.kapp.data.profile.ProfileRepository
 import co.edu.konradlorenz.kapp.data.session.KeystoreSessionStore
 import co.edu.konradlorenz.kapp.data.session.SessionManager
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 /**
  * Holds the one instance of everything that must be shared: two clients sending different tokens,
  * or two session managers renewing the same refresh token, would undo each other.
  *
- * Built by hand rather than through a DI framework: there are four objects, and a framework would
- * be more to read than they are.
+ * Built by hand rather than through a DI framework: there are a handful of objects, and a framework
+ * would be more to read than they are.
  */
 class AppContainer(context: Context) {
 
@@ -32,6 +38,25 @@ class AppContainer(context: Context) {
     )
 
     val microsoft = MicrosoftSignIn.forThisBuild(context)
+
+    /** Debug against the mocks only. See MockProfilePreference. */
+    val mockProfile = MockProfilePreference(context)
+
+    val profile = ProfileRepository(
+        users = api.users,
+        session = session,
+        prefer = { if (microsoft.isFake) "example=${mockProfile.example}" else null },
+    )
+
+    init {
+        // The profile follows the session: read when somebody is signed in - including a session
+        // saved from an earlier run - and forgotten when the session ends, however it ends.
+        MainScope().launch {
+            session.session.map { it?.userId }.distinctUntilChanged().collect { userId ->
+                if (userId == null) profile.clear() else profile.load()
+            }
+        }
+    }
 
     /** KApp's session first - it is the one that matters - then Microsoft's account on the device. */
     suspend fun signOut() {

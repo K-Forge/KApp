@@ -1,5 +1,7 @@
 package co.edu.konradlorenz.kapp.ui.home
 
+import co.edu.konradlorenz.kapp.data.network.AcademicInfo
+import co.edu.konradlorenz.kapp.data.network.UserProfile
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -15,6 +17,33 @@ class HomeUiStateTest {
         val student = student("Pepe Pérez")
         assertEquals("Pepe", student.firstName)
         assertEquals("PP", student.initials)
+    }
+
+    @Test
+    fun `a profile greets by its first given name, with given name and surname initials`() {
+        val professor = UserProfile(
+            id = "6b2d9e40-1c3f-4a57-8e69-0d1f2a3b4c5d",
+            email = "laura.gomez@konradlorenz.edu.co",
+            firstName = "Laura Marcela",
+            lastName = "Gómez Restrepo",
+            roles = listOf("ROLE_PROFESSOR"),
+            active = true,
+        )
+        assertEquals(Student(firstName = "Laura", initials = "LG"), professor.toStudent())
+    }
+
+    @Test
+    fun `a student profile brings the programme`() {
+        val student = UserProfile(
+            id = "3f8a1c2e-7b4d-4e5a-9c6f-2d1b8e0a4c73",
+            email = "pepito.perez@konradlorenz.edu.co",
+            firstName = "Pepito",
+            lastName = "Perez Gomez",
+            roles = listOf("ROLE_STUDENT"),
+            active = true,
+            academic = AcademicInfo("506", "Ingeniería de Sistemas", "1015", 8),
+        )
+        assertEquals("Ingeniería de Sistemas", student.toStudent().programme)
     }
 
     @Test

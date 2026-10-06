@@ -92,7 +92,7 @@ fun HomeScreen(
     destinations: List<KAppDestination>,
     onOpen: (KAppDestination) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = viewModel(),
+    viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory),
 ) {
     HomeContent(
         state = viewModel.uiState,
@@ -161,6 +161,8 @@ private fun HomeContent(
                     link = stringResource(R.string.home_semester_link),
                     onLink = { onOpen(KAppDestination.Semaphore) },
                 )
+                // Which programme the semester is of: academic.programName, read from SINU.
+                state.student?.programme?.let { ProgrammeLine(it) }
                 when (state.semester) {
                     SemesterState.Loading -> SemesterSkeleton()
                     is SemesterState.Ready -> SemesterCard(state.semester)
@@ -184,9 +186,16 @@ private fun HomeContent(
     }
 }
 
-/** The band of BrandBand, with the greeting in it and the student's initials on the end. */
+/**
+ * The band of BrandBand, with the greeting in it and the person's initials on the end. Until the
+ * profile is here it says only "Hola", and the circle waits for initials to put in it.
+ */
 @Composable
-private fun HomeBand(student: Student) {
+private fun HomeBand(student: Student?) {
+    if (student == null) {
+        BrandBand(title = stringResource(R.string.home_greeting_anonymous))
+        return
+    }
     BrandBand(title = stringResource(R.string.home_greeting, student.firstName)) {
         // Initials rather than a photo: user.openapi.yaml carries a name and no picture.
         Box(
@@ -501,6 +510,22 @@ private fun SectionHeading(title: String, link: String, onLink: () -> Unit) {
         )
     }
     Spacer(Modifier.height(6.dp))
+}
+
+/**
+ * The programme, between the heading and the semester card. Not in the mockup, which predates
+ * user 1.0.0; issue #47 asks for it on Inicio, and under the semester is where it explains
+ * something.
+ */
+@Composable
+private fun ProgrammeLine(programme: String) {
+    Text(
+        text = programme,
+        modifier = Modifier.padding(bottom = 8.dp),
+        fontSize = 13.sp,
+        lineHeight = 16.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 /** Credits through the pensum: passed, being taken, and the rest of the track. */

@@ -30,6 +30,7 @@
     <string name="login_copyright">© 2026 Fundación Universitaria Konrad Lorenz</string>
 
     <string name="home_greeting">Hola, %1$s</string>
+    <string name="home_greeting_anonymous">Hola</string>
     <string name="home_loading">Cargando</string>
 
     <string name="home_next_class">PRÓXIMA CLASE</string>
@@ -61,6 +62,20 @@
     <string name="home_class_where">%1$s · %2$s</string>
 
     <string name="sign_out">Cerrar sesión</string>
+
+    <string name="profile_avatar_description">Tu foto de perfil</string>
+    <string name="profile_role_student">Estudiante</string>
+    <string name="profile_role_professor">Profesor</string>
+    <string name="profile_role_staff">Administrativo</string>
+    <string name="profile_programme">Programa</string>
+    <string name="profile_level">Semestre</string>
+    <string name="profile_pensum">Pensum</string>
+    <string name="profile_remove_avatar">Quitar foto</string>
+    <string name="profile_remove_avatar_failed">No pudimos quitar la foto. Inténtalo otra vez.</string>
+    <string name="profile_where_from">Tu nombre y tu correo vienen de tu cuenta de Microsoft. Si algo no está bien, se corrige allá.</string>
+    <string name="profile_where_from_student">Tu nombre y tu correo vienen de tu cuenta de Microsoft, y tus datos académicos de SINU. Si algo no está bien, se corrige allá.</string>
+    <string name="profile_failed">No pudimos cargar tu perfil</string>
+    <string name="profile_retry">Reintentar</string>
 
     <string name="placeholder_pending">Esta pantalla todavía no existe</string>
     <string name="placeholder_profile_contract">Se alimentará de GET /api/users/me.</string>
