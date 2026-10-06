@@ -10,6 +10,8 @@ del mapa sale de aquí, después de revisarlo juntos.
   piso por piso, en qué se contradicen y qué falta.
 - **Este documento:** el resumen, lo que vale para todo el campus y la **lista de lo que hay que ir
   a caminar**.
+- **Las fotos**, en [`fuentes/`](fuentes/): una copia liviana de cada una, sin metadatos, en la
+  carpeta de su edificio.
 
 ## Cobertura
 
