@@ -68,9 +68,9 @@ private val SheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
 /**
  * Sign-in.
  *
- * The screen does not talk to anything yet: [onSignIn] fires as soon as both fields have content.
- * The credential check, and with it the four cases drawn in
- * docs/design/mobile/EstadosLogin.dc.html, arrive with POST /auth/login.
+ * The screen checks no credentials yet: [onSignIn] fires once both fields have content, after the
+ * debug build's connection check (LoginViewModel.signIn). The real sign-in, and with it the cases
+ * drawn in docs/design/mobile/EstadosLogin.dc.html, arrive with issue #46.
  */
 @Composable
 fun LoginScreen(
@@ -136,7 +136,10 @@ fun LoginScreen(
                     checked = viewModel.keepSignedIn,
                     onCheckedChange = viewModel::onKeepSignedInChange,
                 )
-                SignInButton(enabled = viewModel.canSubmit, onClick = onSignIn)
+                SignInButton(
+                    enabled = viewModel.canSubmit && !viewModel.checkingConnection,
+                    onClick = { viewModel.signIn(onSignIn) },
+                )
                 InvitationRow(onClick = onUseInvitationCode)
             }
 
