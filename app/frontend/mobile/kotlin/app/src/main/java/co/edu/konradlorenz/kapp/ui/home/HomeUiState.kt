@@ -122,15 +122,18 @@ sealed interface SemesterState {
     /** Waiting on semaphore-service. */
     data object Loading : SemesterState
 
+    /**
+     * It could not be read. No mockup draws this, so the card says it in one line rather than
+     * leaving a skeleton that never resolves.
+     */
+    data object Unavailable : SemesterState
+
     data class Ready(
         /** `currentLevel`: the semester the student is counted as being in. */
         val level: Int,
         /**
-         * Courses being taken right now.
-         *
-         * `ProgressSummary` counts credits and not courses, so this number has to be counted off
-         * `GET /api/semaphore/me` instead. Worth knowing before the network layer is written: it
-         * is a second call, or a field the contract grows.
+         * Courses being taken right now. `ProgressSummary` counts credits and not courses, so this
+         * one is counted off `GET /api/semaphore/me`, which the Semáforo tab reads anyway.
          */
         val coursesInProgress: Int,
         val creditsPassed: Int,

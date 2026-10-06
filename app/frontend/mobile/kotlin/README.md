@@ -20,9 +20,20 @@ profile role and, for a student, the academic block read from SINU. The picture 
 that can be changed, and only removed for now - see "What is deliberately missing". No mockup
 covers it, so it is built from Inicio's parts. **Cerrar sesión** is at its foot.
 
+**Semáforo** is built (issue #44) from semaphore 2.0.0: the student's pensum one semester under the
+other, each item painted by its status - SINU's five, with `PENDING` split into *puedes tomarla*
+and *bloqueada* by `GET /api/semaphore/me/eligible` - and its area's colour on its edge. Tapping an
+item shows what SINU says about it: status, `sinuStatus`, period, grade when there is one, credits,
+hours and prerequisites. Nothing changes a status or a grade; the contract has no route for it. The
+one thing written is **plans**: the grid switches between the pensum as published and each plan,
+opening on the primary one, and in a plan an item still ahead can be moved to another semester or,
+for an elective slot, given a course from this semester's bank. `source: TEST` puts a notice on top.
+No mockup covers it; *aplazada* takes the orchid of `docs/design/orchid-palette.md`, as the issue
+suggests. The code shown is `sinuCode`, never `pensumItemCode`.
+
 **Inicio** matches [`HomeAndroid.dc.html`](../../../../docs/design/mobile/HomeAndroid.dc.html).
-The greeting and the programme under "Tu semestre" come from the profile; the day and the semester
-are still sample data.
+The greeting and the programme come from the profile, and the semester card from the semáforo; the
+day is still sample data.
 
 The login keeps the band, crest, stripe and footer of
 [`LoginAndroid.dc.html`](../../../../docs/design/mobile/LoginAndroid.dc.html), but not its fields:
@@ -143,7 +154,7 @@ The session, in `data/session/`:
 Every `@Preview` renders at 360x800, which is the size the mockups are drawn at, so the two can be
 compared side by side without a device. `HomeScreen.kt` has four — the screen and the three states
 of `EstadosHome.dc.html` — `LoginScreen.kt` two, as a release build and as a debug build with an
-error showing, `ProfileScreen.kt` two, loaded and failed, and `PlaceholderScreen.kt` one.
+error showing, `ProfileScreen.kt` two, loaded and failed, and `PlaceholderScreen.kt` one. The Semáforo has none: it is too long for one 800 dp frame, and the emulator against the mocks shows it better.
 
 ## Layout
 
@@ -155,7 +166,8 @@ app/src/main/java/co/edu/konradlorenz/kapp/
 │   ├── network/                 KAppApi (Retrofit), the contract models
 │   ├── auth/                    Microsoft's sign-in: MSAL, or the fake in debug
 │   ├── session/                 SessionManager, its encrypted store, the profile role
-│   └── profile/                 ProfileRepository, the debug build's mock profile choice
+│   ├── profile/                 ProfileRepository, the debug build's mock profile choice
+│   └── semaphore/               SemaphoreApi, its models, the grid builder, SemaphoreRepository
 └── ui/
     ├── theme/                   the palette, the type scale, the Material scheme
     ├── common/                  the brand band, shared by every screen inside the bar
@@ -163,7 +175,8 @@ app/src/main/java/co/edu/konradlorenz/kapp/
     ├── login/                   LoginScreen + LoginViewModel
     ├── home/                    HomeScreen + HomeViewModel + HomeUiState + HomeSampleData
     ├── profile/                 ProfileScreen + ProfileViewModel
-    ├── placeholder/             the three tabs that are not built yet
+    ├── semaphore/               SemaphoreScreen + SemaphoreViewModel
+    ├── placeholder/             the two tabs that are not built yet
     └── invitation/              stub
 ```
 
@@ -190,12 +203,14 @@ names that sheet assigns. Two rules worth not rediscovering:
 | Visitor passes | `ROLE_GUEST` and `POST /auth/visitor-passes/{code}/redeem`. No issue asks for them in the app yet |
 | Hilt | It earns its place when there are two implementations to swap, not before |
 | A monochrome launcher icon | Themed icons need a single-colour version of the crest, which is a design asset we do not have |
-| `GET /api/schedule/me/day` and `GET /api/semaphore/me/summary` | What Inicio is drawn from. `HomeViewModel` already has the two states they fill; what neither contract has a picture for is the failure case, so that is the first thing to design |
-| Semáforo, Horario and Mapa | Three routes that reach `PlaceholderScreen`. Each is replaced by editing its entry in `KAppNavHost`; nothing else has to move |
+| `GET /api/schedule/me/day` | What Inicio's day is drawn from. `HomeViewModel` already has the states it fills; the failure case has no picture yet |
+| Horario and Mapa | Two routes that reach `PlaceholderScreen`. Each is replaced by editing its entry in `KAppNavHost`; nothing else has to move |
+| A mockup for the Semáforo | None exists; the screen is Inicio's band and card with one row per item |
+| Renaming a plan, or making another one primary | `PATCH /api/semaphore/me/plans/{planId}`. Not in issue #44's list; plans are created, opened, changed and deleted |
+| A semáforo you can plan against the mocks | The contract's `MySemaphore` example names five items its `Pensum1015` example lacks - the failed, postponed and pending ones - so against the mocks every item drawn is passed or in progress and nothing can be moved. The unit tests cover planning; the example needs those items |
 | Choosing a profile picture | user 1.0.0 takes the picture as a URL and has no endpoint to upload one to, so Perfil can only remove it. A backend endpoint first |
 | A mockup for Perfil | None exists; the screen is Inicio's band and card with the contract's fields |
 | The block a class is in | `ClassOccurrence` carries `room` and `campus`; the mockup prints "Salón 401 · Bloque B". The block comes from map-service or it is a field `schedule.openapi.yaml` grows |
-| The number of courses in progress | `ProgressSummary` counts credits, not courses, so "5 materias en curso" needs a second call to `GET /api/semaphore/me` or a new field |
 
 ## Versions
 
