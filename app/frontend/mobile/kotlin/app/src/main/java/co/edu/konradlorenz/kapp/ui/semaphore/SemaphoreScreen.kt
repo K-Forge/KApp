@@ -70,6 +70,7 @@ import co.edu.konradlorenz.kapp.data.semaphore.formatPeriod
 import co.edu.konradlorenz.kapp.ui.common.BandContentHeight
 import co.edu.konradlorenz.kapp.ui.common.BrandBand
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
+import co.edu.konradlorenz.kapp.ui.common.hexColor
 import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
 import co.edu.konradlorenz.kapp.ui.theme.Brand
 import co.edu.konradlorenz.kapp.ui.theme.ErrorRed
@@ -806,9 +807,4 @@ private fun labelOf(status: CourseStatus): Int = when (status) {
 }
 
 /** The area's `#RRGGBB`, or the brand purple if the API sent something else. */
-private fun areaColour(item: SemaphoreItem): Color = item.areaColor
-    ?.removePrefix("#")
-    ?.takeIf { it.length == 6 }
-    ?.toLongOrNull(16)
-    ?.let { Color(0xFF000000 or it) }
-    ?: Brand
+private fun areaColour(item: SemaphoreItem): Color = hexColor(item.areaColor, Brand)

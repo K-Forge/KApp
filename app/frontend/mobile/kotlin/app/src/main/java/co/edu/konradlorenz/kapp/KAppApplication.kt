@@ -6,6 +6,7 @@ import co.edu.konradlorenz.kapp.data.auth.MicrosoftSignIn
 import co.edu.konradlorenz.kapp.data.network.KAppApi
 import co.edu.konradlorenz.kapp.data.profile.MockProfilePreference
 import co.edu.konradlorenz.kapp.data.profile.ProfileRepository
+import co.edu.konradlorenz.kapp.data.schedule.ScheduleRepository
 import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreRepository
 import co.edu.konradlorenz.kapp.data.session.KeystoreSessionStore
 import co.edu.konradlorenz.kapp.data.session.SessionManager
@@ -52,15 +53,20 @@ class AppContainer(context: Context) {
     /** A student's only: the tab and Inicio's semester card ask for it, nobody else does. */
     val semaphore = SemaphoreRepository(api.semaphore)
 
+    /** A student's or a professor's: staff have no timetable, and get 403. */
+    val schedule = ScheduleRepository(api.schedule, api.map)
+
     init {
         // The profile follows the session: read when somebody is signed in - including a session
         // saved from an earlier run - and forgotten when the session ends, however it ends. The
-        // semáforo is read by the screens that show it, and forgotten with the rest.
+        // semáforo and the timetable are read by the screens that show them, and forgotten with
+        // the rest.
         MainScope().launch {
             session.session.map { it?.userId }.distinctUntilChanged().collect { userId ->
                 if (userId == null) {
                     profile.clear()
                     semaphore.clear()
+                    schedule.clear()
                 } else {
                     profile.load()
                 }
