@@ -22,7 +22,7 @@ cd "$(dirname "$0")"
 # One run at a time: the timer and a person running it by hand would recreate the same containers.
 exec 9>.agent.lock
 flock -n 9 || exit 0
-# sort and comm must agree on the order, whatever the host's locale.
+# The same order for sort whatever the host's locale.
 export LC_ALL=C
 
 EXTRAS_FLOOR_MB=300
@@ -43,22 +43,28 @@ REPO=$(setting KAPP_DEV_REPO); REPO=${REPO:-K-Forge/KApp}
 BRANCH=$(setting KAPP_DEV_BRANCH)
 [[ -n "$BRANCH" ]] || { echo "KAPP_DEV_BRANCH is not set in /opt/kapp/.env" >&2; exit 1; }
 
-images() { docker compose config --images | sort; }
-ids() { images | while read -r img; do printf '%s %s\n' "$img" "$(docker image inspect -f '{{.Id}}' "$img" 2>/dev/null || echo none)"; done; }
-
-before=$(ids)
 docker compose pull -q
-after=$(ids)
-if [[ "$before" == "$after" ]] && [[ -n "$(docker compose ps -q --status running)" ]]; then
+
+# What changed is any configured image the containers are not running yet. Compared against the
+# containers rather than against the previous run, so a run that pulled and then failed - or the
+# first run on a new branch, whose images were not here before - still recreates them next time.
+# `docker image inspect -f` prints an empty line for an image that does not exist (Docker 29), so
+# only the first line counts and an empty one is a missing image.
+running=$(docker compose ps -a -q | xargs -r docker inspect -f '{{.Image}}' | sort -u)
+changed=()
+for img in $(docker compose config --images | sort); do
+  id=$(docker image inspect -f '{{.Id}}' "$img" 2>/dev/null | head -1 || true)
+  [[ -n "$id" ]] || { echo "no image $img after the pull" >&2; exit 1; }
+  grep -qxF "$id" <<<"$running" || changed+=("$img")
+done
+if (( ${#changed[@]} == 0 )) && [[ -n "$(docker compose ps -q --status running)" ]]; then
   exit 0
 fi
 
 # Built from the branch? The compare API says "behind" or "identical" when the image's commit is in
 # the branch's history. Unauthenticated, it allows 60 calls an hour: only a changed image costs one.
 head=$(curl -fsS -H 'Accept: application/vnd.github.sha' "https://api.github.com/repos/$REPO/commits/$BRANCH")
-# Worked out first, so that a failure here stops the run instead of leaving nothing to check.
-changed=$(comm -13 <(printf '%s\n' "$before") <(printf '%s\n' "$after") | cut -d' ' -f1)
-for img in $changed; do
+for img in "${changed[@]}"; do
   rev=$(docker image inspect -f '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$img")
   status=$(curl -fsS "https://api.github.com/repos/$REPO/compare/$head...$rev" \
     | python3 -c 'import json, sys; print(json.load(sys.stdin)["status"])')
