@@ -52,7 +52,7 @@
 #
 # Two stacks at once also need different ports. Set these in the same .env:
 #
-#   KAPP_GATEWAY_PORT   KAPP_PORTAL_PORT
+#   KAPP_GATEWAY_PORT   KAPP_PORTAL_PORT   KAPP_MOCK_PORT
 #   KAPP_MOCK_AUTH_PORT   KAPP_MOCK_USER_PORT   KAPP_MOCK_SEMAPHORE_PORT
 #   KAPP_MOCK_SCHEDULE_PORT   KAPP_MOCK_MAP_PORT
 #
@@ -67,6 +67,21 @@
 # `version:` is intentionally absent - the Compose Specification dropped it and v2 warns.
 
 name: ${KAPP_PROJECT:-kapp}
+
+# What the five Prism mocks share. `pull_policy: build` builds the image from mock/Dockerfile and
+# never pulls one by this name from a registry.
+x-prism: &prism
+  image: kapp/prism:5.16.0
+  build:
+    context: ./mock
+    args:
+      PRISM_VERSION: "5.16.0"
+  pull_policy: build
+  profiles: ["mock", "full"]
+  volumes:
+    - ../../../docs/api:/specs:ro
+  mem_limit: 256m
+  networks: [kapp]
 
 services:
   # ---------------------------------------------------------------------------------
@@ -307,91 +322,74 @@ services:
     networks: [kapp]
 
   # ---------------------------------------------------------------------------------
-  # Prism mock servers, one per published OpenAPI contract.
+  # Prism mock servers, one per published OpenAPI contract, behind one gateway.
   #
-  # This is the whole point of the `mock` profile: four mobile developers can build
-  # against the real contracts on day one with no JVM, no Mongo and no build. Prism
-  # serves the examples in the spec, so the shapes are the ones the services will
-  # return. Keep them out of every other profile so `--profile mock` stays JVM-free.
+  # This is the whole point of the `mock` profile: the mobile developers build against
+  # the real contracts with no JVM, no Mongo and no build of ours. Prism serves the
+  # examples in the spec, so the shapes are the ones the services will return. Keep
+  # them out of every other profile so `--profile mock` stays JVM-free.
   #
   # The specs live at the REPO ROOT (docs/api), three levels above this file, and are
   # mounted read-only - the contracts are owned elsewhere and must not be edited here.
-  # Prism listens on 4010 inside each container; the host ports differ per service:
+  #
+  # Clients use mock-gateway, one port with the real gateway's routes (mock/nginx.conf):
+  #
+  #   http://localhost:4000   (an Android emulator reaches the host at 10.0.2.2)
+  #
+  # Each Prism also keeps its own port, for whoever still points at one service:
   #
   #   4010 auth   4011 user   4012 semaphore   4013 schedule   4014 map
+  #
+  # The Prism image is built here, from mock/Dockerfile, the first time a mock starts:
+  # stoplight/prism is amd64 only, and this one is native on every machine. A new Prism
+  # version is a change to both version strings in x-prism, at the top of this file.
   # ---------------------------------------------------------------------------------
-  mock-auth:
-    image: stoplight/prism:4
-    # stoplight/prism publishes linux/amd64 only, so this runs under Rosetta on Apple
-    # Silicon. Stating the platform keeps Docker from warning on every `up`; a Node
-    # process serving canned examples is not something emulation makes slow enough to
-    # notice. Declared per service because Compose has no file-level default.
-    platform: linux/amd64
-    container_name: ${KAPP_STACK:-back}-auth-service-mock
+  mock-gateway:
+    image: nginx:1.29-alpine
+    container_name: ${KAPP_STACK:-back}-mock-gateway
     profiles: ["mock", "full"]
+    ports:
+      - "${KAPP_MOCK_PORT:-4000}:80"
+    volumes:
+      - ./mock/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [mock-auth, mock-user, mock-semaphore, mock-schedule, mock-map]
+    mem_limit: 32m
+    networks: [kapp]
+
+  mock-auth:
+    <<: *prism
+    container_name: ${KAPP_STACK:-back}-auth-service-mock
     command: mock -h 0.0.0.0 /specs/auth.openapi.yaml
     ports:
       - "${KAPP_MOCK_AUTH_PORT:-4010}:4010"
-    volumes:
-      - ../../../docs/api:/specs:ro
-    mem_limit: 256m
-    networks: [kapp]
 
   mock-user:
-    image: stoplight/prism:4
-    # linux/amd64 only - see the note on mock-auth.
-    platform: linux/amd64
+    <<: *prism
     container_name: ${KAPP_STACK:-back}-user-service-mock
-    profiles: ["mock", "full"]
     command: mock -h 0.0.0.0 /specs/user.openapi.yaml
     ports:
       - "${KAPP_MOCK_USER_PORT:-4011}:4010"
-    volumes:
-      - ../../../docs/api:/specs:ro
-    mem_limit: 256m
-    networks: [kapp]
 
   mock-semaphore:
-    image: stoplight/prism:4
-    # linux/amd64 only - see the note on mock-auth.
-    platform: linux/amd64
+    <<: *prism
     container_name: ${KAPP_STACK:-back}-semaphore-service-mock
-    profiles: ["mock", "full"]
     command: mock -h 0.0.0.0 /specs/semaphore.openapi.yaml
     ports:
       - "${KAPP_MOCK_SEMAPHORE_PORT:-4012}:4010"
-    volumes:
-      - ../../../docs/api:/specs:ro
-    mem_limit: 256m
-    networks: [kapp]
 
   mock-schedule:
-    image: stoplight/prism:4
-    # linux/amd64 only - see the note on mock-auth.
-    platform: linux/amd64
+    <<: *prism
     container_name: ${KAPP_STACK:-back}-schedule-service-mock
-    profiles: ["mock", "full"]
     command: mock -h 0.0.0.0 /specs/schedule.openapi.yaml
     ports:
       - "${KAPP_MOCK_SCHEDULE_PORT:-4013}:4010"
-    volumes:
-      - ../../../docs/api:/specs:ro
-    mem_limit: 256m
-    networks: [kapp]
 
   mock-map:
-    image: stoplight/prism:4
-    # linux/amd64 only - see the note on mock-auth.
-    platform: linux/amd64
+    <<: *prism
     container_name: ${KAPP_STACK:-back}-map-service-mock
-    profiles: ["mock", "full"]
     command: mock -h 0.0.0.0 /specs/map.openapi.yaml
     ports:
       - "${KAPP_MOCK_MAP_PORT:-4014}:4010"
-    volumes:
-      - ../../../docs/api:/specs:ro
-    mem_limit: 256m
-    networks: [kapp]
 
   # ---------------------------------------------------------------------------------
   # web-admin - the internal admin/dev portal (Angular), containerised so nobody has to run
