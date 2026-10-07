@@ -3,15 +3,17 @@ package co.edu.konradlorenz.kapp.user.service;
 import co.edu.konradlorenz.kapp.common.error.ApiError;
 import co.edu.konradlorenz.kapp.common.error.BusinessRuleException;
 import co.edu.konradlorenz.kapp.common.error.ResourceNotFoundException;
-import co.edu.konradlorenz.kapp.user.domain.AcademicInfo;
-import co.edu.konradlorenz.kapp.user.domain.SearchTokens;
-import co.edu.konradlorenz.kapp.user.domain.StoredInstant;
 import co.edu.konradlorenz.kapp.user.client.CredentialStatusClient;
 import co.edu.konradlorenz.kapp.user.client.CredentialStatusUpdate;
+import co.edu.konradlorenz.kapp.user.domain.SearchTokens;
+import co.edu.konradlorenz.kapp.user.domain.StoredInstant;
 import co.edu.konradlorenz.kapp.user.domain.UserProfile;
 import co.edu.konradlorenz.kapp.user.domain.UserRole;
 import co.edu.konradlorenz.kapp.user.repository.UserDirectoryRepository;
 import co.edu.konradlorenz.kapp.user.repository.UserProfileRepository;
+import co.edu.konradlorenz.kapp.user.sinu.SinuStudentPort;
+import co.edu.konradlorenz.kapp.user.web.dto.AcademicInfoResponse;
+import co.edu.konradlorenz.kapp.user.web.dto.DirectoryEntry;
 import co.edu.konradlorenz.kapp.user.web.dto.InternalUserUpsertRequest;
 import co.edu.konradlorenz.kapp.user.web.dto.PageResponse;
 import co.edu.konradlorenz.kapp.user.web.dto.ProfilePatch;
@@ -43,55 +45,32 @@ public class UserProfileService {
     private final UserProfileRepository repository;
     private final UserDirectoryRepository directory;
     private final CredentialStatusClient credentials;
+    private final SinuStudentPort sinu;
 
     public UserProfileService(UserProfileRepository repository,
                               UserDirectoryRepository directory,
-                              CredentialStatusClient credentials) {
+                              CredentialStatusClient credentials,
+                              SinuStudentPort sinu) {
         this.repository = repository;
         this.directory = directory;
         this.credentials = credentials;
+        this.sinu = sinu;
     }
 
-    /** The profile of the account a token belongs to, resolved from its {@code sub}. */
-    public UserProfileResponse byId(String userId) {
-        return UserProfileResponse.from(load(userId));
+    /** The caller's own profile, with their program, pensum and level when they are a student. */
+    public UserProfileResponse me(String userId) {
+        return withAcademic(load(userId));
     }
 
-    /**
-     * Applies a partial update to one profile.
-     *
-     * <p>The identity, e-mail, role and activation flag are carried over from the stored
-     * document rather than read from the patch: the reader has already rejected any
-     * attempt to send them, and taking them from the document means a future field added
-     * to the patch cannot reach them by accident.
-     */
+    /** Sets or clears the caller's picture, the one thing a person changes about their profile. */
     public UserProfileResponse update(String userId, ProfilePatch patch) {
-        UserProfile current = load(userId);
+        UserProfile updated = load(userId).withAvatarUrl(patch.avatarUrl(), StoredInstant.now());
+        return withAcademic(repository.save(updated));
+    }
 
-        if (patch.academic().hasValue() && current.role().isGuest()) {
-            throw new BusinessRuleException(
-                    "A guest account has no academic record",
-                    List.of(new ApiError.FieldIssue("academic",
-                            "must be null for a " + UserRole.ROLE_GUEST + " account")));
-        }
-
-        UserProfile updated = new UserProfile(
-                current.id(),
-                current.email(),
-                patch.firstName().orElse(current.firstName()),
-                patch.lastName().orElse(current.lastName()),
-                patch.identification().orElse(current.identification()),
-                patch.phone().orElse(current.phone()),
-                patch.avatarUrl().orElse(current.avatarUrl()),
-                current.role(),
-                current.active(),
-                patch.academic().orElse(current.academic()),
-                // Derived: the compact constructor recomputes it from the names above.
-                List.of(),
-                current.createdAt(),
-                StoredInstant.now());
-
-        return UserProfileResponse.from(repository.save(updated));
+    /** One account of the directory, for an administrator: nothing academic. */
+    public DirectoryEntry entry(String userId) {
+        return DirectoryEntry.from(load(userId));
     }
 
     /**
@@ -108,9 +87,9 @@ public class UserProfileService {
         }
 
         long total = directory.count(role, active, terms);
-        List<UserProfileResponse> content = directory.findPage(role, active, terms, page, size)
+        List<DirectoryEntry> content = directory.findPage(role, active, terms, page, size)
                 .stream()
-                .map(UserProfileResponse::from)
+                .map(DirectoryEntry::from)
                 .toList();
 
         return PageResponse.of(content, page, size, total);
@@ -132,21 +111,15 @@ public class UserProfileService {
      *
      * <p>Idempotent: setting the value the account already holds writes nothing on either side.
      */
-    public UserProfileResponse setActive(String userId, boolean active) {
+    public DirectoryEntry setActive(String userId, boolean active) {
         UserProfile current = load(userId);
 
         credentials.setStatus(userId, new CredentialStatusUpdate(active));
 
         UserProfile updated = current.withActive(active, StoredInstant.now());
-        return UserProfileResponse.from(updated == current ? current : repository.save(updated));
+        return DirectoryEntry.from(updated == current ? current : repository.save(updated));
     }
 
-    /**
-     * Creates or updates the profile that matches a credential auth-service has just
-     * written. Keyed by e-mail, so a retry after a network timeout updates the profile the
-     * first attempt created instead of duplicating it - which is why this endpoint returns
-     * 200 for both cases and never 409.
-     */
     /**
      * The profile of an account an administrator deleted. Nothing else here points at a
      * profile, so removing the document removes the person from the directory.
@@ -155,8 +128,17 @@ public class UserProfileService {
         repository.deleteById(userId);
     }
 
-    public UserProfileResponse upsertFromRegistration(InternalUserUpsertRequest request) {
-        requireAcademicToMatchRole(request.role(), request.academic());
+    /**
+     * Creates or updates the profile of an account auth-service has just written or signed in:
+     * the names it was given and the roles it holds. Keyed by e-mail, so a retry after a network
+     * timeout updates the profile the first attempt created instead of duplicating it - which is
+     * why this endpoint returns 200 for both cases and never 409.
+     *
+     * @throws BusinessRuleException (400) unless the roles hold exactly one profile role, and no
+     *                               {@code ROLE_GUEST}: a visitor holds a day pass, not an account
+     */
+    public DirectoryEntry upsertFromAuth(InternalUserUpsertRequest request) {
+        List<UserRole> roles = checkRoles(request.roles());
 
         // Lowercased on the way in, and auth-service does the same on its side. Without
         // it a retry that differs only in capitalisation slips past the unique index and
@@ -164,17 +146,17 @@ public class UserProfileService {
         String email = request.email().strip().toLowerCase(Locale.ROOT);
 
         try {
-            return UserProfileResponse.from(upsertOnce(email, request));
+            return DirectoryEntry.from(upsertOnce(email, request, roles));
         } catch (DuplicateKeyException race) {
-            // Two registrations for the same address at once: both found nothing and both
+            // Two sign-ins for the same address at once: both found nothing and both
             // inserted. The unique index rejected this one, so the other has landed and
             // the retry finds it and updates instead.
             log.info("Concurrent profile creation for an e-mail already taken; retrying as an update");
-            return UserProfileResponse.from(upsertOnce(email, request));
+            return DirectoryEntry.from(upsertOnce(email, request, roles));
         }
     }
 
-    private UserProfile upsertOnce(String email, InternalUserUpsertRequest request) {
+    private UserProfile upsertOnce(String email, InternalUserUpsertRequest request, List<UserRole> roles) {
         Instant now = StoredInstant.now();
         Optional<UserProfile> existing = repository.findByEmail(email);
 
@@ -184,14 +166,10 @@ public class UserProfileService {
                         email,
                         request.firstName(),
                         request.lastName(),
-                        // Contact details belong to the user, not to the registrar: a
-                        // replayed registration must not wipe a phone number they added.
-                        current.identification(),
-                        current.phone(),
+                        // The picture is the person's own: a sign-in must not wipe it.
                         current.avatarUrl(),
-                        request.role(),
+                        roles,
                         current.active(),
-                        request.academic(),
                         List.of(),
                         current.createdAt(),
                         now))
@@ -201,11 +179,8 @@ public class UserProfileService {
                         request.firstName(),
                         request.lastName(),
                         null,
-                        null,
-                        null,
-                        request.role(),
+                        roles,
                         true,
-                        request.academic(),
                         List.of(),
                         now,
                         now));
@@ -213,19 +188,39 @@ public class UserProfileService {
         return repository.save(profile);
     }
 
-    private void requireAcademicToMatchRole(UserRole role, AcademicInfo academic) {
-        if (role.isGuest() && academic != null) {
-            throw new BusinessRuleException(
-                    "A guest account has no academic record",
-                    List.of(new ApiError.FieldIssue("academic",
-                            "must be null for a " + UserRole.ROLE_GUEST + " account")));
+    private static List<UserRole> checkRoles(List<UserRole> requested) {
+        List<UserRole> roles = requested.stream().distinct().toList();
+        if (roles.contains(UserRole.ROLE_GUEST)) {
+            throw new BusinessRuleException("A visitor holds a day pass, not an account",
+                    List.of(new ApiError.FieldIssue("roles", "must not hold " + UserRole.ROLE_GUEST)));
         }
-        if (role == UserRole.ROLE_STUDENT && academic == null) {
-            throw new BusinessRuleException(
-                    "A student account requires an academic record",
-                    List.of(new ApiError.FieldIssue("academic",
-                            "must be present for a " + UserRole.ROLE_STUDENT + " account")));
+        long profileRoles = roles.stream().filter(UserRole::isProfileRole).count();
+        if (profileRoles != 1) {
+            throw new BusinessRuleException("An account holds exactly one profile role",
+                    List.of(new ApiError.FieldIssue("roles",
+                            "must hold exactly one of ROLE_STUDENT, ROLE_PROFESSOR or ROLE_STAFF")));
         }
+        return roles;
+    }
+
+    /**
+     * The profile with the academic block a student's carries, read from SINU now. With SINU out of
+     * reach the profile is still served, the block null: a person's name and picture do not depend
+     * on the university's record.
+     */
+    private UserProfileResponse withAcademic(UserProfile profile) {
+        if (!profile.hasRole(UserRole.ROLE_STUDENT)) {
+            return UserProfileResponse.from(profile, null);
+        }
+        AcademicInfoResponse academic;
+        try {
+            academic = sinu.student(profile.id(), profile.email()).map(AcademicInfoResponse::from).orElse(null);
+        } catch (RuntimeException e) {
+            log.warn("Could not read the academic block of {} from SINU; serving the profile without it",
+                    profile.id(), e);
+            academic = null;
+        }
+        return UserProfileResponse.from(profile, academic);
     }
 
     private UserProfile load(String userId) {

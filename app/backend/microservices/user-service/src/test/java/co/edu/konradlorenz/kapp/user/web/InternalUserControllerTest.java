@@ -2,14 +2,19 @@ package co.edu.konradlorenz.kapp.user.web;
 
 import co.edu.konradlorenz.kapp.common.feign.InternalTokenInterceptor;
 import co.edu.konradlorenz.kapp.user.AbstractUserServiceTest;
+import co.edu.konradlorenz.kapp.user.domain.StoredInstant;
 import co.edu.konradlorenz.kapp.user.domain.UserProfile;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.MediaType;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -17,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * {@code POST /internal/users}: the shared-secret gate and the idempotent, e-mail-keyed
- * upsert that lets a replayed registration call be safe.
+ * upsert that lets a replayed sign-in call be safe.
  *
  * <p>No {@code jwt()} post-processor appears anywhere in this class. This endpoint carries
  * no user identity at all - authentication is the {@code X-Internal-Token} header, checked
@@ -26,11 +31,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 class InternalUserControllerTest extends AbstractUserServiceTest {
 
+    private static final String EMAIL = "pepito.perez@konradlorenz.edu.co";
+
     private static final String STUDENT_BODY = """
             {"email": "Pepito.Perez@Konradlorenz.edu.co", "firstName": "Pepito",
-             "lastName": "Perez Gomez", "role": "ROLE_STUDENT",
-             "academic": {"studentCode": "506999999", "programCode": "506",
-                          "pensumCode": "1015", "currentLevel": 1}}""";
+             "lastName": "Perez Gomez", "roles": ["ROLE_STUDENT"]}""";
 
     @Test
     @DisplayName("a request with no token is rejected with 401")
@@ -50,94 +55,127 @@ class InternalUserControllerTest extends AbstractUserServiceTest {
     }
 
     @Test
-    @DisplayName("the correct token is accepted and creates the profile")
+    @DisplayName("the correct token is accepted and creates the profile, a directory entry with nothing academic")
     void upsert_correctToken_createsProfile() throws Exception {
         mockMvc.perform(post("/internal/users")
                         .header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON).content(STUDENT_BODY))
                 .andExpect(status().isOk())
                 // Lowercased on the way in, regardless of how auth-service sent it.
-                .andExpect(jsonPath("$.email").value("pepito.perez@konradlorenz.edu.co"))
-                .andExpect(jsonPath("$.role").value("ROLE_STUDENT"))
+                .andExpect(jsonPath("$.email").value(EMAIL))
+                .andExpect(jsonPath("$.roles", contains("ROLE_STUDENT")))
                 .andExpect(jsonPath("$.active").value(true))
-                .andExpect(jsonPath("$.academic.studentCode").value("506999999"));
+                .andExpect(jsonPath("$..avatarUrl").exists())
+                .andExpect(jsonPath("$.avatarUrl").value(nullValue()))
+                .andExpect(jsonPath("$.academic").doesNotExist());
     }
 
     @Test
     @DisplayName("two calls with the e-mail differently capitalised yield exactly one document")
     void upsert_calledTwiceWithDifferentCapitalisation_yieldsOneDocument() throws Exception {
-        mockMvc.perform(post("/internal/users")
-                        .header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON).content("""
-                                {"email": "Pepito.Perez@Konradlorenz.edu.co",
-                                 "firstName": "Pepito", "lastName": "Perez Gomez",
-                                 "role": "ROLE_STUDENT",
-                                 "academic": {"studentCode": "506999999", "programCode": "506",
-                                              "pensumCode": "1015", "currentLevel": 1}}"""))
-                .andExpect(status().isOk());
+        upsert(STUDENT_BODY);
+        upsert("""
+                {"email": "pepito.perez@konradlorenz.edu.co", "firstName": "Pepito",
+                 "lastName": "Perez Gomez", "roles": ["ROLE_STUDENT"]}""");
 
-        mockMvc.perform(post("/internal/users")
-                        .header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON).content("""
-                                {"email": "pepito.perez@konradlorenz.edu.co",
-                                 "firstName": "Pepito", "lastName": "Perez Gomez",
-                                 "role": "ROLE_STUDENT",
-                                 "academic": {"studentCode": "506999999", "programCode": "506",
-                                              "pensumCode": "1015", "currentLevel": 2}}"""))
-                .andExpect(status().isOk());
-
-        long documents = mongoTemplate.count(
-                Query.query(Criteria.where("email").is("pepito.perez@konradlorenz.edu.co")),
-                UserProfile.class);
+        long documents = mongoTemplate.count(Query.query(Criteria.where("email").is(EMAIL)), UserProfile.class);
         assertThat(documents).isEqualTo(1);
     }
 
+    /**
+     * A sign-in carries what Microsoft and auth-service know - the names and the roles - and
+     * nothing else: the picture is the person's own, and whether the account is active is an
+     * administrator's decision. Neither may be undone by the person signing in again.
+     */
     @Test
-    @DisplayName("the second call updates the existing profile rather than creating another")
-    void upsert_secondCall_updatesExistingProfile() throws Exception {
-        mockMvc.perform(post("/internal/users")
-                        .header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON).content(STUDENT_BODY))
-                .andExpect(status().isOk());
+    @DisplayName("the second call updates names and roles, and keeps the picture, the active flag and the creation date")
+    void upsert_secondCall_updatesNamesAndRolesOnly() throws Exception {
+        upsert(STUDENT_BODY);
+        UserProfile created = mongoTemplate.findOne(Query.query(Criteria.where("email").is(EMAIL)), UserProfile.class);
+        assertThat(created).isNotNull();
+        save(created.withAvatarUrl("https://cdn.kapp.konradlorenz.edu.co/avatars/3f8a1c2e.jpg", StoredInstant.now())
+                .withActive(false, StoredInstant.now()));
 
         mockMvc.perform(post("/internal/users")
                         .header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON).content("""
                                 {"email": "pepito.perez@konradlorenz.edu.co",
-                                 "firstName": "Brian S.", "lastName": "Vargas C.",
-                                 "role": "ROLE_STUDENT",
-                                 "academic": {"studentCode": "506999999", "programCode": "506",
-                                              "pensumCode": "1015", "currentLevel": 2}}"""))
+                                 "firstName": "Pepito Andrés", "lastName": "Perez Gomez",
+                                 "roles": ["ROLE_STAFF", "ROLE_ADMIN"]}"""))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName").value("Brian S."))
-                .andExpect(jsonPath("$.academic.currentLevel").value(2));
+                .andExpect(jsonPath("$.id").value(created.id()))
+                .andExpect(jsonPath("$.firstName").value("Pepito Andrés"))
+                .andExpect(jsonPath("$.roles", contains("ROLE_STAFF", "ROLE_ADMIN")))
+                .andExpect(jsonPath("$.avatarUrl").value("https://cdn.kapp.konradlorenz.edu.co/avatars/3f8a1c2e.jpg"))
+                .andExpect(jsonPath("$.active").value(false));
+
+        UserProfile updated = reload(created.id());
+        assertThat(updated.createdAt()).isEqualTo(created.createdAt());
+        assertThat(updated.updatedAt()).isAfterOrEqualTo(created.updatedAt());
     }
 
     @Test
-    @DisplayName("a guest with an academic record is rejected with 400")
-    void upsert_guestWithAcademic_isRejected() throws Exception {
+    @DisplayName("a role sent twice is stored once")
+    void upsert_repeatedRole_isStoredOnce() throws Exception {
         mockMvc.perform(post("/internal/users")
                         .header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON).content("""
-                                {"email": "maria.rodriguez@gmail.com", "firstName": "Maria",
-                                 "lastName": "Rodriguez", "role": "ROLE_GUEST",
-                                 "academic": {"studentCode": "506999999", "programCode": "506",
+                                {"email": "ana.ruiz@konradlorenz.edu.co", "firstName": "Ana",
+                                 "lastName": "Ruiz Mejía",
+                                 "roles": ["ROLE_STAFF", "ROLE_ADMIN", "ROLE_STAFF"]}"""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roles", contains("ROLE_STAFF", "ROLE_ADMIN")));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @CsvSource(delimiter = '|', textBlock = """
+            '[]'                                  | must hold the profile role
+            '["ROLE_ADMIN"]'                      | must hold exactly one of ROLE_STUDENT, ROLE_PROFESSOR or ROLE_STAFF
+            '["ROLE_STUDENT", "ROLE_PROFESSOR"]'  | must hold exactly one of ROLE_STUDENT, ROLE_PROFESSOR or ROLE_STAFF
+            '["ROLE_GUEST"]'                      | must not hold ROLE_GUEST
+            '["ROLE_STUDENT", "ROLE_GUEST"]'      | must not hold ROLE_GUEST
+            """)
+    @DisplayName("roles must hold exactly one profile role, and never ROLE_GUEST")
+    void upsert_badRoles_areRejected(String roles, String issue) throws Exception {
+        mockMvc.perform(post("/internal/users")
+                        .header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"email": "maria.rodriguez@konradlorenz.edu.co", "firstName": "Maria",
+                                 "lastName": "Rodriguez", "roles": %s}""".formatted(roles)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[0].field").value("roles"))
+                .andExpect(jsonPath("$.details[0].issue").value(issue));
+
+        assertThat(mongoTemplate.count(new Query(), UserProfile.class)).isZero();
+    }
+
+    /**
+     * Before user 1.0, auth-service sent one {@code role} and an {@code academic} block. Such a call
+     * must fail loudly rather than create a profile with no roles: the two services ship together.
+     */
+    @Test
+    @DisplayName("a caller still on the old shape - one role and an academic block - is rejected")
+    void upsert_oldShape_isRejected() throws Exception {
+        mockMvc.perform(post("/internal/users")
+                        .header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"email": "pepito.perez@konradlorenz.edu.co", "firstName": "Pepito",
+                                 "lastName": "Perez Gomez", "role": "ROLE_STUDENT",
+                                 "academic": {"studentCode": "506900001", "programCode": "506",
                                               "pensumCode": "1015", "currentLevel": 1}}"""))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.details[0].field").value("academic"));
+                .andExpect(jsonPath("$.details[0].field").value("roles"));
     }
 
     @Test
-    @DisplayName("a student without an academic record is rejected with 400")
-    void upsert_studentWithoutAcademic_isRejected() throws Exception {
+    @DisplayName("a role KApp does not know is rejected with 400")
+    void upsert_unknownRole_isRejected() throws Exception {
         mockMvc.perform(post("/internal/users")
                         .header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON).content("""
-                                {"email": "pepito.perez@konradlorenz.edu.co",
-                                 "firstName": "Brian", "lastName": "Vargas",
-                                 "role": "ROLE_STUDENT", "academic": null}"""))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.details[0].field").value("academic"));
+                                {"email": "pepito.perez@konradlorenz.edu.co", "firstName": "Pepito",
+                                 "lastName": "Perez Gomez", "roles": ["ROLE_STUDENT", "ROLE_DEAN"]}"""))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -152,5 +190,12 @@ class InternalUserControllerTest extends AbstractUserServiceTest {
         assertThat(mongoTemplate.findById("to-delete", UserProfile.class)).isNull();
         mockMvc.perform(delete("/internal/users/to-delete").header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN))
                 .andExpect(status().isNoContent());
+    }
+
+    private void upsert(String body) throws Exception {
+        mockMvc.perform(post("/internal/users")
+                        .header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isOk());
     }
 }
