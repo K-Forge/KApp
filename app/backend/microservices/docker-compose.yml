@@ -149,6 +149,10 @@ services:
       # unmistakable in a log or a deployed config. Set the real value in .env.
       KAPP_INTERNAL_TOKEN: ${KAPP_INTERNAL_TOKEN:-CHANGE_ME_UNSET_INTERNAL_TOKEN}
 
+      # Password sign-in and everything around it: on for development, where nobody signs in
+      # with Microsoft yet. Production leaves it off, and those paths answer 404.
+      KAPP_LOCAL_SIGN_IN: ${KAPP_LOCAL_SIGN_IN:-true}
+
       # Registration gating. Only this domain may use /auth/register; guests are
       # unrestricted and land on ROLE_GUEST.
       KAPP_ALLOWED_EMAIL_DOMAINS: ${KAPP_ALLOWED_EMAIL_DOMAINS:-konradlorenz.edu.co,kforge.dev}
