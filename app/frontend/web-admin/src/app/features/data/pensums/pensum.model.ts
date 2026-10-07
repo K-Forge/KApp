@@ -7,7 +7,7 @@ export interface PensumArea {
 }
 
 export interface PensumCourse {
-  code: string | null;
+  /** KApp's own identifier of the item, which prerequisites and plans name it by. Never shown. */
   pensumItemCode: string;
   name: string;
   level: number;
@@ -21,9 +21,9 @@ export interface PensumCourse {
    * The course code as the university's own system carries it, or null where it is not known.
    *
    * <p>This is the only field that says a code is real. Nineteen of the twenty-three published
-   * plans are brochures that print no codes at all, so `code` there holds something KApp made up
-   * (`MKT-101`) to tell the items apart. It is an internal handle, not an institutional code,
-   * and it is never put on screen — see {@link officialCode}.
+   * plans are brochures that print no codes at all, so their `pensumItemCode` is something KApp
+   * made up (`MKT-101`) to tell the items apart. It is an internal handle, not an institutional
+   * code, and it is never put on screen — see {@link officialCode}.
    */
   sinuCode?: string | null;
 }
@@ -44,9 +44,9 @@ export function publishesCourseCodes(pensum: Pensum): boolean {
   return pensum.courses.some((course) => !!course.sinuCode);
 }
 
-/** The items of a pensum by the code its prerequisites name them with. */
-export function coursesByCode(pensum: Pensum): Map<string, PensumCourse> {
-  return new Map(pensum.courses.filter((c) => c.code).map((c) => [c.code as string, c]));
+/** The items of a pensum by the identifier its prerequisites name them with. */
+export function coursesByItemCode(pensum: Pensum): Map<string, PensumCourse> {
+  return new Map(pensum.courses.map((c) => [c.pensumItemCode, c]));
 }
 
 /**
@@ -55,11 +55,11 @@ export function coursesByCode(pensum: Pensum): Map<string, PensumCourse> {
  * whoever is checking the plan against its PDF, which a made-up code does not.
  */
 export function prerequisiteLabels(
-  byCode: Map<string, PensumCourse>,
+  byItemCode: Map<string, PensumCourse>,
   course: PensumCourse,
 ): string[] {
   return course.prerequisites.map((code) => {
-    const target = byCode.get(code);
+    const target = byItemCode.get(code);
     // Unreachable through the API, which refuses a prerequisite naming no course in the same
     // pensum; a hand-edited document pasted into the editor is another matter.
     if (!target) return code;
@@ -81,21 +81,6 @@ export interface Pensum {
   areas: PensumArea[];
   courses: PensumCourse[];
 }
-
-/** A minimal, valid starting document for the "New pensum" editor. */
-export const PENSUM_SKELETON: Pensum = {
-  pensumCode: '',
-  programCode: '',
-  programName: '',
-  faculty: '',
-  reform: '',
-  status: 'DRAFT',
-  totalCredits: 0,
-  totalHours: 0,
-  levels: 9,
-  areas: [],
-  courses: [],
-};
 
 /**
  * A pensum without its courses — what `GET /api/catalog/pensums` returns.

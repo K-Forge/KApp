@@ -2,7 +2,7 @@ package co.edu.konradlorenz.kapp.semaphore.service;
 
 import co.edu.konradlorenz.kapp.semaphore.domain.CourseStatus;
 import co.edu.konradlorenz.kapp.semaphore.domain.PensumCourse;
-import co.edu.konradlorenz.kapp.semaphore.domain.StudentProgressCourse;
+import co.edu.konradlorenz.kapp.semaphore.domain.SemaphoreEntry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +31,7 @@ class PrerequisiteWalkerTest {
     @DisplayName("a prerequisite recorded PASSED unlocks the item")
     void passedPrerequisiteUnlocks() {
         PensumCourse item = course("10024", List.of("10011"));
-        Map<String, StudentProgressCourse> byCode = Map.of(
+        Map<String, SemaphoreEntry> byCode = Map.of(
                 "10011", entry("10011", CourseStatus.PASSED));
 
         assertThat(walker.allPrerequisitesPassed(item, byCode)).isTrue();
@@ -41,8 +41,18 @@ class PrerequisiteWalkerTest {
     @DisplayName("IN_PROGRESS does not unlock - a course being taken has not settled")
     void inProgressPrerequisiteDoesNotUnlock() {
         PensumCourse item = course("10024", List.of("10011"));
-        Map<String, StudentProgressCourse> byCode = Map.of(
+        Map<String, SemaphoreEntry> byCode = Map.of(
                 "10011", entry("10011", CourseStatus.IN_PROGRESS));
+
+        assertThat(walker.allPrerequisitesPassed(item, byCode)).isFalse();
+    }
+
+    @Test
+    @DisplayName("a POSTPONED prerequisite does not unlock: aplazada is not passed")
+    void postponedPrerequisiteDoesNotUnlock() {
+        PensumCourse item = course("10024", List.of("10011"));
+        Map<String, SemaphoreEntry> byCode = Map.of(
+                "10011", entry("10011", CourseStatus.POSTPONED));
 
         assertThat(walker.allPrerequisitesPassed(item, byCode)).isFalse();
     }
@@ -51,7 +61,7 @@ class PrerequisiteWalkerTest {
     @DisplayName("a FAILED prerequisite does not unlock")
     void failedPrerequisiteDoesNotUnlock() {
         PensumCourse item = course("10024", List.of("10011"));
-        Map<String, StudentProgressCourse> byCode = Map.of(
+        Map<String, SemaphoreEntry> byCode = Map.of(
                 "10011", entry("10011", CourseStatus.FAILED));
 
         assertThat(walker.allPrerequisitesPassed(item, byCode)).isFalse();
@@ -61,7 +71,7 @@ class PrerequisiteWalkerTest {
     @DisplayName("a PENDING prerequisite does not unlock")
     void pendingPrerequisiteDoesNotUnlock() {
         PensumCourse item = course("10024", List.of("10011"));
-        Map<String, StudentProgressCourse> byCode = Map.of(
+        Map<String, SemaphoreEntry> byCode = Map.of(
                 "10011", entry("10011", CourseStatus.PENDING));
 
         assertThat(walker.allPrerequisitesPassed(item, byCode)).isFalse();
@@ -79,7 +89,7 @@ class PrerequisiteWalkerTest {
     @DisplayName("all of several prerequisites must be PASSED, not just some")
     void allOfSeveralPrerequisitesMustBePassed() {
         PensumCourse item = course("IS-ARQSOFT", List.of("46018", "20037"));
-        Map<String, StudentProgressCourse> byCode = Map.of(
+        Map<String, SemaphoreEntry> byCode = Map.of(
                 "46018", entry("46018", CourseStatus.PASSED),
                 "20037", entry("20037", CourseStatus.IN_PROGRESS));
 
@@ -87,11 +97,10 @@ class PrerequisiteWalkerTest {
     }
 
     private static PensumCourse course(String code, List<String> prerequisites) {
-        return new PensumCourse(code, code, "Course " + code, 1, 3, 4, "BIS", false,
-                prerequisites, null);
+        return new PensumCourse(code, "Course " + code, 1, 3, 4, "BIS", false, prerequisites, null);
     }
 
-    private static StudentProgressCourse entry(String code, CourseStatus status) {
-        return new StudentProgressCourse(code, code, status, null, null, null, null);
+    private static SemaphoreEntry entry(String code, CourseStatus status) {
+        return new SemaphoreEntry(code, status, null, null, null, null, null);
     }
 }

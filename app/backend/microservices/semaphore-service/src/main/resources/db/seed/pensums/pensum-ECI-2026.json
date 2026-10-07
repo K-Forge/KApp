@@ -19,7 +19,6 @@
   ],
   "courses": [
     {
-      "code": "ECI-101",
       "pensumItemCode": "ECI-101",
       "name": "Bases y aplicaciones del análisis conductual aplicado",
       "level": 1,
@@ -31,7 +30,6 @@
       "sinuCode": null
     },
     {
-      "code": "ECI-102",
       "pensumItemCode": "ECI-102",
       "name": "Evaluación psicológica y análisis funcional",
       "level": 1,
@@ -43,7 +41,6 @@
       "sinuCode": null
     },
     {
-      "code": "ECI-103",
       "pensumItemCode": "ECI-103",
       "name": "Perspectiva dimensional en clínica infantil",
       "level": 1,
@@ -55,7 +52,6 @@
       "sinuCode": null
     },
     {
-      "code": "ECI-104",
       "pensumItemCode": "ECI-104",
       "name": "Práctica en Psicología Clínica I",
       "level": 1,
@@ -67,7 +63,6 @@
       "sinuCode": null
     },
     {
-      "code": "ECI-105",
       "pensumItemCode": "ECI-105",
       "name": "Diseños de investigación Clínica I",
       "level": 1,
@@ -79,7 +74,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "ECI-106",
       "name": "Electiva I",
       "level": 1,
@@ -91,7 +85,6 @@
       "sinuCode": null
     },
     {
-      "code": "ECI-107",
       "pensumItemCode": "ECI-107",
       "name": "Entrenamiento en habilidades clínicas I",
       "level": 1,
@@ -103,7 +96,6 @@
       "sinuCode": null
     },
     {
-      "code": "ECI-201",
       "pensumItemCode": "ECI-201",
       "name": "Terapias contextuales I: ACT y PAF",
       "level": 2,
@@ -115,7 +107,6 @@
       "sinuCode": null
     },
     {
-      "code": "ECI-202",
       "pensumItemCode": "ECI-202",
       "name": "Aplicaciones del análisis de la conducta verbal en dificultades del desarrollo",
       "level": 2,
@@ -127,7 +118,6 @@
       "sinuCode": null
     },
     {
-      "code": "ECI-203",
       "pensumItemCode": "ECI-203",
       "name": "Práctica en Psicología Clínica II",
       "level": 2,
@@ -139,7 +129,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "ECI-204",
       "name": "Electiva II",
       "level": 2,
@@ -151,7 +140,6 @@
       "sinuCode": null
     },
     {
-      "code": "ECI-205",
       "pensumItemCode": "ECI-205",
       "name": "Seminario investigativo",
       "level": 2,
@@ -163,7 +151,6 @@
       "sinuCode": null
     },
     {
-      "code": "ECI-206",
       "pensumItemCode": "ECI-206",
       "name": "Entrenamiento en habilidades clínicas II",
       "level": 2,

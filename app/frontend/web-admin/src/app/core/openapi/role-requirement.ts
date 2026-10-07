@@ -92,10 +92,7 @@ function extractRoles(text: string): Role[] {
 function fallbackByPath(op: ConsoleOperation): RoleRequirement | null {
   if (op.serviceId === 'semaphore') {
     if (op.path.startsWith('/api/catalog')) {
-      return { kind: 'roles', roles: op.method === 'get' ? ['ROLE_STUDENT', 'ROLE_PROFESSOR', 'ROLE_ADMIN'] : ['ROLE_ADMIN'], source: 'inferred' };
-    }
-    if (op.path === '/api/semaphore/{userId}') {
-      return { kind: 'roles', roles: ['ROLE_ADMIN'], source: 'inferred' };
+      return { kind: 'roles', roles: op.method === 'get' ? ['ROLE_STUDENT', 'ROLE_PROFESSOR', 'ROLE_STAFF', 'ROLE_ADMIN'] : ['ROLE_ADMIN'], source: 'inferred' };
     }
     if (op.path.startsWith('/api/semaphore/me')) {
       return { kind: 'roles', roles: ['ROLE_STUDENT'], source: 'inferred' };

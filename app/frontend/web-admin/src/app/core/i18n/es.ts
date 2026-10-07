@@ -584,6 +584,9 @@ export const ES: Record<string, string> = {
   'The published plan prints no weekly hours per course.': 'El plan publicado no trae horas semanales por materia.',
   '{credits} cr': '{credits} cr',
   // features/data/pensums/pensums.page.ts
+  'Correct one by importing it again': 'Corregir uno importándolo de nuevo',
+  'The catalog is SINU’s; these plans are its backup. Correcting one reaches every student.': 'El catálogo es de SINU; estos planes son su respaldo. Corregir uno le llega a cada estudiante.',
+  'Choose one above to read it.': 'Elija uno arriba para leerlo.',
   'Pensums': 'Pensums',
   'A programme’s plan of study: its courses, levels, credits and prerequisites.': 'El plan de estudios de un programa: sus materias, niveles, créditos y prerrequisitos.',
   'Open one by its code': 'Abrir uno por su código',
@@ -628,6 +631,8 @@ export const ES: Record<string, string> = {
   'The pensum document is not valid JSON.': 'El documento del pensum no es JSON válido.',
   'Delete pensum {code} ({program})? It has {courses} courses. If any student is following it, the server refuses and says how many.': '¿Eliminar el pensum {code} ({program})? Tiene {courses} materias. Si algún estudiante lo está siguiendo, el servidor lo rechaza y dice cuántos.',
   // features/data/programs/programs.page.ts
+  'See every programme and its active pensum': 'Ver cada programa y su pensum activo',
+  'The catalog is SINU’s, and read-only here. A programme arrives, or changes, by importing its pensum.': 'El catálogo es de SINU y aquí es de solo lectura. Un programa llega, o cambia, al importar su pensum.',
   'Programs': 'Programas',
   'The degree programmes; their courses live in their pensum.': 'Los programas académicos; sus materias están en su pensum.',
   'Create, edit and delete programmes': 'Crear, editar y eliminar programas',

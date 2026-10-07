@@ -27,12 +27,12 @@ import java.net.URI;
 import java.util.List;
 
 /**
- * The student's saved arrangements of their pensum.
+ * The student's saved arrangements of their pensum: the one thing in this service a student writes.
  *
  * <p>{@code ROLE_STUDENT} only, and identity always comes from {@link CurrentUser#id()} - the
- * validated JWT subject - never from the path. A professor has no academic record of their own
- * and is refused here exactly as they are on the rest of {@code /api/semaphore/me/**}; an
- * administrator reads a student's progress through {@code GET /api/semaphore/{userId}}.
+ * validated JWT subject - never from the path. A professor or staff member follows no program and
+ * is refused here exactly as on the rest of {@code /api/semaphore/me/**}, and nobody reads another
+ * student's plans, administrators included.
  */
 @RestController
 @RequestMapping("/api/semaphore/me/plans")
@@ -49,14 +49,14 @@ public class AcademicPlanController {
     @StudentOnly
     @Operation(summary = "List the caller's academic plans")
     public List<AcademicPlanDto> listPlans() {
-        return planService.list(CurrentUser.id()).stream().map(AcademicPlanDto::from).toList();
+        return planService.list(CurrentUser.id()).stream().map(planService::view).toList();
     }
 
     @PostMapping
     @StudentOnly
     @Operation(summary = "Create an academic plan")
     public ResponseEntity<AcademicPlanDto> createPlan(@Valid @RequestBody AcademicPlanRequest body) {
-        AcademicPlanDto created = AcademicPlanDto.from(planService.create(CurrentUser.id(), body));
+        AcademicPlanDto created = planService.view(planService.create(CurrentUser.id(), body));
         return ResponseEntity.created(URI.create("/api/semaphore/me/plans/" + created.id()))
                 .body(created);
     }
@@ -65,7 +65,7 @@ public class AcademicPlanController {
     @StudentOnly
     @Operation(summary = "Get one academic plan")
     public AcademicPlanDto getPlan(@PathVariable String planId) {
-        return AcademicPlanDto.from(planService.get(CurrentUser.id(), planId));
+        return planService.view(planService.get(CurrentUser.id(), planId));
     }
 
     @PatchMapping("/{planId}")
@@ -73,7 +73,7 @@ public class AcademicPlanController {
     @Operation(summary = "Rename a plan or make it the primary one")
     public AcademicPlanDto updatePlan(@PathVariable String planId,
                                        @Valid @RequestBody AcademicPlanUpdate body) {
-        return AcademicPlanDto.from(planService.update(CurrentUser.id(), planId, body));
+        return planService.view(planService.update(CurrentUser.id(), planId, body));
     }
 
     @DeleteMapping("/{planId}")
@@ -84,21 +84,22 @@ public class AcademicPlanController {
         planService.delete(CurrentUser.id(), planId);
     }
 
-    @PutMapping("/{planId}/placements/{code}")
+    @PutMapping("/{planId}/placements/{pensumItemCode}")
     @StudentOnly
     @Operation(summary = "Move a course to a different level",
-            description = "Does NOT affect eligibility, which is computed from approved prerequisites.")
+            description = "For an elective slot, electiveSinuCode names the course from the elective "
+                    + "bank. Does NOT affect eligibility, which is computed from approved prerequisites.")
     public AcademicPlanDto placeCourse(@PathVariable String planId,
-                                        @PathVariable String code,
+                                        @PathVariable String pensumItemCode,
                                         @Valid @RequestBody PlacementRequest body) {
-        return AcademicPlanDto.from(
-                planService.place(CurrentUser.id(), planId, code, body.plannedLevel()));
+        return planService.view(planService.place(CurrentUser.id(), planId, pensumItemCode,
+                body.plannedLevel(), body.electiveSinuCode()));
     }
 
-    @DeleteMapping("/{planId}/placements/{code}")
+    @DeleteMapping("/{planId}/placements/{pensumItemCode}")
     @StudentOnly
     @Operation(summary = "Return a course to the level the pensum gives it")
-    public AcademicPlanDto resetCourse(@PathVariable String planId, @PathVariable String code) {
-        return AcademicPlanDto.from(planService.reset(CurrentUser.id(), planId, code));
+    public AcademicPlanDto resetCourse(@PathVariable String planId, @PathVariable String pensumItemCode) {
+        return planService.view(planService.reset(CurrentUser.id(), planId, pensumItemCode));
     }
 }

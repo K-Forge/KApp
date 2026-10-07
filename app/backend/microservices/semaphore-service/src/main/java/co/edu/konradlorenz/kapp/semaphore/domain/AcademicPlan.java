@@ -53,27 +53,28 @@ public record AcademicPlan(
         return new AcademicPlan(null, userId, name, pensumCode, primary, List.of(), now, now);
     }
 
-    public Optional<Placement> placementFor(String code) {
-        return placements.stream().filter(p -> p.code().equals(code)).findFirst();
+    public Optional<Placement> placementFor(String pensumItemCode) {
+        return placements.stream().filter(p -> p.pensumItemCode().equals(pensumItemCode)).findFirst();
     }
 
     /**
-     * @return a copy with {@code code} pinned to {@code level}, replacing any existing
-     *         placement for it. Idempotent, which is what lets the endpoint be a PUT.
+     * @return a copy with the item pinned to {@code level}, and an elective slot to the course chosen
+     *         for it, replacing any existing placement for the item. Idempotent, which is what lets
+     *         the endpoint be a PUT.
      */
-    public AcademicPlan withPlacement(String code, int level) {
+    public AcademicPlan withPlacement(String pensumItemCode, int level, String electiveSinuCode) {
         List<Placement> next = new ArrayList<>(placements.stream()
-                .filter(p -> !p.code().equals(code))
+                .filter(p -> !p.pensumItemCode().equals(pensumItemCode))
                 .toList());
-        next.add(new Placement(code, level));
-        next.sort((a, b) -> a.code().compareTo(b.code()));
+        next.add(new Placement(pensumItemCode, level, electiveSinuCode));
+        next.sort((a, b) -> a.pensumItemCode().compareTo(b.pensumItemCode()));
         return new AcademicPlan(id, userId, name, pensumCode, primary, next, createdAt, Instant.now());
     }
 
-    /** @return a copy without a placement for {@code code}; the course returns to its pensum level */
-    public AcademicPlan withoutPlacement(String code) {
+    /** @return a copy without a placement for the item; it returns to its pensum level */
+    public AcademicPlan withoutPlacement(String pensumItemCode) {
         return new AcademicPlan(id, userId, name, pensumCode, primary,
-                placements.stream().filter(p -> !p.code().equals(code)).toList(),
+                placements.stream().filter(p -> !p.pensumItemCode().equals(pensumItemCode)).toList(),
                 createdAt, Instant.now());
     }
 

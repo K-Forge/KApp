@@ -118,11 +118,12 @@ class PublishedPensumSeedTest {
     }
 
     @Test
-    @DisplayName("placeholder course codes carry no sinuCode; printed ones carry their own")
+    @DisplayName("placeholder item codes carry no sinuCode; printed ones carry their own, or SINU's where it differs")
     void sinuCodeMarksInstitutionalCodes() {
         assertThat(pensum("MKT-2026").courses()).allSatisfy(c -> assertThat(c.sinuCode()).isNull());
-        assertThat(pensum("1015").courses())
-                .allSatisfy(c -> assertThat(c.sinuCode()).isEqualTo(c.pensumItemCode()));
+        // Estadística Descriptiva: 17018 on the 2019 grid, 17080 in SINU (docs/pensums/catalog.yaml).
+        assertThat(pensum("1015").courses()).allSatisfy(c -> assertThat(c.sinuCode())
+                .isEqualTo(c.pensumItemCode().equals("17018") ? "17080" : c.pensumItemCode()));
     }
 
     @Test
@@ -192,9 +193,9 @@ class PublishedPensumSeedTest {
     void sistemasPrerequisitesAndElectives() {
         Pensum pensum = pensum("1015");
 
-        assertThat(pensum.findByAddressableCode("12015").orElseThrow().prerequisites()).containsExactly("11015");
-        assertThat(pensum.findByAddressableCode("46012").orElseThrow().prerequisites()).containsExactly("45012");
-        assertThat(pensum.findByAddressableCode("39020").orElseThrow().prerequisites()).containsExactly("56201");
+        assertThat(pensum.findByPensumItemCode("12015").orElseThrow().prerequisites()).containsExactly("11015");
+        assertThat(pensum.findByPensumItemCode("46012").orElseThrow().prerequisites()).containsExactly("45012");
+        assertThat(pensum.findByPensumItemCode("39020").orElseThrow().prerequisites()).containsExactly("56201");
         assertThat(pensum.courses().stream().filter(PensumCourse::electiveSlot).map(PensumCourse::pensumItemCode))
                 .containsExactlyInAnyOrder("59075", "59078", "59085", "59088", "59096", "59098");
     }
