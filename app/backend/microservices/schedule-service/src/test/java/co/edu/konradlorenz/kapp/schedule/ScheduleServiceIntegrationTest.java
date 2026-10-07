@@ -2,54 +2,21 @@ package co.edu.konradlorenz.kapp.schedule;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
-import java.util.stream.StreamSupport;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * The Phase 0 exit test. It proves the whole skeleton actually holds together:
- * MongoDB wiring, Mongock migrations, the shared security auto-configuration from
- * {@code common}, role mapping from the {@code roles} claim, and the shared error
- * envelope.
- *
- * <p>Before this, the repository had zero tests across every service and CI passed
- * vacuously - {@code mvn verify} compiled and reported success with nothing to run.
- *
- * <p>Testcontainers' {@code MongoDBContainer} starts a single-node replica set, which
- * matches how MongoDB is run in docker-compose. That is deliberate: a standalone
- * {@code mongod} cannot perform multi-document transactions, and the failure appears at
- * runtime rather than at startup.
+ * The skeleton holds together: the shared security auto-configuration from {@code common}, role
+ * mapping from the {@code roles} claim, the open health probe and the shared error envelope. The
+ * service stores nothing, so it starts without any database.
  */
-@SpringBootTest
-@AutoConfigureMockMvc
-@Testcontainers
-class ScheduleServiceIntegrationTest {
-
-    @Container
-    @ServiceConnection
-    static final MongoDBContainer MONGO = new MongoDBContainer("mongo:7.0");
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
+class ScheduleServiceIntegrationTest extends AbstractScheduleServiceTest {
 
     @Test
     @DisplayName("rejects a request with no token")
@@ -68,13 +35,13 @@ class ScheduleServiceIntegrationTest {
         mockMvc.perform(get("/api/schedule/ping")
                         .with(jwt()
                                 .jwt(builder -> builder
-                                        .subject("507f1f77bcf86cd799439011")
-                                        .claim("email", "brian@konradlorenz.edu.co")
+                                        .subject(STUDENT_ID)
+                                        .claim("email", "pepito.perez@konradlorenz.edu.co")
                                         .claim("roles", List.of("ROLE_STUDENT")))
                                 .authorities(new SimpleGrantedAuthority("ROLE_STUDENT"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.service").value("schedule-service"))
-                .andExpect(jsonPath("$.userId").value("507f1f77bcf86cd799439011"))
+                .andExpect(jsonPath("$.userId").value(STUDENT_ID))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_STUDENT"));
     }
 
@@ -94,16 +61,5 @@ class ScheduleServiceIntegrationTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.error").value("Not Found"));
-    }
-
-    @Test
-    @DisplayName("Mongock created the baseline indexes")
-    void mongockRanMigrations() {
-        var indexNames = StreamSupport
-                .stream(mongoTemplate.indexOps("schedules").getIndexInfo().spliterator(), false)
-                .map(info -> info.getName())
-                .toList();
-
-        assertThat(indexNames).contains("uk_schedule_user_period", "ix_schedule_user_active");
     }
 }

@@ -1,0 +1,480 @@
+{
+  "about": "An invented student, in the shape KApp expects from SINU. Nothing here is real: not the person, the professors, the section codes or the rooms. The program, the pensum and the course codes are the published ones of Ingeniería de Sistemas 1015. pacr42-example.pdf is this same timetable printed the way SINU prints a student's.",
+  "person": {
+    "email": "pepito.perez@konradlorenz.edu.co",
+    "name": "PEREZ PEREZ PEPITO",
+    "profile": "STUDENT",
+    "programCode": "506",
+    "programName": "Ingeniería de sistemas",
+    "pensumCode": "1015",
+    "pensumName": "Pensum Ingenieria de sistemas vigente",
+    "currentLevel": 5
+  },
+  "timetable": {
+    "period": "20271",
+    "sections": [
+      {
+        "sectionCode": "3101",
+        "sinuCode": "13013",
+        "courseName": "ECUACIONES DIFERENCIALES",
+        "level": 5,
+        "credits": 3,
+        "totalHours": 64,
+        "group": "21",
+        "subgroup": null,
+        "professor": "DOCENTE EJEMPLO UNO",
+        "sede": "Sede Principal",
+        "meetings": [
+          {
+            "dayOfWeek": "MONDAY",
+            "startTime": "07:00",
+            "endTime": "08:30",
+            "blocks": 2,
+            "periods": [
+              {
+                "from": "2027-02-01",
+                "to": "2027-03-15",
+                "room": "402"
+              },
+              {
+                "from": "2027-03-29",
+                "to": "2027-05-24",
+                "room": "402"
+              }
+            ]
+          },
+          {
+            "dayOfWeek": "WEDNESDAY",
+            "startTime": "07:00",
+            "endTime": "08:30",
+            "blocks": 2,
+            "periods": [
+              {
+                "from": "2027-02-03",
+                "to": "2027-03-17",
+                "room": "402"
+              },
+              {
+                "from": "2027-03-31",
+                "to": "2027-05-26",
+                "room": "402"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "sectionCode": "3102",
+        "sinuCode": "46033",
+        "courseName": "SISTEMAS OPERACIONALES",
+        "level": 5,
+        "credits": 2,
+        "totalHours": 48,
+        "group": "21",
+        "subgroup": "02",
+        "professor": "DOCENTE EJEMPLO DOS",
+        "sede": "Sede Principal",
+        "meetings": [
+          {
+            "dayOfWeek": "TUESDAY",
+            "startTime": "07:00",
+            "endTime": "09:15",
+            "blocks": 3,
+            "periods": [
+              {
+                "from": "2027-02-02",
+                "to": "2027-03-16",
+                "room": "605"
+              },
+              {
+                "from": "2027-03-30",
+                "to": "2027-05-25",
+                "room": "605"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "sectionCode": "3103",
+        "sinuCode": "31404",
+        "courseName": "DISEÑO DE INTERFACES DE USUARIO",
+        "level": 5,
+        "credits": 3,
+        "totalHours": 48,
+        "group": "21",
+        "subgroup": null,
+        "professor": "DOCENTE EJEMPLO TRES",
+        "sede": "Sede Principal",
+        "meetings": [
+          {
+            "dayOfWeek": "WEDNESDAY",
+            "startTime": "09:15",
+            "endTime": "11:30",
+            "blocks": 3,
+            "periods": [
+              {
+                "from": "2027-02-03",
+                "to": "2027-03-17",
+                "room": "710"
+              },
+              {
+                "from": "2027-03-31",
+                "to": "2027-05-26",
+                "room": "711"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "sectionCode": "3104",
+        "sinuCode": "31614",
+        "courseName": "NUEVAS TECNOLOGÍAS DE DESARROLLO",
+        "level": 5,
+        "credits": 3,
+        "totalHours": 48,
+        "group": "21",
+        "subgroup": null,
+        "professor": "DOCENTE EJEMPLO CUATRO",
+        "sede": "Sede Principal",
+        "meetings": [
+          {
+            "dayOfWeek": "THURSDAY",
+            "startTime": "18:15",
+            "endTime": "20:30",
+            "blocks": 3,
+            "periods": [
+              {
+                "from": "2027-02-04",
+                "to": "2027-03-18",
+                "room": "612"
+              },
+              {
+                "from": "2027-04-01",
+                "to": "2027-04-01",
+                "room": null
+              },
+              {
+                "from": "2027-04-08",
+                "to": "2027-05-27",
+                "room": "612"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "sectionCode": "3105",
+        "sinuCode": "46012",
+        "courseName": "BASES DE DATOS II",
+        "level": 5,
+        "credits": 3,
+        "totalHours": 64,
+        "group": "21",
+        "subgroup": null,
+        "professor": "DOCENTE EJEMPLO UNO",
+        "sede": "Sede Principal",
+        "meetings": [
+          {
+            "dayOfWeek": "FRIDAY",
+            "startTime": "18:15",
+            "endTime": "21:15",
+            "blocks": 4,
+            "periods": [
+              {
+                "from": "2027-02-05",
+                "to": "2027-03-19",
+                "room": "709"
+              },
+              {
+                "from": "2027-04-02",
+                "to": "2027-05-28",
+                "room": "709"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "sectionCode": "3106",
+        "sinuCode": "75081",
+        "courseName": "INGLÉS PROFICIENCIA",
+        "level": 5,
+        "credits": 2,
+        "totalHours": 64,
+        "group": "23",
+        "subgroup": null,
+        "professor": "DOCENTE EJEMPLO CINCO",
+        "sede": "Sede Principal",
+        "meetings": [
+          {
+            "dayOfWeek": "SATURDAY",
+            "startTime": "08:00",
+            "endTime": "11:00",
+            "blocks": 4,
+            "periods": [
+              {
+                "from": "2027-02-06",
+                "to": "2027-02-06",
+                "room": null
+              },
+              {
+                "from": "2027-02-13",
+                "to": "2027-03-20",
+                "room": "301"
+              },
+              {
+                "from": "2027-04-03",
+                "to": "2027-05-29",
+                "room": "301"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "records": [
+    {
+      "sinuCode": "11015",
+      "name": "PRECÁLCULO",
+      "status": "APROBADA",
+      "period": "20251",
+      "grade": 42
+    },
+    {
+      "sinuCode": "21012",
+      "name": "LÓGICA MATEMÁTICA",
+      "status": "APROBADA",
+      "period": "20251",
+      "grade": 38
+    },
+    {
+      "sinuCode": "41025",
+      "name": "FUNDAMENTOS DE PROGRAMACIÓN",
+      "status": "APROBADA",
+      "period": "20251",
+      "grade": 45
+    },
+    {
+      "sinuCode": "41012",
+      "name": "INTRODUCCIÓN A LA INGENIERÍA DE SISTEMAS",
+      "status": "APROBADA",
+      "period": "20251",
+      "grade": 40
+    },
+    {
+      "sinuCode": "71181",
+      "name": "INGLÉS INTERMEDIO BAJO",
+      "status": "APROBADA",
+      "period": "20251",
+      "grade": 47
+    },
+    {
+      "sinuCode": "71071",
+      "name": "HABILIDADES COMUNICATIVAS",
+      "status": "APROBADA",
+      "period": "20251",
+      "grade": 36
+    },
+    {
+      "sinuCode": "12015",
+      "name": "CÁLCULO I",
+      "status": "APROBADA",
+      "period": "20252",
+      "grade": 39
+    },
+    {
+      "sinuCode": "63202",
+      "name": "ÁLGEBRA LINEAL I",
+      "status": "APROBADA",
+      "period": "20252",
+      "grade": 41
+    },
+    {
+      "sinuCode": "23012",
+      "name": "MATEMÁTICAS DISCRETAS",
+      "status": "APROBADA",
+      "period": "20252",
+      "grade": 33
+    },
+    {
+      "sinuCode": "31013",
+      "name": "TÉCNICAS DE PROGRAMACIÓN I",
+      "status": "APROBADA",
+      "period": "20252",
+      "grade": 44
+    },
+    {
+      "sinuCode": "72081",
+      "name": "INGLÉS INTERMEDIO MEDIO",
+      "status": "APROBADA",
+      "period": "20252",
+      "grade": 46
+    },
+    {
+      "sinuCode": "71221",
+      "name": "CULTURA I",
+      "status": "APROBADA",
+      "period": "20252",
+      "grade": 37
+    },
+    {
+      "sinuCode": "13015",
+      "name": "CÁLCULO II",
+      "status": "APROBADA",
+      "period": "20261",
+      "grade": 35
+    },
+    {
+      "sinuCode": "54034",
+      "name": "CINEMÁTICA",
+      "status": "APROBADA",
+      "period": "20261",
+      "grade": 43
+    },
+    {
+      "sinuCode": "31014",
+      "name": "TÉCNICAS DE PROGRAMACIÓN II",
+      "status": "APROBADA",
+      "period": "20261",
+      "grade": 40
+    },
+    {
+      "sinuCode": "54033",
+      "name": "ESTRUCTURAS DE DATOS",
+      "status": "APROBADA",
+      "period": "20261",
+      "grade": 48
+    },
+    {
+      "sinuCode": "73081",
+      "name": "INGLÉS INTERNEDIO ALTO",
+      "status": "APROBADA",
+      "period": "20261",
+      "grade": 34
+    },
+    {
+      "sinuCode": "76011",
+      "name": "CÁTEDRA DE CULTURA II",
+      "status": "APROBADA",
+      "period": "20261",
+      "grade": 39
+    },
+    {
+      "sinuCode": "14015",
+      "name": "CÁLCULO III",
+      "status": "APROBADA",
+      "period": "20262",
+      "grade": 42
+    },
+    {
+      "sinuCode": "54044",
+      "name": "ELECTROMAGNETISMO",
+      "status": "APLAZADA",
+      "period": "20262",
+      "grade": null
+    },
+    {
+      "sinuCode": "54043",
+      "name": "ANÁLISIS Y DISEÑO DE SISTEMAS",
+      "status": "APROBADA",
+      "period": "20262",
+      "grade": 45
+    },
+    {
+      "sinuCode": "31506",
+      "name": "LÓGICA DIGITAL Y MICROPROCESADORES",
+      "status": "PERDIDA",
+      "period": "20262",
+      "grade": 24
+    },
+    {
+      "sinuCode": "45012",
+      "name": "BASES DE DATOS I",
+      "status": "APROBADA",
+      "period": "20262",
+      "grade": 38
+    },
+    {
+      "sinuCode": "74081",
+      "name": "INGLÉS AVANZADO",
+      "status": "APROBADA",
+      "period": "20262",
+      "grade": 41
+    },
+    {
+      "sinuCode": "13013",
+      "name": "ECUACIONES DIFERENCIALES",
+      "status": "EN CURSO",
+      "period": "20271",
+      "grade": null
+    },
+    {
+      "sinuCode": "46033",
+      "name": "SISTEMAS OPERACIONALES",
+      "status": "EN CURSO",
+      "period": "20271",
+      "grade": null
+    },
+    {
+      "sinuCode": "31404",
+      "name": "DISEÑO DE INTERFACES DE USUARIO",
+      "status": "EN CURSO",
+      "period": "20271",
+      "grade": null
+    },
+    {
+      "sinuCode": "31614",
+      "name": "NUEVAS TECNOLOGÍAS DE DESARROLLO",
+      "status": "EN CURSO",
+      "period": "20271",
+      "grade": null
+    },
+    {
+      "sinuCode": "46012",
+      "name": "BASES DE DATOS II",
+      "status": "EN CURSO",
+      "period": "20271",
+      "grade": null
+    },
+    {
+      "sinuCode": "75081",
+      "name": "INGLÉS PROFICIENCIA",
+      "status": "EN CURSO",
+      "period": "20271",
+      "grade": null
+    }
+  ],
+  "electiveBank": {
+    "period": "20271",
+    "pensumCode": "1015",
+    "offerings": [
+      {
+        "sinuCode": "59211",
+        "name": "COMPUTACIÓN EN LA NUBE",
+        "credits": 3,
+        "weeklyHours": 3,
+        "slots": []
+      },
+      {
+        "sinuCode": "59214",
+        "name": "INTELIGENCIA ARTIFICIAL APLICADA",
+        "credits": 3,
+        "weeklyHours": 3,
+        "slots": []
+      },
+      {
+        "sinuCode": "59217",
+        "name": "SEGURIDAD DE LA INFORMACIÓN",
+        "credits": 3,
+        "weeklyHours": 3,
+        "slots": [
+          "59096",
+          "59098"
+        ]
+      }
+    ]
+  }
+}

@@ -233,7 +233,7 @@ services:
     profiles: ["academic", "full"]
     environment:
       SERVER_PORT: 8084
-      MONGODB_URI: ${MONGO_SCHEDULE_URI:?set it in .env - docs/ATLAS-SETUP.md}
+      # No database: the timetable is read from SINU (the test SINU until it opens) and never stored.
       KAPP_JWKS_URI: http://auth-service:8081/.well-known/jwks.json
       KAPP_LOG_LEVEL: ${KAPP_LOG_LEVEL:-INFO}
     mem_limit: 512m

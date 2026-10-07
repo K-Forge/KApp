@@ -8,11 +8,6 @@ spring:
   application:
     name: schedule-service
 
-  data:
-    mongodb:
-      uri: ${MONGODB_URI:mongodb://localhost:27017/kapp_schedule}
-      auto-index-creation: false   # indexes are declared in Mongock change units
-
   security:
     oauth2:
       resourceserver:
@@ -22,16 +17,14 @@ spring:
           # auth-service were already up - a boot-order deadlock under docker compose.
           jwk-set-uri: ${KAPP_JWKS_URI:http://localhost:8081/.well-known/jwks.json}
 
-  # The catalogue is near-static reference data - a pensum does not change mid-semester -
-  # so an hour-old answer is as good as a fresh one, and it means a briefly-down
-  # semaphore-service never blocks a student from entering their own timetable by hand.
+  # The catalogue (pensumCourses) and the building of each sede (sedeBuildings): reference data
+  # that changes rarely, kept a few minutes so a timetable does not cost two more calls.
   cache:
-    cache-names: pensumCourses
+    cache-names: pensumCourses,sedeBuildings
     caffeine:
-      spec: expireAfterWrite=1h,maximumSize=1000
+      spec: expireAfterWrite=5m,maximumSize=1000
 
-# Feign timeouts for the semaphore-service catalogue lookup: fail fast rather than let a
-# slow dependency stall an enrollment write, matching auth-service's client to user-service.
+# Fail fast rather than let a slow neighbour stall a timetable: both lookups fail open.
 feign:
   client:
     config:
@@ -40,18 +33,20 @@ feign:
         read-timeout: 5000
 
 kapp:
+  sinu:
+    # Which SINU the timetables are read from. `fake` serves the invented timetables of
+    # docs/api/sinu/ while the university has not opened SINU; there is no other adapter yet.
+    adapter: ${KAPP_SINU_ADAPTER:fake}
   schedule:
-    # Where semaphore-service answers. By name: Docker Compose and Kubernetes both resolve a
+    # A timetable read from SINU is kept this long, and no longer: nothing academic is stored.
+    timetable-cache: ${KAPP_TIMETABLE_CACHE:5m}
+    # The university's clock: which day it is decides the current period and the current week.
+    zone: ${KAPP_SCHEDULE_ZONE:America/Bogota}
+    # Where its neighbours answer. By name: Docker Compose and Kubernetes both resolve a
     # service's name to its address, so no registry is needed. A host-networked server or a
     # local run sets the address itself.
     semaphore-service-url: ${KAPP_SEMAPHORE_SERVICE_URL:http://semaphore-service:8083}
-
-mongock:
-  migration-scan-package: co.edu.konradlorenz.kapp.schedule.migration
-  # Left off deliberately: the change units only create indexes, which are idempotent,
-  # and enabling transactions requires a MongoTransactionManager bean.
-  # Property is `transactional`; `transaction-enabled` is deprecated in Mongock 5.5.
-  transactional: false
+    map-service-url: ${KAPP_MAP_SERVICE_URL:http://map-service:8085}
 
 management:
   endpoints:

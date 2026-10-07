@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class MeetingResolutionTest {
 
-    private static final Meeting ESTADISTICA = new Meeting("meeting-1", DayOfWeek.MONDAY,
+    private static final Meeting ESTADISTICA = new Meeting(DayOfWeek.MONDAY,
             LocalTime.of(18, 15), LocalTime.of(20, 30), List.of(
                     range("2026-07-27", "2026-08-10", "302"),
                     range("2026-08-24", "2026-09-14", "302"),

@@ -7,6 +7,12 @@ The contracts are the source of truth: the mocks serve them as soon as they merg
 (`app/backend/microservices/mock/README.md`), and the services implement them in the pull requests
 that follow. Until a service has caught up, its contract describes where it is going, not where it is.
 
+## October 2026: schedule 2.0.1
+
+- `Section.color`: two courses of one timetable never share a colour while there are colours
+  left. Each course still starts from a colour of its own, which it keeps from one period to the
+  next. Nothing to migrate.
+
 ## October 2026: the 2.0 set
 
 KApp stops being an academic record the student edits and becomes a reader of SINU, the

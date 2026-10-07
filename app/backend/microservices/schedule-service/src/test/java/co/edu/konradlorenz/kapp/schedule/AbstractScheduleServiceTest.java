@@ -2,91 +2,114 @@ package co.edu.konradlorenz.kapp.schedule;
 
 import co.edu.konradlorenz.kapp.common.security.KappRoles;
 import co.edu.konradlorenz.kapp.schedule.catalog.CatalogClient;
-import co.edu.konradlorenz.kapp.schedule.domain.Enrollment;
-import co.edu.konradlorenz.kapp.schedule.domain.Meeting;
-import co.edu.konradlorenz.kapp.schedule.domain.MeetingPeriod;
-import co.edu.konradlorenz.kapp.schedule.domain.Schedule;
+import co.edu.konradlorenz.kapp.schedule.catalog.PensumCourseView;
+import co.edu.konradlorenz.kapp.schedule.map.MapBuildingView;
+import co.edu.konradlorenz.kapp.schedule.map.MapClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
-import org.testcontainers.containers.MongoDBContainer;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 /**
- * Shared fixture for the schedule tests, mirroring {@code user-service}'s
- * {@code AbstractUserServiceTest}: one MongoDB, one application context, one set of seed
- * helpers.
+ * Shared fixture for the schedule tests: one application context, a fixed clock, and the two
+ * neighbours mocked.
  *
- * <p>{@link CatalogClient} is replaced with a Mockito mock rather than left to call
- * semaphore-service: it is not guaranteed to be up, and the contract only asks this service to fail open when it isn't - see
- * {@code catalog.PensumCatalogService}. Left unstubbed, the mock's default answer for
- * a {@code List}-returning method is an empty list, which is exactly the "catalogue not
- * reachable" case.
+ * <p>The test SINU serves the invented timetable of {@code docs/api/sinu/example.json}, moved onto
+ * the current period. The clock stands on Monday 5 October 2026, week 11 of 2026-2, so every test
+ * sees the same classes on the same dates. Nothing is stored, so there is no database to start.
+ *
+ * <p>{@link CatalogClient} and {@link MapClient} are Mockito mocks rather than real neighbours: both
+ * lookups fail open, and the tests say what the neighbours answer. By default the map says the
+ * Edificio Central is SINU's "Sede Principal", and the catalogue has five of the six level-5 courses
+ * the example's student takes, each under its own code; Inglés Proficiencia is missing on purpose.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(AbstractScheduleServiceTest.FixedClock.class)
 public abstract class AbstractScheduleServiceTest {
 
-    static final MongoDBContainer MONGO = new MongoDBContainer("mongo:7.0");
+    /** Monday 5 October 2026, ten in the morning in Bogotá. */
+    protected static final Instant NOW = Instant.parse("2026-10-05T15:00:00Z");
 
-    static {
-        MONGO.start();
-    }
+    protected static final String STUDENT_ID = "507f1f77bcf86cd799439011";
+    protected static final String PROFESSOR_ID = "507f1f77bcf86cd799439022";
 
-    @DynamicPropertySource
-    static void mongoProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", MONGO::getReplicaSetUrl);
+    /** The profile role of administrative staff, which takes and teaches no classes. */
+    protected static final String ROLE_STAFF = "ROLE_STAFF";
+
+    @TestConfiguration
+    static class FixedClock {
+        @Bean
+        @Primary
+        Clock fixedClock() {
+            return Clock.fixed(NOW, ZoneId.of("America/Bogota"));
+        }
     }
 
     @Autowired
     protected MockMvc mockMvc;
 
     @Autowired
-    protected MongoTemplate mongoTemplate;
+    protected ObjectMapper objectMapper;
 
     @Autowired
-    protected ObjectMapper objectMapper;
+    private CacheManager caches;
 
     @MockitoBean
     protected CatalogClient catalogClient;
 
+    @MockitoBean
+    protected MapClient mapClient;
+
     @BeforeEach
-    void clearSchedules() {
-        mongoTemplate.remove(new Query(), Schedule.class);
+    void neighbours() {
+        caches.getCacheNames().forEach(name -> caches.getCache(name).clear());
+        when(mapClient.listBuildings()).thenReturn(List.of(
+                new MapBuildingView("EC", List.of("Sede Principal")),
+                new MapBuildingView("BI", List.of())));
+        when(catalogClient.listPensumCourses("1015")).thenReturn(List.of(
+                course("13013", "Ecuaciones Diferenciales"),
+                course("46033", "Sistemas Operacionales"),
+                course("31404", "Diseño de Interfaces de usuario"),
+                course("31614", "Nuevas Tecnologías de Desarrollo"),
+                course("46012", "Bases de Datos II")));
+    }
+
+    private static PensumCourseView course(String code, String name) {
+        return new PensumCourseView(code, code, code, name);
     }
 
     // ---------------------------------------------------------------------------------
     // Callers
     // ---------------------------------------------------------------------------------
 
-    protected static RequestPostProcessor callerWith(String userId, String role) {
+    protected static RequestPostProcessor callerWith(String userId, String... roles) {
         return jwt()
                 .jwt(builder -> builder
                         .subject(userId)
-                        .claim("email", userId + "@konradlorenz.edu.co")
-                        .claim("roles", List.of(role)))
-                .authorities(new SimpleGrantedAuthority(role));
-    }
-
-    protected static RequestPostProcessor guest(String userId) {
-        return callerWith(userId, KappRoles.GUEST);
+                        .claim("email", "caller-" + userId + "@konradlorenz.edu.co")
+                        .claim("roles", List.of(roles)))
+                .authorities(Arrays.stream(roles).map(SimpleGrantedAuthority::new).toArray(GrantedAuthority[]::new));
     }
 
     protected static RequestPostProcessor student(String userId) {
@@ -97,46 +120,15 @@ public abstract class AbstractScheduleServiceTest {
         return callerWith(userId, KappRoles.PROFESSOR);
     }
 
+    protected static RequestPostProcessor staff(String userId) {
+        return callerWith(userId, ROLE_STAFF);
+    }
+
     protected static RequestPostProcessor admin(String userId) {
         return callerWith(userId, KappRoles.ADMIN);
     }
 
-    // ---------------------------------------------------------------------------------
-    // Seed data
-    // ---------------------------------------------------------------------------------
-
-    protected Schedule save(Schedule schedule) {
-        return mongoTemplate.save(schedule);
-    }
-
-    protected Schedule reload(String id) {
-        return mongoTemplate.findById(id, Schedule.class);
-    }
-
-    protected static Schedule schedule(String userId, String period, boolean active,
-                                       List<Enrollment> enrollments) {
-        return new Schedule(UUID.randomUUID().toString(), userId, period, "506", "1015", 8,
-                active, enrollments);
-    }
-
-    /** A level-6 Estadística Descriptiva enrollment, following the contract's own example. */
-    protected static Enrollment estadistica(List<Meeting> meetings) {
-        return new Enrollment(UUID.randomUUID().toString(), "17080", "2018", "ESTADISTICA DESCRIPTIVA",
-                6, 3, 48, "51", null, "CAMPOS AVENDANO GUSTAVO ANDRES", "Sede Principal",
-                LocalDate.parse("2026-07-27"), LocalDate.parse("2026-11-30"), "#539392", meetings);
-    }
-
-    protected static Meeting meeting(DayOfWeek dayOfWeek, String startTime, String endTime,
-                                     MeetingPeriod... periods) {
-        return new Meeting(UUID.randomUUID().toString(), dayOfWeek,
-                LocalTime.parse(startTime), LocalTime.parse(endTime), List.of(periods));
-    }
-
-    protected static MeetingPeriod period(String from, String to, String room) {
-        return new MeetingPeriod(LocalDate.parse(from), LocalDate.parse(to), room);
-    }
-
-    protected String json(Object value) throws Exception {
-        return objectMapper.writeValueAsString(value);
+    protected static RequestPostProcessor guest(String userId) {
+        return callerWith(userId, KappRoles.GUEST);
     }
 }
