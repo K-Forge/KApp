@@ -40,7 +40,6 @@
   ],
   "courses": [
     {
-      "code": "EPC-101",
       "pensumItemCode": "EPC-101",
       "name": "Fundamentos de Psicología del Consumidor",
       "level": 1,
@@ -52,7 +51,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPC-102",
       "pensumItemCode": "EPC-102",
       "name": "Estrategias de marketing centradas en el consumidor",
       "level": 1,
@@ -64,7 +62,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPC-103",
       "pensumItemCode": "EPC-103",
       "name": "Enfoques y Procesos de Investigación del Consumidor",
       "level": 1,
@@ -76,7 +73,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "EPC-104",
       "name": "Electiva I",
       "level": 1,
@@ -88,7 +84,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPC-201",
       "pensumItemCode": "EPC-201",
       "name": "Perspectivas Socioculturales del Consumo",
       "level": 2,
@@ -100,7 +95,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPC-202",
       "pensumItemCode": "EPC-202",
       "name": "Gestión del Valor al Cliente",
       "level": 2,
@@ -112,7 +106,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPC-203",
       "pensumItemCode": "EPC-203",
       "name": "Métodos y técnicas de Investigación del Consumidor",
       "level": 2,
@@ -124,7 +117,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "EPC-204",
       "name": "Electiva II",
       "level": 2,

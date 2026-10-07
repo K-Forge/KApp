@@ -38,7 +38,7 @@ class HalfHourPracticesTest {
     }
 
     private static PensumCourse course(String code, int level, double weeklyHours, String area) {
-        return new PensumCourse(code, code, "Práctica " + code, level, 9, weeklyHours, area,
+        return new PensumCourse(code, "Práctica " + code, level, 9, weeklyHours, area,
                 false, List.of(), code);
     }
 

@@ -58,16 +58,6 @@ public record Pensum(
         courses = courses == null ? List.of() : List.copyOf(courses);
     }
 
-    /**
-     * @return the item addressed by {@code identifier}, which is a course {@code code} for
-     *         a fixed course and a {@code pensumItemCode} for an elective slot
-     */
-    public Optional<PensumCourse> findByAddressableCode(String identifier) {
-        return courses.stream()
-                .filter(c -> c.addressableCode().equals(identifier))
-                .findFirst();
-    }
-
     public Optional<PensumCourse> findByPensumItemCode(String pensumItemCode) {
         return courses.stream()
                 .filter(c -> c.pensumItemCode().equals(pensumItemCode))
@@ -78,15 +68,6 @@ public record Pensum(
     public Map<String, PensumCourse> byPensumItemCode() {
         Map<String, PensumCourse> index = new LinkedHashMap<>();
         courses.forEach(c -> index.put(c.pensumItemCode(), c));
-        return index;
-    }
-
-    /** @return items keyed by course {@code code}, skipping elective slots, which have none */
-    public Map<String, PensumCourse> byCourseCode() {
-        Map<String, PensumCourse> index = new LinkedHashMap<>();
-        courses.stream()
-                .filter(c -> c.code() != null)
-                .forEach(c -> index.put(c.code(), c));
         return index;
     }
 

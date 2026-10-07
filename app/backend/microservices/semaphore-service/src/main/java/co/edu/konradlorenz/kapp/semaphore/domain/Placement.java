@@ -1,12 +1,15 @@
 package co.edu.konradlorenz.kapp.semaphore.domain;
 
 /**
- * One course pinned to a level other than the one its pensum gives it.
+ * One item of a plan pinned to a level other than the one its pensum gives it, or an elective
+ * slot with the course the student means to take in it.
  *
- * @param code         the course {@code code}, or an elective slot's {@code pensumItemCode} -
- *                     the same identifier every other per-course endpoint accepts, so a client
- *                     never has to hold two ways of naming the same square of the grid
- * @param plannedLevel the level the student intends to take it in
+ * @param pensumItemCode   the item, by the identifier every per-item endpoint takes, fixed course
+ *                         or elective slot alike
+ * @param plannedLevel     the level the student intends to take it in
+ * @param electiveSinuCode for an elective slot, the course from the elective bank the student
+ *                         means to take; null for a fixed course or a slot with none chosen. A
+ *                         plan, not an enrolment: the bank is checked when the plan is read
  */
-public record Placement(String code, int plannedLevel) {
+public record Placement(String pensumItemCode, int plannedLevel, String electiveSinuCode) {
 }

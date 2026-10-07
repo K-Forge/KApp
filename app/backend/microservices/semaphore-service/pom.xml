@@ -12,7 +12,7 @@
 
     <artifactId>semaphore-service</artifactId>
     <name>Semaphore Service</name>
-    <description>Academic catalog and student curriculum progress (semaforo).</description>
+    <description>The academic catalog and each student's semáforo, read from SINU.</description>
 
     <!--
       Versions come from the parent's dependencyManagement. Never add a <version>
@@ -46,16 +46,10 @@
         </dependency>
 
 
-        <!--
-          Lazy creation of GET /api/semaphore/me needs the caller's programCode, which
-          this service does not own. user-service is the source of truth
-          (GET /api/users/me); common's KappFeignAutoConfiguration forwards the caller's
-          own bearer token on every Feign call, so the downstream request is authorised
-          as the same student, never as a service account.
-        -->
+        <!-- Keeps a student's SINU record a few minutes in memory; see service/StudentRecordReader. -->
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
 
         <dependency>

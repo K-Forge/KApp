@@ -40,7 +40,6 @@
   ],
   "courses": [
     {
-      "code": "TDS-101",
       "pensumItemCode": "TDS-101",
       "name": "Precálculo",
       "level": 1,
@@ -52,7 +51,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-102",
       "pensumItemCode": "TDS-102",
       "name": "Lógica Matemática",
       "level": 1,
@@ -64,7 +62,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-103",
       "pensumItemCode": "TDS-103",
       "name": "Fundamentos de Programación",
       "level": 1,
@@ -76,7 +73,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-104",
       "pensumItemCode": "TDS-104",
       "name": "Introducción al Desarrollo de Software",
       "level": 1,
@@ -88,7 +84,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-105",
       "pensumItemCode": "TDS-105",
       "name": "Habilidades Digitales",
       "level": 1,
@@ -100,7 +95,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-106",
       "pensumItemCode": "TDS-106",
       "name": "Inglés Intermedio Bajo",
       "level": 1,
@@ -112,7 +106,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-201",
       "pensumItemCode": "TDS-201",
       "name": "Cálculo I",
       "level": 2,
@@ -126,7 +119,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-202",
       "pensumItemCode": "TDS-202",
       "name": "Algebra Lineal",
       "level": 2,
@@ -138,7 +130,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-203",
       "pensumItemCode": "TDS-203",
       "name": "Técnicas de Programación I",
       "level": 2,
@@ -152,7 +143,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-204",
       "pensumItemCode": "TDS-204",
       "name": "Fundamentos de Programación Web",
       "level": 2,
@@ -166,7 +156,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-205",
       "pensumItemCode": "TDS-205",
       "name": "Habilidades Comunicativas",
       "level": 2,
@@ -178,7 +167,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-206",
       "pensumItemCode": "TDS-206",
       "name": "Inglés Intermedio Medio",
       "level": 2,
@@ -190,7 +178,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-301",
       "pensumItemCode": "TDS-301",
       "name": "Cálculo II",
       "level": 3,
@@ -204,7 +191,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-302",
       "pensumItemCode": "TDS-302",
       "name": "Técnicas de Programación II",
       "level": 3,
@@ -218,7 +204,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-303",
       "pensumItemCode": "TDS-303",
       "name": "Diseño de Bases de datos",
       "level": 3,
@@ -233,7 +218,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-304",
       "pensumItemCode": "TDS-304",
       "name": "Análisis y Diseño de Sistemas",
       "level": 3,
@@ -247,7 +231,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-305",
       "pensumItemCode": "TDS-305",
       "name": "Cultura I",
       "level": 3,
@@ -259,7 +242,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-306",
       "pensumItemCode": "TDS-306",
       "name": "Inglés Intermedio Alto",
       "level": 3,
@@ -271,7 +253,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-401",
       "pensumItemCode": "TDS-401",
       "name": "Matemáticas Discretas",
       "level": 4,
@@ -285,7 +266,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-402",
       "pensumItemCode": "TDS-402",
       "name": "Diseño de Interfaces de Usuario",
       "level": 4,
@@ -299,7 +279,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-403",
       "pensumItemCode": "TDS-403",
       "name": "Nuevas Tecnologías de Desarrollo",
       "level": 4,
@@ -313,7 +292,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "TDS-404",
       "name": "Electiva I",
       "level": 4,
@@ -327,7 +305,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "TDS-405",
       "name": "Cultura II (electiva)",
       "level": 4,
@@ -339,7 +316,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-406",
       "pensumItemCode": "TDS-406",
       "name": "Inglés Avanzado",
       "level": 4,
@@ -351,7 +327,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-501",
       "pensumItemCode": "TDS-501",
       "name": "Estadística Descriptiva",
       "level": 5,
@@ -365,7 +340,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-502",
       "pensumItemCode": "TDS-502",
       "name": "Taller de Programación Web",
       "level": 5,
@@ -380,7 +354,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-503",
       "pensumItemCode": "TDS-503",
       "name": "Pruebas y Calidad del Software",
       "level": 5,
@@ -395,7 +368,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-504",
       "pensumItemCode": "TDS-504",
       "name": "Desarrollo Móvil",
       "level": 5,
@@ -410,7 +382,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "TDS-505",
       "name": "Electiva II",
       "level": 5,
@@ -424,7 +395,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-506",
       "pensumItemCode": "TDS-506",
       "name": "Inglés Proficiencia",
       "level": 5,
@@ -436,7 +406,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-601",
       "pensumItemCode": "TDS-601",
       "name": "Emprendimiento",
       "level": 6,
@@ -448,7 +417,6 @@
       "sinuCode": null
     },
     {
-      "code": "TDS-602",
       "pensumItemCode": "TDS-602",
       "name": "Práctica",
       "level": 6,
@@ -464,7 +432,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "TDS-603",
       "name": "Electiva Institucional",
       "level": 6,
@@ -476,7 +443,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "TDS-604",
       "name": "Electiva III",
       "level": 6,

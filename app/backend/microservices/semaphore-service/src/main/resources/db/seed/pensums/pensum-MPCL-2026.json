@@ -19,7 +19,6 @@
   ],
   "courses": [
     {
-      "code": "MPCL-101",
       "pensumItemCode": "MPCL-101",
       "name": "Avances y aplicaciones de la terapia cognitivo-conductual (énfasis adultos)",
       "level": 1,
@@ -31,7 +30,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-102",
       "pensumItemCode": "MPCL-102",
       "name": "Bases y aplicaciones del análisis conductual aplicado (énfasis infantil)",
       "level": 1,
@@ -43,7 +41,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-103",
       "pensumItemCode": "MPCL-103",
       "name": "Evaluación psicológica y análisis funcional",
       "level": 1,
@@ -55,7 +52,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-104",
       "pensumItemCode": "MPCL-104",
       "name": "Fundamentos de aprendizaje en el contexto clínico (énfasis adultos)",
       "level": 1,
@@ -67,7 +63,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-105",
       "pensumItemCode": "MPCL-105",
       "name": "Perspectiva dimensional en clínica infantil (énfasis infantil)",
       "level": 1,
@@ -79,7 +74,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-106",
       "pensumItemCode": "MPCL-106",
       "name": "Entrenamiento en habilidades clínicas I",
       "level": 1,
@@ -91,7 +85,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-107",
       "pensumItemCode": "MPCL-107",
       "name": "Práctica en Psicología Clínica I",
       "level": 1,
@@ -103,7 +96,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-108",
       "pensumItemCode": "MPCL-108",
       "name": "Diseños de investigación clínica I",
       "level": 1,
@@ -115,7 +107,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-201",
       "pensumItemCode": "MPCL-201",
       "name": "Terapias contextuales I: ACT y PAF",
       "level": 2,
@@ -127,7 +118,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-202",
       "pensumItemCode": "MPCL-202",
       "name": "Terapias contextuales II: Activación conductual y DBT (énfasis adultos)",
       "level": 2,
@@ -139,7 +129,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-203",
       "pensumItemCode": "MPCL-203",
       "name": "Aplicaciones del análisis de la conducta verbal en dificultades del desarrollo (énfasis infantil)",
       "level": 2,
@@ -151,7 +140,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-204",
       "pensumItemCode": "MPCL-204",
       "name": "Entrenamiento en habilidades clínicas II",
       "level": 2,
@@ -163,7 +151,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-205",
       "pensumItemCode": "MPCL-205",
       "name": "Práctica en psicología clínica II",
       "level": 2,
@@ -175,7 +162,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-206",
       "pensumItemCode": "MPCL-206",
       "name": "Diseños de investigación clínica II",
       "level": 2,
@@ -187,7 +173,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-207",
       "pensumItemCode": "MPCL-207",
       "name": "Trabajo de grado I",
       "level": 2,
@@ -199,7 +184,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "MPCL-208",
       "name": "Electiva I",
       "level": 2,
@@ -211,7 +195,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-301",
       "pensumItemCode": "MPCL-301",
       "name": "Alternativas terapéuticas con apoyo empírico",
       "level": 3,
@@ -223,7 +206,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-302",
       "pensumItemCode": "MPCL-302",
       "name": "Evaluación e intervención en pareja y familia",
       "level": 3,
@@ -235,7 +217,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-303",
       "pensumItemCode": "MPCL-303",
       "name": "Práctica en psicología clínica III",
       "level": 3,
@@ -247,7 +228,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-304",
       "pensumItemCode": "MPCL-304",
       "name": "Trabajo de grado II",
       "level": 3,
@@ -259,7 +239,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "MPCL-305",
       "name": "Electiva II",
       "level": 3,
@@ -271,7 +250,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-401",
       "pensumItemCode": "MPCL-401",
       "name": "El Psicólogo clínico en el contexto colombiano",
       "level": 4,
@@ -283,7 +261,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-402",
       "pensumItemCode": "MPCL-402",
       "name": "Práctica en Psicología Clínica IV",
       "level": 4,
@@ -295,7 +272,6 @@
       "sinuCode": null
     },
     {
-      "code": "MPCL-403",
       "pensumItemCode": "MPCL-403",
       "name": "Trabajo de grado III",
       "level": 4,
@@ -307,7 +283,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "MPCL-404",
       "name": "Electiva III",
       "level": 4,

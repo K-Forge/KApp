@@ -3,16 +3,17 @@ package co.edu.konradlorenz.kapp.semaphore;
 import io.mongock.runner.springboot.EnableMongock;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
- * Owns the academic catalog (programs and pensums) and each student's pensum
- * progress - the semaforo. The pensum IS the semaforo at Konrad Lorenz: the grid a
- * student sees is the pensum coloured by their own progress, so the two are one service.
+ * Serves the academic catalog (programs, pensums, the elective bank) and each student's semáforo:
+ * the pensum coloured by the status SINU gives every course. The pensum IS the semáforo at Konrad
+ * Lorenz, so the two are one service.
  *
- * <p>It deliberately does NOT own the student's profile - name, contact details, or the
- * {@code programCode} lazy creation resolves from. Those belong to user-service, reached
- * through the {@code UserProfileClient} Feign client enabled below.
+ * <p>Everything academic is read from SINU through
+ * {@link co.edu.konradlorenz.kapp.semaphore.sinu.SinuRecordPort} and never stored: the student's
+ * program, pensum and level, their record and the elective bank. What this service does store is
+ * the catalog's backup - the published plans - and the student's own plans, the one thing a
+ * student writes.
  *
  * <p>Security is configured by {@code common}'s auto-configuration: no annotation or
  * component scan is required here.
@@ -24,7 +25,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * KApp service that talks to MongoDB must carry it.
  */
 @SpringBootApplication
-@EnableFeignClients
 @EnableMongock
 public class SemaphoreServiceApplication {
 

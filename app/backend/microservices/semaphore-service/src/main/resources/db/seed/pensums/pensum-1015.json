@@ -40,7 +40,6 @@
   ],
   "courses": [
     {
-      "code": "11015",
       "pensumItemCode": "11015",
       "name": "Precálculo",
       "level": 1,
@@ -52,7 +51,6 @@
       "sinuCode": "11015"
     },
     {
-      "code": "21012",
       "pensumItemCode": "21012",
       "name": "Lógica Matemática",
       "level": 1,
@@ -64,7 +62,6 @@
       "sinuCode": "21012"
     },
     {
-      "code": "41025",
       "pensumItemCode": "41025",
       "name": "Fundamentos de Programación",
       "level": 1,
@@ -76,7 +73,6 @@
       "sinuCode": "41025"
     },
     {
-      "code": "41012",
       "pensumItemCode": "41012",
       "name": "Introducción a la Ingeniería de Sistemas",
       "level": 1,
@@ -88,7 +84,6 @@
       "sinuCode": "41012"
     },
     {
-      "code": "71181",
       "pensumItemCode": "71181",
       "name": "Inglés Intermedio Bajo",
       "level": 1,
@@ -100,7 +95,6 @@
       "sinuCode": "71181"
     },
     {
-      "code": "71071",
       "pensumItemCode": "71071",
       "name": "Habilidades comunicativas",
       "level": 1,
@@ -112,7 +106,6 @@
       "sinuCode": "71071"
     },
     {
-      "code": "12015",
       "pensumItemCode": "12015",
       "name": "Cálculo I",
       "level": 2,
@@ -126,7 +119,6 @@
       "sinuCode": "12015"
     },
     {
-      "code": "63202",
       "pensumItemCode": "63202",
       "name": "Álgebra Lineal I",
       "level": 2,
@@ -140,7 +132,6 @@
       "sinuCode": "63202"
     },
     {
-      "code": "23012",
       "pensumItemCode": "23012",
       "name": "Matemáticas Discretas",
       "level": 2,
@@ -152,7 +143,6 @@
       "sinuCode": "23012"
     },
     {
-      "code": "31013",
       "pensumItemCode": "31013",
       "name": "Técnicas de Programación I",
       "level": 2,
@@ -166,7 +156,6 @@
       "sinuCode": "31013"
     },
     {
-      "code": "72081",
       "pensumItemCode": "72081",
       "name": "Inglés Intermedio Medio",
       "level": 2,
@@ -180,7 +169,6 @@
       "sinuCode": "72081"
     },
     {
-      "code": "71221",
       "pensumItemCode": "71221",
       "name": "Cultura I",
       "level": 2,
@@ -192,7 +180,6 @@
       "sinuCode": "71221"
     },
     {
-      "code": "13015",
       "pensumItemCode": "13015",
       "name": "Cálculo II",
       "level": 3,
@@ -206,7 +193,6 @@
       "sinuCode": "13015"
     },
     {
-      "code": "54034",
       "pensumItemCode": "54034",
       "name": "Cinemática",
       "level": 3,
@@ -218,7 +204,6 @@
       "sinuCode": "54034"
     },
     {
-      "code": "31014",
       "pensumItemCode": "31014",
       "name": "Técnicas de Programación II",
       "level": 3,
@@ -232,7 +217,6 @@
       "sinuCode": "31014"
     },
     {
-      "code": "54033",
       "pensumItemCode": "54033",
       "name": "Estructuras de Datos",
       "level": 3,
@@ -246,7 +230,6 @@
       "sinuCode": "54033"
     },
     {
-      "code": "73081",
       "pensumItemCode": "73081",
       "name": "Inglés Intermedio Alto",
       "level": 3,
@@ -260,7 +243,6 @@
       "sinuCode": "73081"
     },
     {
-      "code": "76011",
       "pensumItemCode": "76011",
       "name": "Cátedra de Cultura II",
       "level": 3,
@@ -272,7 +254,6 @@
       "sinuCode": "76011"
     },
     {
-      "code": "14015",
       "pensumItemCode": "14015",
       "name": "Cálculo III",
       "level": 4,
@@ -286,7 +267,6 @@
       "sinuCode": "14015"
     },
     {
-      "code": "54044",
       "pensumItemCode": "54044",
       "name": "Electromagnetismo",
       "level": 4,
@@ -298,7 +278,6 @@
       "sinuCode": "54044"
     },
     {
-      "code": "54043",
       "pensumItemCode": "54043",
       "name": "Análisis y Diseño de Sistemas",
       "level": 4,
@@ -312,7 +291,6 @@
       "sinuCode": "54043"
     },
     {
-      "code": "31506",
       "pensumItemCode": "31506",
       "name": "Lógica Digital y Microprocesadores",
       "level": 4,
@@ -324,7 +302,6 @@
       "sinuCode": "31506"
     },
     {
-      "code": "45012",
       "pensumItemCode": "45012",
       "name": "Bases de Datos I",
       "level": 4,
@@ -336,7 +313,6 @@
       "sinuCode": "45012"
     },
     {
-      "code": "74081",
       "pensumItemCode": "74081",
       "name": "Inglés Avanzado",
       "level": 4,
@@ -350,7 +326,6 @@
       "sinuCode": "74081"
     },
     {
-      "code": "13013",
       "pensumItemCode": "13013",
       "name": "Ecuaciones Diferenciales",
       "level": 5,
@@ -364,7 +339,6 @@
       "sinuCode": "13013"
     },
     {
-      "code": "46033",
       "pensumItemCode": "46033",
       "name": "Sistemas Operacionales",
       "level": 5,
@@ -376,7 +350,6 @@
       "sinuCode": "46033"
     },
     {
-      "code": "31404",
       "pensumItemCode": "31404",
       "name": "Diseño de Interfaces de usuario",
       "level": 5,
@@ -388,7 +361,6 @@
       "sinuCode": "31404"
     },
     {
-      "code": "31614",
       "pensumItemCode": "31614",
       "name": "Nuevas Tecnologías de Desarrollo",
       "level": 5,
@@ -402,7 +374,6 @@
       "sinuCode": "31614"
     },
     {
-      "code": "46012",
       "pensumItemCode": "46012",
       "name": "Bases de Datos II",
       "level": 5,
@@ -416,7 +387,6 @@
       "sinuCode": "46012"
     },
     {
-      "code": "75081",
       "pensumItemCode": "75081",
       "name": "Inglés Proficiencia",
       "level": 5,
@@ -430,7 +400,6 @@
       "sinuCode": "75081"
     },
     {
-      "code": "17018",
       "pensumItemCode": "17018",
       "name": "Estadística Descriptiva",
       "level": 6,
@@ -441,10 +410,9 @@
       "prerequisites": [
         "13013"
       ],
-      "sinuCode": "17018"
+      "sinuCode": "17080"
     },
     {
-      "code": "47022",
       "pensumItemCode": "47022",
       "name": "Ingeniería de Software I",
       "level": 6,
@@ -458,7 +426,6 @@
       "sinuCode": "47022"
     },
     {
-      "code": "31750",
       "pensumItemCode": "31750",
       "name": "Redes de Comunicación I",
       "level": 6,
@@ -472,7 +439,6 @@
       "sinuCode": "31750"
     },
     {
-      "code": null,
       "pensumItemCode": "59075",
       "name": "Electiva I",
       "level": 6,
@@ -484,7 +450,6 @@
       "sinuCode": "59075"
     },
     {
-      "code": null,
       "pensumItemCode": "59078",
       "name": "Electiva II",
       "level": 6,
@@ -496,7 +461,6 @@
       "sinuCode": "59078"
     },
     {
-      "code": "9a032",
       "pensumItemCode": "9a032",
       "name": "Cátedra de cultura III: ética profesional",
       "level": 6,
@@ -508,7 +472,6 @@
       "sinuCode": "9a032"
     },
     {
-      "code": "17070",
       "pensumItemCode": "17070",
       "name": "Inferencia Estadística",
       "level": 7,
@@ -522,7 +485,6 @@
       "sinuCode": "17070"
     },
     {
-      "code": "48022",
       "pensumItemCode": "48022",
       "name": "Ingeniería de Software II",
       "level": 7,
@@ -536,7 +498,6 @@
       "sinuCode": "48022"
     },
     {
-      "code": "31850",
       "pensumItemCode": "31850",
       "name": "Redes de Comunicación II",
       "level": 7,
@@ -550,7 +511,6 @@
       "sinuCode": "31850"
     },
     {
-      "code": "40012",
       "pensumItemCode": "40012",
       "name": "Gestión en TIC",
       "level": 7,
@@ -562,7 +522,6 @@
       "sinuCode": "40012"
     },
     {
-      "code": null,
       "pensumItemCode": "59085",
       "name": "Electiva III",
       "level": 7,
@@ -574,7 +533,6 @@
       "sinuCode": "59085"
     },
     {
-      "code": null,
       "pensumItemCode": "59088",
       "name": "Electiva IV",
       "level": 7,
@@ -586,7 +544,6 @@
       "sinuCode": "59088"
     },
     {
-      "code": "48050",
       "pensumItemCode": "48050",
       "name": "Arquitectura de Software",
       "level": 8,
@@ -600,7 +557,6 @@
       "sinuCode": "48050"
     },
     {
-      "code": "59035",
       "pensumItemCode": "59035",
       "name": "Desarrollo de Aplicaciones Móviles",
       "level": 8,
@@ -612,7 +568,6 @@
       "sinuCode": "59035"
     },
     {
-      "code": "59045",
       "pensumItemCode": "59045",
       "name": "Taller de emprendimiento",
       "level": 8,
@@ -624,7 +579,6 @@
       "sinuCode": "59045"
     },
     {
-      "code": "56201",
       "pensumItemCode": "56201",
       "name": "Metodología de Investigación",
       "level": 8,
@@ -636,7 +590,6 @@
       "sinuCode": "56201"
     },
     {
-      "code": null,
       "pensumItemCode": "59096",
       "name": "Electiva V",
       "level": 8,
@@ -648,7 +601,6 @@
       "sinuCode": "59096"
     },
     {
-      "code": null,
       "pensumItemCode": "59098",
       "name": "Electiva VI",
       "level": 8,
@@ -660,7 +612,6 @@
       "sinuCode": "59098"
     },
     {
-      "code": "9a020",
       "pensumItemCode": "9a020",
       "name": "Práctica Profesional",
       "level": 9,
@@ -672,7 +623,6 @@
       "sinuCode": "9a020"
     },
     {
-      "code": "39020",
       "pensumItemCode": "39020",
       "name": "Trabajo de grado",
       "level": 9,
@@ -686,7 +636,6 @@
       "sinuCode": "39020"
     },
     {
-      "code": "4a033",
       "pensumItemCode": "4a033",
       "name": "Gerencia de Proyectos TIC",
       "level": 9,

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: KApp Semaphore API
-  version: 2.0.0
+  version: 2.0.1
   summary: Academic catalog and student pensum progress (semáforo) for Fundación Universitaria Konrad Lorenz.
   description: |
     The Semaphore service serves the **academic catalog** (programs and pensums) and each
@@ -159,6 +159,41 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+
+  /api/catalog/pensums:
+    get:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
+      operationId: listPensums
+      summary: List the pensums
+      description: |
+        Every pensum of the catalog without its items, for listings and pickers: active plans
+        first, then by program and code. `GET /api/catalog/pensums/{pensumCode}` has the items.
+      tags: [Catalog]
+      responses:
+        '200':
+          description: The pensums, without their items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PensumSummary'
+              example:
+                - pensumCode: "1015"
+                  programCode: "506"
+                  programName: Ingeniería de Sistemas
+                  faculty: Facultad de Matemáticas e Ingenierías
+                  reform: Plan de estudios 2019-1
+                  status: ACTIVE
+                  totalCredits: 143
+                  totalHours: 194
+                  levels: 9
+                  courses: 51
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 
   /api/catalog/pensums/{pensumCode}:
     parameters:
@@ -1173,6 +1208,31 @@ components:
             Ingeniería de Sistemas plan.
           items:
             $ref: '#/components/schemas/PensumCourse'
+
+    PensumSummary:
+      type: object
+      description: A pensum without its items, for listings and pickers.
+      required: [pensumCode, programCode, programName, faculty, reform, status, totalCredits, totalHours, levels, courses]
+      properties:
+        pensumCode: { type: string, maxLength: 20, example: "1015" }
+        programCode: { type: string, maxLength: 20, example: "506" }
+        programName: { type: string, maxLength: 100, example: Ingeniería de Sistemas }
+        faculty: { type: string, maxLength: 100, example: Facultad de Matemáticas e Ingenierías }
+        reform: { type: string, maxLength: 100, example: Plan de estudios 2019-1 }
+        status: { type: string, enum: [ACTIVE, DRAFT, OBSOLETE], example: ACTIVE }
+        totalCredits: { type: integer, minimum: 0, example: 143 }
+        totalHours:
+          type: number
+          description: The weekly hours the printed plan declares, as in `Pensum`.
+          minimum: 0
+          multipleOf: 0.5
+          example: 194
+        levels: { type: integer, minimum: 1, maximum: 12, example: 9 }
+        courses:
+          type: integer
+          description: How many items the pensum carries, without sending them.
+          minimum: 0
+          example: 51
 
     ElectiveOffering:
       type: object
