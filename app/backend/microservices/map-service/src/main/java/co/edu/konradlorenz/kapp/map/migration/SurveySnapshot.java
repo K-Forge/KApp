@@ -59,16 +59,25 @@ public final class SurveySnapshot {
             List<SnapshotFloor> floors,
             PlacementDto placement,
             List<FootprintPartDto> footprint,
-            String address
+            String address,
+            List<String> sinuSedes
     ) {
         /** A snapshot building that gives no address. */
         public Building(String code, String name, String campus, String description, List<String> aliases,
                         List<WingDto> wings, List<SnapshotFloor> floors, PlacementDto placement,
                         List<FootprintPartDto> footprint) {
-            this(code, name, campus, description, aliases, wings, floors, placement, footprint, null);
+            this(code, name, campus, description, aliases, wings, floors, placement, footprint, null, null);
+        }
+
+        /** A snapshot building no sede is mapped to. */
+        public Building(String code, String name, String campus, String description, List<String> aliases,
+                        List<WingDto> wings, List<SnapshotFloor> floors, PlacementDto placement,
+                        List<FootprintPartDto> footprint, String address) {
+            this(code, name, campus, description, aliases, wings, floors, placement, footprint, address, null);
         }
 
         public Building {
+            sinuSedes = sinuSedes == null ? List.of() : List.copyOf(sinuSedes);
             aliases = aliases == null ? List.of() : List.copyOf(aliases);
             wings = wings == null ? List.of() : List.copyOf(wings);
             floors = floors == null ? List.of() : List.copyOf(floors);
@@ -79,7 +88,7 @@ public final class SurveySnapshot {
             return new BuildingDocument(UUID.randomUUID().toString(), code, name, campus, description,
                     aliases, wings.stream().map(MapMapper::toWing).toList(),
                     floors.stream().map(SnapshotFloor::toFloor).toList(), false, now, now, toPlacement(),
-                    toFootprint(), address);
+                    toFootprint(), address, sinuSedes);
         }
 
         /** The building from above as the snapshot takes it from the cadastre; empty when it has none. */

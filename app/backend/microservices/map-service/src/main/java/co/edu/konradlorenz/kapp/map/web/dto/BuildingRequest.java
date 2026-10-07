@@ -54,12 +54,16 @@ public record BuildingRequest(
         @Schema(description = "Its street address as people write it. Omitted on PUT, the stored one is kept; "
                 + "empty clears it.", example = "Cra. 9 Bis # 62-43")
         @Size(max = 200)
-        String address
+        String address,
+        @Schema(description = "The names SINU gives this building as a sede, exactly as its timetable prints "
+                + "them. Omitted on PUT, the stored ones are kept. A sede belongs to one building only; naming "
+                + "one another building has is a 409.", example = "[\"Sede Principal\"]")
+        List<@NotBlank @Size(max = 120) String> sinuSedes
 ) {
-    /** A request that leaves the building's placement and footprint as they are. */
+    /** A request that leaves the building's placement, footprint, address and sedes as they are. */
     public BuildingRequest(String code, String name, String campus, String description, List<String> aliases,
                            List<WingDto> wings, List<FloorDto> floors) {
-        this(code, name, campus, description, aliases, wings, floors, null, null, null);
+        this(code, name, campus, description, aliases, wings, floors, null, null, null, null);
     }
 
 

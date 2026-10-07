@@ -25,6 +25,7 @@ public record BuildingResponse(
         List<FloorDto> floors,
         PlacementDto placement,
         List<FootprintPartDto> footprint,
-        String address
+        String address,
+        List<String> sinuSedes
 ) {
 }

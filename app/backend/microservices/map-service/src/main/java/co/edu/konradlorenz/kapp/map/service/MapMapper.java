@@ -94,7 +94,8 @@ public final class MapMapper {
                 building.floors().stream().map(MapMapper::toFloorDto).toList(),
                 toPlacementDto(building.placement()),
                 building.footprint().stream().map(MapMapper::toFootprintPartDto).toList(),
-                building.address());
+                building.address(),
+                building.sinuSedes());
     }
 
     public static FootprintPartDto toFootprintPartDto(FootprintPart part) {
@@ -132,7 +133,8 @@ public final class MapMapper {
                 building.campus(),
                 building.description(),
                 building.aliases(),
-                building.wings().stream().map(MapMapper::toWingDto).toList());
+                building.wings().stream().map(MapMapper::toWingDto).toList(),
+                building.sinuSedes());
     }
 
     public static SpaceTypeResponse toSpaceTypeResponse(SpaceTypeDocument type) {

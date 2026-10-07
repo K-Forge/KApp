@@ -117,6 +117,11 @@ export interface Building {
   placement?: Placement | null;
   /** The building from above, part by part; empty until taken from the cadastre. */
   footprint?: FootprintPart[];
+  /**
+   * The names SINU gives the building as a sede, exactly as its timetable prints them. A class's
+   * room is found by its sede and its number, and a sede belongs to one building only.
+   */
+  sinuSedes?: string[];
 }
 
 /**
@@ -135,6 +140,8 @@ export interface BuildingRequest {
   floors: Floor[];
   placement?: Placement | null;
   footprint?: FootprintPart[];
+  /** Left out, the stored ones stay; empty, they go. Another building's sede is a 409. */
+  sinuSedes?: string[];
 }
 
 /**

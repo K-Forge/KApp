@@ -44,6 +44,7 @@ import { t } from '../../../core/i18n/i18n.service';
               <th>{{ 'Code' | t }}</th>
               <th>{{ 'Name' | t }}</th>
               <th>{{ 'Address' | t }}</th>
+              <th>{{ 'In SINU' | t }}</th>
               <th>{{ 'Wings' | t }}</th>
               <th>{{ 'Floors' | t }}</th>
               <th></th>
@@ -60,6 +61,7 @@ import { t } from '../../../core/i18n/i18n.service';
                   }
                 </td>
                 <td class="text-muted">{{ building.address || '—' }}</td>
+                <td class="text-muted">{{ building.sinuSedes?.length ? building.sinuSedes!.join(' · ') : '—' }}</td>
                 <td class="text-muted">{{ wingNames(building) }}</td>
                 <td style="min-width: 10rem">
                   <div class="row" style="flex-wrap: wrap; gap: 0.25rem">
