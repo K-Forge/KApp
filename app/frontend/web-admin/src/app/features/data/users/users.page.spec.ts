@@ -81,11 +81,11 @@ describe('UsersPage', () => {
     expect(create).not.toHaveBeenCalled();
     expect(page.invalid('studentCode')).toBe(true);
 
-    page.createForm.patchValue({ studentCode: '506232730' });
+    page.createForm.patchValue({ studentCode: '506900001' });
     // The program is the code's first three digits: shown, and left to the server to read the same way.
     expect(page.program()).toBe('506');
     page.createAccount();
-    expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'pepito@konradlorenz.edu.co', firstName: 'Pepito', lastName: 'Perez', role: 'ROLE_STUDENT', studentCode: '506232730' });
+    expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'pepito@konradlorenz.edu.co', firstName: 'Pepito', lastName: 'Perez', role: 'ROLE_STUDENT', studentCode: '506900001' });
   });
 
   it('gives somebody else a new temporary password once it is confirmed', () => {
