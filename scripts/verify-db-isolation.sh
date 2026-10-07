@@ -22,6 +22,9 @@ if [ ! -f .env ]; then
 fi
 set -a; . ./.env; set +a
 
+# schedule-service has no database since it reads SINU, but kapp_schedule stays in this list
+# while it exists in Atlas: what it stored before is still there, and no other account may
+# reach it.
 ALL_DBS="kapp_auth kapp_user kapp_semaphore kapp_schedule kapp_map"
 
 # Every try/catch below is at the TOP LEVEL of the mongosh program, including the ones
@@ -75,7 +78,7 @@ quit(failures === 0 ? 0 : 1);
 JS
 
 status=0
-for svc in auth user semaphore schedule map; do
+for svc in auth user semaphore map; do
   own="kapp_${svc}"
   uri_var="MONGO_$(printf '%s' "$svc" | tr '[:lower:]' '[:upper:]')_URI"
   # Indirect expansion WITHOUT a modifier: macOS ships bash 3.2, which rejects
