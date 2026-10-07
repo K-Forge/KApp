@@ -85,7 +85,7 @@ class TemporaryPasswordIntegrationTest extends AbstractAuthIntegrationTest {
 
         ArgumentCaptor<InternalUserUpsert> profile = ArgumentCaptor.forClass(InternalUserUpsert.class);
         verify(userProfileClient, atLeastOnce()).upsert(profile.capture());
-        assertThat(profile.getValue().role()).isEqualTo("ROLE_PROFESSOR");
+        assertThat(profile.getValue().roles()).containsExactly("ROLE_PROFESSOR");
         assertThat(profile.getValue().firstName()).isEqualTo("Ana");
     }
 
@@ -241,8 +241,8 @@ class TemporaryPasswordIntegrationTest extends AbstractAuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("a student's program is read from the first three digits of its student code")
-    void theProgramComesFromTheStudentCode() throws Exception {
+    @DisplayName("a student's code is still required, and no longer sent: user-service keeps none")
+    void theStudentCodeStaysInAuth() throws Exception {
         mockMvc.perform(post("/auth/admin/accounts")
                         .header("Authorization", adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -253,8 +253,8 @@ class TemporaryPasswordIntegrationTest extends AbstractAuthIntegrationTest {
 
         ArgumentCaptor<InternalUserUpsert> profile = ArgumentCaptor.forClass(InternalUserUpsert.class);
         verify(userProfileClient, atLeastOnce()).upsert(profile.capture());
-        assertThat(profile.getValue().academic().studentCode()).isEqualTo("506900001");
-        assertThat(profile.getValue().academic().programCode()).isEqualTo("506");
+        assertThat(profile.getValue().roles()).containsExactly("ROLE_STUDENT");
+        assertThat(profile.getValue().lastName()).isEqualTo("Veras");
     }
 
     @Test

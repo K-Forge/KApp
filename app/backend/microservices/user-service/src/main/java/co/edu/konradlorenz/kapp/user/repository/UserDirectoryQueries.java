@@ -29,7 +29,7 @@ public final class UserDirectoryQueries {
      * The filter alone, without paging or sorting. Every supplied filter narrows the same
      * result set, combined with AND.
      *
-     * @param role   restrict to one role, or null for every role
+     * @param role   restrict to accounts holding this role among others, or null for every role
      * @param active restrict to active or deactivated accounts, or null for both
      * @param terms  folded search terms from {@link SearchTokens#forQuery(String)}; an
      *               empty list means no text filter, so callers that folded a non-empty
@@ -39,7 +39,8 @@ public final class UserDirectoryQueries {
         List<Criteria> clauses = new ArrayList<>();
 
         if (role != null) {
-            clauses.add(Criteria.where("role").is(role));
+            // roles is a list: equality matches a document that holds the role among others.
+            clauses.add(Criteria.where("roles").is(role));
         }
         if (active != null) {
             clauses.add(Criteria.where("active").is(active));

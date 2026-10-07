@@ -103,13 +103,15 @@ class UserServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("Mongock created the baseline indexes")
+    @DisplayName("Mongock created the indexes, and V003 took the student code's away with the field")
     void mongockRanMigrations() {
         var indexNames = StreamSupport
                 .stream(mongoTemplate.indexOps("users").getIndexInfo().spliterator(), false)
                 .map(info -> info.getName())
                 .toList();
 
-        assertThat(indexNames).contains("uk_users_email", "ix_users_student_code");
+        assertThat(indexNames)
+                .contains("uk_users_email", "ix_users_search_tokens", "ix_users_roles")
+                .doesNotContain("ix_users_student_code");
     }
 }

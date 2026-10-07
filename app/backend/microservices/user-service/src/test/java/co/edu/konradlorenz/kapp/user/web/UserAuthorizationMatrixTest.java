@@ -16,9 +16,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * <p>One test method per {@code (endpoint, caller)} pair and one assertion per test, so a
  * failure names the exact combination that broke rather than hiding it inside a loop. The
- * five endpoints are {@code GET/PATCH /api/users/me} (self-service, open to any
- * authenticated role) and {@code GET /api/users}, {@code GET /api/users/{userId}},
+ * five endpoints are {@code GET/PATCH /api/users/me} (self-service, open to every profile
+ * role) and {@code GET /api/users}, {@code GET /api/users/{userId}},
  * {@code PATCH /api/users/{userId}/status} (administration, {@code ROLE_ADMIN} only).
+ *
+ * <p>An administrator's token holds a profile role and the permission, as auth-service signs
+ * it: {@code ROLE_STAFF} and {@code ROLE_ADMIN}. Another permission next to the profile role
+ * opens nothing here.
  *
  * <p>Business behaviour - patch semantics, pagination, search, idempotency - is covered
  * elsewhere. This class only answers "who may call this at all".
@@ -30,18 +34,20 @@ class UserAuthorizationMatrixTest extends AbstractUserServiceTest {
     private static final String OTHER_STUDENT_ID = "a0000000-0000-0000-0000-000000000003";
     private static final String PROFESSOR_ID = "a0000000-0000-0000-0000-000000000004";
     private static final String ADMIN_ID = "a0000000-0000-0000-0000-000000000005";
+    private static final String STAFF_ID = "a0000000-0000-0000-0000-000000000006";
 
-    /** A trivial, always-valid patch body: touches a field every role may edit. */
+    /** A trivial, always-valid patch body: the one field a person may edit. */
     private static final String TRIVIAL_PATCH = """
-            {"firstName": "Updated"}""";
+            {"avatarUrl": null}""";
 
+    /** A visitor holds a day pass and has no profile, so none is seeded for GUEST_ID. */
     @BeforeEach
     void seedOneAccountPerRole() {
-        save(guest(GUEST_ID, "guest@gmail.com", "Guest", "Account"));
         save(student(STUDENT_ID, "student@konradlorenz.edu.co", "Student", "Account"));
         save(student(OTHER_STUDENT_ID, "other@konradlorenz.edu.co", "Other", "Student"));
         save(professor(PROFESSOR_ID, "professor@konradlorenz.edu.co", "Professor", "Account"));
         save(admin(ADMIN_ID, "admin@konradlorenz.edu.co", "Admin", "Account"));
+        save(profile(STAFF_ID, "staff@konradlorenz.edu.co", "Staff", "Account", UserRole.ROLE_STAFF));
     }
 
     // ---------------------------------------------------------------------------------
@@ -76,9 +82,16 @@ class UserAuthorizationMatrixTest extends AbstractUserServiceTest {
     }
 
     @Test
+    @DisplayName("GET /api/users/me: an administrative employee reaches their own profile")
+    void getMe_staff_succeeds() throws Exception {
+        mockMvc.perform(get("/api/users/me").with(callerWith(STAFF_ID, UserRole.ROLE_STAFF)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @DisplayName("GET /api/users/me: an admin reaches their own profile")
     void getMe_admin_succeeds() throws Exception {
-        mockMvc.perform(get("/api/users/me").with(callerWith(ADMIN_ID, UserRole.ROLE_ADMIN)))
+        mockMvc.perform(get("/api/users/me").with(callerWith(ADMIN_ID, UserRole.ROLE_STAFF, UserRole.ROLE_ADMIN)))
                 .andExpect(status().isOk());
     }
 
@@ -118,9 +131,17 @@ class UserAuthorizationMatrixTest extends AbstractUserServiceTest {
     }
 
     @Test
+    @DisplayName("PATCH /api/users/me: an administrative employee can edit their own profile")
+    void patchMe_staff_succeeds() throws Exception {
+        mockMvc.perform(patch("/api/users/me").with(callerWith(STAFF_ID, UserRole.ROLE_STAFF))
+                        .contentType(MediaType.APPLICATION_JSON).content(TRIVIAL_PATCH))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @DisplayName("PATCH /api/users/me: an admin can edit their own profile")
     void patchMe_admin_succeeds() throws Exception {
-        mockMvc.perform(patch("/api/users/me").with(callerWith(ADMIN_ID, UserRole.ROLE_ADMIN))
+        mockMvc.perform(patch("/api/users/me").with(callerWith(ADMIN_ID, UserRole.ROLE_STAFF, UserRole.ROLE_ADMIN))
                         .contentType(MediaType.APPLICATION_JSON).content(TRIVIAL_PATCH))
                 .andExpect(status().isOk());
     }
@@ -140,7 +161,7 @@ class UserAuthorizationMatrixTest extends AbstractUserServiceTest {
     @Test
     @DisplayName("GET /api/users: an admin may list the directory")
     void listUsers_admin_succeeds() throws Exception {
-        mockMvc.perform(get("/api/users").with(callerWith(ADMIN_ID, UserRole.ROLE_ADMIN)))
+        mockMvc.perform(get("/api/users").with(callerWith(ADMIN_ID, UserRole.ROLE_STAFF, UserRole.ROLE_ADMIN)))
                 .andExpect(status().isOk());
     }
 
@@ -166,6 +187,21 @@ class UserAuthorizationMatrixTest extends AbstractUserServiceTest {
     }
 
     @Test
+    @DisplayName("GET /api/users: an administrative employee is refused")
+    void listUsers_staff_isForbidden() throws Exception {
+        mockMvc.perform(get("/api/users").with(callerWith(STAFF_ID, UserRole.ROLE_STAFF)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("GET /api/users: another permission, such as reception's, does not open the directory")
+    void listUsers_reception_isForbidden() throws Exception {
+        mockMvc.perform(get("/api/users")
+                        .with(callerWith(STAFF_ID, UserRole.ROLE_STAFF, UserRole.ROLE_RECEPTION)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @DisplayName("GET /api/users: an anonymous caller is rejected")
     void listUsers_anonymous_isRejected() throws Exception {
         mockMvc.perform(get("/api/users"))
@@ -180,7 +216,7 @@ class UserAuthorizationMatrixTest extends AbstractUserServiceTest {
     @DisplayName("GET /api/users/{userId}: an admin may read another account")
     void getById_admin_succeeds() throws Exception {
         mockMvc.perform(get("/api/users/{userId}", STUDENT_ID)
-                        .with(callerWith(ADMIN_ID, UserRole.ROLE_ADMIN)))
+                        .with(callerWith(ADMIN_ID, UserRole.ROLE_STAFF, UserRole.ROLE_ADMIN)))
                 .andExpect(status().isOk());
     }
 
@@ -217,6 +253,14 @@ class UserAuthorizationMatrixTest extends AbstractUserServiceTest {
     }
 
     @Test
+    @DisplayName("GET /api/users/{userId}: an administrative employee is refused")
+    void getById_staff_isForbidden() throws Exception {
+        mockMvc.perform(get("/api/users/{userId}", STUDENT_ID)
+                        .with(callerWith(STAFF_ID, UserRole.ROLE_STAFF)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @DisplayName("GET /api/users/{userId}: an anonymous caller is rejected")
     void getById_anonymous_isRejected() throws Exception {
         mockMvc.perform(get("/api/users/{userId}", STUDENT_ID))
@@ -231,7 +275,7 @@ class UserAuthorizationMatrixTest extends AbstractUserServiceTest {
     @DisplayName("PATCH /api/users/{userId}/status: an admin may change another account's status")
     void setStatus_admin_succeeds() throws Exception {
         mockMvc.perform(patch("/api/users/{userId}/status", STUDENT_ID)
-                        .with(callerWith(ADMIN_ID, UserRole.ROLE_ADMIN))
+                        .with(callerWith(ADMIN_ID, UserRole.ROLE_STAFF, UserRole.ROLE_ADMIN))
                         .contentType(MediaType.APPLICATION_JSON).content("""
                                 {"active": false}"""))
                 .andExpect(status().isOk());
@@ -262,6 +306,16 @@ class UserAuthorizationMatrixTest extends AbstractUserServiceTest {
     void setStatus_professor_isForbidden() throws Exception {
         mockMvc.perform(patch("/api/users/{userId}/status", STUDENT_ID)
                         .with(callerWith(PROFESSOR_ID, UserRole.ROLE_PROFESSOR))
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"active": false}"""))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/users/{userId}/status: moderation's permission does not open activation")
+    void setStatus_moderation_isForbidden() throws Exception {
+        mockMvc.perform(patch("/api/users/{userId}/status", STUDENT_ID)
+                        .with(callerWith(STAFF_ID, UserRole.ROLE_STAFF, UserRole.ROLE_MODERATION))
                         .contentType(MediaType.APPLICATION_JSON).content("""
                                 {"active": false}"""))
                 .andExpect(status().isForbidden());

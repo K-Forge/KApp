@@ -1,22 +1,21 @@
 package co.edu.konradlorenz.kapp.user.web.dto;
 
-import co.edu.konradlorenz.kapp.user.domain.AcademicInfo;
 import co.edu.konradlorenz.kapp.user.domain.UserRole;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.List;
+
 /**
- * Body of {@code POST /internal/users}, sent by auth-service during registration.
+ * Body of {@code POST /internal/users}: what auth-service knows about an account - the names
+ * Microsoft gives and the roles it grants.
  *
- * <p>{@code email} is the natural key of the upsert, which is why a repeated call updates
- * rather than duplicates and the registration flow can be replayed after a timeout.
- *
- * <p>{@code academic} carries no {@code @NotNull}: it is required to be <em>present</em>
- * in the JSON but may be null, and the rule that decides which is correct depends on the
- * role, so it is enforced in the service rather than by an annotation.
+ * <p>{@code email} is the natural key of the upsert, which is why a repeated call updates rather
+ * than duplicates and a sign-in can be replayed after a timeout. That the roles hold exactly one
+ * profile role is checked in the service, since it concerns the list as a whole.
  */
 public record InternalUserUpsertRequest(
 
@@ -33,10 +32,7 @@ public record InternalUserUpsertRequest(
         @Size(min = 1, max = 50, message = "must be between 1 and 50 characters")
         String lastName,
 
-        @NotNull(message = "must not be null")
-        UserRole role,
-
-        @Valid
-        AcademicInfo academic
+        @NotEmpty(message = "must hold the profile role")
+        List<@NotNull(message = "must not hold null") UserRole> roles
 ) {
 }

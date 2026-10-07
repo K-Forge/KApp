@@ -2,7 +2,7 @@ package co.edu.konradlorenz.kapp.user.web;
 
 import co.edu.konradlorenz.kapp.user.service.UserProfileService;
 import co.edu.konradlorenz.kapp.user.web.dto.InternalUserUpsertRequest;
-import co.edu.konradlorenz.kapp.user.web.dto.UserProfileResponse;
+import co.edu.konradlorenz.kapp.user.web.dto.DirectoryEntry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -46,8 +46,8 @@ public class InternalUserController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create or update a profile from another service",
             description = "Idempotent upsert keyed by e-mail. Returns 200 in both cases.")
-    public UserProfileResponse upsert(@Valid @RequestBody InternalUserUpsertRequest request) {
-        return users.upsertFromRegistration(request);
+    public DirectoryEntry upsert(@Valid @RequestBody InternalUserUpsertRequest request) {
+        return users.upsertFromAuth(request);
     }
 
     /** auth-service removing an account an administrator deleted: its credential is already gone. */

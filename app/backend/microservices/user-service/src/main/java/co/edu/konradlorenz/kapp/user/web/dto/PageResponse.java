@@ -8,7 +8,7 @@ import java.util.List;
  * <p>Page indexes are zero-based, so {@code first} is true at {@code page: 0}.
  */
 public record PageResponse(
-        List<UserProfileResponse> content,
+        List<DirectoryEntry> content,
         int page,
         int size,
         long totalElements,
@@ -17,7 +17,7 @@ public record PageResponse(
         boolean last
 ) {
 
-    public static PageResponse of(List<UserProfileResponse> content, int page, int size,
+    public static PageResponse of(List<DirectoryEntry> content, int page, int size,
                                   long totalElements) {
         int totalPages = (int) ((totalElements + size - 1) / size);
         return new PageResponse(

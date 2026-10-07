@@ -88,10 +88,10 @@ class RegistrationIntegrationTest extends AbstractAuthIntegrationTest {
         verify(userProfileClient).upsert(captor.capture());
         InternalUserUpsert sent = captor.getValue();
         assertThat(sent.email()).isEqualTo("ana.gomez@konradlorenz.edu.co");
-        assertThat(sent.role()).isEqualTo("ROLE_STUDENT");
-        assertThat(sent.academic()).isNotNull();
-        assertThat(sent.academic().studentCode()).isEqualTo("506111222");
-        assertThat(sent.academic().programCode()).isEqualTo("506");
+        // Since user 1.0 the profile carries the roles and nothing academic: user-service keeps
+        // no student code, and reads a student's program, pensum and level from SINU.
+        assertThat(sent.roles()).containsExactly("ROLE_STUDENT");
+        assertThat(sent.firstName()).isNotBlank();
     }
 
     @Test
@@ -168,7 +168,7 @@ class RegistrationIntegrationTest extends AbstractAuthIntegrationTest {
 
         var captor = org.mockito.ArgumentCaptor.forClass(InternalUserUpsert.class);
         verify(userProfileClient).upsert(captor.capture());
-        assertThat(captor.getValue().academic()).isNull();
+        assertThat(captor.getValue().roles()).containsExactly("ROLE_PROFESSOR");
     }
 
     @Test

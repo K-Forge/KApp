@@ -890,7 +890,6 @@ export const ES: Record<string, string> = {
   'E-mail': 'Correo electrónico',
   'Academic': 'Académico',
   'deactivated': 'desactivado',
-  'level {level} · {program}': 'nivel {level} · {program}',
   'View': 'Ver',
   'This is your own account. Deactivating it would sign you out and there is no way back in from here.': 'Esta es su propia cuenta. Desactivarla cerraría su sesión y no habría forma de volver a entrar desde aquí.',
   'Temporary password': 'Contraseña temporal',

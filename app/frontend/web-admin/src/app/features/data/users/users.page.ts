@@ -1,7 +1,6 @@
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
 import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ALL_ROLES, type Role } from '../../../core/auth/auth.model';
 import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
 import type { PageResponse } from '../../../core/http/page-response.model';
@@ -11,7 +10,7 @@ import { DataTableComponent } from '../../../shared/ui/data-table/data-table.com
 import { JsonViewComponent } from '../../../shared/ui/json-view/json-view.component';
 import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 import { RoleBadgeComponent } from '../../../shared/ui/role-badge/role-badge.component';
-import type { UserProfile } from './user.model';
+import { DIRECTORY_ROLES, type DirectoryEntry, type DirectoryRole } from './user.model';
 import { UsersService } from './users.service';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { locale, t } from '../../../core/i18n/i18n.service';
@@ -24,8 +23,9 @@ const PAGE_SIZE = 20;
 
 /**
  * Directory browse + the one admin write this contract exposes on another account: flipping
- * `active`. Everything else about a profile (name, phone, academic record) is only editable by
- * the account owner through /api/users/me, which is why there is no "edit" action here.
+ * `active`. Names come from Microsoft at every sign-in and the picture is the owner's, through
+ * /api/users/me, which is why there is no "edit" action here. Nothing academic is shown: an
+ * administrator manages accounts, not records.
  */
 @Component({
   selector: 'app-users-page',
@@ -99,9 +99,8 @@ const PAGE_SIZE = 20;
             <tr>
               <th>{{ 'Name' | t }}</th>
               <th>{{ 'E-mail' | t }}</th>
-              <th>{{ 'Role' | t }}</th>
+              <th>{{ 'Roles' | t }}</th>
               <th>{{ 'Status' | t }}</th>
-              <th>{{ 'Academic' | t }}</th>
               <th></th>
             </tr>
           </thead>
@@ -110,14 +109,17 @@ const PAGE_SIZE = 20;
               <tr>
                 <td>{{ user.firstName }} {{ user.lastName }}</td>
                 <td class="mono">{{ user.email }}</td>
-                <td><app-role-badge [role]="user.role" /></td>
+                <td>
+                  <span class="row">
+                    @for (role of user.roles; track role) {
+                      <app-role-badge [role]="role" />
+                    }
+                  </span>
+                </td>
                 <td>
                   <span class="badge" [class]="user.active ? 'badge-success' : 'badge-neutral'">
                     {{ user.active ? ('active' | t) : ('deactivated' | t) }}
                   </span>
-                </td>
-                <td class="text-muted">
-                  {{ user.academic ? ('level {level} · {program}' | t: { level: user.academic.currentLevel, program: user.academic.programCode }) : '—' }}
                 </td>
                 <td class="row">
                   <button type="button" class="btn btn-sm" (click)="view(user)">{{ 'View' | t }}</button>
@@ -135,7 +137,7 @@ const PAGE_SIZE = 20;
                     <button type="button" class="btn btn-sm" [disabled]="updatingId() === user.id" (click)="newTemporaryPassword(user)">
                       {{ 'Temporary password' | t }}
                     </button>
-                    @if (user.role !== 'ROLE_ADMIN') {
+                    @if (!user.roles.includes('ROLE_ADMIN')) {
                       <button type="button" class="btn btn-sm btn-danger" [disabled]="updatingId() === user.id" (click)="deleteAccount(user)">
                         {{ 'Delete' | t }}
                       </button>
@@ -250,18 +252,18 @@ export class UsersPage {
   private readonly usersService = inject(UsersService);
   private readonly tokens = inject(TokenStore);
 
-  readonly roles = ALL_ROLES;
+  readonly roles = DIRECTORY_ROLES;
 
   readonly page = signal(0);
-  readonly role = signal<Role | ''>('');
+  readonly role = signal<DirectoryRole | ''>('');
   readonly active = signal<'' | 'true' | 'false'>('');
   readonly q = signal('');
 
   readonly loading = signal(false);
   readonly error = signal<ApiError | null>(null);
-  readonly result = signal<PageResponse<UserProfile> | null>(null);
+  readonly result = signal<PageResponse<DirectoryEntry> | null>(null);
 
-  readonly selectedUser = signal<UserProfile | null>(null);
+  readonly selectedUser = signal<DirectoryEntry | null>(null);
   readonly updatingId = signal<string | null>(null);
 
   @ViewChild('detailModal') private detailModal?: ModalComponent;
@@ -326,7 +328,7 @@ export class UsersPage {
 
   onRoleChange(event: Event): void {
     this.page.set(0);
-    this.role.set((event.target as HTMLSelectElement).value as Role | '');
+    this.role.set((event.target as HTMLSelectElement).value as DirectoryRole | '');
   }
 
   onActiveChange(event: Event): void {
@@ -408,7 +410,7 @@ export class UsersPage {
   }
 
   /** The account and its profile, for good: the person can no longer sign in, and leaves the list. */
-  deleteAccount(user: UserProfile): void {
+  deleteAccount(user: DirectoryEntry): void {
     if (!window.confirm(t('Delete the account of {email} for good? Their profile goes with it, and it cannot be undone. Deactivating keeps it.', { email: user.email }))) {
       return;
     }
@@ -426,7 +428,7 @@ export class UsersPage {
   }
 
   /** For somebody who forgot their password: the one they had stops working at once. */
-  newTemporaryPassword(user: UserProfile): void {
+  newTemporaryPassword(user: DirectoryEntry): void {
     if (!window.confirm(t('Give {email} a new temporary password? The one they have stops working at once.', { email: user.email }))) {
       return;
     }
@@ -443,7 +445,7 @@ export class UsersPage {
     });
   }
 
-  view(user: UserProfile): void {
+  view(user: DirectoryEntry): void {
     this.selectedUser.set(user);
     this.detailModal?.open();
   }
@@ -461,11 +463,11 @@ export class UsersPage {
    * do to another administrator, and it is recorded as S14 in SECURITY-AUDIT.md rather than
    * guessed at here.
    */
-  isSelf(user: UserProfile): boolean {
+  isSelf(user: DirectoryEntry): boolean {
     return user.id === this.tokens.decoded()?.claims.sub;
   }
 
-  toggleActive(user: UserProfile): void {
+  toggleActive(user: DirectoryEntry): void {
     const nextActive = !user.active;
     const question = nextActive ? t('Reactivate {email}?', { email: user.email }) : t('Deactivate {email}?', { email: user.email });
     if (!window.confirm(question)) {

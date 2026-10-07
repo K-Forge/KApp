@@ -6,8 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
- * Owns user profiles: name, identification, contact details and, for members of the
- * university, their academic placement.
+ * Owns user profiles: names, picture, roles and activation state. It keeps no identity
+ * document, no phone number and nothing academic: a student's program, pensum and level are
+ * read from SINU when the student asks for their own profile.
  *
  * <p>It deliberately does NOT own credentials. Passwords, roles and e-mail verification
  * live in auth-service. Splitting them this way keeps authentication behind a single

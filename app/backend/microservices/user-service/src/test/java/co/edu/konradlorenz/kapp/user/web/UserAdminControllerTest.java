@@ -9,9 +9,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
+import static org.hamcrest.Matchers.contains;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -57,7 +59,35 @@ class UserAdminControllerTest extends AbstractUserServiceTest {
                         .with(callerWith(ADMIN_ID, UserRole.ROLE_ADMIN)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(1))
-                .andExpect(jsonPath("$.content[0].role").value("ROLE_PROFESSOR"));
+                .andExpect(jsonPath("$.content[0].roles", contains("ROLE_PROFESSOR")));
+    }
+
+    @Test
+    @DisplayName("the role filter finds a permission held alongside a profile role, and that profile role too")
+    void list_roleFilter_matchesAnyRoleHeld() throws Exception {
+        save(student("s1", "s1@konradlorenz.edu.co", "One", "Student"));
+        save(admin("a1", "ana.ruiz@konradlorenz.edu.co", "Ana", "Ruiz Mejía"));
+
+        mockMvc.perform(get("/api/users").param("role", "ROLE_ADMIN")
+                        .with(callerWith(ADMIN_ID, UserRole.ROLE_STAFF, UserRole.ROLE_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].roles", contains("ROLE_STAFF", "ROLE_ADMIN")));
+
+        mockMvc.perform(get("/api/users").param("role", "ROLE_STAFF")
+                        .with(callerWith(ADMIN_ID, UserRole.ROLE_STAFF, UserRole.ROLE_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].id").value("a1"));
+    }
+
+    @Test
+    @DisplayName("a role KApp does not know is rejected with 400")
+    void list_unknownRole_isRejected() throws Exception {
+        mockMvc.perform(get("/api/users").param("role", "ROLE_DEAN")
+                        .with(callerWith(ADMIN_ID, UserRole.ROLE_ADMIN)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[0].field").value("role"));
     }
 
     @Test
@@ -182,16 +212,33 @@ class UserAdminControllerTest extends AbstractUserServiceTest {
                 .andExpect(status().isNotFound());
     }
 
+    /** An administrator manages accounts, not records: a student's program is not theirs to see. */
     @Test
-    @DisplayName("a known id returns that profile")
-    void getById_knownId_returnsProfile() throws Exception {
+    @DisplayName("a known id returns that directory entry, with nothing academic")
+    void getById_knownId_returnsEntryWithoutAcademic() throws Exception {
         save(fullyPopulated(TARGET_ID, "pepito.perez@konradlorenz.edu.co"));
 
         mockMvc.perform(get("/api/users/{userId}", TARGET_ID)
                         .with(callerWith(ADMIN_ID, UserRole.ROLE_ADMIN)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(TARGET_ID))
-                .andExpect(jsonPath("$.email").value("pepito.perez@konradlorenz.edu.co"));
+                .andExpect(jsonPath("$.email").value("pepito.perez@konradlorenz.edu.co"))
+                .andExpect(jsonPath("$.roles", contains("ROLE_STUDENT")))
+                .andExpect(jsonPath("$.academic").doesNotExist());
+
+        verify(sinu, never()).student(any(), any());
+    }
+
+    /** {@code ROLE_GUEST} stays in the enum for exactly this: V003 turned such a profile's role into a list. */
+    @Test
+    @DisplayName("a profile written before user 1.0 with ROLE_GUEST still reads")
+    void getById_legacyGuestProfile_stillReads() throws Exception {
+        save(profile(TARGET_ID, "maria.rodriguez@gmail.com", "Maria", "Rodriguez", UserRole.ROLE_GUEST));
+
+        mockMvc.perform(get("/api/users/{userId}", TARGET_ID)
+                        .with(callerWith(ADMIN_ID, UserRole.ROLE_ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roles", contains("ROLE_GUEST")));
     }
 
     // ---------------------------------------------------------------------------------
