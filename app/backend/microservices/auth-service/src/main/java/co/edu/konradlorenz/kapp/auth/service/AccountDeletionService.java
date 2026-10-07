@@ -31,10 +31,13 @@ public class AccountDeletionService {
 
     private final CredentialRepository credentials;
     private final UserProfileClient userProfiles;
+    private final SessionService sessions;
 
-    public AccountDeletionService(CredentialRepository credentials, UserProfileClient userProfiles) {
+    public AccountDeletionService(CredentialRepository credentials, UserProfileClient userProfiles,
+                                  SessionService sessions) {
         this.credentials = credentials;
         this.userProfiles = userProfiles;
+        this.sessions = sessions;
     }
 
     public void delete(String userId, String requestedBy) {
@@ -49,6 +52,8 @@ public class AccountDeletionService {
             credentials.delete(found);
             log.info("Account {} deleted by {}", found.email(), requestedBy);
         });
+        // Also when the credential was already gone: a deletion sent again finishes the job.
+        sessions.deleteAll(userId);
         try {
             userProfiles.delete(userId);
         } catch (RuntimeException e) {

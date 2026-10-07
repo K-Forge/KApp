@@ -62,6 +62,10 @@ public class AuthSecurityConfig {
      */
     static final String[] PUBLIC_AUTH_PATHS = {
             "/auth/login",
+            // The refresh token in the body is the proof, and the access token it renews may
+            // already have expired. Signing out takes the same token.
+            "/auth/refresh",
+            "/auth/logout",
             // A temporary password is replaced before it signs anybody in: the current
             // password in the body is the proof, as at login.
             "/auth/password",

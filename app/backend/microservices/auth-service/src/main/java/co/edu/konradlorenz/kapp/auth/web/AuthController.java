@@ -1,8 +1,11 @@
 package co.edu.konradlorenz.kapp.auth.web;
 
+import co.edu.konradlorenz.kapp.auth.domain.RefreshToken;
+import co.edu.konradlorenz.kapp.auth.jwt.JwtIssuer;
 import co.edu.konradlorenz.kapp.auth.service.AuthService;
 import co.edu.konradlorenz.kapp.auth.service.PasswordService;
 import co.edu.konradlorenz.kapp.auth.service.RegistrationService;
+import co.edu.konradlorenz.kapp.auth.service.SessionService;
 import co.edu.konradlorenz.kapp.auth.service.VerificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,15 +42,18 @@ public class AuthController {
     private final RegistrationService registrationService;
     private final VerificationService verificationService;
     private final PasswordService passwordService;
+    private final SessionService sessions;
 
     public AuthController(AuthService authService,
                           RegistrationService registrationService,
                           VerificationService verificationService,
-                          PasswordService passwordService) {
+                          PasswordService passwordService,
+                          SessionService sessions) {
         this.authService = authService;
         this.registrationService = registrationService;
         this.verificationService = verificationService;
         this.passwordService = passwordService;
+        this.sessions = sessions;
     }
 
     @PostMapping("/register")
@@ -59,12 +65,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Exchange credentials for an access token")
+    @Operation(summary = "Exchange credentials for an access token and a refresh token")
     public TokenResponse login(@Valid @RequestBody LoginRequest request) {
         var issued = authService.login(request.email(), request.password(), request.allowedRoles());
-        return new TokenResponse(
-                issued.accessToken(), issued.tokenType(), issued.expiresIn(),
-                issued.userId(), issued.roles());
+        return TokenResponse.of(sessions.open(issued, RefreshToken.Client.APP));
     }
 
     /**
@@ -77,9 +81,27 @@ public class AuthController {
     public TokenResponse changePassword(@Valid @RequestBody PasswordChangeRequest request) {
         var issued = passwordService.change(request.email(), request.currentPassword(), request.newPassword(),
                 request.allowedRoles());
-        return new TokenResponse(
-                issued.accessToken(), issued.tokenType(), issued.expiresIn(),
-                issued.userId(), issued.roles());
+        return TokenResponse.of(sessions.open(issued, RefreshToken.Client.APP));
+    }
+
+    /**
+     * A new access token and the next refresh token, for the one sent - which stops working at
+     * once. Public: the refresh token is the proof, and the access token may have expired.
+     */
+    @PostMapping("/refresh")
+    @Operation(summary = "Renew the access token",
+            description = "Rotates the refresh token. One already used revokes its whole family: 401.")
+    public TokenResponse refresh(@Valid @RequestBody RefreshRequest request) {
+        return TokenResponse.of(sessions.renew(request.refreshToken()));
+    }
+
+    /** Always 204: signing out with a token that is already unknown or revoked is not an error. */
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Sign out",
+            description = "Revokes the refresh token's whole family. Always 204.")
+    public void logout(@Valid @RequestBody RefreshRequest request) {
+        sessions.close(request.refreshToken());
     }
 
     /**
@@ -135,11 +157,31 @@ public class AuthController {
             @Size(max = 4) List<@Pattern(regexp = ROLE_PATTERN) String> allowedRoles) {
     }
 
+    public record RefreshRequest(@NotBlank @Size(min = 16, max = 256) String refreshToken) {
+    }
+
+    /**
+     * {@code refreshToken} and {@code refreshExpiresIn} are written as null, never left out, for a
+     * visitor pass, which does not renew: the contract lists both as required.
+     */
     public record TokenResponse(
             String accessToken,
             String tokenType,
             long expiresIn,
+            String refreshToken,
+            Long refreshExpiresIn,
             String userId,
             List<String> roles) {
+
+        public static TokenResponse of(SessionService.SessionTokens session) {
+            JwtIssuer.IssuedToken access = session.access();
+            return new TokenResponse(access.accessToken(), access.tokenType(), access.expiresIn(),
+                    session.refresh().token(), session.refresh().expiresIn(), access.userId(), access.roles());
+        }
+
+        public static TokenResponse withoutRefresh(JwtIssuer.IssuedToken access) {
+            return new TokenResponse(access.accessToken(), access.tokenType(), access.expiresIn(),
+                    null, null, access.userId(), access.roles());
+        }
     }
 }
