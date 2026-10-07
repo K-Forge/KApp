@@ -1,33 +1,25 @@
 package co.edu.konradlorenz.kapp.schedule;
 
-import io.mongock.runner.springboot.EnableMongock;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
- * Owns each student's per-period class timetable: enrollments, their weekly meetings, and
- * the disjoint date ranges - each with its own room - those meetings are actually taught
- * over. Modelled directly on the university's own SINU report so a future automatic sync
- * needs no migration; see {@code docs/api/schedule.openapi.yaml}.
+ * Serves a person's class timetable as SINU has it, and never changes it: a student's, the sections
+ * they take; a professor's, the sections they teach. Choosing courses happens in SINU, through the
+ * university. See {@code docs/api/schedule.openapi.yaml} and {@code docs/api/sinu/}.
  *
- * <p>Security is configured by {@code common}'s auto-configuration: no annotation or
- * component scan is required here.
+ * <p>Nothing is stored. Each timetable is read through
+ * {@link co.edu.konradlorenz.kapp.schedule.sinu.SinuTimetablePort} and kept in memory a few minutes at
+ * most. What KApp adds to it - the pensum item of each course, the building of each sede and the
+ * colours - comes from semaphore-service, map-service and {@link co.edu.konradlorenz.kapp.schedule.color.CourseColors}.
  *
- * <p>{@code @EnableMongock} is NOT optional. Mongock 5.5.1 ships neither
- * {@code AutoConfiguration.imports} nor {@code spring.factories}, so nothing registers
- * it automatically: without this annotation the migrations are silently skipped, indexes
- * are never created and the failure only shows up as duplicate data much later. Every
- * KApp service that talks to MongoDB must carry it.
- *
- * <p>{@code @EnableFeignClients} activates
- * {@link co.edu.konradlorenz.kapp.schedule.catalog.CatalogClient}, which reads the
- * academic catalogue from semaphore-service. {@code @EnableCaching} backs the ~1h cache in
- * front of it - see {@link co.edu.konradlorenz.kapp.schedule.catalog.PensumCatalogService}.
+ * <p>Security is configured by {@code common}'s auto-configuration: no annotation or component scan
+ * is required here. {@code @EnableFeignClients} activates the catalogue and map clients, and
+ * {@code @EnableCaching} the short caches in front of them.
  */
 @SpringBootApplication
-@EnableMongock
 @EnableFeignClients
 @EnableCaching
 public class ScheduleServiceApplication {

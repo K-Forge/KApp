@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Schedule API
-  version: 2.0.0
+  version: 2.0.1
   summary: A person's class timetable for one academic period, read from SINU.
   description: |
     The class timetable of a student, or of a professor, at Fundación Universitaria Konrad Lorenz,
@@ -598,8 +598,9 @@ components:
           type: string
           description: |
             The colour the client paints this course with, as `#RRGGBB`. KApp assigns it from the
-            six non-pink colours of the palette, and a course keeps its colour from one period to
-            the next.
+            six non-pink colours of the palette. Each course starts from a colour of its own, which
+            it keeps from one period to the next, and two courses of one timetable never share one
+            while there are colours left.
           pattern: '^#[0-9A-Fa-f]{6}$'
           example: '#539392'
         meetings:

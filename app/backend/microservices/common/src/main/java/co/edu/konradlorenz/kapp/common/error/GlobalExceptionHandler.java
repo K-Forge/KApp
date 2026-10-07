@@ -4,10 +4,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,6 +18,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Translates exceptions into the shared {@link ApiError} envelope for every service.
@@ -110,6 +113,26 @@ public class GlobalExceptionHandler {
         var issue = new ApiError.FieldIssue(ex.getName(), "Expected a valid "
                 + (ex.getRequiredType() == null ? "value" : ex.getRequiredType().getSimpleName()));
         return build(HttpStatus.BAD_REQUEST, "Invalid parameter", request, List.of(issue));
+    }
+
+    /**
+     * A method the path does not take - a POST where there is only a GET - is the caller's mistake,
+     * and HTTP has a status for it. Without this, Spring's exception reached the catch-all below and
+     * a client got a 500, and the server a stack trace, for a route that simply does not write. The
+     * answer names the methods the path does take, in {@code Allow}, as HTTP asks.
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiError> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex,
+                                                             HttpServletRequest request) {
+        ResponseEntity<ApiError> answer = build(HttpStatus.METHOD_NOT_ALLOWED,
+                "This path does not take " + ex.getMethod(), request, List.of());
+        Set<HttpMethod> allowed = ex.getSupportedHttpMethods();
+        if (allowed == null || allowed.isEmpty()) {
+            return answer;
+        }
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .allow(allowed.toArray(HttpMethod[]::new))
+                .body(answer.getBody());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
