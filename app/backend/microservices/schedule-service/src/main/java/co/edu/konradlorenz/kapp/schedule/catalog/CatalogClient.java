@@ -9,8 +9,8 @@ import java.util.List;
 /**
  * Reads the academic catalogue from {@code semaphore-service}, which owns it.
  *
- * <p>{@code name} matches {@code spring.application.name} in semaphore-service's own
- * {@code application.yml}, so Eureka resolves the call; no URL is hardcoded. The caller's
+ * <p>Addressed by {@code kapp.schedule.semaphore-service-url}: semaphore-service's name, which
+ * Docker Compose and Kubernetes resolve, or whatever address a host or a test sets. The caller's
  * own bearer token is attached automatically by {@code common}'s
  * {@code KappFeignAutoConfiguration} - nothing here has to touch a token.
  *
@@ -18,7 +18,7 @@ import java.util.List;
  * service runs; see {@link PensumCatalogService} for how that is handled, and mock
  * this interface directly in tests rather than standing up a real semaphore-service.
  */
-@FeignClient(name = "semaphore-service", path = "/api/catalog")
+@FeignClient(name = "semaphore-service", url = "${kapp.schedule.semaphore-service-url}", path = "/api/catalog")
 public interface CatalogClient {
 
     @GetMapping("/pensums/{pensumCode}/courses")

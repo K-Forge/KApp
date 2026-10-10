@@ -16,7 +16,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -35,19 +34,14 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
  * {@code AbstractUserServiceTest}: one MongoDB, one application context, one set of seed
  * helpers.
  *
- * <p>{@link CatalogClient} is replaced with a Mockito mock rather than left to resolve
- * through Eureka: semaphore-service is being built in parallel and is not guaranteed to be
- * up, and the contract only asks this service to fail open when it isn't - see
+ * <p>{@link CatalogClient} is replaced with a Mockito mock rather than left to call
+ * semaphore-service: it is not guaranteed to be up, and the contract only asks this service to fail open when it isn't - see
  * {@code catalog.PensumCatalogService}. Left unstubbed, the mock's default answer for
  * a {@code List}-returning method is an empty list, which is exactly the "catalogue not
  * reachable" case.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(properties = {
-        "eureka.client.enabled=false",
-        "spring.cloud.discovery.enabled=false"
-})
 public abstract class AbstractScheduleServiceTest {
 
     static final MongoDBContainer MONGO = new MongoDBContainer("mongo:7.0");

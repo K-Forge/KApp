@@ -27,7 +27,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.testcontainers.containers.MongoDBContainer;
@@ -59,10 +58,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
-@TestPropertySource(properties = {
-        "eureka.client.enabled=false",
-        "spring.cloud.discovery.enabled=false"
-})
 class TracedCampusTest {
 
     @Container

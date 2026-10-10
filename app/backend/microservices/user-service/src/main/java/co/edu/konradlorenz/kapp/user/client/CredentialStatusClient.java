@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
  * existed only the first half happened, so "Deactivate" removed a person from a filter and left
  * them able to log in.
  *
- * <p>Resolved through Eureka by service name. {@code url} stays bindable so a test or a local
- * run can point it at a stub; blank means "use discovery", which is the production path.
+ * <p>Addressed by {@code kapp.user.auth-service-url}: auth-service's name, which Docker Compose
+ * and Kubernetes resolve, or whatever address a host or a test sets.
  *
  * <p>Authenticated with {@code X-Internal-Token}, not the administrator's bearer token: the
  * secret identifies a service, and {@code /internal/**} is not routed by the gateway.
