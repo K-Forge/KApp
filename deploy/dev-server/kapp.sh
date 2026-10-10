@@ -3,8 +3,8 @@
 # install.sh puts it in /usr/local/bin/kapp.
 #
 #   kapp status          what runs, how much each takes, and how much the host has left
-#   kapp stop            stop the whole server, the map's five and the extras; it stays stopped
-#   kapp start           start the map's five again, and the extras if they were on
+#   kapp stop            stop the whole server, the map's four and the extras; it stays stopped
+#   kapp start           start the map's four again, and the extras if they were on
 #   kapp extras on       start users and the semaphore (users, programs, pensums), if there is room
 #   kapp extras off      stop them again
 #   kapp extras          whether they are on
@@ -77,7 +77,7 @@ start_all() {
   local profiles=''
   is_on && profiles=extras
   COMPOSE_PROFILES=$profiles docker compose up -d
-  echo "Started: the map's five$(is_on && echo ' and the extras'). The gateway answers in about a minute."
+  echo "Started: the map's four$(is_on && echo ' and the extras'). The gateway answers in about a minute."
 }
 
 extras_off() {
