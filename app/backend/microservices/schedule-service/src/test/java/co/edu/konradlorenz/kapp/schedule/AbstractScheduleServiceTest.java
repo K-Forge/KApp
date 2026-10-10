@@ -122,7 +122,7 @@ public abstract class AbstractScheduleServiceTest {
     /** A level-6 Estadística Descriptiva enrollment, following the contract's own example. */
     protected static Enrollment estadistica(List<Meeting> meetings) {
         return new Enrollment(UUID.randomUUID().toString(), "17080", "2018", "ESTADISTICA DESCRIPTIVA",
-                6, 3, 48, "51", null, "CAMPOS AVENDANO GUSTAVO ANDRES", "Sede Principal",
+                6, 3, 48, "51", null, "GÓMEZ RESTREPO LAURA MARCELA", "Sede Principal",
                 LocalDate.parse("2026-07-27"), LocalDate.parse("2026-11-30"), "#539392", meetings);
     }
 

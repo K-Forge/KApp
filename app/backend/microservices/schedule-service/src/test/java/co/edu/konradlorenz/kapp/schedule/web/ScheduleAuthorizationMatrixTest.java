@@ -54,7 +54,7 @@ class ScheduleAuthorizationMatrixTest extends AbstractScheduleServiceTest {
     private static final String TRIVIAL_ENROLLMENT_BODY = """
             {"courseCode": "48022", "pensumItemCode": "2027", "courseName": "INGENIERIA DE SOFTWARE II",
              "level": 7, "credits": 3, "totalHours": 64, "group": "51", "subgroup": null,
-             "professor": "LOPEZ OSPINA CARLOS ANDRES", "campus": "Sede Principal",
+             "professor": "RAMÍREZ SALAZAR DIANA PATRICIA", "campus": "Sede Principal",
              "startDate": "2026-07-29", "endDate": "2026-11-25", "color": "#D51A65",
              "meetings": [{"dayOfWeek": "WEDNESDAY", "startTime": "18:15", "endTime": "21:15",
                            "periods": [{"from": "2026-07-29", "to": "2026-11-25", "room": "710"}]}]}""";
@@ -76,7 +76,7 @@ class ScheduleAuthorizationMatrixTest extends AbstractScheduleServiceTest {
                 LocalTime.parse("18:15"), LocalTime.parse("20:30"), List.of(meetingPeriod));
         Enrollment enrollment = new Enrollment(ENROLLMENT_ID, "17080", "2018",
                 "ESTADISTICA DESCRIPTIVA", 6, 3, 48, "51", null,
-                "CAMPOS AVENDANO GUSTAVO ANDRES", "Sede Principal",
+                "GÓMEZ RESTREPO LAURA MARCELA", "Sede Principal",
                 LocalDate.parse("2026-07-27"), LocalDate.parse("2026-11-30"), "#539392",
                 List.of(meeting));
         return schedule(userId, PERIOD, true, List.of(enrollment));

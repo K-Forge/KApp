@@ -17,7 +17,7 @@ export interface AccountRequest {
   programCode?: string;
 }
 
-/** The program a student code belongs to: its first three digits, 506232730 is a 506. */
+/** The program a student code belongs to: its first three digits, 506900001 is a 506. */
 export function programOf(studentCode: string): string {
   const code = studentCode.trim();
   return /^\d{6,20}$/.test(code) ? code.slice(0, 3) : '';
