@@ -133,7 +133,7 @@ public class V007_KeepTheHalfHourPractices {
 
         List<PensumCourse> courses = pensum.courses().stream()
                 .map(c -> wanted.containsKey(c.pensumItemCode())
-                        ? new PensumCourse(c.code(), c.pensumItemCode(), c.name(), c.level(),
+                        ? new PensumCourse(c.pensumItemCode(), c.name(), c.level(),
                                 c.credits(), wanted.get(c.pensumItemCode()), c.area(),
                                 c.electiveSlot(), c.prerequisites(), c.sinuCode())
                         : c)

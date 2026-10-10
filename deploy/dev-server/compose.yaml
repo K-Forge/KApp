@@ -153,7 +153,6 @@ services:
       SERVER_ADDRESS: 127.0.0.1
       MONGODB_URI: ${MONGO_SEMAPHORE_URI:-}
       KAPP_JWKS_URI: http://127.0.0.1:8081/.well-known/jwks.json
-      KAPP_USER_SERVICE_URL: http://127.0.0.1:8082
       KAPP_LOG_LEVEL: INFO
       # The programs' catalogue and every pensum's grid weigh a little more than a profile.
       JAVA_OPTS: "-Xmx112m -XX:MaxDirectMemorySize=16m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:CICompilerCount=1 -XX:ReservedCodeCacheSize=48m -XX:MaxMetaspaceSize=160m -Xss512k"

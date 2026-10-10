@@ -19,7 +19,6 @@
   ],
   "courses": [
     {
-      "code": "ANI-101",
       "pensumItemCode": "ANI-101",
       "name": "Matemáticas I",
       "level": 1,
@@ -31,7 +30,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-102",
       "pensumItemCode": "ANI-102",
       "name": "Fundamentos de Economía",
       "level": 1,
@@ -43,7 +41,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-103",
       "pensumItemCode": "ANI-103",
       "name": "Mundo Empresarial",
       "level": 1,
@@ -55,7 +52,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-104",
       "pensumItemCode": "ANI-104",
       "name": "Habilidades Comunicativas",
       "level": 1,
@@ -67,7 +63,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-105",
       "pensumItemCode": "ANI-105",
       "name": "Inglés Intermedio Bajo",
       "level": 1,
@@ -79,7 +74,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-201",
       "pensumItemCode": "ANI-201",
       "name": "Matemáticas II",
       "level": 2,
@@ -91,7 +85,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-202",
       "pensumItemCode": "ANI-202",
       "name": "Macroeconomía",
       "level": 2,
@@ -103,7 +96,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-203",
       "pensumItemCode": "ANI-203",
       "name": "Contabilidad Gerencial",
       "level": 2,
@@ -115,7 +107,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-204",
       "pensumItemCode": "ANI-204",
       "name": "Administración y Organizaciones",
       "level": 2,
@@ -127,7 +118,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-205",
       "pensumItemCode": "ANI-205",
       "name": "Cultura I",
       "level": 2,
@@ -139,7 +129,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-206",
       "pensumItemCode": "ANI-206",
       "name": "Inglés Intermedio Medio",
       "level": 2,
@@ -151,7 +140,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-301",
       "pensumItemCode": "ANI-301",
       "name": "Estadística I",
       "level": 3,
@@ -163,7 +151,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-302",
       "pensumItemCode": "ANI-302",
       "name": "Costos y Presupuestos",
       "level": 3,
@@ -175,7 +162,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-303",
       "pensumItemCode": "ANI-303",
       "name": "Fundamentos de Mercadeo",
       "level": 3,
@@ -187,7 +173,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-304",
       "pensumItemCode": "ANI-304",
       "name": "Gestión de la Información",
       "level": 3,
@@ -199,7 +184,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-305",
       "pensumItemCode": "ANI-305",
       "name": "Contexto Internacional",
       "level": 3,
@@ -211,7 +195,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-306",
       "pensumItemCode": "ANI-306",
       "name": "Inglés Intermedio Alto",
       "level": 3,
@@ -223,7 +206,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-401",
       "pensumItemCode": "ANI-401",
       "name": "Estadística II",
       "level": 4,
@@ -235,7 +217,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-402",
       "pensumItemCode": "ANI-402",
       "name": "Matemática Financiera",
       "level": 4,
@@ -247,7 +228,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-403",
       "pensumItemCode": "ANI-403",
       "name": "Metodología de la Investigación",
       "level": 4,
@@ -259,7 +239,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-404",
       "pensumItemCode": "ANI-404",
       "name": "Comercio Exterior I",
       "level": 4,
@@ -271,7 +250,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-405",
       "pensumItemCode": "ANI-405",
       "name": "Cultura II",
       "level": 4,
@@ -283,7 +261,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-406",
       "pensumItemCode": "ANI-406",
       "name": "Inglés Avanzado",
       "level": 4,
@@ -295,7 +272,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-501",
       "pensumItemCode": "ANI-501",
       "name": "Derecho en los Negocios",
       "level": 5,
@@ -307,7 +283,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-502",
       "pensumItemCode": "ANI-502",
       "name": "Gestión de Operaciones",
       "level": 5,
@@ -319,7 +294,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-503",
       "pensumItemCode": "ANI-503",
       "name": "Investigación de Mercados",
       "level": 5,
@@ -331,7 +305,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-504",
       "pensumItemCode": "ANI-504",
       "name": "Comercio Exterior II",
       "level": 5,
@@ -343,7 +316,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "ANI-505",
       "name": "Electiva Profesional I",
       "level": 5,
@@ -355,7 +327,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-506",
       "pensumItemCode": "ANI-506",
       "name": "Inglés Proficiencia",
       "level": 5,
@@ -367,7 +338,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-601",
       "pensumItemCode": "ANI-601",
       "name": "Administración Financiera",
       "level": 6,
@@ -379,7 +349,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-602",
       "pensumItemCode": "ANI-602",
       "name": "Pensamiento Estratégico",
       "level": 6,
@@ -391,7 +360,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-603",
       "pensumItemCode": "ANI-603",
       "name": "Gestión del Talento Humano",
       "level": 6,
@@ -403,7 +371,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-604",
       "pensumItemCode": "ANI-604",
       "name": "Economía Internacional",
       "level": 6,
@@ -415,7 +382,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "ANI-605",
       "name": "Electiva Profesional II",
       "level": 6,
@@ -427,7 +393,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-606",
       "pensumItemCode": "ANI-606",
       "name": "Cultura III",
       "level": 6,
@@ -439,7 +404,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-607",
       "pensumItemCode": "ANI-607",
       "name": "Inglés / Especializado I",
       "level": 6,
@@ -451,7 +415,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-701",
       "pensumItemCode": "ANI-701",
       "name": "Empresariado",
       "level": 7,
@@ -463,7 +426,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-702",
       "pensumItemCode": "ANI-702",
       "name": "Negocios Internacionales",
       "level": 7,
@@ -475,7 +437,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-703",
       "pensumItemCode": "ANI-703",
       "name": "Finanzas Internacionales",
       "level": 7,
@@ -487,7 +448,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "ANI-704",
       "name": "Electiva Profesional III",
       "level": 7,
@@ -499,7 +459,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-705",
       "pensumItemCode": "ANI-705",
       "name": "Logística y Distribución Física Internacional",
       "level": 7,
@@ -511,7 +470,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-706",
       "pensumItemCode": "ANI-706",
       "name": "Inglés / Especializado II",
       "level": 7,
@@ -523,7 +481,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-801",
       "pensumItemCode": "ANI-801",
       "name": "Proyectos",
       "level": 8,
@@ -535,7 +492,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-802",
       "pensumItemCode": "ANI-802",
       "name": "Marketing Internacional",
       "level": 8,
@@ -547,7 +503,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-803",
       "pensumItemCode": "ANI-803",
       "name": "Gerencia Estratégica Internacional",
       "level": 8,
@@ -559,7 +514,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-804",
       "pensumItemCode": "ANI-804",
       "name": "Derecho Económico Internacional",
       "level": 8,
@@ -571,7 +525,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "ANI-805",
       "name": "Electiva I Institucional",
       "level": 8,
@@ -583,7 +536,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-901",
       "pensumItemCode": "ANI-901",
       "name": "Trabajo de Grado",
       "level": 9,
@@ -595,7 +547,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-902",
       "pensumItemCode": "ANI-902",
       "name": "Geopolítica y Relaciones Internacionales",
       "level": 9,
@@ -607,7 +558,6 @@
       "sinuCode": null
     },
     {
-      "code": "ANI-903",
       "pensumItemCode": "ANI-903",
       "name": "Práctica Profesional",
       "level": 9,
@@ -619,7 +569,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "ANI-904",
       "name": "Electiva Profesional IV",
       "level": 9,

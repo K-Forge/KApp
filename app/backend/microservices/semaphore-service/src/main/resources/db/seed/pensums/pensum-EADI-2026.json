@@ -19,7 +19,6 @@
   ],
   "courses": [
     {
-      "code": "EADI-101",
       "pensumItemCode": "EADI-101",
       "name": "Gestión Estratégica de Proyectos de Analítica de Datos",
       "level": 1,
@@ -31,7 +30,6 @@
       "sinuCode": null
     },
     {
-      "code": "EADI-102",
       "pensumItemCode": "EADI-102",
       "name": "Inteligencia de Negocios",
       "level": 1,
@@ -43,7 +41,6 @@
       "sinuCode": null
     },
     {
-      "code": "EADI-103",
       "pensumItemCode": "EADI-103",
       "name": "Fundamentos de Programación y Bases de Datos para Analítica",
       "level": 1,
@@ -55,7 +52,6 @@
       "sinuCode": null
     },
     {
-      "code": "EADI-104",
       "pensumItemCode": "EADI-104",
       "name": "Introducción a la IA y a la Ciencia de Datos",
       "level": 1,
@@ -67,7 +63,6 @@
       "sinuCode": null
     },
     {
-      "code": "EADI-105",
       "pensumItemCode": "EADI-105",
       "name": "Visualización de Datos",
       "level": 1,
@@ -79,7 +74,6 @@
       "sinuCode": null
     },
     {
-      "code": "EADI-201",
       "pensumItemCode": "EADI-201",
       "name": "Gobernanza de Datos y Ética en la Analítica",
       "level": 2,
@@ -91,7 +85,6 @@
       "sinuCode": null
     },
     {
-      "code": "EADI-202",
       "pensumItemCode": "EADI-202",
       "name": "Machine Learning y Procesamiento de Lenguaje Natural",
       "level": 2,
@@ -103,7 +96,6 @@
       "sinuCode": null
     },
     {
-      "code": "EADI-203",
       "pensumItemCode": "EADI-203",
       "name": "Herramientas y Analítica y Despliegue en Nube",
       "level": 2,
@@ -115,7 +107,6 @@
       "sinuCode": null
     },
     {
-      "code": "EADI-204",
       "pensumItemCode": "EADI-204",
       "name": "Análisis de Casos",
       "level": 2,
@@ -127,7 +118,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "EADI-205",
       "name": "Electiva",
       "level": 2,

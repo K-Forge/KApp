@@ -31,11 +31,15 @@ spring:
           jwk-set-uri: ${KAPP_JWKS_URI:http://localhost:8081/.well-known/jwks.json}
 
 kapp:
+  sinu:
+    # Which SINU the students' records are read from. `fake` serves the invented student of
+    # docs/api/sinu/ while the university has not opened SINU; there is no other adapter yet.
+    adapter: ${KAPP_SINU_ADAPTER:fake}
   semaphore:
-    # Where user-service answers. By name: Docker Compose and Kubernetes both resolve a
-    # service's name to its address, so no registry is needed. A host-networked server or a
-    # local run sets the address itself.
-    user-service-url: ${KAPP_USER_SERVICE_URL:http://user-service:8082}
+    # A student's record read from SINU is kept this long, and no longer: nothing academic is stored.
+    record-cache: ${KAPP_RECORD_CACHE:5m}
+    # The university's clock: which day it is decides the current period and its elective bank.
+    zone: ${KAPP_SEMAPHORE_ZONE:America/Bogota}
 
 mongock:
   migration-scan-package: co.edu.konradlorenz.kapp.semaphore.migration

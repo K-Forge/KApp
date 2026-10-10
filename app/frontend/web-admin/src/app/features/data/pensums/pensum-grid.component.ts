@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import {
-  coursesByCode,
+  coursesByItemCode,
   officialCode as codeOf,
   prerequisiteLabels,
   publishesCourseCodes,
@@ -240,7 +240,7 @@ export class PensumGridComponent {
   /** False when the plan's codes are KApp's own handles rather than the university's. */
   readonly hasOfficialCodes = computed(() => publishesCourseCodes(this.pensum()));
 
-  private readonly byCode = computed(() => coursesByCode(this.pensum()));
+  private readonly byCode = computed(() => coursesByItemCode(this.pensum()));
 
   /** Says which figures the source document leaves out, so a missing one never reads as a zero. */
   readonly missingNote = computed(() => {

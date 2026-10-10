@@ -96,7 +96,7 @@ class WeeklyHoursTest {
     }
 
     private static PensumCourseDto course(double weeklyHours) {
-        return new PensumCourseDto("P5805", "P5805", "Práctica profesional", 8, 9, weeklyHours,
+        return new PensumCourseDto("P5805", "Práctica profesional", 8, 9, weeklyHours,
                 null, "PROFESIONAL", false, List.of(), null);
     }
 }

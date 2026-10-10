@@ -13,6 +13,11 @@
   programCode: "506"
   pensumCode: "1015"
   status: ACTIVE
+  # Where SINU's code differs from the one the PDF prints: Estadística Descriptiva is 17018 on the
+  # 2019 grid and 17080 in SINU, as a 2026-2 timetable report shows. The item keeps the printed
+  # code as its pensumItemCode, so the plans and prerequisites that name it do not change.
+  sinuCodes:
+    "17018": "17080"
 - file: matematicas-1017.yaml
   programCode: MATEMATICAS
   pensumCode: "1017"

@@ -9,13 +9,13 @@ import co.edu.konradlorenz.kapp.semaphore.domain.Pensum;
 import co.edu.konradlorenz.kapp.semaphore.domain.PensumCourse;
 import co.edu.konradlorenz.kapp.semaphore.repository.AcademicPlanRepository;
 import co.edu.konradlorenz.kapp.semaphore.repository.PensumRepository;
+import co.edu.konradlorenz.kapp.semaphore.sinu.SinuElectiveOffering;
+import co.edu.konradlorenz.kapp.semaphore.web.dto.AcademicPlanDto;
 import co.edu.konradlorenz.kapp.semaphore.web.dto.AcademicPlanRequest;
 import co.edu.konradlorenz.kapp.semaphore.web.dto.AcademicPlanUpdate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * The student's own arrangements of their pensum.
@@ -42,10 +42,25 @@ public class AcademicPlanService {
 
     private final AcademicPlanRepository plans;
     private final PensumRepository pensums;
+    private final ElectiveBank electives;
 
-    public AcademicPlanService(AcademicPlanRepository plans, PensumRepository pensums) {
+    public AcademicPlanService(AcademicPlanRepository plans, PensumRepository pensums, ElectiveBank electives) {
         this.plans = plans;
         this.pensums = pensums;
+        this.electives = electives;
+    }
+
+    /**
+     * The plan as the API returns it: each elective chosen for a slot says whether this period's bank
+     * offers it for that slot. Checked when the plan is read, not when it was saved, because the bank
+     * changes every semester.
+     */
+    public AcademicPlanDto view(AcademicPlan plan) {
+        boolean anyElective = plan.placements().stream().anyMatch(p -> p.electiveSinuCode() != null);
+        List<SinuElectiveOffering> bank = anyElective ? electives.offerings(plan.pensumCode(), null) : List.of();
+        return AcademicPlanDto.from(plan, placement -> placement.electiveSinuCode() == null ? null
+                : bank.stream().anyMatch(o -> o.sinuCode().equals(placement.electiveSinuCode())
+                        && o.fills(placement.pensumItemCode())));
     }
 
     public List<AcademicPlan> list(String userId) {
@@ -122,25 +137,31 @@ public class AcademicPlanService {
     }
 
     /**
-     * Pins a course to a level. Idempotent.
+     * Pins an item to a level, and an elective slot to the course chosen for it. Idempotent.
      *
-     * @throws BusinessRuleException (400) if the identifier is not an item of the plan's
-     *                               pensum. Accepting an unknown code would let a plan carry
-     *                               placements for courses the grid has no square for, which
-     *                               the client would silently drop while the student believed
-     *                               the move was saved
+     * @param electiveSinuCode null, or blank, for no chosen course
+     * @throws BusinessRuleException (400) if the item is not in the plan's pensum - a plan carrying a
+     *                               placement the grid has no square for would be dropped silently
+     *                               by the client while the student believed the move was saved -
+     *                               or if a course is chosen for an item that is not an elective slot
      */
-    public AcademicPlan place(String userId, String planId, String code, int plannedLevel) {
+    public AcademicPlan place(String userId, String planId, String pensumItemCode, int plannedLevel,
+                              String electiveSinuCode) {
         AcademicPlan plan = requireOwn(userId, planId);
         Pensum pensum = pensums.findById(plan.pensumCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Pensum", plan.pensumCode()));
 
-        if (!addressableCodes(pensum).contains(code)) {
+        PensumCourse item = pensum.findByPensumItemCode(pensumItemCode)
+                .orElseThrow(() -> new BusinessRuleException(
+                        "%s is not an item of pensum %s".formatted(pensumItemCode, plan.pensumCode()),
+                        List.of(new ApiError.FieldIssue("pensumItemCode", "unknown in this pensum"))));
+        String elective = electiveSinuCode == null || electiveSinuCode.isBlank() ? null : electiveSinuCode.trim();
+        if (elective != null && !item.electiveSlot()) {
             throw new BusinessRuleException(
-                    "%s is not an item of pensum %s".formatted(code, plan.pensumCode()),
-                    List.of(new ApiError.FieldIssue("code", "unknown in this pensum")));
+                    "%s is a fixed course: only an elective slot takes a course from the bank".formatted(pensumItemCode),
+                    List.of(new ApiError.FieldIssue("electiveSinuCode", "only for an elective slot")));
         }
-        return plans.save(plan.withPlacement(code, plannedLevel));
+        return plans.save(plan.withPlacement(pensumItemCode, plannedLevel, elective));
     }
 
     /**
@@ -149,18 +170,12 @@ public class AcademicPlanService {
      *                                    answering 204 would tell a client it had reset
      *                                    something it had not
      */
-    public AcademicPlan reset(String userId, String planId, String code) {
+    public AcademicPlan reset(String userId, String planId, String pensumItemCode) {
         AcademicPlan plan = requireOwn(userId, planId);
-        if (plan.placementFor(code).isEmpty()) {
-            throw new ResourceNotFoundException("Placement", code);
+        if (plan.placementFor(pensumItemCode).isEmpty()) {
+            throw new ResourceNotFoundException("Placement", pensumItemCode);
         }
-        return plans.save(plan.withoutPlacement(code));
-    }
-
-    private static Set<String> addressableCodes(Pensum pensum) {
-        return pensum.coursesInDisplayOrder().stream()
-                .map(PensumCourse::addressableCode)
-                .collect(Collectors.toSet());
+        return plans.save(plan.withoutPlacement(pensumItemCode));
     }
 
     private AcademicPlan requireOwn(String userId, String planId) {
