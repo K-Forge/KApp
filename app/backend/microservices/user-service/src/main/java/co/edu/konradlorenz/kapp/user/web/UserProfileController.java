@@ -45,25 +45,21 @@ public class UserProfileController {
     @GetMapping("/me")
     @NotGuest
     @Operation(summary = "Get the authenticated user's profile",
-            description = "Resolved from the token's sub claim. academic is null for a guest.")
+            description = "Resolved from the token's sub claim. academic, read from SINU, is null for "
+                    + "anybody who is not a student.")
     public UserProfileResponse me() {
-        return users.byId(CurrentUser.id());
+        return users.me(CurrentUser.id());
     }
 
     /**
-     * Binds the raw JSON tree on purpose.
-     *
-     * <p>A record would make an omitted field and a field sent as {@code null} arrive as
-     * the same thing, and the contract gives them opposite meanings: leave it alone
-     * versus clear it. {@link ProfilePatchReader} reads the tree and hands back a patch
-     * that keeps the two apart.
+     * Binds the raw JSON tree on purpose, so that every field sent can be seen and named:
+     * {@link ProfilePatchReader} takes {@code avatarUrl} and refuses anything else with a reason.
      */
     @PatchMapping(path = "/me", consumes = MediaType.APPLICATION_JSON_VALUE)
     @NotGuest
     @Operation(summary = "Update the authenticated user's profile",
-            description = "Only the fields present in the body are touched. Sending null "
-                    + "clears phone, avatarUrl, identification or academic. Sending email, "
-                    + "role, active or id is rejected with 400.")
+            description = "Changes the caller's own picture; null clears it. Any other field is "
+                    + "rejected with 400, naming why.")
     public UserProfileResponse updateMe(@RequestBody JsonNode body) {
         return users.update(CurrentUser.id(), patchReader.read(body));
     }

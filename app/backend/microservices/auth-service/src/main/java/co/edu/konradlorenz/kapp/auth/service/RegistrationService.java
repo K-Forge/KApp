@@ -56,9 +56,6 @@ public class RegistrationService {
 
     private static final Logger log = LoggerFactory.getLogger(RegistrationService.class);
 
-    /** How many of a student code's first digits are its program's: 506232730 is a 506. */
-    static final int PROGRAM_DIGITS = 3;
-
     private final CredentialRepository credentials;
     private final InvitationCodeService invitationCodes;
     private final UserProfileClient userProfiles;
@@ -95,9 +92,9 @@ public class RegistrationService {
         // reopens the read-then-write race redeem() exists to close.
         try {
             String role = roleFrom(code);
-            InternalUserUpsert.AcademicInfo academic = academicFor(role, request.studentCode(), request.programCode());
+            requireStudentCode(role, request.studentCode());
             Credential credential = createAccount(email, request.password(),
-                    request.firstName(), request.lastName(), role, academic, initialStatus(), null);
+                    request.firstName(), request.lastName(), role, initialStatus(), null);
 
             verification.issueAndSend(credential);
             return respond(credential);
@@ -124,21 +121,20 @@ public class RegistrationService {
             throw new BusinessRuleException("An account can be created as a student or a professor",
                     List.of(new ApiError.FieldIssue("role", "ROLE_STUDENT or ROLE_PROFESSOR")));
         }
-        InternalUserUpsert.AcademicInfo academic = academicFor(role, request.studentCode(), request.programCode());
+        requireStudentCode(role, request.studentCode());
         String password = TemporaryPasswords.next();
         Instant expiresAt = Instant.now().plus(TemporaryPasswords.LIFETIME);
         Credential credential = createAccount(email, password, request.firstName(), request.lastName(),
-                role, academic, Credential.Status.ACTIVE, expiresAt);
+                role, Credential.Status.ACTIVE, expiresAt);
         return new PasswordService.Issued(credential, password, expiresAt);
     }
 
     private Credential createAccount(String email, String rawPassword, String firstName,
                                      String lastName, String role,
-                                     InternalUserUpsert.AcademicInfo academic,
                                      Credential.Status status, Instant temporaryUntil) {
 
         UserProfileView profile = createProfile(
-                new InternalUserUpsert(email, firstName.trim(), lastName.trim(), role, academic));
+                new InternalUserUpsert(email, firstName.trim(), lastName.trim(), List.of(role)));
 
         Instant now = Instant.now();
         try {
@@ -185,31 +181,16 @@ public class RegistrationService {
     }
 
     /**
-     * A staff invitation carries no student code, and user-service requires an academic
-     * record for a student and forbids one for a guest.
-     *
-     * <p>The program may be left out: the university's student codes begin with their
-     * program's three digits - 506232730 is a 506, Ingeniería de Sistemas - so it is read from
-     * there. One sent anyway is kept as sent.
+     * Registration under the 0.3 contract still asks a student for their student code, until local
+     * sign-in moves behind its flag with auth 1.0. It is no longer sent anywhere: since user 1.0,
+     * KApp keeps no student code, and a student's program, pensum and level come from SINU.
      */
-    private InternalUserUpsert.AcademicInfo academicFor(String role, String studentCode, String programCode) {
-        if (!KappRoles.STUDENT.equals(role)) {
-            return null;
-        }
-        if (isBlank(studentCode)) {
+    private static void requireStudentCode(String role, String studentCode) {
+        if (KappRoles.STUDENT.equals(role) && isBlank(studentCode)) {
             throw new BusinessRuleException(
                     "A student account requires studentCode",
                     List.of(new ApiError.FieldIssue("studentCode", "Required for a student")));
         }
-        if (isBlank(programCode)) {
-            programCode = studentCode.trim().substring(0, PROGRAM_DIGITS);
-        }
-        // pensumCode and currentLevel are not in the registration contract but are
-        // mandatory on the profile, so the deployment supplies them. A new student starts
-        // on the current pensum, at semester one.
-        return new InternalUserUpsert.AcademicInfo(
-                studentCode.trim(), programCode.trim(),
-                properties.defaultPensumCode(), properties.defaultCurrentLevel());
     }
 
     /** ROLE_ADMIN is never reachable through signup, whatever a code claims. */

@@ -23,6 +23,10 @@ spring:
           jwk-set-uri: ${KAPP_JWKS_URI:http://localhost:8081/.well-known/jwks.json}
 
 kapp:
+  sinu:
+    # Where a student's program, pensum and level are read from for their own profile. `fake`
+    # serves the invented student of docs/api/sinu/ while the university has not opened SINU.
+    adapter: ${KAPP_SINU_ADAPTER:fake}
   internal:
     # Shared secret guarding /internal/** in both directions: POST /internal/users here, which
     # auth-service calls during registration, and PATCH /internal/credentials/{id}/status there,

@@ -178,13 +178,14 @@ class DirectorySearchIndexTest extends AbstractUserServiceTest {
     @Test
     @DisplayName("filters combine with the search rather than replacing it")
     void filtersCombineWithTheSearch() {
-        save(guest("22222222-0000-0000-0000-000000000001",
-                "laura.munoz@gmail.com", "Laura", "Muñoz"));
+        save(professor("22222222-0000-0000-0000-000000000001",
+                "laura.munoz.docente@konradlorenz.edu.co", "Laura", "Muñoz"));
 
-        List<UserProfile> guests = new UserDirectoryRepository(mongoTemplate)
-                .findPage(UserRole.ROLE_GUEST, null, SearchTokens.forQuery("munoz"), 0, 20);
+        List<UserProfile> professors = new UserDirectoryRepository(mongoTemplate)
+                .findPage(UserRole.ROLE_PROFESSOR, null, SearchTokens.forQuery("munoz"), 0, 20);
 
-        assertThat(guests).extracting(UserProfile::email).containsExactly("laura.munoz@gmail.com");
+        assertThat(professors).extracting(UserProfile::email)
+                .containsExactly("laura.munoz.docente@konradlorenz.edu.co");
     }
 
     // ---------------------------------------------------------------------------------

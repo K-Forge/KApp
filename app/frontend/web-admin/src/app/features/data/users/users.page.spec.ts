@@ -6,20 +6,17 @@ import { vi } from 'vitest';
 import { TokenStore } from '../../../core/auth/token.store';
 import { AccountsService, type AccountRequest } from './accounts.service';
 import { UsersPage } from './users.page';
-import type { UserProfile } from './user.model';
+import type { DirectoryEntry } from './user.model';
 
-function profile(id: string): UserProfile {
+function profile(id: string): DirectoryEntry {
   return {
     id,
     email: `${id}@kforge.dev`,
     firstName: 'A',
     lastName: 'B',
-    identification: null,
-    phone: null,
     avatarUrl: null,
-    role: 'ROLE_ADMIN',
+    roles: ['ROLE_STAFF', 'ROLE_ADMIN'],
     active: true,
-    academic: null,
   };
 }
 
@@ -81,11 +78,11 @@ describe('UsersPage', () => {
     expect(create).not.toHaveBeenCalled();
     expect(page.invalid('studentCode')).toBe(true);
 
-    page.createForm.patchValue({ studentCode: '506232730' });
+    page.createForm.patchValue({ studentCode: '506900001' });
     // The program is the code's first three digits: shown, and left to the server to read the same way.
     expect(page.program()).toBe('506');
     page.createAccount();
-    expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'pepito@konradlorenz.edu.co', firstName: 'Pepito', lastName: 'Perez', role: 'ROLE_STUDENT', studentCode: '506232730' });
+    expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'pepito@konradlorenz.edu.co', firstName: 'Pepito', lastName: 'Perez', role: 'ROLE_STUDENT', studentCode: '506900001' });
   });
 
   it('gives somebody else a new temporary password once it is confirmed', () => {

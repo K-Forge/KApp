@@ -103,5 +103,3 @@ kapp:
     verification-link-base: ${KAPP_VERIFICATION_LINK_BASE:http://localhost:8080/auth/verify}
     verification-ttl: ${KAPP_VERIFICATION_TTL:24h}
     mail-from: ${KAPP_MAIL_FROM:no-reply@konradlorenz.edu.co}
-    default-pensum-code: ${KAPP_DEFAULT_PENSUM_CODE:1015}
-    default-current-level: ${KAPP_DEFAULT_CURRENT_LEVEL:1}

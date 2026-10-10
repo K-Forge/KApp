@@ -1,8 +1,5 @@
 package co.edu.konradlorenz.kapp.user;
 
-import co.edu.konradlorenz.kapp.user.domain.AcademicInfo;
-import co.edu.konradlorenz.kapp.user.domain.Identification;
-import co.edu.konradlorenz.kapp.user.domain.IdentificationType;
 import co.edu.konradlorenz.kapp.user.domain.StoredInstant;
 import co.edu.konradlorenz.kapp.user.domain.UserProfile;
 import co.edu.konradlorenz.kapp.user.domain.UserRole;
@@ -13,11 +10,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import co.edu.konradlorenz.kapp.user.client.CredentialStatusClient;
+import co.edu.konradlorenz.kapp.user.sinu.SinuStudentPort;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -25,6 +25,7 @@ import org.testcontainers.containers.MongoDBContainer;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -63,6 +64,15 @@ public abstract class AbstractUserServiceTest {
     @MockitoBean
     protected CredentialStatusClient credentialStatus;
 
+    /**
+     * The test SINU, wrapped rather than replaced: it answers as the {@code fake} adapter does -
+     * the invented student of {@code docs/api/sinu/} - unless a test makes it fail. A spy in the
+     * base class keeps one application context for every suite, where a mock in one suite would
+     * start a second.
+     */
+    @MockitoSpyBean
+    protected SinuStudentPort sinu;
+
     static final MongoDBContainer MONGO = new MongoDBContainer("mongo:7.0");
 
     static {
@@ -96,15 +106,16 @@ public abstract class AbstractUserServiceTest {
 
     /**
      * A validated token for one account, shaped exactly like the ones auth-service signs:
-     * the id in {@code sub}, the role already prefixed in the {@code roles} claim.
+     * the id in {@code sub}, the roles already prefixed in the {@code roles} claim.
      */
-    protected static RequestPostProcessor callerWith(String userId, UserRole role) {
+    protected static RequestPostProcessor callerWith(String userId, UserRole... roles) {
+        List<String> names = Arrays.stream(roles).map(UserRole::name).toList();
         return jwt()
                 .jwt(builder -> builder
                         .subject(userId)
                         .claim("email", userId + "@konradlorenz.edu.co")
-                        .claim("roles", List.of(role.name())))
-                .authorities(new SimpleGrantedAuthority(role.name()));
+                        .claim("roles", names))
+                .authorities(names.stream().map(SimpleGrantedAuthority::new).toArray(GrantedAuthority[]::new));
     }
 
     // ---------------------------------------------------------------------------------
@@ -115,55 +126,43 @@ public abstract class AbstractUserServiceTest {
         return mongoTemplate.save(profile);
     }
 
-    /** A student with a full academic record and no contact details filled in yet. */
+    /** A student. What they study is SINU's, so the profile holds none of it. */
     protected static UserProfile student(String id, String email, String firstName,
                                          String lastName) {
-        return profile(id, email, firstName, lastName, UserRole.ROLE_STUDENT,
-                new AcademicInfo("506999999", "506", "1015", 6));
-    }
-
-    /** A guest: no student code, no programme, no pensum, and no academic record at all. */
-    protected static UserProfile guest(String id, String email, String firstName,
-                                       String lastName) {
-        return profile(id, email, firstName, lastName, UserRole.ROLE_GUEST, null);
+        return profile(id, email, firstName, lastName, UserRole.ROLE_STUDENT);
     }
 
     protected static UserProfile professor(String id, String email, String firstName,
                                            String lastName) {
-        return profile(id, email, firstName, lastName, UserRole.ROLE_PROFESSOR, null);
+        return profile(id, email, firstName, lastName, UserRole.ROLE_PROFESSOR);
     }
 
+    /** An administrative employee who also administers KApp, as the contract's example. */
     protected static UserProfile admin(String id, String email, String firstName,
                                        String lastName) {
-        return profile(id, email, firstName, lastName, UserRole.ROLE_ADMIN, null);
+        return profile(id, email, firstName, lastName, UserRole.ROLE_STAFF, UserRole.ROLE_ADMIN);
     }
 
     protected static UserProfile profile(String id, String email, String firstName,
-                                         String lastName, UserRole role,
-                                         AcademicInfo academic) {
+                                         String lastName, UserRole... roles) {
         Instant now = StoredInstant.now();
-        return new UserProfile(id, email, firstName, lastName, null, null, null, role, true,
-                academic, List.of(), now, now);
+        return new UserProfile(id, email, firstName, lastName, null, List.of(roles), true,
+                List.of(), now, now);
     }
 
     /** A document with every optional field populated, for round-trip assertions. */
     protected static UserProfile fullyPopulated(String id, String email) {
         Instant now = StoredInstant.now();
         return new UserProfile(id, email, "Pepito", "Perez Gomez",
-                new Identification(IdentificationType.CC, "1032456789"),
-                "+573105551234",
                 "https://cdn.kapp.konradlorenz.edu.co/avatars/3f8a1c2e.jpg",
-                UserRole.ROLE_STUDENT, true,
-                new AcademicInfo("506999999", "506", "1015", 6),
-                List.of(), now, now);
+                List.of(UserRole.ROLE_STUDENT), true, List.of(), now, now);
     }
 
     /** Ages a profile so that "newest first" has something to order by. */
     protected static UserProfile createdMinutesAgo(UserProfile profile, int minutes) {
         Instant when = StoredInstant.of(profile.createdAt().minus(minutes, ChronoUnit.MINUTES));
         return new UserProfile(profile.id(), profile.email(), profile.firstName(),
-                profile.lastName(), profile.identification(), profile.phone(),
-                profile.avatarUrl(), profile.role(), profile.active(), profile.academic(),
+                profile.lastName(), profile.avatarUrl(), profile.roles(), profile.active(),
                 List.of(), when, when);
     }
 

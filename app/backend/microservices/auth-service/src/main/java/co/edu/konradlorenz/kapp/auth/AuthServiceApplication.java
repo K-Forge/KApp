@@ -12,9 +12,9 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * Owns credentials: e-mail, password hash, roles, e-mail verification state, and the
  * RS256 key pair that signs every access token on the platform.
  *
- * <p>It deliberately does NOT own profiles. Names, identification, contact details and
- * academic placement live in user-service, which this service calls exactly once, during
- * registration. Splitting them this way keeps authentication behind a single seam, which
+ * <p>It deliberately does NOT own profiles. Names, the picture and the activation state live
+ * in user-service, which this service calls exactly once, during registration; nothing academic
+ * is kept on either side, since a student's program comes from SINU. Splitting them this way keeps authentication behind a single seam, which
  * is the piece Microsoft Entra ID replaces once the university grants an application
  * registration - see {@code identity.EntraIdAdapter}.
  *
