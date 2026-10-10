@@ -10,15 +10,23 @@ spring:
     gateway:
       # Routes are declared in GatewayConfig, not here.
       #
-      # The Eureka discovery locator is intentionally NOT enabled. Turning it on
-      # auto-publishes every registered service at /{service-id}/**, which bypasses the
-      # explicit route table and would expose the /internal/** endpoints. That was
-      # finding S4 in docs/SECURITY-AUDIT.md. The default is off; keep it that way.
+      # Nothing is discovered: the route table is explicit, so no service and no
+      # /internal/** endpoint is ever published by accident (finding S4 in
+      # docs/SECURITY-AUDIT.md).
       httpclient:
         connect-timeout: 5000
         response-timeout: 10s
 
 kapp:
+  # Where each service answers. By name: Docker Compose and Kubernetes both resolve a
+  # service's name to its address, so no registry is needed. A host-networked server sets
+  # 127.0.0.1 and the port instead (deploy/dev-server/compose.yaml).
+  services:
+    auth: ${KAPP_AUTH_SERVICE_URL:http://auth-service:8081}
+    user: ${KAPP_USER_SERVICE_URL:http://user-service:8082}
+    semaphore: ${KAPP_SEMAPHORE_SERVICE_URL:http://semaphore-service:8083}
+    schedule: ${KAPP_SCHEDULE_SERVICE_URL:http://schedule-service:8084}
+    map: ${KAPP_MAP_SERVICE_URL:http://map-service:8085}
   cors:
     # Explicit allow-list, replacing the previous wildcard (finding S3).
     # 4300 is the admin portal's container (compose `dev` profile), 4200 is that same
@@ -32,14 +40,6 @@ kapp:
   rate-limit:
     # In-memory, single instance. See AuthRateLimitFilter before adding a second one.
     auth-attempts-per-minute: ${KAPP_AUTH_RATE_LIMIT:10}
-
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
-    enabled: ${EUREKA_ENABLED:true}
-  instance:
-    prefer-ip-address: true
 
 resilience4j:
   circuitbreaker:

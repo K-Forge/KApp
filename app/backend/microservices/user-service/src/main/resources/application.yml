@@ -32,9 +32,10 @@ kapp:
     token: ${KAPP_INTERNAL_TOKEN:}
 
   user:
-    # Blank means "resolve auth-service through Eureka", the production path. A test or a
-    # local run can point this at a stub instead.
-    auth-service-url: ${KAPP_AUTH_SERVICE_URL:}
+    # Where auth-service answers. By name: Docker Compose and Kubernetes both resolve a
+    # service's name to its address, so no registry is needed. A host-networked server or a
+    # local run sets the address itself.
+    auth-service-url: ${KAPP_AUTH_SERVICE_URL:http://auth-service:8081}
 
 mongock:
   migration-scan-package: co.edu.konradlorenz.kapp.user.migration
@@ -42,15 +43,6 @@ mongock:
   # and enabling transactions requires a MongoTransactionManager bean.
   # Property is `transactional`; `transaction-enabled` is deprecated in Mongock 5.5.
   transactional: false
-
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
-    # Registering with Eureka is pointless in tests and slows them down.
-    enabled: ${EUREKA_ENABLED:true}
-  instance:
-    prefer-ip-address: true
 
 management:
   endpoints:

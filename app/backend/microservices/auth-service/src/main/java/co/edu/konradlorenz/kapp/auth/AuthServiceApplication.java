@@ -6,7 +6,6 @@ import io.mongock.runner.springboot.EnableMongock;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
@@ -33,7 +32,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * KApp service that talks to MongoDB must carry it.
  */
 @SpringBootApplication
-@EnableDiscoveryClient
 @EnableMongock
 @EnableFeignClients
 @EnableConfigurationProperties({JwtProperties.class, RegistrationProperties.class})

@@ -47,8 +47,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
-        "eureka.client.enabled=false",
-        "spring.cloud.discovery.enabled=false",
         "kapp.internal.token=" + AbstractUserServiceTest.INTERNAL_TOKEN
 })
 public abstract class AbstractUserServiceTest {
