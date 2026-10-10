@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
 import co.edu.konradlorenz.kapp.R
+import co.edu.konradlorenz.kapp.data.session.ProfileRole
 import co.edu.konradlorenz.kapp.ui.theme.Brand
 import co.edu.konradlorenz.kapp.ui.theme.Passed
 import co.edu.konradlorenz.kapp.ui.theme.Person
@@ -32,4 +33,26 @@ enum class KAppDestination(
     Home("home", R.drawable.ic_home, R.string.home_tab_home, Brand),
     Map("map", R.drawable.ic_pin, R.string.home_shortcut_map, Brand),
     Schedule("schedule", R.drawable.ic_calendar, R.string.home_shortcut_schedule, Subject),
+}
+
+/**
+ * The tabs a profile role sees, in bar order. The table is issue #46's:
+ *
+ * | Profile role | Semaforo | Horario | Mapa |
+ * |---|---|---|---|
+ * | student | yes | yes | yes |
+ * | professor | no | yes (the sections they teach) | yes |
+ * | staff | no | no | yes |
+ *
+ * Inicio and Perfil are everybody's. With no profile role at all - a role this build does not know
+ * yet - the safe answer is the tabs every role shares, rather than a student's screens full of
+ * calls that would be refused.
+ */
+fun destinationsFor(role: ProfileRole?): List<KAppDestination> {
+    val hidden = when (role) {
+        ProfileRole.Student -> emptySet()
+        ProfileRole.Professor -> setOf(KAppDestination.Semaphore)
+        ProfileRole.Staff, null -> setOf(KAppDestination.Semaphore, KAppDestination.Schedule)
+    }
+    return KAppDestination.entries.filterNot { it in hidden }
 }

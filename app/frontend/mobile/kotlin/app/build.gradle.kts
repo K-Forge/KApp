@@ -17,6 +17,18 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0-alpha.1"
+
+        // Microsoft sign-in (issue #46, ADR 0003), from Gradle properties so no id or tenant is
+        // committed: ~/.gradle/gradle.properties on a developer's machine, -P on CI. All three come
+        // from the university's app registration (#62); until it exists they are empty, and a
+        // debug build signs in with a fake ID token the mocks accept. The module README has the
+        // details, including how to get the signature hash of a signing key.
+        val msal = { name: String -> providers.gradleProperty("kapp.msal.$name").getOrElse("") }
+        buildConfigField("String", "MSAL_CLIENT_ID", "\"${msal("clientId")}\"")
+        buildConfigField("String", "MSAL_TENANT_ID", "\"${msal("tenantId")}\"")
+        buildConfigField("String", "MSAL_SIGNATURE_HASH", "\"${msal("signatureHash")}\"")
+        // The redirect path BrowserTabActivity answers to, in AndroidManifest.xml.
+        manifestPlaceholders["msalSignatureHash"] = msal("signatureHash")
     }
 
     buildTypes {
@@ -76,6 +88,8 @@ dependencies {
     implementation(libs.retrofit.converter.kotlinx.serialization)
     implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.msal)
 
     testImplementation(libs.junit)
 }

@@ -2,6 +2,7 @@ package co.edu.konradlorenz.kapp.data.network
 
 import co.edu.konradlorenz.kapp.BuildConfig
 import kotlinx.serialization.json.Json
+import okhttp3.Authenticator
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -16,13 +17,19 @@ import java.util.concurrent.TimeUnit
  *
  * [accessToken] is asked for on every request. While it answers `null` no `Authorization` header is
  * sent, which is what the public endpoints expect and what a secured one answers `401` to.
+ *
+ * [renewAfterRejection] is asked once when a request that carried a token comes back `401`: it
+ * answers the token to retry with, or `null` to let the `401` through. Both run on OkHttp's threads
+ * and may block - SessionManager renews inside them.
  */
 class KAppApi(
     accessToken: () -> String?,
+    renewAfterRejection: ((rejected: String) -> String?)? = null,
     baseUrl: String = BuildConfig.API_BASE_URL,
 ) {
     private val client = OkHttpClient.Builder()
         .addInterceptor(bearer(accessToken))
+        .apply { renewAfterRejection?.let { authenticator(retryOnce(it)) } }
         // Short on purpose: against the mocks, a server that has not answered in a few seconds is
         // a server that is not running, and the developer should hear about it now.
         .connectTimeout(5, TimeUnit.SECONDS)
@@ -57,6 +64,19 @@ class KAppApi(
                 chain.request().newBuilder().header("Authorization", "Bearer $token").build()
             }
             chain.proceed(request)
+        }
+
+        /**
+         * Retries a `401` once with the token [renew] answers. Once, and only for a request that
+         * sent a token: a second `401` on a fresh token is a real refusal, and retrying it would
+         * loop.
+         */
+        private fun retryOnce(renew: (String) -> String?) = Authenticator { _, response ->
+            val sent = response.request.header("Authorization")?.removePrefix("Bearer ")
+            if (sent == null || response.priorResponse != null) return@Authenticator null
+            renew(sent)?.let {
+                response.request.newBuilder().header("Authorization", "Bearer $it").build()
+            }
         }
     }
 }

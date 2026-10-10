@@ -83,14 +83,23 @@ private val TileShape = RoundedCornerShape(16.dp)
  * only leaves room for it.
  *
  * The data is [SampleHomeUiState] until there is a repository behind [HomeViewModel].
+ *
+ * [destinations] are the tabs the profile role sees. A card about a screen the role does not have
+ * is left out with it: no semester for a professor, no timetable for staff.
  */
 @Composable
 fun HomeScreen(
+    destinations: List<KAppDestination>,
     onOpen: (KAppDestination) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(),
 ) {
-    HomeContent(state = viewModel.uiState, onOpen = onOpen, modifier = modifier)
+    HomeContent(
+        state = viewModel.uiState,
+        destinations = destinations,
+        onOpen = onOpen,
+        modifier = modifier,
+    )
 }
 
 @Composable
@@ -98,7 +107,11 @@ private fun HomeContent(
     state: HomeUiState,
     onOpen: (KAppDestination) -> Unit,
     modifier: Modifier = Modifier,
+    destinations: List<KAppDestination> = KAppDestination.entries,
 ) {
+    val hasSchedule = KAppDestination.Schedule in destinations
+    val hasSemaphore = KAppDestination.Semaphore in destinations
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -125,29 +138,38 @@ private fun HomeContent(
                 )
                 .navigationBarsPadding(),
         ) {
-            when (state.day) {
-                DayState.Loading -> HeadlineSkeleton()
-                DayState.NoSchedule -> NoScheduleCard(onOpen)
-                DayState.NoClassesToday -> FreeDayCard(onOpen)
-                is DayState.Classes -> NextClassCard(state.day.next, onOpen)
+            if (hasSchedule) {
+                when (state.day) {
+                    DayState.Loading -> HeadlineSkeleton()
+                    DayState.NoSchedule -> NoScheduleCard(onOpen)
+                    DayState.NoClassesToday -> FreeDayCard(onOpen)
+                    is DayState.Classes -> NextClassCard(state.day.next, onOpen)
+                }
+                Spacer(Modifier.height(16.dp))
+            } else {
+                // The column starts inside the band, where the headline card overlaps it. Without
+                // the card the shortcuts would land on purple, so they start below the band's edge,
+                // as far from it as they sit from the card when there is one.
+                Spacer(Modifier.height(CardOverlap + 16.dp))
             }
 
-            Spacer(Modifier.height(16.dp))
-            Shortcuts(onOpen)
+            Shortcuts(destinations, onOpen)
 
-            SectionHeading(
-                title = stringResource(R.string.home_semester_title),
-                link = stringResource(R.string.home_semester_link),
-                onLink = { onOpen(KAppDestination.Semaphore) },
-            )
-            when (state.semester) {
-                SemesterState.Loading -> SemesterSkeleton()
-                is SemesterState.Ready -> SemesterCard(state.semester)
+            if (hasSemaphore) {
+                SectionHeading(
+                    title = stringResource(R.string.home_semester_title),
+                    link = stringResource(R.string.home_semester_link),
+                    onLink = { onOpen(KAppDestination.Semaphore) },
+                )
+                when (state.semester) {
+                    SemesterState.Loading -> SemesterSkeleton()
+                    is SemesterState.Ready -> SemesterCard(state.semester)
+                }
             }
 
             // "Resto del dia" is the classes after the one on the card. With none of them there is
             // no heading either: an empty list under a title reads as something having failed.
-            val later = (state.day as? DayState.Classes)?.later.orEmpty()
+            val later = if (hasSchedule) (state.day as? DayState.Classes)?.later.orEmpty() else emptyList()
             if (later.isNotEmpty()) {
                 SectionHeading(
                     title = stringResource(R.string.home_rest_title),
@@ -388,17 +410,23 @@ private fun HeadlineSkeleton() {
  * step to weigh the same as the others.
  */
 @Composable
-private fun Shortcuts(onOpen: (KAppDestination) -> Unit) {
+private fun Shortcuts(destinations: List<KAppDestination>, onOpen: (KAppDestination) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Shortcut(KAppDestination.Semaphore, alpha = 0.12f, onOpen = onOpen)
-        Shortcut(KAppDestination.Schedule, alpha = 0.14f, onOpen = onOpen)
-        Shortcut(KAppDestination.Map, alpha = 0.12f, onOpen = onOpen)
-        Shortcut(KAppDestination.Profile, alpha = 0.12f, onOpen = onOpen)
+        ShortcutOrder.filter { (destination, _) -> destination in destinations }
+            .forEach { (destination, alpha) -> Shortcut(destination, alpha, onOpen) }
     }
 }
+
+/** The order the card draws the shortcuts in, which is not the bar's, and each one's tint. */
+private val ShortcutOrder = listOf(
+    KAppDestination.Semaphore to 0.12f,
+    KAppDestination.Schedule to 0.14f,
+    KAppDestination.Map to 0.12f,
+    KAppDestination.Profile to 0.12f,
+)
 
 @Composable
 private fun RowScope.Shortcut(

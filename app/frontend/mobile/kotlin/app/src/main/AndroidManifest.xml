@@ -8,7 +8,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".KAppApplication"
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -23,6 +26,26 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+          Where Microsoft's sign-in returns to: msauth://<package>/<signature hash>, the redirect
+          URI the app registration lists for Android. The hash comes from the Gradle property
+          kapp.msal.signatureHash (app/build.gradle.kts); while it is empty nothing ever redirects
+          here, because a build without a client id never starts MSAL.
+        -->
+        <activity
+            android:name="com.microsoft.identity.client.BrowserTabActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="${applicationId}"
+                    android:path="/${msalSignatureHash}"
+                    android:scheme="msauth" />
             </intent-filter>
         </activity>
 
