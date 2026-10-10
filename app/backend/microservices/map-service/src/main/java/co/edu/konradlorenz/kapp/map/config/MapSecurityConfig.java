@@ -31,7 +31,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
  *
  * <h2>The shape of the rule</h2>
  * <pre>
- * GET    /api/map/**  -> GUEST, STUDENT, PROFESSOR, ADMIN
+ * GET    /api/map/**  -> GUEST, STUDENT, PROFESSOR, STAFF, ADMIN
  * POST   /api/map/**  -> ADMIN
  * PUT    /api/map/**  -> ADMIN
  * PATCH  /api/map/**  -> ADMIN
@@ -72,6 +72,7 @@ public class MapSecurityConfig {
             KappRoles.Short.GUEST,
             KappRoles.Short.STUDENT,
             KappRoles.Short.PROFESSOR,
+            KappRoles.Short.STAFF,
             KappRoles.Short.ADMIN
     };
 

@@ -21,6 +21,7 @@ public record BuildingSummaryResponse(
         String campus,
         String description,
         List<String> aliases,
-        List<WingDto> wings
+        List<WingDto> wings,
+        List<String> sinuSedes
 ) {
 }
