@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.data.network
 
 import co.edu.konradlorenz.kapp.BuildConfig
+import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreApi
 import kotlinx.serialization.json.Json
 import okhttp3.Authenticator
 import okhttp3.Interceptor
@@ -44,6 +45,7 @@ class KAppApi(
 
     val auth: AuthApi = retrofit.create(AuthApi::class.java)
     val users: UserApi = retrofit.create(UserApi::class.java)
+    val semaphore: SemaphoreApi = retrofit.create(SemaphoreApi::class.java)
 
     companion object {
         /**
