@@ -56,7 +56,10 @@ import static org.mockito.Mockito.when;
         // The Feign client this token would decorate is mocked below, so the value
         // itself is never sent anywhere; it only has to be non-blank for the context
         // to start.
-        "kapp.internal.token=test-internal-token"
+        "kapp.internal.token=test-internal-token",
+        // Most of this suite signs in with a password. LocalSignInGateIntegrationTest turns it
+        // off again to prove what production answers.
+        "kapp.auth.local-sign-in.enabled=true"
 })
 @Import(AbstractAuthIntegrationTest.InProcessJwtDecoderConfig.class)
 abstract class AbstractAuthIntegrationTest {
