@@ -7,6 +7,9 @@ activityCompose = "1.10.1"
 navigationCompose = "2.9.0"
 composeBom = "2025.06.01"
 junit = "4.13.2"
+retrofit = "3.0.0"
+okhttp = "4.12.0"
+kotlinxSerialization = "1.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -23,9 +26,17 @@ androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graph
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 
+# The network layer: Retrofit over OkHttp, JSON through kotlinx.serialization. OkHttp is pinned to
+# the 4.x line Retrofit 3 is built against, not to the newest 5.x.
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 [plugins]
 # No kotlin-android entry: AGP 9 has its own Kotlin compiler built in.
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

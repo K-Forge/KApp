@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The Prism mocks speak plain HTTP (app/backend/microservices/mock/README.md), and Android refuses
+  it since API 28. Allowed for these two hosts only: 10.0.2.2 is the emulator's name for the
+  computer running the mocks. A physical phone reaches them by the computer's LAN IP, which has to
+  be added here on that machine and not committed.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+</network-security-config>
