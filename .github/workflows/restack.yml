@@ -1,0 +1,79 @@
+name: Restack
+
+# When a pull request is squash merged, the pull requests stacked on it still carry its original
+# commits, and Git reports conflicts with develop that are not real. This rebases them onto the new
+# develop, retargets them, and cascades to the pull requests stacked on those. The logic and its
+# rules live in scripts/restack.sh; this file only hands it the event and a token.
+#
+# The token comes from the K-Forge restack GitHub App, not from the job. A push made with the job's
+# own GITHUB_TOKEN does not trigger other workflows, so a rebased pull request would never re-run
+# CI or Conventions, and its required checks would stay pending forever. The App belongs to no
+# person, holds permissions on this repository only, and is on no ruleset's bypass list: it only
+# ever pushes to working branches, never to main or develop.
+
+on:
+  pull_request:
+    types: [closed]
+
+# The job's own token only reads. Everything that writes uses the App's.
+permissions:
+  contents: read
+
+# One run at a time for the whole repository, and none cancelled: two merges in a row must not
+# rebase the same branch twice in parallel, and a cancelled run would leave a stack half done.
+concurrency:
+  group: restack
+  cancel-in-progress: false
+
+jobs:
+  restack:
+    name: Rebase the pull requests stacked on this one
+    # Only merged pull requests from this repository: a fork's gets no secrets, and every branch of
+    # the team lives here. Skipped, not failed, until the App's client ID is configured.
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      vars.RESTACK_APP_CLIENT_ID != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      # Pinned to a commit, not a tag: this step holds the App's private key.
+      - name: Token from the K-Forge restack App
+        id: app
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.RESTACK_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RESTACK_APP_PRIVATE_KEY }}
+          # Only what a rebase needs. Workflows too: a rebased branch picks up develop's changes to
+          # .github/workflows/, and GitHub refuses that push from a token without it.
+          permission-contents: write
+          permission-pull-requests: write
+          permission-workflows: write
+
+      # The script comes from the base branch, which is reviewed and protected, never from the
+      # branches it is about to rebase. Full history, because it walks the stack.
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 0
+          token: ${{ steps.app.outputs.token }}
+
+      # A rebase keeps every author; only the committer changes, and it should say who did it.
+      - name: Commit as the App
+        env:
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+        run: |
+          id=$(gh api "/users/${APP_SLUG}%5Bbot%5D" --jq .id)
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${id}+${APP_SLUG}[bot]@users.noreply.github.com"
+
+      - name: Rebase the stack
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          PARENT_NUMBER: ${{ github.event.pull_request.number }}
+          PARENT_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PARENT_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: bash scripts/restack.sh
