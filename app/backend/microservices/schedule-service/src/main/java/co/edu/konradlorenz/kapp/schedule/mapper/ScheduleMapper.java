@@ -1,18 +1,18 @@
 package co.edu.konradlorenz.kapp.schedule.mapper;
 
-import co.edu.konradlorenz.kapp.schedule.domain.Enrollment;
 import co.edu.konradlorenz.kapp.schedule.domain.Meeting;
 import co.edu.konradlorenz.kapp.schedule.domain.MeetingPeriod;
 import co.edu.konradlorenz.kapp.schedule.domain.Schedule;
+import co.edu.konradlorenz.kapp.schedule.domain.Section;
 import co.edu.konradlorenz.kapp.schedule.web.dto.ClassOccurrenceResponse;
-import co.edu.konradlorenz.kapp.schedule.web.dto.EnrollmentResponse;
 import co.edu.konradlorenz.kapp.schedule.web.dto.MeetingPeriodResponse;
 import co.edu.konradlorenz.kapp.schedule.web.dto.MeetingResponse;
 import co.edu.konradlorenz.kapp.schedule.web.dto.ScheduleResponse;
+import co.edu.konradlorenz.kapp.schedule.web.dto.SectionResponse;
 
 /**
- * The single place a domain object turns into the shape the API returns. Every controller
- * and every test goes through here, so the wire format only has to be gotten right once.
+ * The single place a domain object turns into the shape the API returns. Every controller and every
+ * test goes through here, so the wire format only has to be gotten right once.
  */
 public final class ScheduleMapper {
 
@@ -21,41 +21,43 @@ public final class ScheduleMapper {
 
     public static ScheduleResponse toResponse(Schedule schedule) {
         return new ScheduleResponse(
-                schedule.id(),
                 schedule.userId(),
-                schedule.period(),
+                schedule.period().toString(),
                 schedule.programCode(),
                 schedule.pensumCode(),
                 schedule.level(),
                 schedule.active(),
-                schedule.enrollments().stream().map(ScheduleMapper::toResponse).toList());
+                schedule.source().name(),
+                schedule.readAt(),
+                schedule.sections().stream().map(ScheduleMapper::toResponse).toList());
     }
 
-    public static EnrollmentResponse toResponse(Enrollment enrollment) {
-        return new EnrollmentResponse(
-                enrollment.enrollmentId(),
-                enrollment.courseCode(),
-                enrollment.pensumItemCode(),
-                enrollment.courseName(),
-                enrollment.level(),
-                enrollment.credits(),
-                enrollment.totalHours(),
-                enrollment.group(),
-                enrollment.subgroup(),
-                enrollment.professor(),
-                enrollment.campus(),
-                enrollment.startDate(),
-                enrollment.endDate(),
-                enrollment.color(),
-                enrollment.meetings().stream().map(ScheduleMapper::toResponse).toList());
+    public static SectionResponse toResponse(Section section) {
+        return new SectionResponse(
+                section.sectionCode(),
+                section.sinuCode(),
+                section.pensumItemCode(),
+                section.courseName(),
+                section.level(),
+                section.credits(),
+                section.totalHours(),
+                section.group(),
+                section.subgroup(),
+                section.professor(),
+                section.sede(),
+                section.buildingCode(),
+                section.startDate(),
+                section.endDate(),
+                section.color(),
+                section.meetings().stream().map(ScheduleMapper::toResponse).toList());
     }
 
     public static MeetingResponse toResponse(Meeting meeting) {
         return new MeetingResponse(
-                meeting.meetingId(),
                 meeting.dayOfWeek(),
                 meeting.startTime(),
                 meeting.endTime(),
+                meeting.blocks(),
                 meeting.periods().stream().map(ScheduleMapper::toResponse).toList());
     }
 
@@ -64,21 +66,23 @@ public final class ScheduleMapper {
     }
 
     /**
-     * @param resolvedRoom the room in force during the period that matched the requested
-     *                      date - not necessarily {@code meeting}'s only room, and
-     *                      possibly {@code null}
+     * @param resolvedRoom the room in force during the range that matched the requested date - not
+     *                     necessarily the meeting's only room, and possibly {@code null}
      */
-    public static ClassOccurrenceResponse toClassOccurrence(Enrollment enrollment, Meeting meeting,
-                                                            String resolvedRoom) {
+    public static ClassOccurrenceResponse toClassOccurrence(Section section, Meeting meeting, String resolvedRoom) {
         return new ClassOccurrenceResponse(
-                enrollment.enrollmentId(),
-                enrollment.courseCode(),
-                enrollment.courseName(),
-                enrollment.professor(),
+                section.sectionCode(),
+                section.sinuCode(),
+                section.pensumItemCode(),
+                section.courseName(),
+                section.group(),
+                section.professor(),
                 meeting.startTime(),
                 meeting.endTime(),
+                meeting.blocks(),
+                section.sede(),
+                section.buildingCode(),
                 resolvedRoom,
-                enrollment.campus(),
-                enrollment.color());
+                section.color());
     }
 }

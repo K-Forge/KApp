@@ -7,16 +7,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 /**
- * Plain Mockito unit test - no Spring context, no MongoDB - for the one behaviour that
- * matters about the semaphore-service dependency: this service must still work when that
- * one is down. {@link CatalogClient} is mocked directly here rather than through Spring,
- * the way the task calls for.
+ * Which pensum item a course of the timetable is, without a Spring context: matched by SINU's code,
+ * by the printed one while semaphore 1.0 knows no other, and failing open when semaphore-service is
+ * down.
  */
 @ExtendWith(MockitoExtension.class)
 class PensumCatalogServiceTest {
@@ -25,55 +23,54 @@ class PensumCatalogServiceTest {
     private CatalogClient client;
 
     @Test
-    @DisplayName("a successful catalogue read is returned as-is")
-    void pensumCourses_success_returnsTheCatalogue() {
-        PensumCourseView course = new PensumCourseView("17080", "2018", "ESTADISTICA DESCRIPTIVA", 6, 3);
-        when(client.listPensumCourses("1015")).thenReturn(List.of(course));
+    @DisplayName("a course is matched by its SINU code, whatever the item's printed code")
+    void matchesBySinuCode() {
+        when(client.listPensumCourses("1015")).thenReturn(List.of(
+                new PensumCourseView("17018", "17080", "17018", "Estadística Descriptiva")));
 
-        PensumCatalogService service = new PensumCatalogService(client);
-
-        assertThat(service.pensumCourses("1015")).containsExactly(course);
+        assertThat(new PensumCatalogService(client).pensumItemCode("1015", "17080")).contains("17018");
     }
 
     @Test
-    @DisplayName("a Feign failure fails open: empty list, not an exception")
-    void pensumCourses_clientThrows_returnsEmptyRatherThanPropagating() {
+    @DisplayName("an item SINU's code is not known for is matched by its printed code")
+    void matchesByPrintedCodeWhenSinuCodeIsUnknown() {
+        when(client.listPensumCourses("1015")).thenReturn(List.of(
+                new PensumCourseView("59035", null, "59035", "Desarrollo de Aplicaciones Móviles")));
+
+        assertThat(new PensumCatalogService(client).pensumItemCode("1015", "59035")).contains("59035");
+    }
+
+    @Test
+    @DisplayName("a printed code is not used once the item has a SINU code of its own")
+    void printedCodeDoesNotWinOverSinuCode() {
+        when(client.listPensumCourses("1015")).thenReturn(List.of(
+                new PensumCourseView("17018", "17080", "17018", "Estadística Descriptiva")));
+
+        assertThat(new PensumCatalogService(client).pensumItemCode("1015", "17018")).isEmpty();
+    }
+
+    @Test
+    @DisplayName("a course that is not in the pensum has no item")
+    void noMatch() {
+        when(client.listPensumCourses("1015")).thenReturn(List.of());
+
+        assertThat(new PensumCatalogService(client).pensumItemCode("1015", "99999")).isEmpty();
+    }
+
+    @Test
+    @DisplayName("a Feign failure fails open: no item, not an exception")
+    void clientThrows_failsOpen() {
         when(client.listPensumCourses("1015")).thenThrow(new RuntimeException("semaphore-service is down"));
 
         PensumCatalogService service = new PensumCatalogService(client);
 
         assertThat(service.pensumCourses("1015")).isEmpty();
+        assertThat(service.pensumItemCode("1015", "17080")).isEmpty();
     }
 
     @Test
-    @DisplayName("find matches a fixed course by its course code")
-    void find_matchesByCourseCode() {
-        PensumCourseView course = new PensumCourseView("17080", "2018", "ESTADISTICA DESCRIPTIVA", 6, 3);
-        when(client.listPensumCourses("1015")).thenReturn(List.of(course));
-
-        PensumCatalogService service = new PensumCatalogService(client);
-
-        assertThat(service.find("1015", "17080", "2018")).contains(course);
-    }
-
-    @Test
-    @DisplayName("find matches an elective slot, which has no course code, by pensumItemCode")
-    void find_matchesElectiveSlotByPensumItemCode() {
-        PensumCourseView elective = new PensumCourseView(null, "ELECTIVA_VI", "Electiva VI", 9, 3);
-        when(client.listPensumCourses("1015")).thenReturn(List.of(elective));
-
-        PensumCatalogService service = new PensumCatalogService(client);
-
-        assertThat(service.find("1015", "99999", "ELECTIVA_VI")).contains(elective);
-    }
-
-    @Test
-    @DisplayName("find returns empty when the course is genuinely not in the pensum")
-    void find_noMatch_returnsEmpty() {
-        when(client.listPensumCourses("1015")).thenReturn(List.of());
-
-        PensumCatalogService service = new PensumCatalogService(client);
-
-        assertThat(service.find("1015", "00000", "0000")).isEmpty();
+    @DisplayName("no pensum, as on a professor's timetable, means no lookup at all")
+    void noPensum() {
+        assertThat(new PensumCatalogService(client).pensumItemCode(null, "17080")).isEmpty();
     }
 }

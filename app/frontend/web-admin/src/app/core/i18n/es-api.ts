@@ -1283,8 +1283,8 @@ export const ES_API: Record<string, string> = {
     'Primer día de la materia en todo el semestre, inclusive. Igual al `from` más temprano de todos los periodos de reunión de esta sección.',
   'Last day of the course over the whole semester, inclusive. Equal to the latest `to`\nacross all of this section\'s meeting periods.':
     'Último día de la materia en todo el semestre, inclusive. Igual al `to` más tardío de todos los periodos de reunión de esta sección.',
-  'The colour the client paints this course with, as `#RRGGBB`. KApp assigns it from the\nsix non-pink colours of the palette, and a course keeps its colour from one period to\nthe next.':
-    'El color con el que el cliente pinta esta materia, como `#RRGGBB`. KApp lo asigna entre los seis colores no rosados de la paleta, y una materia conserva su color de un periodo al siguiente.',
+  'The colour the client paints this course with, as `#RRGGBB`. KApp assigns it from the\nsix non-pink colours of the palette. Each course starts from a colour of its own, which\nit keeps from one period to the next, and two courses of one timetable never share one\nwhile there are colours left.':
+    'El color con el que el cliente pinta esta materia, como `#RRGGBB`. KApp lo asigna entre los seis colores no rosados de la paleta. Cada materia parte de un color propio, que conserva de un periodo al siguiente, y dos materias de un mismo horario nunca comparten uno mientras queden colores.',
   'The weekly slots this course is taught in.':
     'Las franjas semanales en las que se dicta esta materia.',
   'One weekly day + time slot of a section, together with the date ranges over which it is\nactually taught and the room in force during each of them.':
