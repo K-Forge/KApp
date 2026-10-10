@@ -35,7 +35,7 @@ public class VisitorPassController {
     public AuthController.TokenResponse redeemVisitorPass(@PathVariable String code,
                                             @Valid @RequestBody VisitorPassRedemptionRequest body) {
         var issued = passes.redeem(code, body);
-        return new AuthController.TokenResponse(issued.accessToken(), issued.tokenType(), issued.expiresIn(),
-                issued.userId(), issued.roles());
+        // A pass is for today: no refresh token, and both of its fields null.
+        return AuthController.TokenResponse.withoutRefresh(issued);
     }
 }

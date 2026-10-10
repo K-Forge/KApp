@@ -88,6 +88,10 @@ kapp:
       key-id: ${KAPP_JWT_KEY_ID:kapp-signing-key}
       ttl: ${KAPP_JWT_TTL:1h}
       issuer: ${KAPP_JWT_ISSUER:https://kapp.konradlorenz.edu.co}
+    sessions:
+      # How long a refresh token lasts if it is not used. Every renewal starts the count again.
+      app-ttl: ${KAPP_SESSION_APP_TTL:30d}
+      portal-ttl: ${KAPP_SESSION_PORTAL_TTL:12h}
 
     # Where user-service answers. By name: Docker Compose and Kubernetes both resolve a
     # service's name to its address, so no registry is needed. A host-networked server or a

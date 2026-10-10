@@ -16,6 +16,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -107,7 +108,12 @@ class VisitorPassIntegrationTest extends AbstractAuthIntegrationTest {
                 .andExpect(jsonPath("$.accessToken").exists())
                 .andExpect(jsonPath("$.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_GUEST"))
-                .andExpect(jsonPath("$.roles.length()").value(1));
+                .andExpect(jsonPath("$.roles.length()").value(1))
+                // A pass is for today: nothing renews it, and both fields say so rather than
+                // being left out.
+                .andExpect(jsonPath("$..refreshToken").exists())
+                .andExpect(jsonPath("$.refreshToken").value(nullValue()))
+                .andExpect(jsonPath("$.refreshExpiresIn").value(nullValue()));
     }
 
     /**

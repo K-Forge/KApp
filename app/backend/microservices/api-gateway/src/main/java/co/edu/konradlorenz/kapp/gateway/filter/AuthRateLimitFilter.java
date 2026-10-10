@@ -63,6 +63,11 @@ public class AuthRateLimitFilter implements WebFilter, Ordered {
         return chain.filter(exchange);
     }
 
+    /**
+     * Not {@code /auth/refresh} or {@code /auth/logout}: a refresh token is 32 random bytes, past
+     * guessing at any rate, and a campus behind one public address renews hundreds of sessions an
+     * hour, which a per-address limit would refuse.
+     */
     private static boolean isCredentialEndpoint(String path) {
         return path.equals("/auth/login")
                 // Replacing a password takes the current one, so it is guessed at like login.

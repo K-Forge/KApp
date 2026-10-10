@@ -27,8 +27,8 @@ import java.util.List;
  *       the shared {@code JwtAuthenticationConverter} expects.</li>
  * </ul>
  *
- * <p>Refresh tokens and revocation are deliberately out of the MVP and recorded as
- * deferred work; a token simply expires after {@link JwtProperties#ttl()}.
+ * <p>An access token cannot be revoked: it expires after {@link JwtProperties#ttl()}, an hour.
+ * What can be revoked is the refresh token that renews it - see {@code SessionService}.
  */
 @Service
 public class JwtIssuer {
