@@ -56,6 +56,13 @@ data class UserProfile(
     val academic: AcademicInfo? = null,
 )
 
+/**
+ * `UserProfileUpdate` in user.openapi.yaml: the avatar and nothing else. `null` removes it, and is
+ * sent as `null` rather than left out, because the field is required.
+ */
+@Serializable
+data class UserProfileUpdate(val avatarUrl: String?)
+
 /** `AcademicInfo` in user.openapi.yaml. */
 @Serializable
 data class AcademicInfo(

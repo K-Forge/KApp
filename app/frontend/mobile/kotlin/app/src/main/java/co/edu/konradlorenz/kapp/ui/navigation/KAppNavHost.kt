@@ -5,7 +5,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,7 +14,7 @@ import co.edu.konradlorenz.kapp.ui.home.HomeScreen
 import co.edu.konradlorenz.kapp.ui.invitation.InvitationScreen
 import co.edu.konradlorenz.kapp.ui.login.LoginScreen
 import co.edu.konradlorenz.kapp.ui.placeholder.PlaceholderScreen
-import kotlinx.coroutines.launch
+import co.edu.konradlorenz.kapp.ui.profile.ProfileScreen
 
 // The two routes outside the bar. The other five are in KAppDestination, which is also what the
 // bar iterates, so a destination cannot be added to one and forgotten in the other.
@@ -34,7 +33,6 @@ fun KAppNavHost(container: AppContainer) {
     val navController = rememberNavController()
     val session by container.session.session.collectAsState()
     val destinations = destinationsFor(session?.profileRole)
-    val scope = rememberCoroutineScope()
 
     // Decided once: afterwards the session moves the screens, not the start destination.
     val start = remember { if (session != null) KAppDestination.Home.route else LOGIN }
@@ -66,9 +64,8 @@ fun KAppNavHost(container: AppContainer) {
             InvitationScreen(onBack = { navController.popBackStack() })
         }
 
-        // The tabs, each inside the shell that draws the bar over it. Only Inicio has a screen of
-        // its own so far; the others share the placeholder, and Perfil's carries the sign-out
-        // until #47 gives it a screen.
+        // The tabs, each inside the shell that draws the bar over it. Inicio and Perfil have screens
+        // of their own; the other three share the placeholder.
         KAppDestination.entries.forEach { destination ->
             composable(destination.route) {
                 MainShell(
@@ -81,10 +78,7 @@ fun KAppNavHost(container: AppContainer) {
                             destinations = destinations,
                             onOpen = { navController.openTab(it) },
                         )
-                        KAppDestination.Profile -> PlaceholderScreen(
-                            destination = destination,
-                            onSignOut = { scope.launch { container.signOut() } },
-                        )
+                        KAppDestination.Profile -> ProfileScreen()
                         else -> PlaceholderScreen(destination)
                     }
                 }

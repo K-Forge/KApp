@@ -11,9 +11,18 @@ with the tabs of the account's profile role. The session is kept encrypted, rene
 expires and on a `401`, and ended with **Cerrar sesión** on Perfil. A saved session opens straight
 on Inicio. See "Microsoft sign-in" below.
 
-**Inicio** is built as an interface only: it matches
-[`HomeAndroid.dc.html`](../../../../docs/design/mobile/HomeAndroid.dc.html), and nothing it shows
-comes from the API yet.
+The profile is read once per session by `ProfileRepository`, when somebody signs in or the app
+opens on a saved session, and shared by Inicio and Perfil. Its `roles` are what the tabs follow,
+so a role changed in the directory reaches the bar the next time the app opens.
+
+**Perfil** is built (issue #47) from `GET /api/users/me`: picture or initials, name, address,
+profile role and, for a student, the academic block read from SINU. The picture is the one thing
+that can be changed, and only removed for now - see "What is deliberately missing". No mockup
+covers it, so it is built from Inicio's parts. **Cerrar sesión** is at its foot.
+
+**Inicio** matches [`HomeAndroid.dc.html`](../../../../docs/design/mobile/HomeAndroid.dc.html).
+The greeting and the programme under "Tu semestre" come from the profile; the day and the semester
+are still sample data.
 
 The login keeps the band, crest, stripe and footer of
 [`LoginAndroid.dc.html`](../../../../docs/design/mobile/LoginAndroid.dc.html), but not its fields:
@@ -134,7 +143,7 @@ The session, in `data/session/`:
 Every `@Preview` renders at 360x800, which is the size the mockups are drawn at, so the two can be
 compared side by side without a device. `HomeScreen.kt` has four — the screen and the three states
 of `EstadosHome.dc.html` — `LoginScreen.kt` two, as a release build and as a debug build with an
-error showing, and `PlaceholderScreen.kt` one.
+error showing, `ProfileScreen.kt` two, loaded and failed, and `PlaceholderScreen.kt` one.
 
 ## Layout
 
@@ -145,14 +154,16 @@ app/src/main/java/co/edu/konradlorenz/kapp/
 ├── data/
 │   ├── network/                 KAppApi (Retrofit), the contract models
 │   ├── auth/                    Microsoft's sign-in: MSAL, or the fake in debug
-│   └── session/                 SessionManager, its encrypted store, the profile role
+│   ├── session/                 SessionManager, its encrypted store, the profile role
+│   └── profile/                 ProfileRepository, the debug build's mock profile choice
 └── ui/
     ├── theme/                   the palette, the type scale, the Material scheme
     ├── common/                  the brand band, shared by every screen inside the bar
     ├── navigation/              seven routes: the five tabs, the login and the invitation
     ├── login/                   LoginScreen + LoginViewModel
     ├── home/                    HomeScreen + HomeViewModel + HomeUiState + HomeSampleData
-    ├── placeholder/             the four tabs that are not built yet
+    ├── profile/                 ProfileScreen + ProfileViewModel
+    ├── placeholder/             the three tabs that are not built yet
     └── invitation/              stub
 ```
 
@@ -180,7 +191,9 @@ names that sheet assigns. Two rules worth not rediscovering:
 | Hilt | It earns its place when there are two implementations to swap, not before |
 | A monochrome launcher icon | Themed icons need a single-colour version of the crest, which is a design asset we do not have |
 | `GET /api/schedule/me/day` and `GET /api/semaphore/me/summary` | What Inicio is drawn from. `HomeViewModel` already has the two states they fill; what neither contract has a picture for is the failure case, so that is the first thing to design |
-| Semáforo, Horario, Mapa and Perfil | Four routes that reach `PlaceholderScreen`; Perfil's carries **Cerrar sesión** until #47 builds it. Each is replaced by editing its entry in `KAppNavHost`; nothing else has to move |
+| Semáforo, Horario and Mapa | Three routes that reach `PlaceholderScreen`. Each is replaced by editing its entry in `KAppNavHost`; nothing else has to move |
+| Choosing a profile picture | user 1.0.0 takes the picture as a URL and has no endpoint to upload one to, so Perfil can only remove it. A backend endpoint first |
+| A mockup for Perfil | None exists; the screen is Inicio's band and card with the contract's fields |
 | The block a class is in | `ClassOccurrence` carries `room` and `campus`; the mockup prints "Salón 401 · Bloque B". The block comes from map-service or it is a field `schedule.openapi.yaml` grows |
 | The number of courses in progress | `ProgressSummary` counts credits, not courses, so "5 materias en curso" needs a second call to `GET /api/semaphore/me` or a new field |
 

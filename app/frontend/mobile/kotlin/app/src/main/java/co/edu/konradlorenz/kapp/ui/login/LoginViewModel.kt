@@ -14,7 +14,8 @@ import co.edu.konradlorenz.kapp.data.auth.MicrosoftSignIn
 import co.edu.konradlorenz.kapp.data.auth.MicrosoftUnreachableException
 import co.edu.konradlorenz.kapp.data.auth.SignInCancelledException
 import co.edu.konradlorenz.kapp.data.auth.SignInNotConfiguredException
-import co.edu.konradlorenz.kapp.data.network.UserApi
+import co.edu.konradlorenz.kapp.data.profile.MockProfilePreference
+import co.edu.konradlorenz.kapp.data.profile.ProfileRepository
 import co.edu.konradlorenz.kapp.data.session.SessionManager
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -52,7 +53,7 @@ enum class MockProfile(val example: String) {
 
 /**
  * The sign-in of issue #46: Microsoft's sign-in, its ID token to `POST /auth/microsoft`, then the
- * profile, whose roles decide the tabs.
+ * profile, whose roles decide the tabs (ProfileRepository).
  *
  * There are no fields to hold: the address and the password are typed into Microsoft's page, never
  * into KApp's (auth.openapi.yaml: "It stores no password for a member of the university").
@@ -60,7 +61,8 @@ enum class MockProfile(val example: String) {
 class LoginViewModel(
     private val microsoft: MicrosoftSignIn,
     private val session: SessionManager,
-    private val users: UserApi,
+    private val profile: ProfileRepository,
+    private val mockProfiles: MockProfilePreference,
 ) : ViewModel() {
 
     var signingIn by mutableStateOf(false)
@@ -74,11 +76,14 @@ class LoginViewModel(
     val offersMockProfiles: Boolean
         get() = microsoft.isFake
 
-    var mockProfile by mutableStateOf(MockProfile.Student)
+    var mockProfile by mutableStateOf(
+        MockProfile.entries.firstOrNull { it.example == mockProfiles.example } ?: MockProfile.Student,
+    )
         private set
 
     fun onMockProfileChange(profile: MockProfile) {
         mockProfile = profile
+        mockProfiles.example = profile.example
     }
 
     fun signIn(activity: Activity, onSignedIn: () -> Unit) {
@@ -88,7 +93,10 @@ class LoginViewModel(
         viewModelScope.launch {
             try {
                 session.signIn(microsoft.idToken(activity))
-                loadProfileRoles()
+                // Waited for so the first screen already has the right tabs. If it fails the
+                // token's roles stand in, and Perfil offers to try again: refusing entry over a
+                // profile call would be worse than showing the tabs the token says.
+                profile.load()
                 onSignedIn()
             } catch (e: CancellationException) {
                 throw e
@@ -99,21 +107,6 @@ class LoginViewModel(
             } finally {
                 signingIn = false
             }
-        }
-    }
-
-    /**
-     * The tabs follow the profile's roles. If the profile cannot be read now, the token's roles
-     * stand in - signing in worked, and refusing entry over a profile call would be worse than
-     * showing the tabs the token says.
-     */
-    private suspend fun loadProfileRoles() {
-        val prefer = if (microsoft.isFake) "example=${mockProfile.example}" else null
-        try {
-            session.setProfileRoles(users.me(prefer).roles)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Exception) {
         }
     }
 
@@ -132,7 +125,12 @@ class LoginViewModel(
         val Factory = viewModelFactory {
             initializer {
                 val container = (this[APPLICATION_KEY] as KAppApplication).container
-                LoginViewModel(container.microsoft, container.session, container.api.users)
+                LoginViewModel(
+                    container.microsoft,
+                    container.session,
+                    container.profile,
+                    container.mockProfile,
+                )
             }
         }
     }

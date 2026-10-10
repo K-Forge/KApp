@@ -8,11 +8,12 @@ import co.edu.konradlorenz.kapp.ui.theme.Subject
  * The state the mockups are drawn with.
  *
  * Pepe is the student every artboard in docs/design/mobile/ uses, and the numbers are the ones on
- * HomeAndroid.dc.html: 112 credits of 142, a semester 8 that is 78.9% done. This is what the
- * screen shows until there is a repository behind it, and what the previews render.
+ * HomeAndroid.dc.html: 112 credits of 142, a semester 8 that is 78.9% done. The day and the
+ * semester are what the screen shows until there are repositories behind them; the previews render
+ * all of it. The programme is the student example's in user.openapi.yaml.
  */
 val SampleHomeUiState = HomeUiState(
-    student = student("Pepe Pérez"),
+    student = student("Pepe Pérez").copy(programme = "Ingeniería de Sistemas"),
     day = DayState.Classes(
         next = NextClass(
             courseName = "Bases de Datos",

@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,21 +40,18 @@ import co.edu.konradlorenz.kapp.ui.theme.Brand
 import co.edu.konradlorenz.kapp.ui.theme.KAppTheme
 
 /**
- * Semaforo, Horario, Mapa and Perfil, until each one is built.
+ * Semaforo, Horario and Mapa, until each one is built.
  *
- * One screen for the four of them on purpose: there is nothing to tell apart yet, and four
- * identical files would only be four files to delete. When a real screen is written it replaces
+ * One screen for the three of them on purpose: there is nothing to tell apart yet, and three
+ * identical files would only be three files to delete. When a real screen is written it replaces
  * this destination's entry in KAppNavHost and the others keep using this.
  *
  * It borrows the band and the card of Inicio rather than inventing a look of its own: no mockup
- * covers these four, and a screen invented here would be one more thing to undo when one arrives.
+ * covers these three, and a screen invented here would be one more thing to undo when one arrives.
  * The contract underneath is printed because it is the useful thing to know while it is empty.
- *
- * [onSignOut] puts "Cerrar sesion" under the card. Only Perfil passes it, and only until #47 builds
- * that screen: signing out has to live somewhere, and the profile is where people look for it.
  */
 @Composable
-fun PlaceholderScreen(destination: KAppDestination, onSignOut: (() -> Unit)? = null) {
+fun PlaceholderScreen(destination: KAppDestination) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -116,18 +112,6 @@ fun PlaceholderScreen(destination: KAppDestination, onSignOut: (() -> Unit)? = n
                     textAlign = TextAlign.Center,
                 )
             }
-            if (onSignOut != null) {
-                Spacer(Modifier.height(16.dp))
-                OutlinedButton(
-                    onClick = onSignOut,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
-                ) {
-                    Text(text = stringResource(R.string.sign_out))
-                }
-            }
         }
     }
 }
@@ -137,8 +121,8 @@ private val CardShape = RoundedCornerShape(18.dp)
 /**
  * The call each screen will be built on, out of docs/api/.
  *
- * Inicio is in the list because the enum is, not because it is ever drawn by this screen: it has
- * had a real screen since the mockup was translated.
+ * Inicio and Perfil are in the list because the enum is, not because this screen ever draws them:
+ * both have screens of their own.
  */
 @StringRes
 private fun contractOf(destination: KAppDestination): Int = when (destination) {
