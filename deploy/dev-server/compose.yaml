@@ -87,6 +87,8 @@ services:
       KAPP_INTERNAL_TOKEN: ${KAPP_INTERNAL_TOKEN:?set it in .env}
       KAPP_ALLOWED_EMAIL_DOMAINS: konradlorenz.edu.co,kforge.dev
       KAPP_REQUIRE_EMAIL_VERIFICATION: "false"
+      # Passwords stay on here until the test tenant signs people in with Microsoft (#62).
+      KAPP_LOCAL_SIGN_IN: "true"
       JAVA_OPTS: "-Xmx96m -XX:MaxDirectMemorySize=16m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:CICompilerCount=1 -XX:ReservedCodeCacheSize=48m -XX:MaxMetaspaceSize=160m -Xss512k"
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8081/actuator/health || exit 1"]
