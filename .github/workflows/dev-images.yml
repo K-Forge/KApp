@@ -23,7 +23,8 @@ permissions:
   contents: read
   packages: write
 
-# A newer push supersedes an older one on the same branch: its images are the ones wanted.
+# A newer push supersedes an older one on the same branch: its images are the ones wanted. Cancelling
+# loses nothing, because each run plans against what is published, not against the previous push.
 concurrency:
   group: dev-images-${{ github.ref }}
   cancel-in-progress: true
@@ -59,7 +60,6 @@ jobs:
       - name: Plan
         id: plan
         env:
-          BEFORE: ${{ github.event.before }}
           REF_NAME: ${{ github.ref_name }}
           OWNER: ${{ github.repository_owner }}
         run: |
@@ -68,17 +68,15 @@ jobs:
           tag=$(printf '%s' "$REF_NAME" | tr '[:upper:]' '[:lower:]' | sed 's#[^a-z0-9._-]#-#g' | cut -c1-120)
           image="ghcr.io/$(printf '%s' "$OWNER" | tr '[:upper:]' '[:lower:]')/kapp"
 
-          # The files this push changed. A new branch, a forced push or a manual run builds everything.
-          if [[ -n "$BEFORE" && ! "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null \
-             && [[ "$GITHUB_EVENT_NAME" == push ]]; then
-            files=$(git diff --name-only "$BEFORE" "$GITHUB_SHA")
-          else
-            files=ALL
-          fi
-
+          # Each service is compared with the commit its published image was built from - stamped by
+          # the build as org.opencontainers.image.revision - not with the previous push. A run cancelled
+          # by a newer push, or one that failed, leaves its changes unpublished, and comparing push to
+          # push never saw them again: four merges in seven minutes left develop without the images
+          # that removed Eureka (#74).
           build=()
           for s in $SERVICES; do
-            if [[ "$files" == ALL ]]; then build+=("$s"); continue; fi
+            # A manual run builds everything.
+            if [[ "$GITHUB_EVENT_NAME" != push ]]; then build+=("$s"); continue; fi
             if [[ "$s" == web-admin ]]; then
               pattern='^(app/frontend/web-admin/|docs/api/)'
             else
@@ -86,11 +84,19 @@ jobs:
               # module change them all.
               pattern="^app/backend/microservices/($s/|common/|pom\.xml|\.mvn/|mvnw)"
             fi
-            if grep -qE "$pattern|^\.github/workflows/dev-images\.yml$" <<<"$files"; then
+            # Both platforms are built from the same commit, so the first label found will do.
+            revision=$( { docker buildx imagetools inspect "$image-$s:$tag" --format '{{ json .Image }}' 2>/dev/null || true; } \
+              | jq -r '[.. | objects | to_entries[]? | select(.key == "org.opencontainers.image.revision") | .value] | first // empty')
+            if [[ -z "$revision" ]] || ! git cat-file -e "$revision^{commit}" 2>/dev/null; then
+              # No image for this branch yet - a new branch, or one whose first build failed - or one
+              # built from a commit this branch no longer has, after a forced push.
               build+=("$s")
-            elif ! docker buildx imagetools inspect "$image-$s:$tag" >/dev/null 2>&1; then
-              # Nothing of it changed, but the branch has no image of it yet: a branch older than this
-              # workflow, or one whose first build failed.
+              continue
+            fi
+            # Into a variable first: grep -q stops reading at the first match, and under pipefail the
+            # SIGPIPE that kills git diff would turn a match into "nothing changed".
+            changed=$(git diff --name-only "$revision" "$GITHUB_SHA")
+            if grep -qE "$pattern|^\.github/workflows/dev-images\.yml$" <<<"$changed"; then
               build+=("$s")
             fi
           done
