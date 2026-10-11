@@ -647,6 +647,6 @@ arithmetic and dies with `discovery: unbound variable`.
 The `pnpm run microservices:*` commands it backed now wrap `docker compose` directly, which is how
 everything has actually run since the migration, and which behaves the same on Windows and macOS.
 
-`scripts/start-frontend.sh` stays. It serves the frozen prototype in `app/frontend/web/`, it works,
-and `PORT=4000 scripts/start-frontend.sh` still uses it; `pnpm run prototype:serve` is the
-same thing on port 3000.
+`scripts/start-frontend.sh` and `pnpm run prototype:serve` are gone too. They served the 2025 HTML
+prototype in `app/frontend/web/`, which was deleted in October 2026 with its public demo (#51); git
+keeps it.

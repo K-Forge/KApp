@@ -74,12 +74,9 @@ KApp/
 │   │   └── postman/                 # Postman collections
 │   ├── frontend/
 │   │   ├── web-admin/               # Admin and developer portal (Angular)
-│   │   ├── web/                     # FROZEN prototype of the mobile layout
 │   │   └── mobile/
 │   │       ├── kotlin/              # Android
 │   │       └── swift/               # iOS
-│   └── database/
-│       └── init.sql                 # LEGACY PostgreSQL schema, reference only
 ├── docs/
 │   ├── api/                         # OpenAPI contracts — the source of truth
 │   ├── adr/                         # Architecture decisions and their reasons
@@ -93,8 +90,7 @@ KApp/
 │   ├── install-git-hooks.sh         # Once per clone: enables .githooks/
 │   ├── sync-contributing.sh         # Refreshes CONTRIBUTING.md from the organization
 │   ├── restack.sh                   # Rebases a stack after its bottom is squash merged
-│   ├── generate-dev-secrets.sh  create-dev-accounts.sh  verify-db-isolation.sh
-│   └── start-frontend.sh
+│   └── generate-dev-secrets.sh  create-dev-accounts.sh  verify-db-isolation.sh
 ├── .githooks/commit-msg             # Refuses a commit that breaks CONTRIBUTING.md
 ├── .github/
 │   ├── CODEOWNERS                   # The lead reviews every path
@@ -189,7 +185,6 @@ npx --package=@redocly/cli@latest redocly lint docs/api/*.yaml
   auto-configuration, so without it migrations are skipped in silence.
 - Academic periods use the university's own format, `YYYYS` (e.g. `20262`). Validate with
   `@ValidAcademicPeriod` from `common`.
-- `app/database/init.sql` is the legacy PostgreSQL schema, kept for reference only.
 
 ### Inter-Service Communication
 
@@ -272,9 +267,8 @@ Read `docs/PROGRESS.md` for up-to-date implementation status before proposing la
   other way round.
 - **Mobile (the product, in progress):** Kotlin and Swift clients, built against the mocks.
 - **Web:** the admin and developer portal (Angular, `app/frontend/web-admin/`) is built, tested in CI and used by
-  the mobile team to sign in as a role and reproduce a failing call. The old HTML/JS client under
-  `app/frontend/web/` was a prototype of the mobile design and is frozen: it is not student-facing and nothing
-  new is built on it.
+  the mobile team to sign in as a role and reproduce a failing call. The 2025 HTML/JS prototype and the legacy
+  PostgreSQL schema were deleted in October 2026 (#51); git keeps them. A better public demo is planned (#92).
 
 ---
 
@@ -301,7 +295,7 @@ semaforo. Everything else is deferred. Keep this list in sync with `docs/PROGRES
 
 - **Never modify** `.env` files (contains secrets).
 - **Backend location:** all backend work goes in `app/backend/microservices/`. The original monolith was deleted once the migration completed; it is only retrievable from the git history and must not be resurrected.
-- **Schema:** changes go in Mongock change units (see Database). `app/database/init.sql` is the legacy PostgreSQL schema; nothing reads it, so do not update it.
+- **Schema:** changes go in Mongock change units (see Database), never in a hand-written schema file.
 - **Before large changes:** Read `docs/PROGRESS.md` first.
 - **Before any git operation:** Read [CONTRIBUTING.md](CONTRIBUTING.md), including its section for AI agents. The commit author is the member running the session, never the agent.
 - **No tool attribution, anywhere.** Never write a `Co-Authored-By` trailer for a tool, a "generated with" line, a
@@ -309,9 +303,7 @@ semaforo. Everything else is deferred. Keep this list in sync with `docs/PROGRES
   documentation. `scripts/check-git-conventions.sh` refuses a commit authored by an automated identity or one whose
   message credits one. The history records what the team built, not what wrote it.
 - **Product identity:** KApp is a **mobile app** for Konrad Lorenz. The microservices are the backend that powers the mobile clients. Do not describe KApp as a "web platform" — it is a mobile-first product.
-- **Demo mode:** `app/frontend/web/js/demo.js` intercepts API calls with sample data and activates only when the client is served from a host other than `localhost` (or forced with `?demo=1`). It exists so the interface can be deployed statically while no backend is hosted. Never point it at real data, and never let it change behaviour during local development.
-- **Delivery sequence:** backend first, then **mobile directly**. The web client was a prototype of
-  the mobile layout and is frozen; it is not a step on the path any more. The clients are built
+- **Delivery sequence:** backend first, then **mobile directly**. The clients are built
   against the OpenAPI mocks rather than against a finished backend, which is what lets client and
   server work proceed at the same time.
 - **Contract first.** Changing a request or response shape means editing `docs/api/*.openapi.yaml`

@@ -50,8 +50,9 @@ Ordered by how badly each reads to somebody deciding whether to open SINU to us.
   grades, a digital ID card, library loans, parking payments and a chat. It is the first document
   a reviewer would open, and it describes a replacement for SINU.
 - **`app/database/`**: the legacy PostgreSQL schema, with `grade`, `student_course`,
-  `library_loan`, `parking_reservation` and `chat_message`. Nothing reads it.
+  `library_loan`, `parking_reservation` and `chat_message`. Nothing reads it. **Deleted** (#51).
 - **`app/frontend/web/`**: the old prototype, with `notas.html`, `inscribir.html` and `pqr.html`.
+  **Deleted** with its public demo (#51).
 - **`course-service`** and **`assignment-service`**: frozen, out of the build.
 - **`docs/MICROSERVICES-IDEAS.md`**: seventeen services nobody is building.
 

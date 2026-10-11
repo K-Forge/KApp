@@ -16,7 +16,6 @@
 <p align="center">
   <a href="https://github.com/K-Forge/KApp/actions/workflows/ci.yml"><img src="https://github.com/K-Forge/KApp/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"/></a>
   &nbsp;
-  <a href="https://kapp-black.vercel.app"><img src="https://img.shields.io/badge/Demo-frozen%20prototype-6B7280?logo=vercel&logoColor=white" alt="Demo of the frozen prototype"/></a>
   <br/><br/>
   <img src="https://img.shields.io/badge/Android-Kotlin-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android (Kotlin)"/>
   <img src="https://img.shields.io/badge/iOS-Swift-F05138?style=for-the-badge&logo=swift&logoColor=white" alt="iOS (Swift)"/>
@@ -149,12 +148,11 @@ product surface** — nothing a student ever sees.
 cd app/backend/microservices && docker compose --profile core --profile dev up -d
 ```
 
-### The frozen prototype
+### The 2025 prototype
 
-An earlier plain HTML/JS client is still in the tree at `app/frontend/web/`, and the **[live
-demo](https://kapp-black.vercel.app)** runs it. It shows courses, assignments and grading — none of
-which is being built any more. It is kept as the interface study it was, not as a description of the
-product; see [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md) for what is and is not in scope.
+An earlier plain HTML/JS client showed courses, assignments and grading, none of which KApp builds. It was deleted
+in October 2026, together with its public demo and the legacy PostgreSQL schema (#51); git keeps both. A better
+public demo, showing the real apps with invented data, is planned (#92).
 
 ---
 
@@ -269,7 +267,6 @@ shortest path to a running stack.
 | `pnpm run microservices:status` | Shows what is running.                                                    |
 | `pnpm run microservices:logs`   | Follows the logs. Add `-- <service>` for one of them.                     |
 | `pnpm run microservices:stop`   | Stops everything, mocks and portal included.                              |
-| `pnpm run prototype:serve`      | Serves the frozen HTML prototype in `app/frontend/web` on port 3000.      |
 
 The admin portal has its own scripts, in `app/frontend/web-admin/package.json`, because they are
 its build and not the repository's: `pnpm start`, `pnpm build`, `pnpm test`.
@@ -304,40 +301,6 @@ Either way the interface is the same and it is in [`docs/api/`](docs/api/), not 
   actually enforce. The portal's "Who can do what" screen renders the same data if you would rather
   read it as a table.
 
-### Demo mode
-
-The backend is not hosted anywhere, so a plain static deployment of the web client would show a login screen that
-can never authenticate. [`app/frontend/web/js/demo.js`](app/frontend/web/js/demo.js) closes that gap: it intercepts
-the API calls and answers them with sample data, letting a visitor sign in with any credentials and walk through the
-student, professor and administrator views.
-
-It activates **only when the client is served from a host other than `localhost`**, so local development keeps
-talking to the real microservices and nothing about the normal workflow changes. To exercise it locally, append
-`?demo=1` (and `?demo=0` to leave it):
-
-```bash
-pnpm run prototype:serve   # then open http://localhost:3000/login.html?demo=1
-```
-
-A persistent banner marks every screen as demo data, and offers a role switcher so the administrator panel is
-reachable without credentials.
-
-### Deploying the web demo
-
-[`vercel.json`](vercel.json) configures the repository as a static deployment of `app/frontend/web`, with no build
-step and a baseline set of security headers. With the Vercel CLI authenticated:
-
-```bash
-vercel link
-```
-
-```bash
-vercel deploy --prod
-```
-
-Linking the repository from the Vercel dashboard works as well; the configuration file is picked up automatically,
-and the framework preset should be left as "Other".
-
 ---
 
 ## Project Structure
@@ -363,11 +326,9 @@ KApp/
 │   │   └── postman/                  # API collections
 │   ├── frontend/
 │   │   ├── web-admin/                # Admin and developer console (Angular 22)
-│   │   ├── web/                      # FROZEN prototype — the live demo runs this
 │   │   └── mobile/
 │   │       ├── kotlin/               # Android client — the product, not started
 │   │       └── swift/                # iOS client — the product, not started
-│   └── database/init.sql             # Legacy PostgreSQL schema. Reference only; nothing reads it
 ├── docs/
 │   ├── api/                          # Five OpenAPI 3.1 contracts — the source of truth
 │   ├── adr/                          # Architecture decision records
