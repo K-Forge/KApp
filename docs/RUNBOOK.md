@@ -53,8 +53,8 @@ cluster; see [ADR 0009](adr/0009-atlas-is-the-only-development-database.md) and
 
 | Profile    | What starts                        | RAM     | Use it when                                       |
 | ---------- | ---------------------------------- | ------- | ------------------------------------------------- |
-| `mock`     | one Prism mock server per contract | ~200 MB | Building a mobile screen against the API contract |
-| `core`     | discovery, gateway, auth, user     | ~1.5 GB | Working on sign-in or profiles                    |
+| `mock`     | the five Prism mocks, on one port  | ~200 MB | Building a mobile screen against the API contract |
+| `core`     | gateway, auth, user                | ~1.5 GB | Working on sign-in or profiles                    |
 | `academic` | core + semaphore, schedule         | ~2.5 GB | Working on pensums or timetables                  |
 | `map`      | core + map                         | ~2 GB   | Working on the campus map                         |
 | `full`     | everything                         | ~4 GB   | End-to-end checks before a merge                  |
@@ -121,7 +121,7 @@ Either way they need different host ports. Set these in the same `.env`:
 | ------------------- | ------- | -------------------------- | ------- |
 | `KAPP_GATEWAY_PORT` | 8080    | `KAPP_MOCK_AUTH_PORT`      | 4010    |
 | `KAPP_PORTAL_PORT`  | 4300    | `KAPP_MOCK_USER_PORT`      | 4011    |
-| `KAPP_MONGO_PORT`   | 27017   | `KAPP_MOCK_SEMAPHORE_PORT` | 4012    |
+| `KAPP_MOCK_PORT`    | 4000    | `KAPP_MOCK_SEMAPHORE_PORT` | 4012    |
 |                     |         | `KAPP_MOCK_SCHEDULE_PORT`  | 4013    |
 |                     |         | `KAPP_MOCK_MAP_PORT`       | 4014    |
 
@@ -213,8 +213,8 @@ docker compose logs --tail=50 api-gateway
 | http://localhost:4300                 | **Admin and developer portal**                    |
 | http://localhost:8080                 | API gateway — the only backend entry point        |
 | http://localhost:8080/swagger-ui.html | Aggregated API documentation                      |
-| http://localhost:27017                | MongoDB, for `mongosh` and Compass                |
-| http://localhost:4010-4014            | Prism mocks: auth, user, semaphore, schedule, map |
+| http://localhost:4000                 | **Prism mocks, all five behind one port**         |
+| http://localhost:4010-4014            | Prism mocks one per service: auth, user, semaphore, schedule, map |
 
 **The floor editor** is part of the portal, at http://localhost:4300/data/floors. It is meant for
 an iPad on the floor being drawn: open the portal from the iPad at this machine's address on the

@@ -124,6 +124,9 @@ from scratch regardless.
   `course-service` and `assignment-service` pull neither. No filter chain, therefore no authentication at the
   service boundary.
 
+> **October 2026.** `course-service` and `assignment-service` were deleted (#65), and the registry with them (#64).
+> The evidence above is kept as the record of what was true when the audit ran.
+
 **Impact.** A caller who can reach a service port directly can send any `X-User-Email` value and act as any user,
 without ever presenting a token. The gateway's JWT validation becomes decorative rather than enforcing.
 
@@ -141,6 +144,7 @@ validate the JWT in each service, or have the gateway sign the propagated identi
 - `assignment-service/.../AssignmentAdminController.java:16` (`/api/admin/assignments`),
   `course-service/.../CourseAdminController.java:16` and `user-service/.../UserAdminController.java:17`
   (both `/api/admin`) — administrative CRUD controllers with no `@PreAuthorize` or equivalent check.
+  *The two frozen services cited here were deleted in October 2026 (#65).*
 - No module declares `@EnableMethodSecurity`; across the ten controllers in the backend there is not a single
   authorization annotation.
 
@@ -184,6 +188,10 @@ The internal identity-resolution endpoints turn any valid token into an enumerat
 **Suggested remediation.** Disable the discovery locator; move the internal API under a distinct prefix
 (for example `/internal/**`) that the gateway does not route, and reach it only through the service network.
 
+> **October 2026.** The registry itself is gone (#64): services address each other by name, and the gateway routes
+> only to the explicit addresses in `kapp.services.*`. With no registry and no discovery locator, S4 cannot come
+> back by registering a service.
+
 ### S5 — Actuator and Eureka dashboard exposure (Moderate)
 
 **Evidence**
@@ -201,6 +209,8 @@ name.
 
 **Suggested remediation.** Set `show-details=when-authorized`, remove `gateway` from the exposed endpoints outside
 development, keep the discovery server off the published ports, and require authentication on the Eureka endpoints.
+
+> **October 2026.** The Eureka half of this finding is gone with the registry (#64). The actuator half still applies.
 
 ### S6 — Debug logging and SQL echo in default configuration (Low)
 
@@ -442,7 +452,8 @@ as an explicit pending list in [PROGRESS.md](PROGRESS.md#pending--repository-gov
       are. History rewriting is optional and not recommended for values this dead.
 - [ ] Enable GitHub secret scanning and push protection, so the next accidental commit is caught at push time.
 - [ ] Enable Dependabot alerts (Spring Boot 3.2.0 and Spring Cloud 2023.0.0 both have newer patch releases).
-- [ ] Enable branch protection on `main`: required review, no force pushes.
+- [x] Enable branch protection on `main`: required review, no force pushes. Done in September 2026: rulesets on
+  `main` and `develop`, with the lead as code owner and no direct pushes.
 - [ ] Re-run the secret sweep periodically, and before any release:
 
       git grep -nEi "(password|secret|api[_-]?key|private[_-]?key)[[:space:]]*=[[:space:]]*\"[^\"]{6,}\""
@@ -460,7 +471,7 @@ should be done.
       service boundary (S1).
 - [ ] Enforce role-based authorization on `/api/admin/**`, `/api/professor/**` and `/api/student/**` (S2).
 - [ ] Take the internal API off the public routing surface and disable the discovery locator (S4).
-- [ ] Lock down actuator and the Eureka dashboard (S5).
+- [ ] Lock down actuator (S5). The Eureka dashboard went with the registry in October 2026 (#64).
 - [ ] Replace wildcard CORS with an explicit origin list per environment (S3).
 - [ ] Split configuration into profiles so `DEBUG` logging and SQL echo never reach a shared environment (S6).
 - [ ] Shorten token lifetime, add refresh, and store tokens in the platform keystore on mobile (S7).
