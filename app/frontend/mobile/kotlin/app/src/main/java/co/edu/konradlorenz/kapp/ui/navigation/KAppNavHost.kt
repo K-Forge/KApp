@@ -15,6 +15,7 @@ import co.edu.konradlorenz.kapp.ui.invitation.InvitationScreen
 import co.edu.konradlorenz.kapp.ui.login.LoginScreen
 import co.edu.konradlorenz.kapp.ui.placeholder.PlaceholderScreen
 import co.edu.konradlorenz.kapp.ui.profile.ProfileScreen
+import co.edu.konradlorenz.kapp.ui.semaphore.SemaphoreScreen
 
 // The two routes outside the bar. The other five are in KAppDestination, which is also what the
 // bar iterates, so a destination cannot be added to one and forgotten in the other.
@@ -64,8 +65,8 @@ fun KAppNavHost(container: AppContainer) {
             InvitationScreen(onBack = { navController.popBackStack() })
         }
 
-        // The tabs, each inside the shell that draws the bar over it. Inicio and Perfil have screens
-        // of their own; the other three share the placeholder.
+        // The tabs, each inside the shell that draws the bar over it. Inicio, Perfil and Semaforo
+        // have screens of their own; the other two share the placeholder.
         KAppDestination.entries.forEach { destination ->
             composable(destination.route) {
                 MainShell(
@@ -79,6 +80,7 @@ fun KAppNavHost(container: AppContainer) {
                             onOpen = { navController.openTab(it) },
                         )
                         KAppDestination.Profile -> ProfileScreen()
+                        KAppDestination.Semaphore -> SemaphoreScreen()
                         else -> PlaceholderScreen(destination)
                     }
                 }

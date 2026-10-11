@@ -39,6 +39,14 @@ val BorderSoft = Color(0xFFEFEBF1)
 /** A course not taken yet. Same value as [Border]; the two roles are named apart on purpose. */
 val Pending = Color(0xFFE7E2EA)
 
+/**
+ * A postponed course (*aplazada*), new in semaphore 2.0.0. Not one of the seven: issue #44 sends
+ * it to docs/design/orchid-palette.md, whose active-section pair this is - the orchid background
+ * and its dark text, 6.7:1. Orchid rather than the K's pink, which means "you can touch this".
+ */
+val Postponed = Color(0xFFE8A5D4)
+val OnPostponed = Color(0xFF59134A)
+
 // Login-only tints, read straight off LoginAndroid.dc.html.
 
 /** Hint text inside an empty field. */

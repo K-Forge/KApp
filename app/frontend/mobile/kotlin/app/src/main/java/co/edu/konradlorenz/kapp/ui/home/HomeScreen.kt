@@ -165,6 +165,11 @@ private fun HomeContent(
                 state.student?.programme?.let { ProgrammeLine(it) }
                 when (state.semester) {
                     SemesterState.Loading -> SemesterSkeleton()
+                    SemesterState.Unavailable -> Text(
+                        text = stringResource(R.string.home_semester_unavailable),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     is SemesterState.Ready -> SemesterCard(state.semester)
                 }
             }
