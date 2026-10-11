@@ -1,4 +1,4 @@
-name: Restack probe
+name: Restack probe (touched after the stack branched)
 
 # Throwaway, lives only on test/restack-base: proves that a push made by the restack App
 # triggers pull_request workflows, which a push with the job's own token would not.
