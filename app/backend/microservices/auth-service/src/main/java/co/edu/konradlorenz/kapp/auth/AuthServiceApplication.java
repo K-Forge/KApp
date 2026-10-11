@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.auth;
 
 import co.edu.konradlorenz.kapp.auth.config.RegistrationProperties;
+import co.edu.konradlorenz.kapp.auth.config.SessionProperties;
 import co.edu.konradlorenz.kapp.auth.jwt.JwtProperties;
 import io.mongock.runner.springboot.EnableMongock;
 import org.springframework.boot.SpringApplication;
@@ -34,7 +35,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableMongock
 @EnableFeignClients
-@EnableConfigurationProperties({JwtProperties.class, RegistrationProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, RegistrationProperties.class, SessionProperties.class})
 public class AuthServiceApplication {
 
     public static void main(String[] args) {

@@ -53,6 +53,14 @@ public class AuthExceptionHandler {
         return ResponseEntity.status(status).body(body);
     }
 
+    @ExceptionHandler(AccountDeactivatedException.class)
+    public ResponseEntity<ApiError> handleAccountDeactivated(AccountDeactivatedException ex, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        ApiError body = ApiError.of(status.value(), status.getReasonPhrase(), ex.getMessage(),
+                request.getRequestURI(), List.of());
+        return ResponseEntity.status(status).body(body);
+    }
+
     @ExceptionHandler(PasswordChangeRequiredException.class)
     public ResponseEntity<ApiError> handlePasswordChangeRequired(
             PasswordChangeRequiredException ex, HttpServletRequest request) {
