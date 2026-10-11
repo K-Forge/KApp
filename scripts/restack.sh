@@ -159,16 +159,28 @@ main() {
 
   # Direct children are found by history, not by base: with "delete branch on merge", GitHub may
   # already have retargeted them to BASE_REF by the time this runs. A branch is a child when it
-  # contains the parent's head and targets either the parent or the parent's own base. Its own
+  # targets the parent or the parent's own base, and shares commits with the parent that never
+  # reached that base. Containing the parent's head is not required, and must not be: a parent
+  # usually gains commits after its child branched - a review fix, a merge of develop - that the
+  # child never pulls. The rebase still drops everything the parent had, old and new. Its own
   # children target it, so they wait for the cascade.
-  local number head base found=0
+  local number head base shared ancestor found=0
   # The loops read the list on descriptor 3, so a command inside that reads stdin cannot eat it.
   while IFS="$(printf '\t')" read -r number head base <&3; do
     [ -n "$number" ] || continue
     [ "$head" != "$PARENT_HEAD_REF" ] || continue
     [ "$base" = "$PARENT_HEAD_REF" ] || [ "$base" = "$BASE_REF" ] || continue
     git rev-parse -q --verify "refs/remotes/$REMOTE/$head" >/dev/null || continue
-    git merge-base --is-ancestor "$PARENT_SHA" "refs/remotes/$REMOTE/$head" || continue
+    # Every best common ancestor, not one: when both branches merged develop by hand they have
+    # several, and git merge-base alone may return the one that is already in develop.
+    shared=0
+    for ancestor in $(git merge-base --all "$PARENT_SHA" "refs/remotes/$REMOTE/$head" 2>/dev/null); do
+      if ! git merge-base --is-ancestor "$ancestor" "refs/remotes/$REMOTE/$BASE_REF"; then
+        shared=1
+        break
+      fi
+    done
+    [ "$shared" -eq 1 ] || continue
     found=1
     restack "$number" "$head" 1 "$BASE_REF" "$PARENT_SHA" "$BASE_REF"
   done 3<<EOF
