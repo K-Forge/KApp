@@ -440,8 +440,10 @@ as an explicit pending list in [PROGRESS.md](PROGRESS.md#pending--repository-gov
       `@konradlorenz.edu.co` sample addresses.
 - [ ] Confirm the two historical credentials (H1) are not reused anywhere that still matters; change them if they
       are. History rewriting is optional and not recommended for values this dead.
-- [ ] Enable GitHub secret scanning and push protection, so the next accidental commit is caught at push time.
-- [ ] Enable Dependabot alerts (Spring Boot 3.2.0 and Spring Cloud 2023.0.0 both have newer patch releases).
+- [x] Enable GitHub secret scanning and push protection, so the next accidental commit is caught at push time. Done
+  on 2026-10-11 (#53); the first scan found only documentation placeholders.
+- [x] Enable Dependabot alerts (Spring Boot 3.2.0 and Spring Cloud 2023.0.0 both have newer patch releases). Alerts
+  were on; version updates are configured in `.github/dependabot.yml` since #53.
 - [ ] Enable branch protection on `main`: required review, no force pushes.
 - [ ] Re-run the secret sweep periodically, and before any release:
 

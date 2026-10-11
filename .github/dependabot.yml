@@ -1,0 +1,100 @@
+# Keeps the dependencies patched until the 2027-2 presentation (#53). Pull requests go to develop
+# once a week. Minor and patch updates are grouped per ecosystem so the queue stays short; majors
+# arrive one at a time, because they are the ones that need reading.
+#
+# Titles come out as "chore: bump ...", which scripts/check-git-conventions.sh accepts. Dependabot
+# keeps the lowercase because this repository's history is lowercase. The Conventions workflow skips
+# Dependabot's own commits but still checks the title, since squash merging turns it into the commit
+# that stays on develop. Every pull request still needs the lead's review, like any other.
+
+version: 2
+
+updates:
+  - package-ecosystem: maven
+    directory: /app/backend/microservices
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: chore
+    labels: [area/backend]
+    groups:
+      maven-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # The backend stays on Boot 3.x on purpose: Mongock publishes no Boot 4 artifact (docs/PROGRESS.md).
+      - dependency-name: "org.springframework.boot:*"
+        update-types: ["version-update:semver-major"]
+      # Spring Cloud 2025.1 is the Boot 4 line, even though its number only looks like a minor step.
+      - dependency-name: "org.springframework.cloud:*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
+
+  - package-ecosystem: gradle
+    directory: /app/frontend/mobile/kotlin
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: chore
+    labels: [area/kotlin]
+    groups:
+      gradle-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directories:
+      - /app/frontend/web-admin
+      - /
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: chore
+    labels: [area/docs]
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directories:
+      - /app/backend/microservices/api-gateway
+      - /app/backend/microservices/auth-service
+      - /app/backend/microservices/map-service
+      - /app/backend/microservices/schedule-service
+      - /app/backend/microservices/semaphore-service
+      - /app/backend/microservices/user-service
+      - /app/backend/microservices/mock
+      - /app/frontend/web-admin
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: chore
+    labels: [area/backend]
+    groups:
+      docker-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # The images build what the pom compiles: Java 21. A new JDK major is a backend decision.
+      - dependency-name: eclipse-temurin
+        update-types: ["version-update:semver-major"]
+      # Node matches what CI uses (22 for the portal, 24 for the mocks); a major moves both together.
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: chore
+    labels: [area/docs]
+    groups:
+      actions:
+        patterns: ["*"]
