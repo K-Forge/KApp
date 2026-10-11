@@ -1,44 +1,26 @@
-# K-APP
+# KApp
 
 ## Mobile Application for Fundación Universitaria Konrad Lorenz
 
 ### Software Requirements Specification (SRS)
 
-**Version:** 1.0
-**Date:** 00/00/2025
+**Version:** 2.0
+**Date:** 11 October 2026
 
----
-
-> Any form of exploitation is prohibited, in particular the reproduction, distribution, public communication and/or
-> transformation, in whole or in part, by any means, of this document without the prior express written consent of
-> Brian Steven Vargas Clavijo and Santiago Rocha Ramírez.
-
----
-
-## Version Control
-
-| Version | Reason for Change | Owner | Date       |
-| ------- | ----------------- | ----- | ---------- |
-| 1.0     | Initial version   |       | 00/00/2025 |
+> This Markdown version describes the product as decided on 2–5 October 2026. It will be rewritten as a `.docx` for
+> the thesis; until then this file is the reference. The detailed, testable requirements are in
+> [`REQUIREMENTS.md`](REQUIREMENTS.md); this document gives the product's shape, its actors and its limits.
 
 ---
 
 ## Table of Contents
 
-- [1.1 Purpose](#11-purpose)
-- [1.2 Objectives](#12-objectives)
-  - [1.2.1 General Objective](#121-general-objective)
-  - [1.2.2 Specific Objectives](#122-specific-objectives)
-- [1.3 Scope](#13-scope)
-- [1.4 Definitions, Acronyms and Abbreviations](#14-definitions-acronyms-and-abbreviations)
-- [2.1 Product Perspective](#21-product-perspective)
-- [2.2 Product Features (Summary)](#22-product-features-summary)
-- [2.3 User Characteristics](#23-user-characteristics)
-- [2.4 General Constraints](#24-general-constraints)
-- [2.5 Assumptions and Dependencies](#25-assumptions-and-dependencies)
-- [3.1 Functional Requirements](#31-functional-requirements)
-- [3.2 Non-Functional Requirements](#32-non-functional-requirements)
-- [3.3 User Roles and Permissions](#33-user-roles-and-permissions)
+- [1. Introduction](#1-introduction)
+- [2. General Description](#2-general-description)
+- [3. Functional Requirements](#3-functional-requirements)
+- [4. Non-Functional Requirements](#4-non-functional-requirements)
+- [5. Personal Data (Ley 1581 de 2012)](#5-personal-data-ley-1581-de-2012)
+- [6. Version History](#6-version-history)
 
 ---
 
@@ -46,65 +28,65 @@
 
 ### 1.1 Purpose
 
-K-APP is a mobile application created within the **K-Forge** development club, aimed at students of Fundación
-Universitaria Konrad Lorenz. Its purpose is to centralize in one place the most relevant information and services of
-university life, providing fast access to academic, administrative and communication features from an intuitive and
-secure environment.
+KApp is a mobile application, for Android and iOS, for the community of Fundación Universitaria Konrad Lorenz. It
+helps a student find their way around the campus and their own academic day: where a class is, what their timetable
+is, how far they are in their programme. It also gives the community a place to report a damaged room, hand in a lost
+object or raise a suggestion.
 
-### 1.2 Objectives
+KApp **complements SINU, the university's academic system, and never replaces it**. Everything academic is read from
+SINU, read-only, and nothing academic is stored in KApp.
 
-#### 1.2.1 General Objective
+### 1.2 What KApp Is Not
 
-Develop a mobile application that simplifies the university experience by integrating academic, administrative,
-communication and student-participation tools in a single place.
+These are deliberately out of scope, and no requirement in this document may reintroduce them:
 
-#### 1.2.2 Specific Objectives
-
-1. Facilitate academic management through quick access to schedules, grades and relevant notifications.
-2. Improve communication among students and with the university through messaging and real-time announcements.
-3. Centralize digital services such as the university ID card, space reservations and institutional appointments to
-   simplify administrative procedures.
-4. Foster a sense of university community by promoting and enabling registration for campus events and activities.
+- **Anything that writes to SINU**, or copies its data: grades, enrolment, academic records.
+- **Editing grades.** A student may see their own grades if SINU provides them, read-only and optionally.
+- **Enrolment** in courses or sections.
+- **Payments** of any kind, including parking.
+- **Personal documents**: digital ID cards, certificates, identity documents of members.
+- **Chat** or private messaging between users.
+- **Library loans**, which belong to the library's own system.
+- **Administrators reading students' academic data.** The portal manages KApp's own data, not SINU's.
 
 ### 1.3 Scope
 
-K-APP will be available as a mobile application for Android and iOS devices, aimed primarily at students of
-Fundación Universitaria Konrad Lorenz, while also allowing limited access to professors, administrative staff and
-guests.
+| Area | What the user gets |
+|---|---|
+| Sign-in | One Microsoft account for the apps and the portal |
+| Timetable | The student's timetable, read from SINU; a professor's own sections |
+| Semáforo | The student's progress through their pensum, read from SINU, plus personal plans they edit |
+| Campus map | Buildings, floors drawn from the university's plans, spaces and search |
+| Notifications | An in-app inbox and push notifications, with per-topic preferences |
+| Community | Student voice, damage reports, lost and found, citizenship points |
+| Visitors | A one-day pass, issued by reception, that opens the map and nothing else |
+| Administration | A web portal for the staff who manage KApp's own data |
+| Later | Wellbeing, events, clubs and recreation bookings, after a questionnaire to the offices |
 
-The application will integrate in one place:
+### 1.4 Definitions
 
-- **Academic features:** schedules, grades and notifications.
-- **University services:** digital ID card, space reservations, wellbeing appointments and tutoring.
-- **Communication:** private and group chat, plus real-time official announcements.
-- **Institutional information:** interactive map, event calendar and social networks.
+| Term | Meaning |
+|---|---|
+| **SINU** | The university's academic system. The source of every academic datum KApp shows |
+| **Test SINU adapter** | A stand-in that serves invented academic data with SINU's shape. Used until the university opens SINU, and for the presentation if access never comes |
+| **Entra ID** | Microsoft's identity service. Members sign in to KApp with their university Microsoft account |
+| **Pensum** | The curriculum of a programme: its courses, levels and prerequisites |
+| **Semáforo** | The view of a student's progress through their pensum, course by course, with a status for each |
+| **Plan** | A student's own arrangement of the courses they intend to take. The only academic thing a student edits in KApp |
+| **Sede** | What SINU calls a building. Room numbers repeat across sedes |
+| **Block** | SINU's scheduling unit, 45 minutes. A SINU "hour" is one block |
+| **Profile role** | What a member is: student, professor or administrative staff |
+| **Permission** | What a member may manage in the portal: administration, reception, maintenance, moderation, wellbeing |
+| **Visitor pass** | A one-day credential reception issues to a person without a university account |
+| **Ley 1581** | Colombia's personal data protection law (Ley 1581 de 2012) |
 
-Development will focus on delivering an **intuitive, secure and customizable experience**, ensuring students can
-manage their university life from anywhere. Integration with the university's existing systems will be prioritized
-to keep information up to date without duplicating processes.
+### 1.5 References
 
-### 1.4 Definitions, Acronyms and Abbreviations
-
-| Term                        | Definition                                                                                                                                                                     |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **K-APP**                   | Mobile application built for Fundación Universitaria Konrad Lorenz to centralize services and tools for students, professors, administrative staff and guests.                   |
-| **K-Forge**                 | Student technology development club responsible for designing and maintaining K-APP and other software projects for the university.                                              |
-| **University credentials**  | Username and password issued by the university to identify each member and grant access to internal systems.                                                                     |
-| **Digital ID card**         | Electronic version of the university ID card available inside K-APP, including personal information and a QR code for validation.                                                |
-| **QR code**                 | Graphical code scanned with the device camera to authenticate identity or access services.                                                                                       |
-| **User roles**              | Profiles with different access levels and permissions: Student, Professor, Administrator, Administrative Staff and Guest.                                                        |
-| **Internal chat**           | In-app messaging feature for private or group communication among members of the university community.                                                                           |
-| **University services**     | Set of features that support procedures or reservations: wellbeing appointments, tutoring, parking and academic support.                                                          |
-| **Events**                  | Academic, cultural, sports or institutional activities organized by the university.                                                                                              |
-| **Interactive map**         | Visual tool showing buildings, classrooms and relevant campus spaces.                                                                                                            |
-| **Push notifications**      | Real-time alerts sent to the mobile device about events, changes or important messages.                                                                                          |
-| **LMS**                     | Learning Management System: digital platform for managing learning (such as Moodle or Blackboard).                                                                               |
-| **System integration**      | Connection between K-APP and the university's existing platforms to synchronize data.                                                                                            |
-| **Secure authentication**   | Process that verifies user identity through passwords, verification codes or two-factor authentication.                                                                          |
-| **Accessibility**           | Design characteristics that make the app usable by people with disabilities (enlarged text, high contrast, and so on).                                                           |
-| **Customization**           | Ability to adjust the appearance or configuration of the app (colors, themes, font sizes).                                                                                       |
-| **API**                     | Application Programming Interface: set of rules and methods that let different systems communicate with each other.                                                               |
-| **App**                     | Application designed to run on mobile devices.                                                                                                                                   |
+- [`REQUIREMENTS.md`](REQUIREMENTS.md): the detailed requirements and their status.
+- [`SINU-ALIGNMENT.md`](SINU-ALIGNMENT.md): how KApp reads SINU and what it must never store.
+- [`api/CHANGELOG.md`](api/CHANGELOG.md): the API contracts and their versions.
+- [`MICROSERVICES-IDEAS.md`](MICROSERVICES-IDEAS.md): the roadmap of new services.
+- [`adr/`](adr/): the architecture decisions and their reasons.
 
 ---
 
@@ -112,362 +94,173 @@ to keep information up to date without duplicating processes.
 
 ### 2.1 Product Perspective
 
-K-APP is a standalone mobile application that will integrate with the existing academic and administrative systems of
-Fundación Universitaria Konrad Lorenz. It will act as a centralized platform for students, professors,
-administrative staff and guests, granting access to information and services without needing multiple applications or
-web portals.
+KApp has two native clients, Android (Kotlin) and iOS (Swift), and a web portal for administration. Behind them, a
+set of independent services sits behind a single gateway, each owning its own data. It is deployed on Kubernetes.
 
-### 2.2 Product Features (Summary)
+KApp's data and SINU's data never mix:
 
-- Secure authentication with university credentials, or limited guest access.
-- Access to schedules, grades and academic history.
-- Communication through private and group chat with real-time notifications.
-- Digital university ID card with a unique and secure QR code.
-- Access to services such as space reservations, wellbeing appointments, tutoring and parking.
-- University event information and direct registration from the app.
-- Interactive campus map and guided orientation.
-- Display of official posts and social networks.
-- Built-in support center and feedback channel.
-- Accessibility options and interface customization.
+- **KApp stores**: member profiles (name, picture, roles, active flag), the student's plans, the campus map, the
+  community's content, notifications, and visitor passes.
+- **KApp reads, and never stores**: timetables, the catalog, programmes, pensums, a student's level, and course
+  statuses. These come from SINU, read-only, cached for minutes at most.
 
-### 2.3 User Characteristics
+### 2.2 Actors
 
-| Role                     | Description                                                                            |
-| ------------------------ | -------------------------------------------------------------------------------------- |
-| **Students**             | Primary users with full access to academic tools and university services.               |
-| **Professors**           | Access to class management, communication with students and grade publication.          |
-| **Administrators**       | Full control to manage users, events and system configuration.                          |
-| **Administrative staff** | Access to appointment, event and resource management without modifying academic data.   |
-| **Guests**               | Limited access to events and public content.                                            |
+Every member has **one profile role**, taken from the university's directory when they sign in. Permissions are granted
+on top by an administrator, and they only open the portal: the app's tabs follow the profile role.
 
-### 2.4 General Constraints
+| Actor | Role | What they can do |
+|---|---|---|
+| **Student** | `ROLE_STUDENT` | Their own timetable, semáforo and plans; the map; notifications; the community features |
+| **Professor** | `ROLE_PROFESSOR` | Their own sections; the map; notifications; the community features |
+| **Administrative staff** | `ROLE_STAFF` | The map. Also the default when the directory names no role |
+| **Visitor** | `ROLE_GUEST` | The map, for one day, with a pass from reception. No account |
 
-- The application must be available for Android and iOS.
-- Full access requires valid university credentials.
-- All sensitive information must be handled with encryption and comply with data protection regulations.
-- Integration with current systems depends on the availability of APIs provided by the university.
+| Permission | Granted to manage |
+|---|---|
+| `ROLE_ADMIN` | Accounts, roles and permissions, and the campus map |
+| `ROLE_RECEPTION` | Visitor passes, and lost-and-found hand-ins and claims |
+| `ROLE_MAINTENANCE` | Damage reports: validating and closing them |
+| `ROLE_MODERATION` | Student voice and comments: reviewing reports and hiding content |
+| `ROLE_WELLBEING` | Citizenship points, and the wellbeing features once they exist |
 
-### 2.5 Assumptions and Dependencies
+### 2.3 Constraints
 
-- Users will have an Internet connection to access most features.
-- The university will provide the databases and services required to synchronize academic and administrative data.
-- Real-time notifications require devices to allow push alerts.
-- Successful rollout depends on proper collaboration between K-Forge, the university and the existing system
-  vendors.
+- **SINU is read-only and never copied.** Access to it is the university's IT director's decision.
+- **Android and iOS** native clients; a web portal for the staff.
+- **Personal data** is handled under Ley 1581 de 2012 (section 5).
+- **The source code is public**, so no credential, real student datum or private document is ever committed.
+- **Members never have a KApp password in production.** Password sign-in exists only for development and tests.
 
----
+### 2.4 Assumptions and Dependencies
 
-## 3. Specific Requirements
+- **SINU access**, granted by the university's IT director. Until then, and if it never comes, the test SINU adapter
+  serves invented data with SINU's shape.
+- **An Entra ID application registration** from the university. Development uses a test tenant and a fake identity
+  server.
+- **Push to iOS** needs an Apple Developer account, whose funding is being sought. Android push uses Firebase.
+- **Wellbeing, events, clubs and recreation bookings** depend on a questionnaire to the offices that run them.
+- **Production hardware** is agreed with the university's IT director; the fallback is a single machine running
+  Kubernetes.
 
-### 3.1 Functional Requirements
+### 2.5 Dates
 
-#### 3.1.1 Authentication and Access
-
-1. The application must allow login using university credentials (student/professor code and password).
-2. The application must allow guest access with features limited to public information.
-3. The application must offer the option to remember credentials to speed up future logins.
-4. The application must allow password recovery through a secure validation process.
-
-#### 3.1.2 General Navigation
-
-5. The application must include a home button accessible from any screen to return to the main page.
-6. The application must have a structured navigation menu for quick access to all main sections.
-
-#### 3.1.3 Communication
-
-7. The application must allow communication among students through a private and group chat system.
-8. The chat system must support sending text, images, videos and file attachments.
-9. The application must send real-time push notifications for important announcements, new messages and relevant
-   changes.
-
-#### 3.1.4 Academic Management
-
-10. The application must allow viewing the current academic schedule.
-11. The application must notify the user about class changes or cancellations.
-12. The application must allow viewing grades for the current semester.
-13. The application must allow access to the grade history of previous semesters.
-
-#### 3.1.5 Digital University ID Card
-
-14. The application must display the university ID card in digital format.
-15. The system must generate a unique and secure QR code bound to the student's identity.
-
-#### 3.1.6 Library
-
-16. The application must display the personal book loan history and return dates.
-17. The application must allow renewing loans directly from the app.
-18. The application must allow reserving available books or joining a waiting list.
-
-#### 3.1.7 University Services
-
-19. The application must allow reserving spaces or appointments at Student Wellbeing.
-20. The application must allow managing the reservation and access to university parking, including payment.
-21. The application must allow booking academic tutoring sessions.
-22. The application must allow scheduling appointments with academic coordination.
-23. The application must allow scheduling appointments with the psychology service.
-
-#### 3.1.8 Events and Activities
-
-24. The application must display upcoming events organized by the university.
-25. The application must allow filtering events by category (cultural, academic, sports, and so on).
-26. The application must allow registering directly for university events.
-27. The application must allow adding events to the user's personal calendar.
-
-#### 3.1.9 Location and Orientation
-
-28. The application must display an interactive map of the university campus.
-29. The application must show the location of classrooms, buildings and relevant spaces.
-30. The application must offer interactive guides or videos to orient the user within the campus.
-
-#### 3.1.10 Social Networks
-
-31. The application must redirect users to the university's official social networks.
-32. The application must display recent university posts or updates inside the app.
-
-### 3.2 Non-Functional Requirements
-
-1. The application must be available for Android and iOS devices.
-2. All sensitive information must be handled with encryption and comply with data protection regulations.
-3. The application must guarantee response times under 2 seconds under normal usage conditions.
-4. The application must be accessible, including high contrast, enlarged text and screen reader compatibility.
-5. The application must allow interface customization (themes, font sizes, colors).
-
-### 3.3 User Roles and Permissions
-
-#### 3.3.1 Student
-
-- Full access to academic tools, university services, chat, digital ID card, interactive map and events.
-- May book tutoring sessions, spaces and institutional appointments.
-- Receives personalized notifications.
-
-#### 3.3.2 Professor
-
-- Access to class, schedule and grade management.
-- May communicate with students through chat and notifications.
-- May schedule academic tutoring sessions and create academic events.
-
-#### 3.3.3 Administrator
-
-- Full control over the application: user, role, event and configuration management.
-- Access to reports and usage history.
-- May modify academic and administrative information.
-
-#### 3.3.4 Administrative Staff
-
-- Access to service and institutional appointment management.
-- May monitor resource availability and manage general events.
-
-#### 3.3.5 Guest
-
-- Limited access to public information, open events and official social networks.
+The thesis proposal is handed in at the end of the 2026-2 term. The product is presented in **2027-2**.
 
 ---
 
-> IMPORTANT: **TODO:** sections 4 to 10 are being reformatted and restructured for clarity.
+## 3. Functional Requirements
+
+Each requirement is detailed, with its acceptance criteria, in [`REQUIREMENTS.md`](REQUIREMENTS.md).
+
+### 3.1 Identity and Access
+
+1. Members sign in with their university **Microsoft account**, in the apps and in the portal.
+2. KApp issues its own access tokens after verifying the Microsoft sign-in. Sessions renew with **rotating refresh
+   tokens**: 30 days in the apps, 12 hours in the portal. Reusing a refresh token revokes the whole session.
+3. Members can sign out, and suspending an account revokes all its sessions.
+4. Only members with a permission can enter the portal.
+
+### 3.2 Timetable
+
+5. A student sees their timetable as SINU has it: course, section, day, time in blocks, sede and room.
+6. A professor sees their own sections.
+7. The timetable is **not edited in KApp**. A change is made in SINU and appears in KApp.
+
+### 3.3 Semáforo and Plans
+
+8. A student sees their pensum course by course, with SINU's status for each: passed, in progress, pending, failed or
+   postponed (*aplazada*).
+9. A student may see their grades, read-only, if SINU provides them.
+10. A student arranges their own **plans**: which pending courses they intend to take, and when. KApp checks
+    prerequisites. Plans are the only academic data a student writes.
+
+### 3.4 Campus Map
+
+11. Anyone signed in, and any visitor with a pass, sees the campus: buildings, their floors and the spaces on each.
+12. Floors are drawn as polygons taken from the university's plans, not sketched by eye.
+13. A user searches for a space by name or room number, and KApp tells the sedes apart, since room numbers repeat.
+14. KApp says how to reach a floor: stairs, the main lift or another access.
+15. The map is managed in the portal, which is its source of truth.
+
+### 3.5 Notifications
+
+16. Each member has an in-app **inbox** and receives **push notifications**.
+17. A member chooses, per topic, what reaches them.
+18. Every feature notifies through one service, so the inbox is complete and the preferences apply everywhere.
+
+### 3.6 Community
+
+19. **Student voice.** A student posts a complaint or a suggestion. It is not anonymous: the author chooses to show
+    their name or their programme, and moderation always sees who wrote it. Posts may not name people. A word filter,
+    reports from users and human moderation keep it civil. Members vote and comment, in 20 to 200 words. There are no
+    official replies.
+20. **Damage reports.** A member reports a damaged space or object with its place on the map, a photo and a short
+    description. The same votes, comments and reports apply. Maintenance validates and closes them.
+21. **Lost and found.** Reception keeps the objects. Handing an object in and claiming it both use one-time codes:
+    reception generates the hand-in code, and the app generates the claim code once the server confirms the match.
+    The history is never deleted. Photos of documents, IDs or cards are not allowed.
+22. **Citizenship points.** Members earn points for contributing — handing in an object, a validated report, a
+    well-received post, voting — and lose them when a report they filed is overturned. Points are visible to their
+    owner and to the university, are not redeemable yet, and may go negative.
+
+### 3.7 Visitor Pass
+
+23. Reception issues a pass code. A visitor redeems it with an identity document and gets 24 hours of map-only
+    access. No account is created.
+
+### 3.8 Administration Portal
+
+24. The portal is bilingual, Spanish first, and serves only members with a permission.
+25. It manages accounts, roles and permissions; the campus map; visitor passes; lost and found; damage reports;
+    moderation; and the citizenship points.
+26. It never shows students' academic data.
+
+### 3.9 Later, After the Office Questionnaire
+
+27. Wellbeing services, events, clubs and recreation bookings. Their requirements are written once the offices that
+    run them have said how they work today.
 
 ---
 
-3. Main Features
-1. Authentication and Access
-   Login with university credentials: allow students to access the app using their student number (student code) and
-   the associated password.
-   Guest login: limited access to the university's public features without authentication.
-   Remember login data: option to store the user's credentials to log in automatically on future visits.
-   Password recovery: feature to recover the password if forgotten, through a secure validation process.
-1. General Navigation
-   Home button: fast and easy access to the app home screen from anywhere.
-   Intuitive navigation menu: a clear, well-structured menu for quick access to every section of the application
-   (schedules, grades, services, and so on).
-1. Communication
-   Chat system: allow communication among students through private or group chat.
-   Push notifications: send real-time notifications for important events, new messages or changes in the academic
-   schedule.
-1. Academic Management
-   Schedule view: easy access to the current academic schedule, with the option to see details of each class,
-   classroom and professor.
-   Schedule change notifications: alerts about any change, cancellation or rescheduling of classes.
-   Grade view: access grades for the current semester, with the ability to review the grade history of previous
-   semesters.
-1. Virtual ID Card
-   Digital university ID card view: display the university ID card digitally (including a QR code bound to the
-   student's identity).
-   QR code generation: create a unique QR code associated with the student's identity, to be scanned across
-   different services within the university
-1. Library
-   Access to the library record: view loan history and book return dates.
-   Loan renewal: option to renew book loans from the app without visiting the library in person.
-   Book reservation: allow reserving books available in the library (or, when they are on loan, adding them to a
-   waiting list).
-1. University Services
-   Student Wellbeing space reservations: schedule appointments or reserve spaces in Student Wellbeing activities or
-   facilities.
-   Parking management: reserve parking spots, manage access and, if needed, pay for parking use.
-   Academic tutoring reservations: schedule an appointment for academic support with professors or tutors.
-   Academic coordination appointments: schedule a meeting with academic coordination staff to resolve questions.
-   Psychology appointments: book an appointment with the psychology or emotional wellbeing service.
-1. Events and Activities
-   Event view: access a calendar of university events, including cultural, sports and academic activities.
-   Event filtering by category: ability to filter events by type (cultural, academic, sports, and so on).
-   Add events to the personal calendar: allow users to add events to their mobile device calendar.
-   Event registration: register directly for university events (when required).
-1. Location and Orientation
-   Interactive campus map: view a map of the university with the location of buildings, classrooms, libraries and
-   other relevant services.
-   Interactive guide or orientation video: provide guides or interactive videos explaining how to reach different
-   places within the campus.
-   Real-time location: feature that shows the user's current location within the campus for real-time orientation.
-1. Social Networks
-   Social network links: direct access to the university's official social networks (Facebook, Instagram, Twitter,
-   and so on).
-   Recent post view: show the latest posts or featured events directly inside the app (for example, news and
-   university updates)
-1. Support and Help
-   In-app support center: a support system that lets users resolve questions or technical issues, either through a
-   knowledge base or direct contact with support staff.
-   Feedback and suggestions: allow users to send comments, suggestions or bug reports easily and directly.
+## 4. Non-Functional Requirements
 
-1. Accessibility and Customization
-   Accessibility mode: include accessibility options for people with disabilities (for example, text enlargement,
-   contrast, screen reader).
-   Interface customization: allow users to customize the app's appearance (themes, font sizes, and so on) to improve
-   the usage experience.
-1. Security and Privacy
-   Secure authentication: implement a robust authentication system (such as two-factor authentication) to protect
-   the user account.
-   Personal data protection: ensure sensitive data (such as grades, schedules and personal information) is encrypted
-   and protected according to data security regulations.
-   Access history and secure session: give users a record of active devices or sessions, and allow them to log out
-   remotely.
-1. Integrations
-   Integration with other university systems: integrate the app with systems already in place at the university,
-   such as learning platforms, payment management or academic management systems, to improve data synchronization.
+1. **Platforms.** Native Android and iOS apps; a web portal for the staff.
+2. **Security.** Every service validates every request's token itself, so bypassing the gateway gains nothing. No
+   credential lives in the source code. Members have no password in production.
+3. **Read, never copy.** Academic data is read from SINU and cached for minutes at most.
+4. **Deployment.** Every service runs on Kubernetes, locally with kind and in production.
+5. **Independent services.** One service per feature, each with its own data. What crosses services goes through a
+   transactional outbox, so a failure in one never leaves another half updated.
+6. **Accessibility.** Readable contrast and support for the system's text size.
+7. **Photos** are resized and stripped of their location metadata before they are stored.
 
-1. Users and Roles
+---
 
-1. Student
-   The Student is the application's primary user and has access to most academic features and services related to
-   university life.
-   Permissions:
-   Authentication:
-   Login with university credentials (student code and password).
-   Limited guest access (access to public features).
-   Academic Management:
-   View the current academic schedule and the details of each class.
-   View grades for the current semester and the grade history.
-   Library:
-   Access the personal library record (borrowed books and return dates).
-   Renew book loans from the app.
-   Reserve available books or add books to a waiting list.
-   University Services:
-   Reserve spaces at Student Wellbeing, parking, academic tutoring, academic coordination and psychology
-   appointments.
-   Events and Activities:
-   View events organized by the university, filter them by category (cultural, academic, sports, and so on) and add
-   them to the personal calendar.
-   Register for university events when required.
-   Virtual ID Card:
-   View the digital university ID card and generate a QR code for identification within the university.
-   Communication:
-   Access a chat system to communicate with other students.
-   Receive push notifications about events, schedule changes, messages, and so on.
-   Location and Orientation:
-   View the interactive campus map and the location of buildings and relevant spaces.
-   Access interactive guides or videos about how to reach certain places within the campus.
-   Social Networks:
-   Access the university's official social networks.
+## 5. Personal Data (Ley 1581 de 2012)
 
-1. Professor
-   The Professor has access to features related to academic management, communication with students and some
-   administrative services.
-   Permissions:
-   Authentication:
-   Login with academic credentials (professor code and password).
-   Academic Management:
-   View the academic schedule of the classes they teach.
-   View the list of students enrolled in their classes.
-   View student grades and upload new grades.
-   Update the class schedule or make adjustments when changes occur.
-   Communication:
-   Access the chat system to communicate with their students.
-   Send notifications to students about class changes or important events.
-   University Services:
-   Schedule academic tutoring sessions with students.
-   Events and Activities:
-   Create or manage academic or cultural events organized by the university.
-   View events relevant to their area of work (academic activities, meetings, and so on).
-   Social Networks:
-   Access the university's official social networks to stay informed.
+KApp keeps as little personal data as it can, and says why it keeps each piece:
 
-1. Administrator
-   The Administrator is the user with full access to application management and administration. They can manage
-   configuration and users, and supervise every university process within the app.
-   Permissions:
-   User Management:
-   Create, edit and delete student, professor and administrative staff accounts.
-   Manage user roles and permissions (assign administrator, professor and other roles).
-   Academic Management:
-   Modify academic schedules globally.
-   View and edit grades of every student in the university.
-   Manage the assignment of educational resources, such as classrooms or technical equipment.
-   University Services:
-   Manage space reservations at Student Wellbeing and parking.
-   View appointments and reservations made by students and professors.
-   Administer psychology, academic tutoring and academic coordination services.
-   Events and Activities:
-   Create, edit and manage events and activities within the university.
-   View event registration details and control access to them.
-   Communication:
-   Send notifications to all users about important events, schedule updates, new services, and so on.
-   Security and Configuration:
-   Configure and manage application security (data encryption, two-factor authentication, and so on).
-   Perform backups and system maintenance.
-   Social Networks:
-   Manage links and content related to the university's official social networks.
-   Reports and Analytics:
-   Access detailed reports on application usage, student interaction with services and academic performance.
+| Data | Why it is kept | How long |
+|---|---|---|
+| Member profile: name, picture, roles | To show who a member is in the community features | While the account exists |
+| No identity document, phone or student code of members | — | Never stored |
+| Visitor's identity document | Reception must know who entered with a pass | Deleted automatically after 30 days |
+| Author of a voice post or report | Moderation must be able to act, since posts are not anonymous | With the post |
+| Lost-and-found history | An object handed in and claimed must stay traceable | Never deleted |
+| Photos in reports | To show the damage | With the report; resized, location metadata stripped |
 
-1. Administrative Staff
-   Administrative Staff hold an intermediate role, with access to certain administrative and support services, but
-   with limited permissions compared to administrators.
-   Permissions:
-   Academic Management:
-   View schedules and the list of students enrolled in classes, without the ability to modify grades or schedules.
-   Manage resource assignment for academic activities (spaces, materials, and so on).
-   University Services:
-   Manage student appointments for services such as student wellbeing, psychology, tutoring and academic
-   coordination.
-   Monitor parking and other facility availability.
-   Events and Activities:
-   Create or manage events at the administrative level, such as wellbeing activities or general academic events.
-   Manage event registration and attendance.
-   Communication:
-   Communicate with students and professors through notifications or messages about events, appointments or
-   important updates.
-   Social Networks:
-   Access the university's social network information and support event promotion.
+Academic data is not in this table because KApp does not store it.
 
-1. Guest (Unauthenticated User)
-   The Guest is a user without full access to the app, but who can view certain features of general interest, such
-   as public events, basic information services or open university content.
-   Permissions:
-   Limited Access:
-   View public events organized by the university.
-   Consult general information about the university, such as location and contact details.
-   Social Networks:
-   Access the university's official social networks without authentication.
+---
 
-1. Platform and Technologies
-   Specify which platforms the application will run on (web, mobile, desktop) and which technologies will be used.
-1. Design and User Experience (UI/UX)
-   Describe the appearance and usability of the application.
-1. Integrations
-   Specify systems or services the application must integrate with.
-1. Security
-   Define the required security measures, such as authentication, encryption and data protection.
-1. Non-Functional Requirements
-   Describe performance, scalability and availability requirements, among others.
-1. Delivery and Schedule
-   Define the development plan and delivery dates for each phase.
+## 6. Version History
 
-RESOURCES & SOURCES:
-VIDEO: Paper Prototype Jave Móvil
+| Version | Date | Change |
+|---|---|---|
+| 1.0 | 2025 | First version, written by the 2025 team. It described a different product: grades, enrolment, a digital ID card, library loans, parking payments and a chat — in effect a replacement for SINU |
+| 2.0 | 11 October 2026 | Rewritten to the product decided on 2–5 October 2026 (#49): SINU read-only, Microsoft sign-in, the campus map, notifications and the community features |
+
+Version 1.0 carried a notice reserving its reproduction to its two authors, Brian Steven Vargas Clavijo and Santiago
+Rocha Ramírez. The project's terms of use are now those in the repository's `LICENSE`. Version 1.0 remains readable in
+the repository's history.
