@@ -6,20 +6,17 @@ import { vi } from 'vitest';
 import { TokenStore } from '../../../core/auth/token.store';
 import { AccountsService, type AccountRequest } from './accounts.service';
 import { UsersPage } from './users.page';
-import type { UserProfile } from './user.model';
+import type { DirectoryEntry } from './user.model';
 
-function profile(id: string): UserProfile {
+function profile(id: string): DirectoryEntry {
   return {
     id,
     email: `${id}@kforge.dev`,
     firstName: 'A',
     lastName: 'B',
-    identification: null,
-    phone: null,
     avatarUrl: null,
-    role: 'ROLE_ADMIN',
+    roles: ['ROLE_STAFF', 'ROLE_ADMIN'],
     active: true,
-    academic: null,
   };
 }
 

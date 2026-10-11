@@ -32,10 +32,6 @@ import java.util.List;
  *                                 appended as {@code ?token=...}
  * @param verificationTtl          how long a verification token stays valid
  * @param mailFrom                 the From address on verification e-mails
- * @param defaultPensumCode        pensum version assigned to a newly registered student.
- *                                 The registration contract does not carry one, and
- *                                 user-service requires it on the academic record.
- * @param defaultCurrentLevel      semester a newly registered student starts on
  */
 @ConfigurationProperties(prefix = "kapp.auth")
 public record RegistrationProperties(
@@ -43,9 +39,7 @@ public record RegistrationProperties(
         boolean requireEmailVerification,
         String verificationLinkBase,
         Duration verificationTtl,
-        String mailFrom,
-        String defaultPensumCode,
-        Integer defaultCurrentLevel
+        String mailFrom
 ) {
     public RegistrationProperties {
         allowedEmailDomains = allowedEmailDomains == null || allowedEmailDomains.isEmpty()
@@ -57,8 +51,6 @@ public record RegistrationProperties(
         verificationLinkBase = orDefault(verificationLinkBase, "http://localhost:8080/auth/verify");
         verificationTtl = verificationTtl == null ? Duration.ofHours(24) : verificationTtl;
         mailFrom = orDefault(mailFrom, "no-reply@konradlorenz.edu.co");
-        defaultPensumCode = orDefault(defaultPensumCode, "1015");
-        defaultCurrentLevel = defaultCurrentLevel == null ? 1 : defaultCurrentLevel;
     }
 
     /** The account status a freshly registered credential gets. */

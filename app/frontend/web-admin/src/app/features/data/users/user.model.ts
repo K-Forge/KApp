@@ -1,35 +1,46 @@
-import type { Role } from '../../../core/auth/auth.model';
+/**
+ * Mirrors Role in docs/api/user.openapi.yaml. An account holds one profile role - student,
+ * professor or staff - and any number of permissions.
+ */
+export type DirectoryRole =
+  | 'ROLE_STUDENT'
+  | 'ROLE_PROFESSOR'
+  | 'ROLE_STAFF'
+  | 'ROLE_ADMIN'
+  | 'ROLE_RECEPTION'
+  | 'ROLE_MAINTENANCE'
+  | 'ROLE_MODERATION'
+  | 'ROLE_WELLBEING';
 
-export interface Identification {
-  type: 'CC' | 'TI' | 'CE' | 'PASAPORTE';
-  number: string;
-}
+export const DIRECTORY_ROLES: DirectoryRole[] = [
+  'ROLE_STUDENT',
+  'ROLE_PROFESSOR',
+  'ROLE_STAFF',
+  'ROLE_ADMIN',
+  'ROLE_RECEPTION',
+  'ROLE_MAINTENANCE',
+  'ROLE_MODERATION',
+  'ROLE_WELLBEING',
+];
 
-export interface AcademicInfo {
-  studentCode: string;
-  programCode: string;
-  pensumCode: string;
-  currentLevel: number;
-}
-
-/** Mirrors UserProfile in docs/api/user.openapi.yaml. */
-export interface UserProfile {
+/**
+ * Mirrors DirectoryEntry in docs/api/user.openapi.yaml: an account as the directory shows it, with
+ * nothing academic. An administrator manages accounts, not records.
+ */
+export interface DirectoryEntry {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  identification: Identification | null;
-  phone: string | null;
   avatarUrl: string | null;
-  role: Role;
+  roles: DirectoryRole[];
   active: boolean;
-  academic: AcademicInfo | null;
 }
 
 export interface UserListFilters {
   page: number;
   size: number;
-  role?: Role;
+  role?: DirectoryRole;
   active?: boolean;
   q?: string;
 }
