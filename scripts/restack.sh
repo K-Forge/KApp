@@ -148,6 +148,15 @@ EOF
 main() {
   git fetch -q --prune "$REMOTE"
 
+  # GitHub deletes the parent's branch when it merges, before this job clones. If no child contains
+  # the parent's head, nothing fetched does either - that is how #73 was missed when #72 merged.
+  # GitHub keeps every pull request's last head under refs/pull/<n>/head, deleted branch or not.
+  git fetch -q "$REMOTE" "refs/pull/$PARENT_NUMBER/head" 2>/dev/null || true
+  if ! git cat-file -e "$PARENT_SHA^{commit}" 2>/dev/null; then
+    echo "error: the merged head of #$PARENT_NUMBER, $PARENT_SHA, is not available, so its children cannot be found" >&2
+    exit 1
+  fi
+
   # A merge commit or a fast-forward brings the parent's commits into the base, so the children
   # never conflict. Only a squash leaves them behind.
   if git merge-base --is-ancestor "$PARENT_SHA" "refs/remotes/$REMOTE/$BASE_REF"; then
