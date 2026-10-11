@@ -125,6 +125,40 @@
     <string name="semaphore_elective_bank_empty">SINU todavía no ha publicado electivas para este semestre.</string>
     <string name="semaphore_elective_bank_failed">No pudimos cargar las electivas.</string>
     <string name="home_semester_unavailable">No pudimos cargar tu semestre.</string>
+    <string name="home_day_unavailable">No pudimos cargar tus clases de hoy.</string>
+    <string name="home_done_title">Ya terminaste las clases de hoy</string>
+    <string name="room_number">Salón %1$s</string>
+    <string name="room_none">Sin salón asignado</string>
+
+    <string name="schedule_view_day">Día</string>
+    <string name="schedule_view_two_days">2 días</string>
+    <string name="schedule_view_week">Semana</string>
+    <!-- "21 sep – 27 sep". -->
+    <string name="schedule_week_range">%1$d %2$s – %3$d %4$s</string>
+    <string name="schedule_no_classes">Sin clases</string>
+    <string name="schedule_none">SINU no tiene un horario para ti en este periodo.</string>
+    <string name="schedule_failed">No pudimos cargar tu horario</string>
+    <string name="schedule_retry">Reintentar</string>
+    <string name="schedule_test_notice">Datos de prueba: la universidad todavía no ha conectado SINU, así que este no es tu horario real.</string>
+    <!-- Course code and group: "59035 · grupo 51". -->
+    <string name="schedule_code_group">%1$s · grupo %2$s</string>
+    <string name="schedule_detail_time">Hora</string>
+    <string name="schedule_detail_blocks">Duración</string>
+    <string name="schedule_detail_professor">Docente</string>
+    <string name="schedule_detail_sede">Sede</string>
+    <string name="schedule_where">Dónde es</string>
+    <string name="schedule_detail_room">Salón</string>
+    <string name="schedule_detail_space_name">Espacio</string>
+    <string name="schedule_detail_space_type">Tipo</string>
+    <string name="schedule_detail_building">Edificio</string>
+    <string name="schedule_detail_floor">Piso</string>
+    <string name="schedule_detail_capacity">Capacidad</string>
+    <string name="schedule_detail_access">Acceso</string>
+    <string name="schedule_access_step_free">Sin escaleras</string>
+    <string name="schedule_access_stairs">Solo por escaleras</string>
+    <string name="schedule_room_none_detail">SINU todavía no tiene un salón asignado para esta clase en estas fechas.</string>
+    <string name="schedule_room_not_mapped">Esta sede todavía no está en el mapa.</string>
+    <string name="schedule_room_failed">No pudimos buscar el salón en el mapa.</string>
 
     <string name="placeholder_pending">Esta pantalla todavía no existe</string>
     <string name="placeholder_profile_contract">Se alimentará de GET /api/users/me.</string>
@@ -141,6 +175,36 @@
       The semester card counts credits, which is what GET /api/semaphore/me/summary returns. Only
       the second line of it counts courses.
     -->
+    <!-- A SINU block is 45 minutes: "3 bloques de 45 min". -->
+    <plurals name="schedule_blocks">
+        <item quantity="one">%1$d bloque de 45 min</item>
+        <item quantity="other">%1$d bloques de 45 min</item>
+    </plurals>
+    <!-- Monday first, as the API runs its weeks. -->
+    <string-array name="weekdays">
+        <item>Lun</item>
+        <item>Mar</item>
+        <item>Mié</item>
+        <item>Jue</item>
+        <item>Vie</item>
+        <item>Sáb</item>
+        <item>Dom</item>
+    </string-array>
+    <string-array name="months_short">
+        <item>ene</item>
+        <item>feb</item>
+        <item>mar</item>
+        <item>abr</item>
+        <item>may</item>
+        <item>jun</item>
+        <item>jul</item>
+        <item>ago</item>
+        <item>sep</item>
+        <item>oct</item>
+        <item>nov</item>
+        <item>dic</item>
+    </string-array>
+
     <plurals name="home_semester_courses">
         <item quantity="one">%1$d materia en curso</item>
         <item quantity="other">%1$d materias en curso</item>

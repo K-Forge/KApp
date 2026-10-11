@@ -31,9 +31,19 @@ for an elective slot, given a course from this semester's bank. `source: TEST` p
 No mockup covers it; *aplazada* takes the orchid of `docs/design/orchid-palette.md`, as the issue
 suggests. The code shown is `sinuCode`, never `pensumItemCode`.
 
-**Inicio** matches [`HomeAndroid.dc.html`](../../../../docs/design/mobile/HomeAndroid.dc.html).
-The greeting and the programme come from the profile, and the semester card from the semáforo; the
-day is still sample data.
+**Horario** is built (issue #45) from schedule 2.0.0, read-only: one `GET /api/schedule/me/week`
+drawn as a day, two days side by side, or the week one day under the other, with arrows to the
+weeks around it. A class with no room says "Sin salón asignado" in its row; nothing is hidden.
+Tapping a class shows it in full and asks the map for its room,
+`GET /api/map/spaces/{room}?buildingCode=…` - always with the building, since room numbers repeat
+across buildings - or says why there is no room to show. `source: TEST` puts a notice on top.
+There is no control to build a timetable, add or drop a course. No mockup covers it.
+
+**Inicio** matches [`HomeAndroid.dc.html`](../../../../docs/design/mobile/HomeAndroid.dc.html),
+and all of it is real now: the greeting and the programme from the profile, the semester card from
+the semáforo, and the next class and the rest of the day from `GET /api/schedule/me/day` - for a
+student or a professor, with "Sin salón asignado" where SINU has no room. The countdown badge shows
+in the last hour before a class.
 
 The login keeps the band, crest, stripe and footer of
 [`LoginAndroid.dc.html`](../../../../docs/design/mobile/LoginAndroid.dc.html), but not its fields:
@@ -167,7 +177,8 @@ app/src/main/java/co/edu/konradlorenz/kapp/
 │   ├── auth/                    Microsoft's sign-in: MSAL, or the fake in debug
 │   ├── session/                 SessionManager, its encrypted store, the profile role
 │   ├── profile/                 ProfileRepository, the debug build's mock profile choice
-│   └── semaphore/               SemaphoreApi, its models, the grid builder, SemaphoreRepository
+│   ├── semaphore/               SemaphoreApi, its models, the grid builder, SemaphoreRepository
+│   └── schedule/                ScheduleApi, the map's room lookup, ScheduleRepository
 └── ui/
     ├── theme/                   the palette, the type scale, the Material scheme
     ├── common/                  the brand band, shared by every screen inside the bar
@@ -176,7 +187,8 @@ app/src/main/java/co/edu/konradlorenz/kapp/
     ├── home/                    HomeScreen + HomeViewModel + HomeUiState + HomeSampleData
     ├── profile/                 ProfileScreen + ProfileViewModel
     ├── semaphore/               SemaphoreScreen + SemaphoreViewModel
-    ├── placeholder/             the two tabs that are not built yet
+    ├── schedule/                ScheduleScreen + ScheduleViewModel
+    ├── placeholder/             Mapa, the one tab not built yet
     └── invitation/              stub
 ```
 
@@ -203,14 +215,15 @@ names that sheet assigns. Two rules worth not rediscovering:
 | Visitor passes | `ROLE_GUEST` and `POST /auth/visitor-passes/{code}/redeem`. No issue asks for them in the app yet |
 | Hilt | It earns its place when there are two implementations to swap, not before |
 | A monochrome launcher icon | Themed icons need a single-colour version of the crest, which is a design asset we do not have |
-| `GET /api/schedule/me/day` | What Inicio's day is drawn from. `HomeViewModel` already has the states it fills; the failure case has no picture yet |
-| Horario and Mapa | Two routes that reach `PlaceholderScreen`. Each is replaced by editing its entry in `KAppNavHost`; nothing else has to move |
+| Mapa | The one route left on `PlaceholderScreen`. No issue asks for the Kotlin map yet; a class's room is shown from the map API in the timetable's sheet, without drawing the floor |
+| A mockup for the Horario | None exists; the screen is Inicio's band, card and class rows |
+| The period switcher | `GET /api/schedule/me/periods`. Not in issue #45's list; the timetable is the current period's |
 | A mockup for the Semáforo | None exists; the screen is Inicio's band and card with one row per item |
 | Renaming a plan, or making another one primary | `PATCH /api/semaphore/me/plans/{planId}`. Not in issue #44's list; plans are created, opened, changed and deleted |
 | A semáforo you can plan against the mocks | The contract's `MySemaphore` example names five items its `Pensum1015` example lacks - the failed, postponed and pending ones - so against the mocks every item drawn is passed or in progress and nothing can be moved. The unit tests cover planning; the example needs those items |
 | Choosing a profile picture | user 1.0.0 takes the picture as a URL and has no endpoint to upload one to, so Perfil can only remove it. A backend endpoint first |
 | A mockup for Perfil | None exists; the screen is Inicio's band and card with the contract's fields |
-| The block a class is in | `ClassOccurrence` carries `room` and `campus`; the mockup prints "Salón 401 · Bloque B". The block comes from map-service or it is a field `schedule.openapi.yaml` grows |
+| The block a class is in, on Inicio | `ClassOccurrence` carries `room` and the `sede`; the mockup prints "Salón 401 · Bloque B". Inicio prints the sede; the building's name is in the class's sheet, from the map |
 
 ## Versions
 

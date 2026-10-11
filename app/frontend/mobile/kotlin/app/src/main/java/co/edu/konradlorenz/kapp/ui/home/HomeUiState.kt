@@ -77,6 +77,12 @@ sealed interface DayState {
     /** `day` answered `[]`: there is a schedule, and nothing on it today. */
     data object NoClassesToday : DayState
 
+    /** There were classes today, and the last one has ended. */
+    data object DoneForToday : DayState
+
+    /** It could not be read. One line, rather than a skeleton that never resolves. */
+    data object Unavailable : DayState
+
     /**
      * `day` answered with classes. [next] is the first one still to come and [later] is the rest,
      * in the order the server sorted them, which is by `startTime` ascending.
@@ -94,7 +100,9 @@ data class NextClass(
     val courseName: String,
     val startTime: String,
     val endTime: String,
-    val room: String,
+    /** The room number, or `null`: no classroom assigned for this stretch. Drawn, never hidden. */
+    val room: String?,
+    /** The sede, as SINU writes it. */
     val building: String,
     val color: Color,
     val startsInMinutes: Int?,
@@ -105,7 +113,7 @@ data class UpcomingClass(
     val courseName: String,
     val startTime: String,
     val endTime: String,
-    val room: String,
+    val room: String?,
     val building: String,
     val color: Color,
 )

@@ -143,6 +143,13 @@ private fun HomeContent(
                     DayState.Loading -> HeadlineSkeleton()
                     DayState.NoSchedule -> NoScheduleCard(onOpen)
                     DayState.NoClassesToday -> FreeDayCard(onOpen)
+                    DayState.DoneForToday -> FreeDayCard(onOpen, done = true)
+                    DayState.Unavailable -> Text(
+                        text = stringResource(R.string.home_day_unavailable),
+                        modifier = Modifier.padding(top = 8.dp),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     is DayState.Classes -> NextClassCard(state.day.next, onOpen)
                 }
                 Spacer(Modifier.height(16.dp))
@@ -272,7 +279,7 @@ private fun NextClassCard(next: NextClass, onOpen: (KAppDestination) -> Unit) {
                     R.string.home_next_when_where,
                     next.startTime,
                     next.endTime,
-                    next.room,
+                    roomLabel(next.room),
                     next.building,
                 ),
                 fontSize = 14.sp,
@@ -319,18 +326,18 @@ private fun DirectionsButton(onClick: () -> Unit) {
 }
 
 /**
- * A day with a schedule and nothing on it.
+ * A day with a schedule and nothing on it - or, with [done], nothing left on it.
  *
  * Same height as the card it replaces, so the four shortcuts under it do not move between one
  * student's screen and another's.
  */
 @Composable
-private fun FreeDayCard(onOpen: (KAppDestination) -> Unit) {
+private fun FreeDayCard(onOpen: (KAppDestination) -> Unit, done: Boolean = false) {
     CenteredCard(height = HeadlineCardHeight) {
         IconBubble(R.drawable.ic_free_day, colour = InProgress, alpha = 0.30f, iconColour = Brand)
         Spacer(Modifier.height(10.dp))
         Text(
-            text = stringResource(R.string.home_free_day_title),
+            text = stringResource(if (done) R.string.home_done_title else R.string.home_free_day_title),
             style = MaterialTheme.typography.titleMedium.copy(lineHeight = 20.sp),
             color = MaterialTheme.colorScheme.onSurface,
         )
@@ -668,6 +675,11 @@ private fun SemesterSkeleton() {
     }
 }
 
+/** "Salón 405", or "Sin salón asignado": a null room is SINU telling us so, not a gap. */
+@Composable
+private fun roomLabel(room: String?): String =
+    if (room == null) stringResource(R.string.room_none) else stringResource(R.string.room_number, room)
+
 /** One of the later classes of the day. */
 @Composable
 private fun UpcomingRow(upcoming: UpcomingClass) {
@@ -704,7 +716,7 @@ private fun UpcomingRow(upcoming: UpcomingClass) {
                 Text(
                     text = stringResource(
                         R.string.home_class_where,
-                        upcoming.room,
+                        roomLabel(upcoming.room),
                         upcoming.building,
                     ),
                     fontSize = 12.sp,
