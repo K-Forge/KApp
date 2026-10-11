@@ -80,6 +80,20 @@ kapp:
     token: ${KAPP_INTERNAL_TOKEN:}
 
   auth:
+    # Signing in with Microsoft. Nothing here is a secret: KApp checks the ID token a client brings
+    # and needs no client secret. With only the tenant id set, the issuer and the keys are that
+    # tenant's; development points them at the fake OIDC server. Unset, POST /auth/microsoft answers
+    # 503. The profile claim and its values are agreed with the university's IT office.
+    microsoft:
+      tenant-id: ${KAPP_MICROSOFT_TENANT_ID:}
+      issuers: ${KAPP_MICROSOFT_ISSUERS:}
+      jwks-uri: ${KAPP_MICROSOFT_JWKS_URI:}
+      client-ids: ${KAPP_MICROSOFT_CLIENT_IDS:}
+      profile-claim: ${KAPP_MICROSOFT_PROFILE_CLAIM:roles}
+      student-values: ${KAPP_MICROSOFT_STUDENT_VALUES:Student}
+      professor-values: ${KAPP_MICROSOFT_PROFESSOR_VALUES:Professor}
+      staff-values: ${KAPP_MICROSOFT_STAFF_VALUES:Staff}
+
     jwt:
       # Base64-encoded PEM. Leave blank locally and an ephemeral pair is generated,
       # with a warning: every restart then invalidates all tokens already issued.
