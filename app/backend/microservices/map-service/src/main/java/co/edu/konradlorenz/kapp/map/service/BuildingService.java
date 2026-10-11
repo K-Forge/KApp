@@ -88,6 +88,8 @@ public class BuildingService {
         if (buildings.existsByCode(request.code())) {
             throw new DuplicateResourceException("Building", request.code());
         }
+        List<String> sedes = cleanAliases(request.sinuSedes() == null ? List.of() : request.sinuSedes());
+        rejectSedesOfOthers(sedes, null);
 
         Instant now = Instant.now();
         BuildingDocument saved = buildings.save(new BuildingDocument(
@@ -104,7 +106,8 @@ public class BuildingService {
                 now,
                 MapMapper.toPlacement(request.placement(), null),
                 MapMapper.toFootprint(request.footprint(), null),
-                request.address()));
+                request.address(),
+                sedes));
 
         log.info("Created building {} on campus {} with {} floors",
                 saved.code(), saved.campus(), saved.floors().size());
@@ -137,6 +140,9 @@ public class BuildingService {
                 .toList();
         List<Wing> wings = request.wingsOrEmpty().stream().map(MapMapper::toWing).toList();
         rejectRemovingOccupied(existing, floors, wings);
+        // Left out, the sedes stay; sent, they replace the stored ones.
+        List<String> sedes = request.sinuSedes() == null ? existing.sinuSedes() : cleanAliases(request.sinuSedes());
+        rejectSedesOfOthers(sedes, existing.id());
 
         BuildingDocument saved = buildings.save(new BuildingDocument(
                 existing.id(),
@@ -153,7 +159,8 @@ public class BuildingService {
                 MapMapper.toPlacement(request.placement(), existing.placement()),
                 MapMapper.toFootprint(request.footprint(), existing.footprint()),
                 // Left out, the address stays; sent empty, it goes.
-                request.address() == null ? existing.address() : request.address()));
+                request.address() == null ? existing.address() : request.address(),
+                sedes));
 
         propagateToSpaces(saved);
         return MapMapper.toBuildingResponse(saved);
@@ -325,6 +332,29 @@ public class BuildingService {
         if (!affected.isEmpty()) {
             spaces.saveAll(affected);
             log.info("Propagated building {} changes to {} spaces", building.code(), affected.size());
+        }
+    }
+
+    /**
+     * A sede names one building: the schedule service finds the building of a class by its sede, and a
+     * sede on two buildings would put the class in whichever came first. Compared as SINU prints them,
+     * spaces at the ends aside.
+     *
+     * @param self the building being saved, which may keep its own sedes; null for a new one
+     */
+    private void rejectSedesOfOthers(List<String> sedes, String self) {
+        if (sedes.isEmpty()) {
+            return;
+        }
+        List<ApiError.FieldIssue> taken = buildings.findAllByOrderByCodeAsc().stream()
+                .filter(other -> !other.id().equals(self))
+                .flatMap(other -> other.sinuSedes().stream()
+                        .filter(sedes::contains)
+                        .map(sede -> new ApiError.FieldIssue("sinuSedes",
+                                "Sede %s already belongs to building %s".formatted(sede, other.code()))))
+                .toList();
+        if (!taken.isEmpty()) {
+            throw new MapConflictException("A sede belongs to one building only.", taken);
         }
     }
 

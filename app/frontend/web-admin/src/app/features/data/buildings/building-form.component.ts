@@ -41,6 +41,7 @@ type BuildingForm = FormGroup<{
   description: FormControl<string>;
   address: FormControl<string>;
   aliases: FormControl<string>;
+  sinuSedes: FormControl<string>;
   wings: FormArray<WingForm>;
   floors: FormArray<FloorForm>;
 }>;
@@ -110,6 +111,12 @@ function wingGroup(wing?: Partial<Wing>): WingForm {
         <label for="b-aliases">{{ 'Other names' | t }}</label>
         <textarea id="b-aliases" rows="2" formControlName="aliases" [placeholder]="'Bienestar&#10;Edificio de bienestar' | t"></textarea>
         <span class="hint">{{ 'One per line. What people call the building besides its name - the search matches them.' | t }}</span>
+      </div>
+
+      <div class="field">
+        <label for="b-sedes">{{ 'Sedes in SINU' | t }}</label>
+        <textarea id="b-sedes" rows="2" formControlName="sinuSedes" placeholder="Sede Principal"></textarea><!-- i18n-ignore: SINU's own name for a sede -->
+        <span class="hint">{{ 'One per line, exactly as SINU’s timetable prints them. A class’s room is found by its sede and its number, so a sede belongs to one building only.' | t }}</span>
       </div>
 
       <div class="field">
@@ -292,6 +299,7 @@ export class BuildingFormComponent {
       description: new FormControl(building?.description ?? '', { nonNullable: true, validators: [Validators.maxLength(500)] }),
       address: new FormControl(building?.address ?? '', { nonNullable: true, validators: [Validators.maxLength(200)] }),
       aliases: new FormControl((building?.aliases ?? []).join('\n'), { nonNullable: true }),
+      sinuSedes: new FormControl((building?.sinuSedes ?? []).join('\n'), { nonNullable: true }),
       wings: new FormArray((building?.wings ?? []).map((w) => wingGroup(w))),
       floors: new FormArray(
         (building?.floors.length ? building.floors : [{ code: 'P1', level: 1, name: 'Piso 1' }]).map((f) => floorGroup(f)),
@@ -338,6 +346,8 @@ export class BuildingFormComponent {
       // Sent even when emptied, so a cleared address is cleared rather than kept.
       address: raw.address.trim(),
       aliases: raw.aliases.split('\n').map((a) => a.trim()).filter(Boolean),
+      // Sent even when emptied, so cleared sedes are cleared rather than kept.
+      sinuSedes: raw.sinuSedes.split('\n').map((s) => s.trim()).filter(Boolean),
       wings: raw.wings.map((w) => ({
         code: w.code,
         name: w.name,

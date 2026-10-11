@@ -33,6 +33,10 @@ import java.util.Optional;
  *                  empty until somebody takes it from there
  * @param address   its street address as people write it, "Cra. 9 Bis # 62-43"; null when nobody
  *                  has said
+ * @param sinuSedes the names SINU gives the building as a sede, exactly as its timetable prints them.
+ *                  In SINU each building is a sede, and a class's room is named by sede and number, so
+ *                  this is how the schedule service finds the building of a class. A sede belongs to
+ *                  one building only; empty until somebody maps it in the portal
  */
 @Document(collection = "buildings")
 public record BuildingDocument(
@@ -49,7 +53,8 @@ public record BuildingDocument(
         Instant updatedAt,
         Placement placement,
         List<FootprintPart> footprint,
-        String address
+        String address,
+        List<String> sinuSedes
 ) {
 
     @PersistenceCreator
@@ -61,6 +66,16 @@ public record BuildingDocument(
                 : floors.stream().sorted(Comparator.comparingDouble(Floor::level)).toList();
         footprint = footprint == null ? List.of() : List.copyOf(footprint);
         address = address == null || address.isBlank() ? null : address.trim();
+        sinuSedes = sinuSedes == null ? List.of() : List.copyOf(sinuSedes);
+    }
+
+    /** A building no sede has been mapped to yet. */
+    public BuildingDocument(String id, String code, String name, String campus, String description,
+                            List<String> aliases, List<Wing> wings, List<Floor> floors, boolean placeholder,
+                            Instant createdAt, Instant updatedAt, Placement placement, List<FootprintPart> footprint,
+                            String address) {
+        this(id, code, name, campus, description, aliases, wings, floors, placeholder, createdAt, updatedAt, placement,
+                footprint, address, List.of());
     }
 
     /** A building nobody has given an address yet. */

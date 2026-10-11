@@ -129,6 +129,8 @@ export const ES: Record<string, string> = {
   'Other names': 'Otros nombres',
   'Bienestar&#10;Edificio de bienestar': 'Bienestar&#10;Edificio de bienestar',
   'One per line. What people call the building besides its name - the search matches them.': 'Uno por línea. Cómo más le dice la gente al edificio: la búsqueda también los encuentra.',
+  'Sedes in SINU': 'Sedes en SINU',
+  'One per line, exactly as SINU’s timetable prints them. A class’s room is found by its sede and its number, so a sede belongs to one building only.': 'Una por línea, tal como las imprime el horario de SINU. El aula de una clase se encuentra por su sede y su número, así que una sede es de un solo edificio.',
   'Address': 'Dirección',
   'Description': 'Descripción',
   'Optional, up to 500 characters.': 'Opcional, hasta 500 caracteres.',
@@ -171,6 +173,7 @@ export const ES: Record<string, string> = {
   'Draft, from photos': 'Borrador, desde fotos',
   'Verified on site': 'Verificado en sitio',
   // features/data/buildings/buildings.page.ts
+  'In SINU': 'En SINU',
   'Buildings': 'Edificios',
   'Each building of the university, with its address, wings and floors.': 'Cada edificio de la universidad, con su dirección, sus alas y sus pisos.',
   'Create, edit and delete buildings': 'Crear, editar y eliminar edificios',
