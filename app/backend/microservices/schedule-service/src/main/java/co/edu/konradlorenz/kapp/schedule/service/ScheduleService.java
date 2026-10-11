@@ -1,24 +1,25 @@
 package co.edu.konradlorenz.kapp.schedule.service;
 
-import co.edu.konradlorenz.kapp.common.error.DuplicateResourceException;
+import co.edu.konradlorenz.kapp.common.academic.AcademicPeriod;
 import co.edu.konradlorenz.kapp.common.error.ResourceNotFoundException;
-import co.edu.konradlorenz.kapp.schedule.domain.Enrollment;
+import co.edu.konradlorenz.kapp.schedule.catalog.PensumCatalogService;
+import co.edu.konradlorenz.kapp.schedule.color.CourseColors;
 import co.edu.konradlorenz.kapp.schedule.domain.Meeting;
 import co.edu.konradlorenz.kapp.schedule.domain.MeetingResolution;
 import co.edu.konradlorenz.kapp.schedule.domain.Schedule;
+import co.edu.konradlorenz.kapp.schedule.domain.Section;
+import co.edu.konradlorenz.kapp.schedule.map.SedeBuildings;
 import co.edu.konradlorenz.kapp.schedule.mapper.ScheduleMapper;
-import co.edu.konradlorenz.kapp.schedule.repository.ScheduleRepository;
+import co.edu.konradlorenz.kapp.schedule.sinu.SinuPerson;
+import co.edu.konradlorenz.kapp.schedule.sinu.SinuSection;
+import co.edu.konradlorenz.kapp.schedule.sinu.SinuTimetable;
+import co.edu.konradlorenz.kapp.schedule.sinu.SinuTimetablePort;
 import co.edu.konradlorenz.kapp.schedule.web.dto.ClassOccurrenceResponse;
-import co.edu.konradlorenz.kapp.schedule.web.dto.CreateScheduleRequest;
 import co.edu.konradlorenz.kapp.schedule.web.dto.SchedulePeriodSummaryResponse;
 import co.edu.konradlorenz.kapp.schedule.web.dto.WeekAgendaResponse;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,123 +27,111 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
 
 /**
- * The schedule container itself: creation, retrieval, deletion, the period switcher, and
- * the day/week resolution that is the whole reason the nested model exists.
+ * A person's timetable as SINU has it, with what KApp adds, and the day and week resolution that is
+ * the whole reason the nested model exists. Read-only: nothing here writes, and nothing is stored.
  *
- * <p>Enrollment and meeting mutations live in {@link EnrollmentService} and
- * {@link MeetingService}; this class owns the schedule document as a whole.
+ * <p>KApp adds three things to each section, all of them failing open: the pensum item of the course
+ * (a student's only, from semaphore-service), the building of its sede (from map-service) and its
+ * colour.
  */
 @Service
 public class ScheduleService {
 
-    private final ScheduleRepository repository;
-    private final MongoTemplate mongoTemplate;
+    private final SinuTimetablePort sinu;
+    private final TimetableReader reader;
+    private final PensumCatalogService catalog;
+    private final SedeBuildings sedes;
+    private final Clock clock;
 
-    public ScheduleService(ScheduleRepository repository, MongoTemplate mongoTemplate) {
-        this.repository = repository;
-        this.mongoTemplate = mongoTemplate;
+    public ScheduleService(SinuTimetablePort sinu, TimetableReader reader, PensumCatalogService catalog,
+                           SedeBuildings sedes, Clock clock) {
+        this.sinu = sinu;
+        this.reader = reader;
+        this.catalog = catalog;
+        this.sedes = sedes;
+        this.clock = clock;
     }
 
-    /** @param period null resolves to the caller's currently active schedule */
-    public Schedule getSchedule(String userId, String period) {
-        return period == null
-                ? activeOrThrow(userId)
-                : repository.findByUserIdAndPeriod(userId, period)
-                        .orElseThrow(() -> new ResourceNotFoundException("No schedule found for period " + period));
+    /** @param period null for the current one */
+    public Schedule schedule(SinuPerson person, String period) {
+        AcademicPeriod wanted = period == null ? current() : AcademicPeriod.parse(period);
+        return read(person, wanted)
+                .orElseThrow(() -> new ResourceNotFoundException("No schedule found for period " + wanted));
     }
 
-    /** Same lookup as {@link #getSchedule}, with the messages {@code GET /{userId}} uses. */
-    public Schedule getScheduleForAdmin(String userId, String period) {
-        if (period == null) {
-            return repository.findByUserIdAndActiveTrue(userId)
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "No active schedule found for user " + userId));
-        }
-        return repository.findByUserIdAndPeriod(userId, period)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "No schedule found for user " + userId + " in period " + period));
-    }
-
-    public List<SchedulePeriodSummaryResponse> listPeriods(String userId) {
-        return repository.findByUserIdOrderByPeriodDesc(userId).stream()
-                .map(s -> new SchedulePeriodSummaryResponse(s.period(), s.active(), s.enrollments().size()))
+    /** One row per period SINU has a timetable for, newest first. */
+    public List<SchedulePeriodSummaryResponse> periods(SinuPerson person) {
+        AcademicPeriod current = current();
+        return sinu.periods(person).stream()
+                .distinct()
+                .sorted(Comparator.reverseOrder())
+                .flatMap(p -> reader.read(person, p).stream()
+                        .map(r -> new SchedulePeriodSummaryResponse(p.toString(), p.equals(current),
+                                r.timetable().sections().size())))
                 .toList();
     }
 
-    /**
-     * Creates an empty schedule for one period, and demotes whatever schedule was active
-     * before it: exactly one schedule is active per student at a time.
-     *
-     * <p>Existence is checked before anything is demoted, so a duplicate request fails
-     * cleanly with 409 and leaves the previously active schedule untouched - deactivating
-     * first and only then discovering the insert cannot proceed would silently strand the
-     * student with no active schedule at all.
-     */
-    public Schedule createSchedule(String userId, CreateScheduleRequest request) {
-        if (repository.findByUserIdAndPeriod(userId, request.period()).isPresent()) {
-            throw new DuplicateResourceException(
-                    "A schedule for period " + request.period() + " already exists");
-        }
-
-        mongoTemplate.updateMulti(
-                Query.query(Criteria.where("userId").is(userId).and("active").is(true)),
-                Update.update("active", false),
-                Schedule.class);
-
-        Schedule toCreate = new Schedule(UUID.randomUUID().toString(), userId, request.period(),
-                request.programCode(), request.pensumCode(), request.level(), true, List.of());
-        try {
-            return repository.save(toCreate);
-        } catch (DuplicateKeyException race) {
-            // Two concurrent creates for the same period: the unique index is the real
-            // guard, the pre-check above only avoids the common case touching `active`.
-            throw new DuplicateResourceException(
-                    "A schedule for period " + request.period() + " already exists");
-        }
+    /** The classes that take place on that date, in the timetable of the period it falls in. */
+    public List<ClassOccurrenceResponse> day(SinuPerson person, LocalDate date) {
+        return occurrencesOn(timetableOn(person, date), date);
     }
 
-    public void deleteSchedule(String userId, String period) {
-        Schedule schedule = repository.findByUserIdAndPeriod(userId, period)
-                .orElseThrow(() -> new ResourceNotFoundException("No schedule found for period " + period));
-        repository.delete(schedule);
-    }
-
-    public List<ClassOccurrenceResponse> day(String userId, LocalDate date) {
-        return occurrencesOn(activeOrThrow(userId), date);
-    }
-
-    public WeekAgendaResponse week(String userId, LocalDate anyDateInWeek) {
-        Schedule schedule = activeOrThrow(userId);
-        LocalDate monday = (anyDateInWeek == null ? LocalDate.now() : anyDateInWeek).with(DayOfWeek.MONDAY);
-        LocalDate sunday = monday.plusDays(6);
+    /** The week of that date, today's when there is none, Monday to Sunday. */
+    public WeekAgendaResponse week(SinuPerson person, LocalDate anyDateInWeek) {
+        LocalDate monday = (anyDateInWeek == null ? LocalDate.now(clock) : anyDateInWeek).with(DayOfWeek.MONDAY);
+        Schedule schedule = timetableOn(person, monday);
 
         Map<DayOfWeek, List<ClassOccurrenceResponse>> days = new EnumMap<>(DayOfWeek.class);
         for (int offset = 0; offset < 7; offset++) {
             LocalDate date = monday.plusDays(offset);
             days.put(date.getDayOfWeek(), occurrencesOn(schedule, date));
         }
-        return new WeekAgendaResponse(monday, sunday, days);
+        return new WeekAgendaResponse(monday, monday.plusDays(6), days);
     }
 
-    Schedule activeOrThrow(String userId) {
-        return repository.findByUserIdAndActiveTrue(userId)
+    private AcademicPeriod current() {
+        return sinu.periodOn(LocalDate.now(clock));
+    }
+
+    private Schedule timetableOn(SinuPerson person, LocalDate date) {
+        return read(person, sinu.periodOn(date))
                 .orElseThrow(() -> new ResourceNotFoundException("No active schedule found"));
     }
 
+    private Optional<Schedule> read(SinuPerson person, AcademicPeriod period) {
+        AcademicPeriod current = current();
+        return reader.read(person, period).map(reading -> {
+            SinuTimetable timetable = reading.timetable();
+            Map<String, String> buildings = sedes.bySede();
+            Map<String, String> colors = CourseColors.assign(
+                    timetable.sections().stream().map(SinuSection::sinuCode).toList());
+            List<Section> sections = timetable.sections().stream()
+                    .map(s -> new Section(s.sectionCode(), s.sinuCode(),
+                            person.role() == SinuPerson.Role.STUDENT
+                                    ? catalog.pensumItemCode(timetable.pensumCode(), s.sinuCode()).orElse(null)
+                                    : null,
+                            s.courseName(), s.level(), s.credits(), s.totalHours(), s.group(), s.subgroup(),
+                            s.professor(), s.sede(), s.sede() == null ? null : buildings.get(s.sede().trim()),
+                            colors.get(s.sinuCode()), s.meetings()))
+                    .toList();
+            return new Schedule(person.userId(), period, timetable.programCode(), timetable.pensumCode(),
+                    timetable.level(), period.equals(current), sinu.source(), reading.readAt(), sections);
+        });
+    }
+
     /**
-     * The single place a date is resolved against every meeting in a schedule - used
-     * identically by {@link #day} and, once per date of the week, by {@link #week}, which
-     * is what keeps the two endpoints from re-implementing the resolution rule twice.
+     * The single place a date is resolved against every meeting of a timetable - used identically by
+     * {@link #day} and, once per date of the week, by {@link #week}.
      */
     private List<ClassOccurrenceResponse> occurrencesOn(Schedule schedule, LocalDate date) {
         List<ClassOccurrenceResponse> result = new ArrayList<>();
-        for (Enrollment enrollment : schedule.enrollments()) {
-            for (Meeting meeting : enrollment.meetings()) {
+        for (Section section : schedule.sections()) {
+            for (Meeting meeting : section.meetings()) {
                 MeetingResolution.periodOn(meeting, date).ifPresent(period ->
-                        result.add(ScheduleMapper.toClassOccurrence(enrollment, meeting, period.room())));
+                        result.add(ScheduleMapper.toClassOccurrence(section, meeting, period.room())));
             }
         }
         result.sort(Comparator.comparing(ClassOccurrenceResponse::startTime));

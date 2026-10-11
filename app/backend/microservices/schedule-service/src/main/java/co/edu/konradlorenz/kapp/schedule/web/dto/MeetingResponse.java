@@ -9,14 +9,11 @@ import java.util.List;
 /**
  * Wire shape of {@code Meeting}. Built only by {@code mapper.ScheduleMapper}.
  *
- * <p>{@code @JsonFormat(pattern = "HH:mm")} is required, not decorative: without it
- * Jackson's default {@code LocalTime} serializer writes seconds whenever they happen to be
- * zero-valued to begin with ({@code "18:15:00"}), which is a real value but not one the
- * contract's {@code LocalTime} schema - {@code ^([01][0-9]|2[0-3]):[0-5][0-9]$}, "No
- * seconds" - accepts.
+ * <p>{@code @JsonFormat(pattern = "HH:mm")} is required, not decorative: without it Jackson's default
+ * {@code LocalTime} serializer writes seconds when they happen to be zero ({@code "18:15:00"}), which
+ * the contract's {@code LocalTime} - {@code ^([01][0-9]|2[0-3]):[0-5][0-9]$}, "No seconds" - refuses.
  */
 public record MeetingResponse(
-        String meetingId,
         DayOfWeek dayOfWeek,
 
         @JsonFormat(pattern = "HH:mm")
@@ -25,6 +22,7 @@ public record MeetingResponse(
         @JsonFormat(pattern = "HH:mm")
         LocalTime endTime,
 
+        int blocks,
         List<MeetingPeriodResponse> periods
 ) {
 }

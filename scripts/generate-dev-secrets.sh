@@ -10,7 +10,7 @@
 # becomes KAPP_STACK, which names the containers and the image tags, so two worktrees can run
 # at once without taking each other's names, ports or images.
 #
-# THE DATABASE IS NOT GENERATED HERE. There is no local MongoDB any more: the five
+# THE DATABASE IS NOT GENERATED HERE. There is no local MongoDB any more: the four
 # MONGO_*_URI values come from the shared Atlas cluster, one per service, and you paste them
 # in. docs/ATLAS-SETUP.md is the walkthrough; a teammate who already has them can send you
 # theirs over a private channel, never through the group chat or a commit.
@@ -54,13 +54,12 @@ cat <<EOF
 # scripts break.
 #
 # Keep maxPoolSize=10 on each one. An M0 cluster allows 500 concurrent connections and the
-# driver's default pool is 100 PER SERVICE - five services is 500 for one developer, and six
-# developers sharing the cluster could ask for 3000. The pool only grows under load, so this
+# driver's default pool is 100 PER SERVICE - four services is 400 for one developer, and six
+# developers sharing the cluster could ask for 2400. The pool only grows under load, so this
 # has never bitten us, which is exactly why it would bite at the worst possible moment.
 MONGO_AUTH_URI=''
 MONGO_USER_URI=''
 MONGO_SEMAPHORE_URI=''
-MONGO_SCHEDULE_URI=''
 MONGO_MAP_URI=''
 
 # ── Services ───────────────────────────────────────────────────────────────────
@@ -78,7 +77,7 @@ cat >&2 <<'EOF'
 
 Written. Two things worth knowing:
 
-  1. It is not usable yet: paste the five MONGO_*_URI values from the Atlas cluster.
+  1. It is not usable yet: paste the four MONGO_*_URI values from the Atlas cluster.
      docs/ATLAS-SETUP.md walks through where they come from.
 
   2. KAPP_INTERNAL_TOKEN was generated on this machine and is yours alone. Every service in

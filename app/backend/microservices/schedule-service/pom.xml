@@ -12,7 +12,7 @@
 
     <artifactId>schedule-service</artifactId>
     <name>Schedule Service</name>
-    <description>Owns each student's per-period class timetable: enrollments, weekly meetings and their date-ranged rooms.</description>
+    <description>Serves a person's class timetable as SINU has it, read-only: sections, weekly meetings and their date-ranged rooms.</description>
 
     <!--
       Versions come from the parent's dependencyManagement. Never add a <version>
@@ -38,22 +38,19 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
 
 
-        <!-- Reads the academic catalogue from semaphore-service; see catalog/CatalogClient. -->
+        <!-- Reads the catalogue from semaphore-service and the buildings from map-service:
+             see catalog/CatalogClient and map/MapClient. -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
 
-        <!-- Backs the ~1h in-memory cache over the catalogue lookup, so a briefly-down
-             semaphore-service never blocks a student from entering their own timetable. -->
+        <!-- The short in-memory caches: a timetable read from SINU, the catalogue and the
+             buildings of each sede. Nothing is stored. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
@@ -68,35 +65,9 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
 
-        <!-- Versioned MongoDB migrations, indexes and seed data. -->
-        <dependency>
-            <groupId>io.mongock</groupId>
-            <artifactId>mongock-springboot-v3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.mongock</groupId>
-            <artifactId>mongodb-springdata-v4-driver</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!-- Provides @ServiceConnection, which wires the container's URI automatically. -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-testcontainers</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>mongodb</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

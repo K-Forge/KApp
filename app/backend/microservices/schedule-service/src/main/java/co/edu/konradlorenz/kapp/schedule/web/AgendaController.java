@@ -1,6 +1,5 @@
 package co.edu.konradlorenz.kapp.schedule.web;
 
-import co.edu.konradlorenz.kapp.common.security.CurrentUser;
 import co.edu.konradlorenz.kapp.common.security.KappRoles;
 import co.edu.konradlorenz.kapp.schedule.service.ScheduleService;
 import co.edu.konradlorenz.kapp.schedule.web.dto.ClassOccurrenceResponse;
@@ -20,15 +19,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Resolved day and week views: the whole reason the schedule → enrollment → meeting →
- * meeting-period nesting exists. The client asks "what's on this date" and gets an
- * already-resolved answer, room included, instead of walking every meeting's periods
- * itself.
+ * Resolved day and week views: the whole reason the schedule → section → meeting → meeting-period
+ * nesting exists. The client asks "what's on this date" and gets an already-resolved answer, room
+ * included, instead of walking every meeting's periods itself.
  */
 @RestController
 @RequestMapping("/api/schedule/me")
-@PreAuthorize("hasAnyRole('" + KappRoles.Short.STUDENT + "', '" + KappRoles.Short.PROFESSOR
-        + "', '" + KappRoles.Short.ADMIN + "')")
+@PreAuthorize("hasAnyRole('" + KappRoles.Short.STUDENT + "', '" + KappRoles.Short.PROFESSOR + "')")
 @Validated
 @Tag(name = "Agenda")
 public class AgendaController {
@@ -41,21 +38,20 @@ public class AgendaController {
 
     @GetMapping("/day")
     @Operation(summary = "Get the caller's classes on one date",
-            description = "Sorted by startTime ascending. This is the endpoint the mobile "
-                    + "home screen calls.")
+            description = "Sorted by startTime ascending. This is the endpoint the mobile home screen calls.")
     public List<ClassOccurrenceResponse> getMyDay(
             @RequestParam(required = false) @NotNull @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate date) {
-        return scheduleService.day(CurrentUser.id(), date);
+        return scheduleService.day(Callers.person(), date);
     }
 
     @GetMapping("/week")
     @Operation(summary = "Get the caller's classes for one week",
-            description = "date may be any date inside the wanted week; the server snaps it to "
-                    + "that week's Monday. Omitted, the current week is returned.")
+            description = "date may be any date inside the wanted week; the server snaps it to that "
+                    + "week's Monday. Omitted, the current week is returned.")
     public WeekAgendaResponse getMyWeek(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate date) {
-        return scheduleService.week(CurrentUser.id(), date);
+        return scheduleService.week(Callers.person(), date);
     }
 }
