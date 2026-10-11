@@ -53,7 +53,9 @@ Ordered by how badly each reads to somebody deciding whether to open SINU to us.
   `library_loan`, `parking_reservation` and `chat_message`. Nothing reads it.
 - **`app/frontend/web/`**: the old prototype, with `notas.html`, `inscribir.html` and `pqr.html`.
 - **`course-service`** and **`assignment-service`**: frozen, out of the build.
-- **`docs/MICROSERVICES-IDEAS.md`**: seventeen services nobody is building.
+- **`docs/MICROSERVICES-IDEAS.md`**: seventeen services nobody is building. **Not removed but reworked** (#50):
+  it now opens with the roadmap Brian decided on 3 October 2026, keeps the rest as ideas, and flags the ones that
+  fall where KApp does not go — chat, payments, documents and SINU's own domain.
 
 ### 3.2 Marks
 
