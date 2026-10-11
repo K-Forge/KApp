@@ -247,13 +247,13 @@ class TemporaryPasswordIntegrationTest extends AbstractAuthIntegrationTest {
                         .header("Authorization", adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"email":"codigo.solo%s","firstName":"Pepe","lastName":"Veras","role":"ROLE_STUDENT","studentCode":"506232730"}
+                                {"email":"codigo.solo%s","firstName":"Pepe","lastName":"Veras","role":"ROLE_STUDENT","studentCode":"506900001"}
                                 """.formatted(INSTITUTIONAL_DOMAIN)))
                 .andExpect(status().isCreated());
 
         ArgumentCaptor<InternalUserUpsert> profile = ArgumentCaptor.forClass(InternalUserUpsert.class);
         verify(userProfileClient, atLeastOnce()).upsert(profile.capture());
-        assertThat(profile.getValue().academic().studentCode()).isEqualTo("506232730");
+        assertThat(profile.getValue().academic().studentCode()).isEqualTo("506900001");
         assertThat(profile.getValue().academic().programCode()).isEqualTo("506");
     }
 

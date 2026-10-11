@@ -31,9 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Testcontainers
 @TestPropertySource(properties = {
-        "kapp.map.survey-seed=false",
-        "eureka.client.enabled=false",
-        "spring.cloud.discovery.enabled=false"
+        "kapp.map.survey-seed=false"
 })
 class StructuresTest {
 

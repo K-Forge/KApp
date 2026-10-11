@@ -89,7 +89,8 @@ def write_bmp(path, pixels, width, height):
 
 def survey_file(spec_path, name):
     """A photo the spec names: next to the spec, or in the survey folder - $KAPP_SURVEY, by default
-    ~/Desktop/map, where the survey photos were taken to. They stay out of the repository."""
+    ~/Desktop/map, where the survey photos were taken to. The full-size originals stay out of the
+    repository; docs/map/fuentes/ keeps a light copy of each (export-sources.py)."""
     beside = os.path.join(os.path.dirname(os.path.abspath(spec_path)), name)
     if os.path.exists(beside):
         return beside

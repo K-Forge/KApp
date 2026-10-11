@@ -113,8 +113,6 @@ export const ES_API: Record<string, string> = {
     'Exponente público RSA, codificado en base64url. `AQAB` es 65537.',
   'Report service liveness':
     'Informar si el servicio está vivo',
-  'Liveness probe used by Docker Compose, the Eureka registry and the\ngateway circuit breaker.\n\nPublic endpoint: no token required. It reports only whether the service\nprocess is answering; it deliberately exposes no build, dependency or\ndatabase detail.':
-    'Sonda de vida que usan Docker Compose, el registro Eureka y el circuit breaker del gateway.\n\nEndpoint público: no requiere token. Solo informa si el proceso del servicio responde; a propósito no expone detalles de la compilación, las dependencias ni la base de datos.',
   'Service state. `UP` when the process is answering.':
     'Estado del servicio. `UP` cuando el proceso responde.',
   'List invitation codes':

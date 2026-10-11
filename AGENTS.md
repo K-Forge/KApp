@@ -92,6 +92,7 @@ KApp/
 │   ├── check-git-conventions.sh     # The git rules as code: CI and the commit-msg hook run it
 │   ├── install-git-hooks.sh         # Once per clone: enables .githooks/
 │   ├── sync-contributing.sh         # Refreshes CONTRIBUTING.md from the organization
+│   ├── restack.sh                   # Rebases a stack after its bottom is squash merged
 │   ├── generate-dev-secrets.sh  create-dev-accounts.sh  verify-db-isolation.sh
 │   └── start-frontend.sh
 ├── .githooks/commit-msg             # Refuses a commit that breaks CONTRIBUTING.md
@@ -99,7 +100,9 @@ KApp/
 │   ├── CODEOWNERS                   # The lead reviews every path
 │   └── workflows/
 │       ├── ci.yml                   # Backend, contracts and portal
-│       └── conventions.yml          # Branch, title and commits of every pull request
+│       ├── conventions.yml          # Branch, title and commits of every pull request
+│       ├── dev-images.yml           # Per-branch images for the dev server, on GHCR
+│       └── restack.yml              # After a squash merge, rebases the pull requests stacked on it
 ├── CONTRIBUTING.md                  # Verbatim copy of the K-Forge guide. Never edit here
 └── package.json
 ```
@@ -249,8 +252,11 @@ Rules specific to KApp:
   Ignored files do not follow a new worktree: copy `app/backend/microservices/.env` and
   `app/frontend/mobile/kotlin/local.properties`, or regenerate them. Compose names its project after the directory,
   so stop the stack in one worktree before starting it in another.
-- **A branch built on an unmerged branch** opens its pull request against that branch, and is retargeted to
-  `develop` once the parent merges.
+- **A branch built on an unmerged branch** opens its pull request against that branch. When the parent is squash
+  merged, `.github/workflows/restack.yml` rebases the child onto `develop`, retargets it and cascades to the pull
+  requests stacked on it, pushing as the K-Forge restack App so their checks run again. Nobody runs git in
+  between. A real conflict is left untouched, with the commands to finish by hand in a comment. Stack only when a
+  feature needs unmerged code, and keep stacks to two or three levels.
 
 ---
 

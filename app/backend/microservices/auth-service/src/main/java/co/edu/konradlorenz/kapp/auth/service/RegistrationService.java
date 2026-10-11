@@ -56,7 +56,7 @@ public class RegistrationService {
 
     private static final Logger log = LoggerFactory.getLogger(RegistrationService.class);
 
-    /** How many of a student code's first digits are its program's: 506232730 is a 506. */
+    /** How many of a student code's first digits are its program's: 506900001 is a 506. */
     static final int PROGRAM_DIGITS = 3;
 
     private final CredentialRepository credentials;
@@ -189,7 +189,7 @@ public class RegistrationService {
      * record for a student and forbids one for a guest.
      *
      * <p>The program may be left out: the university's student codes begin with their
-     * program's three digits - 506232730 is a 506, Ingeniería de Sistemas - so it is read from
+     * program's three digits - 506900001 is a 506, Ingeniería de Sistemas - so it is read from
      * there. One sent anyway is kept as sent.
      */
     private InternalUserUpsert.AcademicInfo academicFor(String role, String studentCode, String programCode) {

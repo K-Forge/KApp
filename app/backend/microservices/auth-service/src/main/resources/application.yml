@@ -44,15 +44,6 @@ mongock:
   # Property is `transactional`; `transaction-enabled` is deprecated in Mongock 5.5.
   transactional: false
 
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
-    # Registering with Eureka is pointless in tests and slows them down.
-    enabled: ${EUREKA_ENABLED:true}
-  instance:
-    prefer-ip-address: true
-
 management:
   health:
     mail:
@@ -98,9 +89,10 @@ kapp:
       ttl: ${KAPP_JWT_TTL:1h}
       issuer: ${KAPP_JWT_ISSUER:https://kapp.konradlorenz.edu.co}
 
-    # Blank means "resolve user-service through Eureka", the production path. A test
-    # or a local run can point this at a stub instead.
-    user-service-url: ${KAPP_USER_SERVICE_URL:}
+    # Where user-service answers. By name: Docker Compose and Kubernetes both resolve a
+    # service's name to its address, so no registry is needed. A host-networked server or a
+    # local run sets the address itself.
+    user-service-url: ${KAPP_USER_SERVICE_URL:http://user-service:8082}
 
     # Registration and e-mail verification. See RegistrationProperties.
     allowed-email-domains: ${KAPP_ALLOWED_EMAIL_DOMAINS:konradlorenz.edu.co,kforge.dev}

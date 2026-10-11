@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.GetMapping;
  * itself, never from a semaphore-service credential, and can never be asked for anyone
  * else's profile through this seam.
  */
-@FeignClient(name = "user-service", contextId = "userProfileClient", path = "/api/users")
+@FeignClient(name = "user-service", contextId = "userProfileClient",
+        url = "${kapp.semaphore.user-service-url}", path = "/api/users")
 public interface UserProfileClient {
 
     @GetMapping("/me")

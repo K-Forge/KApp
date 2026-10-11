@@ -4,7 +4,6 @@ import io.mongock.runner.springboot.EnableMongock;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
@@ -28,7 +27,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * front of it - see {@link co.edu.konradlorenz.kapp.schedule.catalog.PensumCatalogService}.
  */
 @SpringBootApplication
-@EnableDiscoveryClient
 @EnableMongock
 @EnableFeignClients
 @EnableCaching

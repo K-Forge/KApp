@@ -11,9 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
  * The one Feign edge out of auth-service: creating the profile that matches a new
  * credential, and removing it with the account.
  *
- * <p>Resolved through Eureka by service name. {@code url} is left bindable so a test or a
- * local run can point it at a stub; blank means "use discovery", which is the production
- * path.
+ * <p>Addressed by {@code kapp.auth.user-service-url}: user-service's name, which Docker Compose
+ * and Kubernetes resolve, or whatever address a host or a test sets.
  *
  * <p>Authenticated with {@code X-Internal-Token}, not a bearer token, because at
  * registration time the account does not exist yet and there is no user token to forward.

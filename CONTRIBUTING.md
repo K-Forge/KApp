@@ -289,18 +289,29 @@ git push --force-with-lease
 
 ### Ramas que dependen de otra rama
 
+Por defecto, **una PR por funcionalidad, desde `develop`**. Apila ramas solo cuando una funcionalidad necesita de
+verdad codigo que aun no se ha fusionado, y no pases de dos o tres niveles.
+
 1. Crea tu rama desde la rama padre y abre tu PR **contra la rama padre**, no contra `develop`. Asi la revision
    muestra solo tus cambios.
 2. Cuando la padre se fusiona con squash, sus commits originales siguen dentro de tu rama y chocarian con el commit
-   squash de `develop`. Mueve **solo tus commits** encima de `develop`, usando la padre tal como estaba antes del merge:
+   squash de `develop`, aunque nadie mas haya tocado esos archivos. Hay que mover **solo tus commits** encima de
+   `develop`.
+3. **Si el repositorio tiene el workflow `restack`, eso lo hace el solo**: rebasa tu rama sobre `develop`, cambia la
+   base de tu PR, sigue con las ramas apiladas sobre la tuya y comenta en cada PR. Tus checks vuelven a correr. Antes
+   de commitear de nuevo, actualiza tu copia con `git pull --rebase`.
+4. Si no hay workflow, o si el workflow te comenta que no pudo porque hay un **conflicto real** (alguien cambio las
+   mismas lineas en `develop`), tu rama queda intacta y lo haces a mano, usando la padre tal como estaba antes del
+   merge. El comentario trae los comandos exactos:
 
    ```bash
    git fetch origin
    git rebase --onto origin/develop feature/rama-padre feature/tu-rama
+   # resuelve los conflictos, y luego
    git push --force-with-lease
    ```
 
-3. Cambia la base de tu PR a `develop` (boton **Edit** junto al titulo).
+   Despues cambia la base de tu PR a `develop` (boton **Edit** junto al titulo), si GitHub no lo hizo ya.
 
 ### Release paso a paso
 

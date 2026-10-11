@@ -45,9 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestPropertySource(properties = {
         // The placeholder campus is these tests' fixture; SurveyedCampusTest covers the survey.
-        "kapp.map.survey-seed=false",
-        "eureka.client.enabled=false",
-        "spring.cloud.discovery.enabled=false"
+        "kapp.map.survey-seed=false"
 })
 class SpaceSearchTest {
 

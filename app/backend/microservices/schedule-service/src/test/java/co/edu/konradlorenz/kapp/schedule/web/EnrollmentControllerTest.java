@@ -26,7 +26,7 @@ class EnrollmentControllerTest extends AbstractScheduleServiceTest {
     private static final String DAM_ENROLLMENT_BODY = """
             {"courseCode": "59035", "pensumItemCode": "2033", "courseName": "DESARROLLO DE APLICACIONES MOVILES",
              "level": 8, "credits": 3, "totalHours": 64, "group": "51", "subgroup": null,
-             "professor": "MORALES SUAREZ ANDRES CAMILO", "campus": "Sede Principal",
+             "professor": "MARTÍNEZ ACOSTA JORGE ENRIQUE", "campus": "Sede Principal",
              "startDate": "2026-07-31", "endDate": "2026-11-27", "color": "#C9D329",
              "meetings": [{"dayOfWeek": "FRIDAY", "startTime": "18:15", "endTime": "21:15",
                            "periods": [{"from": "2026-07-31", "to": "2026-11-27", "room": "709"}]}]}""";
@@ -164,7 +164,7 @@ class EnrollmentControllerTest extends AbstractScheduleServiceTest {
     @DisplayName("an explicit null clears the subgroup")
     void updateEnrollment_explicitNullSubgroup_clearsIt() throws Exception {
         Enrollment withSubgroup = new Enrollment("enrollment-1", "17080", "2018", "ESTADISTICA DESCRIPTIVA",
-                6, 3, 48, "51", "02", "CAMPOS AVENDANO GUSTAVO ANDRES", "Sede Principal",
+                6, 3, 48, "51", "02", "GÓMEZ RESTREPO LAURA MARCELA", "Sede Principal",
                 java.time.LocalDate.parse("2026-07-27"), java.time.LocalDate.parse("2026-11-30"),
                 "#539392", List.of());
         save(schedule(STUDENT_ID, "20262", true, List.of(withSubgroup)));

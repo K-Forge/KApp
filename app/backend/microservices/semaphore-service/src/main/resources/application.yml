@@ -30,21 +30,19 @@ spring:
           # auth-service were already up - a boot-order deadlock under docker compose.
           jwk-set-uri: ${KAPP_JWKS_URI:http://localhost:8081/.well-known/jwks.json}
 
+kapp:
+  semaphore:
+    # Where user-service answers. By name: Docker Compose and Kubernetes both resolve a
+    # service's name to its address, so no registry is needed. A host-networked server or a
+    # local run sets the address itself.
+    user-service-url: ${KAPP_USER_SERVICE_URL:http://user-service:8082}
+
 mongock:
   migration-scan-package: co.edu.konradlorenz.kapp.semaphore.migration
   # Left off deliberately: the change units only create indexes, which are idempotent,
   # and enabling transactions requires a MongoTransactionManager bean.
   # Property is `transactional`; `transaction-enabled` is deprecated in Mongock 5.5.
   transactional: false
-
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
-    # Registering with Eureka is pointless in tests and slows them down.
-    enabled: ${EUREKA_ENABLED:true}
-  instance:
-    prefer-ip-address: true
 
 management:
   endpoints:
