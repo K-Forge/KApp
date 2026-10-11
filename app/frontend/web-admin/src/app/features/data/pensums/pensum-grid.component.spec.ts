@@ -2,12 +2,12 @@ import { TestBed } from '@angular/core/testing';
 import { PensumGridComponent } from './pensum-grid.component';
 import type { Pensum, PensumCourse } from './pensum.model';
 
-// sinuCode mirrors the code by default: that is a plan the university prints codes for, which is
-// the only kind whose codes are shown. A brochure plan is built by clearing it, as BROCHURE does.
+// sinuCode mirrors the item code by default: that is a plan the university prints codes for, which
+// is the only kind whose codes are shown. A brochure plan is built by clearing it, as BROCHURE does.
 function course(code: string, name: string, level: number, area: string, credits: number, weeklyHours: number,
                 extra: Partial<PensumCourse> = {}): PensumCourse {
   return {
-    code, pensumItemCode: code, name, level, credits, weeklyHours, area,
+    pensumItemCode: code, name, level, credits, weeklyHours, area,
     isElectiveSlot: false, prerequisites: [], sinuCode: code, ...extra,
   };
 }
@@ -23,7 +23,7 @@ const PRINTED_GRID: Pensum = {
     course('11015', 'Precálculo', 1, 'CB', 3, 4),
     course('12015', 'Cálculo I', 2, 'CB', 3, 4, { prerequisites: ['11015'] }),
     course('71221', 'Cultura I', 2, 'SI', 2, 2),
-    { ...course('59075', 'Electiva I', 3, 'SI', 3, 3), code: null, isElectiveSlot: true },
+    { ...course('59075', 'Electiva I', 3, 'SI', 3, 3), isElectiveSlot: true },
   ],
 };
 

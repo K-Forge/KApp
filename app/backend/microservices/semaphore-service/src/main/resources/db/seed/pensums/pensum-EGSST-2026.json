@@ -19,7 +19,6 @@
   ],
   "courses": [
     {
-      "code": "EGSST-101",
       "pensumItemCode": "EGSST-101",
       "name": "Seguridad social y legislación en riesgos laborales",
       "level": 1,
@@ -31,7 +30,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGSST-102",
       "pensumItemCode": "EGSST-102",
       "name": "Aspectos psicológicos en contextos laborales",
       "level": 1,
@@ -43,7 +41,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGSST-103",
       "pensumItemCode": "EGSST-103",
       "name": "Gerencia de proyectos",
       "level": 1,
@@ -55,7 +52,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGSST-104",
       "pensumItemCode": "EGSST-104",
       "name": "Analítica de datos para la toma de decisiones gerenciales",
       "level": 1,
@@ -67,7 +63,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "EGSST-105",
       "name": "Electiva",
       "level": 1,
@@ -79,7 +74,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGSST-106",
       "pensumItemCode": "EGSST-106",
       "name": "Higiene y seguridad industrial",
       "level": 1,
@@ -91,7 +85,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGSST-201",
       "pensumItemCode": "EGSST-201",
       "name": "Sistema de gestión en seguridad y salud en el trabajo",
       "level": 2,
@@ -103,7 +96,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGSST-202",
       "pensumItemCode": "EGSST-202",
       "name": "Sistemas integrados de gestión",
       "level": 2,
@@ -115,7 +107,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGSST-203",
       "pensumItemCode": "EGSST-203",
       "name": "Sistema de vigilancia epidemiológica",
       "level": 2,
@@ -127,7 +118,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGSST-204",
       "pensumItemCode": "EGSST-204",
       "name": "Medicina preventiva, del trabajo y laboral",
       "level": 2,
@@ -139,7 +129,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGSST-205",
       "pensumItemCode": "EGSST-205",
       "name": "Ergonomía",
       "level": 2,
@@ -151,7 +140,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGSST-206",
       "pensumItemCode": "EGSST-206",
       "name": "Riesgo psicosocial en el trabajo",
       "level": 2,
@@ -163,7 +151,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGSST-207",
       "pensumItemCode": "EGSST-207",
       "name": "Trabajo de grado",
       "level": 2,

@@ -8,8 +8,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Authorises an administrative operation: catalog writes, and reading another
- * student's semaforo at {@code GET /api/semaphore/{userId}}. Requires {@code ROLE_ADMIN}.
+ * Authorises the one administrative operation left here: loading the catalog's backup from a CSV.
+ * Requires {@code ROLE_ADMIN}. Nobody reads another student's semáforo, administrators included.
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

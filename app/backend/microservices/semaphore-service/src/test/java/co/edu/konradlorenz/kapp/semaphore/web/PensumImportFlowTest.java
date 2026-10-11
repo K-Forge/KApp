@@ -247,13 +247,27 @@ class PensumImportFlowTest {
     }
 
     @Test
-    @DisplayName("an elective slot carrying a course code is refused")
-    void electiveSlotWithACodeIsRefused() throws Exception {
+    @DisplayName("a course code on an elective slot is ignored: semaphore 2.0 keeps no printed code")
+    void courseCodeOnAnElectiveSlotIsIgnored() throws Exception {
         String csv = HEADER + "\n"
                 + row("IMP-ELEC", "CB", "E1", "E1C", "Electiva", 1, 3, 4, true, "");
 
         mockMvc.perform(upload(csv))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
+        assertThat(pensums.findById("IMP-ELEC").orElseThrow().courses().get(0).pensumItemCode()).isEqualTo("E1");
+    }
+
+    @Test
+    @DisplayName("a prerequisite written as a course code names that row's item")
+    void prerequisiteByCourseCodeNamesTheItem() throws Exception {
+        String csv = HEADER + "\n"
+                + row("IMP-PRE", "CB", "P1", "P1C", "Uno", 1, 3, 4, false, "", 6, 8)
+                + row("IMP-PRE", "CB", "P2", "P2C", "Dos", 2, 3, 4, false, "P1C", 6, 8);
+
+        mockMvc.perform(upload(csv))
+                .andExpect(status().isOk());
+        assertThat(pensums.findById("IMP-PRE").orElseThrow().findByPensumItemCode("P2").orElseThrow().prerequisites())
+                .containsExactly("P1");
     }
 
     @Test
@@ -300,29 +314,6 @@ class PensumImportFlowTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    @DisplayName("what the import accepts, the update accepts: a pensum built here can be edited here")
-    void importedPensumSurvivesBeingSavedBack() throws Exception {
-        // COMPLEMENTARIA is fourteen characters. The import used to write it and the PUT used to
-        // refuse it, so the portal produced pensums it could not then edit - and the message the
-        // admin saw was "size must be between 0 and 10" about a document they never typed.
-        String csv = HEADER + "\n"
-                + "IMP-PROG,Programa,Facultad,PREGRADO,IMP-WORDS,R,DRAFT,3,4,1,COMPLEMENTARIA,"
-                + "Complementaria,#539392,W1,W1C,Uno,1,3,4,false,,\n";
-
-        mockMvc.perform(upload(csv)).andExpect(status().isOk());
-
-        String document = mockMvc.perform(
-                        get("/api/catalog/pensums/{code}", "IMP-WORDS").with(admin("editor")))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
-
-        mockMvc.perform(put("/api/catalog/pensums/{code}", "IMP-WORDS")
-                        .with(admin("editor"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(document))
-                .andExpect(status().isOk());
-    }
 
     @Test
     @DisplayName("the import refuses what the update would refuse, instead of writing it")

@@ -12,8 +12,11 @@ What it decides, so the transcriptions do not have to:
     Whole hours stay whole in the JSON - 4, never 4.0 - so only those four carry a decimal.
   * A missing credit or hour value is stored as 0. The pensum keeps the total the document
     prints, so the gap stays visible instead of being papered over.
-  * A course is an elective slot when its name says so. A slot has no course code, so
-    prerequisites between two slots cannot be stored and are reported.
+  * A course is an elective slot when its name says so. Prerequisites name fixed courses, so
+    one whose source is a slot cannot be stored and is reported.
+  * Every item is addressed by its pensumItemCode: the printed code, or one generated from the
+    plan's prefix. sinuCode is the printed code, the one a client shows, unless the plan's
+    sinuCodes in catalog.yaml says SINU carries another; a brochure that prints no codes has none.
   * Printed typos in course names are corrected from TYPOS below, and nowhere else.
 """
 import json, re, sys, unicodedata
@@ -128,7 +131,6 @@ def build(entry, problems):
             problems.append(f"{entry['file']}: {name} {e}")
             continue
         courses.append({
-            "code": None if slot else item_code,
             "pensumItemCode": item_code,
             "name": name,
             "level": r["level"],
@@ -137,12 +139,12 @@ def build(entry, problems):
             "area": lookup(r),
             "isElectiveSlot": slot,
             "prerequisites": [],
-            "sinuCode": printed,
+            "sinuCode": (entry.get("sinuCodes") or {}).get(printed, printed),
         })
         code_of_name[str(r["name"])] = item_code
         code_of_name[name] = item_code
 
-    fixed = {c["code"] for c in courses if c["code"]}
+    fixed = {c["pensumItemCode"] for c in courses if not c["isElectiveSlot"]}
     items = {c["pensumItemCode"]: c for c in courses}
     for target, sources in (src.get("prerequisites") or {}).items():
         t = items.get(str(target)) or items.get(code_of_name.get(str(target), ""))

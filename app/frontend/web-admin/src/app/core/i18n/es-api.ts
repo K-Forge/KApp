@@ -1344,4 +1344,14 @@ export const ES_API: Record<string, string> = {
     'Todo lo que hay en las manzanas de la sede que no es de la universidad (el edificio de un vecino, una casa patrimonial con su jardín), para dibujarlo alrededor de los edificios. Una lista vacía, en la versión `0`, mientras no se haya guardado nada. El nombre de la sede coincide sin distinguir mayúsculas ni tildes.\n\nRoles permitidos: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.',
   'Where each wall stands from the curb and how long it is, as taken on site with the portal\'s\nsurvey sheet. None, at version `0`, while nothing has been saved. The campus name matches\nignoring case and accents.\n\nAllowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.':
     'Dónde queda cada muro respecto al sardinel y cuánto mide, tal como se tomó en el sitio con la hoja de levantamiento del portal. Ninguna, en la versión `0`, mientras no se haya guardado nada. El nombre de la sede coincide sin distinguir mayúsculas ni tildes.\n\nRoles permitidos: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.',
+  'List the pensums':
+    'Listar los pensums',
+  'Every pensum of the catalog without its items, for listings and pickers: active plans\nfirst, then by program and code. `GET /api/catalog/pensums/{pensumCode}` has the items.':
+    'Cada pensum del catálogo sin sus ítems, para listados y selectores: primero los planes activos, y después por programa y código. `GET /api/catalog/pensums/{pensumCode}` trae los ítems.',
+  'A pensum without its items, for listings and pickers.':
+    'Un pensum sin sus ítems, para listados y selectores.',
+  'The weekly hours the printed plan declares, as in `Pensum`.':
+    'Las horas semanales que declara el plan impreso, como en `Pensum`.',
+  'How many items the pensum carries, without sending them.':
+    'Cuántos ítems tiene el pensum, sin enviarlos.',
 };

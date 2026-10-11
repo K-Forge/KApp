@@ -19,7 +19,6 @@
   ],
   "courses": [
     {
-      "code": "EPF-101",
       "pensumItemCode": "EPF-101",
       "name": "Criminología y Victimología",
       "level": 1,
@@ -31,7 +30,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPF-102",
       "pensumItemCode": "EPF-102",
       "name": "Fundamentos de Derecho Penal y Procesal",
       "level": 1,
@@ -43,7 +41,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPF-103",
       "pensumItemCode": "EPF-103",
       "name": "Psicopatología Forense I",
       "level": 1,
@@ -55,7 +52,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPF-104",
       "pensumItemCode": "EPF-104",
       "name": "Evaluación Forense y Técnicas de Entrevista",
       "level": 1,
@@ -67,7 +63,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPF-105",
       "pensumItemCode": "EPF-105",
       "name": "Práctica forense I",
       "level": 1,
@@ -79,7 +74,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "EPF-106",
       "name": "Electiva I",
       "level": 1,
@@ -91,7 +85,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPF-201",
       "pensumItemCode": "EPF-201",
       "name": "Fundamentos de Investigación Criminal",
       "level": 2,
@@ -103,7 +96,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPF-202",
       "pensumItemCode": "EPF-202",
       "name": "Fundamentos de Derecho de Familia",
       "level": 2,
@@ -115,7 +107,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPF-203",
       "pensumItemCode": "EPF-203",
       "name": "Psicopatología Forense de la Familia",
       "level": 2,
@@ -127,7 +118,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPF-204",
       "pensumItemCode": "EPF-204",
       "name": "Técnicas de oralidad",
       "level": 2,
@@ -139,7 +129,6 @@
       "sinuCode": null
     },
     {
-      "code": "EPF-205",
       "pensumItemCode": "EPF-205",
       "name": "Práctica forense II",
       "level": 2,
@@ -151,7 +140,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "EPF-206",
       "name": "Electiva II",
       "level": 2,

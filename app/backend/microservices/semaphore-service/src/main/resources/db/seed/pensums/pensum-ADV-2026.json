@@ -19,7 +19,6 @@
   ],
   "courses": [
     {
-      "code": "ADV-101",
       "pensumItemCode": "ADV-101",
       "name": "Fundamentos de Economía",
       "level": 1,
@@ -31,7 +30,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-102",
       "pensumItemCode": "ADV-102",
       "name": "Introducción a la Administración",
       "level": 1,
@@ -43,7 +41,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-103",
       "pensumItemCode": "ADV-103",
       "name": "Fundamentos de Matemáticas",
       "level": 1,
@@ -55,7 +52,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-104",
       "pensumItemCode": "ADV-104",
       "name": "Habilidades Comunicativas",
       "level": 1,
@@ -67,7 +63,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-105",
       "pensumItemCode": "ADV-105",
       "name": "Inglés Intermedio Bajo",
       "level": 1,
@@ -79,7 +74,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-201",
       "pensumItemCode": "ADV-201",
       "name": "Introducción a la Contabilidad",
       "level": 2,
@@ -91,7 +85,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-202",
       "pensumItemCode": "ADV-202",
       "name": "Teoría Organizacional",
       "level": 2,
@@ -103,7 +96,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-203",
       "pensumItemCode": "ADV-203",
       "name": "Ética Empresarial",
       "level": 2,
@@ -115,7 +107,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-204",
       "pensumItemCode": "ADV-204",
       "name": "Matemáticas para la Administración y los Negocios",
       "level": 2,
@@ -127,7 +118,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-205",
       "pensumItemCode": "ADV-205",
       "name": "Cultura I",
       "level": 2,
@@ -139,7 +129,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-206",
       "pensumItemCode": "ADV-206",
       "name": "Inglés Intermedio Medio",
       "level": 2,
@@ -151,7 +140,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-301",
       "pensumItemCode": "ADV-301",
       "name": "Costos y Presupuestos con Herramientas Digitales",
       "level": 3,
@@ -163,7 +151,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-302",
       "pensumItemCode": "ADV-302",
       "name": "Fundamentos de Marketing",
       "level": 3,
@@ -175,7 +162,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "ADV-303",
       "name": "Electiva Profesional I",
       "level": 3,
@@ -187,7 +173,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-304",
       "pensumItemCode": "ADV-304",
       "name": "Estadística Descriptiva",
       "level": 3,
@@ -199,7 +184,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-305",
       "pensumItemCode": "ADV-305",
       "name": "Cultura II",
       "level": 3,
@@ -211,7 +195,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-306",
       "pensumItemCode": "ADV-306",
       "name": "Inglés Intermedio Alto",
       "level": 3,
@@ -223,7 +206,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-401",
       "pensumItemCode": "ADV-401",
       "name": "Matemáticas Financieras con Herramientas Digitales",
       "level": 4,
@@ -235,7 +217,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-402",
       "pensumItemCode": "ADV-402",
       "name": "Pensamiento Estratégico",
       "level": 4,
@@ -247,7 +228,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-403",
       "pensumItemCode": "ADV-403",
       "name": "Investigación de Mercados",
       "level": 4,
@@ -259,7 +239,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "ADV-404",
       "name": "Electiva Institucional",
       "level": 4,
@@ -271,7 +250,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-405",
       "pensumItemCode": "ADV-405",
       "name": "Estadística Inferencial",
       "level": 4,
@@ -283,7 +261,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-406",
       "pensumItemCode": "ADV-406",
       "name": "Inglés Avanzado",
       "level": 4,
@@ -295,7 +272,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-501",
       "pensumItemCode": "ADV-501",
       "name": "Gestión de la Información",
       "level": 5,
@@ -307,7 +283,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-502",
       "pensumItemCode": "ADV-502",
       "name": "Análisis Financiero",
       "level": 5,
@@ -319,7 +294,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-503",
       "pensumItemCode": "ADV-503",
       "name": "Emprendimiento e Innovación",
       "level": 5,
@@ -331,7 +305,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-504",
       "pensumItemCode": "ADV-504",
       "name": "Gerencia estratégica de Marketing con ambientes de IA",
       "level": 5,
@@ -343,7 +316,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-505",
       "pensumItemCode": "ADV-505",
       "name": "Talento humano y Legislación laboral",
       "level": 5,
@@ -355,7 +327,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "ADV-506",
       "name": "Electiva Profesional II",
       "level": 5,
@@ -367,7 +338,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-507",
       "pensumItemCode": "ADV-507",
       "name": "Inglés proficiencia",
       "level": 5,
@@ -379,7 +349,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-601",
       "pensumItemCode": "ADV-601",
       "name": "Gerencia Financiera y Decisiones en Ambientes Digitales",
       "level": 6,
@@ -391,7 +360,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-602",
       "pensumItemCode": "ADV-602",
       "name": "Gerencia Estratégica con escenarios de simulación",
       "level": 6,
@@ -403,7 +371,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-603",
       "pensumItemCode": "ADV-603",
       "name": "Negocios Electrónicos y Comercio en canales digitales",
       "level": 6,
@@ -415,7 +382,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-604",
       "pensumItemCode": "ADV-604",
       "name": "Liderazgo",
       "level": 6,
@@ -427,7 +393,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "ADV-605",
       "name": "Electiva Profesional III",
       "level": 6,
@@ -439,7 +404,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-606",
       "pensumItemCode": "ADV-606",
       "name": "Habilidades Gerenciales I",
       "level": 6,
@@ -451,7 +415,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-701",
       "pensumItemCode": "ADV-701",
       "name": "Finanzas Internacionales",
       "level": 7,
@@ -463,7 +426,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-702",
       "pensumItemCode": "ADV-702",
       "name": "Herramientas Digitales",
       "level": 7,
@@ -475,7 +437,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-703",
       "pensumItemCode": "ADV-703",
       "name": "Investigación de Operaciones",
       "level": 7,
@@ -487,7 +448,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-704",
       "pensumItemCode": "ADV-704",
       "name": "Gestión del Talento Humano",
       "level": 7,
@@ -499,7 +459,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "ADV-705",
       "name": "Electiva Profesional IV",
       "level": 7,
@@ -511,7 +470,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-706",
       "pensumItemCode": "ADV-706",
       "name": "Cultura III",
       "level": 7,
@@ -523,7 +481,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-707",
       "pensumItemCode": "ADV-707",
       "name": "Habilidades Gerenciales II",
       "level": 7,
@@ -535,7 +492,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-801",
       "pensumItemCode": "ADV-801",
       "name": "Metodología de la Investigación",
       "level": 8,
@@ -547,7 +503,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-802",
       "pensumItemCode": "ADV-802",
       "name": "Formulación y Evaluación de Proyectos",
       "level": 8,
@@ -559,7 +514,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-803",
       "pensumItemCode": "ADV-803",
       "name": "Legislación Empresarial",
       "level": 8,
@@ -571,7 +525,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-804",
       "pensumItemCode": "ADV-804",
       "name": "Gerencia de Operaciones",
       "level": 8,
@@ -583,7 +536,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-805",
       "pensumItemCode": "ADV-805",
       "name": "Marketing Internacional",
       "level": 8,
@@ -595,7 +547,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-901",
       "pensumItemCode": "ADV-901",
       "name": "Trabajo de grado",
       "level": 9,
@@ -607,7 +558,6 @@
       "sinuCode": null
     },
     {
-      "code": "ADV-902",
       "pensumItemCode": "ADV-902",
       "name": "Práctica Profesional",
       "level": 9,

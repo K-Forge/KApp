@@ -1,16 +1,14 @@
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
-import { ChangeDetectionStrategy, Component, ViewChild, computed, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
 import { ApiErrorBannerComponent } from '../../../shared/ui/api-error-banner/api-error-banner.component';
-import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 import { ImportPanelComponent } from '../import/import-panel.component';
 import { PastePensumComponent } from '../import/paste-pensum.component';
 import { PensumGridComponent } from './pensum-grid.component';
 import { PensumsService } from './pensums.service';
 import {
-  PENSUM_SKELETON,
-  coursesByCode,
+  coursesByItemCode,
   officialCode,
   prerequisiteLabels,
   publishesCourseCodes,
@@ -22,23 +20,23 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { t } from '../../../core/i18n/i18n.service';
 
 /**
- * Lookup-by-code rather than a table: the semaphore contract has no "list pensums" endpoint,
- * only get/create/replace by pensumCode (see docs/api/semaphore.openapi.yaml). A pensum document
- * nests ~50 course items, so create/replace edit the whole document as JSON rather than forcing
- * every field through bespoke inputs - the same trade-off the API console makes for request
- * bodies, and for the same reason: the shape is defined by the schema, not reinvented here.
+ * The pensums of the catalog, read-only: a picker over `GET /api/catalog/pensums`, and each plan
+ * drawn as printed or as a table, to check it against its PDF.
+ *
+ * <p>The catalog is SINU's. The one write it takes is the import of its backup, which lives at the
+ * bottom of this screen: a pensum arrives, or is corrected, by importing it again.
  */
 @Component({
   selector: 'app-pensums-page',
-  imports: [TranslatePipe, ApiErrorBannerComponent, ModalComponent, ImportPanelComponent, PageIntroComponent, PastePensumComponent, PensumGridComponent],
+  imports: [TranslatePipe, ApiErrorBannerComponent, ImportPanelComponent, PageIntroComponent, PastePensumComponent, PensumGridComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
         [title]="'Pensums' | t"
         [what]="'A programme’s plan of study: its courses, levels, credits and prerequisites.' | t"
-        [can]="[('Open one by its code' | t), ('Build one by pasting a PDF’s table' | t), ('Edit or delete it' | t)]"
-        [note]="'Correcting a pensum reaches every student. One that students follow cannot be deleted.' | t"
+        [can]="[('Open one by its code' | t), ('Build one by pasting a PDF’s table' | t), ('Correct one by importing it again' | t)]"
+        [note]="'The catalog is SINU’s; these plans are its backup. Correcting one reaches every student.' | t"
       >
       </app-page-intro>
 
@@ -62,7 +60,6 @@ import { t } from '../../../core/i18n/i18n.service';
           <button type="button" class="btn" (click)="load()" [disabled]="loading() || !searchCode().trim()">
             {{ loading() ? ('Loading…' | t) : ('Load' | t) }}
           </button>
-          <button type="button" class="btn btn-primary work-create" (click)="openCreate()">{{ 'New pensum' | t }}</button>
         </div>
 
         @if (!catalogLoading() && catalog().length === 0) {
@@ -75,21 +72,13 @@ import { t } from '../../../core/i18n/i18n.service';
 
         @if (!loading() && !error() && !loaded()) {
           <div class="empty-state">
-            <p>{{ 'Choose one above to read it, edit it or delete it.' | t }}</p>
+            <p>{{ 'Choose one above to read it.' | t }}</p>
           </div>
         }
 
         @if (loaded(); as c) {
           <div class="stack">
-            <div class="row-between">
-              <h2 style="margin:0">{{ c.programName }} · {{ c.pensumCode }}</h2>
-              <div class="row">
-                <button type="button" class="btn btn-sm" (click)="openEdit(c)">{{ 'Edit this pensum' | t }}</button>
-                <button type="button" class="btn btn-sm btn-danger" [disabled]="deleting()" (click)="remove(c)">
-                  {{ deleting() ? ('Deleting…' | t) : ('Delete' | t) }}
-                </button>
-              </div>
-            </div>
+            <h2 style="margin:0">{{ c.programName }} · {{ c.pensumCode }}</h2>
             <dl class="pensum-summary">
               <dt>{{ 'Faculty' | t }}</dt>
               <dd>{{ c.faculty }}</dd>
@@ -186,9 +175,8 @@ import { t } from '../../../core/i18n/i18n.service';
         }
       </div>
 
-      <!-- Bulk creation. It lives here rather than in its own navigation entry because
-           importing a CSV IS the create half of this screen's CRUD - twenty-four pensums is
-           not something anybody types in one at a time. -->
+      <!-- The catalog's only write: its backup, imported. It lives here rather than in its own
+           navigation entry because it is how a pensum on this screen arrives or is corrected. -->
       <!-- Creating a pensum, at the scale the pensums actually arrive: as PDFs, twenty-four
            of them. Paste is the primary path because copying a table out of a PDF preserves
            its rows better than any attempt to reconstruct the page, and because whoever does
@@ -214,25 +202,6 @@ import { t } from '../../../core/i18n/i18n.service';
       </details>
     </div>
 
-    <app-modal #formModal [title]="formMode() === 'create' ? ('New pensum' | t) : ('Edit pensum' | t)" (closed)="formError.set(null)">
-      <div class="stack">
-        <app-api-error-banner [error]="formError()" />
-        <p class="text-muted">
-          {{ 'The whole pensum as JSON, matching the' | t }} <code>{{ 'Pensum' | t }}</code> {{ 'schema in' | t }}
-          <code>{{ 'docs/api/semaphore.openapi.yaml' | t }}</code> {{ '— which is still what the contract calls it.' | t }}
-        </p>
-        <div class="field">
-          <label for="pensum-json">{{ 'Pensum document' | t }}</label>
-          <textarea id="pensum-json" rows="16" [value]="formText()" (input)="onFormTextInput($event)"></textarea>
-        </div>
-        <div class="row">
-          <button type="button" class="btn btn-primary" [disabled]="formSubmitting()" (click)="submit()">
-            {{ formSubmitting() ? ('Saving…' | t) : formMode() === 'create' ? ('Create pensum' | t) : ('Save changes' | t) }}
-          </button>
-          <button type="button" class="btn" (click)="formModal.close()">{{ 'Cancel' | t }}</button>
-        </div>
-      </div>
-    </app-modal>
   `,
   styles: `
     .import-panel > summary {
@@ -311,7 +280,6 @@ export class PensumsPage {
   readonly error = signal<ApiError | null>(null);
   /** The pensum currently on screen. Null until one is loaded. */
   readonly loaded = signal<Pensum | null>(null);
-  readonly deleting = signal(false);
   /**
    * A plan whose document prints no credits (or no hours) stores zeros for them. Zeros on
    * screen would read as "worth nothing", so those columns show a dash instead - the grid
@@ -355,7 +323,7 @@ export class PensumsPage {
    */
   private readonly byCode = computed(() => {
     const pensum = this.loaded();
-    return pensum ? coursesByCode(pensum) : new Map<string, PensumCourse>();
+    return pensum ? coursesByItemCode(pensum) : new Map<string, PensumCourse>();
   });
 
   /** Prerequisites as they are shown: by code where the plan has real ones, by name where not. */
@@ -371,13 +339,6 @@ export class PensumsPage {
 
   /** How the items are shown. The grid first: it is the view a pensum is checked against its PDF with. */
   readonly view = signal<'grid' | 'table'>('grid');
-
-  readonly formMode = signal<'create' | 'edit'>('create');
-  readonly formText = signal('');
-  readonly formSubmitting = signal(false);
-  readonly formError = signal<ApiError | null>(null);
-
-  @ViewChild('formModal') private formModal?: ModalComponent;
 
   constructor() {
     this.loadCatalog();
@@ -408,7 +369,7 @@ export class PensumsPage {
     }
   }
 
-  /** Re-reads the catalogue, so a pensum just imported or deleted shows up in the picker. */
+  /** Re-reads the catalogue, so a pensum just imported shows up in the picker. */
   loadCatalog(): void {
     this.catalogLoading.set(true);
     this.pensumsService.list().subscribe({
@@ -446,92 +407,6 @@ export class PensumsPage {
       error: (err: unknown) => {
         this.loaded.set(null);
         this.loading.set(false);
-        this.error.set(err instanceof AppHttpError ? err.apiError : null);
-      },
-    });
-  }
-
-  openCreate(): void {
-    this.formMode.set('create');
-    this.formText.set(JSON.stringify(PENSUM_SKELETON, null, 2));
-    this.formError.set(null);
-    this.formModal?.open();
-  }
-
-  openEdit(pensum: Pensum): void {
-    this.formMode.set('edit');
-    this.formText.set(JSON.stringify(pensum, null, 2));
-    this.formError.set(null);
-    this.formModal?.open();
-  }
-
-  onFormTextInput(event: Event): void {
-    this.formText.set((event.target as HTMLTextAreaElement).value);
-  }
-
-  submit(): void {
-    let parsed: Pensum;
-    try {
-      parsed = JSON.parse(this.formText());
-    } catch {
-      this.formError.set({
-        timestamp: new Date().toISOString(),
-        status: 0,
-        error: t('Invalid JSON'),
-        message: t('The pensum document is not valid JSON.'),
-        path: '',
-      });
-      return;
-    }
-
-    this.formSubmitting.set(true);
-    this.formError.set(null);
-    const call =
-      this.formMode() === 'create' ? this.pensumsService.create(parsed) : this.pensumsService.replace(parsed.pensumCode, parsed);
-
-    call.subscribe({
-      next: (saved) => {
-        this.formSubmitting.set(false);
-        this.formModal?.close();
-        this.loaded.set(saved);
-        this.searchCode.set(saved.pensumCode);
-        this.loadCatalog();
-      },
-      error: (err: unknown) => {
-        this.formSubmitting.set(false);
-        this.formError.set(err instanceof AppHttpError ? err.apiError : null);
-      },
-    });
-  }
-
-  /**
-   * Deleting never cascades. A pensum students are following comes back as `409` saying how many,
-   * which the error banner renders from the envelope's own details - the confirmation says so up
-   * front rather than letting the refusal look like a bug.
-   */
-  remove(pensum: Pensum): void {
-    if (
-      !window.confirm(
-        t('Delete pensum {code} ({program})? It has {courses} courses. If any student is following it, the server refuses and says how many.', {
-          code: pensum.pensumCode,
-          program: pensum.programName,
-          courses: pensum.courses.length,
-        }),
-      )
-    ) {
-      return;
-    }
-    this.deleting.set(true);
-    this.error.set(null);
-    this.pensumsService.delete(pensum.pensumCode).subscribe({
-      next: () => {
-        this.deleting.set(false);
-        this.loaded.set(null);
-        this.searchCode.set('');
-        this.loadCatalog();
-      },
-      error: (err: unknown) => {
-        this.deleting.set(false);
         this.error.set(err instanceof AppHttpError ? err.apiError : null);
       },
     });

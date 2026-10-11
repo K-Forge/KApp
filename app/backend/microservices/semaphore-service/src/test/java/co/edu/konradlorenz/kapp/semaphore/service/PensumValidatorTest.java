@@ -29,37 +29,28 @@ class PensumValidatorTest {
         // No exception: that is the assertion.
     }
 
+
+
     @Test
-    @DisplayName("an elective slot with a non-null code is rejected")
-    void electiveSlotWithCodeIsRejected() {
-        PensumCourseDto badElective = new PensumCourseDto(
-                "SHOULD-BE-NULL", "ELECTIVA_I", "Electiva I", 1, 3, 3, null, "ISA", true, List.of(), null);
-        PensumDto dto = withCourses(List.of(badElective));
+    @DisplayName("a prerequisite naming an elective slot is rejected: a slot's content is not known yet")
+    void prerequisiteOnASlotIsRejected() {
+        PensumCourseDto slot = new PensumCourseDto(
+                "ELECTIVA_I", "Electiva I", 1, 3, 3, null, "ISA", true, List.of(), null);
+        PensumCourseDto dependent = new PensumCourseDto(
+                "1102", "Calculo I", 2, 4, 5, null, "CB", false, List.of("ELECTIVA_I"), null);
+        PensumDto dto = withCourses(List.of(slot, dependent));
 
         assertThatThrownBy(() -> validator.validate(dto))
                 .isInstanceOf(BusinessRuleException.class)
                 .satisfies(ex -> assertThat(((BusinessRuleException) ex).getDetails())
-                        .anySatisfy(issue -> assertThat(issue.field()).isEqualTo("courses[0].code")));
-    }
-
-    @Test
-    @DisplayName("a fixed course with a null code is rejected")
-    void fixedCourseWithoutCodeIsRejected() {
-        PensumCourseDto badFixed = new PensumCourseDto(
-                null, "1001", "Precalculo", 1, 3, 4, null, "CB", false, List.of(), null);
-        PensumDto dto = withCourses(List.of(badFixed));
-
-        assertThatThrownBy(() -> validator.validate(dto))
-                .isInstanceOf(BusinessRuleException.class)
-                .satisfies(ex -> assertThat(((BusinessRuleException) ex).getDetails())
-                        .anySatisfy(issue -> assertThat(issue.field()).isEqualTo("courses[0].code")));
+                        .anySatisfy(issue -> assertThat(issue.field()).isEqualTo("courses[1].prerequisites")));
     }
 
     @Test
     @DisplayName("a course whose area is not declared by the pensum is rejected")
     void undeclaredAreaIsRejected() {
         PensumCourseDto badArea = new PensumCourseDto(
-                "10011", "1001", "Precalculo", 1, 3, 4, null, "NOPE", false, List.of(), null);
+                "1001", "Precalculo", 1, 3, 4, null, "NOPE", false, List.of(), null);
         PensumDto dto = withCourses(List.of(badArea));
 
         assertThatThrownBy(() -> validator.validate(dto))
@@ -69,10 +60,10 @@ class PensumValidatorTest {
     }
 
     @Test
-    @DisplayName("a prerequisite that names no course code in the same document is rejected")
+    @DisplayName("a prerequisite that names no course of the same document is rejected")
     void unknownPrerequisiteIsRejected() {
         PensumCourseDto badPrereq = new PensumCourseDto(
-                "10024", "1102", "Calculo I", 2, 4, 5, null, "CB", false, List.of("GHOST-CODE"), null);
+                "1102", "Calculo I", 2, 4, 5, null, "CB", false, List.of("GHOST-CODE"), null);
         PensumDto dto = withCourses(List.of(badPrereq));
 
         assertThatThrownBy(() -> validator.validate(dto))
@@ -85,7 +76,7 @@ class PensumValidatorTest {
     @DisplayName("a supplied totalHours that breaks weeklyHours * 16 is rejected")
     void wrongTotalHoursInvariantIsRejected() {
         PensumCourseDto badHours = new PensumCourseDto(
-                "10011", "1001", "Precalculo", 1, 3, 4, 999, "CB", false, List.of(), null);
+                "1001", "Precalculo", 1, 3, 4, 999, "CB", false, List.of(), null);
         PensumDto dto = withCourses(List.of(badHours));
 
         assertThatThrownBy(() -> validator.validate(dto))
@@ -98,7 +89,7 @@ class PensumValidatorTest {
     @DisplayName("half an hour a week is accepted, and its 72 contact hours with it")
     void halfAnHourIsAccepted() {
         PensumCourseDto practice = new PensumCourseDto(
-                "P5805", "P5805", "Práctica profesional", 8, 9, 4.5, 72, "CB", false, List.of(), null);
+                "P5805", "Práctica profesional", 8, 9, 4.5, 72, "CB", false, List.of(), null);
         validator.validate(withCourses(List.of(practice)));
         // No exception: that is the assertion.
     }
@@ -107,7 +98,7 @@ class PensumValidatorTest {
     @DisplayName("a fraction of an hour that is not a half is rejected")
     void anHourAndAThirdIsRejected() {
         PensumCourseDto odd = new PensumCourseDto(
-                "10011", "1001", "Precalculo", 1, 3, 4.3, null, "CB", false, List.of(), null);
+                "1001", "Precalculo", 1, 3, 4.3, null, "CB", false, List.of(), null);
         PensumDto dto = withCourses(List.of(odd));
 
         assertThatThrownBy(() -> validator.validate(dto))
@@ -120,7 +111,7 @@ class PensumValidatorTest {
     @DisplayName("omitting totalHours on write is not an error - the server derives it")
     void omittedTotalHoursIsAccepted() {
         PensumCourseDto noHours = new PensumCourseDto(
-                "10011", "1001", "Precalculo", 1, 3, 4, null, "CB", false, List.of(), null);
+                "1001", "Precalculo", 1, 3, 4, null, "CB", false, List.of(), null);
         validator.validate(withCourses(List.of(noHours)));
         // No exception: that is the assertion.
     }
@@ -133,11 +124,11 @@ class PensumValidatorTest {
 
     private static PensumDto validPensum() {
         PensumCourseDto fixed = new PensumCourseDto(
-                "10011", "1001", "Precalculo", 1, 3, 4, 64, "CB", false, List.of(), "10011");
+                "1001", "Precalculo", 1, 3, 4, 64, "CB", false, List.of(), "10011");
         PensumCourseDto dependent = new PensumCourseDto(
-                "10024", "1102", "Calculo I", 2, 4, 5, 80, "CB", false, List.of("10011"), "10024");
+                "1102", "Calculo I", 2, 4, 5, 80, "CB", false, List.of("1001"), "10024");
         PensumCourseDto elective = new PensumCourseDto(
-                null, "ELECTIVA_I", "Electiva I", 6, 3, 3, null, "ISA", true, List.of(), null);
+                "ELECTIVA_I", "Electiva I", 6, 3, 3, null, "ISA", true, List.of(), null);
         return withCourses(List.of(fixed, dependent, elective));
     }
 

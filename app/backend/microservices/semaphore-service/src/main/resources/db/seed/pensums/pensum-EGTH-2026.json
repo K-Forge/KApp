@@ -19,7 +19,6 @@
   ],
   "courses": [
     {
-      "code": "EGTH-101",
       "pensumItemCode": "EGTH-101",
       "name": "Sistemas Estratégicos de Compensación",
       "level": 1,
@@ -31,7 +30,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGTH-102",
       "pensumItemCode": "EGTH-102",
       "name": "Gerencia del Talento Humano por Competencias",
       "level": 1,
@@ -43,7 +41,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGTH-103",
       "pensumItemCode": "EGTH-103",
       "name": "Coaching Calidad de Vida",
       "level": 1,
@@ -55,7 +52,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGTH-104",
       "pensumItemCode": "EGTH-104",
       "name": "Derecho Laboral y Seguridad Social",
       "level": 1,
@@ -67,7 +63,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGTH-105",
       "pensumItemCode": "EGTH-105",
       "name": "Gestión en las Organizaciones",
       "level": 1,
@@ -79,7 +74,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGTH-106",
       "pensumItemCode": "EGTH-106",
       "name": "Investigación Aplicada a Talento Humano – Consultoría",
       "level": 1,
@@ -91,7 +85,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGTH-201",
       "pensumItemCode": "EGTH-201",
       "name": "Analítica de Datos en Talento Humano",
       "level": 2,
@@ -103,7 +96,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGTH-202",
       "pensumItemCode": "EGTH-202",
       "name": "Proceso Integral del Talento Humano",
       "level": 2,
@@ -115,7 +107,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGTH-203",
       "pensumItemCode": "EGTH-203",
       "name": "Gestión Estratégica del Talento Humano y Comportamiento Organizacional",
       "level": 2,
@@ -127,7 +118,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGTH-204",
       "pensumItemCode": "EGTH-204",
       "name": "Gestión Financiera en la Gerencia del Talento Humano",
       "level": 2,
@@ -139,7 +129,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGTH-205",
       "pensumItemCode": "EGTH-205",
       "name": "Coaching y Habilidades Gerenciales",
       "level": 2,
@@ -151,7 +140,6 @@
       "sinuCode": null
     },
     {
-      "code": null,
       "pensumItemCode": "EGTH-206",
       "name": "Electiva",
       "level": 2,
@@ -163,7 +151,6 @@
       "sinuCode": null
     },
     {
-      "code": "EGTH-207",
       "pensumItemCode": "EGTH-207",
       "name": "Seminario de Investigación Aplicado",
       "level": 2,

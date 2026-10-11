@@ -1,17 +1,11 @@
 package co.edu.konradlorenz.kapp.semaphore.web;
 
-import co.edu.konradlorenz.kapp.semaphore.domain.PensumStatus;
-import co.edu.konradlorenz.kapp.semaphore.web.dto.PensumAreaDto;
-import co.edu.konradlorenz.kapp.semaphore.web.dto.PensumCourseDto;
-import co.edu.konradlorenz.kapp.semaphore.web.dto.PensumDto;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,17 +17,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Catalog behaviours that are specific to the admin write path and not already covered
- * by {@code PensumValidatorTest} (the cross-field rules in isolation) or
- * {@code AuthorizationMatrixTest} (that ADMIN can reach these endpoints at all):
- * creating a pensum that already exists, replacing one whose body disagrees with the
- * path, and the level/area/elective filters on the item listing.
+ * The catalog as semaphore 2.0 reads it: the pensum listing, the shape of an item - addressed by
+ * {@code pensumItemCode}, shown by {@code sinuCode}, with no printed {@code code} - the filters on
+ * the item listing, and the elective bank of a semester.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -46,9 +36,6 @@ class CatalogFlowTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper mapper;
 
     private static final String SEEDED_PENSUM = "1015";
 
@@ -67,39 +54,8 @@ class CatalogFlowTest {
                 .andExpect(jsonPath("$[0].courses").isNumber());
     }
 
-    @Test
-    @DisplayName("creating a pensum whose pensumCode already exists is rejected with 409")
-    void creatingADuplicatePensumCodeIsConflict() throws Exception {
-        String pensumCode = "DUP-TEST";
-        mockMvc.perform(post("/api/catalog/pensums").with(admin("dup-1"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(minimalPensumJson(pensumCode)))
-                .andExpect(status().isCreated());
 
-        mockMvc.perform(post("/api/catalog/pensums").with(admin("dup-2"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(minimalPensumJson(pensumCode)))
-                .andExpect(status().isConflict());
-    }
 
-    @Test
-    @DisplayName("replacing a pensum whose body pensumCode disagrees with the path is rejected with 400")
-    void replaceWithMismatchedPensumCodeIsRejected() throws Exception {
-        mockMvc.perform(put("/api/catalog/pensums/{code}", "PATH-CODE").with(admin("mismatch-admin"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(minimalPensumJson("BODY-CODE")))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.details[0].field").value("pensumCode"));
-    }
-
-    @Test
-    @DisplayName("replacing a pensum that does not exist yet is rejected with 404")
-    void replaceOfUnknownPensumIs404() throws Exception {
-        mockMvc.perform(put("/api/catalog/pensums/{code}", "NEVER-CREATED").with(admin("replace-404"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(minimalPensumJson("NEVER-CREATED")))
-                .andExpect(status().isNotFound());
-    }
 
     @Test
     @DisplayName("listPensumCourses filters by level")
@@ -135,14 +91,77 @@ class CatalogFlowTest {
                 .andExpect(jsonPath("$[0].area").value("SI"));
     }
 
-    private String minimalPensumJson(String pensumCode) throws Exception {
-        PensumAreaDto area = new PensumAreaDto("CB", "Ciencias Basicas", "#539392", 3, 4);
-        PensumCourseDto course = new PensumCourseDto(
-                "M1", "M1", "Minimal Course", 1, 3, 4, null, "CB", false, List.of(), null);
-        PensumDto dto = new PensumDto(pensumCode, "506", "Test Program",
-                "Test Faculty", "Test Reform", PensumStatus.ACTIVE, 3, 4, 1,
-                List.of(area), List.of(course));
-        return mapper.writeValueAsString(dto);
+
+    // ── Items, as 2.0 shows them ───────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("an item is addressed by pensumItemCode and shown by sinuCode, with no printed code")
+    void itemShape() throws Exception {
+        mockMvc.perform(get("/api/catalog/pensums/{code}/courses", SEEDED_PENSUM)
+                        .param("level", "1")
+                        .with(student("shape-student")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].pensumItemCode").exists())
+                .andExpect(jsonPath("$[0].sinuCode").exists())
+                .andExpect(jsonPath("$[0].code").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("Estadística Descriptiva keeps its printed item code and shows SINU's, 17080")
+    void estadisticaDescriptivaShowsSinusCode() throws Exception {
+        mockMvc.perform(get("/api/catalog/pensums/{code}/courses", SEEDED_PENSUM)
+                        .param("level", "6")
+                        .with(student("estadistica-student")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.pensumItemCode=='17018')].sinuCode").value(
+                        org.hamcrest.Matchers.contains("17080")));
+    }
+
+    @Test
+    @DisplayName("a prerequisite names an item by its pensumItemCode")
+    void prerequisitesAreItemCodes() throws Exception {
+        mockMvc.perform(get("/api/catalog/pensums/{code}/courses", SEEDED_PENSUM)
+                        .param("level", "7")
+                        .with(student("prereq-student")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.pensumItemCode=='17070')].prerequisites[0]").value(
+                        org.hamcrest.Matchers.contains("17018")));
+    }
+
+    // ── The elective bank ──────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("the elective bank of the current period lists the courses SINU offers for the slots")
+    void electiveBankOfTheCurrentPeriod() throws Exception {
+        mockMvc.perform(get("/api/catalog/pensums/{code}/electives", SEEDED_PENSUM)
+                        .with(student("bank-student")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].sinuCode").value("59211"))
+                .andExpect(jsonPath("$[0].credits").value(3))
+                .andExpect(jsonPath("$[0].weeklyHours").value(3))
+                .andExpect(jsonPath("$[0].slots.length()").value(0))
+                .andExpect(jsonPath("$[2].slots[0]").value("59096"));
+    }
+
+    @Test
+    @DisplayName("a period SINU has not published answers an empty bank, not an error")
+    void unpublishedPeriodIsEmpty() throws Exception {
+        mockMvc.perform(get("/api/catalog/pensums/{code}/electives", SEEDED_PENSUM)
+                        .param("period", "20301")
+                        .with(student("bank-future")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    @DisplayName("the bank of a pensum that does not exist is 404, and a malformed period 400")
+    void bankErrors() throws Exception {
+        mockMvc.perform(get("/api/catalog/pensums/{code}/electives", "NO-EXISTE").with(student("bank-404")))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/catalog/pensums/{code}/electives", SEEDED_PENSUM)
+                        .param("period", "2026-2").with(student("bank-400")))
+                .andExpect(status().isBadRequest());
     }
 
     private static RequestPostProcessor student(String subject) {

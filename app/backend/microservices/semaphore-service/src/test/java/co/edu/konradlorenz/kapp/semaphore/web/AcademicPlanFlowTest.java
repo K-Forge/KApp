@@ -1,7 +1,5 @@
 package co.edu.konradlorenz.kapp.semaphore.web;
 
-import co.edu.konradlorenz.kapp.semaphore.client.UserProfileClient;
-import co.edu.konradlorenz.kapp.semaphore.client.UserProfileResponse;
 import co.edu.konradlorenz.kapp.semaphore.repository.AcademicPlanRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +13,6 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.testcontainers.containers.MongoDBContainer;
@@ -25,7 +22,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -57,11 +54,7 @@ class AcademicPlanFlowTest {
     @Autowired
     private AcademicPlanRepository plans;
 
-    @MockitoBean
-    private UserProfileClient userProfileClient;
-
     private static final String SEEDED_PENSUM = "1015";
-    private static final String SEEDED_PROGRAM = "506";
     /** A first-level course of the seeded plan, so it is eligible from the start. */
     private static final String FIRST_LEVEL_COURSE = "11015";
 
@@ -282,7 +275,9 @@ class AcademicPlanFlowTest {
                         .content("{\"plannedLevel\":7}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.placements.length()").value(1))
-                .andExpect(jsonPath("$.placements[0].code").value(FIRST_LEVEL_COURSE))
+                .andExpect(jsonPath("$.placements[0].pensumItemCode").value(FIRST_LEVEL_COURSE))
+                .andExpect(jsonPath("$.placements[0].electiveSinuCode").value(nullValue()))
+                .andExpect(jsonPath("$.placements[0].electiveOffered").value(nullValue()))
                 .andExpect(jsonPath("$.placements[0].plannedLevel").value(7));
     }
 
@@ -331,7 +326,7 @@ class AcademicPlanFlowTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"plannedLevel\":3}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.details[0].field").value("code"));
+                .andExpect(jsonPath("$.details[0].field").value("pensumItemCode"));
     }
 
     @Test
@@ -353,8 +348,6 @@ class AcademicPlanFlowTest {
     @Test
     @DisplayName("planning a course earlier does NOT make it eligible")
     void planningACourseEarlierDoesNotMakeItEligible() throws Exception {
-        stubProfile("p-eligible", SEEDED_PROGRAM, "506232799", 1);
-
         List<String> before = eligibleCodes("p-eligible");
         String locked = lockedCourse("p-eligible", before);
 
@@ -367,6 +360,71 @@ class AcademicPlanFlowTest {
                         + "prerequisites, never from a plan", locked)
                 .doesNotContain(locked)
                 .containsExactlyElementsOf(before);
+    }
+
+    // ── Electives ──────────────────────────────────────────────────────────────────
+
+    /**
+     * The test SINU's bank for pensum 1015 offers Computación en la Nube (59211) and Inteligencia
+     * Artificial Aplicada (59214) for any slot, and Seguridad de la Información (59217) only for
+     * Electiva V and VI (59096, 59098). Whether a plan's choice is offered is worked out on read.
+     */
+    @Test
+    @DisplayName("an elective slot takes a course from the bank, and says whether this period offers it there")
+    void electiveSlotTakesACourseFromTheBank() throws Exception {
+        String id = createPlan("p-elective", "Mi plan");
+
+        mockMvc.perform(put("/api/semaphore/me/plans/{id}/placements/{item}", id, "59096")
+                        .with(student("p-elective"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"plannedLevel\":8,\"electiveSinuCode\":\"59217\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.placements[0].pensumItemCode").value("59096"))
+                .andExpect(jsonPath("$.placements[0].electiveSinuCode").value("59217"))
+                .andExpect(jsonPath("$.placements[0].electiveOffered").value(true));
+
+        mockMvc.perform(put("/api/semaphore/me/plans/{id}/placements/{item}", id, "59075")
+                        .with(student("p-elective"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"plannedLevel\":6,\"electiveSinuCode\":\"59217\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.placements[0].pensumItemCode").value("59075"))
+                .andExpect(jsonPath("$.placements[0].electiveOffered").value(false));
+
+        mockMvc.perform(put("/api/semaphore/me/plans/{id}/placements/{item}", id, "59078")
+                        .with(student("p-elective"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"plannedLevel\":6,\"electiveSinuCode\":\"59211\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.placements[1].pensumItemCode").value("59078"))
+                .andExpect(jsonPath("$.placements[1].electiveOffered").value(true));
+    }
+
+    @Test
+    @DisplayName("a course the bank does not have is kept, and comes back as not offered")
+    void electiveNotInTheBank() throws Exception {
+        String id = createPlan("p-elective-gone", "Mi plan");
+
+        mockMvc.perform(put("/api/semaphore/me/plans/{id}/placements/{item}", id, "59098")
+                        .with(student("p-elective-gone"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"plannedLevel\":8,\"electiveSinuCode\":\"99999\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.placements[0].electiveSinuCode").value("99999"))
+                .andExpect(jsonPath("$.placements[0].electiveOffered").value(false));
+    }
+
+    @Test
+    @DisplayName("choosing a course for a fixed course is refused, naming the field")
+    void electiveOnAFixedCourseIsRejected() throws Exception {
+        String id = createPlan("p-elective-fixed", "Mi plan");
+
+        mockMvc.perform(put("/api/semaphore/me/plans/{id}/placements/{item}", id, FIRST_LEVEL_COURSE)
+                        .with(student("p-elective-fixed"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"plannedLevel\":3,\"electiveSinuCode\":\"59211\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[0].field").value("electiveSinuCode"));
     }
 
     // ── Resetting ──────────────────────────────────────────────────────────────────
@@ -410,7 +468,7 @@ class AcademicPlanFlowTest {
     }
 
     @Test
-    @DisplayName("an admin has no plans either; they read /api/semaphore/{userId} instead")
+    @DisplayName("an admin has no plans either, and reads nobody else's")
     void adminIsForbidden() throws Exception {
         mockMvc.perform(get("/api/semaphore/me/plans").with(jwtWithRole("adm", "ROLE_ADMIN")))
                 .andExpect(status().isForbidden());
@@ -500,15 +558,8 @@ class AcademicPlanFlowTest {
 
     private static List<String> codesOf(JsonNode array) {
         return java.util.stream.StreamSupport.stream(array.spliterator(), false)
-                .map(n -> n.hasNonNull("code") ? n.get("code").asText()
-                        : n.get("pensumItemCode").asText())
+                .map(n -> n.get("pensumItemCode").asText())
                 .toList();
-    }
-
-    private void stubProfile(String subject, String programCode, String studentCode, int currentLevel) {
-        when(userProfileClient.getMyProfile()).thenReturn(new UserProfileResponse(
-                subject, "ROLE_STUDENT",
-                new UserProfileResponse.Academic(studentCode, programCode, currentLevel)));
     }
 
     private static RequestPostProcessor student(String subject) {

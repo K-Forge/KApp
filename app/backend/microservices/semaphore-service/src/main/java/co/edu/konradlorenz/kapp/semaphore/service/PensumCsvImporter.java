@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -274,6 +275,8 @@ public class PensumCsvImporter {
         private final Map<String, double[]> areaTotals = new LinkedHashMap<>();
         private final List<PensumCourseDto> courses = new ArrayList<>();
         private final Set<String> seenItemCodes = new LinkedHashSet<>();
+        /** courseCode -> itemCode, so a prerequisite written as a course code still names its item. */
+        private final Map<String, String> itemOfCourseCode = new HashMap<>();
 
         PensumDraft(String pensumCode) {
             this.pensumCode = pensumCode;
@@ -357,10 +360,15 @@ public class PensumCsvImporter {
                         "pensumItemCode '%s' appears twice in pensum %s".formatted(itemCode, pensumCode));
             }
             boolean elective = booleanValue(r, "isElectiveSlot");
-            String code = blankToNull(r.get("courseCode"));
+            // courseCode is still a column of the template, so an old file keeps importing, but
+            // semaphore 2.0 keeps no printed code: an item is its itemCode, and the code a client
+            // shows is sinuCode. A prerequisite that names a courseCode is read as that row's item.
+            String courseCode = blankToNull(r.get("courseCode"));
+            if (courseCode != null) {
+                itemOfCourseCode.putIfAbsent(courseCode, itemCode);
+            }
 
             courses.add(new PensumCourseDto(
-                    code,
                     itemCode,
                     required(r, "courseName"),
                     integer(r, "courseLevel"),
@@ -380,8 +388,14 @@ public class PensumCsvImporter {
                         return new PensumAreaDto(a.code(), a.name(), a.color(), (int) t[0], t[1]);
                     })
                     .toList();
+            List<PensumCourseDto> byItem = courses.stream()
+                    .map(c -> new PensumCourseDto(c.pensumItemCode(), c.name(), c.level(), c.credits(),
+                            c.weeklyHours(), c.totalHours(), c.area(), c.isElectiveSlot(),
+                            c.prerequisites().stream().map(p -> itemOfCourseCode.getOrDefault(p, p)).toList(),
+                            c.sinuCode()))
+                    .toList();
             return new PensumDto(pensumCode, programCode, programName, faculty, reform,
-                    status, declaredCredits, declaredHours, levels, withTotals, courses);
+                    status, declaredCredits, declaredHours, levels, withTotals, byItem);
         }
 
         Program toProgram() {
