@@ -156,6 +156,22 @@ public class UserProfileService {
         }
     }
 
+    /**
+     * The roles an administrator gave an account in auth-service, so the directory shows them.
+     *
+     * @throws BusinessRuleException     (400) unless they hold exactly one profile role, and no
+     *                                   {@code ROLE_GUEST}
+     * @throws ResourceNotFoundException (404) when no profile carries that id
+     */
+    public DirectoryEntry setRoles(String userId, List<UserRole> requested) {
+        List<UserRole> roles = checkRoles(requested);
+        UserProfile current = load(userId);
+        if (current.roles().equals(roles)) {
+            return DirectoryEntry.from(current);
+        }
+        return DirectoryEntry.from(repository.save(current.withRoles(roles, StoredInstant.now())));
+    }
+
     private UserProfile upsertOnce(String email, InternalUserUpsertRequest request, List<UserRole> roles) {
         Instant now = StoredInstant.now();
         Optional<UserProfile> existing = repository.findByEmail(email);

@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.auth.web;
 
 import co.edu.konradlorenz.kapp.auth.service.AccountDeletionService;
+import co.edu.konradlorenz.kapp.auth.service.AccountRolesService;
 import co.edu.konradlorenz.kapp.auth.service.PasswordService;
 import co.edu.konradlorenz.kapp.auth.service.RegistrationService;
 import co.edu.konradlorenz.kapp.common.security.CurrentUser;
@@ -8,10 +9,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -32,12 +35,23 @@ public class AdminAccountController {
     private final RegistrationService registration;
     private final PasswordService passwords;
     private final AccountDeletionService deletion;
+    private final AccountRolesService roles;
 
     public AdminAccountController(RegistrationService registration, PasswordService passwords,
-                                  AccountDeletionService deletion) {
+                                  AccountDeletionService deletion, AccountRolesService roles) {
         this.registration = registration;
         this.passwords = passwords;
         this.deletion = deletion;
+        this.roles = roles;
+    }
+
+    @PutMapping(path = "/{userId}/roles", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Set an account's profile role and permissions",
+            description = "Replaces the account's roles. They reach its tokens at the next renewal.")
+    public AccountRolesResponse setRoles(@PathVariable String userId, @Valid @RequestBody AccountRolesRequest body) {
+        return new AccountRolesResponse(userId,
+                roles.set(userId, body.profileRole(), body.permissions(), CurrentUser.id()));
     }
 
     @PostMapping

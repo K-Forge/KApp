@@ -5,6 +5,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
@@ -31,6 +32,10 @@ public interface UserProfileClient {
      */
     @PostMapping(value = "/internal/users", consumes = MediaType.APPLICATION_JSON_VALUE)
     UserProfileView upsert(@RequestBody InternalUserUpsert body);
+
+    /** The roles an administrator gave the account, so the directory shows them. */
+    @PutMapping(value = "/internal/users/{id}/roles", consumes = MediaType.APPLICATION_JSON_VALUE)
+    UserProfileView setRoles(@PathVariable("id") String id, @RequestBody InternalUserRoles body);
 
     /** The profile of an account an administrator deleted. Idempotent: 204 whether it was there or not. */
     @DeleteMapping("/internal/users/{id}")

@@ -103,6 +103,13 @@ public record Credential(
                 verificationTokenHash, verificationTokenExpiresAt, createdAt, now, true, expiresAt);
     }
 
+    /** The roles an administrator set: the profile role first, then the permissions. */
+    public Credential withRoles(List<String> newRoles, Instant now) {
+        return new Credential(id, userId, email, passwordHash, List.copyOf(newRoles), status, emailVerified,
+                provider, verificationTokenHash, verificationTokenExpiresAt, createdAt, now,
+                passwordChangeRequired, temporaryPasswordExpiresAt);
+    }
+
     /** The person's own password: whatever was temporary about the last one is over. */
     public Credential withPassword(String hash, Instant now) {
         return new Credential(id, userId, email, hash, roles, status, emailVerified, provider,

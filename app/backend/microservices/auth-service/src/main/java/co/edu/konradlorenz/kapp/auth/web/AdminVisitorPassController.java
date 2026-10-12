@@ -24,8 +24,8 @@ import java.util.List;
 /**
  * The reception counter: minting day passes and reading the register of who used them.
  *
- * <p>{@code ROLE_ADMIN} throughout, enforced per method rather than on the class, so a later
- * addition to this controller cannot inherit an assumption nobody re-reads.
+ * <p>{@code ROLE_RECEPTION} or {@code ROLE_ADMIN} throughout, enforced per method rather than on
+ * the class, so a later addition to this controller cannot inherit an assumption nobody re-reads.
  *
  * <p><strong>Everything here returns personal data.</strong> The listing carries visitors'
  * names and identity documents, which is the whole point of a register and also the reason
@@ -44,7 +44,7 @@ public class AdminVisitorPassController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTION')")
     @Operation(summary = "List visitor passes",
             description = "Newest first. Filter by whether they have been redeemed. "
                     + "Includes visitors' identity documents; records disappear after 30 days.")
@@ -54,7 +54,7 @@ public class AdminVisitorPassController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTION')")
     @Operation(summary = "Issue a visitor day pass",
             description = "Returns a code to read out to the visitor. Redeemable for 12 hours; "
                     + "once redeemed the visitor has 24 hours of map-only access.")
@@ -67,7 +67,7 @@ public class AdminVisitorPassController {
     }
 
     @DeleteMapping("/{code}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTION')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Revoke an unredeemed pass",
             description = "409 for a pass that has been redeemed: that row is the record of a "

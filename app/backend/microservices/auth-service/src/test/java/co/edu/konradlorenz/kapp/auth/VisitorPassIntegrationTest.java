@@ -305,13 +305,31 @@ class VisitorPassIntegrationTest extends AbstractAuthIntegrationTest {
     // ── Authorization ──────────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("minting a pass needs ROLE_ADMIN")
-    void issuingRequiresAdmin() throws Exception {
-        for (String role : List.of("ROLE_STUDENT", "ROLE_PROFESSOR", "ROLE_GUEST")) {
+    @DisplayName("minting a pass needs ROLE_RECEPTION or ROLE_ADMIN; another permission does not do")
+    void issuingRequiresReceptionOrAdmin() throws Exception {
+        for (String role : List.of("ROLE_STUDENT", "ROLE_PROFESSOR", "ROLE_STAFF", "ROLE_GUEST",
+                "ROLE_MAINTENANCE", "ROLE_MODERATION", "ROLE_WELLBEING")) {
             mockMvc.perform(post("/auth/admin/visitor-passes")
                             .header("Authorization", bearerFor("u", "u@x.co", role)))
                     .andExpect(status().isForbidden());
         }
+    }
+
+    /** Reception keeps the register: it issues the passes, reads them and revokes an unused one. */
+    @Test
+    @DisplayName("reception issues a pass, reads the register and revokes an unused pass")
+    void receptionRunsTheCounter() throws Exception {
+        String reception = bearerFor("r-1", "recepcion@konradlorenz.edu.co", "ROLE_STAFF", "ROLE_RECEPTION");
+
+        String body = mockMvc.perform(post("/auth/admin/visitor-passes").header("Authorization", reception))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        String code = objectMapper.readTree(body).get("code").asText();
+
+        mockMvc.perform(get("/auth/admin/visitor-passes").header("Authorization", reception))
+                .andExpect(status().isOk());
+        mockMvc.perform(delete("/auth/admin/visitor-passes/{code}", code).header("Authorization", reception))
+                .andExpect(status().isNoContent());
     }
 
     @Test
