@@ -46,6 +46,11 @@ import java.util.List;
  *                                   Null on every account older than temporary passwords, which
  *                                   reads as false
  * @param temporaryPasswordExpiresAt when that temporary password stops being accepted at all
+ * @param externalId                 the person at the identity provider: Microsoft's {@code oid},
+ *                                   stable for life where the address is not. Null for a local
+ *                                   account that has never signed in with Microsoft
+ * @param profileRoleChosenByAdmin   true once an administrator set the profile role, which the
+ *                                   directory then no longer overrides at sign-in. Null reads as false
  */
 @Document(collection = "credentials")
 public record Credential(
@@ -62,7 +67,9 @@ public record Credential(
         Instant createdAt,
         Instant updatedAt,
         Boolean passwordChangeRequired,
-        Instant temporaryPasswordExpiresAt
+        Instant temporaryPasswordExpiresAt,
+        String externalId,
+        Boolean profileRoleChosenByAdmin
 ) {
 
     public enum Status {
@@ -100,20 +107,43 @@ public record Credential(
     /** A temporary password an administrator issued, replacing whatever the account had. */
     public Credential withTemporaryPassword(String hash, Instant expiresAt, Instant now) {
         return new Credential(id, userId, email, hash, roles, status, emailVerified, provider,
-                verificationTokenHash, verificationTokenExpiresAt, createdAt, now, true, expiresAt);
+                verificationTokenHash, verificationTokenExpiresAt, createdAt, now, true, expiresAt, externalId,
+                profileRoleChosenByAdmin);
     }
 
-    /** The roles an administrator set: the profile role first, then the permissions. */
-    public Credential withRoles(List<String> newRoles, Instant now) {
+    /**
+     * The account's roles: the profile role first, then the permissions.
+     *
+     * @param chosenByAdmin true when an administrator set them, so the profile role is theirs from
+     *                      now on rather than the directory's; false keeps the account as it was
+     */
+    public Credential withRoles(List<String> newRoles, boolean chosenByAdmin, Instant now) {
         return new Credential(id, userId, email, passwordHash, List.copyOf(newRoles), status, emailVerified,
                 provider, verificationTokenHash, verificationTokenExpiresAt, createdAt, now,
-                passwordChangeRequired, temporaryPasswordExpiresAt);
+                passwordChangeRequired, temporaryPasswordExpiresAt, externalId,
+                chosenByAdmin ? Boolean.TRUE : profileRoleChosenByAdmin);
+    }
+
+    /** Whether an administrator chose the profile role, which the directory then leaves alone. */
+    public boolean profileRoleIsAdministrators() {
+        return Boolean.TRUE.equals(profileRoleChosenByAdmin);
+    }
+
+    /** The account adopted by its Microsoft identity, on its first sign-in with Microsoft. */
+    public Credential withExternalId(String newExternalId, Instant now) {
+        // The tenant owns the mailbox: an account still waiting for its address to be confirmed is
+        // confirmed now. A suspended one stays suspended.
+        Status adopted = status == Status.PENDING_VERIFICATION ? Status.ACTIVE : status;
+        return new Credential(id, userId, email, passwordHash, roles, adopted, true, provider,
+                verificationTokenHash, verificationTokenExpiresAt, createdAt, now,
+                passwordChangeRequired, temporaryPasswordExpiresAt, newExternalId, profileRoleChosenByAdmin);
     }
 
     /** The person's own password: whatever was temporary about the last one is over. */
     public Credential withPassword(String hash, Instant now) {
         return new Credential(id, userId, email, hash, roles, status, emailVerified, provider,
-                verificationTokenHash, verificationTokenExpiresAt, createdAt, now, null, null);
+                verificationTokenHash, verificationTokenExpiresAt, createdAt, now, null, null, externalId,
+                profileRoleChosenByAdmin);
     }
 
     /**
@@ -138,7 +168,7 @@ public record Credential(
         }
         return new Credential(id, userId, email, passwordHash, roles, target, emailVerified,
                 provider, verificationTokenHash, verificationTokenExpiresAt, createdAt, now,
-                passwordChangeRequired, temporaryPasswordExpiresAt);
+                passwordChangeRequired, temporaryPasswordExpiresAt, externalId, profileRoleChosenByAdmin);
     }
 
     /**
@@ -148,9 +178,19 @@ public record Credential(
      * parameter: there is no path through registration that legitimately produces a
      * verified address, so the type refuses to express one.
      */
+    /**
+     * An account created the first time somebody signs in with Microsoft. No password: the tenant
+     * vouches for the person, and it owns their mailbox, so the address counts as verified.
+     */
+    public static Credential newMicrosoftAccount(String userId, String email, List<String> roles,
+                                                 String externalId, Instant now) {
+        return new Credential(null, userId, email, null, List.copyOf(roles), Status.ACTIVE, true,
+                Provider.ENTRA_ID, null, null, now, now, null, null, externalId, null);
+    }
+
     public static Credential newLocalAccount(String userId, String email, String passwordHash,
                                              List<String> roles, Status status, Instant now) {
         return new Credential(null, userId, email, passwordHash, roles, status, false,
-                Provider.LOCAL, null, null, now, now, null, null);
+                Provider.LOCAL, null, null, now, now, null, null, null, null);
     }
 }

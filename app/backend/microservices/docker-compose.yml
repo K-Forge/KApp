@@ -179,6 +179,8 @@ services:
       KAPP_MICROSOFT_ISSUERS: ${KAPP_MICROSOFT_ISSUERS:-http://localhost:${KAPP_FAKE_OIDC_PORT:-8090}/kapp,http://10.0.2.2:${KAPP_FAKE_OIDC_PORT:-8090}/kapp}
       KAPP_MICROSOFT_JWKS_URI: ${KAPP_MICROSOFT_JWKS_URI:-http://fake-oidc:8080/kapp/jwks}
       KAPP_MICROSOFT_CLIENT_IDS: ${KAPP_MICROSOFT_CLIENT_IDS:-kapp-app-dev,kapp-portal-dev}
+      # The fake directory's administrative employee opens the portal locally.
+      KAPP_FIRST_ADMINS: ${KAPP_FIRST_ADMINS:-administrativo@kforge.dev}
     mem_limit: 512m
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:8081/actuator/health || exit 1"]

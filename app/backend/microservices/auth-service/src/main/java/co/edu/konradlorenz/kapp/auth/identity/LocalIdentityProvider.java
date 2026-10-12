@@ -18,9 +18,9 @@ import java.util.Optional;
 /**
  * Verifies a password against the BCrypt hash this service stores itself.
  *
- * <p>The only implementation of {@link IdentityProviderPort} in the MVP, and the only
- * class in the service that knows a password hash exists. An Entra adapter will sit
- * beside it, supporting {@link IdentityAssertion.AuthorizationCode} instead.
+ * <p>The only class in the service that knows a password hash exists. It serves development, CI
+ * and the mocks, behind the local sign-in flag; members of the university sign in through
+ * {@link EntraIdAdapter} beside it, with a {@link IdentityAssertion.MicrosoftIdToken}.
  *
  * <h2>Failure modes are deliberately uneven, and deliberately so in one direction only</h2>
  * Unknown account, wrong password and suspended account all raise the same

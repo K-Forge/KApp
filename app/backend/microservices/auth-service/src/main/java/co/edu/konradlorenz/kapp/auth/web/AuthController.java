@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.auth.web;
 
 import co.edu.konradlorenz.kapp.auth.domain.RefreshToken;
+import co.edu.konradlorenz.kapp.auth.identity.IdentityAssertion;
 import co.edu.konradlorenz.kapp.auth.jwt.JwtIssuer;
 import co.edu.konradlorenz.kapp.auth.service.AuthService;
 import co.edu.konradlorenz.kapp.auth.service.PasswordService;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
@@ -62,6 +64,19 @@ public class AuthController {
             description = "The invitation code decides the role. ROLE_ADMIN is never granted here.")
     public RegistrationResponse register(@Valid @RequestBody RegistrationRequest request) {
         return registrationService.register(request);
+    }
+
+    /**
+     * Members of the university sign in here, with the ID token Microsoft's sign-in gave the
+     * client. Public: the ID token is the proof, and the gateway rate-limits this as it does login.
+     */
+    @PostMapping("/microsoft")
+    @Operation(summary = "Sign in with Microsoft",
+            description = "Exchanges a Microsoft ID token for KApp's tokens. PORTAL takes only an account "
+                    + "with a permission.")
+    public TokenResponse signInWithMicrosoft(@Valid @RequestBody MicrosoftSignInRequest request) {
+        var issued = authService.authenticate(new IdentityAssertion.MicrosoftIdToken(request.idToken(), request.client()));
+        return TokenResponse.of(sessions.open(issued, request.client()));
     }
 
     @PostMapping("/login")
@@ -155,6 +170,11 @@ public class AuthController {
             @NotBlank @Size(min = 10, max = 72) String currentPassword,
             @NotBlank @Size(min = 10, max = 72) String newPassword,
             @Size(max = 4) List<@Pattern(regexp = ROLE_PATTERN) String> allowedRoles) {
+    }
+
+    public record MicrosoftSignInRequest(
+            @NotBlank @Size(min = 20, max = 8192) String idToken,
+            @NotNull RefreshToken.Client client) {
     }
 
     public record RefreshRequest(@NotBlank @Size(min = 16, max = 256) String refreshToken) {
