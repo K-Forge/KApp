@@ -26,7 +26,7 @@ issues labelled `area/*`.
 | API contracts | **The 2.0 set** | semaphore 2.0, schedule 2.0, auth 1.0, user 1.0, map 3.6 (#42). Mocks on one port, 4000 (#40). History in [`api/CHANGELOG.md`](api/CHANGELOG.md) |
 | Database isolation | Complete | One database and one account per service that stores data. Verified by `scripts/verify-db-isolation.sh` |
 | Academic data | **Read-only, from SINU** | Behind the test SINU adapter (#77–#80). semaphore keeps only the student's plans; schedule has no database |
-| Identity | **In progress** | Microsoft sign-in, rotating refresh tokens, profile roles and permissions: backend phase 3 (#56). Refresh tokens in #82, password sign-in closed outside development in #83 |
+| Identity | **In progress** | Backend phase 3 (#56). Merged: rotating refresh tokens with reuse detection (#82), and password sign-in only when local sign-in is enabled (#83). Next: Microsoft sign-in, permissions, and the new roles in every service |
 | User profiles | Merged | user 1.0 (#80): names, picture, roles, active. No identity document, phone or student code. A student's programme is read from SINU |
 | Campus map | Merged | Buildings mapped to their SINU sedes, floors drawn as polygons from the evacuation plans, cacheable reads (#77) |
 | Admin and developer portal | Merged | Angular, bilingual. CRUD, an API console driven by the specs, a role inspector, and the floor editor |
@@ -47,7 +47,7 @@ One issue per backend phase. The clients follow each contract through `area/kotl
 |---|---|---|
 | 1 · Remove Eureka and the frozen services | #54 | Code merged (#64, #65); the plan material and the two `.docx` remain |
 | 2 · Read-only academic data behind a test SINU | #55 | Merged (#77–#80) |
-| 3 · Microsoft sign-in, rotating refresh tokens, roles and permissions | #56 | In progress (#82, #83). The Entra ID test tenant is #62 |
+| 3 · Microsoft sign-in, rotating refresh tokens, roles and permissions | #56 | In progress: refresh tokens (#82) and local sign-in behind its flag (#83) merged; Microsoft sign-in, permissions, roles and the portal remain. The Entra ID test tenant is #62 |
 | 4 · End-to-end journeys per profile | #57 | Planned |
 | 5 · EC floors faithful to the plans | #58 | Blocked on Brian's sketches |
 | 6 · Kubernetes with kind, the guide, and production | #59 | Planned |
@@ -127,11 +127,11 @@ Tracked in `docs/SECURITY-AUDIT.md`.
 | S4 | Moderate | Resolved. No registry since #64; the gateway routes only to explicit addresses, and `/internal/**` has no route |
 | S5 | Moderate | Resolved. Actuator exposes health and info only, without details; the Eureka dashboard is gone |
 | S6 | Low | Resolved. Debug logging off by default |
-| S7 | Low | Open. Tokens expire in one hour with no refresh or revocation; rotating refresh tokens are in #82 |
+| S7 | Low | Addressed by #82: rotating refresh tokens with reuse detection. Marked closed when the audit is re-run |
 | S8 | Informational | Open. HS512 key length — superseded in practice: signing is RS256 now |
 | S9 | Informational | Open. Sample data credentials |
 | S10 | High | Resolved. Each service holds its own MongoDB account with `readWrite` on one database |
-| S11 | Moderate | Open. The development accounts hold `ROLE_ADMIN` and two seeded invitation codes ship in the repository. Correct while nothing is reachable from outside; #83 closes password sign-in and invitation codes outside development |
+| S11 | Moderate | Mitigated. The development accounts hold `ROLE_ADMIN` and two seeded invitation codes ship in the repository, but since #83 password sign-in and invitation codes answer only when local sign-in is enabled |
 | H1 | High | Open. Two development credentials remain readable in git history. Rotation belongs to backend phase 6 |
 
 ---

@@ -302,7 +302,8 @@ Read `docs/PROGRESS.md` for the detailed status before proposing large changes.
   `docs/api/CHANGELOG.md` holds the history. Write the spec first; springdoc output is a drift check against it,
   not the other way round.
 - **Backend:** phase 1 removed Eureka and the frozen services; phase 2 made the academic data read-only, behind the
-  test SINU adapter. Phase 3, Microsoft sign-in with rotating refresh tokens and the new roles, is in progress.
+  test SINU adapter. Phase 3 is under way: rotating refresh tokens (#82) and development-only password sign-in
+  (#83) are in; Microsoft sign-in, permissions and the new roles are next.
 - **Android:** sign-in, home, profile, semáforo with plans, and timetable, against the mocks.
 - **iOS:** in progress in its own worktree.
 - **Portal:** built, tested in CI, and used by the team to sign in as a role and reproduce a failing call.

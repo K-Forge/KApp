@@ -82,8 +82,8 @@ What that means when reading this repository:
   is in [`docs/api/`](docs/api/), with its history in [`docs/api/CHANGELOG.md`](docs/api/CHANGELOG.md), and is
   served as Prism mocks, so the clients never wait on the backend.
 - **The backend is built in phases**, one issue each. Phase 1 removed the Eureka registry and two frozen services;
-  phase 2 made the academic data read-only, behind the test SINU adapter; phase 3 — Microsoft sign-in, rotating
-  refresh tokens and the new roles — is in progress. Kubernetes, notifications and the community features follow.
+  phase 2 made the academic data read-only, behind the test SINU adapter; phase 3 is under way — rotating refresh
+  tokens and development-only password sign-in are in, and Microsoft sign-in and the new roles come next. Kubernetes, notifications and the community features follow.
   [`docs/PROGRESS.md`](docs/PROGRESS.md) has the detail.
 - **The Android app is under way**: sign-in, home, profile, semáforo with plans, and timetable, built against the
   mocks. The iOS app is in progress.
@@ -294,8 +294,8 @@ Either way the interface is the same and it is in [`docs/api/`](docs/api/), not 
 - **Everything goes through the gateway on `:8080`.** Service ports are unpublished on purpose.
 - **Members sign in with Microsoft.** In auth 1.0 the app sends the Microsoft ID token to `POST /auth/microsoft` and
   gets KApp's RS256 access token; send it as `Authorization: Bearer <token>`. It lasts an hour, and
-  `POST /auth/refresh` renews it. Backend phase 3 implements this; until then, and in development only,
-  `POST /auth/login` signs in with a password. A `401` means "send the user back to sign-in" — the Auth contract
+  `POST /auth/refresh` renews it (#82). Microsoft sign-in is the rest of backend phase 3; until it lands, and in
+  development only, `POST /auth/login` signs in with a password. A `401` means "send the user back to sign-in" — the Auth contract
   says so in the spec rather than leaving you to find out.
 - **Every error has the same shape**: `timestamp`, `status`, `error`, `message`, `path`, and
   `details` when a field is at fault. Bind your form errors to `details`; show `message` to a person.
@@ -398,11 +398,11 @@ endpoint carries an explicit rule asserted per role in tests, and the CORS wildc
 Three findings remain open, deliberately, and each says what has to happen before KApp is reachable from outside a
 laptop:
 
-- **S7** — tokens simply expire after an hour; there is no refresh and no revocation. Rotating refresh tokens
-  with revocation are in review (#82).
+- **S7** — tokens simply expired after an hour, with no refresh. #82 added rotating refresh tokens with reuse
+  detection; the audit closes the finding when it is re-run.
 - **S11** — the four development accounts hold `ROLE_ADMIN`, and the two seeded invitation codes ship in this
   repository. Both are correct while this runs on one machine and **must be revoked before it does not**.
-  Password sign-in and invitation codes close outside development with #83.
+  Since #83, password sign-in and invitation codes answer only when local sign-in is enabled, in development.
 - **H1** — two development credentials from the deleted monolith remain readable in the git history.
 
 Secrets are generated per machine by `scripts/generate-dev-secrets.sh` and never committed; the working tree carries
