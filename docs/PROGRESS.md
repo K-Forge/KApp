@@ -165,7 +165,6 @@ than an oversight.
 | Spring Cloud Config Server | Configuration is per-service environment variables |
 | Distributed tracing | No Zipkin |
 | Database per service | One database **and one account** per service, on one MongoDB instance. Moving one service to its own cluster — or to a different engine — is a change to one connection string |
-| `app/database/init.sql` | Legacy PostgreSQL schema, reference only |
 
 ### Deployment
 

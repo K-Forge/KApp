@@ -8,11 +8,7 @@
     "microservices:mock": "docker compose -f app/backend/microservices/docker-compose.yml --profile mock up -d",
     "microservices:status": "docker compose -f app/backend/microservices/docker-compose.yml --profile full --profile dev ps",
     "microservices:logs": "docker compose -f app/backend/microservices/docker-compose.yml logs -f --tail=60",
-    "microservices:stop": "docker compose -f app/backend/microservices/docker-compose.yml --profile full --profile dev down",
-    "prototype:serve": "pnpm exec serve app/frontend/web -s -l 3000"
-  },
-  "devDependencies": {
-    "serve": "^14.2.4"
+    "microservices:stop": "docker compose -f app/backend/microservices/docker-compose.yml --profile full --profile dev down"
   },
   "packageManager": "pnpm@10.33.0"
 }

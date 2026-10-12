@@ -1,7 +1,7 @@
 # Konrad Colors — KApp
 
 <p align="center">
-  <img src="../app/frontend/web/images/konrad-logo.png" alt="Konrad Lorenz logo" width="200">
+  <img src="design/mobile/konrad-logo.png" alt="Konrad Lorenz logo" width="200">
 </p>
 
 ## Color Palette

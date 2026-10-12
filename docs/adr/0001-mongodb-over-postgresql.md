@@ -58,4 +58,5 @@ have gone into deleting it.
   tests and local runs match.
 - Images must be MongoDB 7.0 or newer: earlier lines publish no arm64 build and would run emulated
   on the Apple Silicon machines the team uses.
-- `app/database/init.sql` is retained for reference only, as the record of the previous model.
+- `app/database/init.sql` was retained for reference only, as the record of the previous model. It was deleted in
+  October 2026 (#51), since nothing read it; git keeps it.
