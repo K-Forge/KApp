@@ -1,4 +1,4 @@
 programCode,programName,faculty,programLevel,pensumCode,reform,pensumStatus,declaredCredits,declaredHours,levels,areaCode,areaName,areaColor,pensumItemCode,courseCode,courseName,courseLevel,credits,weeklyHours,isElectiveSlot,prerequisites,sinuCode
-777,Programa de Ejemplo,Facultad de Ejemplo,PREGRADO,9999,Reforma 2026,DRAFT,9,11,2,CB,Ciencias Basicas,#539392,9001,90011,Calculo Diferencial,1,3,4,false,,
-777,Programa de Ejemplo,Facultad de Ejemplo,PREGRADO,9999,Reforma 2026,DRAFT,9,11,2,CB,Ciencias Basicas,#539392,9002,90021,Calculo Integral,2,3,4,false,90011,
+777,Programa de Ejemplo,Facultad de Ejemplo,PREGRADO,9999,Reforma 2026,DRAFT,9,11,2,CB,Ciencias Basicas,#539392,9001,,Calculo Diferencial,1,3,4,false,,99011
+777,Programa de Ejemplo,Facultad de Ejemplo,PREGRADO,9999,Reforma 2026,DRAFT,9,11,2,CB,Ciencias Basicas,#539392,9002,,Calculo Integral,2,3,4,false,9001,99021
 777,Programa de Ejemplo,Facultad de Ejemplo,PREGRADO,9999,Reforma 2026,DRAFT,9,11,2,SI,Sistemas,#C2185B,9003,,Electiva I,2,3,3,true,,

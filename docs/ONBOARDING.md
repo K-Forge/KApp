@@ -16,7 +16,7 @@ tú también.
 
 Dos cosas, y las manda **por mensaje directo — nunca al grupo**:
 
-1. **Cinco líneas** que empiezan por `MONGO_` y terminan en `.mongodb.net/...`. Son las que
+1. **Cuatro líneas** que empiezan por `MONGO_` y terminan en `.mongodb.net/...`. Son las que
    conectan con la base compartida y llevan contraseñas dentro.
 2. **Tu línea** del archivo de cuentas: tu correo `@kforge.dev` y tu contraseña. Ese correo no
    existe de verdad — es una identidad de desarrollo, y sólo sirve para entrar al portal.
@@ -76,18 +76,17 @@ sólo tuyas: no tienen que coincidir con las de nadie.
 
 ## 4. Apuntar a la base compartida
 
-Abre `app/backend/microservices/.env` con cualquier editor. Busca estas cinco líneas —están
+Abre `app/backend/microservices/.env` con cualquier editor. Busca estas cuatro líneas —están
 juntas, más o menos a mitad del archivo:
 
 ```
 MONGO_AUTH_URI='mongodb://...'
 MONGO_USER_URI='mongodb://...'
 MONGO_SEMAPHORE_URI='mongodb://...'
-MONGO_SCHEDULE_URI='mongodb://...'
 MONGO_MAP_URI='mongodb://...'
 ```
 
-**Reemplázalas por las cinco que te pasó Brian**, tal cual, con las comillas simples incluidas.
+**Reemplázalas por las cuatro que te pasó Brian**, tal cual, con las comillas simples incluidas.
 Las suyas empiezan por `mongodb+srv://` y llevan `.mongodb.net` en medio.
 
 **No toques nada más del archivo.** Lo demás lo generó el script en tu máquina y es tuyo.
@@ -107,7 +106,7 @@ La primera vez tarda: está descargando y construyendo siete imágenes. Diez o q
 sola vez.
 
 No hay base de datos que levantar: todos los servicios usan la de la nube. Si te falta alguna de
-las cinco cadenas, Compose no arranca y te dice cuál.
+las cuatro cadenas, Compose no arranca y te dice cuál.
 `dev` añade el portal de administración.
 
 Mira cómo va:
@@ -220,7 +219,7 @@ Cambia `auth-service` por el que falle: `user-service`, `semaphore-service`, `sc
 
 ### `bad auth : authentication failed`
 
-Una de las cinco líneas quedó mal pegada. Compárala carácter por carácter con la que te mandaron
+Una de las cuatro líneas quedó mal pegada. Compárala carácter por carácter con la que te mandaron
 —suele ser una cortada a la mitad, o sin las comillas del final.
 
 ### `Timed out ... no primary` o `Unable to look up TXT record`

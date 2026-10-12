@@ -372,10 +372,9 @@ rather than only in the code.
 | `kapp_auth`      | `kapp_auth_user`        | auth-service      |
 | `kapp_user`      | `kapp_user_user`        | user-service      |
 | `kapp_semaphore` | `kapp_semaphore_user`   | semaphore-service |
-| `kapp_schedule`  | `kapp_schedule_user`    | schedule-service  |
 | `kapp_map`       | `kapp_map_user`         | map-service       |
 
-All five live in the shared Atlas cluster. Their connection strings go in `.env`, one per
+All four live in the shared Atlas cluster; schedule-service has none, since it reads SINU (#78). Their connection strings go in `.env`, one per
 service, and nothing generates them for you: they come from the cluster, through
 [ATLAS-SETUP.md](ATLAS-SETUP.md) or from a teammate, privately.
 

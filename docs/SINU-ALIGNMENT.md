@@ -13,8 +13,8 @@ that collects data SINU already guards, makes the request to Dirección de TI ha
 |---|---|---|---|
 | Password, e-mail verification, invitation codes, temporary passwords | `auth-service` | Entra ID | Goes when Entra ID arrives. Keep as the stated interim until then |
 | Name, institutional e-mail, role | `auth-service`, `user-service` | Entra ID | Read from the token at sign-in |
-| Identity document and phone of a member | `user-service` (`identification`, `phone`) | SINU | **Remove.** Nothing in the repository uses them |
-| Student code, programme, pensum version, level | `user-service` (`academic`) | SINU | Read. An administrator types them today |
+| Identity document and phone of a member | `user-service` (`identification`, `phone`) | SINU | **Removed** in user 1.0 (#80) |
+| Student code, programme, pensum version, level | `user-service` (`academic`) | SINU | **Done** (#80): the student code is gone, and programme, pensum and level are read from SINU when the student asks for their own profile |
 | Programmes and pensums: 23 plans, 650 items | `semaphore-service`, typed in from brochures; the portal creates and edits them | SINU | Read-only mirror. The portal shows them and imports them; it stops editing them |
 | A final mark, 0 to 50, for each course | `semaphore-service` (`grade`), typed by the student | SINU | **Remove.** The semáforo needs the state, not the mark |
 | Passed, in progress, pending or failed, for each course | `semaphore-service`, typed by the student | SINU | Read where TI allows it; typed by the student otherwise |
@@ -74,9 +74,12 @@ academic data is visible to that student only.
 ### 3.4 Documents and phones of members
 
 `REQUIREMENTS.md` says KApp stores no government-issued data except a visitor's document. The user
-contract contradicts it: `UserProfile.identification` carries a member's document type and number,
-and `phone` their number. No rule uses either, the portal does not show them and neither mobile
-client refers to them.
+contract contradicted it: `UserProfile.identification` carried a member's document type and number,
+and `phone` their number. No rule used either, the portal did not show them and neither mobile
+client referred to them.
+
+**Done** in user 1.0 ([#80](https://github.com/K-Forge/KApp/pull/80)): a profile keeps names, a picture, roles and
+the active flag, and nothing else.
 
 ### 3.5 The visitor's document
 
