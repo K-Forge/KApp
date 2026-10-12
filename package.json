@@ -1,6 +1,6 @@
 {
   "name": "kapp",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "private": true,
   "description": "KApp – University mobile app for Konrad Lorenz, powered by a Spring Boot microservices backend",
   "scripts": {
