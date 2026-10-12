@@ -26,12 +26,12 @@ curl -X POST 'http://localhost:8080/api/catalog/pensums/import?dryRun=true' \
 | `declaredCredits`, `declaredHours` | What the official document says. **Checked, not trusted** — see below. `declaredHours` is the sum of **weekly** hours across the plan, not hours per semester: the Ingeniería de Sistemas grid adds up to 194. |
 | `levels` | How many semesters the plan has. |
 | `areaCode`, `areaName`, `areaColor` | The semáforo row this item belongs to. Name and colour need only be right on the first row that mentions the area. Area totals are **summed from the courses**, so there is nothing to transcribe. |
-| `pensumItemCode` | Stable identifier of the square in the grid. Must be unique within the pensum. |
-| `courseCode` | The institutional course code. **Leave empty for an elective slot** — a slot is not a course yet. |
+| `pensumItemCode` | Stable identifier of the square in the grid — the item's fixed slot in the pensum. Must be unique within the pensum. This is what a prerequisite names. |
+| `courseCode` | **Legacy, leave it empty.** Semaphore 2.0 keeps no invented code, and nothing shows this column any more. It stays only so an old file keeps importing: a prerequisite that names a course code is read as that row's item. |
 | `courseName`, `courseLevel`, `credits`, `weeklyHours` | The item itself. Total hours are derived as `weeklyHours × 16`. `weeklyHours` may be a half — `4.5`, or `"4,5"` **with the quotes**, since an unquoted comma splits the cell in two. Nothing finer than a half is accepted. |
 | `isElectiveSlot` | `true` or `false`. Also accepts `1`/`0`, `si`/`no`, `x`. |
-| `prerequisites` | **Semicolon-separated**, not comma — a comma would need quoting and spreadsheets drop the quotes on a round trip. Each value must be a `courseCode` present in the same pensum. |
-| `sinuCode` | Optional. Leave empty until the university's own export provides it. |
+| `prerequisites` | **Semicolon-separated**, not comma — a comma would need quoting and spreadsheets drop the quotes on a round trip. Each value is the **`pensumItemCode`** of a course in the same pensum (`9001`, not `90011`). |
+| `sinuCode` | **The code a student sees.** Fill it whenever the course exists in SINU; leave it empty for an elective slot, which is not a course yet. |
 
 ### The totals are checked
 

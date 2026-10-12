@@ -151,12 +151,11 @@ one read back. Truncate at the seam.
 - `page`/`size` above the cap: the spec **rejects with 400**; do not clamp. Clamping tells a client
   asking for 5000 that it got everything when it got 100.
 - `currentLevel` is 1–12 per the spec, not 1–20.
-- `identification.number` is 5–20 characters per the spec.
 - PATCH `/me` also rejects `active` and `id`, and rejects unknown fields, per `additionalProperties: false`.
 - Login returns 403 for a valid password against an unverified address. A narrow account oracle, but
   it is in the contract and knowing the password is already the harder half.
-- `phone` was `maxLength: 15`; E.164 permits 15 *digits* plus the leading `+`. Already fixed in the
-  spec to 16 with an explicit `^\+[1-9]\d{1,14}$` pattern.
+- *Historical:* `identification.number` (5–20 characters) and `phone` (E.164, `maxLength: 16`) were settled here
+  too. Both fields left the profile with user 1.0 (#80): KApp stores no identity document or phone for members.
 
 ---
 
