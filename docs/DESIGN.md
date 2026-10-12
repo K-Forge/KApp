@@ -12,7 +12,7 @@ reasoning is the part people stop trusting first.
 
 ## 1. Shape of the system
 
-Six services behind one gateway. The clients are native mobile apps; the web portal is an
+Five services behind one gateway. The clients are native mobile apps; the web portal is an
 administration and development console for the team, not a product surface.
 
 ```mermaid
@@ -24,21 +24,21 @@ flowchart TB
     end
 
     GW["API Gateway :8080<br/>the only reachable entry point"]
-    EUREKA["Discovery :8761"]
 
-    subgraph svc["Services — ports NOT published"]
-        AUTH["auth-service :8081<br/>credentials, tokens, JWKS,<br/>invitation codes, visitor passes"]
+    subgraph svc["Services — ports NOT published, addressed by name, no registry"]
+        AUTH["auth-service :8081<br/>Microsoft sign-in, tokens, JWKS,<br/>refresh, visitor passes"]
         USER["user-service :8082<br/>profiles, directory search"]
-        SEM["semaphore-service :8083<br/>catalogue, progress, academic plans"]
-        SCH["schedule-service :8084<br/>enrolments, meetings, agenda"]
-        MAP["map-service :8085<br/>buildings, floors, spaces, search"]
+        SEM["semaphore-service :8083<br/>student plans"]
+        SCH["schedule-service :8084<br/>timetable, no database"]
+        MAP["map-service :8085<br/>buildings, polygon floors, spaces, search"]
     end
 
-    subgraph data["MongoDB — one database AND one account per service"]
+    SINU["SINU — read-only<br/>a test adapter until the university opens it"]
+
+    subgraph data["MongoDB Atlas — one database AND one account per service that stores data"]
         DBA[("kapp_auth")]
         DBU[("kapp_user")]
         DBS[("kapp_semaphore")]
-        DBC[("kapp_schedule")]
         DBM[("kapp_map")]
     end
 
@@ -46,17 +46,14 @@ flowchart TB
     IOS --> GW
     PORTAL --> GW
     GW --> AUTH & USER & SEM & SCH & MAP
-    AUTH -.registers.-> EUREKA
-    USER -.registers.-> EUREKA
-    SEM -.registers.-> EUREKA
-    SCH -.registers.-> EUREKA
-    MAP -.registers.-> EUREKA
-    GW -.resolves.-> EUREKA
+
+    USER -.reads.-> SINU
+    SEM -.reads.-> SINU
+    SCH -.reads.-> SINU
 
     AUTH --> DBA
     USER --> DBU
     SEM --> DBS
-    SCH --> DBC
     MAP --> DBM
 ```
 
@@ -72,10 +69,10 @@ if the port were open — the two protections are independent on purpose.
 |---|---|---|
 | Runtime | Java 21, Spring Boot **3.5.16** | Not Boot 4: Mongock publishes no Boot 4 artifact |
 | Cloud | Spring Cloud **2025.0.3** | The train for Boot 3.5. 2025.1.x targets Boot 4 |
-| Discovery | Netflix Eureka | |
-| Gateway | Spring Cloud Gateway (WebFlux) | Explicit routing table; the discovery locator is **off** (S4) |
+| Addressing | By name, resolved by Docker Compose and Kubernetes | No registry: Eureka was removed in October 2026 (#64) |
+| Gateway | Spring Cloud Gateway (WebFlux) | Explicit routing table to each service's address, `kapp.services.*` (S4) |
 | Security | Spring Security 6.5, OAuth2 resource server | **RS256** with a published JWKS — [ADR 0002](adr/0002-rs256-with-a-published-jwks.md) |
-| IPC | OpenFeign | Three edges only — see §4 |
+| IPC | OpenFeign | Four edges only — see §4 |
 | Persistence | Spring Data MongoDB | One engine — [ADR 0004](adr/0004-one-database-engine-not-polyglot.md) |
 | Migrations | Mongock 5.5.1 | `@EnableMongock` is **mandatory**: it ships no auto-configuration |
 | Contracts | OpenAPI 3.1, hand-written, linted in CI | Served as Prism mocks so client work never waits |
@@ -132,14 +129,19 @@ Every cell in that table is asserted by a test, including every ❌ — those ar
 
 ## 4. Service-to-service calls
 
-Three edges, all synchronous OpenFeign, all one-directional:
+Four edges, all synchronous OpenFeign, each call going one way:
 
 ```mermaid
 flowchart LR
-    AUTH["auth-service"] -->|"POST /internal/users<br/>during registration"| USER["user-service"]
-    SEM["semaphore-service"] -->|"which program is this student in?"| USER
-    SCH["schedule-service"] -->|"which courses are in this pensum?"| SEM
+    AUTH["auth-service"] -->|"POST /internal/users<br/>a new credential gets its profile"| USER["user-service"]
+    USER -->|"POST /internal/credentials/{id}/status<br/>a deactivated profile suspends its credential"| AUTH
+    SCH["schedule-service"] -->|"which courses are in this pensum?"| SEM["semaphore-service"]
+    SCH -->|"which building is this SINU sede?"| MAP["map-service"]
 ```
+
+The two `/internal/**` calls carry a shared internal token, because there may be no user token yet, and **have no
+gateway route at all**. The two reads carry the caller's own token, and schedule-service keeps answering when either
+service is briefly down.
 
 **There are deliberately no more.** Two things the mockups suggested were left to the client
 instead:
@@ -150,16 +152,14 @@ instead:
   locally avoids a fourth edge and, more importantly, means the timetable still loads when the
   semáforo is down.
 
-`POST /internal/users` is reachable only from inside the compose network, carries a shared internal
-token, and **has no gateway route at all**.
-
 ---
 
 ## 5. Data model, in one paragraph each
 
-**auth** — `credentials` (one per account, BCrypt, verification token stored hashed),
-`invitation_codes` (redeemed by an atomic `findAndModify` guarded on the quota, so two simultaneous
-registrations cannot both take the last use), `visitor_passes` (with a **TTL index** that deletes
+**auth** — `credentials` and `invitation_codes`, which serve password sign-in and registration in development
+only, since members sign in with Microsoft (`credentials`: one per account, BCrypt, verification token stored
+hashed; `invitation_codes`: redeemed by an atomic `findAndModify` guarded on the quota, so two simultaneous
+registrations cannot both take the last use), and `visitor_passes` (with a **TTL index** that deletes
 each record 30 days after redemption — [ADR 0007](adr/0007-visitor-day-pass-instead-of-guest-accounts.md)).
 
 **user** — `users`, with pre-computed `searchTokens` so accent-insensitive search is an index hit
@@ -167,17 +167,18 @@ rather than a regex scan. MongoDB 7 reports `IXSCAN` for an unanchored case-inse
 walking the whole index; the assertion to make is about bounds and documents examined, not the stage
 name.
 
-**semaphore** — `programs`, `pensums` (a pensum with its courses, areas and prerequisite graph),
-`studentProgress` (one document per student, materialised lazily on first read), and
-`academicPlans`, which stores **only the courses a student moved**. The pensum stays immutable; the
-plan is a thin layer over it, so a correction to the published pensum reaches every plan without
-rewriting any.
+**semaphore** — `programs` and `pensums` (a pensum with its courses, areas and prerequisite graph), which hold the
+published plans as the catalogue's backup, and `academicPlans`, which stores **only the courses a student moved**.
+A student's course statuses are read from SINU and never stored. The pensum stays immutable; the plan is a thin
+layer over it, so a correction to the published pensum reaches every plan without rewriting any.
 
-**schedule** — `enrollments` and `meetings`, with overlap detection in the domain.
+**schedule** — nothing. It reads the student's timetable from SINU, and the building of each room from map-service.
 
 **map** — `buildings` (floors embedded, since nothing queries a floor without knowing its building)
 and `spaces` (a flat collection, because the primary access pattern is "find a room anywhere"). A
-floor is a **grid**, not a plan image — [ADR 0006](adr/0006-schematic-map-not-floor-plan-images.md).
+floor is drawn as **polygons** traced from the university's evacuation plans, not stored as a plan image
+([ADR 0006](adr/0006-schematic-map-not-floor-plan-images.md)). `map_structures` and `map_surveys` keep the campus's
+shared structures and the survey the floors were drawn from.
 
 ---
 
@@ -191,9 +192,9 @@ flowchart LR
     M -.->|refused| DBA
 ```
 
-Each service holds an account with `readWrite` on exactly one database, created **inside** that
+Each service that stores data holds an account with `readWrite` on exactly one database, created **inside** that
 database so the database is also its `authSource` — a leaked connection string opens one database
-and does not name the others. `scripts/verify-db-isolation.sh` proves it: 25 checks, each account
+and does not name the others. `scripts/verify-db-isolation.sh` proves it by trying each account
 against every database. [ADR 0005](adr/0005-per-service-database-credentials.md).
 
 ---
@@ -209,6 +210,8 @@ against every database. [ADR 0005](adr/0005-per-service-database-credentials.md)
 | One account per service | [ADR 0005](adr/0005-per-service-database-credentials.md) |
 | A schematic map, not floor plan images | [ADR 0006](adr/0006-schematic-map-not-floor-plan-images.md) |
 | A visitor day pass, not guest accounts | [ADR 0007](adr/0007-visitor-day-pass-instead-of-guest-accounts.md) |
+| Invitation codes are temporary | [ADR 0008](adr/0008-invitation-codes-are-temporary.md) |
+| Atlas is the only development database | [ADR 0009](adr/0009-atlas-is-the-only-development-database.md) |
 
 Findings and their fixes: [`SECURITY-AUDIT.md`](SECURITY-AUDIT.md).
 What is built and what is blocked on whom: [`PROGRESS.md`](PROGRESS.md).

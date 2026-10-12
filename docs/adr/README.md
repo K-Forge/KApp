@@ -30,5 +30,6 @@ Decisions already taken whose reasoning currently lives only in commit messages 
 - Contract-first OpenAPI with Prism mocks, so client and server work proceed in parallel
 - `semaphore-service` owning the academic catalogue, because the pensum is what the progress
   view displays
-- Freezing `course-service` and `assignment-service` rather than deleting or migrating them
+- Freezing `course-service` and `assignment-service` rather than deleting or migrating them. The freeze ended in
+  deletion in October 2026 (#65); git keeps both services
 - Personal academic plans stored as deltas over an immutable pensum, rather than as copies of it
