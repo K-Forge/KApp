@@ -142,8 +142,33 @@ Si estás construyendo pantallas del móvil y no quieres levantar el backend ent
 docker compose --profile mock up -d
 ```
 
-Eso arranca cinco servidores que responden lo que dice el contrato, con datos de ejemplo, en los
-puertos 4010 a 4014. Pesan casi nada y no tocan la base compartida.
+Eso arranca los cinco contratos como mocks, **todos detrás de un solo puerto, el 4000**, con las mismas rutas
+que el gateway real. Pesan casi nada y no tocan la base compartida. La primera vez construye la imagen de Prism (un
+minuto, con internet); después arranca en segundos. Para comprobar que responde:
+
+```bash
+curl http://localhost:4000/auth/health
+```
+
+Desde la app apunta a esta URL base, y cuando haya servidor real solo cambias esa línea:
+
+| Dónde corre la app | URL base |
+|---|---|
+| Emulador de Android | `http://10.0.2.2:4000` (así llama el emulador a tu computador) |
+| Simulador de iOS | `http://localhost:4000` |
+| Teléfono físico en la misma Wi-Fi | `http://<la IP de tu computador en la red>:4000` |
+
+Cómo se comportan:
+
+- Cada respuesta es un ejemplo del contrato, así que los campos son exactamente los que va a devolver el backend.
+- Validan lo que mandas: si falta un campo obligatorio responden `400`, y una ruta protegida sin `Authorization`
+  responde `401`. **Aceptan cualquier token.**
+- Para iniciar sesión, `POST /auth/microsoft` con cualquier `idToken` de 20 caracteres o más devuelve tokens.
+- No guardan nada: un `PUT` responde como si hubiera funcionado y el siguiente `GET` trae el mismo ejemplo.
+- Hablan HTTP sin cifrar. En Android permítelo **solo en la variante debug** y solo para esos hosts; el issue #43
+  trae la configuración exacta.
+
+Siguen disponibles uno por servicio, en los puertos 4010 a 4014, para quien ya los usaba.
 
 ---
 
