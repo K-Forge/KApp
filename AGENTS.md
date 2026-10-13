@@ -291,6 +291,13 @@ Rules specific to KApp:
   requests stacked on it, pushing as the K-Forge restack App so their checks run again. Nobody runs git in
   between. A real conflict is left untouched, with the commands to finish by hand in a comment. Stack only when a
   feature needs unmerged code, and keep stacks to two or three levels.
+- **A pull request is a unit of work worth a review, not one edit.** Each one costs the lead a review and CI a full
+  run of every job. Gather what a session does on one screen, feature or topic into one branch: three fixes found
+  while polishing Inicio are one `bugfix/inicio-...` pull request with three commits, never three pull requests. A
+  comment, a rename or a few removed lines never get a pull request of their own; they ride with the next related
+  one. Before opening a pull request, list your area's open ones (`gh pr list --label area/<area>`): if one on the
+  same topic is still waiting for review, push to its branch and update its description instead. Split only along
+  CONTRIBUTING's lines: past about 400 changed lines, or when the topics are unrelated.
 
 ---
 
