@@ -48,7 +48,7 @@
         -->
         <mongock.version>5.5.1</mongock.version>
 
-        <testcontainers.version>1.21.4</testcontainers.version>
+        <testcontainers.version>2.0.5</testcontainers.version>
 
         <!--
           CSV parsing for the bulk pensum import. A dependency rather than a hand-rolled
