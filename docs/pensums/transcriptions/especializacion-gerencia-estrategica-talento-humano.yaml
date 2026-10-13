@@ -1,0 +1,22 @@
+source: pensum-gerencia-estrategica-del-talento-humano.pdf
+program: Especialización en Gerencia Estratégica del Talento Humano
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
+programLevel: ESPECIALIZACION
+period: semestre
+declaredCredits: null
+levels:
+  1:
+    - [Sistemas Estratégicos de Compensación, 2]
+    - [Gerencia del Talento Humano por Competencias, 2]
+    - [Coaching Calidad de Vida, 2]
+    - [Derecho Laboral y Seguridad Social, 2]
+    - [Gestión en las Organizaciones, 2]
+    - [Investigación Aplicada a Talento Humano – Consultoría, 2]
+  2:
+    - [Analítica de Datos en Talento Humano, 2]
+    - [Proceso Integral del Talento Humano, 2]
+    - [Gestión Estratégica del Talento Humano y Comportamiento Organizacional, 2]
+    - [Gestión Financiera en la Gerencia del Talento Humano, 2]
+    - [Coaching y Habilidades Gerenciales, 2]
+    - [Electiva, 2]
+    - [Seminario de Investigación Aplicado, 2]

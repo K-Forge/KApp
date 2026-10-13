@@ -7,6 +7,8 @@ import type { ConsoleOperation, ConsoleParam } from '../../core/openapi/console-
 import { JsonViewComponent } from '../../shared/ui/json-view/json-view.component';
 import { RequestHistoryService } from './request-history.service';
 import type { ConsoleHeader, ConsoleResult, HistoryEntry } from './console.model';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { apiText, t } from '../../core/i18n/i18n.service';
 
 function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
   return `${op.method} ${op.path}`;
@@ -20,34 +22,34 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
  */
 @Component({
   selector: 'app-console-page',
-  imports: [JsonViewComponent, PageIntroComponent],
+  imports: [TranslatePipe, JsonViewComponent, PageIntroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="console-layout">
       <div class="stack console-main">
         <app-page-intro
-          title="API console"
-          what="Call any endpoint of the services with your own token, without leaving the browser or writing a curl."
-          [can]="['Pick an operation from the contracts', 'Fill path, query and body from the contract examples', 'Send it and read the real response', 'Look back at what you already sent']"
-          note="It sends your actual token to the actual gateway — this is not a simulation. A DELETE here deletes. It is also the way to verify a row on the &#39;Who can do what&#39; screen: sign in as that role and call it. Service-to-service endpoints under /internal are left out: the gateway does not route them, so every attempt from here would be a 404 that says nothing about whether they work. They are listed on &#39;Who can do what&#39;, marked SERVICE_ONLY."
+          [title]="'API console' | t"
+          [what]="'Call any service endpoint with your own token.' | t"
+          [can]="[('Pick an operation' | t), ('Fill it from the contract’s examples' | t), ('Send it and read the answer' | t), ('See what you sent before' | t)]"
+          [note]="'It uses your real token on the real gateway: a DELETE here deletes. Endpoints under /internal are not listed; they are on “Who can do what”.' | t"
         />
 
         <div class="card stack">
           <div class="field">
-            <label for="service">Service</label>
+            <label for="service">{{ 'Service' | t }}</label>
             <select id="service" (change)="onServiceChange($event)">
               @for (service of services; track service.id) {
-                <option [value]="service.id" [selected]="service.id === selectedServiceId()">{{ service.label }}</option>
+                <option [value]="service.id" [selected]="service.id === selectedServiceId()">{{ service.label | t }}</option>
               }
             </select>
           </div>
 
           <div class="field">
-            <label for="operation">Endpoint</label>
+            <label for="operation">{{ 'Endpoint' | t }}</label>
             <select id="operation" (change)="onOperationChange($event)">
               @for (op of operations(); track operationKey(op)) {
                 <option [value]="operationKey(op)" [selected]="operationKey(op) === selectedOpKey()">
-                  {{ op.method.toUpperCase() }} {{ op.path }} — {{ op.summary }}
+                  {{ op.method.toUpperCase() }} {{ op.path }} — {{ said(op.summary) }}
                 </option>
               }
             </select>
@@ -55,22 +57,26 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
 
           @if (selectedOperation(); as op) {
             @if (op.description) {
-              <p class="text-muted op-description">{{ op.description }}</p>
+              <div class="text-muted op-description">
+                @for (paragraph of descriptionParagraphs(); track $index) {
+                  <p>{{ paragraph }}</p>
+                }
+              </div>
             }
 
             @if (op.pathParams.length) {
-              <h3>Path parameters</h3>
+              <h3>{{ 'Path parameters' | t }}</h3>
               @for (param of op.pathParams; track param.name) {
                 <div class="field">
                   <label [for]="'path-' + param.name">
                     {{ param.name }}
                     @if (param.required) {
-                      <span class="text-faint">(required)</span>
+                      <span class="text-faint">{{ '(required)' | t }}</span>
                     }
                   </label>
                   @if (param.schema.enum?.length) {
                     <select [id]="'path-' + param.name" (change)="onParamChange(param, $event)">
-                      <option value="" disabled [selected]="!paramValue(param)">choose…</option>
+                      <option value="" disabled [selected]="!paramValue(param)">{{ 'choose…' | t }}</option>
                       @for (opt of param.schema.enum; track opt) {
                         <option [value]="opt" [selected]="opt === paramValue(param)">{{ opt }}</option>
                       }
@@ -79,25 +85,25 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
                     <input [id]="'path-' + param.name" type="text" [value]="paramValue(param)" (input)="onParamChange(param, $event)" />
                   }
                   @if (param.description) {
-                    <span class="hint">{{ param.description }}</span>
+                    <span class="hint">{{ said(param.description) }}</span>
                   }
                 </div>
               }
             }
 
             @if (op.queryParams.length) {
-              <h3>Query parameters</h3>
+              <h3>{{ 'Query parameters' | t }}</h3>
               @for (param of op.queryParams; track param.name) {
                 <div class="field">
                   <label [for]="'query-' + param.name">
                     {{ param.name }}
                     @if (param.required) {
-                      <span class="text-faint">(required)</span>
+                      <span class="text-faint">{{ '(required)' | t }}</span>
                     }
                   </label>
                   @if (param.schema.enum?.length) {
                     <select [id]="'query-' + param.name" (change)="onParamChange(param, $event)">
-                      <option value="" [selected]="!paramValue(param)">(omit)</option>
+                      <option value="" [selected]="!paramValue(param)">{{ '(omit)' | t }}</option>
                       @for (opt of param.schema.enum; track opt) {
                         <option [value]="opt" [selected]="opt === paramValue(param)">{{ opt }}</option>
                       }
@@ -111,7 +117,7 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
                     />
                   }
                   @if (param.description) {
-                    <span class="hint">{{ param.description }}</span>
+                    <span class="hint">{{ said(param.description) }}</span>
                   }
                 </div>
               }
@@ -119,7 +125,7 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
 
             @if (op.requestBodySchema) {
               <div class="field">
-                <label for="body">Request body (JSON)</label>
+                <label for="body">{{ 'Request body (JSON)' | t }}</label>
                 <textarea id="body" rows="12" [value]="bodyText()" (input)="onBodyChange($event)"></textarea>
                 @if (bodyParseError()) {
                   <span class="error">{{ bodyParseError() }}</span>
@@ -129,7 +135,7 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
 
             <div class="row">
               <button type="button" class="btn btn-primary" (click)="send()" [disabled]="sending()">
-                {{ sending() ? 'Sending…' : 'Send ' + op.method.toUpperCase() }}
+                {{ sending() ? ('Sending…' | t) : ('Send ' | t) + op.method.toUpperCase() }}
               </button>
               @if (validationError()) {
                 <span class="error">{{ validationError() }}</span>
@@ -137,27 +143,27 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
             </div>
           } @else {
             <div class="empty-state">
-              <p>This service has no operations to show.</p>
+              <p>{{ 'This service has no operations to show.' | t }}</p>
             </div>
           }
         </div>
 
         @if (sending()) {
           <div class="card empty-state">
-            <p>Waiting for a response…</p>
+            <p>{{ 'Waiting for a response…' | t }}</p>
           </div>
         } @else if (result(); as result) {
           <div class="card stack">
             <div class="row-between">
               <div class="row">
                 <span class="badge" [class]="statusBadgeClass(result.status)">{{ result.status }} {{ result.statusText }}</span>
-                <span class="text-muted">{{ result.timeMs }} ms</span>
+                <span class="text-muted">{{ '{timeMs} ms' | t: { timeMs: result.timeMs } }}</span>
               </div>
             </div>
 
             @if (result.headers.length) {
               <details>
-                <summary>Response headers ({{ result.headers.length }})</summary>
+                <summary>{{ 'Response headers ({length})' | t: { length: result.headers.length } }}</summary>
                 <table class="scroll-x">
                   <tbody>
                     @for (header of result.headers; track header.key) {
@@ -177,27 +183,27 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
                  one of them - kty, e, kid and the rest - and had never shown anybody. -->
             @if (selectedOperation()?.responseFields?.length) {
               <details class="fields" open>
-                <summary>What these fields mean</summary>
+                <summary>{{ 'What these fields mean' | t }}</summary>
                 <div class="scroll-x">
                   <table class="field-table">
                     <thead>
                       <tr>
-                        <th>Field</th>
-                        <th>Type</th>
-                        <th>Meaning</th>
+                        <th>{{ 'Field' | t }}</th>
+                        <th>{{ 'Type' | t }}</th>
+                        <th>{{ 'Meaning' | t }}</th>
                       </tr>
                     </thead>
                     <tbody>
                       @for (field of selectedOperation()!.responseFields; track field.path) {
                         <tr>
                           <td class="mono">
-                            {{ field.path }}@if (field.required) {<span class="field-req" title="Always present">*</span>}
+                            {{ field.path }}@if (field.required) {<span class="field-req" [title]="'Always present' | t">*</span>}
                           </td>
                           <td class="text-muted">{{ field.type }}</td>
                           <td>
-                            {{ field.description || '—' }}
+                            {{ said(field.description) || '—' }}
                             @if (field.enumValues?.length) {
-                              <span class="text-muted">One of: {{ field.enumValues!.join(', ') }}.</span>
+                              <span class="text-muted">{{ 'One of: {value}.' | t: { value: field.enumValues!.join(', ') } }}</span>
                             }
                           </td>
                         </tr>
@@ -213,14 +219,14 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
 
       <aside class="card console-history">
         <div class="row-between">
-          <h2 style="margin:0">History</h2>
+          <h2 style="margin:0">{{ 'History' | t }}</h2>
           @if (history.entries().length) {
-            <button type="button" class="btn btn-ghost btn-sm" (click)="history.clear()">Clear</button>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="history.clear()">{{ 'Clear' | t }}</button>
           }
         </div>
 
         @if (!history.entries().length) {
-          <p class="text-faint">Requests you send appear here, newest first.</p>
+          <p class="text-faint">{{ 'Requests you send appear here, newest first.' | t }}</p>
         } @else {
           <ul class="history-list">
             @for (entry of history.entries(); track entry.id) {
@@ -228,7 +234,7 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
                 <button type="button" class="history-entry" (click)="restore(entry)">
                   <span class="row-between">
                     <span class="badge" [class]="statusBadgeClass(entry.result.status)">{{ entry.result.status }}</span>
-                    <span class="text-faint">{{ entry.result.timeMs }} ms</span>
+                    <span class="text-faint">{{ '{timeMs} ms' | t: { timeMs: entry.result.timeMs } }}</span>
                   </span>
                   <span class="mono history-path">{{ entry.method.toUpperCase() }} {{ entry.path }}</span>
                   <span class="text-faint">{{ relativeTime(entry.timestamp) }}</span>
@@ -290,6 +296,9 @@ function operationKey(op: Pick<ConsoleOperation, 'method' | 'path'>): string {
     }
     .op-description {
       margin: -0.5rem 0 0.5rem;
+    }
+    .op-description p {
+      margin: 0 0 0.5rem;
       white-space: pre-line;
     }
     h3 {
@@ -364,6 +373,14 @@ export class ConsolePage {
   readonly selectedOperation = computed(
     () => this.operations().find((op) => operationKey(op) === this.selectedOpKey()) ?? null,
   );
+  /** What the contract says, in the portal's language. */
+  said(text: string | null | undefined): string {
+    return apiText(text);
+  }
+
+  readonly descriptionParagraphs = computed(() =>
+    descriptionParagraphs(apiText(this.selectedOperation()?.description)),
+  );
 
   readonly pathValues = signal<Record<string, string>>({});
   readonly queryValues = signal<Record<string, string>>({});
@@ -428,11 +445,11 @@ export class ConsolePage {
 
   relativeTime(timestamp: number): string {
     const seconds = Math.round((Date.now() - timestamp) / 1000);
-    if (seconds < 60) return `${seconds}s ago`;
+    if (seconds < 60) return t('{n}s ago', { n: seconds });
     const minutes = Math.round(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
+    if (minutes < 60) return t('{n}m ago', { n: minutes });
     const hours = Math.round(minutes / 60);
-    return `${hours}h ago`;
+    return t('{n}h ago', { n: hours });
   }
 
   restore(entry: HistoryEntry): void {
@@ -454,7 +471,8 @@ export class ConsolePage {
 
     const missing = [...op.pathParams, ...op.queryParams].filter((p) => p.required && !this.paramValue(p).trim());
     if (missing.length) {
-      this.validationError.set(`Missing required parameter${missing.length > 1 ? 's' : ''}: ${missing.map((p) => p.name).join(', ')}`);
+      const names = missing.map((p) => p.name).join(', ');
+      this.validationError.set(missing.length > 1 ? t('Missing required parameters: {names}', { names }) : t('Missing required parameter: {names}', { names }));
       return;
     }
 
@@ -464,7 +482,7 @@ export class ConsolePage {
       try {
         parsedBody = text ? JSON.parse(text) : undefined;
       } catch {
-        this.bodyParseError.set('Body is not valid JSON.');
+        this.bodyParseError.set(t('Body is not valid JSON.'));
         return;
       }
     }
@@ -510,7 +528,7 @@ export class ConsolePage {
     // listening. That is worth saying plainly rather than showing an empty object.
     const body =
       isError && res.status === 0
-        ? `Request failed before reaching a server. Check the gateway base URL and that the service is running.`
+        ? t('Request failed before reaching a server. Check the gateway base URL and that the service is running.')
         : isError
           ? (res as HttpErrorResponse).error
           : (res as HttpResponse<unknown>).body;
@@ -531,6 +549,31 @@ export class ConsolePage {
       result,
     });
   }
+}
+
+/**
+ * A contract's description as paragraphs to reflow.
+ *
+ * <p>The YAML wraps its prose at a hundred columns, and shown with its line breaks kept that
+ * wrapping came through as ragged half-lines on anything narrower than the file - a phone cut
+ * every sentence twice. A blank line still ends a paragraph, and a line that opens a list or a
+ * table row keeps its own line.
+ */
+export function descriptionParagraphs(text: string): string[] {
+  return text
+    .trim()
+    .split(/\n\s*\n/)
+    .map((block) =>
+      block.split('\n').reduce((out, line) => {
+        const trimmed = line.trim();
+        if (!out) {
+          return trimmed;
+        }
+        const ownLine = /^([-*>]|\d+\.)\s/.test(trimmed) || trimmed.startsWith('|');
+        return ownLine ? `${out}\n${trimmed}` : `${out} ${trimmed}`;
+      }, ''),
+    )
+    .filter((paragraph) => paragraph.length > 0);
 }
 
 function headersOf(headers: HttpHeaders): string[] {

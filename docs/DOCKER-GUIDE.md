@@ -1,62 +1,32 @@
-# KApp · Containerization Guide with Docker Desktop
+# KApp · Containerization Guide
 
-> **Superseded by [RUNBOOK.md](RUNBOOK.md) for anything you actually want to run.**
-> That file covers starting, stopping, profiles, accounts and troubleshooting against the
-> current stack. This one predates the move to MongoDB and still describes PostgreSQL
-> environment variables that no longer exist. It is kept for the Dockerfile and image
-> optimisation background, which is still accurate.
+> **Superseded by [`RUNBOOK.md`](RUNBOOK.md) for anything you actually want to run.** This guide used to describe the
+> 2025 stack too — a local database, the Eureka registry and the `course-service` and `assignment-service` deleted in
+> October 2026 — and two guides that disagreed helped nobody, so those parts live in the runbook only. What stays
+> here is background that is still accurate: the Dockerfile pattern, image optimisation, and what production needs.
 
----
+Where to find what this guide used to cover:
 
-## 1. Prerequisites
+| You want to | Read |
+|---|---|
+| Install what the stack needs | [Prerequisites](RUNBOOK.md#prerequisites) |
+| Choose which services to start | [Profiles](RUNBOOK.md#profiles) |
+| Run two worktrees' stacks side by side | [Stacks: one per worktree](RUNBOOK.md#stacks-one-per-worktree) |
+| Start, stop and follow logs | [Starting and stopping](RUNBOOK.md#starting-and-stopping) |
+| Know which port is which | [What runs where](RUNBOOK.md#what-runs-where) |
+| Point the services at the database | [Pointing at Atlas](RUNBOOK.md#pointing-at-atlas) |
+| Fix a service that will not start | [Troubleshooting](RUNBOOK.md#troubleshooting) |
 
-| Tool           | Minimum version | Installation                                   |
-| -------------- | --------------- | ---------------------------------------------- |
-| Docker Desktop | 4.x             | https://www.docker.com/products/docker-desktop |
-| Java           | 21              | Build only (not needed in the Docker runtime)  |
-| Maven          | 3.9+            | Included as a wrapper (`mvnw`)                 |
-
-Verify the installation:
-
-```bash
-docker --version
-docker compose version
-java -version
-```
+In short: there is no local database, since every service reaches the shared Atlas cluster
+([ADR 0009](adr/0009-atlas-is-the-only-development-database.md)). There is no registry either: services address each
+other by name, which Docker Compose and Kubernetes resolve. The Prism mocks answer on `http://localhost:4000`.
 
 ---
 
-## 2. Docker File Layout
+## 1. The Dockerfile pattern
 
-```
-app/backend/microservices/
-├── docker-compose.yml          # Orchestration for all services
-├── discovery-server/Dockerfile
-├── api-gateway/Dockerfile
-├── auth-service/Dockerfile
-├── user-service/Dockerfile
-├── course-service/Dockerfile
-└── assignment-service/Dockerfile
-```
-
----
-
-## 3. Build the Microservices
-
-Before containerizing, build every module:
-
-```bash
-cd app/backend/microservices
-./mvnw clean package -DskipTests
-```
-
-> This produces the `.jar` files under `{service}/target/`.
-
----
-
-## 4. Dockerfile (example)
-
-Every microservice already has its own `Dockerfile`. Standard example:
+Every service already has its own `Dockerfile`. The real ones build from the reactor root, `app/backend/microservices`,
+with the Maven wrapper, so `common` and the parent POM are in the build context. The pattern, reduced to its parts:
 
 ```dockerfile
 # Stage 1: Build
@@ -82,158 +52,7 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 
 ---
 
-## 5. Start with Docker Compose
-
-### 5.1 Configure environment variables
-
-Create a `.env` file in `app/backend/microservices/` (see [`.env.example`](../app/backend/microservices/.env.example) beside it
-for the full list):
-
-```env
-PGHOST=your-postgresql-host
-PGDATABASE=your-database
-PGUSER=your-user
-PGPASSWORD=your-password
-PGSSLMODE=require
-JWT_SECRET=your-64-byte-minimum-secret
-```
-
-### 5.2 Start every service
-
-```bash
-cd app/backend/microservices
-docker compose up -d --build
-```
-
-### 5.3 Check the status
-
-```bash
-# List running services
-docker compose ps
-
-# Follow logs in real time
-docker compose logs -f
-
-# Logs for a specific service
-docker compose logs -f api-gateway
-```
-
-### 5.4 Check in Docker Desktop
-
-1. Open **Docker Desktop**
-2. Go to the **Containers** tab
-3. Look for the `microservices` group
-4. Confirm every container is **Running** (green)
-
----
-
-## 6. Startup Order (automatic)
-
-Docker Compose resolves the dependencies:
-
-```mermaid
-graph TD
-    DS["discovery-server<br/>(first, with healthcheck)"] --> GW[api-gateway]
-    DS --> AUTH[auth-service]
-    DS --> USER[user-service]
-    DS --> COURSE["course-service<br/>(waits for user-service)"]
-    DS --> ASSIGN["assignment-service<br/>(waits for user-service + course-service)"]
-    USER --> COURSE
-    USER --> ASSIGN
-    COURSE --> ASSIGN
-```
-
----
-
-## 7. System URLs
-
-| Service            | Local URL             | Container       |
-| ------------------ | --------------------- | --------------- |
-| Eureka dashboard   | http://localhost:8761 | kapp-discovery  |
-| API Gateway        | http://localhost:8080 | kapp-gateway    |
-| Auth Service       | http://localhost:8081 | kapp-auth       |
-| User Service       | http://localhost:8082 | kapp-user       |
-| Course Service     | http://localhost:8083 | kapp-course     |
-| Assignment Service | http://localhost:8084 | kapp-assignment |
-
-> Publishing ports 8081-8084 is a local development convenience. It also makes the domain services reachable without
-> going through the gateway: see [SECURITY-AUDIT.md](SECURITY-AUDIT.md), finding S1.
-
----
-
-## 8. Common Commands
-
-```bash
-# Start services (rebuild)
-docker compose up -d --build
-
-# Stop services
-docker compose down
-
-# Stop and remove volumes
-docker compose down -v
-
-# Rebuild a single service
-docker compose up -d --build auth-service
-
-# Follow logs in real time
-docker compose logs -f
-
-# Restart a service
-docker compose restart user-service
-
-# Open a shell inside a container
-docker exec -it kapp-auth sh
-
-# Inspect resource usage
-docker stats
-```
-
----
-
-## 9. Troubleshooting
-
-### A service does not start
-
-```bash
-# Detailed logs
-docker compose logs auth-service
-
-# Confirm the image builds
-docker compose build auth-service
-```
-
-### Database connection error
-
-```bash
-# Check environment variables
-docker compose config
-
-# Check connectivity from inside the container
-docker exec -it kapp-auth sh -c "curl -v $PGHOST:5432"
-```
-
-### Eureka does not register a service
-
-```bash
-# Confirm discovery-server is healthy
-docker inspect kapp-discovery | grep -A5 Health
-
-# Check the Eureka URL used by the service
-docker exec -it kapp-auth env | grep EUREKA
-```
-
-### Clean everything and restart
-
-```bash
-docker compose down -v --rmi all
-docker system prune -f
-docker compose up -d --build
-```
-
----
-
-## 10. Image Optimization
+## 2. Image Optimization
 
 ### Reduce image size
 
@@ -261,17 +80,19 @@ RUN mvn package -DskipTests
 
 ---
 
-## 11. Production Considerations
+## 3. Production Considerations
 
-- [ ] Use Docker secrets instead of `.env` variables
-- [ ] Keep service ports internal to the container network; expose only the gateway
-- [ ] Implement health checks on every service
-- [ ] Configure CPU/memory limits per container
-- [ ] Use a private registry for the images
-- [ ] Consider Kubernetes for production orchestration
-- [ ] Implement centralized logging (ELK/Loki)
-- [ ] Configure alerting with Prometheus + Grafana
+Production runs on **Kubernetes**: locally with kind, and on hardware agreed with the university's IT director.
+That is backend phase 6 (#59), which will document it. What it has to cover:
+
+- [ ] Secrets from the cluster's secret store, not from `.env` files
+- [ ] Service ports internal to the cluster; only the gateway exposed, behind TLS
+- [ ] Health checks on every service, as readiness and liveness probes
+- [ ] CPU and memory limits per container
+- [ ] Images from the registry they are already published to, GHCR
+- [ ] Centralised logging and alerting
+- [ ] Backups of the database, copied off the host
 
 ---
 
-_For more detail on the architecture, see [`docs/DESIGN.md`](./DESIGN.md)._
+_For more detail on the architecture, see [`DESIGN.md`](DESIGN.md)._

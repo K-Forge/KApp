@@ -15,6 +15,13 @@ public final class KappRoles {
 
     public static final String STUDENT = "ROLE_STUDENT";
     public static final String PROFESSOR = "ROLE_PROFESSOR";
+
+    /**
+     * A member of the university's administrative staff. Reads what every member reads - the map,
+     * the catalog - and takes and teaches no classes, so has no timetable and no semáforo.
+     */
+    public static final String STAFF = "ROLE_STAFF";
+
     public static final String ADMIN = "ROLE_ADMIN";
 
     /** Bare names for {@code hasRole(...)}, which prepends {@code ROLE_} itself. */
@@ -22,6 +29,7 @@ public final class KappRoles {
         public static final String GUEST = "GUEST";
         public static final String STUDENT = "STUDENT";
         public static final String PROFESSOR = "PROFESSOR";
+        public static final String STAFF = "STAFF";
         public static final String ADMIN = "ADMIN";
 
         private Short() {

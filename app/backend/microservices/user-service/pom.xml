@@ -45,10 +45,6 @@
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-        </dependency>
 
         <!-- Suspends the credential in auth-service when an administrator deactivates an
              account. Whether a person may sign in is decided there, so the switch has to

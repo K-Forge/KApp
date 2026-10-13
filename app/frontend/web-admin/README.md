@@ -61,7 +61,7 @@ docker compose --profile dev up -d
 Opens on **http://localhost:4300**. No Node, no pnpm, nothing to install - a multi-stage build
 compiles the Angular app and serves the static output with nginx. The published port is 4300, not
 4200: `pnpm start` above already claims 4200 for local development of the portal itself, and 8080,
-8761, 27017 and 4010-4014 are already spoken for by the rest of `docker-compose.yml`. A distinct
+27017, 4000 and 4010-4014 are already spoken for by the rest of `docker-compose.yml`. A distinct
 port means you can run the container and a local `pnpm start` side by side if you ever need to.
 
 ```bash

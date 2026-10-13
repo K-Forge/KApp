@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Backups up to Android 11. The session stays out: it is encrypted with a Keystore key that never
+  leaves this device, so a copy restored anywhere else could not be read anyway.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" path="kapp.session.xml" />
+</full-backup-content>

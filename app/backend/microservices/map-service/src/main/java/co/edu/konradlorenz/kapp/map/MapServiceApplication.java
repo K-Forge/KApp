@@ -3,7 +3,6 @@ package co.edu.konradlorenz.kapp.map;
 import io.mongock.runner.springboot.EnableMongock;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
  * Owns the digital campus map: buildings, their floors and static plan images, and the
@@ -24,7 +23,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  * KApp service that talks to MongoDB must carry it.
  */
 @SpringBootApplication
-@EnableDiscoveryClient
 @EnableMongock
 public class MapServiceApplication {
 

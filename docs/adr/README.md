@@ -18,6 +18,7 @@ somewhere right.
 | [0006](0006-schematic-map-not-floor-plan-images.md) | A schematic map drawn from data, not floor plan images | Implemented |
 | [0007](0007-visitor-day-pass-instead-of-guest-accounts.md) | A visitor day pass instead of guest accounts | Implemented |
 | [0008](0008-invitation-codes-are-temporary.md) | Invitation codes are temporary, and this is how they go away | Step 1 implemented |
+| [0009](0009-atlas-is-the-only-development-database.md) | Atlas is the only development database | Implemented |
 
 ## Still to record
 
@@ -29,5 +30,6 @@ Decisions already taken whose reasoning currently lives only in commit messages 
 - Contract-first OpenAPI with Prism mocks, so client and server work proceed in parallel
 - `semaphore-service` owning the academic catalogue, because the pensum is what the progress
   view displays
-- Freezing `course-service` and `assignment-service` rather than deleting or migrating them
+- Freezing `course-service` and `assignment-service` rather than deleting or migrating them. The freeze ended in
+  deletion in October 2026 (#65); git keeps both services
 - Personal academic plans stored as deltas over an immutable pensum, rather than as copies of it

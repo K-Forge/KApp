@@ -72,6 +72,8 @@ whenever a wall intervenes, and confidently wrong is worse than absent for direc
   so an existing volume and a fresh one converge.
 - The pin editor is deleted and replaced by `static/admin/grid-editor.html`, which enforces the same
   two rules so a mistake surfaces while somebody is still standing in the building.
+  *Later:* that file was retired in favour of the floor editor in the admin portal
+  (`/data/floors`), which saves a whole floor through the API instead of exporting JSON to paste.
 - The admin portal's building and space forms had to be rewritten; until they were, editing either
   through the portal would have failed with a 400.
 - **Still needed from a person:** one floor sketched or photographed, to model the first one and

@@ -32,8 +32,8 @@ public class AuthService {
         this.jwtIssuer = jwtIssuer;
     }
 
-    public JwtIssuer.IssuedToken login(String email, String rawPassword) {
-        return authenticate(new IdentityAssertion.Password(email, rawPassword));
+    public JwtIssuer.IssuedToken login(String email, String rawPassword, List<String> allowedRoles) {
+        return authenticate(new IdentityAssertion.Password(email, rawPassword, allowedRoles));
     }
 
     public JwtIssuer.IssuedToken authenticate(IdentityAssertion assertion) {

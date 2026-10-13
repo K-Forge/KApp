@@ -1,0 +1,24 @@
+{
+  "code": "RH",
+  "name": "Edificio de Recursos Humanos",
+  "campus": "Sede Principal",
+  "description": "Sin ubicar. La web de la universidad ubica al Departamento de Talento Humano en la Cra. 9A # 62-12, junto a la Casa de Francisco de Paula Vélez, que es patrimonio y no una oficina; puede estar en las oficinas de la Tienda K, al lado o en su segundo piso. Por confirmar.",
+  "aliases": [
+    "Talento Humano",
+    "Recursos Humanos"
+  ],
+  "wings": [],
+  "floors": [
+    {
+      "code": "P1",
+      "level": 1,
+      "name": "Piso 1",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "width": 1091,
+      "height": 779,
+      "top": "NORTH",
+      "spaces": []
+    }
+  ]
+}

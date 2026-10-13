@@ -2,6 +2,7 @@ package co.edu.konradlorenz.kapp.map.domain;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,19 +14,29 @@ import java.util.Optional;
 public interface SpaceRepository extends MongoRepository<SpaceDocument, String> {
 
     /**
-     * Every space carrying this room code, across all buildings. More than one result is a
-     * normal situation - codes are unique per building - and is what makes the
-     * {@code buildingCode} disambiguator necessary.
+     * Every space carrying this code, across all buildings. More than one result is a normal
+     * situation - codes are unique per building - and is what makes the {@code buildingCode}
+     * disambiguator necessary.
      */
     List<SpaceDocument> findByCodeOrderByBuildingCodeAsc(String code);
 
     Optional<SpaceDocument> findByBuildingIdAndCode(String buildingId, String code);
 
-    List<SpaceDocument> findByBuildingIdAndFloorLevelOrderByCodeAsc(String buildingId, int floorLevel);
+    Optional<SpaceDocument> findByBuildingIdAndDoorCode(String buildingId, String doorCode);
+
+    List<SpaceDocument> findByBuildingIdAndFloorCodeOrderByCodeAsc(String buildingId, String floorCode);
+
+    List<SpaceDocument> findByBuildingIdAndCodeIn(String buildingId, Collection<String> codes);
+
+    List<SpaceDocument> findByBuildingIdAndAccessVia(String buildingId, String accessVia);
 
     boolean existsByBuildingId(String buildingId);
 
-    boolean existsByBuildingIdAndFloorLevel(String buildingId, int floorLevel);
+    boolean existsByBuildingIdAndFloorCode(String buildingId, String floorCode);
+
+    boolean existsByBuildingIdAndWing(String buildingId, String wing);
+
+    boolean existsByTypeCode(String typeCode);
 
     List<SpaceDocument> findByBuildingId(String buildingId);
 

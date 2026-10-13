@@ -7,9 +7,9 @@ export interface TokenResponse {
   roles: Role[];
 }
 
-export type Role = 'ROLE_GUEST' | 'ROLE_STUDENT' | 'ROLE_PROFESSOR' | 'ROLE_ADMIN';
+export type Role = 'ROLE_GUEST' | 'ROLE_STUDENT' | 'ROLE_PROFESSOR' | 'ROLE_STAFF' | 'ROLE_ADMIN';
 
-export const ALL_ROLES: Role[] = ['ROLE_GUEST', 'ROLE_STUDENT', 'ROLE_PROFESSOR', 'ROLE_ADMIN'];
+export const ALL_ROLES: Role[] = ['ROLE_GUEST', 'ROLE_STUDENT', 'ROLE_PROFESSOR', 'ROLE_STAFF', 'ROLE_ADMIN'];
 
 export function roleLabel(role: string): string {
   return role.replace(/^ROLE_/, '');

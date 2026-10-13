@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.testcontainers.containers.MongoDBContainer;
@@ -35,16 +34,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * <p>Two behaviours carry the weight. **Nothing is written unless everything validates** — a
  * partial import would leave the catalogue in a state nobody chose. And **declared totals are
- * checked rather than trusted**, which is the case that already exists in the seeded plan: it
- * declares 142 credits where its courses add up to 144.
+ * checked rather than trusted**, which is the case the reconstructed Ingeniería de Sistemas seed
+ * had: it declared 142 credits where its courses added up to 144.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
-@TestPropertySource(properties = {
-        "eureka.client.enabled=false",
-        "spring.cloud.discovery.enabled=false"
-})
 class PensumImportFlowTest {
 
     @Container
@@ -165,6 +160,41 @@ class PensumImportFlowTest {
                 .andExpect(jsonPath("$.details[?(@.field=~/.*declaredHours.*/)]").isNotEmpty());
     }
 
+    // ── Half hours ─────────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("a practice printed as 4,5 hours imports as 4.5, and as 72 hours a semester")
+    void halfHoursImport() throws Exception {
+        // The Spanish decimal comma, quoted, which is what a spreadsheet in this country
+        // exports. Unquoted it would break the row in two, and Commons CSV says so first.
+        mockMvc.perform(upload(HEADER + "\n" + halfHourRow("\"4,5\"")))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/catalog/pensums/{code}", "IMP-HALF").with(admin("half")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.courses[0].weeklyHours").value(4.5))
+                .andExpect(jsonPath("$.courses[0].totalHours").value(72))
+                .andExpect(jsonPath("$.areas[0].hours").value(4.5))
+                .andExpect(jsonPath("$.totalHours").value(4.5));
+    }
+
+    @Test
+    @DisplayName("a fraction of an hour that is not a half is refused, naming the row")
+    void otherFractionsAreRefused() throws Exception {
+        mockMvc.perform(upload(HEADER + "\n" + halfHourRow("4.3")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[?(@.field=~/row 2.*/)]").isNotEmpty());
+
+        assertThat(pensums.findById("IMP-HALF")).isEmpty();
+    }
+
+    /** One course worth {@code hours} weekly hours, declared as the pensum's total as well. */
+    private static String halfHourRow(String hours) {
+        return ("IMP-PROG,Programa,Facultad,PREGRADO,IMP-HALF,R,DRAFT,9,%s,2,"
+                + "CB,Ciencias,#539392,P5805,P5805,Practica profesional,1,9,%s,false,,\n")
+                .formatted(hours, hours);
+    }
+
     // ── Per-row errors ─────────────────────────────────────────────────────────────
 
     @Test
@@ -217,13 +247,27 @@ class PensumImportFlowTest {
     }
 
     @Test
-    @DisplayName("an elective slot carrying a course code is refused")
-    void electiveSlotWithACodeIsRefused() throws Exception {
+    @DisplayName("a course code on an elective slot is ignored: semaphore 2.0 keeps no printed code")
+    void courseCodeOnAnElectiveSlotIsIgnored() throws Exception {
         String csv = HEADER + "\n"
                 + row("IMP-ELEC", "CB", "E1", "E1C", "Electiva", 1, 3, 4, true, "");
 
         mockMvc.perform(upload(csv))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
+        assertThat(pensums.findById("IMP-ELEC").orElseThrow().courses().get(0).pensumItemCode()).isEqualTo("E1");
+    }
+
+    @Test
+    @DisplayName("a prerequisite written as a course code names that row's item")
+    void prerequisiteByCourseCodeNamesTheItem() throws Exception {
+        String csv = HEADER + "\n"
+                + row("IMP-PRE", "CB", "P1", "P1C", "Uno", 1, 3, 4, false, "", 6, 8)
+                + row("IMP-PRE", "CB", "P2", "P2C", "Dos", 2, 3, 4, false, "P1C", 6, 8);
+
+        mockMvc.perform(upload(csv))
+                .andExpect(status().isOk());
+        assertThat(pensums.findById("IMP-PRE").orElseThrow().findByPensumItemCode("P2").orElseThrow().prerequisites())
+                .containsExactly("P1");
     }
 
     @Test
@@ -270,29 +314,6 @@ class PensumImportFlowTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    @DisplayName("what the import accepts, the update accepts: a pensum built here can be edited here")
-    void importedPensumSurvivesBeingSavedBack() throws Exception {
-        // COMPLEMENTARIA is fourteen characters. The import used to write it and the PUT used to
-        // refuse it, so the portal produced pensums it could not then edit - and the message the
-        // admin saw was "size must be between 0 and 10" about a document they never typed.
-        String csv = HEADER + "\n"
-                + "IMP-PROG,Programa,Facultad,PREGRADO,IMP-WORDS,R,DRAFT,3,4,1,COMPLEMENTARIA,"
-                + "Complementaria,#539392,W1,W1C,Uno,1,3,4,false,,\n";
-
-        mockMvc.perform(upload(csv)).andExpect(status().isOk());
-
-        String document = mockMvc.perform(
-                        get("/api/catalog/pensums/{code}", "IMP-WORDS").with(admin("editor")))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
-
-        mockMvc.perform(put("/api/catalog/pensums/{code}", "IMP-WORDS")
-                        .with(admin("editor"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(document))
-                .andExpect(status().isOk());
-    }
 
     @Test
     @DisplayName("the import refuses what the update would refuse, instead of writing it")

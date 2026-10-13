@@ -1,0 +1,17 @@
+source: pensum-especializacion-psicologia-del-consumidor-konrad-lorenz-1.pdf
+program: Especialización en Psicología del Consumidor
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
+programLevel: ESPECIALIZACION
+period: semestre
+declaredCredits: 24
+levels:
+  1:
+    - [Fundamentos de Psicología del Consumidor, 4, Fundamentación]
+    - [Estrategias de marketing centradas en el consumidor, 4, Profesional]
+    - [Enfoques y Procesos de Investigación del Consumidor, 3, Metodología]
+    - [Electiva I, 2, Profundización]
+  2:
+    - [Perspectivas Socioculturales del Consumo, 3, Fundamentación]
+    - [Gestión del Valor al Cliente, 3, Profesional]
+    - [Métodos y técnicas de Investigación del Consumidor, 3, Metodología]
+    - [Electiva II, 2, Profundización]

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Merged over src/main/AndroidManifest.xml in the debug build only. The release build has no
+  network security config, so it keeps Android's default: no plain HTTP anywhere.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application android:networkSecurityConfig="@xml/network_security_config" />
+
+</manifest>

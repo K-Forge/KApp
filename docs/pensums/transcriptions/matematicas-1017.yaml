@@ -1,0 +1,101 @@
+source: "Planes de estudio matemáticas (1017) con código.pdf"
+program: Matemáticas
+faculty: Facultad de Matemáticas e Ingenierías
+programLevel: PREGRADO
+period: semestre
+reform: "Plan de estudios 2019-2"
+declaredCredits: 143   # printed on plan-estudios-matematicas-konrad.pdf, the brochure of this same plan
+declaredHours: 195   # printed on the brochure; the coded grid adds up to 197 (see notes)
+notes:
+  - "Checked cell by cell against the brochure plan-estudios-matematicas-konrad.pdf, which prints the same plan without codes."
+  - "Práctica Profesional: the coded grid prints 24 contact hours, the brochure 22. That is the whole 197 vs 195 difference."
+  - "Enseñanza de las Matemáticas: 2 credits here; the brochure prints 3, but its own semester VIII total (16) only adds up with 2."
+  - "Matemática fundamental prints HTI 3, Metodología de la Investigación HTI 3 and Trabajo de Grado HTI 4, which break credits x 3 = HTD + HTI. Credits and HTD agree with the brochure and are kept."
+  - "Énfasis I -> II -> III are drawn as a chain, but all three are elective slots and the model only accepts prerequisites that are course codes, so the chain is not stored."
+  - "The brochure calls Electiva 1-4 'Electiva Profesional I-IV'."
+columns: [code, name, credits, hours, area]    # hours = weekly contact hours as printed
+areas:
+  BASICA: "Básica"
+  DEMOSTRATIVA: "Demostrativa"
+  APLICATIVA: "Aplicativa"
+  TEORICA: "Teórica"
+  ELECTIVA: "Electiva"
+  INVESTIGACION: "Investigación"
+  SI: "Sociedad e interculturalidad"
+levels:
+  1:
+    - ["11015", "Precálculo", 3, 4, BASICA]
+    - ["21012", "Lógica Matemática", 3, 3, BASICA]
+    - ["41025", "Fundamentos de Programación", 3, 4, BASICA]
+    - ["11018", "Matemática fundamental", 3, 4, DEMOSTRATIVA]
+    - ["71181", "Inglés Intermedio Bajo", 2, 4, SI]
+    - ["71081", "Habilidades Comunicativas", 2, 3, SI]
+  2:
+    - ["12015", "Cálculo I", 3, 4, BASICA]
+    - ["23012", "Matemáticas Discretas", 3, 3, BASICA]
+    - ["31013", "Técnicas de Programación I", 3, 4, BASICA]
+    - ["63202", "Álgebra Lineal I", 3, 4, BASICA]
+    - ["72081", "Inglés Intermedio Medio", 2, 4, SI]
+    - ["71221", "Cultura I", 2, 2, SI]
+  3:
+    - ["13015", "Cálculo II", 3, 4, BASICA]
+    - ["31014", "Técnicas de Programación II", 3, 4, BASICA]
+    - ["64220", "Álgebra Lineal II", 3, 4, DEMOSTRATIVA]
+    - ["65024", "Historia de las Matemáticas", 2, 2, TEORICA]
+    - ["22144", "Énfasis I", 3, 4, ELECTIVA]
+    - ["73081", "Inglés Internedio Alto", 2, 4, SI]
+  4:
+    - ["14015", "Cálculo III", 3, 4, BASICA]
+    - ["66802", "Análisis Vectorial", 3, 3, DEMOSTRATIVA]
+    - ["65023", "Análisis Numérico", 3, 4, APLICATIVA]
+    - ["14023", "Modelación y Simulación I", 2, 3, APLICATIVA]
+    - ["22344", "Énfasis II", 3, 4, ELECTIVA]
+    - ["74081", "Inglés Avanzado", 2, 4, SI]
+  5:
+    - ["13013", "Ecuaciones Diferenciales", 3, 4, BASICA]
+    - ["15013", "Investigación de Operaciones", 3, 3, BASICA]
+    - ["25014", "Teoría de Conjuntos", 3, 4, DEMOSTRATIVA]
+    - ["15023", "Modelación y Simulación II", 2, 3, APLICATIVA]
+    - ["22544", "Énfasis III", 3, 4, ELECTIVA]
+    - ["75081", "Inglés Proficiencia", 2, 4, SI]
+  6:
+    - ["66502", "Estadística y Probabilidad", 3, 3, BASICA]
+    - ["27012", "Topología General", 3, 4, DEMOSTRATIVA]
+    - ["63063", "Ecuaciones Diferenciales Parciales", 3, 4, APLICATIVA]
+    - ["34015", "Computación Científica I", 2, 3, APLICATIVA]
+    - ["64022", "Epistemología de la Matemática", 2, 2, TEORICA]
+    - ["68076", "Electiva 1", 3, 3, ELECTIVA]
+  7:
+    - ["62601", "Algebra Abstracta", 3, 4, DEMOSTRATIVA]
+    - ["61701", "Análisis Matemático I", 3, 4, DEMOSTRATIVA]
+    - ["63602", "Estadística Matemática", 3, 4, APLICATIVA]
+    - ["35015", "Computación Científica II", 2, 3, APLICATIVA]
+    - ["69066", "Electiva 2", 3, 3, ELECTIVA]
+    - ["76011", "Cátedra de Cultura II", 2, 2, SI]
+  8:
+    - ["61802", "Variable Compleja", 3, 4, DEMOSTRATIVA]
+    - ["18012", "Análisis Matemático II", 3, 4, DEMOSTRATIVA]
+    - ["68040", "Enseñanza de las Matemàticas", 2, 4, TEORICA]
+    - ["69076", "Electiva 3", 3, 3, ELECTIVA]
+    - ["56205", "Metodología de la Investigación", 3, 3, INVESTIGACION]
+    - ["70012", "Cultura III", 2, 2, SI]
+  9:
+    - ["9a020", "Práctica Profesional", 8, 24, APLICATIVA]
+    - ["68086", "Electiva 4", 3, 3, ELECTIVA]
+    - ["39020", "Trabajo de Grado", 4, 2, INVESTIGACION]
+prerequisites:                 # course code: codes that must be passed first, read from the drawn connectors
+  "12015": ["11015"]
+  "31013": ["41025"]
+  "72081": ["71181"]
+  "13015": ["12015"]
+  "31014": ["31013"]
+  "64220": ["63202"]
+  "73081": ["72081"]
+  "14015": ["13015"]
+  "74081": ["73081"]
+  "15023": ["14023"]
+  "75081": ["74081"]
+  "35015": ["34015"]
+  "18012": ["61701"]
+  "39020": ["56205"]
+  "9a020": ["18012"]

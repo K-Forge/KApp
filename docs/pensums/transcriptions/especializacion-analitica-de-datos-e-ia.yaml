@@ -1,0 +1,19 @@
+source: Plan-de-estudios-especializacion-analitica-de-datos-e-IA.pdf
+program: Especialización en Analítica de Datos e Inteligencia Artificial
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
+programLevel: ESPECIALIZACION
+period: semestre
+declaredCredits: null
+levels:
+  1:
+    - [Gestión Estratégica de Proyectos de Analítica de Datos, 2]
+    - [Inteligencia de Negocios, 2]
+    - [Fundamentos de Programación y Bases de Datos para Analítica, 3]
+    - [Introducción a la IA y a la Ciencia de Datos, 2]
+    - [Visualización de Datos, 2]
+  2:
+    - [Gobernanza de Datos y Ética en la Analítica, 2]
+    - [Machine Learning y Procesamiento de Lenguaje Natural, 3]
+    - [Herramientas y Analítica y Despliegue en Nube, 3]
+    - [Análisis de Casos, 2]
+    - [Electiva, 3]

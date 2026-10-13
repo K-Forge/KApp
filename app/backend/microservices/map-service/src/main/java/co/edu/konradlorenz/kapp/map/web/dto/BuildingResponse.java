@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 /**
- * The {@code Building} schema: a building with the full list of its floors, ordered by
- * ascending level.
+ * The {@code Building} schema: a building with its wings and the full list of its floors,
+ * ordered by ascending level.
  *
  * <p>{@code description} is optional in the contract, so a null one is omitted rather than
  * serialised as {@code null}.
@@ -20,6 +20,12 @@ public record BuildingResponse(
         String name,
         String campus,
         String description,
-        List<FloorDto> floors
+        List<String> aliases,
+        List<WingDto> wings,
+        List<FloorDto> floors,
+        PlacementDto placement,
+        List<FootprintPartDto> footprint,
+        String address,
+        List<String> sinuSedes
 ) {
 }

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, ViewChild, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
 import { ApiErrorBannerComponent } from '../../../shared/ui/api-error-banner/api-error-banner.component';
@@ -6,40 +7,46 @@ import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.com
 import { DataTableComponent } from '../../../shared/ui/data-table/data-table.component';
 import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 import { BuildingFormComponent } from './building-form.component';
-import type { Building, BuildingRequest } from './building.model';
+import { FLOOR_STATUS_LABELS, type Building, type BuildingRequest, type FloorStatus } from './building.model';
 import { BuildingsService } from './buildings.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 /** Full CRUD over /api/map/buildings - the smaller of the two map entities, so no server paging. */
 @Component({
   selector: 'app-buildings-page',
-  imports: [DataTableComponent, ApiErrorBannerComponent, ModalComponent, BuildingFormComponent, PageIntroComponent],
+  imports: [TranslatePipe, RouterLink, DataTableComponent, ApiErrorBannerComponent, ModalComponent, BuildingFormComponent, PageIntroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
-        title="Buildings"
-        what="The blocks that make up a campus, and the floors inside each one. A floor is a grid: how many rows and columns the schematic map draws for it."
-        [can]="['Create a building and describe its floors', 'Edit its name, its campus or the grid of a floor', 'Delete one that has no spaces on it']"
-        note="The basement is level −1, not level 0, and the rule that a room code starts with its floor number stops applying there. Floors are edited here; the rooms on them live in Spaces. Deleting a building that still has spaces is refused with a 409 saying how many."
+        [title]="'Buildings' | t"
+        [what]="'Each building of the university, with its address, wings and floors.' | t"
+        [can]="[('Create, edit and delete buildings' | t), ('Edit their wings and floors' | t), ('Find one by code or name' | t)]"
+        [note]="'A floor, a wing or a building that still has spaces cannot be removed.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">New building</button>
       </app-page-intro>
 
       <div class="card stack">
-        <div class="field" style="margin-bottom: 0; max-width: 20rem">
-          <label for="campus">Campus</label>
-          <input id="campus" type="text" placeholder="filter by campus" (input)="onCampusInput($event)" />
+        <div class="work-bar">
+          <div class="field" style="margin-bottom: 0; flex: 1 1 14rem">
+            <label for="q">{{ 'Search' | t }}</label>
+            <input id="q" type="text" [placeholder]="'code, name or other name' | t" (input)="onQueryInput($event)" />
+          </div>
+          <button type="button" class="btn btn-primary work-create" (click)="openCreate()">{{ 'New building' | t }}</button>
         </div>
 
         <app-api-error-banner [error]="error()" />
 
-        <app-data-table [loading]="loading()" [empty]="!loading() && !error() && buildings().length === 0" emptyMessage="No buildings yet.">
+        <app-data-table [loading]="loading()" [empty]="!loading() && !error() && buildings().length === 0" [emptyMessage]="'No buildings yet.' | t">
           <thead>
             <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Campus</th>
-              <th>Floors</th>
+              <th>{{ 'Code' | t }}</th>
+              <th>{{ 'Name' | t }}</th>
+              <th>{{ 'Address' | t }}</th>
+              <th>{{ 'In SINU' | t }}</th>
+              <th>{{ 'Wings' | t }}</th>
+              <th>{{ 'Floors' | t }}</th>
               <th></th>
             </tr>
           </thead>
@@ -47,13 +54,32 @@ import { BuildingsService } from './buildings.service';
             @for (building of buildings(); track building.code) {
               <tr>
                 <td class="mono">{{ building.code }}</td>
-                <td>{{ building.name }}</td>
-                <td>{{ building.campus }}</td>
-                <td>{{ building.floors.length }}</td>
+                <td>
+                  {{ building.name }}
+                  @if (building.aliases.length) {
+                    <div class="text-faint">{{ building.aliases.join(' · ') }}</div>
+                  }
+                </td>
+                <td class="text-muted">{{ building.address || '—' }}</td>
+                <td class="text-muted">{{ building.sinuSedes?.length ? building.sinuSedes!.join(' · ') : '—' }}</td>
+                <td class="text-muted">{{ wingNames(building) }}</td>
+                <td style="min-width: 10rem">
+                  <div class="row" style="flex-wrap: wrap; gap: 0.25rem">
+                    @for (floor of building.floors; track floor.code) {
+                      <a
+                        [class]="statusBadge(floor.status)"
+                        [routerLink]="['/data/floors', building.code, floor.code]"
+                        [title]="'Draw {floor} ({status})' | t: { floor: floor.name, status: (statusLabels[floor.status ?? 'UNMAPPED'] | t) }"
+                      >
+                        {{ floor.code }}
+                      </a>
+                    }
+                  </div>
+                </td>
                 <td class="row">
-                  <button type="button" class="btn btn-sm" (click)="openEdit(building)">Edit</button>
+                  <button type="button" class="btn btn-sm" (click)="openEdit(building)">{{ 'Edit' | t }}</button>
                   <button type="button" class="btn btn-sm btn-danger" [disabled]="deletingCode() === building.code" (click)="remove(building)">
-                    Delete
+                    {{ 'Delete' | t }}
                   </button>
                 </td>
               </tr>
@@ -63,7 +89,7 @@ import { BuildingsService } from './buildings.service';
       </div>
     </div>
 
-    <app-modal #formModal [title]="editingBuilding() ? 'Edit building' : 'New building'" (closed)="formError.set(null)">
+    <app-modal #formModal [title]="editingBuilding() ? ('Edit building' | t) : ('New building' | t)" (closed)="formError.set(null)">
       <app-api-error-banner [error]="formError()" />
       <app-building-form
         [initial]="editingBuilding()"
@@ -86,9 +112,11 @@ export class BuildingsPage {
   readonly formError = signal<ApiError | null>(null);
   readonly deletingCode = signal<string | null>(null);
 
+  readonly statusLabels = FLOOR_STATUS_LABELS;
+
   @ViewChild('formModal') private formModal?: ModalComponent;
 
-  private campus = '';
+  private query = '';
   private debounceHandle?: ReturnType<typeof setTimeout>;
 
   constructor() {
@@ -98,7 +126,7 @@ export class BuildingsPage {
   private fetch(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.buildingsService.list(this.campus || undefined).subscribe({
+    this.buildingsService.list(undefined, this.query.trim() || undefined).subscribe({
       next: (buildings) => {
         this.buildings.set(buildings);
         this.loading.set(false);
@@ -110,10 +138,30 @@ export class BuildingsPage {
     });
   }
 
-  onCampusInput(event: Event): void {
-    this.campus = (event.target as HTMLInputElement).value;
+  onQueryInput(event: Event): void {
+    this.query = (event.target as HTMLInputElement).value;
+    this.fetchSoon();
+  }
+
+  private fetchSoon(): void {
     clearTimeout(this.debounceHandle);
     this.debounceHandle = setTimeout(() => this.fetch(), 300);
+  }
+
+  wingNames(building: Building): string {
+    return building.wings.length ? building.wings.map((w) => w.name).join(', ') : '—';
+  }
+
+  /** Green once walked, amber while it only comes from photos, grey while nothing is drawn. */
+  statusBadge(status: FloorStatus | undefined): string {
+    switch (status) {
+      case 'VERIFIED':
+        return 'badge badge-success';
+      case 'DRAFT':
+        return 'badge badge-warning';
+      default:
+        return 'badge badge-neutral';
+    }
   }
 
   openCreate(): void {
@@ -148,7 +196,7 @@ export class BuildingsPage {
   }
 
   remove(building: Building): void {
-    if (!window.confirm(`Delete building ${building.code} — ${building.name}? This cannot be undone.`)) {
+    if (!window.confirm(t('Delete building {code} — {name}? This cannot be undone.', { code: building.code, name: building.name }))) {
       return;
     }
     this.deletingCode.set(building.code);

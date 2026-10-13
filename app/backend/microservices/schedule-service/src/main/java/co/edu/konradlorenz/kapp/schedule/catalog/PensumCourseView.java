@@ -3,26 +3,23 @@ package co.edu.konradlorenz.kapp.schedule.catalog;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * The slice of {@code semaphore-service}'s {@code PensumCourse} this service actually
- * needs, from {@code GET /api/catalog/pensums/{pensumCode}/courses}
- * ({@code docs/api/semaphore.openapi.yaml}).
+ * The slice of {@code semaphore-service}'s {@code PensumCourse} this service needs, from
+ * {@code GET /api/catalog/pensums/{pensumCode}/courses} ({@code docs/api/semaphore.openapi.yaml}):
+ * which item of the pensum a course of the timetable is.
  *
- * <p>{@code @JsonIgnoreProperties(ignoreUnknown = true)} is required, not decorative: this
- * service's default {@code ObjectMapper} fails on unknown properties (nothing here
- * disables that), and the real schema carries several fields - {@code weeklyHours},
- * {@code totalHours}, {@code area}, {@code isElectiveSlot}, {@code prerequisites} - this
- * client has no use for. Without it, semaphore-service adding a field would break every
- * catalogue lookup here.
+ * <p>{@code @JsonIgnoreProperties(ignoreUnknown = true)} is required, not decorative: the real schema
+ * carries fields this client has no use for, and without it semaphore-service adding one would break
+ * every lookup here.
  *
- * <p>An elective slot has {@code code == null}; matching a hand-entered enrollment is
- * therefore done by {@code pensumItemCode}, which is never null.
+ * @param sinuCode the course code as SINU carries it, which a timetable's section carries too; null
+ *                 where the real one is not known
+ * @param code     the printed code semaphore 1.0 still answers with, read while it does
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record PensumCourseView(
-        String code,
         String pensumItemCode,
-        String name,
-        Integer level,
-        Integer credits
+        String sinuCode,
+        String code,
+        String name
 ) {
 }

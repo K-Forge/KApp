@@ -1,14 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { CopyButtonComponent } from '../copy-button/copy-button.component';
 
 /** Pretty-printed, monospace, copyable JSON - used for tokens, request bodies and responses alike. */
 @Component({
   selector: 'app-json-view',
+  imports: [CopyButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="json-view">
-      <button type="button" class="btn btn-ghost btn-sm copy-btn" (click)="copy()">
-        {{ copied() ? 'Copied' : 'Copy' }}
-      </button>
+      <app-copy-button class="copy-btn" [text]="pretty()" [ghost]="true" />
       <pre class="mono">{{ pretty() }}</pre>
     </div>
   `,
@@ -22,6 +22,8 @@ import { ChangeDetectionStrategy, Component, computed, input, signal } from '@an
     pre {
       margin: 0;
       padding: 0.75rem;
+      /* Room for the copy button above the text, so a long token never runs under it. */
+      padding-top: 2.4rem;
       overflow: auto;
       max-height: 28rem;
       font-size: 0.75rem;
@@ -37,7 +39,6 @@ import { ChangeDetectionStrategy, Component, computed, input, signal } from '@an
 })
 export class JsonViewComponent {
   readonly value = input<unknown>(undefined);
-  readonly copied = signal(false);
 
   readonly pretty = computed(() => {
     const value = this.value();
@@ -50,14 +51,4 @@ export class JsonViewComponent {
       return String(value);
     }
   });
-
-  async copy(): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(this.pretty());
-      this.copied.set(true);
-      setTimeout(() => this.copied.set(false), 1500);
-    } catch {
-      // Clipboard access can be denied by the browser; the value is still fully visible above.
-    }
-  }
 }

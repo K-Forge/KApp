@@ -1,240 +1,319 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, output } from '@angular/core';
-import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import type { Building } from '../buildings/building.model';
-import { CIRCULATION_TYPES, SPACE_TYPES, WINGS, type Space, type SpaceRequest, type SpaceType, type Wing } from './space.model';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import {
+  FormArray,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { ACCESSIBILITY, ACCESSIBILITY_LABELS, type Accessibility, type Building } from '../buildings/building.model';
+import { CATEGORY_LABELS, SPACE_CATEGORIES, type Space, type SpaceRequest, type SpaceType } from './space.model';
+import { SpacesService } from './spaces.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
+
+const CODE = /^[A-Za-z0-9][A-Za-z0-9-]*$/;
 
 type SpaceForm = FormGroup<{
   code: FormControl<string>;
+  doorCode: FormControl<string>;
   name: FormControl<string>;
-  type: FormControl<SpaceType>;
+  typeCode: FormControl<string>;
   buildingCode: FormControl<string>;
-  floorLevel: FormControl<number>;
-  wing: FormControl<Wing | ''>;
-  gridRow: FormControl<number>;
-  gridColumn: FormControl<number>;
-  rowSpan: FormControl<number>;
-  colSpan: FormControl<number>;
+  floorCode: FormControl<string>;
+  wing: FormControl<string>;
   accessVia: FormControl<string>;
+  accessibility: FormControl<Accessibility | ''>;
+  note: FormControl<string>;
   capacity: FormControl<number | null>;
   aliases: FormArray<FormControl<string>>;
 }>;
 
 function aliasControl(value = ''): FormControl<string> {
-  return new FormControl(value, { nonNullable: true, validators: [Validators.required, Validators.minLength(1), Validators.maxLength(120)] });
+  return new FormControl(value, { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] });
 }
 
 /**
- * Create/edit form for a space. `buildingCode` and `floorLevel` are selects driven by the actual
- * buildings list (not free text) so a developer can't point a pin at a building or floor that
- * doesn't exist - the API would 404 that anyway, this just surfaces it before the round trip.
+ * Create/edit form for a space.
+ *
+ * <p>Building, floor and wing are selects driven by the building itself, so a space cannot name a
+ * floor or wing its building does not have. The type comes from the catalogue, grouped by the
+ * category clients draw it with.
+ *
+ * <p>Two codes on purpose. `code` identifies the space and is never shown; `doorCode` is what is
+ * printed on the door. For a numbered room they are the same, which is why the first follows the
+ * second while it has not been touched. For a stairwell or a bathroom with nothing on its door,
+ * the door code stays empty and the app shows the name.
  */
 @Component({
   selector: 'app-space-form',
-  imports: [ReactiveFormsModule],
+  imports: [TranslatePipe, ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()" class="stack">
-      <div class="field" [class.invalid]="invalid('code')">
-        <label for="s-code">Code</label>
-        <input id="s-code" type="text" formControlName="code" placeholder="708" />
-        @if (invalid('code')) {
-          <span class="error">Required, 1-20 characters.</span>
-        }
-      </div>
-
-      <div class="field" [class.invalid]="invalid('name')">
-        <label for="s-name">Name</label>
-        <input id="s-name" type="text" formControlName="name" />
-        @if (invalid('name')) {
-          <span class="error">Required, 1-120 characters.</span>
-        }
-      </div>
-
-      <div class="field">
-        <label for="s-type">Type</label>
-        <select id="s-type" formControlName="type">
-          @for (type of spaceTypes; track type) {
-            <option [value]="type">{{ type }}</option>
-          }
-        </select>
-      </div>
-
       <div class="field" [class.invalid]="invalid('buildingCode')">
-        <label for="s-building">Building</label>
-        <select id="s-building" formControlName="buildingCode">
-          <option value="" disabled>choose a building…</option>
+        <label for="s-building">{{ 'Building' | t }}</label>
+        <select id="s-building" formControlName="buildingCode" (change)="onBuildingChange()">
+          <option value="" disabled>{{ 'choose a building…' | t }}</option>
           @for (building of buildings(); track building.code) {
             <option [value]="building.code">{{ building.code }} — {{ building.name }}</option>
           }
         </select>
         @if (invalid('buildingCode')) {
-          <span class="error">Required.</span>
+          <span class="error">{{ 'Required.' | t }}</span>
         }
-      </div>
-
-      <div class="field">
-        <label for="s-floor">Floor level</label>
-        @if (floorOptions().length) {
-          <select id="s-floor" formControlName="floorLevel">
-            @for (floor of floorOptions(); track floor.level) {
-              <option [value]="floor.level">{{ floor.level }} — {{ floor.name }}</option>
-            }
-          </select>
-        } @else {
-          <input id="s-floor" type="number" formControlName="floorLevel" min="-5" max="99" />
-          <span class="hint">Pick a building to choose from its actual floors.</span>
-        }
-      </div>
-
-      <div class="field">
-        <label for="s-wing">Wing</label>
-        <select id="s-wing" formControlName="wing">
-          <option value="">Derive from the code (-N, -S, -C)</option>
-          @for (w of wings; track w) {
-            <option [value]="w">{{ w }}</option>
-          }
-        </select>
-        <span class="hint">301, 301-N and 301-S are three different rooms on one floor.</span>
       </div>
 
       <div class="row spread">
-        <div class="field" style="margin-bottom:0; flex: 1 1 6rem">
-          <label for="s-row">Grid row</label>
-          <input id="s-row" type="number" formControlName="gridRow" min="0" [max]="maxRow()" />
+        <div class="field" style="flex: 1 1 10rem" [class.invalid]="invalid('floorCode')">
+          <label for="s-floor">{{ 'Floor' | t }}</label>
+          <select id="s-floor" formControlName="floorCode" (change)="onFloorChange()">
+            <option value="" disabled>{{ building() ? ('choose a floor…' | t) : ('pick a building first' | t) }}</option>
+            @for (floor of floors(); track floor.code) {
+              <option [value]="floor.code">{{ floor.code }} — {{ floor.name }}</option>
+            }
+          </select>
+          @if (invalid('floorCode')) {
+            <span class="error">{{ 'Required.' | t }}</span>
+          }
         </div>
-        <div class="field" style="margin-bottom:0; flex: 1 1 6rem">
-          <label for="s-col">Grid column</label>
-          <input id="s-col" type="number" formControlName="gridColumn" min="0" [max]="maxColumn()" />
+        <div class="field" style="flex: 1 1 10rem">
+          <label for="s-wing">{{ 'Wing' | t }}</label>
+          <select id="s-wing" formControlName="wing" [attr.disabled]="wings().length ? null : true">
+            <option value="">{{ wings().length ? ('No wing' | t) : ('This building has no wings' | t) }}</option>
+            @for (wing of wings(); track wing.code) {
+              <option [value]="wing.code">{{ wing.name }}{{ wing.doorSuffix ? ' (' + wing.doorSuffix + ')' : '' }}</option>
+            }
+          </select>
         </div>
-        <div class="field" style="margin-bottom:0; flex: 1 1 5rem">
-          <label for="s-rowspan">Rows</label>
-          <input id="s-rowspan" type="number" formControlName="rowSpan" min="1" max="60" />
+      </div>
+
+      <div class="row spread">
+        <div class="field" style="flex: 1 1 10rem">
+          <label for="s-door">{{ 'Number on the door' | t }}</label>
+          <input id="s-door" type="text" formControlName="doorCode" placeholder="503-S" (input)="mirrorDoorCode()" />
+          <span class="hint">{{ 'Exactly as printed. Leave empty when the door has no number.' | t }}</span>
         </div>
-        <div class="field" style="margin-bottom:0; flex: 1 1 5rem">
-          <label for="s-colspan">Columns</label>
-          <input id="s-colspan" type="number" formControlName="colSpan" min="1" max="60" />
+        <div class="field" style="flex: 1 1 10rem" [class.invalid]="invalid('code')">
+          <label for="s-code">{{ 'Internal code' | t }}</label>
+          <input id="s-code" type="text" formControlName="code" placeholder="503-S" />
+          @if (invalid('code')) {
+            <span class="error">{{ 'Required: letters, digits and dashes, up to 20.' | t }}</span>
+          } @else {
+            <span class="hint">{{ 'Never shown. Unique in the building - e.g. BANO-P6-C for a bathroom.' | t }}</span>
+          }
         </div>
-        <div class="field" style="margin-bottom:0; flex: 1 1 6rem">
-          <label for="s-capacity">Capacity</label>
+      </div>
+
+      <div class="field" [class.invalid]="invalid('name')">
+        <label for="s-name">{{ 'Name' | t }}</label>
+        <input id="s-name" type="text" formControlName="name" [placeholder]="'Aula 503' | t" />
+        @if (invalid('name')) {
+          <span class="error">{{ 'Required, 1-120 characters.' | t }}</span>
+        }
+      </div>
+
+      <div class="field" [class.invalid]="invalid('typeCode')">
+        <label for="s-type">{{ 'Type' | t }}</label>
+        <select id="s-type" formControlName="typeCode">
+          <option value="" disabled>{{ 'choose a type…' | t }}</option>
+          @for (group of typeGroups(); track group.category) {
+            <optgroup [label]="group.label">
+              @for (type of group.types; track type.code) {
+                <option [value]="type.code">{{ type.name }}</option>
+              }
+            </optgroup>
+          }
+        </select>
+        <span class="hint">{{ 'Missing one? Add it under Space types; it shows up here right away.' | t }}</span>
+      </div>
+
+      <div class="row spread">
+        <div class="field" style="flex: 2 1 12rem">
+          <span class="label">{{ 'On the floor plan' | t }}</span>
+          @if (keepsShape()) {
+            <span class="text-muted">{{ (doorCount() === 0 ? ('Drawn' | t) : doorCount() === 1 ? ('Drawn · 1 door' | t) : ('Drawn · {doors} doors' | t: { doors: doorCount() })) + '. ' + ('Its outline and doors are edited in the floor editor.' | t) }}</span>
+          } @else if (initial()?.shape) {
+            <span class="text-muted">{{ 'Moving it to another floor takes it off the plan; draw it there in the floor editor.' | t }}</span>
+          } @else {
+            <span class="text-muted">{{ 'Not drawn yet. Draw it, or match it with a traced room, in the floor editor.' | t }}</span>
+          }
+        </div>
+        <div class="field" style="flex: 1 1 6rem">
+          <label for="s-capacity">{{ 'Capacity' | t }}</label>
           <input id="s-capacity" type="number" formControlName="capacity" min="0" />
         </div>
       </div>
-      @if (selectedFloor(); as floor) {
-        <span class="hint">
-          {{ floor.name }} is {{ floor.gridRows }} x {{ floor.gridColumns }}. The server refuses a
-          space that would not fit, or that would overlap another.
-        </span>
-      } @else {
-        <span class="hint">Pick a building and floor to see the grid's size.</span>
-      }
+
+      <div class="row spread">
+        <div class="field" style="flex: 1 1 12rem">
+          <label for="s-access-via">{{ 'Reached via' | t }}</label>
+          <select id="s-access-via" formControlName="accessVia">
+            <option value="">{{ 'Nothing in particular' | t }}</option>
+            @for (option of circulation(); track option.code) {
+              <option [value]="option.code">{{ option.name }} ({{ option.floorCode }})</option>
+            }
+            @if (unknownAccessVia(); as code) {
+              <option [value]="code">{{ '{code} (not found in this building)' | t: { code: code } }}</option>
+            }
+          </select>
+          <span class="hint">{{ 'The lift, stairs or entrance that serves it: "sube por el ascensor central".' | t }}</span>
+        </div>
+        <div class="field" style="flex: 1 1 12rem">
+          <label for="s-accessibility">{{ 'Reachable without stairs?' | t }}</label>
+          <select id="s-accessibility" formControlName="accessibility">
+            <option value="">{{ 'Same as the floor ({floorAccessibility})' | t: { floorAccessibility: floorAccessibility() } }}</option>
+            @for (value of accessibility; track value) {
+              <option [value]="value">{{ accessibilityLabels[value] | t }}</option>
+            }
+          </select>
+        </div>
+      </div>
 
       <div class="field">
-        <label for="s-access">Reached via</label>
-        <input id="s-access" type="text" formControlName="accessVia" list="circulation-codes" placeholder="ASC-CENTRAL" />
-        <datalist id="circulation-codes">
-          @for (option of circulation(); track option.code) {
-            <option [value]="option.code">{{ option.name }}</option>
-          }
-        </datalist>
-        <span class="hint">
-          The lift, staircase or entrance that serves this space — what produces "piso 4, sube por
-          el ascensor central". The suggestions come from the spaces currently listed; the server
-          checks the code against the whole building and refuses one that names nothing.
-        </span>
+        <label for="s-note">{{ 'How to get there' | t }}</label>
+        <input id="s-note" type="text" formControlName="note" [placeholder]="'Solo por la escalera norte, desde el P5' | t" />
+        <span class="hint">{{ 'For what "reached via" cannot say. Up to 300 characters.' | t }}</span>
       </div>
 
       <div class="row-between">
         <label style="font-size:0.8125rem; font-weight:600; color:var(--text-muted)">
-          Aliases <span class="text-faint">(what students actually search for)</span>
+          {{ 'Other names' | t }} <span class="text-faint">{{ '(what people actually search for)' | t }}</span>
         </label>
-        <button type="button" class="btn btn-sm" (click)="addAlias()">Add alias</button>
+        <button type="button" class="btn btn-sm" (click)="addAlias()">{{ 'Add name' | t }}</button>
       </div>
       @for (alias of form.controls.aliases.controls; track $index) {
         <div class="row">
-          <input type="text" [formControl]="alias" placeholder="sala de sistemas" />
-          <button type="button" class="btn btn-sm btn-danger" (click)="removeAlias($index)">Remove</button>
+          <input type="text" [formControl]="alias" placeholder="S-503" />
+          <button type="button" class="btn btn-sm btn-danger" (click)="removeAlias($index)">{{ 'Remove' | t }}</button>
         </div>
       }
 
       <div class="row">
         <button type="submit" class="btn btn-primary" [disabled]="submitting()">
-          {{ submitting() ? 'Saving…' : editing() ? 'Save changes' : 'Create space' }}
+          {{ submitting() ? ('Saving…' | t) : editing() ? ('Save changes' | t) : ('Create space' | t) }}
         </button>
-        <button type="button" class="btn" (click)="cancelled.emit()">Cancel</button>
+        <button type="button" class="btn" (click)="cancelled.emit()">{{ 'Cancel' | t }}</button>
       </div>
     </form>
   `,
 })
 export class SpaceFormComponent {
+  private readonly spacesService = inject(SpacesService);
+
   readonly initial = input<Space | null>(null);
   readonly buildings = input<Building[]>([]);
+  readonly types = input<SpaceType[]>([]);
   readonly submitting = input(false);
   readonly submitted = output<SpaceRequest>();
   readonly cancelled = output<void>();
 
-  readonly spaceTypes = SPACE_TYPES;
-  readonly wings = WINGS;
+  readonly accessibility = ACCESSIBILITY;
+  readonly accessibilityLabels = ACCESSIBILITY_LABELS;
   readonly editing = () => this.initial() !== null;
 
-  readonly floorOptions = computed(() => {
-    const code = this.selectedBuildingCode();
-    return this.buildings().find((b) => b.code === code)?.floors ?? [];
+  /**
+   * The selects a form control's value drives, mirrored in signals: a computed reading a form
+   * control's value directly would compute once and never again, and the floor list would stay
+   * the first building's.
+   */
+  private readonly buildingCode = signal('');
+  private readonly floorCode = signal('');
+
+  readonly building = computed(() => this.buildings().find((b) => b.code === this.buildingCode()) ?? null);
+  readonly floors = computed(() => this.building()?.floors ?? []);
+  readonly wings = computed(() => this.building()?.wings ?? []);
+  readonly floor = computed(() => this.floors().find((f) => f.code === this.floorCode()) ?? null);
+
+  /** The outline and doors stay with the space while it stays on the floor they were drawn on. */
+  readonly keepsShape = computed(() => {
+    const space = this.initial();
+    return !!space?.shape && this.buildingCode() === space.buildingCode && this.floorCode() === space.floorCode;
   });
+  readonly doorCount = computed(() => this.initial()?.doors?.length ?? 0);
 
-  /** The floor this space claims, so the form can say how big its grid is. */
-  readonly selectedFloor = () =>
-    this.floorOptions().find((f) => f.level === this.form.controls.floorLevel.value) ?? null;
+  readonly floorAccessibility = computed(() => t(ACCESSIBILITY_LABELS[this.floor()?.accessibility ?? 'UNKNOWN']).toLowerCase());
 
-  readonly maxRow = () => Math.max(0, (this.selectedFloor()?.gridRows ?? 60) - 1);
-  readonly maxColumn = () => Math.max(0, (this.selectedFloor()?.gridColumns ?? 60) - 1);
+  readonly typeGroups = computed(() =>
+    SPACE_CATEGORIES.map((category) => ({
+      category,
+      label: t(CATEGORY_LABELS[category]),
+      types: this.types().filter((t) => t.category === category),
+    })).filter((group) => group.types.length > 0),
+  );
 
   /**
-   * What `accessVia` may point at: the circulation elements already recorded in this building.
-   *
-   * <p>A select rather than free text. The value has to match another space's code exactly for
-   * the client to resolve "sube por el ascensor central" into anything, and a typed code that
-   * is almost right fails silently - the app simply says nothing about how to get there.
+   * What `accessVia` may point at: the lifts, stairs, ramps and entrances of this building, on any
+   * floor. A select, not free text - the value has to match another space's code exactly, and an
+   * almost-right code would be refused by the server anyway.
    */
-  readonly circulation = () => {
-    const code = this.selectedBuildingCode();
-    return this.knownSpaces()
-      .filter((s) => s.buildingCode === code && CIRCULATION_TYPES.includes(s.type))
-      .sort((a, b) => a.code.localeCompare(b.code));
-  };
+  readonly circulation = signal<Space[]>([]);
 
-  readonly knownSpaces = input<Space[]>([]);
-
-  private readonly selectedBuildingCode = () => this.form.controls.buildingCode.value;
+  /** A stored accessVia this building no longer lists, kept visible rather than silently dropped. */
+  readonly unknownAccessVia = computed(() => {
+    const current = this.initial()?.accessVia;
+    return current && !this.circulation().some((s) => s.code === current) ? current : null;
+  });
 
   form: SpaceForm = this.buildForm(null);
 
   constructor() {
     effect(() => {
-      this.form = this.buildForm(this.initial());
+      const space = this.initial();
+      this.form = this.buildForm(space);
+      this.buildingCode.set(space?.buildingCode ?? '');
+      this.floorCode.set(space?.floorCode ?? '');
+      this.loadCirculation(space?.buildingCode ?? '');
     });
   }
 
   private buildForm(space: Space | null): SpaceForm {
-    return new FormGroup({
-      code: new FormControl(space?.code ?? '', { nonNullable: true, validators: [Validators.required, Validators.minLength(1), Validators.maxLength(20)] }),
-      name: new FormControl(space?.name ?? '', { nonNullable: true, validators: [Validators.required, Validators.minLength(1), Validators.maxLength(120)] }),
-      type: new FormControl(space?.type ?? SPACE_TYPES[0], { nonNullable: true, validators: [Validators.required] }),
-      buildingCode: new FormControl(space?.buildingCode ?? '', { nonNullable: true, validators: [Validators.required] }),
-      floorLevel: new FormControl(space?.floorLevel ?? 1, { nonNullable: true, validators: [Validators.required, Validators.min(-5), Validators.max(99)] }),
-      wing: new FormControl<Wing | ''>(space?.wing ?? '', { nonNullable: true }),
-      gridRow: new FormControl(space?.gridRow ?? 0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
-      gridColumn: new FormControl(space?.gridColumn ?? 0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
-      rowSpan: new FormControl(space?.rowSpan ?? 1, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(60)] }),
-      colSpan: new FormControl(space?.colSpan ?? 1, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(60)] }),
-      accessVia: new FormControl(space?.accessVia ?? '', { nonNullable: true, validators: [Validators.maxLength(20)] }),
-      capacity: new FormControl<number | null>(space?.capacity ?? null, { validators: [Validators.min(0)] }),
-      aliases: new FormArray((space?.aliases ?? []).map((a) => aliasControl(a))),
-    });
+    return new FormGroup(
+      {
+        code: new FormControl(space?.code ?? '', {
+          nonNullable: true,
+          validators: [Validators.required, Validators.maxLength(20), Validators.pattern(CODE)],
+        }),
+        doorCode: new FormControl(space?.doorCode ?? '', { nonNullable: true, validators: [Validators.maxLength(20)] }),
+        name: new FormControl(space?.name ?? '', { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] }),
+        typeCode: new FormControl(space?.typeCode ?? '', { nonNullable: true, validators: [Validators.required] }),
+        buildingCode: new FormControl(space?.buildingCode ?? '', { nonNullable: true, validators: [Validators.required] }),
+        floorCode: new FormControl(space?.floorCode ?? '', { nonNullable: true, validators: [Validators.required] }),
+        wing: new FormControl(space?.wing ?? '', { nonNullable: true }),
+        accessVia: new FormControl(space?.accessVia ?? '', { nonNullable: true }),
+        accessibility: new FormControl<Accessibility | ''>(space?.accessibility ?? '', { nonNullable: true }),
+        note: new FormControl(space?.note ?? '', { nonNullable: true, validators: [Validators.maxLength(300)] }),
+        capacity: new FormControl<number | null>(space?.capacity ?? null, { validators: [Validators.min(0)] }),
+        aliases: new FormArray((space?.aliases ?? []).map((a) => aliasControl(a))),
+      },
+    );
   }
 
-  invalid(name: 'code' | 'name' | 'buildingCode'): boolean {
+  invalid(name: 'code' | 'name' | 'typeCode' | 'buildingCode' | 'floorCode'): boolean {
     const control = this.form.controls[name];
     return control.invalid && control.touched;
+  }
+
+  onBuildingChange(): void {
+    const code = this.form.controls.buildingCode.value;
+    this.buildingCode.set(code);
+    // A floor or wing of the previous building means nothing in this one.
+    this.form.controls.floorCode.setValue('');
+    this.form.controls.wing.setValue('');
+    this.form.controls.accessVia.setValue('');
+    this.floorCode.set('');
+    this.loadCirculation(code);
+  }
+
+  onFloorChange(): void {
+    this.floorCode.set(this.form.controls.floorCode.value);
+  }
+
+  /** While the internal code has not been typed into, it follows the number on the door. */
+  mirrorDoorCode(): void {
+    const code = this.form.controls.code;
+    if (this.editing() || code.dirty) return;
+    code.setValue(this.form.controls.doorCode.value.trim().replace(/\s+/g, '-'));
   }
 
   addAlias(): void {
@@ -245,20 +324,43 @@ export class SpaceFormComponent {
     this.form.controls.aliases.removeAt(index);
   }
 
+  private loadCirculation(buildingCode: string): void {
+    this.circulation.set([]);
+    if (!buildingCode) return;
+    this.spacesService.search({ page: 0, size: 100, buildingCode, category: 'CIRCULATION' }).subscribe({
+      next: (page) =>
+        this.circulation.set(
+          page.content
+            .filter((s) => s.code !== this.initial()?.code)
+            .sort((a, b) => a.floorLevel - b.floorLevel || a.name.localeCompare(b.name)),
+        ),
+    });
+  }
+
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
     const raw = this.form.getRawValue();
-    // Empty strings mean "not set", not "set to empty": the server treats wing as derivable
-    // from the code and accessVia as genuinely optional, and sending "" would fail validation
-    // on one and store a meaningless value on the other.
+    const keep = this.keepsShape();
+    // An empty field means "not set", never "set to empty": the server reads an absent door code
+    // as "nothing printed on the door" and an absent accessibility as "the floor's", and an
+    // empty string would be stored as a value on both.
     this.submitted.emit({
-      ...raw,
-      type: raw.type as Space['type'],
-      wing: raw.wing === '' ? null : raw.wing,
-      accessVia: raw.accessVia.trim() === '' ? null : raw.accessVia.trim(),
+      code: raw.code.trim(),
+      doorCode: raw.doorCode.trim() || null,
+      wing: raw.wing || null,
+      name: raw.name.trim(),
+      typeCode: raw.typeCode,
+      buildingCode: raw.buildingCode,
+      floorCode: raw.floorCode,
+      aliases: raw.aliases.map((a) => a.trim()).filter(Boolean),
+      shape: keep ? this.initial()?.shape ?? null : null,
+      doors: keep ? this.initial()?.doors ?? [] : [],
+      accessVia: raw.accessVia || null,
+      accessibility: raw.accessibility || null,
+      note: raw.note.trim() || null,
       capacity: raw.capacity ?? undefined,
     });
   }

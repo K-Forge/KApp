@@ -2,14 +2,18 @@ package co.edu.konradlorenz.kapp.user.web;
 
 import co.edu.konradlorenz.kapp.user.service.UserProfileService;
 import co.edu.konradlorenz.kapp.user.web.dto.InternalUserUpsertRequest;
-import co.edu.konradlorenz.kapp.user.web.dto.UserProfileResponse;
+import co.edu.konradlorenz.kapp.user.web.dto.DirectoryEntry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -25,7 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
  * inside the Docker network. No web, Kotlin or Swift client should ever call it.
  *
  * <p>It answers 200 whether it created or updated, and never 409, which is what makes a
- * replayed registration safe.
+ * replayed registration safe. Deleting is idempotent the same way: 204 whether the profile was
+ * there or not, so a deletion that timed out can be sent again.
  */
 @RestController
 @RequestMapping("/internal/users")
@@ -41,7 +46,16 @@ public class InternalUserController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create or update a profile from another service",
             description = "Idempotent upsert keyed by e-mail. Returns 200 in both cases.")
-    public UserProfileResponse upsert(@Valid @RequestBody InternalUserUpsertRequest request) {
-        return users.upsertFromRegistration(request);
+    public DirectoryEntry upsert(@Valid @RequestBody InternalUserUpsertRequest request) {
+        return users.upsertFromAuth(request);
+    }
+
+    /** auth-service removing an account an administrator deleted: its credential is already gone. */
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Delete a profile from another service",
+            description = "Idempotent. Returns 204 whether or not the profile existed.")
+    public void delete(@PathVariable String id) {
+        users.deleteForAccount(id);
     }
 }

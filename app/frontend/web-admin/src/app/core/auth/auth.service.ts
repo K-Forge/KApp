@@ -13,6 +13,9 @@ import { TokenStore } from './token.store';
  * attach, and it is also where a bad base URL first becomes visible, so its errors go through
  * the same AppHttpError/ApiError path as everything else rather than a special case.
  */
+/** Who may sign in to this portal. Later, some administrative staff too. */
+export const PORTAL_ROLES = ['ROLE_ADMIN'];
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -21,7 +24,22 @@ export class AuthService {
   private readonly router = inject(Router);
 
   login(email: string, password: string): Observable<TokenResponse> {
-    return this.http.post<TokenResponse>(`${this.config.baseUrl()}/auth/login`, { email, password }).pipe(
+    // The portal is for administrators: the server refuses any other account here, before it
+    // offers to replace a temporary password - a student's is replaced in the app, not here.
+    return this.http.post<TokenResponse>(`${this.config.baseUrl()}/auth/login`, { email, password, allowedRoles: PORTAL_ROLES }).pipe(
+      tap((response) => this.tokenStore.set(response.accessToken)),
+      catchError((err) => throwError(() => new AppHttpError(parseApiError(err)))),
+    );
+  }
+
+  /**
+   * A temporary password an administrator issued, swapped for the person's own: the server
+   * answers as login does, so the session starts with the new password.
+   */
+  changePassword(email: string, currentPassword: string, newPassword: string): Observable<TokenResponse> {
+    return this.http
+      .post<TokenResponse>(`${this.config.baseUrl()}/auth/password`, { email, currentPassword, newPassword, allowedRoles: PORTAL_ROLES })
+      .pipe(
       tap((response) => this.tokenStore.set(response.accessToken)),
       catchError((err) => throwError(() => new AppHttpError(parseApiError(err)))),
     );
@@ -39,17 +57,36 @@ export class AuthService {
    */
   logout(): void {
     this.tokenStore.clear();
-    this.router
-      .navigateByUrl('/login')
-      .then((navigated) => {
-        if (!navigated) {
-          this.hardRedirectToLogin();
-        }
-      })
-      .catch(() => this.hardRedirectToLogin());
+    this.leaveFor({});
   }
 
-  private hardRedirectToLogin(): void {
-    window.location.assign('/login');
+  /**
+   * Ends a session whose token has run out, the moment it does, and says so on the sign-in
+   * page - which then brings the person back to the page they were on.
+   *
+   * <p>Waiting for the next call to come back `401` left the portal showing everything the dead
+   * token had read, for as long as nobody clicked anything: a list of users on an unattended
+   * screen, with a red "expired" badge over it.
+   */
+  expire(): void {
+    const returnUrl = this.router.url;
+    this.tokenStore.clear();
+    this.leaveFor(returnUrl.startsWith('/login') ? { reason: 'expired' } : { reason: 'expired', returnUrl });
+  }
+
+  private leaveFor(queryParams: Record<string, string>): void {
+    this.router
+      .navigate(['/login'], { queryParams })
+      .then((navigated) => {
+        if (!navigated) {
+          this.hardRedirectToLogin(queryParams);
+        }
+      })
+      .catch(() => this.hardRedirectToLogin(queryParams));
+  }
+
+  private hardRedirectToLogin(queryParams: Record<string, string>): void {
+    const query = new URLSearchParams(queryParams).toString();
+    window.location.assign(query ? `/login?${query}` : '/login');
   }
 }

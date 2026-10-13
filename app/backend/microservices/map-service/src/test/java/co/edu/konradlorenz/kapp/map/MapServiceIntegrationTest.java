@@ -41,8 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Testcontainers
 @TestPropertySource(properties = {
-        "eureka.client.enabled=false",
-        "spring.cloud.discovery.enabled=false"
+        // The placeholder campus is these tests' fixture; SurveyedCampusTest covers the survey.
+        "kapp.map.survey-seed=false"
 })
 class MapServiceIntegrationTest {
 
@@ -109,6 +109,7 @@ class MapServiceIntegrationTest {
                 .map(info -> info.getName())
                 .toList();
 
-        assertThat(indexNames).contains("uk_spaces_building_code", "ix_spaces_code", "tx_spaces_search");
+        assertThat(indexNames).contains("uk_spaces_building_code", "ix_spaces_code", "tx_spaces_search",
+                "ix_spaces_building_floor");
     }
 }

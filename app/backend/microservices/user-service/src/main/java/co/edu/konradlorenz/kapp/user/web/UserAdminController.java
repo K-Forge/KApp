@@ -6,7 +6,7 @@ import co.edu.konradlorenz.kapp.common.security.KappRoles;
 import co.edu.konradlorenz.kapp.user.domain.UserRole;
 import co.edu.konradlorenz.kapp.user.service.UserProfileService;
 import co.edu.konradlorenz.kapp.user.web.dto.PageResponse;
-import co.edu.konradlorenz.kapp.user.web.dto.UserProfileResponse;
+import co.edu.konradlorenz.kapp.user.web.dto.DirectoryEntry;
 import co.edu.konradlorenz.kapp.user.web.dto.UserStatusUpdateRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -62,15 +62,15 @@ public class UserAdminController {
     @GetMapping("/{userId}")
     @Operation(summary = "Get a user profile by id",
             description = "A well-formed but unknown id is a 404, not a 400.")
-    public UserProfileResponse byId(@PathVariable String userId) {
-        return users.byId(userId);
+    public DirectoryEntry byId(@PathVariable String userId) {
+        return users.entry(userId);
     }
 
     @PatchMapping(path = "/{userId}/status", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Activate or deactivate a user",
-            description = "A logical delete: the profile is kept for audit and academic "
-                    + "history, but the account can no longer use the platform. Idempotent.")
-    public UserProfileResponse setStatus(@PathVariable String userId,
+            description = "A logical delete: the profile is kept for audit, but the account can "
+                    + "no longer use the platform. Idempotent.")
+    public DirectoryEntry setStatus(@PathVariable String userId,
                                          @Valid @RequestBody UserStatusUpdateRequest request) {
         return users.setActive(userId, request.active());
     }

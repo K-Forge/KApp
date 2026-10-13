@@ -30,21 +30,23 @@ spring:
           # auth-service were already up - a boot-order deadlock under docker compose.
           jwk-set-uri: ${KAPP_JWKS_URI:http://localhost:8081/.well-known/jwks.json}
 
+kapp:
+  sinu:
+    # Which SINU the students' records are read from. `fake` serves the invented student of
+    # docs/api/sinu/ while the university has not opened SINU; there is no other adapter yet.
+    adapter: ${KAPP_SINU_ADAPTER:fake}
+  semaphore:
+    # A student's record read from SINU is kept this long, and no longer: nothing academic is stored.
+    record-cache: ${KAPP_RECORD_CACHE:5m}
+    # The university's clock: which day it is decides the current period and its elective bank.
+    zone: ${KAPP_SEMAPHORE_ZONE:America/Bogota}
+
 mongock:
   migration-scan-package: co.edu.konradlorenz.kapp.semaphore.migration
   # Left off deliberately: the change units only create indexes, which are idempotent,
   # and enabling transactions requires a MongoTransactionManager bean.
   # Property is `transactional`; `transaction-enabled` is deprecated in Mongock 5.5.
   transactional: false
-
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
-    # Registering with Eureka is pointless in tests and slows them down.
-    enabled: ${EUREKA_ENABLED:true}
-  instance:
-    prefer-ip-address: true
 
 management:
   endpoints:

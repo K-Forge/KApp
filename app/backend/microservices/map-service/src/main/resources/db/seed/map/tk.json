@@ -1,0 +1,59 @@
+{
+  "code": "TK",
+  "name": "Tienda K",
+  "campus": "Sede Principal",
+  "description": "La tienda de la universidad: uniformes y artículos de la Konrad. Ocupa la esquina de la Carrera 9A con la Calle 62, junto a la Casa de Francisco de Paula Vélez, y tiene oficinas al lado y en su segundo piso. Sin visitar.",
+  "address": "Cra. 9A # 62-02",
+  "aliases": [],
+  "wings": [],
+  "placement": {
+    "origin": {
+      "lat": 4.6483654,
+      "lon": -74.0619924
+    },
+    "bearing": 28.9,
+    "metresPerUnit": 0.03333
+  },
+  "footprint": [
+    {
+      "lot": "008213024015",
+      "floors": 2,
+      "basements": 0,
+      "ring": [
+        [-74.0618622, 4.6481558],
+        [-74.0618094, 4.648252],
+        [-74.0619708, 4.6483679],
+        [-74.0620277, 4.6482322],
+        [-74.061877, 4.6481601],
+        [-74.0618622, 4.6481558]
+      ]
+    },
+    {
+      "lot": "008213024015",
+      "floors": 1,
+      "basements": 0,
+      "ring": [
+        [-74.0618769, 4.6481605],
+        [-74.0620277, 4.6482322],
+        [-74.0619823, 4.6483405],
+        [-74.0619916, 4.6483479],
+        [-74.0620414, 4.6482269],
+        [-74.061881, 4.648151],
+        [-74.0618769, 4.6481605]
+      ]
+    }
+  ],
+  "floors": [
+    {
+      "code": "P1",
+      "level": 1,
+      "name": "Piso 1",
+      "status": "UNMAPPED",
+      "accessibility": "UNKNOWN",
+      "width": 803,
+      "height": 575,
+      "top": "NORTH",
+      "spaces": []
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 690" width="1240" height="690" role="img" aria-label="KApp architecture: three clients call one API gateway, which routes to five services, each owning one database.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 690" width="1240" height="690" role="img" aria-label="KApp architecture: three clients call one API gateway, which routes to five services. Four own one database each; schedule-service has none and reads SINU. Services find each other by name, with no registry.">
 <rect width="1240" height="690" fill="#FBFDFC"/>
 <rect x="28.0" y="24" width="381.3333333333333" height="74" rx="10" fill="#FFFFFF" stroke="#539392" stroke-width="1.6"/>
 <text x="218.66666666666666" y="55" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="17" font-weight="600" fill="#16211F" text-anchor="middle">Android · Kotlin</text>
@@ -18,8 +18,8 @@
 <path d="M 140.0 222 L 140.0 249" stroke="#9AA8A4" stroke-width="2.4" stroke-linecap="round"/><path d="M 134.0 248 L 140.0 257 L 146.0 248 Z" fill="#9AA8A4"/>
 <rect x="28.0" y="258" width="224.0" height="118" rx="10" fill="#FFFFFF" stroke="#C4185C" stroke-width="1.6"/>
 <text x="140.0" y="288" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="16" font-weight="600" fill="#16211F" text-anchor="middle">auth · 8081</text>
-<text x="140.0" y="310" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">credentials, RS256</text>
-<text x="140.0" y="327" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">JWKS, invitation codes</text>
+<text x="140.0" y="310" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">Microsoft sign-in, RS256</text>
+<text x="140.0" y="327" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">JWKS, refresh, visitor pass</text>
 <rect x="46.0" y="341" width="188.0" height="22" rx="11" fill="#FCE9F0"/>
 <text x="140.0" y="356" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="700" fill="#8E0F44" text-anchor="middle">its own database</text>
 <path d="M 380.0 222 L 380.0 249" stroke="#9AA8A4" stroke-width="2.4" stroke-linecap="round"/><path d="M 374.0 248 L 380.0 257 L 386.0 248 Z" fill="#9AA8A4"/>
@@ -32,17 +32,17 @@
 <path d="M 620.0 222 L 620.0 249" stroke="#9AA8A4" stroke-width="2.4" stroke-linecap="round"/><path d="M 614.0 248 L 620.0 257 L 626.0 248 Z" fill="#9AA8A4"/>
 <rect x="508.0" y="258" width="224.0" height="118" rx="10" fill="#FFFFFF" stroke="#C4185C" stroke-width="1.6"/>
 <text x="620.0" y="288" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="16" font-weight="600" fill="#16211F" text-anchor="middle">semaphore · 8083</text>
-<text x="620.0" y="310" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">catalogue, progress</text>
-<text x="620.0" y="327" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">academic plans</text>
+<text x="620.0" y="310" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">student plans</text>
+<text x="620.0" y="327" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">pensum read from SINU</text>
 <rect x="526.0" y="341" width="188.0" height="22" rx="11" fill="#FCE9F0"/>
 <text x="620.0" y="356" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="700" fill="#8E0F44" text-anchor="middle">its own database</text>
 <path d="M 860.0 222 L 860.0 249" stroke="#9AA8A4" stroke-width="2.4" stroke-linecap="round"/><path d="M 854.0 248 L 860.0 257 L 866.0 248 Z" fill="#9AA8A4"/>
 <rect x="748.0" y="258" width="224.0" height="118" rx="10" fill="#FFFFFF" stroke="#C4185C" stroke-width="1.6"/>
 <text x="860.0" y="288" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="16" font-weight="600" fill="#16211F" text-anchor="middle">schedule · 8084</text>
-<text x="860.0" y="310" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">enrolments, meetings</text>
-<text x="860.0" y="327" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">agenda</text>
+<text x="860.0" y="310" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">timetable</text>
+<text x="860.0" y="327" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">read from SINU</text>
 <rect x="766.0" y="341" width="188.0" height="22" rx="11" fill="#FCE9F0"/>
-<text x="860.0" y="356" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="700" fill="#8E0F44" text-anchor="middle">its own database</text>
+<text x="860.0" y="356" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="700" fill="#8E0F44" text-anchor="middle">no database</text>
 <path d="M 1100.0 222 L 1100.0 249" stroke="#9AA8A4" stroke-width="2.4" stroke-linecap="round"/><path d="M 1094.0 248 L 1100.0 257 L 1106.0 248 Z" fill="#9AA8A4"/>
 <rect x="988.0" y="258" width="224.0" height="118" rx="10" fill="#FFFFFF" stroke="#C4185C" stroke-width="1.6"/>
 <text x="1100.0" y="288" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="16" font-weight="600" fill="#16211F" text-anchor="middle">map · 8085</text>
@@ -50,20 +50,20 @@
 <text x="1100.0" y="327" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">spaces, search</text>
 <rect x="1006.0" y="341" width="188.0" height="22" rx="11" fill="#FCE9F0"/>
 <text x="1100.0" y="356" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="11.5" font-weight="700" fill="#8E0F44" text-anchor="middle">its own database</text>
-<text x="28" y="424" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="600" fill="#5F6E6A" text-anchor="start">Shared by all five, drawn without arrows because every service touches them</text>
+<text x="28" y="424" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="600" fill="#5F6E6A" text-anchor="start">Shared, drawn without arrows because most services touch them</text>
 <rect x="28.0" y="438" width="381.3333333333333" height="66" rx="10" fill="#F2F8F7" stroke="#539392" stroke-width="1.6"/>
-<text x="218.66666666666666" y="464" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="600" fill="#16211F" text-anchor="middle">Eureka · 8761</text>
-<text x="218.66666666666666" y="484" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">services register; the gateway resolves by name</text>
+<text x="218.66666666666666" y="464" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="600" fill="#16211F" text-anchor="middle">name resolution</text>
+<text x="218.66666666666666" y="484" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">Compose and Kubernetes DNS — no registry</text>
 <rect x="429.3333333333333" y="438" width="381.3333333333333" height="66" rx="10" fill="#F2F8F7" stroke="#539392" stroke-width="1.6"/>
 <text x="620.0" y="464" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="600" fill="#16211F" text-anchor="middle">common library</text>
 <text x="620.0" y="484" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">error envelope, CurrentUser, roles</text>
 <rect x="830.6666666666666" y="438" width="381.3333333333333" height="66" rx="10" fill="#F2F8F7" stroke="#539392" stroke-width="1.6"/>
-<text x="1021.3333333333333" y="464" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="600" fill="#16211F" text-anchor="middle">MongoDB</text>
+<text x="1021.3333333333333" y="464" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="15" font-weight="600" fill="#16211F" text-anchor="middle">MongoDB Atlas</text>
 <text x="1021.3333333333333" y="484" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12" font-weight="500" fill="#5F6E6A" text-anchor="middle">one database and one account per service</text>
 <rect x="28" y="534" width="1184" height="58" rx="10" fill="#FFFFFF" stroke="#B9C6C2" stroke-width="1.6" stroke-dasharray="6 5"/>
-<text x="620.0" y="560" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#5F6E6A" text-anchor="middle">Out of scope for the MVP</text>
-<text x="620.0" y="580" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="500" fill="#5F6E6A" text-anchor="middle">grades · enrolment · payments · institutional production deployment</text>
+<text x="620.0" y="560" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="13.5" font-weight="700" fill="#5F6E6A" text-anchor="middle">Out of scope</text>
+<text x="620.0" y="580" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="500" fill="#5F6E6A" text-anchor="middle">writing to SINU · grades · enrolment · payments · chat</text>
 <text x="28" y="622" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="500" fill="#5F6E6A" text-anchor="start">Every service validates the access token itself against the published JWKS —</text>
-<text x="28" y="640" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="500" fill="#5F6E6A" text-anchor="start">no service trusts a header the gateway sets. Three OpenFeign edges, all one-directional:</text>
-<text x="28" y="658" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="500" fill="#5F6E6A" text-anchor="start">auth → user, semaphore → user, schedule → semaphore.</text>
+<text x="28" y="640" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="500" fill="#5F6E6A" text-anchor="start">no service trusts a header the gateway sets. Four OpenFeign edges, kept few on purpose:</text>
+<text x="28" y="658" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-size="12.5" font-weight="500" fill="#5F6E6A" text-anchor="start">auth → user, user → auth, schedule → semaphore, schedule → map.</text>
 </svg>

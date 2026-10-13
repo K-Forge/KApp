@@ -1,0 +1,29 @@
+source: Plan-Estudio-Maestria-en-Psicologia-del-Consumidor.pdf
+program: Maestría en Psicología del Consumidor
+faculty: Escuela de Posgrados   # not printed; every postgraduate programme belongs to it
+programLevel: MAESTRIA
+period: semestre
+declaredCredits: 52                            # only the total is printed, no per-course credits
+levels:
+  1:
+    - [Fundamentos de Psicología del Consumidor, null, Fundamentación]
+    - [Estrategias de Marketing Centradas en el Consumidor, null, Profesional]
+    - [Enfoques y Procesos de Investigación del Consumidor, null, Metodología]
+    - [Formulación de Proyectos I, null, Proyecto de Trabajo de Grado]
+  2:
+    - [Perspectivas Socioculturales del Consumo, null, Fundamentación]
+    - [Gestión del Valor al Cliente, null, Profesional]
+    - [Métodos y Técnicas de Investigación del Consumidor, null, Metodología]
+    - [Formulación de Proyectos II, null, Proyecto de Trabajo de Grado]
+  3:
+    - [Neurociencias Aplicadas en Contexto de Consumo, null, Fundamentación]
+    - [Marketing para Productos Digitales, null, Profesional]
+    - [Analitica de Datos para la Investigación del Consumidor I, null, Metodología]
+    - [Electiva de Profundización I, null, Profundización]
+    - [Trabajo de Grado I, null, Proyecto de Trabajo de Grado]
+  4:
+    - [Economía Conductual, null, Fundamentación]
+    - [Experiencia de Usuario y Diseño de Servicios, null, Profesional]
+    - [Analítica de Datos para la Investigación del Consumidor II, null, Metodología]
+    - [Electiva de Profundización II, null, Profundización]
+    - [Trabajo de Grado II, null, Proyecto de Trabajo de Grado]

@@ -1,45 +1,54 @@
 import { PageIntroComponent } from '../../../shared/ui/page-intro/page-intro.component';
-import { ChangeDetectionStrategy, Component, ViewChild, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { AppHttpError } from '../../../core/http/api-http-error';
 import type { ApiError } from '../../../core/http/api-error.model';
 import { ApiErrorBannerComponent } from '../../../shared/ui/api-error-banner/api-error-banner.component';
-import { ModalComponent } from '../../../shared/ui/modal/modal.component';
 import { ImportPanelComponent } from '../import/import-panel.component';
 import { PastePensumComponent } from '../import/paste-pensum.component';
+import { PensumGridComponent } from './pensum-grid.component';
 import { PensumsService } from './pensums.service';
-import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model';
+import {
+  coursesByItemCode,
+  officialCode,
+  prerequisiteLabels,
+  publishesCourseCodes,
+  type Pensum,
+  type PensumCourse,
+  type PensumSummary,
+} from './pensum.model';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { t } from '../../../core/i18n/i18n.service';
 
 /**
- * Lookup-by-code rather than a table: the semaphore contract has no "list pensums" endpoint,
- * only get/create/replace by pensumCode (see docs/api/semaphore.openapi.yaml). A pensum document
- * nests ~50 course items, so create/replace edit the whole document as JSON rather than forcing
- * every field through bespoke inputs - the same trade-off the API console makes for request
- * bodies, and for the same reason: the shape is defined by the schema, not reinvented here.
+ * The pensums of the catalog, read-only: a picker over `GET /api/catalog/pensums`, and each plan
+ * drawn as printed or as a table, to check it against its PDF.
+ *
+ * <p>The catalog is SINU's. The one write it takes is the import of its backup, which lives at the
+ * bottom of this screen: a pensum arrives, or is corrected, by importing it again.
  */
 @Component({
   selector: 'app-pensums-page',
-  imports: [ApiErrorBannerComponent, ModalComponent, ImportPanelComponent, PageIntroComponent, PastePensumComponent],
+  imports: [TranslatePipe, ApiErrorBannerComponent, ImportPanelComponent, PageIntroComponent, PastePensumComponent, PensumGridComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="stack">
       <app-page-intro
-        title="Pensums"
-        what="A pensum is one version of a programme&#39;s plan of study: its courses, their levels, their credits and which ones unlock which."
-        [can]="['Load one by its code', 'Build one from a PDF by pasting its table', 'Edit the whole document', 'Delete one no student is following']"
-        note="The pensum is immutable as far as students are concerned — a student&#39;s own rearrangement is a separate plan layered over it, so correcting a pensum here reaches every student without rewriting anybody&#39;s plan. Deleting never cascades: one that students are following is refused with a 409 saying how many."
+        [title]="'Pensums' | t"
+        [what]="'A programme’s plan of study: its courses, levels, credits and prerequisites.' | t"
+        [can]="[('Open one by its code' | t), ('Build one by pasting a PDF’s table' | t), ('Correct one by importing it again' | t)]"
+        [note]="'The catalog is SINU’s; these plans are its backup. Correcting one reaches every student.' | t"
       >
-        <button actions type="button" class="btn btn-primary" (click)="openCreate()">New pensum</button>
       </app-page-intro>
 
       <div class="card stack">
-        <div class="row" style="align-items: end">
+        <div class="work-bar">
           <div class="field" style="margin-bottom: 0; flex: 1 1 22rem">
-            <label for="pensum">Pensum</label>
+            <label for="pensum">{{ 'Pensum' | t }}</label>
             <!-- A list, not a text box. Asking somebody to remember "1015" was asking them to
                  know the answer before the screen could tell them. -->
             <select id="pensum" (change)="onPensumPicked($event)" [disabled]="catalogLoading()">
               <option value="">
-                {{ catalogLoading() ? 'Loading the catalogue…' : 'Choose a pensum…' }}
+                {{ catalogLoading() ? ('Loading the catalogue…' | t) : ('Choose a pensum…' | t) }}
               </option>
               @for (p of catalog(); track p.pensumCode) {
                 <option [value]="p.pensumCode" [selected]="p.pensumCode === searchCode()">
@@ -49,13 +58,13 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
             </select>
           </div>
           <button type="button" class="btn" (click)="load()" [disabled]="loading() || !searchCode().trim()">
-            {{ loading() ? 'Loading…' : 'Load' }}
+            {{ loading() ? ('Loading…' | t) : ('Load' | t) }}
           </button>
         </div>
 
         @if (!catalogLoading() && catalog().length === 0) {
           <p class="hint" style="margin:0">
-            No pensums yet. Build the first one from its PDF below.
+            {{ 'No pensums yet. Build the first one from its PDF below.' | t }}
           </p>
         }
 
@@ -63,41 +72,35 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
 
         @if (!loading() && !error() && !loaded()) {
           <div class="empty-state">
-            <p>Choose one above to read it, edit it or delete it.</p>
+            <p>{{ 'Choose one above to read it.' | t }}</p>
           </div>
         }
 
         @if (loaded(); as c) {
           <div class="stack">
-            <div class="row-between">
-              <h2 style="margin:0">{{ c.programName }} · {{ c.pensumCode }}</h2>
-              <div class="row">
-                <button type="button" class="btn btn-sm" (click)="openEdit(c)">Edit this pensum</button>
-                <button type="button" class="btn btn-sm btn-danger" [disabled]="deleting()" (click)="remove(c)">
-                  {{ deleting() ? 'Deleting…' : 'Delete' }}
-                </button>
-              </div>
-            </div>
+            <h2 style="margin:0">{{ c.programName }} · {{ c.pensumCode }}</h2>
             <dl class="pensum-summary">
-              <dt>Faculty</dt>
+              <dt>{{ 'Faculty' | t }}</dt>
               <dd>{{ c.faculty }}</dd>
-              <dt>Reform</dt>
+              <dt>{{ 'Reform' | t }}</dt>
               <dd>{{ c.reform }}</dd>
-              <dt>Status</dt>
+              <dt>{{ 'Status' | t }}</dt>
               <dd><span class="badge badge-neutral">{{ c.status }}</span></dd>
-              <dt>Totals</dt>
-              <dd>{{ c.totalCredits }} credits · {{ c.totalHours }} weekly hours · {{ c.levels }} levels</dd>
+              <dt>{{ 'Totals' | t }}</dt>
+              <dd>{{ totals(c) }}</dd>
+              <dt>{{ 'Course codes' | t }}</dt>
+              <dd>{{ codesNote(c) }}</dd>
             </dl>
 
-            <h3>Knowledge areas ({{ c.areas.length }})</h3>
+            <h3>{{ 'Knowledge areas ({length})' | t: { length: c.areas.length } }}</h3>
             <div class="scroll-x">
               <table>
                 <thead>
                   <tr>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Credits</th>
-                    <th>Weekly hours</th>
+                    <th>{{ 'Code' | t }}</th>
+                    <th>{{ 'Name' | t }}</th>
+                    <th>{{ 'Credits' | t }}</th>
+                    <th>{{ 'Weekly hours' | t }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -108,56 +111,80 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
                         <span class="area-dot" [style.background]="area.color"></span>
                         {{ area.name }}
                       </td>
-                      <td>{{ area.credits }}</td>
-                      <td>{{ area.hours }}</td>
+                      <td>{{ published(c, 'credits') ? area.credits : '—' }}</td>
+                      <td>{{ published(c, 'hours') ? area.hours : '—' }}</td>
                     </tr>
                   }
                 </tbody>
               </table>
             </div>
 
-            <h3>Pensum items ({{ c.courses.length }})</h3>
-            <div class="scroll-x table-scroll-y">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Level</th>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Area</th>
-                    <th>Credits</th>
-                    <th>Prerequisites</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (course of c.courses; track course.pensumItemCode) {
-                    <tr>
-                      <td>{{ course.level }}</td>
-                      <td class="mono">{{ course.code ?? '(elective slot)' }}</td>
-                      <td>{{ course.name }}</td>
-                      <td>{{ course.area }}</td>
-                      <td>{{ course.credits }}</td>
-                      <td class="text-muted">{{ course.prerequisites.length ? course.prerequisites.join(', ') : '—' }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
+            <div class="row-between">
+              <h3 style="margin:0">{{ 'Pensum items ({length})' | t: { length: c.courses.length } }}</h3>
+              <!-- The grid is for checking a pensum against its printed plan; the table is the
+                   exact data, sortable by eye and readable by a screen reader. -->
+              <div class="view-toggle" role="group" [attr.aria-label]="'How to show the items' | t">
+                <button type="button" class="btn btn-sm" [attr.aria-pressed]="view() === 'grid'" (click)="view.set('grid')">
+                  {{ 'As printed' | t }}
+                </button>
+                <button type="button" class="btn btn-sm" [attr.aria-pressed]="view() === 'table'" (click)="view.set('table')">
+                  {{ 'Table' | t }}
+                </button>
+              </div>
             </div>
+            @if (view() === 'grid') {
+              <app-pensum-grid [pensum]="c" />
+            } @else {
+              <div class="scroll-x table-scroll-y">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>{{ 'Level' | t }}</th>
+                      <th>{{ 'Code' | t }}</th>
+                      <th>{{ 'Name' | t }}</th>
+                      <th>{{ 'Area' | t }}</th>
+                      <th>{{ 'Credits' | t }}</th>
+                      <th>{{ 'Weekly hours' | t }}</th>
+                      <th>{{ 'Prerequisites' | t }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (course of c.courses; track course.pensumItemCode) {
+                      <tr>
+                        <td>{{ course.level }}</td>
+                        <!-- The university's own code or nothing: the internal identifier KApp
+                             gives an item of a plan that prints none is not shown anywhere. -->
+                        <td class="mono">
+                          {{ code(course) ?? '—' }}
+                          @if (course.isElectiveSlot) {
+                            <span class="text-muted">{{ '(elective)' | t }}</span>
+                          }
+                        </td>
+                        <td>{{ course.name }}</td>
+                        <td>{{ course.area }}</td>
+                        <td>{{ published(c, 'credits') ? course.credits : '—' }}</td>
+                        <td>{{ published(c, 'hours') ? course.weeklyHours : '—' }}</td>
+                        <td class="text-muted">{{ prerequisites(course) || '—' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
           </div>
         }
       </div>
 
-      <!-- Bulk creation. It lives here rather than in its own navigation entry because
-           importing a CSV IS the create half of this screen's CRUD - twenty-four pensums is
-           not something anybody types in one at a time. -->
+      <!-- The catalog's only write: its backup, imported. It lives here rather than in its own
+           navigation entry because it is how a pensum on this screen arrives or is corrected. -->
       <!-- Creating a pensum, at the scale the pensums actually arrive: as PDFs, twenty-four
            of them. Paste is the primary path because copying a table out of a PDF preserves
            its rows better than any attempt to reconstruct the page, and because whoever does
            it has to check every row anyway. -->
       <details class="card import-panel" open>
         <summary>
-          <strong>Build one from a PDF</strong>
-          <span class="text-muted"> — paste the table, correct it, import it</span>
+          <strong>{{ 'Build one from a PDF' | t }}</strong>
+          <span class="text-muted"> {{ '— paste the table, correct it, import it' | t }}</span>
         </summary>
         <div style="margin-top:1rem">
           <app-paste-pensum (imported)="loadCatalog()" />
@@ -166,8 +193,8 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
 
       <details class="card import-panel">
         <summary>
-          <strong>Already have a CSV?</strong>
-          <span class="text-muted"> — upload it directly</span>
+          <strong>{{ 'Already have a CSV?' | t }}</strong>
+          <span class="text-muted"> {{ '— upload it directly' | t }}</span>
         </summary>
         <div style="margin-top:1rem">
           <app-import-panel />
@@ -175,25 +202,6 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
       </details>
     </div>
 
-    <app-modal #formModal [title]="formMode() === 'create' ? 'New pensum' : 'Edit pensum'" (closed)="formError.set(null)">
-      <div class="stack">
-        <app-api-error-banner [error]="formError()" />
-        <p class="text-muted">
-          The whole pensum as JSON, matching the <code>Pensum</code> schema in
-          <code>docs/api/semaphore.openapi.yaml</code> — which is still what the contract calls it.
-        </p>
-        <div class="field">
-          <label for="pensum-json">Pensum document</label>
-          <textarea id="pensum-json" rows="16" [value]="formText()" (input)="onFormTextInput($event)"></textarea>
-        </div>
-        <div class="row">
-          <button type="button" class="btn btn-primary" [disabled]="formSubmitting()" (click)="submit()">
-            {{ formSubmitting() ? 'Saving…' : formMode() === 'create' ? 'Create pensum' : 'Save changes' }}
-          </button>
-          <button type="button" class="btn" (click)="formModal.close()">Cancel</button>
-        </div>
-      </div>
-    </app-modal>
   `,
   styles: `
     .import-panel > summary {
@@ -237,6 +245,24 @@ import { PENSUM_SKELETON, type Pensum, type PensumSummary } from './pensum.model
       max-height: 22rem;
       overflow-y: auto;
     }
+    .view-toggle {
+      display: inline-flex;
+    }
+    .view-toggle .btn {
+      border-radius: 0;
+    }
+    .view-toggle .btn:first-child {
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+    }
+    .view-toggle .btn:last-child {
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-left: -1px;
+    }
+    .view-toggle .btn[aria-pressed='true'] {
+      background: var(--nav-active-bg);
+      color: var(--nav-active-text);
+      border-color: var(--border-strong);
+    }
   `,
 })
 export class PensumsPage {
@@ -254,14 +280,65 @@ export class PensumsPage {
   readonly error = signal<ApiError | null>(null);
   /** The pensum currently on screen. Null until one is loaded. */
   readonly loaded = signal<Pensum | null>(null);
-  readonly deleting = signal(false);
+  /**
+   * A plan whose document prints no credits (or no hours) stores zeros for them. Zeros on
+   * screen would read as "worth nothing", so those columns show a dash instead - the grid
+   * says in words which figure the document leaves out.
+   */
+  published(pensum: Pensum, figure: 'credits' | 'hours'): boolean {
+    return figure === 'credits'
+      ? pensum.courses.some((course) => course.credits > 0)
+      : pensum.courses.some((course) => course.weeklyHours > 0);
+  }
 
-  readonly formMode = signal<'create' | 'edit'>('create');
-  readonly formText = signal('');
-  readonly formSubmitting = signal(false);
-  readonly formError = signal<ApiError | null>(null);
+  totals(pensum: Pensum): string {
+    const credits = this.published(pensum, 'credits')
+      ? t('{credits} credits', { credits: pensum.totalCredits })
+      : pensum.totalCredits
+        ? t('{credits} credits in total, none per course', { credits: pensum.totalCredits })
+        : t('credits not published');
+    return [
+      credits,
+      this.published(pensum, 'hours') ? t('{hours} weekly hours', { hours: pensum.totalHours }) : '',
+      t('{levels} levels', { levels: pensum.levels }),
+    ]
+      .filter(Boolean)
+      .join(' · ');
+  }
 
-  @ViewChild('formModal') private formModal?: ModalComponent;
+  /**
+   * The code to put on screen for an item, or null.
+   *
+   * <p>Only four of the twenty-three published plans print course codes. For the rest KApp
+   * generates one so the system can tell the items apart, and that one is never shown: it looks
+   * institutional, it is not, and it changes the day the real codes arrive.
+   */
+  code(course: PensumCourse): string | null {
+    return officialCode(course);
+  }
+
+  /**
+   * The loaded pensum indexed by the code its prerequisites name items with. A computed rather
+   * than a call per row: the table renders sixty rows and the index would be rebuilt for each.
+   */
+  private readonly byCode = computed(() => {
+    const pensum = this.loaded();
+    return pensum ? coursesByItemCode(pensum) : new Map<string, PensumCourse>();
+  });
+
+  /** Prerequisites as they are shown: by code where the plan has real ones, by name where not. */
+  prerequisites(course: PensumCourse): string {
+    return prerequisiteLabels(this.byCode(), course).join(', ');
+  }
+
+  codesNote(pensum: Pensum): string {
+    return publishesCourseCodes(pensum)
+      ? t('The university’s own, as the plan prints them.')
+      : t('Not published. KApp identifies these items internally; those identifiers are not institutional codes and are not shown.');
+  }
+
+  /** How the items are shown. The grid first: it is the view a pensum is checked against its PDF with. */
+  readonly view = signal<'grid' | 'table'>('grid');
 
   constructor() {
     this.loadCatalog();
@@ -292,7 +369,7 @@ export class PensumsPage {
     }
   }
 
-  /** Re-reads the catalogue, so a pensum just imported or deleted shows up in the picker. */
+  /** Re-reads the catalogue, so a pensum just imported shows up in the picker. */
   loadCatalog(): void {
     this.catalogLoading.set(true);
     this.pensumsService.list().subscribe({
@@ -330,90 +407,6 @@ export class PensumsPage {
       error: (err: unknown) => {
         this.loaded.set(null);
         this.loading.set(false);
-        this.error.set(err instanceof AppHttpError ? err.apiError : null);
-      },
-    });
-  }
-
-  openCreate(): void {
-    this.formMode.set('create');
-    this.formText.set(JSON.stringify(PENSUM_SKELETON, null, 2));
-    this.formError.set(null);
-    this.formModal?.open();
-  }
-
-  openEdit(pensum: Pensum): void {
-    this.formMode.set('edit');
-    this.formText.set(JSON.stringify(pensum, null, 2));
-    this.formError.set(null);
-    this.formModal?.open();
-  }
-
-  onFormTextInput(event: Event): void {
-    this.formText.set((event.target as HTMLTextAreaElement).value);
-  }
-
-  submit(): void {
-    let parsed: Pensum;
-    try {
-      parsed = JSON.parse(this.formText());
-    } catch {
-      this.formError.set({
-        timestamp: new Date().toISOString(),
-        status: 0,
-        error: 'Invalid JSON',
-        message: 'The pensum document is not valid JSON.',
-        path: '',
-      });
-      return;
-    }
-
-    this.formSubmitting.set(true);
-    this.formError.set(null);
-    const call =
-      this.formMode() === 'create' ? this.pensumsService.create(parsed) : this.pensumsService.replace(parsed.pensumCode, parsed);
-
-    call.subscribe({
-      next: (saved) => {
-        this.formSubmitting.set(false);
-        this.formModal?.close();
-        this.loaded.set(saved);
-        this.searchCode.set(saved.pensumCode);
-        this.loadCatalog();
-      },
-      error: (err: unknown) => {
-        this.formSubmitting.set(false);
-        this.formError.set(err instanceof AppHttpError ? err.apiError : null);
-      },
-    });
-  }
-
-  /**
-   * Deleting never cascades. A pensum students are following comes back as `409` saying how many,
-   * which the error banner renders from the envelope's own details - the confirmation says so up
-   * front rather than letting the refusal look like a bug.
-   */
-  remove(pensum: Pensum): void {
-    if (
-      !window.confirm(
-        `Delete pensum ${pensum.pensumCode} (${pensum.programName})? ` +
-          `It has ${pensum.courses.length} courses. If any student is following it, the ` +
-          `server refuses and says how many.`,
-      )
-    ) {
-      return;
-    }
-    this.deleting.set(true);
-    this.error.set(null);
-    this.pensumsService.delete(pensum.pensumCode).subscribe({
-      next: () => {
-        this.deleting.set(false);
-        this.loaded.set(null);
-        this.searchCode.set('');
-        this.loadCatalog();
-      },
-      error: (err: unknown) => {
-        this.deleting.set(false);
         this.error.set(err instanceof AppHttpError ? err.apiError : null);
       },
     });

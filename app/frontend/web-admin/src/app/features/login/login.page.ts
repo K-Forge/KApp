@@ -8,15 +8,31 @@ import { ApiConfigService } from '../../core/config/api-config.service';
 import { AppHttpError } from '../../core/http/api-http-error';
 import type { ApiError } from '../../core/http/api-error.model';
 import { ApiErrorBannerComponent } from '../../shared/ui/api-error-banner/api-error-banner.component';
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 
 interface LoginForm {
   email: FormControl<string>;
   password: FormControl<string>;
 }
 
+interface NewPasswordForm {
+  password: FormControl<string>;
+  repeat: FormControl<string>;
+}
+
+/** The server's 403 for a temporary password: it names the field to send, `newPassword`. */
+export function asksForNewPassword(error: ApiError | null): boolean {
+  return error?.status === 403 && (error.details ?? []).some((issue) => issue.field === 'newPassword');
+}
+
+/** The server's 403 for an account this portal does not take: it names `allowedRoles`. */
+export function notForThisPortal(error: ApiError | null): boolean {
+  return error?.status === 403 && (error.details ?? []).some((issue) => issue.field === 'allowedRoles');
+}
+
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule, ApiErrorBannerComponent],
+  imports: [TranslatePipe, ReactiveFormsModule, ApiErrorBannerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="login-shell">
@@ -25,50 +41,88 @@ interface LoginForm {
              the same product. The explanation that used to sit here is gone: nobody reaching
              this screen needs to be told what a token is before they can type a password. -->
         <div class="login-brand">
-          <img src="/konrad-logo.png" alt="Fundación Universitaria Konrad Lorenz" width="44" height="44" />
+          <img src="/konrad-logo.png" [alt]="'Fundación Universitaria Konrad Lorenz' | t" width="44" height="44" />
           <div>
-            <h1>KApp</h1>
-            <p class="login-sub">Admin Portal</p>
+            <h1>{{ 'KApp' | t }}</h1>
+            <p class="login-sub">{{ 'Admin Portal' | t }}</p>
           </div>
         </div>
 
-        @if (refusedAsNonAdmin()) {
-          <div class="card api-error" role="alert">
-            <strong>That account is not an administrator.</strong>
-            <p style="margin:0.35rem 0 0">The sign-in worked; this portal is admin-only.</p>
+        @if (sessionExpired()) {
+          <div class="card expired" role="alert">
+            <strong>{{ 'Your session expired.' | t }}</strong>
+            <p>{{ 'The portal signs out as soon as the token runs out. Sign in again to go back to where you were.' | t }}</p>
           </div>
         }
 
+        @if (refusedAsNonAdmin() || notAdmin()) {
+          <div class="card api-error" role="alert">
+            <strong>{{ 'That account is not an administrator.' | t }}</strong>
+            <p style="margin:0.35rem 0 0">
+              {{ notAdmin() ? ('The password is right, but this portal is only for administrators: students and professors sign in in the KApp app. Nothing about the account changed.' | t) : ('The sign-in worked; this portal is admin-only.' | t) }}
+            </p>
+          </div>
+        }
+
+        @if (choosing()) {
+          <!-- A temporary password worked: the person picks their own, and the browser offers to
+               keep it. The address goes with it, hidden, so the password manager files the new
+               password under the right account. -->
+          <form [formGroup]="newPassword" (ngSubmit)="choose()" class="stack">
+            <div class="card choose" role="status">
+              <strong>{{ 'Choose your password' | t }}</strong>
+              <p>{{ 'The one you were given is temporary. The one you choose now is the one you will use from here on; your iPhone or Mac will offer to save it.' | t }}</p>
+            </div>
+            <input type="email" name="username" autocomplete="username" [value]="form.controls.email.value" readonly hidden />
+            <div class="field" [class.invalid]="newInvalid('password')">
+              <label for="new-password">{{ 'New password' | t }}</label>
+              <input id="new-password" type="password" formControlName="password" autocomplete="new-password" />
+              <span class="hint">{{ 'At least 10 characters.' | t }}</span>
+            </div>
+            <div class="field" [class.invalid]="newInvalid('repeat')">
+              <label for="repeat-password">{{ 'The same, again' | t }}</label>
+              <input id="repeat-password" type="password" formControlName="repeat" autocomplete="new-password" />
+              @if (newInvalid('repeat')) {
+                <span class="error">{{ 'The two do not match.' | t }}</span>
+              }
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="submitting()">
+              {{ submitting() ? ('Saving…' | t) : ('Save it and sign in' | t) }}
+            </button>
+            <button type="button" class="btn btn-ghost" (click)="backToSignIn()">{{ 'Use another account' | t }}</button>
+          </form>
+        } @else {
         <form [formGroup]="form" (ngSubmit)="submit()" class="stack">
           <div class="field" [class.invalid]="isInvalid('email')">
-            <label for="email">E-mail</label>
+            <label for="email">{{ 'E-mail' | t }}</label>
             <input id="email" type="email" formControlName="email" autocomplete="username" />
             @if (isInvalid('email')) {
-              <span class="error">Enter a valid e-mail address.</span>
+              <span class="error">{{ 'Enter a valid e-mail address.' | t }}</span>
             }
           </div>
 
           <div class="field" [class.invalid]="isInvalid('password')">
-            <label for="password">Password</label>
+            <label for="password">{{ 'Password' | t }}</label>
             <input id="password" type="password" formControlName="password" autocomplete="current-password" />
             @if (isInvalid('password')) {
-              <span class="error">Password is required.</span>
+              <span class="error">{{ 'Password is required.' | t }}</span>
             }
           </div>
 
           <button type="submit" class="btn btn-primary" [disabled]="form.invalid || submitting()">
-            {{ submitting() ? 'Signing in…' : 'Sign in' }}
+            {{ submitting() ? ('Signing in…' | t) : ('Sign in' | t) }}
           </button>
         </form>
+        }
 
         <app-api-error-banner [error]="error()" />
 
         <details class="settings">
-          <summary>Gateway</summary>
+          <summary>{{ 'Gateway' | t }}</summary>
           <div class="field" style="margin-top: 0.75rem">
-            <label for="base-url">Base URL</label>
+            <label for="base-url">{{ 'Base URL' | t }}</label>
             <input id="base-url" type="text" [value]="baseUrl()" (change)="onBaseUrlChange($event)" placeholder="http://localhost:8080" />
-            <span class="hint">Saved in this browser only.</span>
+            <span class="hint">{{ 'Saved in this browser only.' | t }}</span>
           </div>
         </details>
       </div>
@@ -90,18 +144,22 @@ interface LoginForm {
       overflow: hidden;
       box-shadow: var(--shadow-md);
     }
-    /* The institutional three, along the top edge - the same signature the header carries. */
+    /* The institutional three, along the top edge - the same signature the header carries, in
+       the same equal thirds. */
     .login-card::before {
       content: '';
       position: absolute;
       inset: 0 0 auto 0;
       height: 3px;
-      background: linear-gradient(
-        90deg,
-        var(--brand-teal) 0 38%,
-        var(--brand-pink) 38% 72%,
-        var(--brand-green) 72% 100%
-      );
+      background: var(--brand-strip);
+    }
+    /* Where the card fills the screen, its bands line up with the strip at the top of the screen:
+       the same gradient, the screen's width, shifted by the card's margin. */
+    @media (max-width: 27rem) {
+      .login-card::before {
+        background-size: 100vw 100%;
+        background-position: -1.5rem 0;
+      }
     }
     .login-brand {
       display: flex;
@@ -124,6 +182,26 @@ interface LoginForm {
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--text-muted);
+    }
+    .expired {
+      margin-bottom: 1rem;
+      padding: 0.75rem 0.9rem;
+      background: var(--warning-bg);
+      color: var(--warning);
+      border-color: color-mix(in srgb, var(--warning) 35%, transparent);
+      box-shadow: none;
+    }
+    .expired p {
+      margin: 0.35rem 0 0;
+      color: var(--text);
+    }
+    .choose {
+      padding: 0.75rem 0.9rem;
+      background: var(--bg-inset);
+      box-shadow: none;
+    }
+    .choose p {
+      margin: 0.35rem 0 0;
     }
     .settings {
       margin-top: 1.5rem;
@@ -158,14 +236,39 @@ export class LoginPage {
     { initialValue: false },
   );
 
+  /** Set when the session ended because its token ran out, rather than by signing out. */
+  protected readonly sessionExpired = toSignal(
+    this.route.queryParamMap.pipe(map((params) => params.get('reason') === 'expired')),
+    { initialValue: false },
+  );
+
   readonly form = new FormGroup<LoginForm>({
     email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
     password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
 
+  /** The new password the person chooses, once their temporary one has been accepted. */
+  readonly newPassword = new FormGroup<NewPasswordForm>(
+    {
+      password: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(10), Validators.maxLength(72)] }),
+      repeat: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    },
+    { validators: (group) => (group.value.password === group.value.repeat ? null : { mismatch: true }) },
+  );
+
+  /** True once login said the password is temporary: the form asks for the person's own. */
+  readonly choosing = signal(false);
+  /** The server refused the account here: it is not an administrator. Nothing about it changed. */
+  readonly notAdmin = signal(false);
   readonly submitting = signal(false);
   readonly error = signal<ApiError | null>(null);
   readonly baseUrl = this.config.baseUrl;
+
+  newInvalid(name: keyof NewPasswordForm): boolean {
+    const control = this.newPassword.controls[name];
+    const mismatch = name === 'repeat' && this.newPassword.hasError('mismatch');
+    return (control.invalid || mismatch) && control.touched;
+  }
 
   isInvalid(name: keyof LoginForm): boolean {
     const control = this.form.controls[name];
@@ -185,18 +288,61 @@ export class LoginPage {
 
     this.submitting.set(true);
     this.error.set(null);
+    this.notAdmin.set(false);
     const { email, password } = this.form.getRawValue();
 
     this.auth.login(email, password).subscribe({
-      next: () => {
-        this.submitting.set(false);
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/my-token';
-        this.router.navigateByUrl(returnUrl);
-      },
+      next: () => this.signedIn(),
       error: (err: unknown) => {
         this.submitting.set(false);
-        this.error.set(err instanceof AppHttpError ? err.apiError : null);
+        const apiError = err instanceof AppHttpError ? err.apiError : null;
+        if (notForThisPortal(apiError)) {
+          this.notAdmin.set(true);
+          return;
+        }
+        if (asksForNewPassword(apiError)) {
+          this.newPassword.reset();
+          this.choosing.set(true);
+          return;
+        }
+        this.error.set(apiError);
       },
     });
+  }
+
+  /** The temporary password and the new one, together: the server swaps them and signs in. */
+  choose(): void {
+    if (this.newPassword.invalid || this.submitting()) {
+      this.newPassword.markAllAsTouched();
+      return;
+    }
+    this.submitting.set(true);
+    this.error.set(null);
+    const { email, password } = this.form.getRawValue();
+    this.auth.changePassword(email, password, this.newPassword.getRawValue().password).subscribe({
+      next: () => this.signedIn(),
+      error: (err: unknown) => {
+        this.submitting.set(false);
+        const apiError = err instanceof AppHttpError ? err.apiError : null;
+        if (notForThisPortal(apiError)) {
+          this.backToSignIn();
+          this.notAdmin.set(true);
+          return;
+        }
+        this.error.set(apiError);
+      },
+    });
+  }
+
+  backToSignIn(): void {
+    this.choosing.set(false);
+    this.error.set(null);
+    this.form.controls.password.reset();
+  }
+
+  private signedIn(): void {
+    this.submitting.set(false);
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/my-token';
+    this.router.navigateByUrl(returnUrl);
   }
 }

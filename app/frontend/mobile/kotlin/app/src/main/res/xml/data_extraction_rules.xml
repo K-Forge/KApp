@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Backups and device transfers from Android 12. The session stays out of both, for the reason in
+  backup_rules.xml: its key does not travel with it.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="kapp.session.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="kapp.session.xml" />
+    </device-transfer>
+</data-extraction-rules>

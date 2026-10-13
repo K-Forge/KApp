@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Interface strings are in Spanish, like the mockups in docs/design/mobile/. Repository
+  documentation and code comments stay in English, as AGENTS.md asks.
+
+  The institutional domain is not here: a resource value starting with "@" is read as a
+  reference. It lives in LoginScreen.kt as INSTITUTIONAL_DOMAIN.
+-->
+<resources>
+    <string name="app_name">KApp</string>
+    <string name="app_subtitle">Fundación Universitaria Konrad Lorenz</string>
+    <string name="app_logo_description">Escudo de la Fundación Universitaria Konrad Lorenz</string>
+
+    <string name="login_intro_title">Ingresa con tu cuenta institucional</string>
+    <!-- The argument is the domain, "@konradlorenz.edu.co". -->
+    <string name="login_intro_body">La misma cuenta de Microsoft de tu correo %1$s. La contraseña se escribe en la página de Microsoft, nunca en KApp.</string>
+    <string name="login_submit">Ingresar con Microsoft</string>
+    <string name="login_signing_in">Ingresando…</string>
+    <string name="login_error_rejected">Microsoft no pudo confirmar tu cuenta. Inténtalo de nuevo.</string>
+    <string name="login_error_deactivated">Tu cuenta de KApp está desactivada.</string>
+    <string name="login_error_offline">No pudimos conectar con el servidor. Revisa tu conexión e inténtalo otra vez.</string>
+    <string name="login_error_not_configured">Esta versión de KApp todavía no tiene configurado el ingreso con Microsoft.</string>
+    <string name="login_error_failed">No pudimos completar el ingreso. Inténtalo otra vez.</string>
+    <string name="login_mock_profile_label">Perfil de prueba en los mocks</string>
+    <string name="login_mock_student">Estudiante</string>
+    <string name="login_mock_professor">Profesor</string>
+    <string name="login_mock_staff">Administrativo</string>
+    <string name="login_first_time">¿Primera vez?</string>
+    <string name="login_invitation_link">Usa tu código de invitación</string>
+    <string name="login_copyright">© 2026 Fundación Universitaria Konrad Lorenz</string>
+
+    <string name="home_greeting">Hola, %1$s</string>
+    <string name="home_greeting_anonymous">Hola</string>
+    <string name="home_loading">Cargando</string>
+
+    <string name="home_next_class">PRÓXIMA CLASE</string>
+    <string name="home_next_starts_in">Empieza en %1$d min</string>
+    <!-- Start, end, room and building: "8:00 – 10:00 · Salón 401 · Bloque B". -->
+    <string name="home_next_when_where">%1$s – %2$s · %3$s · %4$s</string>
+    <string name="home_directions">Cómo llegar</string>
+
+    <string name="home_free_day_title">Hoy no tienes clases</string>
+    <string name="home_free_day_link">Ver la semana</string>
+    <string name="home_no_schedule_title">Aún no armas tu horario</string>
+    <string name="home_no_schedule_body">Agrega tus materias y aparecerán aquí.</string>
+    <string name="home_no_schedule_action">Armar mi horario</string>
+
+    <string name="home_shortcut_semaphore">Semáforo</string>
+    <string name="home_shortcut_schedule">Horario</string>
+    <string name="home_shortcut_map">Mapa</string>
+    <string name="home_shortcut_profile">Perfil</string>
+    <string name="home_tab_home">Inicio</string>
+
+    <string name="home_semester_title">Tu semestre</string>
+    <string name="home_semester_link">Ver semáforo</string>
+    <string name="home_semester_level">Semestre %1$d</string>
+    <string name="home_semester_percent">%1$d%%</string>
+
+    <string name="home_rest_title">Resto del día</string>
+    <string name="home_rest_link">Ver horario</string>
+    <!-- Room and building: "Salón 302 · Bloque A". -->
+    <string name="home_class_where">%1$s · %2$s</string>
+
+    <string name="sign_out">Cerrar sesión</string>
+
+    <string name="profile_avatar_description">Tu foto de perfil</string>
+    <string name="profile_role_student">Estudiante</string>
+    <string name="profile_role_professor">Profesor</string>
+    <string name="profile_role_staff">Administrativo</string>
+    <string name="profile_programme">Programa</string>
+    <string name="profile_level">Semestre</string>
+    <string name="profile_pensum">Pensum</string>
+    <string name="profile_remove_avatar">Quitar foto</string>
+    <string name="profile_remove_avatar_failed">No pudimos quitar la foto. Inténtalo otra vez.</string>
+    <string name="profile_where_from">Tu nombre y tu correo vienen de tu cuenta de Microsoft. Si algo no está bien, se corrige allá.</string>
+    <string name="profile_where_from_student">Tu nombre y tu correo vienen de tu cuenta de Microsoft, y tus datos académicos de SINU. Si algo no está bien, se corrige allá.</string>
+    <string name="profile_failed">No pudimos cargar tu perfil</string>
+    <string name="profile_retry">Reintentar</string>
+
+    <string name="semaphore_status_passed">Aprobada</string>
+    <string name="semaphore_status_in_progress">En curso</string>
+    <string name="semaphore_status_eligible">Puedes tomarla</string>
+    <string name="semaphore_status_blocked">Bloqueada</string>
+    <string name="semaphore_status_failed">Perdida</string>
+    <string name="semaphore_status_postponed">Aplazada</string>
+    <string name="semaphore_status_other">Otro estado</string>
+    <string name="semaphore_test_notice">Datos de prueba: la universidad todavía no ha conectado SINU, así que nada de esto es tu historia académica real.</string>
+    <string name="semaphore_level">Semestre %1$d</string>
+    <string name="semaphore_current_level">Semestre %1$d · el tuyo</string>
+    <string name="semaphore_credits">%1$d créditos</string>
+    <!-- Programme, credits passed, total credits: "Ingeniería de Sistemas · 112 de 143 créditos". -->
+    <string name="semaphore_summary">%1$s · %2$d de %3$d créditos</string>
+    <string name="semaphore_moved_from">Movida del semestre %1$d</string>
+    <string name="semaphore_original">Pensum</string>
+    <string name="semaphore_new_plan">Nuevo plan</string>
+    <string name="semaphore_plan_name">Nombre del plan</string>
+    <string name="semaphore_plan_default_name">Mi plan</string>
+    <string name="semaphore_create">Crear</string>
+    <string name="semaphore_cancel">Cancelar</string>
+    <string name="semaphore_delete_plan">Eliminar este plan</string>
+    <string name="semaphore_plans_hint">Un plan es tu propio orden de las materias que te faltan. Tu pensum y tu semáforo no cambian.</string>
+    <string name="semaphore_save_failed">No pudimos guardar el cambio. Inténtalo otra vez.</string>
+    <string name="semaphore_failed">No pudimos cargar tu semáforo</string>
+    <string name="semaphore_no_program">SINU no tiene un programa registrado para tu cuenta.</string>
+    <string name="semaphore_retry">Reintentar</string>
+    <string name="semaphore_detail_status">Estado</string>
+    <string name="semaphore_detail_sinu_status">Estado en SINU</string>
+    <string name="semaphore_detail_period">Periodo</string>
+    <string name="semaphore_detail_grade">Nota</string>
+    <string name="semaphore_detail_credits">Créditos</string>
+    <string name="semaphore_detail_hours">Horas por semana</string>
+    <string name="semaphore_detail_area">Área</string>
+    <string name="semaphore_detail_elective_slot">Espacio de electiva</string>
+    <string name="semaphore_detail_prerequisites">Prerrequisitos</string>
+    <string name="semaphore_detail_from_sinu">El estado y la nota vienen de SINU. KApp no los cambia.</string>
+    <string name="semaphore_plan_level">Semestre en tu plan</string>
+    <string name="semaphore_plan_reset">Devolver al semestre %1$d</string>
+    <string name="semaphore_plan_needs_plan">Crea un plan para moverla a otro semestre.</string>
+    <string name="semaphore_elective">Electiva elegida</string>
+    <string name="semaphore_elective_none">Ninguna todavía</string>
+    <string name="semaphore_elective_choose">Elegir una electiva</string>
+    <string name="semaphore_elective_clear">Quitar la electiva</string>
+    <string name="semaphore_elective_not_offered">No se ofrece este semestre</string>
+    <string name="semaphore_elective_bank">Electivas de este semestre</string>
+    <string name="semaphore_elective_bank_empty">SINU todavía no ha publicado electivas para este semestre.</string>
+    <string name="semaphore_elective_bank_failed">No pudimos cargar las electivas.</string>
+    <string name="home_semester_unavailable">No pudimos cargar tu semestre.</string>
+    <string name="home_day_unavailable">No pudimos cargar tus clases de hoy.</string>
+    <string name="home_done_title">Ya terminaste las clases de hoy</string>
+    <string name="room_number">Salón %1$s</string>
+    <string name="room_none">Sin salón asignado</string>
+
+    <string name="schedule_view_day">Día</string>
+    <string name="schedule_view_two_days">2 días</string>
+    <string name="schedule_view_week">Semana</string>
+    <!-- "21 sep – 27 sep". -->
+    <string name="schedule_week_range">%1$d %2$s – %3$d %4$s</string>
+    <string name="schedule_no_classes">Sin clases</string>
+    <string name="schedule_none">SINU no tiene un horario para ti en este periodo.</string>
+    <string name="schedule_failed">No pudimos cargar tu horario</string>
+    <string name="schedule_retry">Reintentar</string>
+    <string name="schedule_test_notice">Datos de prueba: la universidad todavía no ha conectado SINU, así que este no es tu horario real.</string>
+    <!-- Course code and group: "59035 · grupo 51". -->
+    <string name="schedule_code_group">%1$s · grupo %2$s</string>
+    <string name="schedule_detail_time">Hora</string>
+    <string name="schedule_detail_blocks">Duración</string>
+    <string name="schedule_detail_professor">Docente</string>
+    <string name="schedule_detail_sede">Sede</string>
+    <string name="schedule_where">Dónde es</string>
+    <string name="schedule_detail_room">Salón</string>
+    <string name="schedule_detail_space_name">Espacio</string>
+    <string name="schedule_detail_space_type">Tipo</string>
+    <string name="schedule_detail_building">Edificio</string>
+    <string name="schedule_detail_floor">Piso</string>
+    <string name="schedule_detail_capacity">Capacidad</string>
+    <string name="schedule_detail_access">Acceso</string>
+    <string name="schedule_access_step_free">Sin escaleras</string>
+    <string name="schedule_access_stairs">Solo por escaleras</string>
+    <string name="schedule_room_none_detail">SINU todavía no tiene un salón asignado para esta clase en estas fechas.</string>
+    <string name="schedule_room_not_mapped">Esta sede todavía no está en el mapa.</string>
+    <string name="schedule_room_failed">No pudimos buscar el salón en el mapa.</string>
+
+    <string name="placeholder_pending">Esta pantalla todavía no existe</string>
+    <string name="placeholder_profile_contract">Se alimentará de GET /api/users/me.</string>
+    <string name="placeholder_semaphore_contract">Se alimentará de GET /api/semaphore/me.</string>
+    <string name="placeholder_map_contract">Se alimentará de GET /api/map/buildings.</string>
+    <string name="placeholder_schedule_contract">Se alimentará de GET /api/schedule/me/week.</string>
+    <string name="placeholder_home_contract">Se alimentará de GET /api/schedule/me/day.</string>
+
+    <string name="invitation_title">Código de invitación</string>
+    <string name="invitation_pending">El registro con código de invitación todavía no existe. Su contrato es POST /auth/register en docs/api/auth.openapi.yaml.</string>
+    <string name="invitation_back">Volver</string>
+
+    <!--
+      The semester card counts credits, which is what GET /api/semaphore/me/summary returns. Only
+      the second line of it counts courses.
+    -->
+    <!-- A SINU block is 45 minutes: "3 bloques de 45 min". -->
+    <plurals name="schedule_blocks">
+        <item quantity="one">%1$d bloque de 45 min</item>
+        <item quantity="other">%1$d bloques de 45 min</item>
+    </plurals>
+    <!-- Monday first, as the API runs its weeks. -->
+    <string-array name="weekdays">
+        <item>Lun</item>
+        <item>Mar</item>
+        <item>Mié</item>
+        <item>Jue</item>
+        <item>Vie</item>
+        <item>Sáb</item>
+        <item>Dom</item>
+    </string-array>
+    <string-array name="months_short">
+        <item>ene</item>
+        <item>feb</item>
+        <item>mar</item>
+        <item>abr</item>
+        <item>may</item>
+        <item>jun</item>
+        <item>jul</item>
+        <item>ago</item>
+        <item>sep</item>
+        <item>oct</item>
+        <item>nov</item>
+        <item>dic</item>
+    </string-array>
+
+    <plurals name="home_semester_courses">
+        <item quantity="one">%1$d materia en curso</item>
+        <item quantity="other">%1$d materias en curso</item>
+    </plurals>
+    <plurals name="home_credits_passed">
+        <item quantity="one">%1$d aprobado</item>
+        <item quantity="other">%1$d aprobados</item>
+    </plurals>
+    <plurals name="home_credits_in_progress">
+        <item quantity="one">%1$d en curso</item>
+        <item quantity="other">%1$d en curso</item>
+    </plurals>
+    <plurals name="home_credits_remaining">
+        <item quantity="one">%1$d restante</item>
+        <item quantity="other">%1$d restantes</item>
+    </plurals>
+</resources>

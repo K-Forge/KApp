@@ -8,6 +8,7 @@ import co.edu.konradlorenz.kapp.auth.domain.Credential;
 import co.edu.konradlorenz.kapp.auth.domain.CredentialRepository;
 import co.edu.konradlorenz.kapp.auth.domain.InvitationCode;
 import co.edu.konradlorenz.kapp.auth.error.ProfileServiceUnavailableException;
+import co.edu.konradlorenz.kapp.auth.web.AccountRequest;
 import co.edu.konradlorenz.kapp.auth.web.RegistrationRequest;
 import co.edu.konradlorenz.kapp.auth.web.RegistrationResponse;
 import co.edu.konradlorenz.kapp.common.error.ApiError;
@@ -91,9 +92,9 @@ public class RegistrationService {
         // reopens the read-then-write race redeem() exists to close.
         try {
             String role = roleFrom(code);
-            InternalUserUpsert.AcademicInfo academic = academicFor(role, request);
+            requireStudentCode(role, request.studentCode());
             Credential credential = createAccount(email, request.password(),
-                    request.firstName(), request.lastName(), role, academic);
+                    request.firstName(), request.lastName(), role, initialStatus(), null);
 
             verification.issueAndSend(credential);
             return respond(credential);
@@ -105,18 +106,45 @@ public class RegistrationService {
         }
     }
 
+    /**
+     * An account an administrator creates, with a temporary password the person replaces at
+     * first sign-in. The same rules as registration - the domain, a student's codes, never
+     * ROLE_ADMIN - minus the invitation code: the administrator is the invitation. It may sign
+     * in at once, since somebody vouched for it, but its address is still not verified.
+     */
+    public PasswordService.Issued createWithTemporaryPassword(AccountRequest request) {
+        String email = normalise(request.email());
+        requireAllowedDomain(email);
+        requireAvailable(email);
+        String role = request.role();
+        if (!KappRoles.STUDENT.equals(role) && !KappRoles.PROFESSOR.equals(role)) {
+            throw new BusinessRuleException("An account can be created as a student or a professor",
+                    List.of(new ApiError.FieldIssue("role", "ROLE_STUDENT or ROLE_PROFESSOR")));
+        }
+        requireStudentCode(role, request.studentCode());
+        String password = TemporaryPasswords.next();
+        Instant expiresAt = Instant.now().plus(TemporaryPasswords.LIFETIME);
+        Credential credential = createAccount(email, password, request.firstName(), request.lastName(),
+                role, Credential.Status.ACTIVE, expiresAt);
+        return new PasswordService.Issued(credential, password, expiresAt);
+    }
+
     private Credential createAccount(String email, String rawPassword, String firstName,
                                      String lastName, String role,
-                                     InternalUserUpsert.AcademicInfo academic) {
+                                     Credential.Status status, Instant temporaryUntil) {
 
         UserProfileView profile = createProfile(
-                new InternalUserUpsert(email, firstName.trim(), lastName.trim(), role, academic));
+                new InternalUserUpsert(email, firstName.trim(), lastName.trim(), List.of(role)));
 
         Instant now = Instant.now();
         try {
-            Credential credential = credentials.save(Credential.newLocalAccount(
+            Credential account = Credential.newLocalAccount(
                     profile.id(), email, passwordEncoder.encode(rawPassword),
-                    List.of(role), initialStatus(), now));
+                    List.of(role), status, now);
+            if (temporaryUntil != null) {
+                account = account.withTemporaryPassword(account.passwordHash(), temporaryUntil, now);
+            }
+            Credential credential = credentials.save(account);
 
             log.info("Registered {} as {} with status {}", email, role, credential.status());
             return credential;
@@ -153,28 +181,16 @@ public class RegistrationService {
     }
 
     /**
-     * A staff invitation carries no student code, and user-service requires an academic
-     * record for a student and forbids one for a guest.
+     * Registration under the 0.3 contract still asks a student for their student code, until local
+     * sign-in moves behind its flag with auth 1.0. It is no longer sent anywhere: since user 1.0,
+     * KApp keeps no student code, and a student's program, pensum and level come from SINU.
      */
-    private InternalUserUpsert.AcademicInfo academicFor(String role, RegistrationRequest request) {
-        if (!KappRoles.STUDENT.equals(role)) {
-            return null;
-        }
-        if (isBlank(request.studentCode()) || isBlank(request.programCode())) {
+    private static void requireStudentCode(String role, String studentCode) {
+        if (KappRoles.STUDENT.equals(role) && isBlank(studentCode)) {
             throw new BusinessRuleException(
-                    "A student invitation code requires studentCode and programCode",
-                    List.of(
-                            new ApiError.FieldIssue("studentCode",
-                                    "Required when the invitation code is a student intake"),
-                            new ApiError.FieldIssue("programCode",
-                                    "Required when the invitation code is a student intake")));
+                    "A student account requires studentCode",
+                    List.of(new ApiError.FieldIssue("studentCode", "Required for a student")));
         }
-        // pensumCode and currentLevel are not in the registration contract but are
-        // mandatory on the profile, so the deployment supplies them. A new student starts
-        // on the current pensum, at semester one.
-        return new InternalUserUpsert.AcademicInfo(
-                request.studentCode().trim(), request.programCode().trim(),
-                properties.defaultPensumCode(), properties.defaultCurrentLevel());
     }
 
     /** ROLE_ADMIN is never reachable through signup, whatever a code claims. */

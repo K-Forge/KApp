@@ -2,7 +2,7 @@
 
 Step by step, in the order the Atlas interface asks for it. About twenty minutes.
 
-The goal is one free cluster holding the same five databases the local stack has, with the same
+The goal is one free cluster holding four databases, one per service that stores data, with one
 rule: **one account per service, able to read and write exactly one database.** After this, the six
 of us share one development database and nobody has to run MongoDB on their machine.
 
@@ -36,9 +36,9 @@ same, so nothing in KApp behaves differently against it.
 **Skip the "Quickstart" wizard's user and IP prompts** if it shows them; the next two steps do the
 same thing properly.
 
-## 3. The five database users
+## 3. The four database users
 
-**Security → Database Access → Add New Database User**, five times.
+**Security → Database Access → Add New Database User**, four times.
 
 For each one: **Password** authentication, then under *Database User Privileges* choose
 **Specific Privileges** — not "Read and write to any database", which is exactly what we are
@@ -49,7 +49,6 @@ avoiding — and add one privilege:
 | `kapp_auth_user`        | `readWrite` | `kapp_auth`      | *(leave blank)* |
 | `kapp_user_user`        | `readWrite` | `kapp_user`      | *(leave blank)* |
 | `kapp_semaphore_user`   | `readWrite` | `kapp_semaphore` | *(leave blank)* |
-| `kapp_schedule_user`    | `readWrite` | `kapp_schedule`  | *(leave blank)* |
 | `kapp_map_user`         | `readWrite` | `kapp_map`       | *(leave blank)* |
 
 Use **Autogenerate Secure Password** and copy each one as you go — Atlas shows it once. You will
@@ -57,6 +56,11 @@ type them into step 5; do not put them in a chat, an issue or a commit.
 
 You do not need to create the databases first. The first write creates them, and Mongock does that
 on startup.
+
+> **schedule-service has no database** since October 2026 (#78): it reads the timetable from SINU. A new setup
+> creates no `kapp_schedule_user`. The shared cluster may still hold a `kapp_schedule` database and its account,
+> with data written before then; deleting them is Brian's call. `scripts/verify-db-isolation.sh` keeps checking
+> that no other account can reach it while it exists.
 
 > **Atlas users live in `admin`, not in their own database.** This is the one place Atlas differs
 > from our local container: every Atlas user authenticates against `admin` regardless of which
@@ -80,49 +84,38 @@ data lands there, and a production cluster must use an IP list or VPC peering in
 
 ## 5. Point the stack at it
 
-Do **not** assemble the connection strings by hand. Every mistake listed at the bottom of this
-document comes from that, and two of the three fail with `Authentication failed`, which reads
-exactly like a wrong password:
+Take each string from Atlas itself — *Connect → Drivers* on the cluster, with the user selected —
+and paste it into `app/backend/microservices/.env`, single-quoted. Assembling one by hand is where
+every mistake at the bottom of this document comes from, and two of the three fail with
+`Authentication failed`, which reads exactly like a wrong password.
 
-```bash
-scripts/set-atlas-uris.sh
+```
+MONGO_MAP_URI='mongodb+srv://kapp_map_user:<password>@<cluster>.mongodb.net/kapp_map?retryWrites=true&w=majority&maxPoolSize=10'
 ```
 
-It asks for the cluster host — **paste the whole string from Connect → Drivers if you like**, it
-takes the host out of it — and then for the five passwords, one at a time, without echoing them.
-Then it writes the five `MONGO_*_URI` lines into `app/backend/microservices/.env`.
-
-What it does that hand-assembly gets wrong:
+Three things the copied string still needs checking for:
 
 - **No `authSource`.** Atlas keeps every user in `admin` regardless of which database it can reach,
-  so pinning it to the service's own database fails. Our local container does the opposite — it
-  creates each user inside its own database — which is why the two shapes differ at all.
+  so pinning it to the service's own database fails with a message that reads exactly like a wrong
+  password. The isolation comes from the privilege, not from where the user is stored.
 - **No `replicaSet`.** The SRV record carries it; passing it as well is an error.
 - **The password is percent-encoded**, so an Atlas-generated one containing `@ : / ? # %` works
   instead of the string being parsed at the wrong character.
 
 Passwords are typed, never passed as arguments — an argument would land in your shell history.
 
-Your previous `.env` is saved as `.env.bak`, and `MONGO_*_PASSWORD` and `MONGO_ROOT_*` are left
-alone on purpose: they provision the **local** container and have nothing to do with Atlas. You want
-them working for the days you are offline.
+Your previous `.env` is saved as `.env.bak`.
 
-## 6. Start it without a local database
+## 6. Start the stack
 
 ```bash
 cd app/backend/microservices
-docker compose --profile full --profile dev down
-docker compose --profile cloud --profile dev up -d
+docker compose --profile academic --profile map --profile dev up -d
 ```
 
-`cloud` starts every service **except** MongoDB.
-
-To go back — on a plane, or with bad Wi-Fi — one command and the local stack is yours again:
-
-```bash
-scripts/set-atlas-uris.sh --local
-docker compose --profile full --profile dev up -d
-```
+There is nothing else to start: this cluster is the only database the stack has
+([ADR 0009](adr/0009-atlas-is-the-only-development-database.md)). If one of the four strings is
+missing, Compose refuses to start and names it.
 
 ## 7. Check it worked
 
@@ -147,19 +140,19 @@ curl -s http://localhost:8080/api/catalog/programs \
 
 ## 8. Tell the others
 
-Each teammate needs the same five `MONGO_*_URI` lines in their own `.env`. Two ways, and the second
+Each teammate needs the same four `MONGO_*_URI` lines in their own `.env`. Two ways, and the second
 is better:
 
-**Send them the five lines** privately — one person, one message, never the group chat. Fastest, but
-it puts five passwords in five chat histories.
+**Send them the four lines** privately — one person, one message, never the group chat. Fastest, but
+it puts four passwords in that many chat histories.
 
 **Or send them the cluster host and their own copy of the passwords**, and let them run the same
 command you did:
 
 ```bash
-../../../scripts/generate-dev-secrets.sh > .env    # only if they have no .env yet
-scripts/set-atlas-uris.sh
-docker compose --profile cloud --profile dev up -d
+../../../scripts/generate-dev-secrets.sh back > .env   # only if they have no .env yet
+# paste the four MONGO_*_URI values into it, single-quoted
+docker compose --profile academic --profile map --profile dev up -d
 ```
 
 Either way they end up with a working backend without installing MongoDB. Nobody needs to run
@@ -175,9 +168,9 @@ deliberately: pointing them at a shared cluster would make them slow and intermi
 person's run would wipe another's data halfway through someone else's. `./mvnw -B verify` needs
 Docker and no Atlas.
 
-**The local profiles keep working.** `--profile core`, `--profile full` and the rest still start a
-local MongoDB with its own credentials. Atlas is an option, not a replacement — on a plane or with
-bad Wi-Fi, the local stack is the one that works.
+**What did change: there is no local database any more.** Atlas is not an option beside a local
+MongoDB, it is the only one, and the stack needs the network. That trade is written down in
+[ADR 0009](adr/0009-atlas-is-the-only-development-database.md).
 
 ---
 
@@ -185,7 +178,7 @@ bad Wi-Fi, the local stack is the one that works.
 
 | What you see | What it is |
 | --- | --- |
-| `Authentication failed` | If you used `set-atlas-uris.sh`, the password is genuinely wrong — re-run it. If you wrote the string by hand, it is almost always `authSource=` left in it, or a password with `@` or `/` that was not percent-encoded. |
+| `Authentication failed` | Almost always `authSource=` left in the string, or a password with `@` `:` `/` `?` `#` `%` that was not percent-encoded. If you copied the string from Atlas and only filled the password in, check that one. |
 | `Timed out ... no primary` | Your IP is not on the Network Access list, or the entry is still "pending". |
 | `not authorized on kapp_auth` | The user was created with a privilege on the wrong database, or with a built-in role instead of Specific Privileges. |
 | `Unable to look up TXT record` | A network that blocks SRV DNS lookups — some campus and captive-portal Wi-Fi does. Use the non-SRV `mongodb://` string Atlas also offers. |

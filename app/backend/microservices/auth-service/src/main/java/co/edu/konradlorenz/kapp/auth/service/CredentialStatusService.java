@@ -22,9 +22,10 @@ import java.time.Instant;
  * user-service calls it over {@code /internal} when an administrator flips the profile flag, in
  * the same movement, so the two cannot drift apart.
  *
- * <p><strong>A token already issued stays valid until it expires.</strong> That is inherent to
- * stateless JWTs and it is why the access token's lifetime is an hour rather than a day. Nothing
- * here revokes one; it stops the next one being issued.
+ * <p><strong>An access token already issued stays valid until it expires.</strong> That is
+ * inherent to stateless JWTs and it is why the access token's lifetime is an hour rather than a
+ * day. What suspending does take back is every refresh token of the account, so no session
+ * renews: the apps are signed out at their next renewal, within that hour.
  */
 @Service
 public class CredentialStatusService {
@@ -32,9 +33,11 @@ public class CredentialStatusService {
     private static final Logger log = LoggerFactory.getLogger(CredentialStatusService.class);
 
     private final CredentialRepository credentials;
+    private final SessionService sessions;
 
-    public CredentialStatusService(CredentialRepository credentials) {
+    public CredentialStatusService(CredentialRepository credentials, SessionService sessions) {
         this.credentials = credentials;
+        this.sessions = sessions;
     }
 
     /**
@@ -56,5 +59,8 @@ public class CredentialStatusService {
 
         credentials.save(updated);
         log.info("Credential for user {} is now {}", userId, updated.status());
+        if (!allowed) {
+            sessions.revokeAll(userId);
+        }
     }
 }

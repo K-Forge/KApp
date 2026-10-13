@@ -1,14 +1,14 @@
 /** The columns the import CSV needs for each pensum item. */
 export const ITEM_FIELDS = [
-  { key: 'pensumItemCode', label: 'Item code', required: true, hint: 'Unique within the pensum' },
-  { key: 'courseCode', label: 'Course code', required: false, hint: 'Empty for an elective slot' },
-  { key: 'courseName', label: 'Name', required: true, hint: '' },
-  { key: 'courseLevel', label: 'Level', required: true, hint: 'Semester, 1–12' },
-  { key: 'credits', label: 'Credits', required: true, hint: '' },
-  { key: 'weeklyHours', label: 'Weekly hours', required: true, hint: '' },
-  { key: 'areaCode', label: 'Area', required: true, hint: 'The semáforo row' },
-  { key: 'prerequisites', label: 'Prerequisites', required: false, hint: 'Course codes, separated by ; or ,' },
-  { key: 'isElectiveSlot', label: 'Elective?', required: false, hint: 'true / false / sí / no' },
+  { key: 'pensumItemCode', label: /* i18n */ 'Item code', required: true, hint: /* i18n */ 'Unique within the pensum' },
+  { key: 'courseCode', label: /* i18n */ 'Course code', required: false, hint: /* i18n */ 'Empty for an elective slot' },
+  { key: 'courseName', label: /* i18n */ 'Name', required: true, hint: '' },
+  { key: 'courseLevel', label: /* i18n */ 'Level', required: true, hint: /* i18n */ 'Semester, 1–12' },
+  { key: 'credits', label: /* i18n */ 'Credits', required: true, hint: '' },
+  { key: 'weeklyHours', label: /* i18n */ 'Weekly hours', required: true, hint: '' },
+  { key: 'areaCode', label: /* i18n */ 'Area', required: true, hint: /* i18n */ 'The semáforo row' },
+  { key: 'prerequisites', label: /* i18n */ 'Prerequisites', required: false, hint: /* i18n */ 'Course codes, separated by ; or ,' },
+  { key: 'isElectiveSlot', label: /* i18n */ 'Elective?', required: false, hint: /* i18n */ 'true / false / sí / no' },
 ] as const;
 
 export type ItemField = (typeof ITEM_FIELDS)[number]['key'];
@@ -120,6 +120,19 @@ export function mapFromHeadings(cells: string[]): Record<number, ItemField | und
     }
   });
   return out;
+}
+
+/**
+ * Weekly hours as a plan prints them: a whole number, or a whole number and a half.
+ *
+ * <p>Four items across the published plans print a half — Psicología's two professional
+ * practices at 4,5 hours and the practices of Marketing and Negocios Internacionales at 1,5 —
+ * and nothing prints anything finer. A `4,3` in a pasted table is a misread cell, and the
+ * server refuses it, so it is worth saying here rather than at the end of the import.
+ */
+export function parseHours(value: string): number {
+  const text = value.trim().replace(',', '.');
+  return /^\d{1,3}(\.5)?$/.test(text) ? Number(text) : NaN;
 }
 
 /** True/false in the forms a person actually types, including Spanish. */

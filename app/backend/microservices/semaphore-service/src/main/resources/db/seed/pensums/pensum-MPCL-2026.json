@@ -1,0 +1,297 @@
+{
+  "pensumCode": "MPCL-2026",
+  "programCode": "MAE-PSI-CLINICA",
+  "programName": "Maestría en Psicología Clínica",
+  "faculty": "Escuela de Posgrados",
+  "reform": "Folleto publicado 2026",
+  "status": "DRAFT",
+  "totalCredits": 59,
+  "totalHours": 0,
+  "levels": 4,
+  "areas": [
+    {
+      "code": "PLAN",
+      "name": "Plan de estudios",
+      "color": "#539392",
+      "credits": 0,
+      "hours": 0
+    }
+  ],
+  "courses": [
+    {
+      "pensumItemCode": "MPCL-101",
+      "name": "Avances y aplicaciones de la terapia cognitivo-conductual (énfasis adultos)",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-102",
+      "name": "Bases y aplicaciones del análisis conductual aplicado (énfasis infantil)",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-103",
+      "name": "Evaluación psicológica y análisis funcional",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-104",
+      "name": "Fundamentos de aprendizaje en el contexto clínico (énfasis adultos)",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-105",
+      "name": "Perspectiva dimensional en clínica infantil (énfasis infantil)",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-106",
+      "name": "Entrenamiento en habilidades clínicas I",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-107",
+      "name": "Práctica en Psicología Clínica I",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-108",
+      "name": "Diseños de investigación clínica I",
+      "level": 1,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-201",
+      "name": "Terapias contextuales I: ACT y PAF",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-202",
+      "name": "Terapias contextuales II: Activación conductual y DBT (énfasis adultos)",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-203",
+      "name": "Aplicaciones del análisis de la conducta verbal en dificultades del desarrollo (énfasis infantil)",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-204",
+      "name": "Entrenamiento en habilidades clínicas II",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-205",
+      "name": "Práctica en psicología clínica II",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-206",
+      "name": "Diseños de investigación clínica II",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-207",
+      "name": "Trabajo de grado I",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-208",
+      "name": "Electiva I",
+      "level": 2,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-301",
+      "name": "Alternativas terapéuticas con apoyo empírico",
+      "level": 3,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-302",
+      "name": "Evaluación e intervención en pareja y familia",
+      "level": 3,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-303",
+      "name": "Práctica en psicología clínica III",
+      "level": 3,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-304",
+      "name": "Trabajo de grado II",
+      "level": 3,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-305",
+      "name": "Electiva II",
+      "level": 3,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-401",
+      "name": "El Psicólogo clínico en el contexto colombiano",
+      "level": 4,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-402",
+      "name": "Práctica en Psicología Clínica IV",
+      "level": 4,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-403",
+      "name": "Trabajo de grado III",
+      "level": 4,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": false,
+      "prerequisites": [],
+      "sinuCode": null
+    },
+    {
+      "pensumItemCode": "MPCL-404",
+      "name": "Electiva III",
+      "level": 4,
+      "credits": 0,
+      "weeklyHours": 0,
+      "area": "PLAN",
+      "isElectiveSlot": true,
+      "prerequisites": [],
+      "sinuCode": null
+    }
+  ]
+}

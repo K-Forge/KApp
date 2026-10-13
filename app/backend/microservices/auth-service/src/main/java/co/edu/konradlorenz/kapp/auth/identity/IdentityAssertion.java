@@ -18,10 +18,14 @@ public sealed interface IdentityAssertion
     /**
      * E-mail and password, verified against a locally stored BCrypt hash.
      *
-     * @param email       the login name, in whatever case the user typed it
-     * @param rawPassword the plain-text password, never logged and never stored
+     * @param email        the login name, in whatever case the user typed it
+     * @param rawPassword  the plain-text password, never logged and never stored
+     * @param allowedRoles the roles the client takes, any one of them; empty for any account
      */
-    record Password(String email, String rawPassword) implements IdentityAssertion {
+    record Password(String email, String rawPassword, java.util.List<String> allowedRoles) implements IdentityAssertion {
+        public Password {
+            allowedRoles = allowedRoles == null ? java.util.List.of() : java.util.List.copyOf(allowedRoles);
+        }
     }
 
     /**

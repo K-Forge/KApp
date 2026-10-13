@@ -2,6 +2,8 @@ package co.edu.konradlorenz.kapp.semaphore.web.dto;
 
 import co.edu.konradlorenz.kapp.semaphore.domain.Pensum;
 import co.edu.konradlorenz.kapp.semaphore.domain.PensumStatus;
+import co.edu.konradlorenz.kapp.semaphore.domain.WeeklyHours;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -25,7 +27,7 @@ public record PensumSummary(
         String reform,
         PensumStatus status,
         int totalCredits,
-        int totalHours,
+        @JsonSerialize(using = WeeklyHours.Serializer.class) double totalHours,
         int levels,
         @Schema(description = "How many items the pensum carries, without sending them.")
         int courses

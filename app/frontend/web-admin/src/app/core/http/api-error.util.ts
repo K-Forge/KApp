@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import type { ApiError } from './api-error.model';
+import { t } from '../i18n/i18n.service';
 
 /**
  * Normalizes anything an HTTP call can fail with into the one `ApiError` shape the rest of the
@@ -31,7 +32,7 @@ export function parseApiError(err: unknown): ApiError {
         timestamp,
         status: 0,
         error: 'Network Error',
-        message: `Could not reach ${err.url ?? 'the API'}. Check the base URL in Settings and that the service is running.`,
+        message: t('Could not reach {url}. Check the gateway address and that the service is running.', { url: err.url ?? t('the API') }),
         path: err.url ?? '',
       };
     }
@@ -40,7 +41,8 @@ export function parseApiError(err: unknown): ApiError {
       timestamp,
       status: err.status,
       error: err.statusText || `HTTP ${err.status}`,
-      message: bodyAsMessage(body) ?? err.message,
+      // Angular's own "Http failure response for …" is English and only repeats the status.
+      message: bodyAsMessage(body) ?? t('The server answered {status} and gave no reason.', { status: err.status }),
       path: err.url ?? '',
     };
   }

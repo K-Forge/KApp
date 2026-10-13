@@ -1,21 +1,21 @@
 package co.edu.konradlorenz.kapp.auth;
 
 import co.edu.konradlorenz.kapp.auth.config.RegistrationProperties;
+import co.edu.konradlorenz.kapp.auth.config.SessionProperties;
 import co.edu.konradlorenz.kapp.auth.jwt.JwtProperties;
 import io.mongock.runner.springboot.EnableMongock;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * Owns credentials: e-mail, password hash, roles, e-mail verification state, and the
  * RS256 key pair that signs every access token on the platform.
  *
- * <p>It deliberately does NOT own profiles. Names, identification, contact details and
- * academic placement live in user-service, which this service calls exactly once, during
- * registration. Splitting them this way keeps authentication behind a single seam, which
+ * <p>It deliberately does NOT own profiles. Names, the picture and the activation state live
+ * in user-service, which this service calls exactly once, during registration; nothing academic
+ * is kept on either side, since a student's program comes from SINU. Splitting them this way keeps authentication behind a single seam, which
  * is the piece Microsoft Entra ID replaces once the university grants an application
  * registration - see {@code identity.EntraIdAdapter}.
  *
@@ -33,10 +33,9 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * KApp service that talks to MongoDB must carry it.
  */
 @SpringBootApplication
-@EnableDiscoveryClient
 @EnableMongock
 @EnableFeignClients
-@EnableConfigurationProperties({JwtProperties.class, RegistrationProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, RegistrationProperties.class, SessionProperties.class})
 public class AuthServiceApplication {
 
     public static void main(String[] args) {

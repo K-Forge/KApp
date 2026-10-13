@@ -52,13 +52,14 @@ import static org.mockito.Mockito.when;
 @AutoConfigureMockMvc
 @Testcontainers
 @TestPropertySource(properties = {
-        "eureka.client.enabled=false",
-        "spring.cloud.discovery.enabled=false",
         // InternalUserClientConfig refuses a genuinely blank token at bean creation.
         // The Feign client this token would decorate is mocked below, so the value
         // itself is never sent anywhere; it only has to be non-blank for the context
         // to start.
-        "kapp.internal.token=test-internal-token"
+        "kapp.internal.token=test-internal-token",
+        // Most of this suite signs in with a password. LocalSignInGateIntegrationTest turns it
+        // off again to prove what production answers.
+        "kapp.auth.local-sign-in.enabled=true"
 })
 @Import(AbstractAuthIntegrationTest.InProcessJwtDecoderConfig.class)
 abstract class AbstractAuthIntegrationTest {
@@ -165,7 +166,7 @@ abstract class AbstractAuthIntegrationTest {
         Instant now = Instant.now();
         return credentials.save(new Credential(null, UUID.randomUUID().toString(), email,
                 passwordEncoder.encode(rawPassword), roles, status, emailVerified,
-                Credential.Provider.LOCAL, null, null, now, now));
+                Credential.Provider.LOCAL, null, null, now, now, null, null));
     }
 
     /** A signed access token for an identity that need not exist in the database at all -

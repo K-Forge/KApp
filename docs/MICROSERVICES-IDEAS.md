@@ -1,50 +1,78 @@
-# Microservice Ideas — KApp
+# Microservice Roadmap and Ideas — KApp
 
-> **"The best architectures grow out of good shared ideas."**
-
-Welcome to the KApp microservice idea bank. This document exists so the whole team can propose, document and discuss
-new microservice ideas in a structured way, without the pressure of building them all right away.
-
-The goal is simple: **leave a solid base of well-thought-out ideas** that lets us prioritize, plan and build the
-future of KApp with clarity. It does not matter whether your idea is small or ambitious — if it solves a real problem
-for the university community, it belongs here.
+This document has two parts. **The roadmap** lists the new services Brian decided to build on 3 October 2026, with
+their status. **The idea bank** below it keeps every other proposal the team has made, so that nothing is lost and the
+next decision has something to choose from. An idea is not a commitment; a roadmap entry is.
 
 ---
 
-## How to Use This Document
+## Roadmap
 
-Got an idea? Follow these steps to add it:
+| Service | Status | What it is |
+|---|---|---|
+| `notification-service` | **Required** | Inbox plus push: FCM, and APNs once an Apple Developer account exists. Per-topic preferences. Cross-cutting: every other service notifies through it |
+| `points-service` | For the final delivery | Citizenship points, visible to their owner and to the university. Not redeemable yet, and a balance may go negative |
+| `voice-service` | For the final delivery | Student voice: complaints and suggestions. Not anonymous — the author chooses to show their name or their programme, and moderation always sees who wrote it. No naming people. Word filter, reports from users and human moderation. Votes and comments of 20 to 200 words. No official replies |
+| `report-service` | For the final delivery | Damage reports with a location on the map, a photo and a short description. The same votes, comments and reports as the voice. Maintenance validates them |
+| `lost-and-found-service` | For the final delivery | Reception keeps the objects. Hand-in and claim with one-time codes that reception generates in KApp. The history is never deleted. No photos of documents, IDs or cards |
+| `event-service`, `club-service`, `recreation-bookings` | After a questionnaire to the offices | Depend on how Bienestar, the clubs and reception work today, which is asked first |
 
-1. **Add a new row to the table** in the "Registered Ideas" section, filling in every field.
-2. **Place your idea in the right position** according to the Impact × Difficulty matrix: first **high impact, low
-   difficulty** (quick wins), then **high impact, high difficulty** (strategic projects), then **low/medium impact,
-   low difficulty** (filler), and finally **low/medium impact, high difficulty** (avoid or postpone).
-3. **Add your name or GitHub handle** so the team knows who to contact to discuss the proposal.
-4. **Commit and open a PR** titled: `idea: Microservice Name`.
+**How they are built.** One service per feature. Everything that crosses services goes through a **transactional
+outbox**: the change and the message are written in the same MongoDB transaction, consumers use idempotency keys, and
+there is no message broker. A service that only needs to notify writes to its outbox, and `notification-service`
+delivers.
 
-> **Tip:** if you are unsure about a field (such as the difficulty level), make your best estimate. Brainstorming is
-> for exploring, not for absolute certainty.
+**Where the work is tracked.** `notification-service` is backend phase 7 (#60). Points, voice, damage reports and lost
+and found are backend phase 8 (#61). The office questionnaire comes before any issue for the last row.
+
+**Personal data.** The voice posts carry a name, the lost-and-found history is kept, and the reports carry photos. All
+three fall under Ley 1581, and their retention and access rules are written into `docs/REQUIREMENTS.md` before they are
+built.
+
+### Already built
+
+Two ideas from the bank below became the current platform. They are listed here so nobody proposes them again:
+
+| Idea | Service | Notes |
+|---|---|---|
+| Interactive Map | `map-service` | Buildings, floors drawn as polygons, spaces and search |
+| Student Academic Traffic Light | `semaphore-service` | Reads the student's progress from SINU and never copies it; the student only edits their plans |
+
+---
+
+## Idea Bank
+
+### How to propose an idea
+
+1. **Add a row to the table** below, filling in every field.
+2. **Place it by the Impact × Difficulty matrix**: first **high impact, low difficulty** (quick wins), then **high
+   impact, high difficulty** (strategic projects), then **low/medium impact, low difficulty** (filler), and finally
+   **low/medium impact, high difficulty** (avoid or postpone).
+3. **Add your name or GitHub handle**, so the team knows who to ask about it.
+4. **Open a pull request** titled `docs: add the <service> idea`, following `CONTRIBUTING.md`.
+
+> **Tip:** if you are unsure about a field, such as the difficulty, make your best estimate. Brainstorming is for
+> exploring, not for certainty.
 
 > [!IMPORTANT]
-> **Ordering rule:** ideas must **always** be sorted by **descending impact** (High → Medium → Low), breaking ties by
-> **ascending difficulty** (Low → Medium → High). When adding a new idea, insert it in the right category according
-> to the Impact × Difficulty matrix; never append it at the end of the document ignoring the order.
+> **Ordering rule:** ideas are always sorted by **descending impact** (High → Medium → Low), breaking ties by
+> **ascending difficulty** (Low → Medium → High). Insert a new idea in its category; never append it at the end.
 
----
+> [!NOTE]
+> **Before building any of these, check the scope.** KApp **reads SINU and never copies it**, and it explicitly
+> leaves out chat, payments, personal documents, enrolment and anything that writes to SINU (`docs/REQUIREMENTS.md`,
+> `docs/SINU-ALIGNMENT.md`). Several ideas below fall in those areas — Per-Course Chat, Parking (payments), Digital ID
+> Card (documents), Academic Procedures and Library loans (SINU's domain). They stay recorded as ideas, but building
+> one means revisiting that decision first.
 
-## Impact × Difficulty Matrix
-
-Below are the ideas proposed by the team. Read the existing ones before adding yours to avoid duplicates, and if you
-like one of them, comment on the corresponding PR.
+### Impact × Difficulty Matrix
 
 |                        | Low Difficulty                              | Medium/High Difficulty                        |
 | ---------------------- | ------------------------------------------- | --------------------------------------------- |
 | **High Impact**        | **Quick wins** <br> _Do first_              | **Strategic projects** <br> _Plan ahead_      |
 | **Medium/Low Impact**  | **Filler** <br> _Do when there is time_     | **Avoid or postpone** <br> _Low priority_     |
 
----
-
-## Registered Ideas
+### Registered Ideas
 
 <!-- IMPORTANT: NOTE FOR AI AGENTS AND CONTRIBUTORS:
   The rows of this table MUST ALWAYS be sorted by the Impact x Difficulty matrix:
@@ -55,28 +83,20 @@ like one of them, comment on the corresponding PR.
   Within the same category, order is chronological (by date).
   When a new idea is added, insert it at the end of its category group.
   NEVER append a row at the end without respecting this order.
+  An idea that is decided moves to the Roadmap section, and one that is built moves to "Already built".
 -->
 
 | Microservice                        | Slug / URL identifier         | Description                                                                                                                                                                          | Audience                                 | Impact | Difficulty | Proposed by                 | Date     |
 | ----------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- | ------ | ---------- | --------------------------- | -------- |
-| Damaged Facility Reports            | report-service                | Report damaged spaces or resources (boards, chairs, restrooms, projectors) so maintenance can prioritize repairs and track them.                                                       | Students, professors, staff              | High   | Low        | KApp Team                   | 26/02/25 |
-| Interactive Map                     | map-service                   | Find classrooms, buildings and campus spaces through an interactive map with visual orientation.                                                                                       | Students, professors, visitors           | High   | Medium     | KApp Team                   | 26/02/25 |
 | Wellbeing and Coordination Bookings | bienestar-appointment-service | Book appointments with student wellbeing services, academic coordination and psychology. Extensible shell so each department configures its own availability and booking flow.         | Students, professors, staff              | High   | Medium     | KApp Team                   | 26/02/25 |
 | Restaurant Menu and Orders          | restaurant-service            | Check the university restaurant daily menu and place food orders from the app.                                                                                                         | Students, professors, staff              | High   | Medium     | KApp Team                   | 26/02/25 |
-| Student Academic Traffic Light      | student-semaphore-service     | Check each student's academic status (average, credits, alerts) and identify at-risk students for timely support.                                                                      | Students, administrators                 | High   | Medium     | KApp Team                   | 26/02/25 |
 | Library                             | library-service               | Browse the catalog, review loan history, renew loans, and reserve books or join a waiting list.                                                                                        | Students, professors                     | High   | Medium     | KApp Team                   | 26/02/25 |
-| Events and Activities               | event-service                 | Centralize university events (cultural, sports, academic), filter by category, register and add them to a personal calendar.                                                           | Everyone                                 | High   | Medium     | KApp Team                   | 26/02/25 |
-| Notifications                       | notification-service          | Cross-cutting real-time push notification service. Centralizes alerts from every microservice (schedules, messages, events, appointments) with per-user configuration.                 | Everyone                                 | High   | Medium     | KApp Team                   | 26/02/25 |
-| Club Management                     | club-service                  | Create, browse and manage student clubs: discover clubs, join them, manage members, publish activities and coordinate meetings.                                                        | Students, administrators                 | High   | Medium     | Brian Steven Vargas Clavijo | 10/03/26 |
 | Academic Procedures                 | academic-procedures-service   | Register and track academic procedures in real time (credit transfers, cancellations, certificates, grade reviews and others), centralizing administrative requests and improving process transparency. | Students, staff                          | High   | Medium     | @DIEGO-ALI                  | 13/03/26 |
 | Per-Course Chat                     | chat-service                  | Messaging organized by course: professor ↔ group, student ↔ student, faculty ↔ academic members. Replaces informal channels (WhatsApp, e-mail).                                        | Students, professors, faculty            | High   | High       | KApp Team                   | 26/02/25 |
-| Lost and Found                      | lost-and-found-service        | Register and search for items lost on campus. Whoever finds an item reports it, and whoever lost it looks for matches to arrange the return.                                           | Students, professors, staff              | Medium | Low        | Brian Steven Vargas Clavijo | 10/03/26 |
 | Available Classrooms                | available-classrooms          | Real-time view of free classrooms and their availability per floor, to avoid interrupting ongoing classes.                                                                             | Students                                 | Medium | Low        | @DIEGO-ALI                  | 10/03/26 |
 | Parking                             | parking-service               | Reserve parking spots, check real-time availability and pay for use of the university parking lot.                                                                                     | Students, professors, staff              | Medium | Medium     | KApp Team                   | 26/02/25 |
-| Digital ID Card                     | carnet-service                | Digital university ID card with a QR code bound to the student or professor identity, for access control and services.                                                                 | Students, professors                     | Low    | Medium     | KApp Team                   | 26/02/25 |
-| Wellbeing Building Space Booking    | recreation-bookings           | Check availability of wellbeing spaces (ping-pong tables, dance studio, pool tables and others) and book limited slots within their opening hours.                                     | Students                                 | Medium | Low        | Zavithar_17                 | 12/03/26 |
 | Gym Management                      | gym-management                | Enroll in the university gym service, manage routines designed by trainers, and get nutrition recommendations aligned with each goal.                                                  | Students and trainers                    | Medium | Medium     | Zavithar_17                 | 12/03/26 |
-
+| Digital ID Card                     | carnet-service                | Digital university ID card with a QR code bound to the student or professor identity, for access control and services.                                                                 | Students, professors                     | Low    | Medium     | KApp Team                   | 26/02/25 |
 
 > **KApp Team:** Brian Steven Vargas Clavijo, Julián David Avila Cortes, Santiago Rocha Ramirez, Diego Ali Lares Rondon.
 

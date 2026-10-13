@@ -1,5 +1,6 @@
 package co.edu.konradlorenz.kapp.semaphore.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -31,7 +32,8 @@ import java.util.Optional;
  * @param reform       name of the curricular reform this plan belongs to
  * @param status       lifecycle state; only ACTIVE plans are pinned to new students
  * @param totalCredits credits the printed plan declares
- * @param totalHours   <strong>weekly</strong> hours the printed plan declares
+ * @param totalHours   <strong>weekly</strong> hours the printed plan declares; whole or half,
+ *                     because the items it adds up can be (see {@link WeeklyHours})
  * @param levels       number of levels (semesters) - the number of grid columns
  * @param areas        knowledge areas in display order - the grid rows
  * @param courses      every item of the plan, fixed courses and elective slots alike
@@ -45,7 +47,7 @@ public record Pensum(
         String reform,
         PensumStatus status,
         int totalCredits,
-        int totalHours,
+        @JsonSerialize(using = WeeklyHours.Serializer.class) double totalHours,
         int levels,
         List<PensumArea> areas,
         List<PensumCourse> courses
@@ -54,16 +56,6 @@ public record Pensum(
     public Pensum {
         areas = areas == null ? List.of() : List.copyOf(areas);
         courses = courses == null ? List.of() : List.copyOf(courses);
-    }
-
-    /**
-     * @return the item addressed by {@code identifier}, which is a course {@code code} for
-     *         a fixed course and a {@code pensumItemCode} for an elective slot
-     */
-    public Optional<PensumCourse> findByAddressableCode(String identifier) {
-        return courses.stream()
-                .filter(c -> c.addressableCode().equals(identifier))
-                .findFirst();
     }
 
     public Optional<PensumCourse> findByPensumItemCode(String pensumItemCode) {
@@ -76,15 +68,6 @@ public record Pensum(
     public Map<String, PensumCourse> byPensumItemCode() {
         Map<String, PensumCourse> index = new LinkedHashMap<>();
         courses.forEach(c -> index.put(c.pensumItemCode(), c));
-        return index;
-    }
-
-    /** @return items keyed by course {@code code}, skipping elective slots, which have none */
-    public Map<String, PensumCourse> byCourseCode() {
-        Map<String, PensumCourse> index = new LinkedHashMap<>();
-        courses.stream()
-                .filter(c -> c.code() != null)
-                .forEach(c -> index.put(c.code(), c));
         return index;
     }
 

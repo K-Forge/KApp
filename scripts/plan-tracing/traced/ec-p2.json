@@ -1,0 +1,29 @@
+{
+ "building": "EC",
+ "floor": "P2",
+ "why": "The floor as build-floor.py wrote it from its evacuation plan's tracing (commit 5687918), before register.py moved anything: where a registration starts from, each time the building is measured again.",
+ "width": 2210,
+ "height": 2320,
+ "spaces": [
+  {"code": "P2-14", "name": "Escalera por identificar", "typeCode": "STAIRS", "aliases": [], "shape": [{"x": 90, "y": 336}, {"x": 261, "y": 336}, {"x": 261, "y": 609}, {"x": 90, "y": 609}]},
+  {"code": "P2-15", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 282, "y": 398}, {"x": 778, "y": 398}, {"x": 778, "y": 597}, {"x": 282, "y": 597}]},
+  {"code": "P2-16", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 1492, "y": 686}, {"x": 1564, "y": 530}, {"x": 2175, "y": 739}, {"x": 2170, "y": 1146}, {"x": 1491, "y": 957}]},
+  {"code": "P2-17", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 63, "y": 807}, {"x": 153, "y": 807}, {"x": 153, "y": 914}, {"x": 63, "y": 914}]},
+  {"code": "P2-18", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 153, "y": 807}, {"x": 289, "y": 807}, {"x": 289, "y": 914}, {"x": 153, "y": 914}]},
+  {"code": "P2-19", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 289, "y": 808}, {"x": 400, "y": 808}, {"x": 400, "y": 914}, {"x": 289, "y": 914}]},
+  {"code": "P2-20", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 623, "y": 819}, {"x": 701, "y": 819}, {"x": 701, "y": 1001}, {"x": 623, "y": 1001}]},
+  {"code": "P2-21", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 533, "y": 821}, {"x": 598, "y": 821}, {"x": 598, "y": 1000}, {"x": 533, "y": 1000}]},
+  {"code": "P2-22", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 884, "y": 821}, {"x": 1064, "y": 821}, {"x": 1064, "y": 1005}, {"x": 884, "y": 1005}]},
+  {"code": "P2-23", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 869, "y": 1020}, {"x": 1166, "y": 1020}, {"x": 1166, "y": 2124}, {"x": 869, "y": 2124}]},
+  {"code": "P2-24", "name": "Escalera por identificar", "typeCode": "STAIRS", "aliases": [], "shape": [{"x": 805, "y": 1573}, {"x": 866, "y": 1573}, {"x": 866, "y": 1849}, {"x": 805, "y": 1849}]},
+  {"code": "P2-25", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 514, "y": 1582}, {"x": 707, "y": 1582}, {"x": 707, "y": 1747}, {"x": 514, "y": 1747}]},
+  {"code": "P2-26", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 275, "y": 1950}, {"x": 380, "y": 1950}, {"x": 380, "y": 2106}, {"x": 275, "y": 2106}]},
+  {"code": "P2-27", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 394, "y": 1951}, {"x": 499, "y": 1951}, {"x": 499, "y": 2104}, {"x": 394, "y": 2104}]},
+  {"code": "P2-28", "name": "Sin identificar", "typeCode": "OTHER", "aliases": [], "shape": [{"x": 671, "y": 1961}, {"x": 671, "y": 1984}, {"x": 698, "y": 1984}, {"x": 698, "y": 1960}, {"x": 797, "y": 1960}, {"x": 797, "y": 2155}, {"x": 760, "y": 2155}, {"x": 760, "y": 2199}, {"x": 553, "y": 2199}, {"x": 553, "y": 2155}, {"x": 515, "y": 2155}, {"x": 515, "y": 1989}, {"x": 540, "y": 1989}, {"x": 540, "y": 1961}]},
+  {"code": "P2-ASC-BANOS", "wing": "C", "name": "Ascensor de los baños", "typeCode": "ELEVATOR", "shape": [{"x": 775, "y": 812}, {"x": 884, "y": 812}, {"x": 884, "y": 1004}, {"x": 775, "y": 1004}]},
+  {"code": "P2-ASC-CENTRAL", "wing": "C", "name": "Ascensores centrales", "typeCode": "ELEVATOR", "aliases": ["ascensores"], "shape": [{"x": 790, "y": 395}, {"x": 866, "y": 395}, {"x": 866, "y": 640}, {"x": 790, "y": 640}]},
+  {"code": "P2-BIBLIOTECA-JUAN", "wing": "C", "name": "Biblioteca Juan Alberto Aragón Bateman", "typeCode": "LIBRARY", "aliases": ["biblioteca"], "shape": [{"x": 64, "y": 617}, {"x": 707, "y": 617}, {"x": 707, "y": 819}, {"x": 533, "y": 819}, {"x": 533, "y": 1001}, {"x": 707, "y": 1001}, {"x": 707, "y": 1582}, {"x": 514, "y": 1582}, {"x": 514, "y": 1755}, {"x": 500, "y": 1755}, {"x": 500, "y": 1949}, {"x": 275, "y": 1949}, {"x": 275, "y": 2179}, {"x": 64, "y": 2179}, {"x": 64, "y": 914}, {"x": 400, "y": 914}, {"x": 400, "y": 807}, {"x": 64, "y": 807}]},
+  {"code": "P2-ESC-EMERGENCIA", "wing": "C", "name": "Escalera de emergencia", "typeCode": "STAIRS", "shape": [{"x": 500, "y": 1755}, {"x": 711, "y": 1755}, {"x": 711, "y": 1943}, {"x": 500, "y": 1943}]},
+  {"code": "P2-ESC-PRINCIPAL", "wing": "C", "name": "Escalera principal", "typeCode": "STAIRS", "shape": [{"x": 950, "y": 394}, {"x": 1095, "y": 394}, {"x": 1095, "y": 638}, {"x": 950, "y": 638}]}
+ ]
+}

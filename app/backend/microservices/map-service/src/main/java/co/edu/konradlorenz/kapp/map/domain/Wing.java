@@ -1,19 +1,27 @@
 package co.edu.konradlorenz.kapp.map.domain;
 
 /**
- * Which arm of a floor a space sits in.
+ * One arm of a building, as that building names it.
  *
- * <p>The central building's rooms come in threes: {@code 301}, {@code 301-N} and
- * {@code 301-S} are three different rooms on the same floor, and a student sent to "301"
- * without the wing is standing in the wrong place a third of the time.
+ * <p>This used to be an enum of NORTE, SUR and CENTRAL - the central building's vocabulary, baked
+ * into the code. The survey found the first building that does not use it: Bienestar has a west
+ * wing of welfare services and an east wing of classrooms and labs. So wings are declared per
+ * building, the way pensum areas are declared per pensum, and a space refers to one by code.
  *
- * <p>This is a FIELD, not a suffix parsed out of the code. Search has to be able to filter
- * by wing and the interface has to group by it, and deriving either from the last two
- * characters of a string would break the first time a building names its wings anything
- * else. A building with a single arm leaves it null.
+ * @param code       short identifier within the building: {@code N}, {@code OCC}
+ * @param name       what people call it: "Ala norte", "Ala occidental"
+ * @param doorSuffix what the doors in this wing append to the room number, or null when they
+ *                   append nothing. The central building's south wing prints {@code 503-S} on the
+ *                   door, so its suffix is {@code -S}; Bienestar's rooms are plain {@code 301} in
+ *                   either wing. Declared rather than guessed from the last characters of a code,
+ *                   which is what the old enum did and what broke on {@code ESC-SUR}
+ * @param note       how to get into or across this wing, where that is not obvious - "se cruza
+ *                   por el P1 o por la terraza"
  */
-public enum Wing {
-    NORTE,
-    SUR,
-    CENTRAL
+public record Wing(
+        String code,
+        String name,
+        String doorSuffix,
+        String note
+) {
 }

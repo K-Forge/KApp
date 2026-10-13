@@ -2,6 +2,7 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
+import { isTokenExpired } from './jwt.util';
 import { TokenStore } from './token.store';
 
 /**
@@ -46,9 +47,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authedReq).pipe(
     catchError((err: unknown) => {
       if (err instanceof HttpErrorResponse && err.status === 401) {
+        const claims = tokenStore.decoded()?.claims;
+        const expired = !!claims && isTokenExpired(claims);
         tokenStore.clear();
         if (!router.url.startsWith('/login')) {
-          router.navigateByUrl('/login');
+          router.navigateByUrl(expired ? '/login?reason=expired' : '/login');
         }
       }
       return throwError(() => err);

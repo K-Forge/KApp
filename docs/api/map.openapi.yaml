@@ -2,79 +2,191 @@ openapi: 3.1.0
 
 info:
   title: KApp Map API
-  version: 1.0.0
-  summary: Static floor-plan campus map and space search for Fundacion Universitaria Konrad Lorenz.
+  version: 3.6.0
+  summary: Schematic campus map and space search for Fundacion Universitaria Konrad Lorenz.
   description: |
     Digital campus map for Fundacion Universitaria Konrad Lorenz (Bogota, Colombia).
 
     ## What this service is (and is not)
 
-    This map is deliberately **not** geospatial. There is no basemap, no GPS, no external map
-    provider and no latitude/longitude anywhere in this contract. It is also **no longer a set
-    of floor plan images**: a floor is described as data and drawn by the client.
+    This map is **not** a geospatial service. There is no basemap, no GPS and no external map
+    provider, and a floor is never positioned by coordinates: it is a drawing, described as data
+    and drawn by the client, not a set of floor plan images either. What version 3.1 adds is the
+    ground a campus stands on - see below.
+
+    ## Version 2: what the campus survey changed
+
+    Version 1 was designed before anybody walked the campus. The survey of the real buildings
+    (`docs/map/LEVANTAMIENTO.md`) broke five of its assumptions, and version 2 fixes each:
+
+    | Found on campus | Version 1 | Version 2 |
+    | --- | --- | --- |
+    | A mezzanine between the first and second floors; an entrance at `P0`; a terrace numbered 5 | Floors addressed by an integer `level` | Floors addressed by a **`code`** (`S1`, `P0`, `P1`, `MEZZ`, `T`); `level` is a decimal that only orders them |
+    | Bienestar's wings are west and east, and its doors carry no wing mark | A closed `NORTE`/`SUR`/`CENTRAL` enum, guessed from a `-N`/`-S`/`-C` suffix | **Wings declared per building**, each with the suffix its doors carry, if any |
+    | Most dependencies have nothing on their door | Every space has a door code | **`doorCode`** apart from **`code`**; only `doorCode` is ever shown |
+    | Plaques list what is on a floor, not where | Every space needs a grid cell | **A space may be inventoried before it is drawn** |
+    | Kinds of room nobody listed in advance | A closed `SpaceType` enum | A **type catalogue** the portal edits, each type in one of seven fixed **categories** |
+
+    It also adds **accessibility** - whether a floor or a space is reachable without stairs,
+    `UNKNOWN` until someone checks - and a floor **status**: `UNMAPPED`, `DRAFT` (drawn from
+    photographs of posted plans) or `VERIFIED` (walked).
+
+    ## Version 3: rooms as the plans draw them
+
+    Version 2 drew each floor on a grid of cells, and the drafts drawn on it did not look like the
+    evacuation plans on the walls: a room in L, a slanted wall or a room half a cell wide cannot be
+    said in cells. Version 3 describes a floor as a drawing, traced from those plans:
+
+    | Version 2 | Version 3 |
+    | --- | --- |
+    | `gridRows` x `gridColumns` cells | A drawing **`width`** x **`height`** units, and the building's **`outline`** |
+    | A space is `gridRow`, `gridColumn`, `rowSpan`, `colSpan` | A space is a **`shape`**: the corners of its outline, in order |
+    | Corridors through cell centres (`row`, `col`) | Corridors through points (`x`, `y`) |
+    | - | Each space's **`doors`**, as stretches of its outline |
+
+    ## Version 3.1: the ground under the buildings
+
+    The plans on the walls draw each building's streets, but not to scale, and a campus spread
+    over several blocks had no map at all. Version 3.1 lays the drawings on the ground, without
+    changing them:
+
+    - A building may carry a **`placement`**: where its drawing's top-left corner is, the
+      **`bearing`** its top edge faces and how many **`metresPerUnit`** one unit of it is. Every
+      floor of a building shares one drawing, so one placement lays them all.
+    - **`GET /api/map/campuses/{campus}/ground`** returns the city around a campus - its
+      **blocks**, **sidewalks**, **roadways**, **medians** and named **streets** - cut from the
+      city's own reference map and shipped with the service. It is reference data, credited in
+      its `source`, and read-only.
+
+    - A building may also carry its **`footprint`**: the building from above, part by part, as the
+      city's cadastre records it - each part's outline, how many floors it rises and, when known,
+      the wing it belongs to. A building nobody has drawn yet still has its true shape on a map.
+
+    With these, a client draws the block, the sidewalk and the streets a building meets under any
+    of its floors, or every building of a campus on one aerial map. For a point `(x, y)`
+    of a drawing, the offset from `origin` is `east = m (x cos b - y sin b)` and
+    `north = -m (x sin b + y cos b)`, with `m = metresPerUnit` and `b = bearing`; a campus is
+    small enough for the plane through its middle to stand in for the earth.
+
+    ## Version 3.3: the rest of the block
+
+    A building stands among others that are not the university's, and a block is surveyed whole.
+    Version 3.3 adds, without changing anything else:
+
+    - **`lots`** in the ground: the cadastral lots of the blocks the university's buildings
+      stand on, each with its code - whose land is whose. Read-only, like the rest of the ground.
+    - **`GET /api/map/campuses/{campus}/structures`**: everything on a campus's blocks that is
+      not the university's - a neighbour's building, a heritage house with its garden - each with
+      its outline and floors, for drawing around the buildings. **`PUT`** saves the list whole,
+      with the `version` it was read at, and is refused with `409` when somebody saved it since.
+
+    ## Version 3.4: the survey
+
+    The outlines are drawn from distances taken on site, round the block, with a tape or a phone's
+    Measure app. Version 3.4 adds, without changing anything else:
+
+    - **`GET /api/map/campuses/{campus}/survey`**: every distance taken round a campus's blocks,
+      each under the id of the portal's survey plan it answers (or its own, for one the plan
+      missed), as it was typed - `4,80 + 3,25` when taken in pieces - with its total in metres, a
+      note, and when it was taken. **`PUT`** saves them whole with the `version` they were read at,
+      `409` when they were saved from somewhere else since; a distance keeps the time it was taken
+      until it changes.
+
+    ## Version 3.5: floors that stand out over the street
+
+    The cadastre sees a building from above, so where the upper floors come out over a portico or
+    a sidewalk it draws them as if they reached the ground. Version 3.5 adds, without changing
+    anything else, **`FootprintPart.lowestFloor`**: the lowest floor above the street a part takes
+    in, when it is not the first. A part that stands on the street leaves it out, as every part did
+    before. The ground floor is the parts that reach it, and the floors above add those that start
+    higher.
+
+    It also adds **`Building.address`**, the street address as people write it, and
+    **`SurveyMeasure.recheck`**: a distance asked to be taken again keeps what was
+    typed, for reference, and the time it was taken, until it is taken again.
+
+    ## Version 3.6: SINU's sedes, and reads a client can cache
+
+    Additive, like every 3.x:
+
+    - **`Building.sinuSedes`**: the names SINU gives the building. In SINU each building is a
+      *sede*, and its timetable names a class's room by sede and number. The schedule service maps
+      the sede to the building through this list, and a class then opens its room with
+      `GET /api/map/spaces/{code}?buildingCode=…`. The same room number exists in more than one
+      building, which is why the building has to be known.
+    - **`ETag` on the reads.** `GET` answers carry an `ETag`. A client that sends it back in
+      `If-None-Match` gets `304 Not Modified`, with no body, while nothing changed. There is no
+      offline package: the map is read online, and the `ETag` keeps it from being read twice.
+    - **`ROLE_STAFF`** reads the map like every other member of the university.
 
     ## Coordinate model
 
-    A floor is a **grid**. It declares `gridRows` and `gridColumns`; every space occupies a
-    rectangle of cells given by `gridRow`, `gridColumn`, `rowSpan` and `colSpan`, zero-based with
-    row 0 at the top of the floor as drawn. Corridors are polylines through the same grid,
-    carrying the colour the wing is actually painted.
+    A floor is a **drawing in its own units**, `width` by `height`, with the origin at the top-left
+    corner as the plan hangs: `x` grows to the right and `y` down. A floor traced from a photograph
+    of its evacuation plan is in that photograph's pixels; one drawn by hand in whatever the person
+    drawing chose. Units are not metres and differ from floor to floor: scale the drawing to the
+    screen, never compare two floors' numbers.
 
-    This replaced a model where each floor carried a plan image and each space was pinned at a
-    percentage of it. The reason is not rendering: obtaining architectural plans for five
-    buildings depended on other people's calendars, and a schematic floor is captured by walking
-    it with the grid editor at `/admin/grid-editor.html`.
+    Every placed space has a **`shape`**: three or more corners, in order, on the drawing. It encloses
+    some area, never crosses itself and never overlaps another space's shape - two rooms that share
+    a wall share the edge, and that is not an overlap. `bounds`, in responses, is the rectangle
+    around the shape, for labels and hit tests. A space without `shape` is on the floor but not
+    drawn yet: list it beside the drawing rather than dropping it.
 
-    ## Room codes and wings
+    **`doors`** are the stretches of a space's outline its doors take up, jamb to jamb; both ends of
+    each lie on the space's shape. A door between two rooms is on both. Corridors are polylines
+    through points on the same drawing, carrying the colour the wing is actually painted, and the
+    floor's `outline`, when traced, is the building's walls around it.
 
-    Room codes such as `708`, `302` or `612` are the real codes printed on Konrad doors, and the
-    first digit is the floor number — **except in the basement**, which is level `-1` and whose
-    rooms are coded however the building codes them.
+    ## Codes: what identifies a space, and what is shown
 
-    The central building's rooms come in threes: `301`, `301-N` and `301-S` are three different
-    rooms on the same floor. The wing is a **field**, not a suffix a client should parse:
-    `wing` carries it, `baseCode` carries the code without it, and `GET /api/map/spaces/search`
-    takes a `wing` filter. A student who types what they were told, without the wing, matches all
-    three through `baseCode`. They are the **same codes the KApp schedule service stores
-    for a class**, which is what makes `GET /api/map/spaces/{code}` the endpoint the schedule
-    screen calls when a student taps a class. `code` is the stable business key across this API:
-    every path parameter addresses a resource by code, never by `id`.
+    A space has two codes, and a client must keep them apart:
 
-    Space codes are unique **within a building**. Where the same code exists in more than one
-    building, pass the optional `buildingCode` query parameter to disambiguate; without it an
-    ambiguous code is answered with `409 Conflict`.
+    - **`code`** identifies the space within its building. It is what paths address and what the
+      KApp schedule service stores against a class, and it is always present.
+    - **`doorCode`** is what is printed on the door - `708`, `503-S` - and is **absent when the door
+      has no number**, as for most offices and dependencies. For those, `code` was generated by
+      whoever captured the floor.
+
+    **Display `doorCode`, never `code`.** A generated code looks exactly like a real one; a
+    student would repeat it at a counter where nobody has heard of it. Where there is no door
+    code, show the `name`.
+
+    `baseCode` is `doorCode` without its wing's suffix: `503` for `503-S`. Someone who was told
+    "el 503" without the wing matches every 503 through it.
+
+    Codes are unique **within a building**. Where the same code exists in more than one building,
+    pass `buildingCode` to disambiguate; without it an ambiguous code is answered with `409`.
+
+    ## Types and categories
+
+    `typeCode` names an entry in `GET /api/map/space-types`. Responses repeat the type's
+    `typeName` and `category`, so a client draws a space whose type it has never seen.
+    **Clients choose colours and icons by `category`**, which is a closed list: types are added
+    from the portal without a release, categories are not.
 
     ## Aliases
 
-    Students search for "sala de sistemas" while the sign on the door says "Lab 302". Every space
-    therefore carries `aliases`, and `GET /api/map/spaces/search` matches against `name`, `code`
-    **and** `aliases`, case- and accent-insensitively.
-
-    ## Data model
-
-    Buildings and spaces are two separate collections, not one nested document. The primary
-    access pattern is "search a space by name across the whole campus", which a nested model
-    would force every client to flatten and filter for itself.
+    People search for "sala de sistemas" while the door says "Laboratorio de Sistemas", and call
+    buildings by what they house. Spaces **and** buildings carry `aliases`, and both searches match
+    them, case- and accent-insensitively.
 
     ## Campuses
 
-    The university's academic records carry a *Sede* field (for example "Sede Principal"), so
-    every building and space carries `campus` and the API supports more than one campus from the
-    start.
+    Every building and space carries `campus`: the university's site, "Sede Principal". SINU
+    uses *sede* for something narrower, the building; that is what `Building.sinuSedes` holds.
 
     ## Access control
 
-    **This is the only KApp service `ROLE_GUEST` can read.** Guests are people without a
-    university account who signed up just to find their way around campus.
+    **This is the only KApp service `ROLE_GUEST` can read.**
 
     | Operations | Allowed roles |
     | --- | --- |
-    | All read operations (`GET`) | `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN` |
+    | All read operations (`GET`) | `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN` |
     | All write operations (`POST`, `PUT`, `DELETE`) | `ROLE_ADMIN` only |
 
-    Every request still needs a valid JWT: `ROLE_GUEST` is an authenticated role, not anonymous
-    access. A request without a token is answered with `401`; a token whose role is not allowed
-    for the operation is answered with `403`.
+    Every request needs a valid JWT: a request without one is answered with `401`; a token whose
+    role is not allowed is answered with `403`.
 
 servers:
   - url: http://localhost:8080
@@ -85,167 +197,94 @@ security:
 
 tags:
   - name: Buildings
-    description: Campus buildings and the floors they contain.
+    description: Campus buildings, their wings and floors, and saving a floor at once.
   - name: Spaces
     description: Rooms, labs, offices and other locatable spaces, plus the campus-wide search.
+  - name: Space types
+    description: The catalogue of kinds of space, each in a fixed category.
   - name: Campuses
-    description: The list of campuses (Sedes) known to the map.
+    description: The list of campuses (Sedes) known to the map, the ground around each, and what else stands on its blocks.
 
 paths:
-
   /api/map/buildings:
 
     get:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: listBuildings
       summary: List buildings
       description: |
-        Returns every building known to the map, each with the full list of its floors. Optionally
-        filtered to a single campus.
+        Every building with its wings and floors, ordered by code. `q` matches the code, the name
+        and every alias, ignoring case and accents.
 
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags:
-        - Buildings
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
+      tags: [Buildings]
       parameters:
         - $ref: '#/components/parameters/CampusQuery'
+        - name: q
+          in: query
+          required: false
+          description: Code, name or alias, ignoring case and accents.
+          schema: { type: string, minLength: 1, maxLength: 120 }
+          example: psicologia
+        - $ref: '#/components/parameters/IfNoneMatch'
       responses:
         '200':
-          description: The list of buildings, ordered by code.
+          description: The buildings, ordered by code.
+          headers:
+            ETag: { $ref: '#/components/headers/ETag' }
           content:
             application/json:
               schema:
                 type: array
-                items:
-                  $ref: '#/components/schemas/Building'
-              example:
-                - id: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                  code: A
-                  name: Bloque A
-                  campus: Sede Principal
-                  description: Main academic building. Classrooms, computer labs and faculty offices.
-                  floors:
-                    - level: 1
-                      name: Piso 1
-                      gridRows: 11
-                      gridColumns: 16
-                    - level: 2
-                      name: Piso 2
-                      gridRows: 11
-                      gridColumns: 16
-                    - level: 3
-                      name: Piso 3
-                      gridRows: 11
-                      gridColumns: 16
-                    - level: 4
-                      name: Piso 4
-                      gridRows: 11
-                      gridColumns: 16
-                    - level: 5
-                      name: Piso 5
-                      gridRows: 11
-                      gridColumns: 16
-                    - level: 6
-                      name: Piso 6
-                      gridRows: 11
-                      gridColumns: 16
-                    - level: 7
-                      name: Piso 7
-                      gridRows: 11
-                      gridColumns: 16
-                - id: 7c4b0a18-5e93-4a6f-8b21-9d0c5e7f1a34
-                  code: B
-                  name: Bloque B
-                  campus: Sede Principal
-                  description: Psychology building. Research labs, library and student wellbeing services.
-                  floors:
-                    - level: 1
-                      name: Piso 1
-                      gridRows: 11
-                      gridColumns: 16
-                    - level: 2
-                      name: Piso 2
-                      gridRows: 11
-                      gridColumns: 16
-                    - level: 3
-                      name: Piso 3
-                      gridRows: 11
-                      gridColumns: 16
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+                items: { $ref: '#/components/schemas/Building' }
+              examples:
+                Buildings: { $ref: '#/components/examples/BuildingList' }
+        '304': { $ref: '#/components/responses/NotModified' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
 
     post:
-      # Authorization as the code enforces it, not as prose describes it.
       x-roles: [ROLE_ADMIN]
       operationId: createBuilding
       summary: Create a building
       description: |
-        Registers a new building together with its floors. The building `code` must be unique
-        across the whole map.
+        Registers a new building with its wings and floors. The `code` must be unique across the
+        map; floor codes and levels, and wing codes, must be unique within the building.
 
         Allowed roles: `ROLE_ADMIN` only.
-      tags:
-        - Buildings
+      tags: [Buildings]
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/BuildingRequest'
+            schema: { $ref: '#/components/schemas/BuildingRequest' }
             example:
-              code: C
-              name: Bloque C
+              code: BI
+              name: Bienestar Institucional
               campus: Sede Principal
-              description: Postgraduate building. Seminar rooms and auditorium.
+              aliases: [Bienestar, Edificio de bienestar]
+              wings:
+                - { code: OCC, name: Ala occidental, note: 'Bienestar: juegos, gimnasio, terraza.' }
+                - { code: OR, name: Ala oriental, note: Salones y laboratorios. Se cruza por el P1 o la terraza. }
               floors:
-                - level: 1
-                  name: Piso 1
-                  gridRows: 11
-                  gridColumns: 16
-                - level: 2
-                  name: Piso 2
-                  gridRows: 11
-                  gridColumns: 16
+                - { code: P1, level: 1, name: Piso 1, width: 640, height: 480 }
+                - { code: T, level: 5, name: Terraza, width: 640, height: 480 }
       responses:
         '201':
           description: The building was created.
           headers:
             Location:
               description: Path of the created building.
-              schema:
-                type: string
-              example: /api/map/buildings/C
+              schema: { type: string }
+              example: /api/map/buildings/BI
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Building'
-              example:
-                id: b81f5d47-2c60-4e39-a5d8-6f3b7c9e0a12
-                code: C
-                name: Bloque C
-                campus: Sede Principal
-                description: Postgraduate building. Seminar rooms and auditorium.
-                floors:
-                  - level: 1
-                    name: Piso 1
-                    gridRows: 11
-                    gridColumns: 16
-                  - level: 2
-                    name: Piso 2
-                    gridRows: 11
-                    gridColumns: 16
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '409':
-          $ref: '#/components/responses/Conflict'
+              schema: { $ref: '#/components/schemas/Building' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
 
   /api/map/buildings/{code}:
 
@@ -253,554 +292,287 @@ paths:
       - $ref: '#/components/parameters/BuildingCodePath'
 
     get:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: getBuildingByCode
       summary: Get a building by code
       description: |
-        Returns one building with all of its floors, including each floor plan's path and
-        intrinsic pixel dimensions.
-
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags:
-        - Buildings
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
+      tags: [Buildings]
+      parameters:
+        - $ref: '#/components/parameters/IfNoneMatch'
       responses:
         '200':
-          description: The building and all of its floors.
+          description: The building, its wings and its floors in vertical order.
+          headers:
+            ETag: { $ref: '#/components/headers/ETag' }
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Building'
-              example:
-                id: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                code: A
-                name: Bloque A
-                campus: Sede Principal
-                description: Main academic building. Classrooms, computer labs and faculty offices.
-                floors:
-                  - level: 1
-                    name: Piso 1
-                    gridRows: 11
-                    gridColumns: 16
-                  - level: 2
-                    name: Piso 2
-                    gridRows: 11
-                    gridColumns: 16
-                  - level: 3
-                    name: Piso 3
-                    gridRows: 11
-                    gridColumns: 16
-                  - level: 4
-                    name: Piso 4
-                    gridRows: 11
-                    gridColumns: 16
-                  - level: 5
-                    name: Piso 5
-                    gridRows: 11
-                    gridColumns: 16
-                  - level: 6
-                    name: Piso 6
-                    gridRows: 11
-                    gridColumns: 16
-                  - level: 7
-                    name: Piso 7
-                    gridRows: 11
-                    gridColumns: 16
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
+              schema: { $ref: '#/components/schemas/Building' }
+              examples:
+                BloqueB: { $ref: '#/components/examples/BloqueB' }
+        '304': { $ref: '#/components/responses/NotModified' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
 
     put:
-      # Authorization as the code enforces it, not as prose describes it.
       x-roles: [ROLE_ADMIN]
       operationId: updateBuilding
-      summary: Update a building
+      summary: Replace a building
       description: |
-        Replaces the building addressed by `code`, including its list of floors. Removing a floor
-        that still has spaces on it is rejected with `409`.
+        Replaces the building, wings and floors included: a floor or a wing omitted here is
+        deleted, and one that still has spaces is refused with `409`. Each floor keeps its
+        `version`, which belongs to the layout save. A changed code, campus, floor level or wing
+        suffix is copied onto every space of the building.
 
         Allowed roles: `ROLE_ADMIN` only.
-      tags:
-        - Buildings
+      tags: [Buildings]
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/BuildingRequest'
-            example:
-              code: B
-              name: Bloque B
-              campus: Sede Principal
-              description: Psychology building. Research labs, library and student wellbeing services.
-              floors:
-                - level: 1
-                  name: Piso 1
-                  gridRows: 11
-                  gridColumns: 16
-                - level: 2
-                  name: Piso 2
-                  gridRows: 11
-                  gridColumns: 16
-                - level: 3
-                  name: Piso 3
-                  gridRows: 11
-                  gridColumns: 16
+            schema: { $ref: '#/components/schemas/BuildingRequest' }
       responses:
         '200':
-          description: The updated building.
+          description: The building as stored.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Building'
-              example:
-                id: 7c4b0a18-5e93-4a6f-8b21-9d0c5e7f1a34
-                code: B
-                name: Bloque B
-                campus: Sede Principal
-                description: Psychology building. Research labs, library and student wellbeing services.
-                floors:
-                  - level: 1
-                    name: Piso 1
-                    gridRows: 11
-                    gridColumns: 16
-                  - level: 2
-                    name: Piso 2
-                    gridRows: 11
-                    gridColumns: 16
-                  - level: 3
-                    name: Piso 3
-                    gridRows: 11
-                    gridColumns: 16
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
+              schema: { $ref: '#/components/schemas/Building' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
 
     delete:
-      # Authorization as the code enforces it, not as prose describes it.
       x-roles: [ROLE_ADMIN]
       operationId: deleteBuilding
       summary: Delete a building
       description: |
-        Deletes a building. The building must be empty: if any space still references it, the
-        request is rejected with `409` and nothing is deleted.
+        The building must be empty: one that still has spaces is refused with `409` and nothing
+        is deleted. Never cascades.
 
         Allowed roles: `ROLE_ADMIN` only.
-      tags:
-        - Buildings
+      tags: [Buildings]
       responses:
-        '204':
-          description: The building was deleted.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
+        '204': { description: Deleted. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
 
-  /api/map/buildings/{code}/floors/{level}:
+  /api/map/buildings/{code}/floors/{floorCode}:
 
     parameters:
       - $ref: '#/components/parameters/BuildingCodePath'
-      - $ref: '#/components/parameters/FloorLevelPath'
+      - $ref: '#/components/parameters/FloorCodePath'
 
     get:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: getFloor
       summary: Get a floor and every space on it
       description: |
-        Returns one floor of a building together with every space located on it, in one call.
-        This is what renders a floor screen: the client draws a `gridRows` x `gridColumns` grid,
-        traces the corridors through it, and fills the cells each space occupies.
+        The call that draws a floor: a drawing `width` x `height` units, origin at the top left,
+        with the building's `outline`, each space as the polygon in its `shape` with its `doors`
+        on it, and the corridors along their paths. Spaces without `shape` are on the floor but not
+        drawn yet - list them beside the drawing rather than dropping them. The building's wings
+        come along so each space's `wing` code can be shown by name.
 
-        Responds `404` when the building does not exist or when it has no floor at that level.
-
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags:
-        - Buildings
-      responses:
-        '200':
-          description: The floor and all spaces on it.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FloorDetail'
-              example:
-                level: 7
-                name: Piso 7
-                gridRows: 11
-                gridColumns: 16
-                buildingId: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                buildingCode: A
-                buildingName: Bloque A
-                campus: Sede Principal
-                spaces:
-                  - id: 5a2c7e10-9b3d-4f68-8c41-2e7a0d6b9f53
-                    code: '708'
-                    baseCode: '708'
-                    name: Aula 708
-                    type: CLASSROOM
-                    buildingId: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                    buildingCode: A
-                    campus: Sede Principal
-                    floorLevel: 7
-                    aliases:
-                      - sala 708
-                      - salon 708
-                    gridRow: 4
-                    gridColumn: 6
-                    rowSpan: 1
-                    colSpan: 2
-                    capacity: 30
-                  - id: 91d0b6a4-3f27-4c8e-b510-7a6d2e4c8b09
-                    code: '709'
-                    baseCode: '709'
-                    name: Aula 709
-                    type: CLASSROOM
-                    buildingId: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                    buildingCode: A
-                    campus: Sede Principal
-                    floorLevel: 7
-                    aliases:
-                      - sala 709
-                      - salon 709
-                    gridRow: 6
-                    gridColumn: 9
-                    rowSpan: 1
-                    colSpan: 2
-                    capacity: 30
-                  - id: c47e8b12-6d05-4a93-9f2c-1b8e5a7d3046
-                    code: '710'
-                    baseCode: '710'
-                    name: Aula 710
-                    type: CLASSROOM
-                    buildingId: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                    buildingCode: A
-                    campus: Sede Principal
-                    floorLevel: 7
-                    aliases:
-                      - sala 710
-                      - salon 710
-                    gridRow: 8
-                    gridColumn: 12
-                    rowSpan: 1
-                    colSpan: 2
-                    capacity: 28
-                  - id: 2b6f9c31-8e14-4d07-a92b-5c3f0e8a7d61
-                    code: '711'
-                    baseCode: '711'
-                    name: Aula 711
-                    type: CLASSROOM
-                    buildingId: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                    buildingCode: A
-                    campus: Sede Principal
-                    floorLevel: 7
-                    aliases:
-                      - sala 711
-                      - salon 711
-                    gridRow: 2
-                    gridColumn: 3
-                    rowSpan: 1
-                    colSpan: 2
-                    capacity: 28
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
-  /api/map/spaces/search:
-
-    get:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
-      operationId: searchSpaces
-      summary: Search spaces across the campus
-      description: |
-        Full-text search over spaces. The query `q` is matched against a space's `name`, its
-        `code` and every entry in its `aliases`, and a space is returned when any one of them
-        matches.
-
-        **`q` is optional.** Without it this lists every space the other filters allow, ordered
-        by building, then floor, then code — the order somebody managing a floor reads them in,
-        rather than by relevance, which means nothing when there is no term. That is how an
-        administrator sees what is in a building at all; with `q` required, the building and
-        type filters did nothing on their own and a space you had just created was invisible
-        until you guessed part of its name.
-
-        Matching is **case- and accent-insensitive**: searching `sala de sistemas` finds a space
-        whose alias is stored as `Sala de Sistemas`, and `psicologia` finds `Psicologia`
-        regardless of how either side is accented. Aliases are what make the search usable in
-        practice, because students search for the name they use ("sala de sistemas") rather than
-        the name on the door ("Laboratorio de Sistemas").
-
-        Results are paginated. With `q` they are ordered by descending match relevance, then by
-        `code`; without it, by building, floor and code.
-
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags:
-        - Spaces
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
+      tags: [Buildings]
       parameters:
-        - name: q
-          in: query
-          required: false
-          description: |
-            Search term, minimum 2 characters when present. Matched case- and
-            accent-insensitively against `name`, `code` and `aliases`. Omit it to list rather
-            than search.
-          schema:
-            type: string
-            minLength: 2
-            maxLength: 100
-          example: sala
-        - $ref: '#/components/parameters/CampusQuery'
-        - name: type
-          in: query
-          required: false
-          description: Restrict results to a single space type.
-          schema:
-            $ref: '#/components/schemas/SpaceType'
-          example: LAB
-        - name: buildingCode
-          in: query
-          required: false
-          description: Restrict results to a single building, addressed by its code.
-          schema:
-            type: string
-            minLength: 1
-            maxLength: 10
-          example: A
-        - name: wing
-          in: query
-          required: false
-          description: |
-            Restrict results to one arm of the floor. This is how a client separates `301`,
-            `301-N` and `301-S`, which are three different rooms sharing one `baseCode`.
-          schema:
-            type: string
-            enum: [NORTE, SUR, CENTRAL]
-          example: NORTE
-        - $ref: '#/components/parameters/PageQuery'
-        - $ref: '#/components/parameters/SizeQuery'
+        - $ref: '#/components/parameters/IfNoneMatch'
       responses:
         '200':
-          description: A page of matching spaces. An empty page is a normal result, not an error.
+          description: The floor and its spaces, ordered by code.
+          headers:
+            ETag: { $ref: '#/components/headers/ETag' }
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/PageResponse'
+              schema: { $ref: '#/components/schemas/FloorDetail' }
               examples:
-                multipleResults:
-                  summary: q=sala - three spaces match on name, code or alias
-                  description: |
-                    Every result matched through `aliases` rather than through `name`: none of
-                    these spaces is actually called "sala".
-                  value:
-                    content:
-                      - id: e83a1f57-4b29-4c60-9d8e-3a5f7c2b6014
-                        code: '302'
-                        baseCode: '302'
-                        name: Laboratorio de Sistemas
-                        type: LAB
-                        buildingId: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                        buildingCode: A
-                        campus: Sede Principal
-                        floorLevel: 3
-                        aliases:
-                          - sala de sistemas
-                          - lab 302
-                          - laboratorio 302
-                        gridRow: 4
-                        gridColumn: 6
-                        rowSpan: 1
-                        colSpan: 2
-                        capacity: 25
-                      - id: 4d9c2e60-7a83-4f15-b6c9-0e2d8b4a7f31
-                        code: '612'
-                        baseCode: '612'
-                        name: Aula 612
-                        type: CLASSROOM
-                        buildingId: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                        buildingCode: A
-                        campus: Sede Principal
-                        floorLevel: 6
-                        aliases:
-                          - sala 612
-                          - salon 612
-                        gridRow: 6
-                        gridColumn: 9
-                        rowSpan: 1
-                        colSpan: 2
-                        capacity: 35
-                      - id: 5a2c7e10-9b3d-4f68-8c41-2e7a0d6b9f53
-                        code: '708'
-                        baseCode: '708'
-                        name: Aula 708
-                        type: CLASSROOM
-                        buildingId: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                        buildingCode: A
-                        campus: Sede Principal
-                        floorLevel: 7
-                        aliases:
-                          - sala 708
-                          - salon 708
-                        gridRow: 8
-                        gridColumn: 12
-                        rowSpan: 1
-                        colSpan: 2
-                        capacity: 30
-                    page: 0
-                    size: 20
-                    totalElements: 3
-                    totalPages: 1
-                    first: true
-                    last: true
-                aliasMatch:
-                  summary: q=sala de sistemas - accent- and case-insensitive alias hit
-                  description: |
-                    The student typed the name they use. Nothing in `name` or `code` contains
-                    "sala de sistemas"; the space is found only through its alias, and it is
-                    found even though the alias is stored capitalised as "Sala de Sistemas".
-                  value:
-                    content:
-                      - id: e83a1f57-4b29-4c60-9d8e-3a5f7c2b6014
-                        code: '302'
-                        baseCode: '302'
-                        name: Laboratorio de Sistemas
-                        type: LAB
-                        buildingId: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                        buildingCode: A
-                        campus: Sede Principal
-                        floorLevel: 3
-                        aliases:
-                          - sala de sistemas
-                          - lab 302
-                          - laboratorio 302
-                        gridRow: 2
-                        gridColumn: 3
-                        rowSpan: 1
-                        colSpan: 2
-                        capacity: 25
-                    page: 0
-                    size: 20
-                    totalElements: 1
-                    totalPages: 1
-                    first: true
-                    last: true
-                emptyResult:
-                  summary: No space matches the query
-                  value:
-                    content: []
-                    page: 0
-                    size: 20
-                    totalElements: 0
-                    totalPages: 0
-                    first: true
-                    last: true
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+                Mezzanine: { $ref: '#/components/examples/MezzanineFloor' }
+        '304': { $ref: '#/components/responses/NotModified' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
 
-  /api/map/spaces:
+  /api/map/buildings/{code}/floors/{floorCode}/layout:
 
-    post:
-      # Authorization as the code enforces it, not as prose describes it.
+    parameters:
+      - $ref: '#/components/parameters/BuildingCodePath'
+      - $ref: '#/components/parameters/FloorCodePath'
+
+    put:
       x-roles: [ROLE_ADMIN]
-      operationId: createSpace
-      summary: Create a space
+      operationId: saveFloorLayout
+      summary: Save everything drawn on a floor at once
       description: |
-        Registers a new space on an existing floor of an existing building. `code` must be unique
-        within that building; a duplicate is rejected with `409`. `x` and `y` are percentages of
-        the floor plan image, not pixels.
+        What the floor editor sends after someone walks a floor. `spaces` is the **complete**
+        list: a space of this floor missing from it is deleted, a new one is created, the rest are
+        replaced. **All or nothing** - if any space is wrong, nothing is written and every problem
+        is reported against its position (`spaces[3].shape`).
 
-        Responds `404` when `buildingCode` does not exist or the building has no floor at
-        `floorLevel`.
+        `version` is the floor's version as the editor loaded it. When someone saved the floor
+        since, the save is refused with `409` rather than silently replacing their work; reload
+        and reapply. A successful save returns the floor with its next version.
+
+        Also `409`: removing a space that rooms on another floor name as their `accessVia`.
 
         Allowed roles: `ROLE_ADMIN` only.
-      tags:
-        - Spaces
+      tags: [Buildings]
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/SpaceRequest'
+            schema: { $ref: '#/components/schemas/FloorLayoutRequest' }
             example:
-              code: '302'
-              name: Laboratorio de Sistemas
-              type: LAB
-              buildingCode: A
-              floorLevel: 3
-              aliases:
-                - sala de sistemas
-                - lab 302
-                - laboratorio 302
-              gridRow: 4
-              gridColumn: 6
-              rowSpan: 1
-              colSpan: 2
-              capacity: 25
+              version: 0
+              width: 400
+              height: 240
+              status: VERIFIED
+              accessibility: STAIRS_ONLY
+              note: Solo por la escalera, desde la recepción.
+              corridors: []
+              spaces:
+                - code: B-MEZZ-01
+                  name: Laboratorio de Interactividad
+                  typeCode: LAB
+                  aliases: [interactividad]
+                  shape: [{ x: 80, y: 80 }, { x: 240, y: 80 }, { x: 240, y: 160 }, { x: 80, y: 160 }]
+                  doors: [{ from: { x: 140, y: 160 }, to: { x: 160, y: 160 } }]
+                  accessVia: B-ESC
+                - code: B-MEZZ-02
+                  name: Sala MAC
+                  typeCode: COMPUTER_LAB
+      responses:
+        '200':
+          description: The floor as saved, with its next version.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FloorDetail' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/map/spaces/search:
+
+    get:
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
+      operationId: searchSpaces
+      summary: Search or list spaces across the campus
+      description: |
+        **With `q`:** matched against the door code, the name and the aliases, case- and
+        accent-insensitively, ordered by descending relevance. It matches whole words, not
+        prefixes: `sistemas` finds the lab, `sistem` does not. Internal codes are never matched,
+        so a generated code cannot surface through the search.
+
+        **Without `q`:** every space the filters allow, ordered by building, floor and code -
+        how a floor is managed rather than how a person finds a room.
+
+        `type` takes one type code; `category` takes a whole category. Unplaced spaces are
+        included.
+
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
+      tags: [Spaces]
+      parameters:
+        - name: q
+          in: query
+          required: false
+          description: Words to search for. At least 2 characters.
+          schema: { type: string, minLength: 2, maxLength: 100 }
+          example: sala de sistemas
+        - $ref: '#/components/parameters/CampusQuery'
+        - name: type
+          in: query
+          required: false
+          description: A type code from `GET /api/map/space-types`.
+          schema: { type: string, minLength: 1, maxLength: 40 }
+          example: LAB
+        - name: category
+          in: query
+          required: false
+          schema: { $ref: '#/components/schemas/SpaceCategory' }
+        - name: buildingCode
+          in: query
+          required: false
+          schema: { type: string, minLength: 1, maxLength: 10 }
+          example: A
+        - name: wing
+          in: query
+          required: false
+          description: A wing code of the building.
+          schema: { type: string, minLength: 1, maxLength: 8 }
+          example: S
+        - name: floor
+          in: query
+          required: false
+          description: A floor code; meaningful together with `buildingCode`.
+          schema: { type: string, minLength: 1, maxLength: 8 }
+          example: P3
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/SizeQuery'
+      responses:
+        '200':
+          description: A page of spaces. An empty page is a normal answer.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageResponse' }
+              examples:
+                Room302: { $ref: '#/components/examples/SearchPage' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/map/spaces:
+
+    post:
+      x-roles: [ROLE_ADMIN]
+      operationId: createSpace
+      summary: Create a space
+      description: |
+        Adds one space to a floor. Omit `shape` to inventory it without drawing it. A space whose
+        shape covers part of another space's is refused with `409`; every other mistake - a shape
+        off the floor, with no area or crossing itself, a door off its outline - is a `400`.
+
+        Allowed roles: `ROLE_ADMIN` only.
+      tags: [Spaces]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SpaceRequest' }
+            example:
+              code: 503-S
+              doorCode: 503-S
+              wing: S
+              name: Aula 503
+              typeCode: CLASSROOM
+              buildingCode: EC
+              floorCode: P5
+              shape: [{ x: 120, y: 320 }, { x: 200, y: 320 }, { x: 200, y: 360 }, { x: 120, y: 360 }]
+              doors: [{ from: { x: 130, y: 320 }, to: { x: 150, y: 320 } }]
+              accessVia: ASC-SUR
+              capacity: 40
       responses:
         '201':
           description: The space was created.
           headers:
             Location:
               description: Path of the created space.
-              schema:
-                type: string
-              example: /api/map/spaces/302?buildingCode=A
+              schema: { type: string }
+              example: /api/map/spaces/503-S?buildingCode=EC
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Space'
-              example:
-                id: e83a1f57-4b29-4c60-9d8e-3a5f7c2b6014
-                code: '302'
-                baseCode: '302'
-                name: Laboratorio de Sistemas
-                type: LAB
-                buildingId: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                buildingCode: A
-                campus: Sede Principal
-                floorLevel: 3
-                aliases:
-                  - sala de sistemas
-                  - lab 302
-                  - laboratorio 302
-                gridRow: 6
-                gridColumn: 9
-                rowSpan: 1
-                colSpan: 2
-                capacity: 25
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
+              schema: { $ref: '#/components/schemas/Space' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
 
   /api/map/spaces/{code}:
 
@@ -809,200 +581,412 @@ paths:
       - $ref: '#/components/parameters/BuildingCodeDisambiguator'
 
     get:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
       operationId: getSpaceByCode
-      summary: Resolve a room code to its space, floor and building
+      summary: Resolve a code to its space, floor and building
       description: |
-        Resolves a room code straight to the space, the floor it sits on and the building that
-        contains it, in one round trip.
+        The endpoint the schedule screen calls when a student taps a class: one round trip from
+        the code to the space, its floor and a summary of its building.
 
-        **This is the endpoint the schedule screen calls when a student taps a class.** The KApp
-        schedule service stores the same room code (`708`, `302`, `612`), so the client can hand
-        that code over unchanged and receive everything it needs to draw the floor: its grid
-        dimensions and corridors, and the cells the space occupies.
-
-        Space codes are unique within a building. If the code exists in more than one building,
-        pass `buildingCode`; without it, an ambiguous code is answered with `409`.
-
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags:
-        - Spaces
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
+      tags: [Spaces]
       responses:
         '200':
-          description: The space, plus the floor it is on and the building that contains it.
+          description: The space, its floor and its building.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/SpaceDetail'
-              example:
-                id: 5a2c7e10-9b3d-4f68-8c41-2e7a0d6b9f53
-                code: '708'
-                baseCode: '708'
-                name: Aula 708
-                type: CLASSROOM
-                buildingId: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                buildingCode: A
-                campus: Sede Principal
-                floorLevel: 7
-                aliases:
-                  - sala 708
-                  - salon 708
-                gridRow: 8
-                gridColumn: 12
-                rowSpan: 1
-                colSpan: 2
-                capacity: 30
-                floor:
-                  level: 7
-                  name: Piso 7
-                  gridRows: 11
-                  gridColumns: 16
-                building:
-                  id: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                  code: A
-                  name: Bloque A
-                  campus: Sede Principal
-                  description: Main academic building. Classrooms, computer labs and faculty offices.
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
+              schema: { $ref: '#/components/schemas/SpaceDetail' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
         '409':
-          $ref: '#/components/responses/Conflict'
+          description: |
+            The code exists in more than one building and `buildingCode` was not sent. `details`
+            names each candidate building.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              example:
+                timestamp: '2026-09-23T15:04:05Z'
+                status: 409
+                error: Conflict
+                message: Code 302 exists in more than one building. Pass buildingCode.
+                path: /api/map/spaces/302
+                details:
+                  - { field: buildingCode, issue: 'Candidate building: A' }
+                  - { field: buildingCode, issue: 'Candidate building: B' }
 
     put:
-      # Authorization as the code enforces it, not as prose describes it.
       x-roles: [ROLE_ADMIN]
       operationId: updateSpace
-      summary: Update a space
+      summary: Replace a space
       description: |
-        Replaces the space addressed by `code`. Moving a pin is done here, by sending new `x`/`y`
-        percentages. Changing `code` to one already used inside the same building is rejected
-        with `409`.
-
-        If the code addresses more than one space, pass `buildingCode` to disambiguate.
+        Replaces a space. Moving one - to another cell, floor or building - is done here too.
 
         Allowed roles: `ROLE_ADMIN` only.
-      tags:
-        - Spaces
+      tags: [Spaces]
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/SpaceRequest'
-            example:
-              code: '710'
-              name: Aula 710
-              type: CLASSROOM
-              buildingCode: A
-              floorLevel: 7
-              aliases:
-                - sala 710
-                - salon 710
-              gridRow: 2
-              gridColumn: 3
-              rowSpan: 1
-              colSpan: 2
-              capacity: 32
+            schema: { $ref: '#/components/schemas/SpaceRequest' }
       responses:
         '200':
-          description: The updated space.
+          description: The space as stored.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Space'
-              example:
-                id: c47e8b12-6d05-4a93-9f2c-1b8e5a7d3046
-                code: '710'
-                baseCode: '710'
-                name: Aula 710
-                type: CLASSROOM
-                buildingId: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-                buildingCode: A
-                campus: Sede Principal
-                floorLevel: 7
-                aliases:
-                  - sala 710
-                  - salon 710
-                gridRow: 4
-                gridColumn: 6
-                rowSpan: 1
-                colSpan: 2
-                capacity: 32
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
+              schema: { $ref: '#/components/schemas/Space' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
 
     delete:
-      # Authorization as the code enforces it, not as prose describes it.
       x-roles: [ROLE_ADMIN]
       operationId: deleteSpace
       summary: Delete a space
       description: |
-        Removes a space and its pin from the floor plan. If the code addresses more than one
-        space, pass `buildingCode` to disambiguate; an ambiguous code is answered with `409` and
-        nothing is deleted.
+        Refused with `409` while other spaces name it as their `accessVia` - deleting the lift
+        three rooms say to take would leave them pointing at nothing.
 
         Allowed roles: `ROLE_ADMIN` only.
-      tags:
-        - Spaces
+      tags: [Spaces]
       responses:
-        '204':
-          description: The space was deleted.
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
+        '204': { description: Deleted. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
 
-  /api/map/campuses:
+  /api/map/space-types:
 
     get:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_ADMIN]
-      operationId: listCampuses
-      summary: List campuses
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
+      operationId: listSpaceTypes
+      summary: List space types
       description: |
-        Returns every campus (Sede) that has at least one building, with the number of buildings
-        it contains. Clients use this to populate the campus selector before any other call.
+        The whole catalogue, grouped by category in the category's declared order, then by name.
 
-        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_ADMIN`.
-      tags:
-        - Campuses
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
+      tags: [Space types]
       responses:
         '200':
-          description: The list of campuses, ordered by name.
+          description: The catalogue.
           content:
             application/json:
               schema:
                 type: array
-                items:
-                  $ref: '#/components/schemas/CampusSummary'
+                items: { $ref: '#/components/schemas/SpaceType' }
               example:
-                - name: Sede Principal
-                  buildingCount: 3
-                - name: Sede Norte
-                  buildingCount: 1
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+                - { code: CLASSROOM, name: Aula, category: TEACHING }
+                - { code: LAB, name: Laboratorio, category: TEACHING }
+                - { code: IT_ROOM, name: Cuarto de TI, category: FACILITIES }
+                - { code: ELEVATOR, name: Ascensor, category: CIRCULATION }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+    post:
+      x-roles: [ROLE_ADMIN]
+      operationId: createSpaceType
+      summary: Create a space type
+      description: |
+        Adds a kind of space to the catalogue. Usable by spaces immediately.
+
+        Allowed roles: `ROLE_ADMIN` only.
+      tags: [Space types]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SpaceTypeRequest' }
+            example: { code: LACTATION_ROOM, name: Sala de lactancia, category: FACILITIES }
+      responses:
+        '201':
+          description: The type was created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SpaceType' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/map/space-types/{typeCode}:
+
+    parameters:
+      - name: typeCode
+        in: path
+        required: true
+        schema: { type: string, pattern: '^[A-Z][A-Z0-9_]{1,39}$' }
+        example: IT_ROOM
+
+    put:
+      x-roles: [ROLE_ADMIN]
+      operationId: updateSpaceType
+      summary: Rename a space type or move it to another category
+      description: |
+        The code never changes - spaces store it - so the `code` in the body is ignored.
+
+        Allowed roles: `ROLE_ADMIN` only.
+      tags: [Space types]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SpaceTypeRequest' }
+      responses:
+        '200':
+          description: The type as stored.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SpaceType' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+    delete:
+      x-roles: [ROLE_ADMIN]
+      operationId: deleteSpaceType
+      summary: Delete a space type
+      description: |
+        Refused with `409` while any space uses it.
+
+        Allowed roles: `ROLE_ADMIN` only.
+      tags: [Space types]
+      responses:
+        '204': { description: Deleted. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/map/campuses:
+
+    get:
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
+      operationId: listCampuses
+      summary: List campuses
+      description: |
+        Every campus that has at least one building, with its building count.
+
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
+      tags: [Campuses]
+      responses:
+        '200':
+          description: The campuses, ordered by name.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CampusSummary' }
+              example:
+                - { name: Sede Principal, buildingCount: 2 }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/map/campuses/{campus}/ground:
+
+    get:
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
+      operationId: getCampusGround
+      summary: The ground around a campus
+      description: |
+        The city around a campus - its blocks, sidewalks, roadways, medians and named streets, and
+        the lots of the blocks the university's buildings stand on - from the city's reference
+        map, for drawing under the buildings. Coordinates are
+        `[lon, lat]` in WGS 84; lay a building's drawing on them with its `placement`. The campus
+        name matches ignoring case and accents. `404` for a campus with no ground yet.
+
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
+      tags: [Campuses]
+      parameters:
+        - name: campus
+          in: path
+          required: true
+          schema: { type: string, maxLength: 120 }
+          example: Sede Principal
+        - $ref: '#/components/parameters/IfNoneMatch'
+      responses:
+        '200':
+          description: The ground.
+          headers:
+            ETag: { $ref: '#/components/headers/ETag' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ground' }
+              example:
+                campus: Sede Principal
+                source: 'Mapa de Referencia para Bogotá D.C., IDECA - UAECD, IDU y otras entidades. CC BY 4.0.'
+                retrieved: '2026-09-27'
+                blocks:
+                  - [[-74.0612, 4.6485], [-74.0616, 4.6489], [-74.0619, 4.6486], [-74.0612, 4.6485]]
+                sidewalks: []
+                roadways: []
+                medians: []
+                streets:
+                  - { name: Calle 63, label: CL 63, path: [[-74.0617, 4.6491], [-74.0611, 4.6486]] }
+        '304': { $ref: '#/components/responses/NotModified' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/map/campuses/{campus}/structures:
+
+    parameters:
+      - name: campus
+        in: path
+        required: true
+        schema: { type: string, maxLength: 120 }
+        example: Sede Principal
+
+    get:
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
+      operationId: getCampusStructures
+      summary: What else stands on a campus's blocks
+      description: |
+        Everything on the campus's blocks that is not the university's - a neighbour's building,
+        a heritage house with its garden - for drawing around the buildings. An empty list, at
+        version `0`, while nothing has been saved. The campus name matches ignoring case and
+        accents.
+
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
+      tags: [Campuses]
+      responses:
+        '200':
+          description: The campus's structures.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Structures' }
+              example:
+                campus: Sede Principal
+                version: 1
+                updatedAt: '2026-09-28T20:00:00Z'
+                structures:
+                  - name: Vecino, Calle 62 # 9-46 a 9-60
+                    floors: 5
+                    basements: 0
+                    lot: '008213024001'
+                    ring: [[-74.0618, 4.6481], [-74.0617, 4.6483], [-74.0615, 4.6482], [-74.0618, 4.6481]]
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+    put:
+      x-roles: [ROLE_ADMIN]
+      operationId: saveCampusStructures
+      summary: Replace what else stands on a campus's blocks
+      description: |
+        The **complete** list, as the portal's block editor saves it: a structure missing from it
+        is gone. `version` is the list's version as it was read, `0` while nothing has been saved;
+        when somebody saved it since, the save is refused with `409` and nothing changes - reload
+        and reapply. Every outline must close, `400` otherwise.
+
+        Allowed roles: `ROLE_ADMIN` only.
+      tags: [Campuses]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StructuresRequest' }
+            example:
+              version: 1
+              structures:
+                - name: Casa de Francisco de Paula Vélez
+                  floors: 1
+                  basements: 0
+                  lot: '008213024004'
+                  ring: [[-74.0620, 4.6484], [-74.0619, 4.6486], [-74.0617, 4.6485], [-74.0620, 4.6484]]
+      responses:
+        '200':
+          description: The list as saved, with its next version.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Structures' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/map/campuses/{campus}/survey:
+
+    parameters:
+      - name: campus
+        in: path
+        required: true
+        schema: { type: string, maxLength: 120 }
+        example: Sede Principal
+
+    get:
+      x-roles: [ROLE_GUEST, ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
+      operationId: getCampusSurvey
+      summary: The distances taken round a campus's blocks
+      description: |
+        Where each wall stands from the curb and how long it is, as taken on site with the portal's
+        survey sheet. None, at version `0`, while nothing has been saved. The campus name matches
+        ignoring case and accents.
+
+        Allowed roles: `ROLE_GUEST`, `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF`, `ROLE_ADMIN`.
+      tags: [Campuses]
+      responses:
+        '200':
+          description: The campus's survey.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Survey' }
+              example:
+                campus: Sede Principal
+                version: 4
+                updatedAt: '2026-09-29T15:10:00Z'
+                measures:
+                  - id: bis-09
+                    text: '4,80 + 4,96'
+                    metres: 9.76
+                    note: Planters in the way, measured round them
+                    updatedAt: '2026-09-29T15:02:11Z'
+                  - id: extra-1
+                    label: Gate on Cra 9A, its width
+                    text: '3,10'
+                    metres: 3.1
+                    updatedAt: '2026-09-29T15:09:40Z'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+    put:
+      x-roles: [ROLE_ADMIN]
+      operationId: saveCampusSurvey
+      summary: Save the distances taken round a campus's blocks
+      description: |
+        The **complete** list: a distance missing from it is gone. `version` is the survey's
+        version as it was read, `0` while nothing has been saved; when it was saved from somewhere
+        else since, the save is refused with `409` and nothing changes - read it again and lay the
+        changes over it. Two distances with one id, or a negative one, are `400`. `updatedAt` is
+        the server's: a distance keeps the time it was taken until its text, total, note or label
+        changes.
+
+        Allowed roles: `ROLE_ADMIN` only.
+      tags: [Campuses]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SurveyRequest' }
+            example:
+              version: 4
+              measures:
+                - id: bis-09
+                  text: '4,80 + 4,96'
+                  metres: 9.76
+      responses:
+        '200':
+          description: The survey as saved, with its next version.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Survey' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
 
 components:
   securitySchemes:
@@ -1010,38 +994,34 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
   schemas:
     ApiError:
       type: object
       required: [timestamp, status, error, message, path]
       properties:
         timestamp:
-          description: >-
-            When the service produced this error, in UTC. Not when the request was sent.
+          description: When the service produced this error, in UTC.
           type: string
           format: date-time
         status:
-          description: >-
-            The HTTP status, repeated in the body so a logged response is self-contained.
+          description: The HTTP status, repeated in the body so a logged response is self-contained.
           type: integer
           example: 400
         error:
-          description: >-
-            The status's standard name - `Bad Request`, `Conflict`. For developers, not for users.
+          description: The status's standard name - `Bad Request`, `Conflict`. For developers.
           type: string
           example: Bad Request
         message:
-          description: >-
-            One sentence a person can act on. This is the line worth surfacing in a UI.
+          description: One sentence a person can act on. This is the line worth surfacing in a UI.
           type: string
         path:
-          description: >-
-            The path that produced the error, so a log line identifies itself.
+          description: The path that produced the error.
           type: string
         details:
-          description: >-
-            Field-by-field reasons, when there are any. `field` names what was wrong and `issue` says what
-            about it - this is what a form binds its per-field errors to.
+          description: |
+            Field-by-field reasons. `field` names what was wrong - in a layout save, with the
+            position of the space: `spaces[3].shape` - and `issue` says what about it.
           type: array
           items:
             type: object
@@ -1049,655 +1029,738 @@ components:
               field: { type: string }
               issue: { type: string }
 
-    SpaceType:
+    SpaceCategory:
       type: string
       description: |
-        The kind of space. Clients use it three times: to decide how a cell is drawn on the
-        schematic floor, to pick its icon, and to offer the `type` filter in search.
+        The fixed family a space type belongs to. **Clients choose colours and icons by
+        category**; the types under it are data the portal adds to.
 
-        `ELEVATOR`, `STAIRS` and `ENTRANCE` are what make `accessVia` answerable — "sube por el
-        ascensor central" needs the lift to be a space with a code, not a decoration.
+        | Value | Spanish | Examples |
+        | --- | --- | --- |
+        | `TEACHING` | Docencia | aulas, laboratorios, salas de cómputo, auditorios, biblioteca |
+        | `PUBLIC_SERVICE` | Atención | ventanillas, recepción, consultorios, enfermería |
+        | `OFFICE` | Oficina | direcciones, decanaturas, salas de juntas, archivo |
+        | `SOCIAL` | Bienestar y social | cafeterías, gimnasio, salas de juego, terrazas |
+        | `FACILITIES` | Servicio | baños, cuartos de aseo y de TI, planta eléctrica, parqueadero |
+        | `CIRCULATION` | Circulación | ascensores, escaleras, rampas, entradas |
+        | `OTHER` | Sin identificar | drawn on a plan, not yet known |
+      enum: [TEACHING, PUBLIC_SERVICE, OFFICE, SOCIAL, FACILITIES, CIRCULATION, OTHER]
 
-        `OFFICE` and `ADMIN_OFFICE` mean different things to somebody looking for a room:
-        `OFFICE` is a person's office, the one a student visits during consulting hours;
-        `ADMIN_OFFICE` is a service counter — Registro, Admisiones, Tesorería — where the queue
-        is the point. `WELLBEING` covers Bienestar Universitario (counselling, sports, culture).
-      enum:
-        - CLASSROOM
-        - LAB
-        - AUDITORIUM
-        - LIBRARY
-        - CAFETERIA
-        - RESTROOM
-        - OFFICE
-        - ADMIN_OFFICE
-        - WELLBEING
-        - TERRACE
-        - ELEVATOR
-        - STAIRS
-        - CORRIDOR
-        - ENTRANCE
-        - OTHER
-      example: CLASSROOM
+    Accessibility:
+      type: string
+      description: |
+        Whether a floor or a space is reachable without stairs. `UNKNOWN` is the default and
+        **must not be shown as either answer** - most of the campus has not been checked yet.
+      enum: [STEP_FREE, STAIRS_ONLY, UNKNOWN]
 
-    GridPoint:
+    FloorStatus:
+      type: string
+      description: |
+        `UNMAPPED` - the floor exists, nothing is drawn. `DRAFT` - drawn from photographs of posted
+        plans, right in shape, unconfirmed in use. `VERIFIED` - walked and corrected on site.
+      enum: [UNMAPPED, DRAFT, VERIFIED]
+
+    SpaceType:
       type: object
-      description: One cell of a floor's grid. Zero-based, row 0 at the top as the floor is drawn.
-      required: [row, col]
+      description: A kind of space in the catalogue.
+      required: [code, name, category]
       properties:
-        row:
-          description: >-
-            Zero-based row in the floor's grid, counted from the top.
-          type: integer
+        code: { type: string, example: IT_ROOM }
+        name: { type: string, example: Cuarto de TI }
+        category: { $ref: '#/components/schemas/SpaceCategory' }
+
+    SpaceTypeRequest:
+      type: object
+      required: [code, name, category]
+      properties:
+        code:
+          type: string
+          pattern: '^[A-Z][A-Z0-9_]{1,39}$'
+          description: Ignored on `PUT`; a type's code never changes.
+          example: LACTATION_ROOM
+        name: { type: string, minLength: 1, maxLength: 60, example: Sala de lactancia }
+        category: { $ref: '#/components/schemas/SpaceCategory' }
+
+    Point:
+      type: object
+      description: |
+        A point on a floor's drawing, in the floor's own units. Origin at the top-left corner as
+        the plan hangs; `x` to the right, `y` down.
+      required: [x, y]
+      properties:
+        x: { type: integer, minimum: 0, example: 120 }
+        y: { type: integer, minimum: 0, example: 48 }
+
+    Door:
+      type: object
+      description: |
+        A way into a space: the stretch of its outline the door takes up, jamb to jamb. Both ends
+        lie on the space's `shape`, along one of its edges.
+      required: [from, to]
+      properties:
+        from: { $ref: '#/components/schemas/Point' }
+        to: { $ref: '#/components/schemas/Point' }
+
+    Compass:
+      type: string
+      enum: [NORTH, EAST, SOUTH, WEST]
+      description: |
+        A direction on the ground. A floor's `top` says which one its drawing's top edge faces, so a
+        client can turn the floor north up or draw a compass that points the right way. Turning a
+        drawing a quarter turn clockwise brings what was on its left to the top.
+      example: EAST
+
+    GeoPoint:
+      type: object
+      description: A point on the earth, in degrees of WGS 84.
+      required: [lat, lon]
+      properties:
+        lat: { type: number, minimum: -90, maximum: 90, example: 4.6485322 }
+        lon: { type: number, minimum: -180, maximum: 180, example: -74.0611553 }
+
+    Placement:
+      type: object
+      description: |
+        Where a building's drawing lies on the ground: its top-left corner, the bearing its top
+        edge faces and how long one unit of it is. Its floors' `top` is the same bearing to the
+        nearest quarter turn.
+      required: [origin, bearing, metresPerUnit]
+      properties:
+        origin: { $ref: '#/components/schemas/GeoPoint' }
+        bearing:
+          type: number
           minimum: 0
-          example: 5
-        col:
-          description: >-
-            Zero-based column in the floor's grid, counted from the left.
-          type: integer
-          minimum: 0
-          example: 3
+          exclusiveMaximum: 360
+          description: Degrees clockwise from true north that the drawing's top edge faces.
+          example: 127.8
+        metresPerUnit:
+          type: number
+          exclusiveMinimum: 0
+          description: How long one unit of the drawing is on the ground, in metres.
+          example: 0.02951
+
+    FootprintPart:
+      type: object
+      description: |
+        One part of a building from above, as the city's cadastre records it or, where the
+        cadastre falls short, as it was found on site. A building is seldom one block - the
+        Edificio Central is a strip of five floors along the Calle 63, a core of eight and a south
+        wing over its auditorium - and each part rises its own number of floors.
+      required: [floors, basements, ring]
+      properties:
+        lot: { type: string, maxLength: 30, description: "The cadastral lot the part stands on. Absent for a part the cadastre does not record, found on site.", example: '008213024019' }
+        floors: { type: integer, minimum: 0, maximum: 200, description: "How many floors it rises above the street: the cadastre's count, unless checked on site.", example: 8 }
+        lowestFloor: { type: integer, minimum: 1, maximum: 200, description: "The lowest floor above the street it takes in, when it is not the first: 2 for what the upper floors carry out over a portico or a sidewalk, which the cadastre, seeing from above, draws as if it reached the ground. Absent for a part that stands on the street.", example: 2 }
+        basements: { type: integer, minimum: 0, maximum: 20, description: How many it goes below., example: 2 }
+        wing: { type: string, maxLength: 10, description: "The code of the building's wing it belongs to, when known.", example: C }
+        ring: { $ref: '#/components/schemas/Ring' }
+
+    Coordinate:
+      type: array
+      description: A point as GeoJSON writes it, `[lon, lat]`.
+      minItems: 2
+      maxItems: 2
+      items: { type: number }
+      example: [-74.0615, 4.6486]
+
+    Ring:
+      type: array
+      description: The outline of an area, closed - its first point repeated at the end.
+      minItems: 4
+      items: { $ref: '#/components/schemas/Coordinate' }
+
+    Street:
+      type: object
+      required: [name, label, path]
+      properties:
+        name: { type: string, example: Carrera 9 Bis }
+        label: { type: string, description: The name as the street signs abbreviate it., example: KR 9BIS }
+        path:
+          type: array
+          description: The street's axis.
+          minItems: 2
+          items: { $ref: '#/components/schemas/Coordinate' }
+
+    Ground:
+      type: object
+      description: The city around a campus, from the city's reference map.
+      required: [campus, source, retrieved, blocks, sidewalks, roadways, medians, streets]
+      properties:
+        campus: { type: string, example: Sede Principal }
+        source: { type: string, description: "Where the data comes from, to credit wherever it is shown." }
+        retrieved: { type: string, format: date, description: The day it was taken from the source. }
+        blocks:
+          type: array
+          description: The city blocks (manzanas) - where private land meets the sidewalk.
+          items: { $ref: '#/components/schemas/Ring' }
+        sidewalks:
+          type: array
+          description: The sidewalks (andenes).
+          items: { $ref: '#/components/schemas/Ring' }
+        roadways:
+          type: array
+          description: The roadways (calzadas), where cars go.
+          items: { $ref: '#/components/schemas/Ring' }
+        medians:
+          type: array
+          description: The medians (separadores) between roadways.
+          items: { $ref: '#/components/schemas/Ring' }
+        streets:
+          type: array
+          items: { $ref: '#/components/schemas/Street' }
+        lots:
+          type: array
+          description: The cadastral lots of the blocks the university's buildings stand on - whose land is whose, for surveying a block.
+          items: { $ref: '#/components/schemas/Lot' }
+
+    Lot:
+      type: object
+      description: A cadastral lot.
+      required: [code, ring]
+      properties:
+        code: { type: string, description: "The cadastre's code: the block's nine digits, then the lot's three.", example: '008213024019' }
+        ring: { $ref: '#/components/schemas/Ring' }
+
+    Structure:
+      type: object
+      description: |
+        Something on a campus's blocks that is not the university's - a neighbour's building, a
+        heritage house with its garden - drawn around the buildings so they read in their place.
+      required: [name, floors, basements, ring]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120, description: "What it is called, or what it is.", example: Casa de Francisco de Paula Vélez }
+        floors: { type: integer, minimum: 0, maximum: 200, description: "How many floors it rises above the street; 0 for ground, like a garden.", example: 1 }
+        basements: { type: integer, minimum: 0, maximum: 20, description: How many it goes below., example: 0 }
+        lot: { type: string, maxLength: 30, description: "The cadastral lot it stands on, when known.", example: '008213024004' }
+        ring: { $ref: '#/components/schemas/Ring' }
+
+    Structures:
+      type: object
+      description: Everything on a campus's blocks that is not the university's.
+      required: [campus, structures, version]
+      properties:
+        campus: { type: string, example: Sede Principal }
+        structures:
+          type: array
+          items: { $ref: '#/components/schemas/Structure' }
+        version: { type: integer, format: int64, description: Bumped by every save. Send it back with the next one., example: 1 }
+        updatedAt: { type: string, format: date-time, description: "When it was last saved; absent while nothing has been." }
+
+    StructuresRequest:
+      type: object
+      description: The whole list, with the version it was read at.
+      required: [version, structures]
+      properties:
+        version: { type: integer, format: int64, minimum: 0, description: "The version the list was read at; 0 while nothing has been saved.", example: 1 }
+        structures:
+          type: array
+          maxItems: 500
+          items: { $ref: '#/components/schemas/Structure' }
+
+    SurveyMeasure:
+      type: object
+      description: |
+        One distance taken on site round a campus's blocks, with a tape or a phone's Measure app:
+        how far a wall stands from the curb, or how long it is.
+      required: [id]
+      properties:
+        id: { type: string, pattern: '^[a-z0-9][a-z0-9-]{0,39}$', description: "Which distance of the portal's survey plan it is, or an extra one's own id.", example: bis-09 }
+        label: { type: string, maxLength: 200, description: "What an extra distance is of; absent for one the plan names.", example: 'Gate on Cra 9A, its width' }
+        text: { type: string, maxLength: 120, description: "What was typed, as it was typed: pieces joined with +.", example: '4,80 + 4,96' }
+        metres: { type: number, format: double, minimum: 0, maximum: 1000, description: "The total the portal read from the text; absent while it reads none.", example: 9.76 }
+        note: { type: string, maxLength: 500, description: "What was seen on site that the sketch does not show.", example: 'Planters in the way, measured round them' }
+        recheck: { type: boolean, description: "True while it is asked to be taken again: what was typed stays, for reference, until it is. Absent otherwise.", example: true }
+        updatedAt: { type: string, format: date-time, readOnly: true, description: "When it was last changed. Set by the server; ignored in a request." }
+
+    Survey:
+      type: object
+      description: The distances taken on site round a campus's blocks.
+      required: [campus, measures, version]
+      properties:
+        campus: { type: string, example: Sede Principal }
+        measures:
+          type: array
+          items: { $ref: '#/components/schemas/SurveyMeasure' }
+        version: { type: integer, format: int64, description: Bumped by every save. Send it back with the next one., example: 4 }
+        updatedAt: { type: string, format: date-time, description: "When it was last saved; absent while nothing has been." }
+
+    SurveyRequest:
+      type: object
+      description: Every distance taken, the whole list, with the version it was read at.
+      required: [version, measures]
+      properties:
+        version: { type: integer, format: int64, minimum: 0, description: "The version the survey was read at; 0 while nothing has been saved.", example: 4 }
+        measures:
+          type: array
+          maxItems: 500
+          items: { $ref: '#/components/schemas/SurveyMeasure' }
+
+    Bounds:
+      type: object
+      description: The rectangle around a shape, in the floor's units.
+      required: [x, y, width, height]
+      properties:
+        x: { type: integer, example: 80 }
+        y: { type: integer, example: 80 }
+        width: { type: integer, example: 160 }
+        height: { type: integer, example: 80 }
 
     Corridor:
       type: object
-      description: |
-        A walkable route across a floor, drawn as a coloured line through the grid.
-
-        `color` is stored rather than derived so whoever captures a floor can match what is
-        painted on the actual walls — several buildings colour-code their wings, and a palette
-        invented by the client would throw that away.
+      description: A walkable route across a floor, drawn as a coloured line.
       required: [code, name, color, path]
       properties:
-        code:
-          description: >-
-            Identifier unique within the floor. Referenced by a space's access route.
-          type: string
-          maxLength: 30
-          example: PAS-CENTRAL
+        code: { type: string, maxLength: 30, example: PAS-CENTRAL }
         name: { type: string, maxLength: 60, example: Pasillo central }
         color:
-          description: >-
-            RGB hex triplet the client draws the corridor in, so one corridor is the same colour on every
-            floor it runs through.
           type: string
           pattern: '^#[0-9A-Fa-f]{6}$'
-          example: "#F2A93B"
+          description: CSS hex colour, matching what is painted on the walls where the building colour-codes its wings.
+          example: '#5B8DEF'
         path:
           type: array
+          description: The points the corridor runs through, in walking order. Must stay on the floor.
           minItems: 1
-          description: The cells the corridor runs through, in walking order. A polyline, not a
-            rectangle — real corridors bend.
-          items:
-            $ref: '#/components/schemas/GridPoint'
+          items: { $ref: '#/components/schemas/Point' }
+
+    Wing:
+      type: object
+      description: One arm of a building, as that building names it.
+      required: [code, name]
+      properties:
+        code: { type: string, pattern: '^[A-Z0-9]{1,8}$', example: S }
+        name: { type: string, maxLength: 60, example: Ala sur }
+        doorSuffix:
+          type: string
+          maxLength: 4
+          description: What the doors in this wing append to the room number. Absent when they append nothing.
+          example: -S
+        note:
+          type: string
+          maxLength: 300
+          description: How to get into or across this wing, where that is not obvious.
+          example: Se cruza por el P1 o por la terraza.
 
     Floor:
       type: object
-      description: |
-        One floor of a building, described as a grid the client draws.
-      required: [level, name, gridRows, gridColumns]
+      description: One floor of a building, described as a drawing the client scales and draws.
+      required: [code, level, name, width, height]
       properties:
+        code:
+          type: string
+          pattern: '^[A-Z0-9]{1,8}$'
+          description: Identifier within the building, and the path segment the API uses. `S1` basement, `P0`, `P1`, `MEZZ`, `T` terrace.
+          example: MEZZ
         level:
-          type: integer
-          description: |
-            Floor number. Matches the first digit of the room codes on this floor, so room `708`
-            is on level 7 — except in the basement, which is `-1` and whose rooms are coded
-            however the building codes them.
+          type: number
           minimum: -5
           maximum: 99
-          example: 7
-        name:
+          description: Vertical order only. Decimal so a mezzanine sits between its floors.
+          example: 1.5
+        name: { type: string, maxLength: 60, example: Mezzanine }
+        status:
+          $ref: '#/components/schemas/FloorStatus'
+        accessibility:
+          $ref: '#/components/schemas/Accessibility'
+        note:
           type: string
-          description: Display name of the floor, in Spanish as shown to students.
-          minLength: 1
-          maxLength: 60
-          example: Piso 7
-        gridRows:
-          type: integer
-          description: How many rows this floor's grid has.
-          minimum: 1
-          maximum: 60
-          example: 11
-        gridColumns:
-          description: >-
-            How many columns the client draws for this floor. With `gridRows`, the canvas every space is
-            positioned inside.
+          maxLength: 300
+          description: How to get here when it is not obvious.
+          example: Solo por la escalera, desde la recepción.
+        width:
           type: integer
           minimum: 1
-          maximum: 60
-          example: 16
+          maximum: 20000
+          description: The drawing's width, in its own units. Every point on the floor lies within it.
+          example: 1640
+        height: { type: integer, minimum: 1, maximum: 20000, example: 590 }
+        top:
+          $ref: '#/components/schemas/Compass'
+          description: The direction on the ground the drawing's top edge faces. Absent until somebody says - the posted plans are not drawn north up.
+        outline:
+          type: array
+          maxItems: 400
+          description: The building's walls around this floor, corners in order. Empty until traced.
+          items: { $ref: '#/components/schemas/Point' }
         corridors:
           type: array
-          description: Walkable routes across this floor. May be empty while a floor is being
-            captured.
-          items:
-            $ref: '#/components/schemas/Corridor'
+          items: { $ref: '#/components/schemas/Corridor' }
+        version:
+          type: integer
+          format: int64
+          readOnly: true
+          description: Bumped by every layout save. Send it back with the next one; ignored when a whole building is written.
+          example: 3
 
     Building:
       type: object
-      description: A campus building, with the full list of its floors.
-      required: [id, code, name, campus, floors]
+      required: [id, code, name, campus, aliases, wings, floors]
       properties:
-        id:
-          type: string
-          format: uuid
-          description: Server-generated identifier. Not used in paths; address buildings by `code`.
-          example: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-        code:
-          type: string
-          description: |
-            Short building code, unique across the map, and the stable business key used in every
-            path parameter.
-          minLength: 1
-          maxLength: 10
-          example: A
-        name:
-          type: string
-          minLength: 1
-          maxLength: 120
-          example: Bloque A
-        campus:
-          type: string
-          description: |
-            The campus (Sede) this building belongs to, matching the *Sede* field in the
-            university's academic records.
-          minLength: 1
-          maxLength: 120
-          example: Sede Principal
-        description:
-          type: string
-          description: Optional free-text description shown on the building screen.
-          maxLength: 500
-          example: Main academic building. Classrooms, computer labs and faculty offices.
+        id: { type: string, example: 7c4b0a18-5e93-4a6f-8b21-9d0c5e7f1a34 }
+        code: { type: string, maxLength: 10, example: B }
+        name: { type: string, maxLength: 120, example: Bloque B }
+        campus: { type: string, maxLength: 120, example: Sede Principal }
+        description: { type: string, maxLength: 500 }
+        aliases:
+          type: array
+          description: Other names people use for the building.
+          items: { type: string }
+        wings:
+          type: array
+          items: { $ref: '#/components/schemas/Wing' }
         floors:
           type: array
-          description: Every floor of the building, ordered by ascending level.
-          items:
-            $ref: '#/components/schemas/Floor'
+          description: Ordered by ascending level.
+          items: { $ref: '#/components/schemas/Floor' }
+        placement:
+          $ref: '#/components/schemas/Placement'
+          description: Where the building's drawing lies on the ground. Absent until somebody lays it.
+        footprint:
+          type: array
+          description: The building from above, part by part, as the cadastre records it. Empty until somebody takes it from there.
+          items: { $ref: '#/components/schemas/FootprintPart' }
+        address: { type: string, maxLength: 200, description: "Its street address as people write it. Absent when nobody has said.", example: 'Cra. 9 Bis # 62-43' }
+        sinuSedes:
+          type: array
+          description: The names SINU gives this building as a sede, exactly as its timetable prints them. Empty until somebody maps them in the portal. Since 3.6.
+          items: { type: string, maxLength: 120 }
+          example: [Sede Principal]
 
     BuildingSummary:
       type: object
-      description: |
-        A building without its floors. Returned inside `SpaceDetail`, where the one relevant floor
-        is already included and the rest would be dead weight.
-      required: [id, code, name, campus]
+      description: A building without its floors.
+      required: [id, code, name, campus, aliases, wings]
       properties:
-        id:
-          type: string
-          format: uuid
-          example: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-        code:
-          type: string
-          minLength: 1
-          maxLength: 10
-          example: A
-        name:
-          type: string
-          minLength: 1
-          maxLength: 120
-          example: Bloque A
-        campus:
-          type: string
-          minLength: 1
-          maxLength: 120
-          example: Sede Principal
-        description:
-          type: string
-          maxLength: 500
-          example: Main academic building. Classrooms, computer labs and faculty offices.
+        id: { type: string }
+        code: { type: string, example: A }
+        name: { type: string, example: Bloque A }
+        campus: { type: string, example: Sede Principal }
+        description: { type: string }
+        aliases:
+          type: array
+          items: { type: string }
+        wings:
+          type: array
+          items: { $ref: '#/components/schemas/Wing' }
+        sinuSedes:
+          type: array
+          description: The names SINU gives this building as a sede. Since 3.6.
+          items: { type: string }
 
     BuildingRequest:
       type: object
-      description: |
-        Payload for creating or replacing a building. `id` is server-generated and is never
-        accepted from the client.
       required: [code, name, campus, floors]
       properties:
-        code:
-          type: string
-          description: Building code, unique across the map.
-          minLength: 1
-          maxLength: 10
-          example: C
-        name:
-          type: string
-          minLength: 1
-          maxLength: 120
-          example: Bloque C
-        campus:
-          type: string
-          minLength: 1
-          maxLength: 120
-          example: Sede Principal
-        description:
-          type: string
-          maxLength: 500
-          example: Postgraduate building. Seminar rooms and auditorium.
+        code: { type: string, minLength: 1, maxLength: 10 }
+        name: { type: string, minLength: 1, maxLength: 120 }
+        campus: { type: string, minLength: 1, maxLength: 120 }
+        description: { type: string, maxLength: 500 }
+        aliases:
+          type: array
+          items: { type: string, minLength: 1, maxLength: 120 }
+        wings:
+          type: array
+          items: { $ref: '#/components/schemas/Wing' }
         floors:
           type: array
-          description: |
-            The complete list of floors. On `PUT` this replaces the existing list, so a floor
-            omitted here is deleted; deleting a floor that still has spaces on it fails with `409`.
           minItems: 1
-          items:
-            $ref: '#/components/schemas/Floor'
+          items: { $ref: '#/components/schemas/Floor' }
+        placement:
+          $ref: '#/components/schemas/Placement'
+          description: Where the building's drawing lies on the ground. Omitted on `PUT`, the stored one is kept.
+        footprint:
+          type: array
+          description: The building from above, part by part. Omitted on `PUT`, the stored one is kept; a part's `wing` must be one of the building's.
+          items: { $ref: '#/components/schemas/FootprintPart' }
+        address: { type: string, maxLength: 200, description: "Its street address as people write it. Omitted on PUT, the stored one is kept; empty clears it.", example: 'Cra. 9 Bis # 62-43' }
+        sinuSedes:
+          type: array
+          description: The names SINU gives this building as a sede. Omitted on `PUT`, the stored ones are kept. A sede belongs to one building only; naming one another building has is a `409`. Since 3.6.
+          items: { type: string, minLength: 1, maxLength: 120 }
 
     Space:
       type: object
-      description: |
-        A locatable space: a classroom, lab, office, or any other place a student may need to
-        find. Denormalised on purpose - `buildingCode`, `campus` and `floorLevel` are carried on
-        the space itself so a search result can be rendered without a second call.
-      required: [id, code, baseCode, name, type, buildingId, buildingCode, campus,
-                 floorLevel, aliases, gridRow, gridColumn, rowSpan, colSpan]
+      required: [id, code, name, typeCode, buildingId, buildingCode, campus, floorCode, floorLevel,
+                 aliases, doors, effectiveAccessibility]
       properties:
-        id:
-          type: string
-          format: uuid
-          description: Server-generated identifier. Not used in paths; address spaces by `code`.
-          example: 5a2c7e10-9b3d-4f68-8c41-2e7a0d6b9f53
+        id: { type: string }
         code:
           type: string
-          description: |
-            Room code as printed on the door, including its wing where the building uses them,
-            unique within its building. The first digit is the floor number, except in the
-            basement. This is the same code the KApp schedule service stores for a class, which
-            is what lets a student jump from a class in their timetable to its classroom.
-          minLength: 1
-          maxLength: 20
-          example: '301-N'
+          description: Identifier within the building. **Not for display** - see `doorCode`.
+          example: '302'
+        doorCode:
+          type: string
+          description: Exactly as printed on the door. Absent when the door has no number. The only code a client shows.
+          example: '302'
         baseCode:
           type: string
-          description: |
-            The code without its wing suffix — `301` for `301-N`. Present so a student who types
-            what they were told, without the wing, matches all three rooms. Equal to `code` when
-            the code carries no wing.
-          minLength: 1
-          maxLength: 20
-          example: '301'
+          description: '`doorCode` without its wing''s suffix. Absent without a door code.'
+          example: '302'
         wing:
-          type: [string, 'null']
-          description: |
-            Which arm of the floor this space is in, or null in a building with one arm. A field
-            rather than something a client parses out of the code: search filters on it, and
-            reading the last two characters would break the first time a building names its
-            wings anything else.
-          enum: [NORTE, SUR, CENTRAL, null]
-          example: NORTE
-        name:
           type: string
-          description: Official name of the space, as signposted.
-          minLength: 1
-          maxLength: 120
-          example: Aula 708
-        type:
-          $ref: '#/components/schemas/SpaceType'
-        buildingId:
-          description: >-
-            The building's internal id. Address a building by its `code` instead - the code is the stable
-            business key across this API.
-          type: string
-          format: uuid
-          example: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-        buildingCode:
-          type: string
-          description: Code of the containing building, denormalised for display and filtering.
-          minLength: 1
-          maxLength: 10
-          example: A
-        campus:
-          type: string
-          description: |
-            Campus (Sede) of the containing building, denormalised so a campus-wide search does
-            not have to join.
-          minLength: 1
-          maxLength: 120
-          example: Sede Principal
-        floorLevel:
-          type: integer
-          description: Level of the floor this space sits on. Matches a `level` in the building's floors.
-          minimum: -5
-          maximum: 99
-          example: 3
+          description: Code of one of the building's wings.
+          example: C
+        name: { type: string, example: Laboratorio de Sistemas }
+        typeCode: { type: string, example: LAB }
+        typeName: { type: string, example: Laboratorio }
+        category: { $ref: '#/components/schemas/SpaceCategory' }
+        buildingId: { type: string }
+        buildingCode: { type: string, example: A }
+        campus: { type: string, example: Sede Principal }
+        floorCode: { type: string, example: P3 }
+        floorLevel: { type: number, example: 3 }
         aliases:
           type: array
-          description: |
-            Alternative names students actually use, and the reason the search feels right rather
-            than broken. Students search "sala de sistemas" while the sign on the door says
-            "Lab 302", so every alias is matched by `GET /api/map/spaces/search`, case- and
-            accent-insensitively. May be empty, but the field is always present.
-          items:
-            type: string
-            minLength: 1
-            maxLength: 120
-          example:
-            - sala 708
-            - salon 708
-        gridRow:
-          type: integer
-          description: |
-            Top-left cell of the rectangle this space occupies, zero-based, row 0 at the top of
-            the floor as drawn.
-          minimum: 0
-          example: 5
-        gridColumn:
-          description: >-
-            Zero-based column of the top-left cell this space occupies, counted from the left.
-          type: integer
-          minimum: 0
-          example: 4
-        rowSpan:
-          type: integer
-          description: How many rows the space covers. 1 for an ordinary room.
-          minimum: 1
-          maximum: 60
-          example: 1
-        colSpan:
-          description: >-
-            How many columns the space spans. 1 for an ordinary single-cell room.
-          type: integer
-          minimum: 1
-          maximum: 60
-          example: 2
+          items: { type: string }
+        shape:
+          type: array
+          minItems: 3
+          description: The room's walls, corners in order, in the floor's units. Absent while the space is inventoried but not drawn.
+          items: { $ref: '#/components/schemas/Point' }
+          example: [{ x: 280, y: 200 }, { x: 400, y: 200 }, { x: 400, y: 280 }, { x: 280, y: 280 }]
+        bounds:
+          $ref: '#/components/schemas/Bounds'
+          description: The box around `shape`, for lists and search results that only need a position. Absent with `shape`.
+        doors:
+          type: array
+          description: Openings on the room's walls. Empty when none is drawn yet.
+          items: { $ref: '#/components/schemas/Door' }
         accessVia:
-          type: [string, 'null']
-          description: |
-            Code of the lift, staircase or entrance that serves this space — a `Space` of type
-            `ELEVATOR`, `STAIRS` or `ENTRANCE` in the same building. This is what produces
-            "piso 4, sube por el ascensor central".
-
-            Explicit rather than derived from grid distance: whoever walks the floor knows which
-            lift people actually use, and nearest-by-distance gives the wrong answer whenever a
-            wall sits between them.
-          maxLength: 20
+          type: string
+          description: Code of the lift, staircase or entrance that serves this space - "sube por el ascensor central".
           example: ASC-CENTRAL
-        capacity:
-          type: integer
-          description: Seating capacity, where it is known. Absent for spaces where it is meaningless.
-          minimum: 0
-          example: 30
+        accessibility:
+          $ref: '#/components/schemas/Accessibility'
+          description: The space's own value; absent when it takes the floor's.
+        effectiveAccessibility:
+          $ref: '#/components/schemas/Accessibility'
+          description: The answer to "can I get there without stairs?", own or inherited.
+        note:
+          type: string
+          description: How to get there when `accessVia` is not enough.
+          example: Solo por la escalera norte, desde el P5.
+        capacity: { type: integer, minimum: 0, example: 25 }
 
     SpaceDetail:
-      description: |
-        A space together with the floor it sits on and a summary of its building - everything the
-        schedule screen needs to render a plan with a pin in a single round trip.
+      description: A space, its floor and a summary of its building, in one round trip.
       allOf:
         - $ref: '#/components/schemas/Space'
         - type: object
           required: [floor, building]
           properties:
-            floor:
-              $ref: '#/components/schemas/Floor'
-            building:
-              $ref: '#/components/schemas/BuildingSummary'
+            floor: { $ref: '#/components/schemas/Floor' }
+            building: { $ref: '#/components/schemas/BuildingSummary' }
 
     FloorDetail:
-      description: A floor together with every space located on it.
-      allOf:
-        - $ref: '#/components/schemas/Floor'
-        - type: object
-          required: [buildingId, buildingCode, buildingName, campus, spaces]
-          properties:
-            buildingId:
-              type: string
-              format: uuid
-              example: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
-            buildingCode:
-              type: string
-              minLength: 1
-              maxLength: 10
-              example: A
-            buildingName:
-              type: string
-              minLength: 1
-              maxLength: 120
-              example: Bloque A
-            campus:
-              type: string
-              minLength: 1
-              maxLength: 120
-              example: Sede Principal
-            spaces:
-              type: array
-              description: Every space on this floor, ordered by code. May be empty.
-              items:
-                $ref: '#/components/schemas/Space'
+      type: object
+      description: Everything needed to draw one floor in a single call.
+      required: [code, level, name, status, accessibility, width, height, outline, corridors, version,
+                 buildingId, buildingCode, buildingName, campus, wings, spaces]
+      properties:
+        code: { type: string, example: MEZZ }
+        level: { type: number, example: 1.5 }
+        name: { type: string, example: Mezzanine }
+        status: { $ref: '#/components/schemas/FloorStatus' }
+        accessibility: { $ref: '#/components/schemas/Accessibility' }
+        note: { type: string }
+        width: { type: integer }
+        height: { type: integer }
+        top: { $ref: '#/components/schemas/Compass' }
+        outline:
+          type: array
+          items: { $ref: '#/components/schemas/Point' }
+        corridors:
+          type: array
+          items: { $ref: '#/components/schemas/Corridor' }
+        version: { type: integer, format: int64 }
+        buildingId: { type: string }
+        buildingCode: { type: string }
+        buildingName: { type: string }
+        campus: { type: string }
+        wings:
+          type: array
+          items: { $ref: '#/components/schemas/Wing' }
+        spaces:
+          type: array
+          description: Every space on the floor, placed or not, ordered by code.
+          items: { $ref: '#/components/schemas/Space' }
 
     SpaceRequest:
       type: object
-      description: |
-        Payload for creating or replacing a space. `id`, `buildingId` and `campus` are derived
-        server-side from `buildingCode` and are never accepted from the client.
-      required: [code, name, type, buildingCode, floorLevel, gridRow, gridColumn]
+      required: [code, name, typeCode, buildingCode, floorCode]
       properties:
         code:
           type: string
-          description: |
-            Room code as printed on the door, including its wing where the building uses them.
-            Unique within the building identified by `buildingCode`.
-          minLength: 1
           maxLength: 20
-          example: '302'
-        wing:
-          type: [string, 'null']
-          description: |
-            Which arm of the floor this space is in. Omit it and the server derives it from a
-            `-N`, `-S` or `-C` suffix on the code; send it explicitly when the building names its
-            wings some other way. `baseCode` is always derived server-side and never accepted.
-          enum: [NORTE, SUR, CENTRAL, null]
-          example: NORTE
-        name:
-          type: string
-          minLength: 1
-          maxLength: 120
-          example: Laboratorio de Sistemas
-        type:
-          $ref: '#/components/schemas/SpaceType'
-        buildingCode:
-          type: string
-          description: Code of the building that contains this space. Must already exist.
-          minLength: 1
-          maxLength: 10
-          example: A
-        floorLevel:
-          type: integer
-          description: |
-            Level of the floor this space sits on. The building must already have a floor at this
-            level, otherwise the request fails with `404`. `-1` is the basement.
-          minimum: -5
-          maximum: 99
-          example: 3
+          pattern: '^[A-Za-z0-9][A-Za-z0-9-]*$'
+          description: The door code for a numbered room; any stable identifier otherwise. Never shown.
+        doorCode: { type: string, maxLength: 20, description: Omit when the door has no number. }
+        wing: { type: string, maxLength: 8 }
+        name: { type: string, minLength: 1, maxLength: 120 }
+        typeCode: { type: string, maxLength: 40 }
+        buildingCode: { type: string, maxLength: 10 }
+        floorCode: { type: string, maxLength: 8 }
         aliases:
           type: array
-          description: |
-            Alternative names students search for. Omit or send an empty array when there are
-            none, but prefer supplying them: a lab with no aliases is effectively unsearchable by
-            the words students actually type.
-          items:
-            type: string
-            minLength: 1
-            maxLength: 120
-          example:
-            - sala de sistemas
-            - lab 302
-            - laboratorio 302
-        gridRow:
-          type: integer
-          description: |
-            Top-left cell of the rectangle this space occupies, zero-based.
+          items: { type: string, minLength: 1, maxLength: 120 }
+        shape:
+          type: array
+          minItems: 3
+          maxItems: 200
+          description: Omit to inventory without drawing. Inside the floor, not crossing itself, not overlapping another space.
+          items: { $ref: '#/components/schemas/Point' }
+        doors:
+          type: array
+          maxItems: 12
+          description: Each on one wall of `shape`. Needs a shape.
+          items: { $ref: '#/components/schemas/Door' }
+        accessVia: { type: string, maxLength: 20 }
+        accessibility:
+          $ref: '#/components/schemas/Accessibility'
+          description: Omit to take the floor's value.
+        note: { type: string, maxLength: 300 }
+        capacity: { type: integer, minimum: 0 }
 
-            The rectangle must fit inside the floor's `gridRows` x `gridColumns`, otherwise the
-            request fails with `400`, and it must not overlap another space on the same floor,
-            otherwise `409`. Neither failure is visible once stored — a space outside the grid
-            simply does not render, and an overlapped one is drawn underneath — so both are
-            refused at write time.
-          minimum: 0
-          example: 5
-        gridColumn:
-          description: >-
-            Zero-based column of the top-left cell, counted from the left.
-          type: integer
-          minimum: 0
-          example: 7
-        rowSpan:
-          type: integer
-          description: How many rows the space covers. Omit for an ordinary single-cell room.
-          minimum: 1
-          maximum: 60
-          default: 1
-          example: 2
-        colSpan:
-          description: >-
-            How many columns the space spans. Omit for an ordinary single-cell room.
-          type: integer
-          minimum: 1
-          maximum: 60
-          default: 1
-          example: 3
-        accessVia:
-          type: [string, 'null']
-          description: |
-            Code of the lift, staircase or entrance that serves this space.
+    LayoutSpace:
+      description: A space inside a layout save. The building and the floor come from the path.
+      type: object
+      required: [code, name, typeCode]
+      properties:
+        code: { type: string, maxLength: 20, pattern: '^[A-Za-z0-9][A-Za-z0-9-]*$' }
+        doorCode: { type: string, maxLength: 20 }
+        wing: { type: string, maxLength: 8 }
+        name: { type: string, minLength: 1, maxLength: 120 }
+        typeCode: { type: string, maxLength: 40 }
+        aliases:
+          type: array
+          items: { type: string, minLength: 1, maxLength: 120 }
+        shape:
+          type: array
+          minItems: 3
+          maxItems: 200
+          items: { $ref: '#/components/schemas/Point' }
+        doors:
+          type: array
+          maxItems: 12
+          items: { $ref: '#/components/schemas/Door' }
+        accessVia: { type: string, maxLength: 20 }
+        accessibility: { $ref: '#/components/schemas/Accessibility' }
+        note: { type: string, maxLength: 300 }
+        capacity: { type: integer, minimum: 0 }
 
-            **Validated.** It must name an existing space in the same building whose type is
-            `ELEVATOR`, `STAIRS` or `ENTRANCE`; anything else is a `400`. A code that matches
-            nothing fails in the worst way — the app says nothing about how to get there, or names
-            something that is not where the visitor is — and a typo is invisible until somebody is
-            standing in the wrong corridor.
-          maxLength: 20
-          example: ASC-CENTRAL
-        capacity:
+    FloorLayoutRequest:
+      type: object
+      description: Everything drawn on one floor, saved at once.
+      required: [version, width, height, spaces]
+      properties:
+        version:
           type: integer
-          description: Seating capacity, where it is known.
+          format: int64
           minimum: 0
-          example: 25
+          description: The floor's version as the editor loaded it.
+        width: { type: integer, minimum: 1, maximum: 20000 }
+        height: { type: integer, minimum: 1, maximum: 20000 }
+        top:
+          $ref: '#/components/schemas/Compass'
+          description: Omit to keep the floor's.
+        outline:
+          type: array
+          maxItems: 400
+          items: { $ref: '#/components/schemas/Point' }
+        status: { $ref: '#/components/schemas/FloorStatus' }
+        accessibility: { $ref: '#/components/schemas/Accessibility' }
+        note: { type: string, maxLength: 300 }
+        corridors:
+          type: array
+          items: { $ref: '#/components/schemas/Corridor' }
+        spaces:
+          type: array
+          description: The complete list. A space of this floor missing from it is deleted.
+          maxItems: 500
+          items: { $ref: '#/components/schemas/LayoutSpace' }
 
     CampusSummary:
       type: object
       description: A campus (Sede) and how many buildings the map holds for it.
       required: [name, buildingCount]
       properties:
-        name:
-          type: string
-          description: Campus name, matching the *Sede* field in the university's academic records.
-          minLength: 1
-          maxLength: 120
-          example: Sede Principal
-        buildingCount:
-          type: integer
-          description: Number of buildings registered on this campus.
-          minimum: 0
-          example: 3
+        name: { type: string, minLength: 1, maxLength: 120, example: Sede Principal }
+        buildingCount: { type: integer, minimum: 0, example: 2 }
 
     PageResponse:
       type: object
-      description: |
-        A page of search results. `content` holds `Space` objects; this is the only paginated
-        collection in this API.
+      description: A page of spaces. The only paginated collection in this API.
       required: [content, page, size, totalElements, totalPages, first, last]
       properties:
         content:
           type: array
-          description: The spaces on this page, ordered by descending match relevance, then by code.
-          items:
-            $ref: '#/components/schemas/Space'
-        page:
-          type: integer
-          description: Zero-based index of the page returned.
-          minimum: 0
-          example: 0
-        size:
-          type: integer
-          description: Requested page size.
-          minimum: 1
-          maximum: 100
-          example: 20
-        totalElements:
-          type: integer
-          description: Total number of spaces matching the query across all pages.
-          minimum: 0
-          example: 3
-        totalPages:
-          type: integer
-          description: Total number of pages available. `0` when nothing matched.
-          minimum: 0
-          example: 1
-        first:
-          type: boolean
-          description: True when this is the first page.
-          example: true
-        last:
-          type: boolean
-          description: True when this is the last page.
-          example: true
+          items: { $ref: '#/components/schemas/Space' }
+        page: { type: integer, minimum: 0, example: 0 }
+        size: { type: integer, minimum: 1, maximum: 100, example: 20 }
+        totalElements: { type: integer, minimum: 0, example: 1 }
+        totalPages: { type: integer, minimum: 0, example: 1 }
+        first: { type: boolean, example: true }
+        last: { type: boolean, example: true }
+
+  headers:
+
+    ETag:
+      description: The version of this answer. Send it back in `If-None-Match` to be told when it changes. Since 3.6.
+      schema: { type: string }
+      example: '"3f2a9c14"'
 
   parameters:
+
+    IfNoneMatch:
+      name: If-None-Match
+      in: header
+      required: false
+      description: The `ETag` of the answer the client already has. When nothing changed since, the answer is `304` with no body. Since 3.6.
+      schema: { type: string }
+      example: '"3f2a9c14"'
 
     CampusQuery:
       name: campus
       in: query
       required: false
-      description: |
-        Restrict results to a single campus (Sede). Matched exactly against the `campus` field.
-        Omit to search every campus.
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 120
+      description: Restrict results to one campus (Sede), matched exactly.
+      schema: { type: string, minLength: 1, maxLength: 120 }
       example: Sede Principal
 
     BuildingCodePath:
       name: code
       in: path
       required: true
-      description: Building code, for example `A` for Bloque A.
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 10
-      example: A
+      description: Building code.
+      schema: { type: string, minLength: 1, maxLength: 10 }
+      example: B
 
-    FloorLevelPath:
-      name: level
+    FloorCodePath:
+      name: floorCode
       in: path
       required: true
-      description: |
-        Floor level. On the floors above ground it matches the first digit of the room codes on
-        that floor: level `7` holds rooms `708` to `711`.
-
-        **May be negative.** `-1` is the basement, and the first-digit rule does not apply
-        there — a basement room's code says nothing about its level. The central block has one.
-      schema:
-        type: integer
-        minimum: -5
-        maximum: 99
-      example: 7
+      description: Floor code within the building - `S1`, `P0`, `P1`, `MEZZ`, `T`.
+      schema: { type: string, pattern: '^[A-Z0-9]{1,8}$' }
+      example: MEZZ
 
     SpaceCodePath:
       name: code
       in: path
       required: true
       description: |
-        Room code as printed on the door, for example `708`. This is the same code the KApp
+        The space's `code`. For a numbered room it is the door code, which is also what the KApp
         schedule service stores for a class.
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 20
-      example: '708'
+      schema: { type: string, minLength: 1, maxLength: 20 }
+      example: '302'
 
     BuildingCodeDisambiguator:
       name: buildingCode
       in: query
       required: false
       description: |
-        Building code, needed **only** when the same room code exists in more than one building.
-        Space codes are unique within a building, not across the map. When the code is ambiguous
-        and this parameter is absent, the request is answered with `409 Conflict` listing the
-        candidate buildings in `details`.
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 10
+        Needed **only** when the same code exists in more than one building; without it an
+        ambiguous code is answered with `409` listing the candidates.
+      schema: { type: string, minLength: 1, maxLength: 10 }
       example: A
 
     PageQuery:
@@ -1705,25 +1768,125 @@ components:
       in: query
       required: false
       description: Zero-based page index.
-      schema:
-        type: integer
-        minimum: 0
-        default: 0
+      schema: { type: integer, minimum: 0, default: 0 }
       example: 0
 
     SizeQuery:
       name: size
       in: query
       required: false
-      description: Page size. Capped at 100.
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 100
-        default: 20
+      description: Page size. Capped at 100 - a larger value is a 400, never silently clamped.
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
       example: 20
 
+  examples:
+
+    BuildingList:
+      summary: A search by alias - "psicologia" finds Bloque B
+      value:
+        - id: 7c4b0a18-5e93-4a6f-8b21-9d0c5e7f1a34
+          code: B
+          name: Bloque B
+          campus: Sede Principal
+          description: Psychology building. Research labs, library and student wellbeing services.
+          aliases: [Bloque de psicología]
+          wings: []
+          floors:
+            - { code: P1, level: 1, name: Piso 1, status: DRAFT, accessibility: STEP_FREE, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+            - { code: MEZZ, level: 1.5, name: Mezzanine, status: DRAFT, accessibility: STAIRS_ONLY, note: 'Solo por la escalera, desde la recepción.', width: 400, height: 240, outline: [], corridors: [], version: 0 }
+            - { code: P2, level: 2, name: Piso 2, status: DRAFT, accessibility: STEP_FREE, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+            - { code: P3, level: 3, name: Piso 3, status: UNMAPPED, accessibility: UNKNOWN, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+
+    BloqueB:
+      summary: A building with a mezzanine reachable only by stairs, and an alias
+      value:
+        id: 7c4b0a18-5e93-4a6f-8b21-9d0c5e7f1a34
+        code: B
+        name: Bloque B
+        campus: Sede Principal
+        description: Psychology building. Research labs, library and student wellbeing services.
+        aliases: [Bloque de psicología]
+        wings: []
+        floors:
+          - { code: P1, level: 1, name: Piso 1, status: DRAFT, accessibility: STEP_FREE, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+          - { code: MEZZ, level: 1.5, name: Mezzanine, status: DRAFT, accessibility: STAIRS_ONLY, note: 'Solo por la escalera, desde la recepción.', width: 400, height: 240, outline: [], corridors: [], version: 0 }
+          - { code: P2, level: 2, name: Piso 2, status: DRAFT, accessibility: STEP_FREE, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+          - { code: P3, level: 3, name: Piso 3, status: UNMAPPED, accessibility: UNKNOWN, width: 640, height: 440, outline: [], corridors: [], version: 0 }
+
+    MezzanineFloor:
+      summary: A floor with a dependency that has nothing on its door
+      value:
+        code: MEZZ
+        level: 1.5
+        name: Mezzanine
+        status: DRAFT
+        accessibility: STAIRS_ONLY
+        note: Solo por la escalera, desde la recepción.
+        width: 400
+        height: 240
+        outline: []
+        corridors: []
+        version: 0
+        buildingId: 7c4b0a18-5e93-4a6f-8b21-9d0c5e7f1a34
+        buildingCode: B
+        buildingName: Bloque B
+        campus: Sede Principal
+        wings: []
+        spaces:
+          - id: 5d1e9a33-0b6c-4f27-8e44-2a9c7b1d3f58
+            code: B-MEZZ-01
+            name: Laboratorio de Interactividad
+            typeCode: LAB
+            typeName: Laboratorio
+            category: TEACHING
+            buildingId: 7c4b0a18-5e93-4a6f-8b21-9d0c5e7f1a34
+            buildingCode: B
+            campus: Sede Principal
+            floorCode: MEZZ
+            floorLevel: 1.5
+            aliases: [interactividad]
+            shape: [{ x: 80, y: 80 }, { x: 240, y: 80 }, { x: 240, y: 160 }, { x: 80, y: 160 }]
+            bounds: { x: 80, y: 80, width: 160, height: 80 }
+            doors: [{ from: { x: 140, y: 160 }, to: { x: 160, y: 160 } }]
+            accessVia: B-ESC
+            effectiveAccessibility: STAIRS_ONLY
+
+    SearchPage:
+      summary: A search for 'sala de sistemas'
+      value:
+        content:
+          - id: 1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d
+            code: '302'
+            doorCode: '302'
+            baseCode: '302'
+            wing: C
+            name: Laboratorio de Sistemas
+            typeCode: LAB
+            typeName: Laboratorio
+            category: TEACHING
+            buildingId: 3f6d1c92-8a41-4b0e-9c77-1d2e3f4a5b60
+            buildingCode: A
+            campus: Sede Principal
+            floorCode: P3
+            floorLevel: 3
+            aliases: [sala de sistemas, lab 302, laboratorio 302]
+            shape: [{ x: 280, y: 200 }, { x: 400, y: 200 }, { x: 400, y: 280 }, { x: 280, y: 280 }]
+            bounds: { x: 280, y: 200, width: 120, height: 80 }
+            doors: [{ from: { x: 280, y: 230 }, to: { x: 280, y: 250 } }]
+            accessVia: ASC-CENTRAL
+            effectiveAccessibility: STEP_FREE
+            capacity: 25
+        page: 0
+        size: 20
+        totalElements: 1
+        totalPages: 1
+        first: true
+        last: true
+
   responses:
+
+    NotModified:
+      description: Nothing changed since the `ETag` sent in `If-None-Match`. No body; keep using what you have.
     BadRequest:
       description: Validation failed
       content: { application/json: { schema: { $ref: '#/components/schemas/ApiError' } } }

@@ -29,15 +29,6 @@ mongock:
   # Property is `transactional`; `transaction-enabled` is deprecated in Mongock 5.5.
   transactional: false
 
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
-    # Registering with Eureka is pointless in tests and slows them down.
-    enabled: ${EUREKA_ENABLED:true}
-  instance:
-    prefer-ip-address: true
-
 management:
   endpoints:
     web:

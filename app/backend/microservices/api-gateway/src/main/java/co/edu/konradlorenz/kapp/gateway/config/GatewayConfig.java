@@ -1,5 +1,6 @@
 package co.edu.konradlorenz.kapp.gateway.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -8,10 +9,14 @@ import org.springframework.context.annotation.Configuration;
 /**
  * The complete routing table.
  *
- * <p>Routes are declared explicitly rather than discovered. Eureka's discovery locator
- * would auto-expose every registered service at {@code /{service-id}/**}, including the
- * internal endpoints below, and would quietly grow a new public surface every time
- * somebody registers a service. That was finding S4; it stays off.
+ * <p>Routes are declared explicitly rather than discovered. A discovery locator would
+ * auto-expose every service at {@code /{service-id}/**}, including the internal endpoints
+ * below, and would quietly grow a new public surface every time somebody adds a service.
+ * That was finding S4.
+ *
+ * <p>Each service is reached at the address in {@code kapp.services.*}: its name, which
+ * Docker Compose and Kubernetes resolve and Kubernetes balances across replicas, or
+ * {@code 127.0.0.1} and its port on a host-networked server. There is no registry.
  *
  * <p>Note what is absent: there is no route for {@code /internal/**}. Those endpoints -
  * user-service's profile creation, called by auth-service during registration - are
@@ -22,7 +27,12 @@ import org.springframework.context.annotation.Configuration;
 public class GatewayConfig {
 
     @Bean
-    public RouteLocator routes(RouteLocatorBuilder builder) {
+    public RouteLocator routes(RouteLocatorBuilder builder,
+                               @Value("${kapp.services.auth}") String auth,
+                               @Value("${kapp.services.user}") String user,
+                               @Value("${kapp.services.semaphore}") String semaphore,
+                               @Value("${kapp.services.schedule}") String schedule,
+                               @Value("${kapp.services.map}") String map) {
         return builder.routes()
 
                 // Declared FIRST, deliberately. The gateway takes the first matching
@@ -36,51 +46,51 @@ public class GatewayConfig {
                 .route("auth-docs", r -> r
                         .path("/auth/v3/api-docs")
                         .filters(f -> f.setPath("/v3/api-docs"))
-                        .uri("lb://auth-service"))
+                        .uri(auth))
                 .route("user-docs", r -> r
                         .path("/users/v3/api-docs")
                         .filters(f -> f.setPath("/v3/api-docs"))
-                        .uri("lb://user-service"))
+                        .uri(user))
                 .route("semaphore-docs", r -> r
                         .path("/semaphore/v3/api-docs")
                         .filters(f -> f.setPath("/v3/api-docs"))
-                        .uri("lb://semaphore-service"))
+                        .uri(semaphore))
                 .route("schedule-docs", r -> r
                         .path("/schedule/v3/api-docs")
                         .filters(f -> f.setPath("/v3/api-docs"))
-                        .uri("lb://schedule-service"))
+                        .uri(schedule))
                 .route("map-docs", r -> r
                         .path("/map/v3/api-docs")
                         .filters(f -> f.setPath("/v3/api-docs"))
-                        .uri("lb://map-service"))
+                        .uri(map))
 
                 // Public: login, registration, verification.
                 .route("auth-service", r -> r
                         .path("/auth/**")
-                        .uri("lb://auth-service"))
+                        .uri(auth))
 
                 // Public and required: every other service fetches this to verify tokens.
                 .route("auth-jwks", r -> r
                         .path("/.well-known/jwks.json")
-                        .uri("lb://auth-service"))
+                        .uri(auth))
 
                 .route("user-service", r -> r
                         .path("/api/users/**")
-                        .uri("lb://user-service"))
+                        .uri(user))
 
                 // semaphore-service owns the academic catalogue as well as student
                 // progress, because the pensum is what the semaforo displays.
                 .route("semaphore-service", r -> r
                         .path("/api/semaphore/**", "/api/catalog/**")
-                        .uri("lb://semaphore-service"))
+                        .uri(semaphore))
 
                 .route("schedule-service", r -> r
                         .path("/api/schedule/**")
-                        .uri("lb://schedule-service"))
+                        .uri(schedule))
 
                 .route("map-service", r -> r
                         .path("/api/map/**")
-                        .uri("lb://map-service"))
+                        .uri(map))
 
                 .build();
     }
