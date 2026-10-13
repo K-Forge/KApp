@@ -30,7 +30,7 @@ COPY docs/api /repo/docs/api
 RUN pnpm run build
 
 # -------------------------------------------------------------------------------------------
-FROM nginx:1.27-alpine AS runtime
+FROM nginx:1.31-alpine AS runtime
 
 COPY app/frontend/web-admin/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /repo/app/frontend/web-admin/dist/web-admin/browser /usr/share/nginx/html
