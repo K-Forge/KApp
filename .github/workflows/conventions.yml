@@ -23,7 +23,7 @@ jobs:
     steps:
       # Full history: the check walks every commit between the base and the head of the pull request.
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -64,7 +64,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Compare with the organization's canonical guide
         run: |

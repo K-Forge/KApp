@@ -53,7 +53,7 @@ jobs:
       # The script comes from the base branch, which is reviewed and protected, never from the
       # branches it is about to rebase. Full history, because it walks the stack.
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.base.ref }}
           fetch-depth: 0
