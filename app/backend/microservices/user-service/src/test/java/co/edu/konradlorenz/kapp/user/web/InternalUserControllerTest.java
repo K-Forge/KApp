@@ -4,6 +4,7 @@ import co.edu.konradlorenz.kapp.common.feign.InternalTokenInterceptor;
 import co.edu.konradlorenz.kapp.user.AbstractUserServiceTest;
 import co.edu.konradlorenz.kapp.user.domain.StoredInstant;
 import co.edu.konradlorenz.kapp.user.domain.UserProfile;
+import co.edu.konradlorenz.kapp.user.domain.UserRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,6 +18,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -190,6 +192,60 @@ class InternalUserControllerTest extends AbstractUserServiceTest {
         assertThat(mongoTemplate.findById("to-delete", UserProfile.class)).isNull();
         mockMvc.perform(delete("/internal/users/to-delete").header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN))
                 .andExpect(status().isNoContent());
+    }
+
+    // ---------------------------------------------------------------------------------
+    // PUT /internal/users/{id}/roles
+    // ---------------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("roles set from auth-service reach the profile, and the directory shows them")
+    void setRoles_updatesTheProfile() throws Exception {
+        save(professor("p-1", "laura.gomez@konradlorenz.edu.co", "Laura Marcela", "Gómez Restrepo"));
+
+        mockMvc.perform(put("/internal/users/{id}/roles", "p-1")
+                        .header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"roles": ["ROLE_PROFESSOR", "ROLE_MODERATION"]}"""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value("p-1"))
+                .andExpect(jsonPath("$.roles", contains("ROLE_PROFESSOR", "ROLE_MODERATION")));
+
+        assertThat(reload("p-1").roles()).containsExactly(UserRole.ROLE_PROFESSOR, UserRole.ROLE_MODERATION);
+    }
+
+    @Test
+    @DisplayName("setting roles needs the internal token")
+    void setRoles_withoutToken_isRejected() throws Exception {
+        mockMvc.perform(put("/internal/users/{id}/roles", "p-1")
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"roles": ["ROLE_STAFF"]}"""))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("roles without exactly one profile role are rejected, and nothing changes")
+    void setRoles_withoutProfileRole_isRejected() throws Exception {
+        save(professor("p-1", "laura.gomez@konradlorenz.edu.co", "Laura Marcela", "Gómez Restrepo"));
+
+        mockMvc.perform(put("/internal/users/{id}/roles", "p-1")
+                        .header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"roles": ["ROLE_ADMIN"]}"""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[0].field").value("roles"));
+
+        assertThat(reload("p-1").roles()).containsExactly(UserRole.ROLE_PROFESSOR);
+    }
+
+    @Test
+    @DisplayName("roles for a profile that does not exist are a 404")
+    void setRoles_unknownProfile_is404() throws Exception {
+        mockMvc.perform(put("/internal/users/{id}/roles", "nobody")
+                        .header(InternalTokenInterceptor.HEADER, INTERNAL_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"roles": ["ROLE_STAFF"]}"""))
+                .andExpect(status().isNotFound());
     }
 
     private void upsert(String body) throws Exception {

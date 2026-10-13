@@ -7,6 +7,13 @@ The contracts are the source of truth: the mocks serve them as soon as they merg
 (`app/backend/microservices/mock/README.md`), and the services implement them in the pull requests
 that follow. Until a service has caught up, its contract describes where it is going, not where it is.
 
+## October 2026: user 1.1.0 (additive, internal)
+
+- **New:** `PUT /internal/users/{id}/roles`. The Auth API calls it when an administrator changes an
+  account's roles, so the directory shows them. Service-to-service only: no client calls it.
+
+Nothing to migrate.
+
 ## October 2026: semaphore 2.0.1 (additive)
 
 - **New:** `GET /api/catalog/pensums` lists every pensum without its items (`PensumSummary`),
