@@ -93,6 +93,9 @@ kapp:
       student-values: ${KAPP_MICROSOFT_STUDENT_VALUES:Student}
       professor-values: ${KAPP_MICROSOFT_PROFESSOR_VALUES:Professor}
       staff-values: ${KAPP_MICROSOFT_STAFF_VALUES:Staff}
+    # The addresses that get ROLE_ADMIN at their sign-in with Microsoft, so somebody can open the
+    # portal on a new server. Every later permission is granted in the portal.
+    first-admins: ${KAPP_FIRST_ADMINS:}
 
     jwt:
       # Base64-encoded PEM. Leave blank locally and an ephemeral pair is generated,

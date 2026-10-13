@@ -166,7 +166,7 @@ abstract class AbstractAuthIntegrationTest {
         Instant now = Instant.now();
         return credentials.save(new Credential(null, UUID.randomUUID().toString(), email,
                 passwordEncoder.encode(rawPassword), roles, status, emailVerified,
-                Credential.Provider.LOCAL, null, null, now, now, null, null));
+                Credential.Provider.LOCAL, null, null, now, now, null, null, null, null));
     }
 
     /** A signed access token for an identity that need not exist in the database at all -

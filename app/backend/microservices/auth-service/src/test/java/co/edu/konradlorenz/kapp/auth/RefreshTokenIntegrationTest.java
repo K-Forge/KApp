@@ -191,7 +191,7 @@ class RefreshTokenIntegrationTest extends AbstractAuthIntegrationTest {
         String token = signIn();
         credentials.save(new Credential(account.id(), account.userId(), account.email(), account.passwordHash(),
                 List.of("ROLE_STAFF", "ROLE_ADMIN"), account.status(), account.emailVerified(), account.provider(),
-                null, null, account.createdAt(), Instant.now(), null, null));
+                null, null, account.createdAt(), Instant.now(), null, null, null, null));
 
         JsonNode renewed = body(refresh(token).andExpect(status().isOk())
                 .andExpect(jsonPath("$.roles", contains("ROLE_STAFF", "ROLE_ADMIN"))));

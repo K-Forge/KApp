@@ -83,8 +83,10 @@ public class AccountRolesService {
         roles.add(profileRole);
         KappRoles.PERMISSIONS.stream().filter(permissions::contains).forEach(roles::add);
 
-        if (!roles.equals(account.roles())) {
-            credentials.save(account.withRoles(roles, Instant.now()));
+        if (!roles.equals(account.roles()) || !account.profileRoleIsAdministrators()) {
+            // From now on the profile role is the administrator's: a sign-in with Microsoft no
+            // longer replaces it with what the directory says.
+            credentials.save(account.withRoles(roles, true, Instant.now()));
             log.info("Roles of account {} set to {} by {}", userId, roles, requestedBy);
         }
         try {

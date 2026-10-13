@@ -15,9 +15,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  *
  * <p>It deliberately does NOT own profiles. Names, the picture and the activation state live
  * in user-service, which this service calls exactly once, during registration; nothing academic
- * is kept on either side, since a student's program comes from SINU. Splitting them this way keeps authentication behind a single seam, which
- * is the piece Microsoft Entra ID replaces once the university grants an application
- * registration - see {@code identity.EntraIdAdapter}.
+ * is kept on either side, since a student's program comes from SINU. Members sign in with
+ * Microsoft - see {@code identity.EntraIdAdapter} - and this service issues KApp's own tokens.
  *
  * <p>{@code @EnableFeignClients} activates {@code UserProfileClient}, that single outbound
  * call.

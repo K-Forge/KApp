@@ -21,4 +21,7 @@ public interface CredentialRepository extends MongoRepository<Credential, String
      * it is what an administrator's "deactivate" has to travel on.
      */
     Optional<Credential> findByUserId(String userId);
+
+    /** By the person's id at Microsoft, {@code oid}: how a sign-in with Microsoft finds its account. */
+    Optional<Credential> findByExternalId(String externalId);
 }
