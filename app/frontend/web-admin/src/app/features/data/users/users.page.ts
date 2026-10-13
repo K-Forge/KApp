@@ -17,7 +17,7 @@ import { locale, t } from '../../../core/i18n/i18n.service';
 import { formatDate } from '@angular/common';
 import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
 import { CopyButtonComponent } from '../../../shared/ui/copy-button/copy-button.component';
-import { ACCOUNT_ROLES, AccountsService, programOf, type AccountRole, type TemporaryPassword } from './accounts.service';
+import { ACCOUNT_ROLES, AccountsService, type AccountRole, type TemporaryPassword } from './accounts.service';
 
 const PAGE_SIZE = 20;
 
@@ -187,23 +187,12 @@ const PAGE_SIZE = 20;
         </div>
         <div class="field">
           <label for="acc-role">{{ 'Role' | t }}</label>
-          <select id="acc-role" formControlName="role">
+          <select id="acc-role" formControlName="profileRole">
             @for (role of accountRoles; track role) {
               <option [value]="role">{{ roleLabel(role) }}</option>
             }
           </select>
         </div>
-        @if (createForm.controls.role.value === 'ROLE_STUDENT') {
-          <div class="field" [class.invalid]="invalid('studentCode')">
-            <label for="acc-code">{{ 'Student code' | t }}</label>
-            <input id="acc-code" type="text" inputmode="numeric" formControlName="studentCode" autocomplete="off" />
-            @if (invalid('studentCode')) {
-              <span class="error">{{ '6 to 20 digits.' | t }}</span>
-            } @else if (program(); as code) {
-              <span class="hint">{{ 'Program {code}, from the first three digits.' | t: { code } }}</span>
-            }
-          </div>
-        }
         <div class="row">
           <button type="submit" class="btn btn-primary" [disabled]="creating()">
             {{ creating() ? ('Creating…' | t) : ('Create the account' | t) }}
@@ -341,7 +330,7 @@ export class UsersPage {
   }
 
   roleLabel(role: AccountRole): string {
-    return role === 'ROLE_PROFESSOR' ? t('professor') : t('student');
+    return role === 'ROLE_PROFESSOR' ? t('professor') : role === 'ROLE_STAFF' ? t('administrative staff') : t('student');
   }
 
   private blankAccount() {
@@ -349,17 +338,11 @@ export class UsersPage {
       firstName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(50)] }),
       lastName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(50)] }),
       email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email, Validators.maxLength(100)] }),
-      role: new FormControl<AccountRole>('ROLE_PROFESSOR', { nonNullable: true }),
-      studentCode: new FormControl('', { nonNullable: true, validators: [Validators.pattern(/^\d{6,20}$/)] }),
+      profileRole: new FormControl<AccountRole>('ROLE_PROFESSOR', { nonNullable: true }),
     });
   }
 
-  /** The program the student code belongs to, shown under it: the server reads it the same way. */
-  program(): string {
-    return programOf(this.createForm.controls.studentCode.value);
-  }
-
-  invalid(name: 'firstName' | 'lastName' | 'email' | 'studentCode'): boolean {
+  invalid(name: 'firstName' | 'lastName' | 'email'): boolean {
     const control = this.createForm.controls[name];
     return control.invalid && control.touched;
   }
@@ -370,16 +353,9 @@ export class UsersPage {
     this.createModal?.open();
   }
 
-  /**
-   * The account and its profile, at once, with a temporary password to hand over. A student
-   * needs its two codes, which the server checks too; a professor's are not sent.
-   */
+  /** The account and its profile, at once, with a temporary password to hand over. */
   createAccount(): void {
     const raw = this.createForm.getRawValue();
-    const student = raw.role === 'ROLE_STUDENT';
-    if (student && !raw.studentCode.trim()) {
-      this.createForm.controls.studentCode.setErrors({ required: true });
-    }
     if (this.createForm.invalid) {
       this.createForm.markAllAsTouched();
       return;
@@ -392,8 +368,7 @@ export class UsersPage {
         email: raw.email.trim(),
         firstName: raw.firstName.trim(),
         lastName: raw.lastName.trim(),
-        role: raw.role,
-        ...(student ? { studentCode: raw.studentCode.trim() } : {}),
+        profileRole: raw.profileRole,
       })
       .subscribe({
         next: (password) => {

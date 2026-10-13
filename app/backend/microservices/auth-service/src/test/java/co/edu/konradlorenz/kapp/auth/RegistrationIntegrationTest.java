@@ -143,15 +143,16 @@ class RegistrationIntegrationTest extends AbstractAuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("requires studentCode and programCode for a student invitation code")
-    void institutionalRegistration_studentCodeRequiresAcademicFields() throws Exception {
+    @DisplayName("a student invitation code registers a student without any code: KApp keeps none")
+    void institutionalRegistration_studentNeedsNoCode() throws Exception {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(institutionalPayload("no.academic@konradlorenz.edu.co",
                                 STUDENT_CODE, null, null)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isCreated());
 
-        assertThat(credentials.existsByEmailIgnoreCase("no.academic@konradlorenz.edu.co")).isFalse();
+        assertThat(credentials.findByEmailIgnoreCase("no.academic@konradlorenz.edu.co").orElseThrow().roles())
+                .containsExactly("ROLE_STUDENT");
     }
 
     @Test

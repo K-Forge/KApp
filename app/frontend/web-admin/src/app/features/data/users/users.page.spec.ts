@@ -25,11 +25,11 @@ describe('UsersPage', () => {
   const issued = (email: string, role: string) => ({
     userId: 'u-1',
     email,
-    role,
+    roles: [role],
     temporaryPassword: 'K7QM-X2RP-94TB',
     expiresAt: '2026-10-08T15:00:00Z',
   });
-  const create = vi.fn((request: AccountRequest) => of(issued(request.email, request.role)));
+  const create = vi.fn((request: AccountRequest) => of(issued(request.email, request.profileRole)));
   const issueTemporaryPassword = vi.fn(() => of(issued('pepita@kforge.dev', 'ROLE_STUDENT')));
   const deleteAccount = vi.fn(() => of(undefined));
 
@@ -60,29 +60,22 @@ describe('UsersPage', () => {
   });
 
   it('creates a professor account and shows its temporary password, with the message to send', () => {
-    page.createForm.setValue({ firstName: ' Ana ', lastName: 'Ruiz', email: 'ana.ruiz@konradlorenz.edu.co', role: 'ROLE_PROFESSOR', studentCode: '' });
+    page.createForm.setValue({ firstName: ' Ana ', lastName: 'Ruiz', email: 'ana.ruiz@konradlorenz.edu.co', profileRole: 'ROLE_PROFESSOR' });
 
     page.createAccount();
 
-    expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'ana.ruiz@konradlorenz.edu.co', firstName: 'Ana', lastName: 'Ruiz', role: 'ROLE_PROFESSOR' });
+    expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'ana.ruiz@konradlorenz.edu.co', firstName: 'Ana', lastName: 'Ruiz', profileRole: 'ROLE_PROFESSOR' });
     expect(page.issued()).toMatchObject({ name: 'Ana Ruiz', created: true, password: { temporaryPassword: 'K7QM-X2RP-94TB' } });
     expect(page.message()).toContain('K7QM-X2RP-94TB');
     expect(page.message()).toContain('ana.ruiz@konradlorenz.edu.co');
   });
 
-  it('asks a student account for its code before creating it, and reads its program from it', () => {
-    create.mockClear();
-    page.createForm.setValue({ firstName: 'Pepito', lastName: 'Perez', email: 'pepito@konradlorenz.edu.co', role: 'ROLE_STUDENT', studentCode: '' });
-
-    page.createAccount();
-    expect(create).not.toHaveBeenCalled();
-    expect(page.invalid('studentCode')).toBe(true);
-
-    page.createForm.patchValue({ studentCode: '506900001' });
-    // The program is the code's first three digits: shown, and left to the server to read the same way.
-    expect(page.program()).toBe('506');
-    page.createAccount();
-    expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'pepito@konradlorenz.edu.co', firstName: 'Pepito', lastName: 'Perez', role: 'ROLE_STUDENT', studentCode: '506900001' });
+  it('creates a student or an administrative employee with no code at all: KApp keeps none', () => {
+    for (const profileRole of ['ROLE_STUDENT', 'ROLE_STAFF'] as const) {
+      page.createForm.setValue({ firstName: 'Pepito', lastName: 'Perez', email: 'pepito@konradlorenz.edu.co', profileRole });
+      page.createAccount();
+      expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'pepito@konradlorenz.edu.co', firstName: 'Pepito', lastName: 'Perez', profileRole });
+    }
   });
 
   it('gives somebody else a new temporary password once it is confirmed', () => {
