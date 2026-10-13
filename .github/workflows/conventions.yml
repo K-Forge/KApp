@@ -39,9 +39,13 @@ jobs:
         run: |
           status=0
           bash scripts/check-git-conventions.sh branch "$HEAD_REF" "$BASE_REF" || status=1
-          bash scripts/check-git-conventions.sh title "$PR_TITLE" || status=1
           # Dependabot writes its own commits and nobody can reword them. The title is still checked,
-          # because squash merging turns it into the commit that stays on develop.
+          # because squash merging turns it into the commit that stays on develop, but its length only
+          # warns: Dependabot names the whole directory, and a weekly hand edit would be the only fix.
+          case $HEAD_REF in
+            dependabot/*) LONG_SUBJECT=warn bash scripts/check-git-conventions.sh title "$PR_TITLE" || status=1 ;;
+            *) bash scripts/check-git-conventions.sh title "$PR_TITLE" || status=1 ;;
+          esac
           # A release carries every commit develop gathered since the last one. Those were checked by
           # their own pull requests, and some predate this check (#24 kept a trailer that develop can
           # no longer drop), so only the release's own commits are checked on the way to main.
