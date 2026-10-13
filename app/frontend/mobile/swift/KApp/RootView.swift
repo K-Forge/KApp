@@ -1,129 +1,145 @@
 import SwiftUI
 
-/// Los cinco destinos, en el orden en que aparecen de izquierda a derecha.
-/// Inicio va al centro a propósito.
-enum KTab: Int, CaseIterable, Identifiable {
-    case perfil, semaforo, inicio, mapa, horario
-
-    var id: Int { rawValue }
-
-    var title: String {
-        switch self {
-        case .perfil: "Perfil"
-        case .semaforo: "Semáforo"
-        case .inicio: "Inicio"
-        case .mapa: "Mapa"
-        case .horario: "Horario"
-        }
-    }
-
-    var symbol: String {
-        switch self {
-        case .perfil: "person"
-        case .semaforo: "square.grid.2x2"
-        case .inicio: "house"
-        case .mapa: "mappin.and.ellipse"
-        case .horario: "calendar"
-        }
-    }
-}
-
+/// The login, or the signed-in app. Nothing else decides which.
 struct RootView: View {
-    /// Provisional. Cuando exista la capa de red esto pasa a ser el token guardado en el
-    /// llavero: la sesión del estudiante se queda en el teléfono y no expira sola.
-    /// Ver el pendiente de refresh token en el README.
-    @State private var isSignedIn = false
+    let app: AppModel
 
     var body: some View {
-        if isSignedIn {
-            MainShell()
+        if let workspace = app.workspace {
+            MainShell(workspace: workspace, app: app)
+                .transition(.opacity)
         } else {
-            LoginView { isSignedIn = true }
+            LoginFlow(app: app)
+                .transition(.opacity)
         }
     }
 }
 
-/// La app con sesión: la pantalla activa y la barra flotante encima.
+/// The two screens outside the bar: the login and the invitation code.
 ///
-/// No se usa `TabView` porque la barra del diseño flota, va separada de los bordes y lleva
-/// su propia sombra. `TabView` ancla la suya al borde inferior y no deja darle esa forma.
+/// The bar is not shown here. It would offer four destinations to somebody who has not signed in.
+private struct LoginFlow: View {
+    let app: AppModel
+    @State private var path: [Route] = []
+    // Held here rather than built in `body`, which runs again on every change: a view model made
+    // there would be a new one each time, and would take what the student typed with it.
+    @State private var model: LoginViewModel
+
+    enum Route: Hashable { case invitation }
+
+    init(app: AppModel) {
+        self.app = app
+        _model = State(initialValue: LoginViewModel(auth: app.services.auth))
+    }
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            LoginView(
+                model: model,
+                notice: app.signedOutNotice,
+                onSignedIn: { token in
+                    withAnimation {
+                        app.signIn(token, email: model.email, keepSignedIn: model.keepSignedIn)
+                    }
+                },
+                onDismissNotice: app.clearSignedOutNotice,
+                onUseInvitationCode: { path.append(.invitation) }
+            )
+            .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(for: Route.self) { _ in
+                InvitationView(onBack: { path.removeLast() })
+                    .toolbar(.hidden, for: .navigationBar)
+            }
+        }
+    }
+}
+
+/// A signed-in screen with the floating bar over it.
+///
+/// The bar is drawn after the content and in the same stack, so it sits on top of whatever scrolls
+/// under it. Every tab refreshes when it is selected, which is how a course marked as passed on the
+/// semáforo reaches the progress card on Inicio without the two screens knowing about each other.
 struct MainShell: View {
-    @State private var tab: KTab = .inicio
+    let workspace: Workspace
+    let app: AppModel
 
     var body: some View {
         ZStack(alignment: .bottom) {
             KColor.background.ignoresSafeArea()
 
             Group {
-                switch tab {
-                case .inicio: HomeView()
-                case .perfil: PlaceholderView(tab: .perfil)
-                case .semaforo: PlaceholderView(tab: .semaforo)
-                case .mapa: PlaceholderView(tab: .mapa)
-                case .horario: PlaceholderView(tab: .horario)
+                switch workspace.selectedTab {
+                case .home:
+                    HomeView(model: workspace.home, open: workspace.open)
+                case .schedule:
+                    ScheduleView(model: workspace.schedule, open: workspace.open)
+                case .semaphore:
+                    SemaphoreView(model: workspace.semaphore)
+                case .map:
+                    PlaceholderView(destination: .map)
+                case .profile:
+                    ProfileView(model: workspace.profile, onSignOut: {
+                        withAnimation { app.signOut() }
+                    })
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            KTabBar(selection: $tab)
+            KTabBar(selection: workspace.selectedTab, onSelect: workspace.open)
                 .padding(.horizontal, KMetrics.tabBarInset)
                 .padding(.bottom, KMetrics.tabBarBottom)
         }
-        .ignoresSafeArea(.keyboard)
+        .task(id: workspace.selectedTab) {
+            await refresh(workspace.selectedTab)
+        }
+    }
+
+    private func refresh(_ tab: KAppDestination) async {
+        switch tab {
+        case .home: await workspace.home.load()
+        case .schedule: await workspace.schedule.load()
+        case .semaphore: await workspace.semaphore.load()
+        case .profile: await workspace.profile.load()
+        case .map: break
+        }
     }
 }
 
+/// The floating bar: Perfil, Semáforo, Inicio, Mapa, Horario.
 struct KTabBar: View {
-    @Binding var selection: KTab
+    let selection: KAppDestination
+    let onSelect: (KAppDestination) -> Void
 
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(KTab.allCases) { tab in
+            ForEach(KAppDestination.allCases) { tab in
+                let active = tab == selection
                 Button {
-                    selection = tab
+                    onSelect(tab)
                 } label: {
                     VStack(spacing: 3) {
-                        Image(systemName: tab.symbol)
-                            .font(.system(size: 20, weight: selection == tab ? .semibold : .regular))
+                        Image(systemName: active ? tab.activeSymbol : tab.symbol)
+                            .font(.system(size: 20, weight: active ? .semibold : .regular))
+                            .frame(height: 24)
                         Text(tab.title)
-                            .font(KType.tab)
+                            .font(KType.tab.weight(active ? .semibold : .regular))
                     }
-                    .foregroundStyle(selection == tab ? KColor.action : KColor.iconIdle)
-                    .frame(maxWidth: .infinity)
+                    .foregroundStyle(active ? KColor.action : KColor.iconIdle)
+                    .frame(maxWidth: .infinity, minHeight: KMetrics.buttonHeight)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityAddTraits(active ? [.isSelected] : [])
             }
         }
+        .padding(.horizontal, 4)
         .frame(height: KMetrics.tabBarHeight)
         .background(KColor.surface)
         .clipShape(RoundedRectangle(cornerRadius: KMetrics.tabBarRadius, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: KMetrics.tabBarRadius, style: .continuous)
-                .stroke(KColor.border.opacity(0.6), lineWidth: 1)
+                .stroke(KColor.borderSoft, lineWidth: 1)
         )
-        .shadow(color: KColor.purple.opacity(0.20), radius: 13, x: 0, y: 8)
+        .shadow(color: KColor.brand.opacity(0.20), radius: 13, x: 0, y: 8)
     }
-}
-
-/// Lo que todavía no existe. Semáforo, Mapa, Horario y Perfil se diseñan después de
-/// Login e Inicio; los wireframes viejos están en `docs/design/`.
-struct PlaceholderView: View {
-    let tab: KTab
-
-    var body: some View {
-        VStack(spacing: 10) {
-            Image(systemName: tab.symbol)
-                .font(.system(size: 32, weight: .light))
-                .foregroundStyle(KColor.textFaint)
-            Text(tab.title)
-                .font(KType.section)
-                .foregroundStyle(KColor.text)
-            Text("Sin diseñar todavía.")
-                .font(KType.meta)
-                .foregroundStyle(KColor.textSoft)
-        }
-    }
-}
-
-#Preview {
-    MainShell()
 }

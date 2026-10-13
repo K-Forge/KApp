@@ -1,122 +1,177 @@
 import SwiftUI
 
+/// Inicio.
+///
+/// Everything on it that names another screen opens that screen: the avatar, the four shortcuts,
+/// the two section links, "Cómo llegar", and the button on each empty state. Mirrors
+/// `ui/home/HomeScreen.kt`.
 struct HomeView: View {
-    /// Provisional: sale de `SampleData` hasta que exista el cliente de red.
-    /// Después, `GET /api/schedule/me/day` y `GET /api/semaphore/me/summary`, que son
-    /// servicios distintos y fallan por separado — cada bloque necesita su propio estado
-    /// de carga y de error.
-    private let classes = SampleData.today
-    private let progress = SampleData.progress
-    private let firstName = "Pepe"
-    private let initials = "PP"
-
-    /// La primera del día es la tarjeta grande; el resto va en la lista de abajo.
-    private var next: ClassOccurrence? { classes.first }
-    private var rest: [ClassOccurrence] { Array(classes.dropFirst()) }
+    let model: HomeViewModel
+    let open: (KAppDestination) -> Void
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                band
-                content
-            }
-        }
-        .background(KColor.background)
-        // PENDIENTE: el morado debería llegar hasta el borde superior, por detrás de la
-        // status bar, como en la maqueta. Hoy queda una franja clara arriba.
-        //
-        // No basta con ignoresSafeArea en el fondo de la banda ni en el del ScrollView:
-        // esta vista vive dentro del ZStack de MainShell, que ya está acotado al área
-        // segura. La salida es leer el inset real (GeometryReader en MainShell) y pasárselo
-        // a la banda, o montar el color de marca como capa base del ZStack.
-    }
+        BandScreen(
+            title: model.student.firstName.isEmpty ? "Hola" : "Hola, \(model.student.firstName)",
+            onRefresh: model.load,
+            trailing: { avatar }
+        ) {
+            dayCard
 
-    // MARK: - Banda de marca
-
-    private var band: some View {
-        HStack(spacing: 12) {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(KColor.surface)
-                .frame(width: 40, height: 40)
-                .overlay(
-                    Image("KonradLogo")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30)
-                )
-
-            Text("Hola, \(firstName)")
-                .font(KType.greeting)
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            Circle()
-                .fill(.white.opacity(0.18))
-                .frame(width: 34, height: 34)
-                .overlay(Circle().stroke(.white.opacity(0.28), lineWidth: 1))
-                .overlay(
-                    Text(initials)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.white)
-                )
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 6)
-        // 44 abajo, no 12: la tarjeta de la próxima clase sube 28 para montarse sobre la
-        // banda, y sin este colchón se come el saludo.
-        .padding(.bottom, 44)
-        .frame(maxWidth: .infinity)
-        // El morado se extiende bajo la status bar, pero el saludo respeta el área segura.
-        // Medir ese margen a mano (antes eran 54 fijos) se rompe en cuanto cambia el
-        // recorte de la pantalla: en el 17 Pro la isla es más alta y tapaba el saludo.
-        .background(KColor.brand.ignoresSafeArea(edges: .top))
-    }
-
-    // MARK: - Contenido
-
-    private var content: some View {
-        VStack(spacing: 0) {
-            if let next {
-                NextClassCard(occurrence: next)
-                    .padding(.top, -28)
-            } else {
-                NoClassesCard()
-                    .padding(.top, -28)
-            }
-
-            QuickAccessRow()
+            shortcuts
                 .padding(.top, 18)
 
-            SectionHeader(title: "Tu semestre", action: "Ver semáforo")
-                .padding(.top, 24)
-            SemesterCard(progress: progress)
-                .padding(.top, 12)
+            SectionHeading(title: "Tu semestre", link: "Ver semáforo") { open(.semaphore) }
+                .padding(.top, 14)
+            semesterCard
+                .padding(.top, 4)
 
-            if !rest.isEmpty {
-                SectionHeader(title: "Resto del día", action: "Ver horario")
-                    .padding(.top, 24)
+            if case .classes(_, let later) = model.day, !later.isEmpty {
+                SectionHeading(title: "Resto del día", link: "Ver horario") { open(.schedule) }
+                    .padding(.top, 14)
                 VStack(spacing: 10) {
-                    ForEach(rest) { ClassRow(occurrence: $0) }
+                    ForEach(Array(later.enumerated()), id: \.offset) { _, item in
+                        ClassRow(summary: item)
+                    }
                 }
-                .padding(.top, 12)
+                .padding(.top, 4)
             }
         }
-        .padding(.horizontal, KMetrics.screenPadding)
-        // Deja pasar la barra flotante sin que tape la última fila.
-        .padding(.bottom, KMetrics.tabBarHeight + KMetrics.tabBarBottom + 24)
+    }
+
+    private var avatar: some View {
+        Button { open(.profile) } label: {
+            Text(model.student.initials)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 34, height: 34)
+                .background(Circle().fill(.white.opacity(0.18)))
+                .overlay(Circle().stroke(.white.opacity(0.28), lineWidth: 1))
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Abrir tu perfil")
+    }
+
+    // MARK: - Day
+
+    @ViewBuilder
+    private var dayCard: some View {
+        switch model.day {
+        case .loading:
+            VStack(alignment: .leading, spacing: 12) {
+                SkeletonBar(width: 104, height: 11)
+                SkeletonBar(width: 188, height: 20, radius: 7)
+                SkeletonBar(width: 236, height: 13, color: KColor.borderSoft)
+                SkeletonBar(width: 142, height: 44, color: KColor.borderSoft, radius: 14)
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .kCard(elevated: true)
+            .accessibilityLabel("Cargando")
+
+        case .noSchedule:
+            NoticeCard(
+                systemImage: "calendar.badge.plus",
+                tint: KColor.subject,
+                title: "Aún no armas tu horario",
+                message: "Agrega tus materias y aparecerán aquí.",
+                actionTitle: "Armar mi horario"
+            ) { open(.schedule) }
+
+        case .noClassesToday:
+            NoticeCard(
+                systemImage: "lightbulb",
+                tint: KColor.brand,
+                circle: KColor.inProgress,
+                title: "Hoy no tienes clases",
+                actionTitle: "Ver la semana",
+                actionIsLink: true
+            ) { open(.schedule) }
+
+        case .doneForToday:
+            NoticeCard(
+                systemImage: "checkmark",
+                tint: KColor.brand,
+                circle: KColor.inProgress,
+                title: "Terminaste las clases de hoy",
+                actionTitle: "Ver la semana",
+                actionIsLink: true
+            ) { open(.schedule) }
+
+        case .classes(let next, _):
+            NextClassCard(summary: next) { open(.map) }
+
+        case .failed(let error):
+            FailureCard(error: error) {
+                Task { await model.loadDay() }
+            }
+        }
+    }
+
+    // MARK: - Shortcuts
+
+    private var shortcuts: some View {
+        HStack(spacing: 12) {
+            ForEach([KAppDestination.semaphore, .schedule, .map, .profile]) { destination in
+                Button { open(destination) } label: {
+                    VStack(spacing: 8) {
+                        Image(systemName: destination.symbol)
+                            .font(.system(size: 20))
+                            .foregroundStyle(destination.colour)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .background(destination.colour.opacity(destination == .schedule ? 0.14 : 0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: KMetrics.tileRadius, style: .continuous))
+                        Text(destination.title)
+                            .font(KType.label)
+                            .foregroundStyle(KColor.text)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    // MARK: - Semester
+
+    @ViewBuilder
+    private var semesterCard: some View {
+        switch model.semester {
+        case .loading:
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    SkeletonBar(width: 96, height: 14, radius: 7)
+                    Spacer()
+                    SkeletonBar(width: 54, height: 22, radius: 7)
+                }
+                SkeletonBar(width: nil, height: 10, color: KColor.borderSoft, radius: 5)
+                SkeletonBar(width: 220, height: 11, color: KColor.borderSoft)
+            }
+            .padding(KMetrics.cardPadding)
+            .kCard()
+
+        case .ready(let progress):
+            SemesterCard(progress: progress)
+
+        case .failed(let error):
+            FailureCard(error: error) {
+                Task { await model.loadSemester() }
+            }
+        }
     }
 }
 
-// MARK: - Piezas
+// MARK: - Pieces
 
-struct NextClassCard: View {
-    let occurrence: ClassOccurrence
+private struct NextClassCard: View {
+    let summary: ClassSummary
+    let onDirections: () -> Void
 
     var body: some View {
         HStack(spacing: 0) {
-            // El riel lleva el color que mandó el servidor.
-            Color(apiHex: occurrence.color)
-                .frame(width: 6)
+            Color(apiHex: summary.colorHex).frame(width: 6)
 
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
@@ -125,132 +180,54 @@ struct NextClassCard: View {
                         .tracking(0.9)
                         .foregroundStyle(KColor.textSoft)
                     Spacer()
-                    Text("Empieza en 25 min")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(KColor.brand)
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 4)
-                        .background(KColor.green.opacity(0.32))
-                        .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                    if let minutes = summary.startsInMinutes {
+                        Text(ClassSummary.startsInLabel(minutes))
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(KColor.brand)
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 4)
+                            .background(KColor.inProgress.opacity(0.32))
+                            .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                    }
                 }
+                .frame(minHeight: 22)
 
-                Text(occurrence.courseName)
+                Text(summary.courseName)
                     .font(KType.subject)
                     .foregroundStyle(KColor.text)
                     .padding(.top, 9)
 
-                Text("\(occurrence.startTime) – \(occurrence.endTime) · \(occurrence.placeLine)")
+                Text("\(summary.startTime) – \(summary.endTime) · \(summary.place)")
                     .font(.system(size: 14))
                     .foregroundStyle(KColor.textSoft)
                     .padding(.top, 3)
 
-                Button { } label: {
-                    HStack(spacing: 7) {
-                        Image(systemName: "mappin.and.ellipse")
-                        Text("Cómo llegar").font(KType.rowTitle)
-                    }
-                    .foregroundStyle(KColor.onAction)
-                    .padding(.horizontal, 18)
-                    .frame(height: KMetrics.buttonHeight)
-                    .background(KColor.action)
-                    .clipShape(RoundedRectangle(cornerRadius: KMetrics.buttonRadius, style: .continuous))
-                }
-                .buttonStyle(.plain)
-                .padding(.top, 14)
+                PrimaryButton(title: "Cómo llegar", systemImage: "mappin.and.ellipse", fullWidth: false, action: onDirections)
+                    .padding(.top, 14)
             }
             .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .fixedSize(horizontal: false, vertical: true)
-        .background(KColor.surface)
-        .clipShape(RoundedRectangle(cornerRadius: KMetrics.cardRadius, style: .continuous))
-        .shadow(color: KColor.purple.opacity(0.16), radius: 14, x: 0, y: 10)
-    }
-}
-
-/// `GET /api/schedule/me/day` devolvió `[]`: hoy no hay clases. No es un error.
-struct NoClassesCard: View {
-    var body: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "lightbulb")
-                .font(.system(size: 22))
-                .foregroundStyle(KColor.brand)
-                .frame(width: 48, height: 48)
-                .background(KColor.green.opacity(0.30))
-                .clipShape(Circle())
-            Text("Hoy no tienes clases")
-                .font(KType.section)
-                .foregroundStyle(KColor.text)
-            Button("Ver la semana") { }
-                .font(KType.body)
-                .tint(KColor.action)
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 168)
-        .background(KColor.surface)
-        .clipShape(RoundedRectangle(cornerRadius: KMetrics.cardRadius, style: .continuous))
-        .shadow(color: KColor.purple.opacity(0.16), radius: 14, x: 0, y: 10)
-    }
-}
-
-struct QuickAccessRow: View {
-    /// Un color de la K por destino. El rosa no está: es de las acciones.
-    private let tiles: [(String, String, Color)] = [
-        ("Semáforo", "square.grid.2x2", KColor.forest),
-        ("Horario", "calendar", KColor.blue),
-        ("Mapa", "mappin.and.ellipse", KColor.purple),
-        ("Perfil", "person", KColor.brown)
-    ]
-
-    var body: some View {
-        HStack(spacing: 12) {
-            ForEach(tiles, id: \.0) { title, symbol, tint in
-                VStack(spacing: 8) {
-                    Image(systemName: symbol)
-                        .font(.system(size: 20))
-                        .foregroundStyle(tint)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(tint.opacity(0.13))
-                        .clipShape(RoundedRectangle(cornerRadius: KMetrics.tileRadius, style: .continuous))
-                    Text(title)
-                        .font(KType.label)
-                        .foregroundStyle(KColor.text)
-                }
-            }
-        }
-    }
-}
-
-struct SectionHeader: View {
-    let title: String
-    let action: String
-
-    var body: some View {
-        HStack {
-            Text(title)
-                .font(KType.section)
-                .foregroundStyle(KColor.text)
-            Spacer()
-            Button(action) { }
-                .font(KType.link)
-                .tint(KColor.action)
-        }
+        .kCard(elevated: true)
     }
 }
 
 struct SemesterCard: View {
-    let progress: ProgressSummary
+    let progress: SemesterProgress
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Semestre \(progress.currentLevel)")
+                    Text("Semestre \(progress.level)")
                         .font(KType.rowTitle)
                         .foregroundStyle(KColor.text)
-                    Text("5 materias en curso")
-                        .font(KType.meta)
-                        .foregroundStyle(KColor.textSoft)
+                    if let courses = progress.coursesInProgress {
+                        Text(plural(courses, "materia en curso", "materias en curso"))
+                            .font(KType.meta)
+                            .foregroundStyle(KColor.textSoft)
+                    }
                 }
                 Spacer()
                 Text("\(Int(progress.percentComplete.rounded()))%")
@@ -258,26 +235,19 @@ struct SemesterCard: View {
                     .foregroundStyle(KColor.brand)
             }
 
-            GeometryReader { geo in
-                HStack(spacing: 0) {
-                    KColor.passed.frame(width: geo.size.width * progress.passedFraction)
-                    KColor.inProgress.frame(width: geo.size.width * progress.inProgressFraction)
-                    KColor.pending
-                }
-            }
-            .frame(height: 10)
-            .clipShape(Capsule())
-            .padding(.top, 13)
+            ProgressBar(passed: progress.passedFraction, inProgress: progress.inProgressFraction)
+                .padding(.top, 13)
 
             HStack(spacing: 14) {
-                legend(KColor.passed, "\(progress.creditsPassed) aprobados")
+                legend(KColor.passed, plural(progress.creditsPassed, "aprobado", "aprobados"))
                 legend(KColor.inProgress, "\(progress.creditsInProgress) en curso")
-                legend(KColor.pending, "\(progress.creditsRemaining) restantes")
+                legend(KColor.pending, plural(progress.creditsRemaining, "restante", "restantes"))
             }
             .padding(.top, 13)
         }
         .padding(KMetrics.cardPadding)
         .kCard()
+        .accessibilityElement(children: .combine)
     }
 
     private func legend(_ color: Color, _ text: String) -> some View {
@@ -290,42 +260,62 @@ struct SemesterCard: View {
     }
 }
 
+/// Green for credits passed, lime for credits in progress, grey for the rest.
+struct ProgressBar: View {
+    let passed: Double
+    let inProgress: Double
+
+    var body: some View {
+        GeometryReader { geo in
+            HStack(spacing: 0) {
+                KColor.passed.frame(width: geo.size.width * min(max(passed, 0), 1))
+                KColor.inProgress.frame(width: geo.size.width * min(max(inProgress, 0), 1 - min(max(passed, 0), 1)))
+                KColor.pending
+            }
+        }
+        .frame(height: 10)
+        .clipShape(Capsule())
+    }
+}
+
 struct ClassRow: View {
-    let occurrence: ClassOccurrence
+    let summary: ClassSummary
 
     var body: some View {
         HStack(spacing: 0) {
-            Color(apiHex: occurrence.color)
-                .frame(width: 4)
+            Color(apiHex: summary.colorHex).frame(width: 4)
 
             HStack(spacing: 14) {
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(occurrence.startTime)
+                    Text(summary.startTime)
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(KColor.text)
-                    Text(occurrence.endTime)
+                    Text(summary.endTime)
                         .font(KType.label)
-                        .foregroundStyle(KColor.textFaint)
+                        .foregroundStyle(KColor.placeholder)
                 }
                 .frame(width: 42, alignment: .leading)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(occurrence.courseName)
+                    Text(summary.courseName)
                         .font(KType.rowTitle)
                         .foregroundStyle(KColor.text)
-                    Text(occurrence.placeLine)
+                        .lineLimit(2)
+                    Text(summary.place)
                         .font(KType.label)
                         .foregroundStyle(KColor.textSoft)
                 }
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 14)
+            .padding(.vertical, 10)
         }
-        .frame(height: KMetrics.rowHeight)
+        .frame(minHeight: KMetrics.rowHeight)
         .kCard(radius: KMetrics.rowRadius)
     }
 }
 
-#Preview {
-    HomeView()
+/// "1 aprobado", "112 aprobados".
+func plural(_ count: Int, _ one: String, _ other: String) -> String {
+    "\(count) \(count == 1 ? one : other)"
 }

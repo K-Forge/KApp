@@ -1,59 +1,74 @@
 import SwiftUI
 
-/// Los colores de la K y el papel que cumple cada uno.
+/// The colours of the K and the role each one plays.
 ///
-/// Los siete hex salen de `docs/K-COLORS.md`. No se inventan colores aquí: si hace falta
-/// un tono nuevo, se deriva de estos con opacidad, y si eso no alcanza, se discute y se
-/// agrega primero al documento y a `docs/design/mobile/Tokens.dc.html`.
+/// The seven brand colours are the ones in `docs/K-COLORS.md`; the greys and tints are the ones
+/// `docs/design/mobile/Tokens.dc.html` derives from them. The names match
+/// `ui/theme/Color.kt` in the Android client, so the two can be read side by side.
 enum KColor {
 
-    // MARK: - La paleta
-
-    /// Rosa. En la app significa *tocable* y nada más.
-    static let pink = Color(hex: 0xD51A65)
-    /// Verde. Solo como relleno: el texto encima va en `brand`, nunca blanco.
-    static let green = Color(hex: 0xC9D329)
-    /// Azul.
-    static let blue = Color(hex: 0x539392)
-    /// Rosa + azul. El morado de marca.
-    static let purple = Color(hex: 0x522567)
-    /// Rosa + verde.
-    static let red = Color(hex: 0xB62325)
-    /// Verde + azul.
-    static let forest = Color(hex: 0x3E823E)
-    /// Los tres superpuestos.
-    static let brown = Color(hex: 0x592E2A)
-
-    // MARK: - Papeles
-
-    /// Marca: la banda superior del inicio y el campo del login.
-    static let brand = purple
-    /// Acción: botón primario, pestaña activa, enlaces. Solo esto.
-    static let action = pink
+    /// Pink. Actions, and nothing else: buttons, links, the active tab.
+    static let action = Color(hex: 0xD51A65)
     static let onAction = Color.white
 
-    /// Estados del semáforo.
-    static let passed = forest
-    static let inProgress = green
-    static let pending = Color(hex: 0xE7E2EA)
+    /// Pink over blue. The brand: the login band and the band on every screen behind the bar.
+    static let brand = Color(hex: 0x522567)
 
-    static let error = red
+    /// Green. A course currently being taken. Never put white on it - 1.5:1.
+    static let inProgress = Color(hex: 0xC9D329)
 
-    /// Superficies. El fondo tiene un tinte morado: no es gris neutro.
+    /// Blue. A course, on the rail of its card.
+    static let subject = Color(hex: 0x539392)
+
+    /// Green over blue. A course already passed.
+    static let passed = Color(hex: 0x3E823E)
+
+    /// Pink over green. Errors, and a failed course.
+    static let error = Color(hex: 0xB62325)
+
+    /// All three at once. The person: the profile shortcut and the profile tab.
+    static let person = Color(hex: 0x592E2A)
+
     static let background = Color(hex: 0xF7F4F8)
     static let surface = Color.white
-
     static let text = Color(hex: 0x1C1420)
     static let textSoft = Color(hex: 0x6B6472)
-    static let textFaint = Color(hex: 0xA29BA9)
     static let border = Color(hex: 0xE7E2EA)
 
-    /// Gris de los íconos inactivos de la barra.
+    /// A line too quiet to be a border: the edge of the floating bar, the paler skeleton bars.
+    static let borderSoft = Color(hex: 0xEFEBF1)
+
+    /// A course not taken yet. Same value as `border`; the two roles are named apart on purpose.
+    static let pending = Color(hex: 0xE7E2EA)
+
+    /// Hint text inside an empty field, and quiet secondary text.
+    static let placeholder = Color(hex: 0xA29BA9)
+
+    /// The fixed "@konradlorenz.edu.co" printed after what the student types.
+    static let domainSuffix = Color(hex: 0xC4BDCA)
+
+    /// White at 74%, for text sitting on the purple band.
+    static let onBrandSoft = Color.white.opacity(0.74)
+
+    /// The grey of an inactive tab icon.
     static let iconIdle = Color(hex: 0x8E8794)
+
+    /// The colours a student can give a course they add to the timetable.
+    ///
+    /// Pink is left out on purpose: it means "you can touch this", and a course painted pink
+    /// would make every class rail look like a button.
+    static let courseChoices: [(name: String, hex: String)] = [
+        ("Azul", "#539392"),
+        ("Morado", "#522567"),
+        ("Verde", "#3E823E"),
+        ("Café", "#592E2A"),
+        ("Lima", "#C9D329"),
+        ("Rojo", "#B62325")
+    ]
 }
 
 extension Color {
-    /// `Color(hex: 0xD51A65)` — para poder pegar los hex del documento tal cual.
+    /// `Color(hex: 0xD51A65)`, so the hexes in the design documents can be pasted as they are.
     init(hex: UInt32) {
         self.init(
             .sRGB,
@@ -64,17 +79,25 @@ extension Color {
         )
     }
 
-    /// El color que manda el servidor en `ClassOccurrence.color`, por ejemplo `"#539392"`.
+    /// A colour the server sent, such as `ClassOccurrence.color` or `PensumArea.color`.
     ///
-    /// El cliente **no** elige el color de una materia: lo pinta. Si la cadena no se puede
-    /// leer, cae en el azul en vez de reventar, porque una materia sin color en la lista es
-    /// mejor que una pantalla en blanco.
+    /// The client does not choose a course's colour: it paints the one it was given. A string that
+    /// cannot be read falls back to the subject blue rather than failing, because a class with the
+    /// wrong rail is better than a list that does not draw.
     init(apiHex: String?) {
-        let cleaned = (apiHex ?? "").trimmingCharacters(in: .whitespaces).replacingOccurrences(of: "#", with: "")
-        guard cleaned.count == 6, let value = UInt32(cleaned, radix: 16) else {
-            self = KColor.blue
+        guard let value = Color.hexValue(apiHex) else {
+            self = KColor.subject
             return
         }
         self.init(hex: value)
+    }
+
+    /// `"#539392"` to `0x539392`, or nil when the string is not a six-digit hex colour.
+    static func hexValue(_ string: String?) -> UInt32? {
+        let cleaned = (string ?? "")
+            .trimmingCharacters(in: .whitespaces)
+            .replacingOccurrences(of: "#", with: "")
+        guard cleaned.count == 6 else { return nil }
+        return UInt32(cleaned, radix: 16)
     }
 }
