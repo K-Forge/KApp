@@ -5,7 +5,8 @@
 # Titles come out as "chore: bump ...", which scripts/check-git-conventions.sh accepts. Dependabot
 # keeps the lowercase because this repository's history is lowercase. The Conventions workflow skips
 # Dependabot's own commits but still checks the title, since squash merging turns it into the commit
-# that stays on develop. Every pull request still needs the lead's review, like any other.
+# that stays on develop; only a title over 100 characters is a warning instead of an error, because
+# Dependabot names the whole directory. Every pull request still needs the lead's review, like any other.
 
 version: 2
 
@@ -29,6 +30,9 @@ updates:
       # Spring Cloud 2025.1 is the Boot 4 line, even though its number only looks like a minor step.
       - dependency-name: "org.springframework.cloud:*"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # springdoc 3 brings Boot 4's web autoconfiguration, which clashes with Boot 3.5's (#108).
+      - dependency-name: "org.springdoc:*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: gradle
     directory: /app/frontend/mobile/kotlin
