@@ -265,12 +265,21 @@ Rules specific to KApp:
 - **KApp has no production deployment, so there are no hotfixes.** A defect is a `bugfix/*` into `develop`.
 - **Nobody pushes to `main` or `develop`**, administrators included. Admins may bypass only when merging a pull
   request, never to push. Every pull request needs the lead's review: `.github/CODEOWNERS` owns every path.
+- **`develop` only takes squash merges, through the merge queue.** The ruleset offers no other method, so the
+  pull request title becomes the one commit on `develop`. Merge with "Merge when ready": the queue tests each
+  pull request on top of the ones queued before it and merges them in order. CI runs only the jobs whose paths a
+  pull request touches (`.github/workflows/ci.yml`, job `changes`); a skipped job counts as passed.
+- **Releases are prepared on `develop`**, so nothing ever has to come back from `main`. First a pull request such
+  as `chore/prepare-release-0-3-0`, titled `release: prepare version 0.3.0`, bumps `package.json` and writes
+  `CHANGELOG.md`. Then `release/0.3.0` is cut from `develop` with no commits of its own, merged into `main` with a
+  merge commit and tagged `v0.3.0`. A defect found during the release is fixed on `develop` and the release is cut
+  again. This replaces CONTRIBUTING's merge back into `develop`.
 - **A pull request into `develop` does not close its issue**, because only the default branch, `main`, does that.
   Close the issue by hand after the merge.
 - **Four chats, one area each**: Kotlin, Swift, Backend and Docs/Chore. They coordinate through GitHub issues in
   English, labelled `area/kotlin`, `area/swift`, `area/backend`, `area/docs`, plus `contract` when a contract in
-  `docs/api` changes. **Every pull request carries its area label too.** A chat never touches another chat's
-  worktree; what belongs to another area becomes an issue for it.
+  `docs/api` changes. **Every pull request carries its area label too**, and Git conventions fails without one. A
+  chat never touches another chat's worktree; what belongs to another area becomes an issue for it.
 - **One session, one worktree.** Two sessions in the same folder share one index and one set of files: they stage
   each other's changes, overwrite each other's edits and run Gradle or Maven over each other's builds. A second
   session on an area gets its own worktree, `../KApp-worktrees/<area>-<topic>`, on its own branch.
