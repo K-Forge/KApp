@@ -585,8 +585,9 @@ private fun SemesterCard(semester: SemesterState.Ready) {
             Spacer(Modifier.height(12.dp))
             ProgressBar(semester)
             Spacer(Modifier.height(12.dp))
+            // No fixed height: 12 sp text needs about 16 dp, more with the system font scaled up,
+            // and a 14 dp row cut the descenders off every label.
             Row(
-                modifier = Modifier.height(14.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -644,6 +645,7 @@ private fun Legend(colour: Color, @PluralsRes label: Int, credits: Int) {
         Text(
             text = pluralStringResource(label, credits, credits),
             fontSize = 12.sp,
+            lineHeight = 16.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
         )
