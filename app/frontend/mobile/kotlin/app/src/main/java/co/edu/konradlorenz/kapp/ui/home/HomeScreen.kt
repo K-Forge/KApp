@@ -98,6 +98,7 @@ fun HomeScreen(
         state = viewModel.uiState,
         destinations = destinations,
         onOpen = onOpen,
+        onRetryDay = viewModel::retryDay,
         modifier = modifier,
     )
 }
@@ -107,6 +108,7 @@ private fun HomeContent(
     state: HomeUiState,
     onOpen: (KAppDestination) -> Unit,
     modifier: Modifier = Modifier,
+    onRetryDay: () -> Unit = {},
     destinations: List<KAppDestination> = KAppDestination.entries,
 ) {
     val hasSchedule = KAppDestination.Schedule in destinations
@@ -144,12 +146,9 @@ private fun HomeContent(
                     DayState.NoSchedule -> NoScheduleCard(onOpen)
                     DayState.NoClassesToday -> FreeDayCard(onOpen)
                     DayState.DoneForToday -> FreeDayCard(onOpen, done = true)
-                    DayState.Unavailable -> Text(
-                        text = stringResource(R.string.home_day_unavailable),
-                        modifier = Modifier.padding(top = 8.dp),
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    // A card like the others, not bare text: this slot starts inside the band, and
+                    // a line of grey text there landed on the purple.
+                    DayState.Unavailable -> DayUnavailableCard(onRetryDay)
                     is DayState.Classes -> NextClassCard(state.day.next, onOpen)
                 }
                 Spacer(Modifier.height(16.dp))
@@ -348,6 +347,31 @@ private fun FreeDayCard(onOpen: (KAppDestination) -> Unit, done: Boolean = false
             // the text.
             modifier = Modifier
                 .clickable { onOpen(KAppDestination.Schedule) }
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            fontSize = 15.sp,
+            lineHeight = 18.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
+/** `day` could not be read: no network, or the service did not answer. */
+@Composable
+private fun DayUnavailableCard(onRetry: () -> Unit) {
+    CenteredCard(height = HeadlineCardHeight) {
+        IconBubble(R.drawable.ic_calendar, colour = Subject, alpha = 0.16f)
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = stringResource(R.string.home_day_unavailable),
+            style = MaterialTheme.typography.titleMedium.copy(lineHeight = 20.sp),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = stringResource(R.string.home_day_retry),
+            modifier = Modifier
+                .clickable(onClick = onRetry)
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             fontSize = 15.sp,
             lineHeight = 18.sp,
