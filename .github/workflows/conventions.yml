@@ -4,14 +4,18 @@ on:
   pull_request:
     branches: [main, develop]
     # A separate workflow from ci.yml so that correcting a title or retargeting a stacked pull request
-    # re-runs this check in seconds, without rebuilding seven services.
-    types: [opened, edited, synchronize, reopened]
+    # re-runs this check in seconds, without rebuilding seven services. labeled and unlabeled re-run it
+    # when the area label is added after opening.
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+  # Git conventions is required, so it has to report on the merge queue's branch too. There it passes at
+  # once: the queue holds pull requests that already passed it, and its branch has no title or labels.
+  merge_group:
 
 permissions:
   contents: read
 
 concurrency:
-  group: conventions-${{ github.event.pull_request.number }}
+  group: conventions-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -36,8 +40,21 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ' ') }}
+          EVENT: ${{ github.event_name }}
         run: |
+          if [ "$EVENT" = merge_group ]; then
+            echo "merge queue: every pull request in it already passed this check"
+            exit 0
+          fi
           status=0
+          # Every pull request names its area, so each chat and person can filter the list by it
+          # (AGENTS.md). Dependabot's come labelled from .github/dependabot.yml.
+          case " $LABELS " in
+            *" area/kotlin "* | *" area/swift "* | *" area/backend "* | *" area/docs "*) ;;
+            *) echo "error: the pull request has no area label. Add one of area/kotlin, area/swift, area/backend or area/docs."
+               status=1 ;;
+          esac
           bash scripts/check-git-conventions.sh branch "$HEAD_REF" "$BASE_REF" || status=1
           # Dependabot writes its own commits and nobody can reword them. The title is still checked,
           # because squash merging turns it into the commit that stays on develop, but its length only
@@ -60,6 +77,7 @@ jobs:
     # Deliberately NOT required: a change to the organization's guide would otherwise block every open
     # pull request here until someone syncs. The red mark on the pull request is the reminder.
     name: CONTRIBUTING in sync
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
