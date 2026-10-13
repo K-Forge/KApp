@@ -116,9 +116,10 @@ KApp/
 ├── .github/
 │   ├── CODEOWNERS                   # The lead reviews every path
 │   ├── dependabot.yml               # Weekly, grouped dependency updates into develop
+│   ├── pull_request_template.md     # Purpose, commits, testing, risks; replaces the organization's
 │   └── workflows/
-│       ├── ci.yml                   # Backend, contracts, portal, Android and the pensum seed
-│       ├── conventions.yml          # Branch, title and commits of every pull request
+│       ├── ci.yml                   # Backend, contracts, portal, Android and the pensum seed, by path
+│       ├── conventions.yml          # Branch, title, commits and area label of every pull request
 │       ├── dev-images.yml           # Per-branch images for the dev server, on GHCR
 │       └── restack.yml              # After a squash merge, rebases the pull requests stacked on it
 ├── CONTRIBUTING.md                  # Verbatim copy of the K-Forge guide. Never edit here
@@ -303,18 +304,64 @@ Rules specific to KApp:
   requests stacked on it, pushing as the K-Forge restack App so their checks run again. Nobody runs git in
   between. A real conflict is left untouched, with the commands to finish by hand in a comment. Stack only when a
   feature needs unmerged code, and keep stacks to two or three levels.
-- **A pull request is a unit of work worth a review, not one edit.** Each one costs the lead a review and CI a full
-  run of every job. Gather what a session does on one screen, feature or topic into one branch: three fixes found
-  while polishing Inicio are one `bugfix/inicio-...` pull request with three commits, never three pull requests. A
-  comment, a rename or a few removed lines never get a pull request of their own; they ride with the next related
-  one. Before opening a pull request, list your area's open ones (`gh pr list --label area/<area>`): if one on the
-  same topic is still waiting for review, push to its branch and update its description instead. Split only along
-  CONTRIBUTING's lines: past about 400 changed lines, or when the topics are unrelated.
+- **One pull request, one purpose.** See *Pull requests and commits* below; it is what review checks first.
 - **When your pull request merges, leave its branch.** Run `git switch --detach origin/develop` in your worktree
   (after `git fetch`), or start the next branch from there. The hooks then delete every local branch whose pull
   request merged: `.githooks/post-checkout` on a switch to develop, `.githooks/post-merge` after a pull. Both run
   `scripts/prune-local-branches.sh`, which never touches a branch some worktree has checked out or one with
   commits outside a merged pull request; run it by hand to see what it keeps and why.
+
+### Pull requests and commits
+
+How a company that ships for years works, adapted from Google's engineering practices ("Small CLs", "Writing good CL
+descriptions"). The lead decided on 2026-10-13: **one pull request, one purpose**: neither a pull request for every
+edit, nor everything packed into one.
+
+**What one pull request is**
+
+1. **One purpose you can say in one sentence**, which becomes its title. If the sentence needs an "and", it is two
+   pull requests. It names its issue in the description with `Refs #N` (into `develop`, `Closes` does nothing).
+2. **Complete.** The code, its tests and the docs or contract it changes go together, and `develop` works after
+   the merge. A new endpoint, model or component lands with the code that uses it, never on its own.
+3. **Sized for a real review: about 100 to 400 lines a person has to read.** Lockfiles, generated code, seeds,
+   transcriptions, map data and photos do not count, and they go in a pull request of their own when they are
+   large. Past 400 lines, split by slices that work on their own (sign-in, then renewal, then sign-out), stacked
+   if each needs the previous one; never by layers that do nothing alone.
+4. **Under about 50 lines only when the change stands on its own**: a real defect with the test that proves it,
+   or a dependency update. A comment, a rename or a tweak travels with the next pull request on the same topic.
+   Before opening one, check `gh pr list --label area/<area>`; if one on the same topic is still waiting for
+   review, push to it and update its description.
+5. **Kept apart:** a refactor never shares a pull request with a change in behaviour, and moving files never
+   shares one with editing them.
+
+**Commits inside it**
+
+- **Each commit is one step that builds and passes its tests**, in an order that tells how the change was made:
+  `feat: store the refresh token in the keystore`, then `feat: renew the session before it expires`, then
+  `feat: sign out when a reused token is refused`, then `test: cover renewal, reuse and sign-out`. A feature
+  usually takes three to eight.
+- **No `wip`, `fix typo` or `address review` commits.** Fold them into the commit they correct
+  (`git commit --fixup <sha>` and `git rebase -i --autosquash origin/develop`) before asking for review, then
+  `git push --force-with-lease` on your own branch.
+- On `develop` the pull request becomes one squashed commit titled like the pull request. The commits are for
+  the review, and the one on `develop` is what gets reverted if something breaks.
+
+**The description** follows `.github/pull_request_template.md`: why, what changed (one line per commit), how it
+was tested (commands, and screenshots for anything visible), risks and what is left for later. It is written for
+the person who finds this pull request a year from now.
+
+**The way to merge**
+
+1. Open the pull request as a **draft** as soon as the branch has its first commit, and push at least once a day.
+   Work that exists only on one laptop is work that can be lost.
+2. Mark it ready when it meets the five points above and CI is green.
+3. The Docs/Chore chat reviews agent pull requests against this section and tells the lead which are ready. The
+   lead reviews the people's. The lead merges with "Merge when ready".
+
+**Work shared by both clients.** A feature both apps need is a parent issue without a client label, with one
+sub-issue per client: `[Kotlin] ...` labelled `area/kotlin` and `[Swift] ...` labelled `area/swift` (as in #44 to
+#47). Each client closes its own sub-issue by hand when its pull request merges; the parent shows the progress and
+closes when both are done. Kotlin goes first; Swift resumes when the Android app is finished.
 
 ---
 
