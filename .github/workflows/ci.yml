@@ -7,6 +7,9 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  # The merge queue tests each pull request on top of the ones queued before it, and only merges what
+  # passes. Without this trigger the required checks never report on the queue's branch and it waits forever.
+  merge_group:
 
 # Read-only by default. No job here publishes anything; a token that cannot write is
 # one less thing an untrusted pull request can abuse.
@@ -18,8 +21,63 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Which parts of the repository a change touches, so a docs pull request does not rebuild the backend,
+  # the Android client and the portal. A job that is skipped counts as passed for the rulesets' required
+  # checks, so skipping is safe. Every push to main or develop still runs everything, and so does any
+  # change to this file. If this job itself fails, every job runs: a broken filter must never skip a build.
+  changes:
+    name: Which parts changed
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.paths.outputs.backend }}
+      contracts: ${{ steps.paths.outputs.contracts }}
+      pensums: ${{ steps.paths.outputs.pensums }}
+      android: ${{ steps.paths.outputs.android }}
+      portal: ${{ steps.paths.outputs.portal }}
+
+    steps:
+      # Full history but no file contents: enough for git diff --name-only, in seconds.
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          filter: blob:none
+
+      - name: Match the changed paths
+        id: paths
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          QUEUE_BASE: ${{ github.event.merge_group.base_sha }}
+          QUEUE_HEAD: ${{ github.event.merge_group.head_sha }}
+        run: |
+          case $EVENT in
+            pull_request) files=$(git diff --name-only "$PR_BASE...$PR_HEAD") ;;
+            merge_group) files=$(git diff --name-only "$QUEUE_BASE" "$QUEUE_HEAD") ;;
+            *) files='' ;;
+          esac
+          printf '%s\n' "$files" | sed 's/^/changed: /'
+
+          # Each job and the paths it reads. The backend's tests and the portal's build both read the
+          # contracts in docs/api, so a contract change runs them too.
+          touched() {
+            [ "$EVENT" = pull_request ] || [ "$EVENT" = merge_group ] || return 0
+            printf '%s\n' "$files" | grep -qE "^(\.github/workflows/ci\.yml|$1)" && return 0
+            return 1
+          }
+          out() { if touched "$2"; then echo "$1=true"; else echo "$1=false"; fi >> "$GITHUB_OUTPUT"; }
+          out backend   'app/backend/|docs/api/'
+          out contracts 'docs/api/'
+          out pensums   'docs/pensums/|app/backend/microservices/semaphore-service/src/main/resources/db/seed/pensums/'
+          out android   'app/frontend/mobile/kotlin/'
+          out portal    'app/frontend/web-admin/|docs/api/|package\.json|pnpm-lock\.yaml'
+          cat "$GITHUB_OUTPUT"
+
   backend:
     name: Build and test microservices (JDK 21)
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.backend == 'true') }}
     runs-on: ubuntu-latest
 
     steps:
@@ -57,6 +115,8 @@ jobs:
 
   openapi:
     name: Lint OpenAPI contracts
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.contracts == 'true') }}
     runs-on: ubuntu-latest
 
     # Independent of the Java build on purpose: the specs are the contract the mobile
@@ -78,6 +138,8 @@ jobs:
 
   pensum-seed:
     name: Pensum seed matches its transcriptions
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.pensums == 'true') }}
     runs-on: ubuntu-latest
 
     # The seed under db/seed/pensums/ is generated from docs/pensums/transcriptions/. Editing a
@@ -98,6 +160,8 @@ jobs:
 
   android:
     name: Build and test the android client (JDK 25)
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.android == 'true') }}
     runs-on: ubuntu-latest
 
     # Nothing built the Android client until this job existed: it reached develop with four green
@@ -137,6 +201,8 @@ jobs:
 
   portal:
     name: Build and test the admin portal
+    needs: changes
+    if: ${{ !cancelled() && (needs.changes.result != 'success' || needs.changes.outputs.portal == 'true') }}
     runs-on: ubuntu-latest
 
     # The portal is how the mobile team signs in as a role, inspects a token and
