@@ -44,7 +44,7 @@ class TemporaryPasswordIntegrationTest extends AbstractAuthIntegrationTest {
                         .header("Authorization", adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"email":"%s%s","firstName":"Ana","lastName":"Ruiz","role":"ROLE_PROFESSOR"}
+                                {"email":"%s%s","firstName":"Ana","lastName":"Ruiz","profileRole":"ROLE_PROFESSOR"}
                                 """.formatted(local, INSTITUTIONAL_DOMAIN)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
@@ -72,7 +72,7 @@ class TemporaryPasswordIntegrationTest extends AbstractAuthIntegrationTest {
         String created = createProfessor("ana.ruiz");
 
         assertThat((String) JsonPath.read(created, "$.temporaryPassword")).matches(TEMPORARY);
-        assertThat((String) JsonPath.read(created, "$.role")).isEqualTo("ROLE_PROFESSOR");
+        assertThat((java.util.List<String>) JsonPath.read(created, "$.roles")).containsExactly("ROLE_PROFESSOR");
         Instant expiresAt = Instant.parse(JsonPath.read(created, "$.expiresAt"));
         assertThat(expiresAt).isBetween(Instant.now().plus(6, ChronoUnit.DAYS), Instant.now().plus(8, ChronoUnit.DAYS));
 
@@ -160,10 +160,10 @@ class TemporaryPasswordIntegrationTest extends AbstractAuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("only an admin creates accounts, never an admin's, and a student needs its codes")
+    @DisplayName("only an admin creates accounts, always with a profile role and never a permission")
     void theRulesOfCreating() throws Exception {
         String body = """
-                {"email":"x%s","firstName":"X","lastName":"Y","role":"%s"%s}
+                {"email":"x%s","firstName":"X","lastName":"Y","profileRole":"%s"%s}
                 """;
         mockMvc.perform(post("/auth/admin/accounts")
                         .header("Authorization", bearerFor("prof-1", "p" + INSTITUTIONAL_DOMAIN, "ROLE_PROFESSOR"))
@@ -178,15 +178,20 @@ class TemporaryPasswordIntegrationTest extends AbstractAuthIntegrationTest {
         mockMvc.perform(post("/auth/admin/accounts")
                         .header("Authorization", adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(body.formatted(INSTITUTIONAL_DOMAIN, "ROLE_STUDENT", "")))
+                        .content(body.formatted(INSTITUTIONAL_DOMAIN, "ROLE_RECEPTION", "")))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.details[0].field").value("studentCode"));
+                .andExpect(jsonPath("$.details[0].field").value("profileRole"));
         mockMvc.perform(post("/auth/admin/accounts")
                         .header("Authorization", adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(body.formatted(INSTITUTIONAL_DOMAIN, "ROLE_STUDENT",
-                                ",\"studentCode\":\"506900200\",\"programCode\":\"506\"")))
+                        .content(body.formatted(INSTITUTIONAL_DOMAIN, "ROLE_STUDENT", "")))
                 .andExpect(status().isCreated());
+        mockMvc.perform(post("/auth/admin/accounts")
+                        .header("Authorization", adminToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body.formatted("2" + INSTITUTIONAL_DOMAIN, "ROLE_STAFF", "")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_STAFF"));
         mockMvc.perform(post("/auth/admin/accounts")
                         .header("Authorization", adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -241,13 +246,13 @@ class TemporaryPasswordIntegrationTest extends AbstractAuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("a student's code is still required, and no longer sent: user-service keeps none")
-    void theStudentCodeStaysInAuth() throws Exception {
+    @DisplayName("a student is created without any code: KApp keeps none")
+    void aStudentNeedsNoCode() throws Exception {
         mockMvc.perform(post("/auth/admin/accounts")
                         .header("Authorization", adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"email":"codigo.solo%s","firstName":"Pepe","lastName":"Veras","role":"ROLE_STUDENT","studentCode":"506900001"}
+                                {"email":"codigo.solo%s","firstName":"Pepe","lastName":"Veras","profileRole":"ROLE_STUDENT"}
                                 """.formatted(INSTITUTIONAL_DOMAIN)))
                 .andExpect(status().isCreated());
 

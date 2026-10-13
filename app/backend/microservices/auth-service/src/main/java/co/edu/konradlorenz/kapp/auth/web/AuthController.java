@@ -151,8 +151,9 @@ public class AuthController {
         return Map.of("status", "UP", "service", "auth-service");
     }
 
-    /** The roles a client may name in {@code allowedRoles}. */
-    static final String ROLE_PATTERN = "ROLE_(GUEST|STUDENT|PROFESSOR|ADMIN)";
+    /** The roles a client may name in {@code allowedRoles}: every role a token may carry. */
+    static final String ROLE_PATTERN =
+            "ROLE_(GUEST|STUDENT|PROFESSOR|STAFF|ADMIN|RECEPTION|MAINTENANCE|MODERATION|WELLBEING)";
 
     /**
      * {@code allowedRoles}: the roles the client takes, any one of them. The admin portal sends
@@ -162,14 +163,14 @@ public class AuthController {
     public record LoginRequest(
             @NotBlank @Email @Size(max = 100) String email,
             @NotBlank @Size(min = 10, max = 72) String password,
-            @Size(max = 4) List<@Pattern(regexp = ROLE_PATTERN) String> allowedRoles) {
+            @Size(max = 8) List<@Pattern(regexp = ROLE_PATTERN) String> allowedRoles) {
     }
 
     public record PasswordChangeRequest(
             @NotBlank @Email @Size(max = 100) String email,
             @NotBlank @Size(min = 10, max = 72) String currentPassword,
             @NotBlank @Size(min = 10, max = 72) String newPassword,
-            @Size(max = 4) List<@Pattern(regexp = ROLE_PATTERN) String> allowedRoles) {
+            @Size(max = 8) List<@Pattern(regexp = ROLE_PATTERN) String> allowedRoles) {
     }
 
     public record MicrosoftSignInRequest(

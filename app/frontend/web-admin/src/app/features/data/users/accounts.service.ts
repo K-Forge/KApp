@@ -2,32 +2,23 @@ import { inject, Injectable } from '@angular/core';
 import type { Observable } from 'rxjs';
 import { ApiClientService } from '../../../core/http/api-client.service';
 
-/** The roles an account an administrator creates may have: never ROLE_ADMIN, as with codes. */
-export const ACCOUNT_ROLES = ['ROLE_STUDENT', 'ROLE_PROFESSOR'] as const;
+/** The profile roles an account an administrator creates may have: never a permission, as with codes. */
+export const ACCOUNT_ROLES = ['ROLE_STUDENT', 'ROLE_PROFESSOR', 'ROLE_STAFF'] as const;
 export type AccountRole = (typeof ACCOUNT_ROLES)[number];
 
-/** Mirrors AccountRequest in docs/api/auth.openapi.yaml. A student needs its two codes. */
+/** Mirrors AccountRequest in docs/api/auth.openapi.yaml. KApp keeps no student code. */
 export interface AccountRequest {
   email: string;
   firstName: string;
   lastName: string;
-  role: AccountRole;
-  studentCode?: string;
-  /** Left out, the server reads it from the student code's first three digits. */
-  programCode?: string;
-}
-
-/** The program a student code belongs to: its first three digits, 506900001 is a 506. */
-export function programOf(studentCode: string): string {
-  const code = studentCode.trim();
-  return /^\d{6,20}$/.test(code) ? code.slice(0, 3) : '';
+  profileRole: AccountRole;
 }
 
 /** Mirrors TemporaryPassword: the only answer the password appears in, since only its hash is kept. */
 export interface TemporaryPassword {
   userId: string;
   email: string;
-  role: string;
+  roles: string[];
   temporaryPassword: string;
   expiresAt: string;
 }

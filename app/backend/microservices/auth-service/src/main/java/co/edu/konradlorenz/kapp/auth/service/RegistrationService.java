@@ -92,7 +92,6 @@ public class RegistrationService {
         // reopens the read-then-write race redeem() exists to close.
         try {
             String role = roleFrom(code);
-            requireStudentCode(role, request.studentCode());
             Credential credential = createAccount(email, request.password(),
                     request.firstName(), request.lastName(), role, initialStatus(), null);
 
@@ -108,20 +107,19 @@ public class RegistrationService {
 
     /**
      * An account an administrator creates, with a temporary password the person replaces at
-     * first sign-in. The same rules as registration - the domain, a student's codes, never
-     * ROLE_ADMIN - minus the invitation code: the administrator is the invitation. It may sign
+     * first sign-in. The same rules as registration - the domain, a profile role and never a
+     * permission - minus the invitation code: the administrator is the invitation. It may sign
      * in at once, since somebody vouched for it, but its address is still not verified.
      */
     public PasswordService.Issued createWithTemporaryPassword(AccountRequest request) {
         String email = normalise(request.email());
         requireAllowedDomain(email);
         requireAvailable(email);
-        String role = request.role();
-        if (!KappRoles.STUDENT.equals(role) && !KappRoles.PROFESSOR.equals(role)) {
-            throw new BusinessRuleException("An account can be created as a student or a professor",
-                    List.of(new ApiError.FieldIssue("role", "ROLE_STUDENT or ROLE_PROFESSOR")));
+        String role = request.profileRole();
+        if (!KappRoles.PROFILE_ROLES.contains(role)) {
+            throw new BusinessRuleException("An account is created with a profile role",
+                    List.of(new ApiError.FieldIssue("profileRole", "ROLE_STUDENT, ROLE_PROFESSOR or ROLE_STAFF")));
         }
-        requireStudentCode(role, request.studentCode());
         String password = TemporaryPasswords.next();
         Instant expiresAt = Instant.now().plus(TemporaryPasswords.LIFETIME);
         Credential credential = createAccount(email, password, request.firstName(), request.lastName(),
@@ -180,23 +178,10 @@ public class RegistrationService {
         }
     }
 
-    /**
-     * Registration under the 0.3 contract still asks a student for their student code, until local
-     * sign-in moves behind its flag with auth 1.0. It is no longer sent anywhere: since user 1.0,
-     * KApp keeps no student code, and a student's program, pensum and level come from SINU.
-     */
-    private static void requireStudentCode(String role, String studentCode) {
-        if (KappRoles.STUDENT.equals(role) && isBlank(studentCode)) {
-            throw new BusinessRuleException(
-                    "A student account requires studentCode",
-                    List.of(new ApiError.FieldIssue("studentCode", "Required for a student")));
-        }
-    }
-
-    /** ROLE_ADMIN is never reachable through signup, whatever a code claims. */
+    /** A permission is never reachable through signup, whatever a code claims. */
     private String roleFrom(InvitationCode code) {
         String role = code.role();
-        if (KappRoles.STUDENT.equals(role) || KappRoles.PROFESSOR.equals(role)) {
+        if (KappRoles.PROFILE_ROLES.contains(role)) {
             return role;
         }
         log.error("Invitation code {} carries role {}, which registration must not grant",
@@ -229,9 +214,6 @@ public class RegistrationService {
         return new RegistrationResponse(credential.userId(), credential.email(), false);
     }
 
-    private static boolean isBlank(String value) {
-        return value == null || value.isBlank();
-    }
 
     /**
      * Lower-cased on the way in, everywhere. The unique index is on the stored form, and

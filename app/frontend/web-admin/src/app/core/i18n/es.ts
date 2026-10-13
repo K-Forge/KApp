@@ -914,6 +914,7 @@ export const ES: Record<string, string> = {
   'Hi {name}: your KApp account is ready. Sign in with {email} and the temporary password {password}; the first time, it asks you to choose your own. It works until {date}.': 'Hola, {name}: su cuenta de KApp está lista. Entre con {email} y la contraseña temporal {password}; la primera vez le pedirá elegir la suya. Sirve hasta el {date}.',
   'professor': 'profesor',
   'student': 'estudiante',
+  'administrative staff': 'administrativo',
   'Delete the account of {email} for good? Their profile goes with it, and it cannot be undone. Deactivating keeps it.': '¿Eliminar para siempre la cuenta de {email}? Su perfil se va con ella y no se puede deshacer. Desactivarla, en cambio, la conserva.',
   'Give {email} a new temporary password? The one they have stops working at once.': '¿Darle a {email} una contraseña temporal nueva? La que tiene deja de servir de inmediato.',
   'Reactivate {email}?': '¿Reactivar a {email}?',
