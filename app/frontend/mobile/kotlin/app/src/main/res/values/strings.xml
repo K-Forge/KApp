@@ -125,7 +125,8 @@
     <string name="semaphore_elective_bank_empty">SINU todavía no ha publicado electivas para este semestre.</string>
     <string name="semaphore_elective_bank_failed">No pudimos cargar las electivas.</string>
     <string name="home_semester_unavailable">No pudimos cargar tu semestre.</string>
-    <string name="home_day_unavailable">No pudimos cargar tus clases de hoy.</string>
+    <string name="home_day_unavailable">No pudimos cargar tus clases de hoy</string>
+    <string name="home_day_retry">Reintentar</string>
     <string name="home_done_title">Ya terminaste las clases de hoy</string>
     <string name="room_number">Salón %1$s</string>
     <string name="room_none">Sin salón asignado</string>

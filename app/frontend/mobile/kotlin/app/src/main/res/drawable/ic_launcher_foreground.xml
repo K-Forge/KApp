@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Adaptive icons are 108dp with only the middle 72dp guaranteed visible, so the crest is inset to
-  stay inside the safe zone whatever mask the launcher applies.
+  An adaptive icon may be cut to a circle two thirds as wide as the icon (72 of 108dp), and the
+  Android 12 splash screen applies the same mask at a much larger size. The crest is square and
+  fills its corners, so its diagonal has to fit in that circle: insets of 29% leave a square 42% of
+  the icon wide, whose diagonal is 60% of it, inside the 61% Google recommends (66 of 108dp).
+
+  The insets are fractions, not dp: an inset in dp is the same absolute margin whatever size the
+  icon is drawn at, so it shrank the crest on the launcher but barely at all on the splash screen,
+  where the tips of the K were cut off.
 -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
     android:drawable="@drawable/konrad_logo"
-    android:insetBottom="26dp"
-    android:insetLeft="26dp"
-    android:insetRight="26dp"
-    android:insetTop="26dp" />
+    android:insetBottom="29%"
+    android:insetLeft="29%"
+    android:insetRight="29%"
+    android:insetTop="29%" />
