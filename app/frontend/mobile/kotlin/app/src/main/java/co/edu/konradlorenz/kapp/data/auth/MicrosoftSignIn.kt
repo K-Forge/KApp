@@ -52,9 +52,11 @@ interface MicrosoftSignIn {
 
     companion object {
         /**
-         * MSAL when the build has a client id, the fake in a debug build without one, and a sign-in
-         * that explains itself in a release build without one. See "Microsoft sign-in" in the
-         * module README for where the client id comes from.
+         * MSAL when the build has a client id. Without one, a debug build signs in through the
+         * backend's fake OIDC server when `kapp.dev.oidcIssuer` is set (DevOidc, src/debug), and
+         * with a made-up token for the mocks when it is not; a release build gets a sign-in that
+         * explains itself. See "Microsoft sign-in" and "Running against the local backend" in the
+         * module README.
          */
         fun forThisBuild(context: Context): MicrosoftSignIn = when {
             BuildConfig.MSAL_CLIENT_ID.isNotBlank() -> MsalSignIn(
@@ -63,8 +65,7 @@ interface MicrosoftSignIn {
                 tenantId = BuildConfig.MSAL_TENANT_ID,
                 signatureHash = BuildConfig.MSAL_SIGNATURE_HASH,
             )
-            BuildConfig.DEBUG -> FakeSignIn
-            else -> NotConfigured
+            else -> DevOidc.signIn(context) ?: if (BuildConfig.DEBUG) FakeSignIn else NotConfigured
         }
     }
 }
