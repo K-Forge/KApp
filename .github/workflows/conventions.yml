@@ -42,8 +42,12 @@ jobs:
           bash scripts/check-git-conventions.sh title "$PR_TITLE" || status=1
           # Dependabot writes its own commits and nobody can reword them. The title is still checked,
           # because squash merging turns it into the commit that stays on develop.
+          # A release carries every commit develop gathered since the last one. Those were checked by
+          # their own pull requests, and some predate this check (#24 kept a trailer that develop can
+          # no longer drop), so only the release's own commits are checked on the way to main.
           case $HEAD_REF in
             dependabot/*) echo "commits skipped: written by Dependabot" ;;
+            release/*) bash scripts/check-git-conventions.sh range origin/develop "$HEAD_SHA" || status=1 ;;
             *) bash scripts/check-git-conventions.sh range "$BASE_SHA" "$HEAD_SHA" || status=1 ;;
           esac
           exit "$status"
