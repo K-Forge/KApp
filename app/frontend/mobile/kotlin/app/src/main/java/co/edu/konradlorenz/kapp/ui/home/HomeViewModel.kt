@@ -70,6 +70,12 @@ class HomeViewModel(
         }
     }
 
+    /** Asks for the day again after it could not be read. The card shows the skeleton meanwhile. */
+    fun retryDay() {
+        uiState = uiState.copy(day = DayState.Loading)
+        viewModelScope.launch { loadDay() }
+    }
+
     private suspend fun loadDay() {
         // Read first, then copy: copying the state around the call would write back whatever it
         // held when the call began, undoing a greeting that arrived in the meantime.
