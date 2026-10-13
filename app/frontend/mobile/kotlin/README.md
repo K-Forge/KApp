@@ -79,10 +79,20 @@ destinations to somebody who has not signed in.
 
 ## Running it
 
-Requires the Android SDK with platform 36 and a JDK 25: `gradle/gradle-daemon-jvm.properties`
-asks for one and Gradle downloads it when the machine has none. Android Studio's bundled JBR
-already is one. Open the `kotlin/` folder in Android Studio - not `kotlin/app/`, which is a
-module and not the project - or from the command line:
+Requires:
+
+- **Android Studio 2026.1.4 (Quail 4) or newer.** The build uses AGP 9.4, and an older Android
+  Studio cannot sync it: the project fails to open instead of building with something else. Check
+  *Android Studio > About* and update before pulling a change that moves AGP. Google's
+  [compatibility table](https://developer.android.com/build/releases/about-agp) gives the oldest
+  Android Studio each AGP release works with.
+- The Android SDK with **platform 37**, which is `compileSdk`. Android Studio offers to install it
+  on the first sync.
+- A JDK 25: `gradle/gradle-daemon-jvm.properties` asks for one and Gradle downloads it when the
+  machine has none. Android Studio's bundled JBR already is one.
+
+Open the `kotlin/` folder in Android Studio - not `kotlin/app/`, which is a module and not the
+project - or from the command line:
 
 ```bash
 cd app/frontend/mobile/kotlin
@@ -235,5 +245,8 @@ by hand, so Gradle and the Kotlin compiler move together. Then read the diff: th
 writes a dozen `android.*` flags into `gradle.properties` that pin the behaviour of the previous
 AGP. They are deprecated the moment they are written and AGP 10 removes them, so take them out and
 fix what actually breaks. That is the whole point of upgrading.
+
+Moving AGP can raise the oldest Android Studio that opens the project. When it does, update the
+first line of *Running it* in the same pull request, and tell the team before it merges.
 
 There is no Kotlin Android plugin in the build: AGP 9 compiles Kotlin itself.
