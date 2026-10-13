@@ -8,7 +8,10 @@ plugins {
 
 android {
     namespace = "co.edu.konradlorenz.kapp"
-    compileSdk = 36
+    // 37 because current Compose, Coil and OkHttp releases refuse to build against anything older.
+    // targetSdk stays at 36 on purpose: targeting 37 turns on Android 17 behaviour changes that
+    // stop a debug build from reaching the mocks on 10.0.2.2, and that move needs its own change.
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "co.edu.konradlorenz.kapp"
