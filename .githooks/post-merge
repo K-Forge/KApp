@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Enabled by scripts/install-git-hooks.sh. After `git pull`, deletes the local branches whose pull request merged.
+exec bash "$(git rev-parse --show-toplevel)/scripts/prune-local-branches.sh" --hook
