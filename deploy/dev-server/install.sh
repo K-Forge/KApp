@@ -5,8 +5,8 @@
 #
 # Needs Docker with the compose plugin, curl, python3, systemd, and /opt/kapp/.env written first
 # (env.example lists what goes in it). Puts compose.yaml and agent.sh in /opt/kapp, starts
-# kapp-dev-agent.timer, and runs the agent once. Run it again after compose.yaml or the agent
-# change: the agent itself never touches them. It also installs `kapp` (kapp.sh), to switch the
+# kapp-dev-agent.timer, applies compose.yaml to what is running, and runs the agent once. Run it
+# again after compose.yaml or the agent change: the agent itself never touches them. It also installs `kapp` (kapp.sh), to switch the
 # extras - users and the semaphore - on and off by hand.
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
@@ -37,6 +37,15 @@ fi
 
 systemctl daemon-reload
 rm -f /opt/kapp/.stopped
+# A new compose.yaml - an environment variable added, a limit changed - reaches running containers
+# only through `up`. The agent runs `up` only when an image changes, so without this an install
+# that changed nothing but compose.yaml left every container on the old configuration. Compose
+# recreates only the services whose configuration differs. Skipped when nothing runs yet: the
+# agent's first run below pulls and starts everything.
+if [[ -n "$(cd /opt/kapp && docker compose ps -q)" ]]; then
+  profiles=; [[ -e /opt/kapp/.extras ]] && profiles=extras
+  (cd /opt/kapp && COMPOSE_PROFILES=$profiles docker compose up -d --no-build --remove-orphans)
+fi
 # The first run through systemd, as the timer's are: one at a time, and in the journal.
 systemctl start kapp-dev-agent.service
 systemctl enable --now kapp-dev-agent.timer
