@@ -56,7 +56,7 @@
           commas and newlines are the normal case, not the edge case, and getting that
           subtly wrong would corrupt a course name instead of failing loudly.
         -->
-        <commons-csv.version>1.12.0</commons-csv.version>
+        <commons-csv.version>1.14.1</commons-csv.version>
     </properties>
 
     <!--
