@@ -106,10 +106,13 @@ KApp/
 ├── scripts/
 │   ├── check-git-conventions.sh     # The git rules as code: CI and the commit-msg hook run it
 │   ├── install-git-hooks.sh         # Once per clone: enables .githooks/
+│   ├── prune-local-branches.sh      # Deletes local branches whose pull request merged (run by the hooks)
 │   ├── sync-contributing.sh         # Refreshes CONTRIBUTING.md from the organization
 │   ├── restack.sh                   # Rebases a stack after its bottom is squash merged
 │   └── generate-dev-secrets.sh  create-dev-accounts.sh  verify-db-isolation.sh
-├── .githooks/commit-msg             # Refuses a commit that breaks CONTRIBUTING.md
+├── .githooks/
+│   ├── commit-msg                   # Refuses a commit that breaks CONTRIBUTING.md
+│   └── post-checkout  post-merge    # Prune merged local branches after a switch to develop or a pull
 ├── .github/
 │   ├── CODEOWNERS                   # The lead reviews every path
 │   ├── dependabot.yml               # Weekly, grouped dependency updates into develop
@@ -298,6 +301,11 @@ Rules specific to KApp:
   one. Before opening a pull request, list your area's open ones (`gh pr list --label area/<area>`): if one on the
   same topic is still waiting for review, push to its branch and update its description instead. Split only along
   CONTRIBUTING's lines: past about 400 changed lines, or when the topics are unrelated.
+- **When your pull request merges, leave its branch.** Run `git switch --detach origin/develop` in your worktree
+  (after `git fetch`), or start the next branch from there. The hooks then delete every local branch whose pull
+  request merged: `.githooks/post-checkout` on a switch to develop, `.githooks/post-merge` after a pull. Both run
+  `scripts/prune-local-branches.sh`, which never touches a branch some worktree has checked out or one with
+  commits outside a merged pull request; run it by hand to see what it keeps and why.
 
 ---
 
