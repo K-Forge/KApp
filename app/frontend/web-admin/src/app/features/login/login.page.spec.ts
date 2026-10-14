@@ -112,6 +112,21 @@ describe('the sign-in options of the server', () => {
     expect(page.passwords()).toBe(true);
   });
 
+  // Against a server with passwords closed that form answers 404, so the page says why it is all
+  // there is.
+  it('says why only the password form is offered', async () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [LoginPage],
+      providers: [provideRouter([{ path: '**', children: [] }]), { provide: AuthService, useValue: {} }, microsoftAnswering(new Error('down'))],
+    });
+    const fixture = TestBed.createComponent(LoginPage);
+    await vi.waitFor(() => expect(fixture.componentInstance.options()).toBeNull());
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.hint')?.textContent).toContain('The server did not say how to sign in');
+  });
+
   it('leaves for Microsoft with the page to come back to, and says so when it cannot', async () => {
     const start = vi.fn(() => Promise.reject(new Error('discovery failed')));
     const page = pageWith(microsoftAnswering({ microsoft, localSignIn: false }, start));

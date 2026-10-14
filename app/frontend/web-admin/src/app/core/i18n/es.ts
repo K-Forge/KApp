@@ -997,6 +997,8 @@ export const ES: Record<string, string> = {
   'Going to Microsoft…': 'Yendo a Microsoft…',
   'or with a password (development only)': 'o con contraseña (solo en desarrollo)',
   'Microsoft could not be reached. Try again in a moment.': 'No se pudo llegar a Microsoft. Intente de nuevo en un momento.',
+  'The server did not say how to sign in, so only the password form is offered. If it fails, check the address under “Gateway” below.':
+    'El servidor no dijo cómo iniciar sesión, así que solo se ofrece el formulario de contraseña. Si falla, revise la dirección en «Gateway», más abajo.',
   'Sign in': 'Iniciar sesión',
   'Gateway': 'Gateway',
   'Base URL': 'URL base',

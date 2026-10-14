@@ -105,6 +105,9 @@ export function notForThisPortal(error: ApiError | null): boolean {
             <p class="divider">{{ 'or with a password (development only)' | t }}</p>
           }
         }
+        @if (options() === null) {
+          <p class="hint" role="status">{{ 'The server did not say how to sign in, so only the password form is offered. If it fails, check the address under “Gateway” below.' | t }}</p>
+        }
         @if (passwords()) {
         <form [formGroup]="form" (ngSubmit)="submit()" class="stack">
           <div class="field" [class.invalid]="isInvalid('email')">
@@ -146,6 +149,11 @@ export function notForThisPortal(error: ApiError | null): boolean {
   styles: `
     .microsoft {
       width: 100%;
+    }
+    .hint {
+      margin: 0;
+      font-size: 0.875rem;
+      color: var(--text-muted);
     }
     .divider {
       margin: 1rem 0 0.5rem;
