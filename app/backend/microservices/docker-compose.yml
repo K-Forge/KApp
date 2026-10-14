@@ -45,11 +45,11 @@
 # stack silently ran an image another worktree had just rebuilt from a different branch - which
 # applied that branch's migrations to the shared Atlas cluster.
 #
-# The Compose PROJECT stays `kapp`, so every stack still appears under one heading in Docker
-# Desktop. That is also why two stacks that run the same services - two backends, say - still
-# collide: Compose tracks a service by project plus service name, so starting one recreates the
-# other's containers. The mocks are safe, because they are different services. If you genuinely
-# need two backends at once, give one of them KAPP_PROJECT=kapp-<something> as well.
+# It also names the Compose PROJECT, `kapp-<stack>`. That is what keeps one worktree's `up` and
+# `down` away from another's containers: Compose tracks a service by project plus service name,
+# and while every stack shared the project `kapp`, the Android worktree starting its stack
+# recreated the backend's containers as its own, and its `down` removed them. KAPP_PROJECT still
+# overrides the name, for a second stack from the same worktree.
 #
 # Two stacks at once also need different ports. Set these in the same .env:
 #
@@ -62,12 +62,12 @@
 #   echo 'KAPP_STACK=swift' >> app/backend/microservices/.env
 #   pnpm run microservices:mock          # -> swift-auth-service-mock, and so on
 #
-# docs/RUNBOOK.md has the whole procedure, including what to do the first time after this change.
+# docs/RUNBOOK.md has the whole procedure, including the one-time move off the shared project.
 # ---------------------------------------------------------------------------------------------
 #
 # `version:` is intentionally absent - the Compose Specification dropped it and v2 warns.
 
-name: ${KAPP_PROJECT:-kapp}
+name: ${KAPP_PROJECT:-kapp-${KAPP_STACK:-back}}
 
 # What the five Prism mocks share. `pull_policy: build` builds the image from mock/Dockerfile and
 # never pulls one by this name from a registry.
