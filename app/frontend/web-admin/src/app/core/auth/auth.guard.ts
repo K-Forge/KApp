@@ -1,10 +1,12 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, Router, UrlTree } from '@angular/router';
+import { AuthService } from './auth.service';
 import { isTokenExpired } from './jwt.util';
 import { TokenStore } from './token.store';
 
 /**
- * Keeps every screen except `/login` behind a valid, unexpired **administrator** token.
+ * Keeps every screen except `/login` behind a valid, unexpired **administrator** token, renewing
+ * an expired one first when the session still can be.
  *
  * <p>The role check is the point. Requiring only a valid token was not enough: an invitation
  * code lets somebody create a `ROLE_STUDENT` account for the mobile app, and that account's
@@ -36,15 +38,28 @@ export const authGuard: CanActivateFn = (_route, state) => {
   // notices the deadline pass.
   const claims = tokenStore.decoded()?.claims;
   if (!claims || isTokenExpired(claims)) {
-    tokenStore.clear();
-    return router.createUrlTree(['/login'], { queryParams: { reason: 'expired', returnUrl: state.url } });
+    const expired = () => {
+      tokenStore.clear();
+      return router.createUrlTree(['/login'], { queryParams: { reason: 'expired', returnUrl: state.url } });
+    };
+    // The refresh token outlives the access token: a tab reopened after lunch renews the
+    // session instead of asking to sign in again.
+    if (!claims || !tokenStore.refreshToken()) {
+      return expired();
+    }
+    return inject(AuthService)
+      .renew()
+      .then((renewed) => (renewed ? admitted(tokenStore, router) : expired()));
   }
 
+  return admitted(tokenStore, router);
+};
+
+function admitted(tokenStore: TokenStore, router: Router): true | UrlTree {
   if (!tokenStore.roles().includes('ROLE_ADMIN')) {
     // `reason` rather than a silent bounce: landing back on the sign-in page having just
     // signed in successfully reads as a broken login, not as a refusal.
     return router.createUrlTree(['/login'], { queryParams: { reason: 'admin-only' } });
   }
-
   return true;
-};
+}
