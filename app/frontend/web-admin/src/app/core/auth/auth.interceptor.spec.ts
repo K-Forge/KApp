@@ -54,6 +54,8 @@ describe('authInterceptor', () => {
 
     for (const url of [
       '/auth/login',
+      '/auth/sign-in-options',
+      '/auth/microsoft',
       '/auth/register',
       '/auth/verify',
       '/auth/visitor-passes/KL-V-ABCD-1234/redeem',
