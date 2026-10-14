@@ -105,3 +105,52 @@ describe('AuthService renewal', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('AuthService sign-out', () => {
+  let auth: AuthService;
+  let http: HttpTestingController;
+  const refreshToken = vi.fn<() => string | null>();
+  const clear = vi.fn();
+
+  beforeEach(() => {
+    refreshToken.mockReset().mockReturnValue('rt_1');
+    clear.mockReset();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        { provide: ApiConfigService, useValue: { baseUrl: () => 'http://localhost:8080' } },
+        { provide: TokenStore, useValue: { refreshToken, clear } },
+      ],
+    });
+    auth = TestBed.inject(AuthService);
+    http = TestBed.inject(HttpTestingController);
+  });
+
+  it('revokes the session on the server, so a copy of the refresh token cannot renew it', () => {
+    auth.logout();
+
+    const call = http.expectOne('http://localhost:8080/auth/logout');
+    expect(call.request.body).toEqual({ refreshToken: 'rt_1' });
+    call.flush(null, { status: 204, statusText: 'No Content' });
+    expect(clear).toHaveBeenCalled();
+  });
+
+  // A gateway that is down must not keep anybody signed in.
+  it('signs out here even when the server cannot be reached', () => {
+    auth.logout();
+
+    http.expectOne('http://localhost:8080/auth/logout').error(new ProgressEvent('error'));
+    expect(clear).toHaveBeenCalled();
+  });
+
+  it('asks nothing of the server with no refresh token', () => {
+    refreshToken.mockReturnValue(null);
+
+    auth.logout();
+
+    http.expectNone('http://localhost:8080/auth/logout');
+    expect(clear).toHaveBeenCalled();
+  });
+});
