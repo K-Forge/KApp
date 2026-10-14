@@ -100,6 +100,7 @@ KApp/
 │   ├── ONBOARDING.md                # A new machine, in Spanish
 │   ├── PROGRESS.md                  # Implementation status — read before large changes
 │   ├── SINU-ALIGNMENT.md            # What KApp reads from SINU, and what it must never store
+│   ├── ti/                          # What KApp asks of the IT office, in Spanish; .docx built by scripts/build-ti-docs.sh
 │   ├── REQUIREMENTS.md  SRS.md  DESIGN.md  MICROSERVICES-IDEAS.md
 │   ├── INTEGRATION-NOTES.md  SECURITY-AUDIT.md  ATLAS-SETUP.md  K-COLORS.md
 │   └── DOCKER-GUIDE.md              # Superseded by RUNBOOK.md
