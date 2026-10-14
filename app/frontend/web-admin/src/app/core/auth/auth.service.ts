@@ -87,7 +87,7 @@ export class AuthService {
   }
 
   /**
-   * Clears the session and leaves the portal.
+   * Ends the session on the server and here, and leaves the portal.
    *
    * <p>The fallback is not defensive padding. `/login` is a lazily loaded route, and its chunk
    * is named by content hash - so after a deploy, a tab that has been open since before it
@@ -97,6 +97,12 @@ export class AuthService {
    * both gets them to the sign-in page and fetches the build that actually exists.
    */
   logout(): void {
+    const refreshToken = this.tokenStore.refreshToken();
+    if (refreshToken) {
+      // Revoked on the server, so the session cannot be renewed from a copy. Always 204, and
+      // signing out does not wait on it: a gateway that is down must not keep anybody in.
+      this.http.post(`${this.config.baseUrl()}/auth/logout`, { refreshToken }).subscribe({ error: () => undefined });
+    }
     this.tokenStore.clear();
     this.leaveFor({});
   }
