@@ -130,7 +130,7 @@ export class MicrosoftSignInService {
           client: 'PORTAL',
         }),
       );
-      this.tokenStore.set(response.accessToken);
+      this.tokenStore.start(response);
     } catch (err) {
       throw new AppHttpError(parseApiError(err));
     }

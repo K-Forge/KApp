@@ -27,7 +27,7 @@ export class AuthService {
     // The portal is for administrators: the server refuses any other account here, before it
     // offers to replace a temporary password - a student's is replaced in the app, not here.
     return this.http.post<TokenResponse>(`${this.config.baseUrl()}/auth/login`, { email, password, allowedRoles: PORTAL_ROLES }).pipe(
-      tap((response) => this.tokenStore.set(response.accessToken)),
+      tap((response) => this.tokenStore.start(response)),
       catchError((err) => throwError(() => new AppHttpError(parseApiError(err)))),
     );
   }
@@ -40,7 +40,7 @@ export class AuthService {
     return this.http
       .post<TokenResponse>(`${this.config.baseUrl()}/auth/password`, { email, currentPassword, newPassword, allowedRoles: PORTAL_ROLES })
       .pipe(
-      tap((response) => this.tokenStore.set(response.accessToken)),
+      tap((response) => this.tokenStore.start(response)),
       catchError((err) => throwError(() => new AppHttpError(parseApiError(err)))),
     );
   }
