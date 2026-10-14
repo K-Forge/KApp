@@ -71,9 +71,10 @@ docker compose --profile core --profile dev up -d
 ## Stacks: one per worktree
 
 Everybody works in their own worktree, and more than one stack ends up running on the same
-laptop. `KAPP_STACK` is what keeps them apart: it names every container and every image tag. The
-Compose project stays `kapp`, so everything still shows up under one heading in Docker Desktop.
-Set it once, in `app/backend/microservices/.env` of that worktree:
+laptop. `KAPP_STACK` is what keeps them apart: it names every container, every image tag and
+the Compose project, `kapp-<stack>`, so each stack shows up under its own heading in Docker
+Desktop and its `up` and `down` touch only its own containers. Set it once, in
+`app/backend/microservices/.env` of that worktree:
 
 ```bash
 echo 'KAPP_STACK=swift' >> app/backend/microservices/.env
@@ -106,16 +107,18 @@ failures were silent.
 
 ### Two stacks at the same time
 
-Two stacks that run **different** services — a backend and somebody's mocks — coexist fine. Two
-that run the **same** services do not, even with different container names: Compose tracks a
-service by project plus service name, so starting one recreates the other's containers. If you
-really need two backends at once, give one of them its own project as well:
+Each worktree is its own Compose project, so two stacks never touch each other's containers,
+even when they run the same services. Compose tracks a service by project plus service name:
+while every stack shared the project `kapp`, the Android worktree starting the real services
+recreated the backend's containers as its own, and its `down` removed them (#144).
+
+For a second stack from the **same** worktree, give it its own project:
 
 ```bash
 echo 'KAPP_PROJECT=kapp-experiment' >> app/backend/microservices/.env
 ```
 
-Either way they need different host ports. Set these in the same `.env`:
+Two stacks at once need different host ports. Set these in the same `.env`:
 
 | Variable            | Default | Variable                   | Default |
 | ------------------- | ------- | -------------------------- | ------- |
@@ -128,21 +131,21 @@ Either way they need different host ports. Set these in the same `.env`:
 The portal reaches the gateway from the browser, so if you move `KAPP_GATEWAY_PORT`, set the base
 URL in the portal's own **Gateway** box on the sign-in screen.
 
-### The first time after this change
+### Once per machine: off the shared project
 
-Stop what is running, so the old `kapp-*` containers go away instead of sitting there stopped, and
-drop the images that carried the old shared tag:
-
-```bash
-docker compose --profile full --profile dev down
-```
+Containers started before #144 live in the project `kapp`. With the new name, `up` stops at
+"container name already in use". Remove them once, from any worktree, without `-v`:
 
 ```bash
-docker images 'kapp/*:local' -q | xargs -r docker rmi
+docker compose -p kapp --profile '*' down
 ```
 
-Then start as usual with `--build`, which builds the images under the new tag. The project name
-does not change, so the local Mongo volume and its data are untouched — and so is Atlas.
+Then start each stack as usual. Nothing is lost: the data lives in Atlas, and the images keep
+their tags. Before running it, `docker ps --filter label=com.docker.compose.project=kapp` shows
+what it will remove, which can be another worktree's stack too.
+
+the-hive is not affected: its compose file is `deploy/dev-server/compose.yaml`, project
+`kapp-dev`.
 
 ---
 
