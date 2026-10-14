@@ -56,6 +56,8 @@ describe('authInterceptor', () => {
       '/auth/login',
       '/auth/sign-in-options',
       '/auth/microsoft',
+      '/auth/refresh',
+      '/auth/logout',
       '/auth/register',
       '/auth/verify',
       '/auth/visitor-passes/KL-V-ABCD-1234/redeem',

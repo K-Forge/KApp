@@ -25,7 +25,7 @@ const PENDING = {
 describe('MicrosoftSignInService', () => {
   let service: MicrosoftSignInService;
   let http: HttpTestingController;
-  const set = vi.fn();
+  const start = vi.fn();
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -33,13 +33,13 @@ describe('MicrosoftSignInService', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: ApiConfigService, useValue: { baseUrl: () => 'http://localhost:8080' } },
-        { provide: TokenStore, useValue: { set } },
+        { provide: TokenStore, useValue: { start } },
       ],
     });
     service = TestBed.inject(MicrosoftSignInService);
     http = TestBed.inject(HttpTestingController);
     sessionStorage.setItem('kapp-admin:microsoft-sign-in', JSON.stringify(PENDING));
-    set.mockClear();
+    start.mockClear();
   });
 
   afterEach(() => {
@@ -64,10 +64,11 @@ describe('MicrosoftSignInService', () => {
     // The call to KApp leaves only after Microsoft's token endpoint has answered.
     const signIn = await vi.waitFor(() => http.expectOne('http://localhost:8080/auth/microsoft'));
     expect(signIn.request.body).toEqual({ idToken: idToken({ nonce: 'nonce-1' }), client: 'PORTAL' });
-    signIn.flush({ accessToken: 'kapp-access-token', tokenType: 'Bearer', expiresIn: 3600, userId: 'u', roles: ['ROLE_STAFF', 'ROLE_ADMIN'] });
+    const tokens = { accessToken: 'kapp-access-token', tokenType: 'Bearer', expiresIn: 3600, refreshToken: 'rt_1', refreshExpiresIn: 43200, userId: 'u', roles: ['ROLE_STAFF', 'ROLE_ADMIN'] };
+    signIn.flush(tokens);
 
     expect(await done).toBe('/data/users');
-    expect(set).toHaveBeenCalledWith('kapp-access-token');
+    expect(start).toHaveBeenCalledWith(tokens);
     const sent = fetchMock.mock.calls[0][1].body as URLSearchParams;
     expect(sent.get('code_verifier')).toBe(PENDING.verifier);
     expect(sent.get('grant_type')).toBe('authorization_code');
@@ -75,7 +76,7 @@ describe('MicrosoftSignInService', () => {
 
   it('refuses a sign-in it did not start: the state does not match', async () => {
     await expect(service.complete(new URLSearchParams({ code: 'the-code', state: 'someone-else' }))).rejects.toThrow();
-    expect(set).not.toHaveBeenCalled();
+    expect(start).not.toHaveBeenCalled();
   });
 
   it('refuses an ID token from another sign-in: the nonce does not match', async () => {
