@@ -9,15 +9,16 @@ plugins {
 android {
     namespace = "co.edu.konradlorenz.kapp"
     // 37 because current Compose, Coil and OkHttp releases refuse to build against anything older.
-    // targetSdk stays at 36 on purpose: targeting 37 turns on Android 17 behaviour changes that
-    // stop a debug build from reaching the mocks on 10.0.2.2, and that move needs its own change.
     compileSdk = 37
 
     defaultConfig {
         applicationId = "co.edu.konradlorenz.kapp"
         // 26 is the first release with adaptive icons, which is what the launcher icon uses.
         minSdk = 26
-        targetSdk = 36
+        // Targeting 37 turns on Android 17's local network protection: a connection to a private
+        // address times out unless the app holds ACCESS_LOCAL_NETWORK. Only a debug build talks to
+        // one, so only the debug manifest declares it and LocalNetworkAccess asks for it.
+        targetSdk = 37
         versionCode = 1
         versionName = "0.1.0-alpha.1"
 

@@ -5,6 +5,13 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--
+      Android 17 blocks connections to private addresses for apps targeting API 37, unless they
+      hold this runtime permission. A debug build talks to the mocks or the local backend on one,
+      so it asks for it (LocalNetworkAccess); the release manifest never declares it.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+
     <application android:networkSecurityConfig="@xml/network_security_config">
 
         <!-- Where the fake OIDC login page redirects to: kapp-dev://oidc/callback. See DevOidc. -->
