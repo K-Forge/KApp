@@ -1,14 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
+import { MicrosoftSignInService, type SignInOptions } from '../../core/auth/microsoft-sign-in.service';
 import { ApiConfigService } from '../../core/config/api-config.service';
 import { AppHttpError } from '../../core/http/api-http-error';
 import type { ApiError } from '../../core/http/api-error.model';
 import { ApiErrorBannerComponent } from '../../shared/ui/api-error-banner/api-error-banner.component';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { t } from '../../core/i18n/i18n.service';
 
 interface LoginForm {
   email: FormControl<string>;
@@ -92,6 +94,18 @@ export function notForThisPortal(error: ApiError | null): boolean {
             <button type="button" class="btn btn-ghost" (click)="backToSignIn()">{{ 'Use another account' | t }}</button>
           </form>
         } @else {
+        @if (options()?.microsoft; as microsoft) {
+          <button type="button" class="btn btn-primary microsoft" [disabled]="leaving()" (click)="signInWithMicrosoft(microsoft)">
+            {{ leaving() ? ('Going to Microsoft…' | t) : ('Sign in with Microsoft' | t) }}
+          </button>
+          @if (microsoftError()) {
+            <p class="error" role="alert">{{ microsoftError() }}</p>
+          }
+          @if (passwords()) {
+            <p class="divider">{{ 'or with a password (development only)' | t }}</p>
+          }
+        }
+        @if (passwords()) {
         <form [formGroup]="form" (ngSubmit)="submit()" class="stack">
           <div class="field" [class.invalid]="isInvalid('email')">
             <label for="email">{{ 'E-mail' | t }}</label>
@@ -114,6 +128,7 @@ export function notForThisPortal(error: ApiError | null): boolean {
           </button>
         </form>
         }
+        }
 
         <app-api-error-banner [error]="error()" />
 
@@ -129,6 +144,15 @@ export function notForThisPortal(error: ApiError | null): boolean {
     </div>
   `,
   styles: `
+    .microsoft {
+      width: 100%;
+    }
+    .divider {
+      margin: 1rem 0 0.5rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
     .login-shell {
       min-height: 100dvh;
       display: flex;
@@ -219,6 +243,7 @@ export class LoginPage {
   private readonly config = inject(ApiConfigService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly microsoft = inject(MicrosoftSignInService);
 
   /**
    * Set by the route guard when a valid but non-administrator token was turned away. Without
@@ -263,6 +288,37 @@ export class LoginPage {
   readonly submitting = signal(false);
   readonly error = signal<ApiError | null>(null);
   readonly baseUrl = this.config.baseUrl;
+
+  /**
+   * How the server the portal points at takes a sign-in. `undefined` while asking, `null` when it
+   * could not be asked - an older server, or the gateway is down - and then the password form shows,
+   * as it always did.
+   */
+  readonly options = signal<SignInOptions | null | undefined>(undefined);
+  readonly passwords = computed(() => {
+    const options = this.options();
+    return options === null || options?.localSignIn === true;
+  });
+  readonly leaving = signal(false);
+  readonly microsoftError = signal<string | null>(null);
+
+  constructor() {
+    this.microsoft.options().then(
+      (options) => this.options.set(options),
+      () => this.options.set(null),
+    );
+  }
+
+  /** Leaves for Microsoft; comes back through /auth/callback to the page the person was on. */
+  signInWithMicrosoft(microsoft: { authority: string; clientId: string }): void {
+    this.leaving.set(true);
+    this.microsoftError.set(null);
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/my-token';
+    this.microsoft.start(microsoft, returnUrl).catch(() => {
+      this.leaving.set(false);
+      this.microsoftError.set(t('Microsoft could not be reached. Try again in a moment.'));
+    });
+  }
 
   newInvalid(name: keyof NewPasswordForm): boolean {
     const control = this.newPassword.controls[name];

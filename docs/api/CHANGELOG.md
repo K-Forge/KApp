@@ -7,6 +7,13 @@ The contracts are the source of truth: the mocks serve them as soon as they merg
 (`app/backend/microservices/mock/README.md`), and the services implement them in the pull requests
 that follow. Until a service has caught up, its contract describes where it is going, not where it is.
 
+## October 2026: auth 1.1.0 (additive)
+
+- **New:** `GET /auth/sign-in-options`, public. It says where Microsoft's sign-in is for the server, and
+  whether password sign-in is open. The admin portal reads it to draw its sign-in page.
+
+Nothing to migrate.
+
 ## October 2026: user 1.1.0 (additive, internal)
 
 - **New:** `PUT /internal/users/{id}/roles`. The Auth API calls it when an administrator changes an

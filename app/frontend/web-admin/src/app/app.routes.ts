@@ -10,6 +10,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/login/login.page').then((m) => m.LoginPage),
   },
   {
+    // Where Microsoft sends the browser back: outside the guard, since nobody is signed in yet.
+    path: 'auth/callback',
+    loadComponent: () => import('./features/login/microsoft-callback.page').then((m) => m.MicrosoftCallbackPage),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./layout/shell/shell.component').then((m) => m.ShellComponent),

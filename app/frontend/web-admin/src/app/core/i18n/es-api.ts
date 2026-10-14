@@ -47,6 +47,18 @@ export const ES_API: Record<string, string> = {
     'Establecer los roles de un perfil desde otro servicio',
   'Service-to-service endpoint. The Auth API calls it when an administrator changes an\naccount\'s profile role or permissions, so the directory shows the roles the account holds.\nNot reachable from outside, with `X-Internal-Token` only, as the upsert above.\n\nThe roles must hold exactly one profile role and never `ROLE_GUEST`, as in the upsert.\nIdempotent. `404` when no profile carries that id.':
     'Endpoint entre servicios. La API de autenticación lo llama cuando un administrador cambia el rol de perfil o los permisos de una cuenta, para que el directorio muestre los roles que tiene. No se alcanza desde afuera, solo con `X-Internal-Token`, como el upsert de arriba.\n\nLos roles deben tener exactamente un rol de perfil y nunca `ROLE_GUEST`, como en el upsert. Idempotente. `404` cuando ningún perfil tiene ese id.',
+  'How to sign in to this server':
+    'Cómo iniciar sesión en este servidor',
+  'What a client needs before anybody has signed in: where Microsoft\'s sign-in is for this\nserver, and whether password sign-in is open. The admin portal reads it to draw its sign-in\npage, so the same build works against any server.\n\nPublic endpoint. Nothing in it is a secret: an authority and a client id are what any\nbrowser sees in the address bar during a sign-in.\n\n- `microsoft` is `null` when the server has no Microsoft configuration.\n- `localSignIn` is `true` only on development servers, where the password routes answer.':
+    'Lo que un cliente necesita antes de que alguien inicie sesión: dónde está el inicio de sesión de Microsoft para este servidor, y si el inicio de sesión con contraseña está abierto. El portal de administración lo lee para dibujar su página de inicio de sesión, así que la misma compilación funciona contra cualquier servidor.\n\nEndpoint público. Nada de lo que trae es secreto: una autoridad y un client id son lo que cualquier navegador muestra en la barra de direcciones durante un inicio de sesión.\n\n- `microsoft` es `null` cuando el servidor no tiene configuración de Microsoft.\n- `localSignIn` es `true` solo en servidores de desarrollo, donde responden las rutas de contraseña.',
+  'Where to sign in with Microsoft: run OpenID Connect against `authority`, whose discovery\ndocument is at `<authority>/.well-known/openid-configuration`, as `clientId`. `null`\nwhen Microsoft is not configured on this server.':
+    'Dónde iniciar sesión con Microsoft: OpenID Connect contra `authority`, cuyo documento de descubrimiento está en `<authority>/.well-known/openid-configuration`, como `clientId`. `null` cuando Microsoft no está configurado en este servidor.',
+  'The issuer of the ID tokens this server accepts.':
+    'El emisor de los ID tokens que acepta este servidor.',
+  'The application id the admin portal signs in as.':
+    'El id de aplicación con el que inicia sesión el portal de administración.',
+  'Whether password sign-in and its routes answer on this server. Development only.':
+    'Si el inicio de sesión con contraseña y sus rutas responden en este servidor. Solo desarrollo.',
   'Delete a profile from another service':
     'Eliminar un perfil desde otro servicio',
   'Service-to-service endpoint. The Auth API calls it when an administrator\ndeletes an account, after removing the account\'s credential. Not reachable\nfrom outside, with `X-Internal-Token` only, as the upsert above.\n\n**Idempotent.** `204` whether or not the profile existed, so a deletion\nthat timed out can be sent again. Since 0.2.0.':
