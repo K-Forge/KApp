@@ -131,6 +131,45 @@ with it the tabs. The token is a student's whatever is picked; only the profile 
 How the mocks answer, the `Prefer` header for other states, and troubleshooting:
 [`app/backend/microservices/mock/README.md`](../../../backend/microservices/mock/README.md).
 
+## Running against the local backend
+
+The mocks answer with examples. To see what the services really do - sign-in, session renewal,
+the profile, the semáforo and the timetable from SINU - run the backend on your computer and point
+a debug build at it. Start it from `app/backend/microservices`, with the `.env` the
+[runbook](../../../../docs/RUNBOOK.md) describes:
+
+```bash
+docker compose --profile core --profile academic --profile map up -d --build
+curl http://localhost:8080/auth/health    # {"status":"UP"}
+```
+
+Then give Gradle two properties, in `~/.gradle/gradle.properties` or with `-P` - never in the
+committed `gradle.properties`, because they are yours, not the project's:
+
+```properties
+kapp.api.baseUrl=http://10.0.2.2:8080/
+kapp.dev.oidcIssuer=http://10.0.2.2:8090/kapp
+```
+
+With them, **Ingresar con Microsoft** opens the backend's
+[fake OIDC server](../../../backend/microservices/fake-oidc/README.md) in the browser. Type
+`estudiante`, `profesor` or `administrativo` and leave the claims box empty: that is who signs in,
+so there is no profile picker under the button. The ID token it returns goes to
+`POST /auth/microsoft`, exactly as Microsoft's will. Remove the two lines to go back to the mocks.
+
+- **Where the code is.** `DevOidc` in `src/debug`: the authorization code flow with PKCE, and
+  `OidcRedirectActivity`, which catches `kapp-dev://oidc/callback`. `src/release` has a `DevOidc`
+  that always answers `null`, so a release build never signs in this way.
+- **The issuer is the address.** auth-service accepts only the issuers in `KAPP_MICROSOFT_ISSUERS`,
+  and the emulator's is `http://10.0.2.2:8090/kapp`. A phone on the same Wi-Fi needs the computer's
+  LAN address in both properties, in that variable, and in the debug network security config.
+- **If Android kills the app while the login page is open**, the sign-in that was waiting is gone:
+  the redirect only reopens the app on the login screen. Sign in again. A real device does this
+  rarely; a busy emulator, more often.
+- **Sessions renew one at a time.** Presenting a refresh token twice revokes its family and ends
+  the session; `SessionManager` already serialises renewals, so this matters only if you add a
+  second path that renews.
+
 ## Microsoft sign-in
 
 Through MSAL, in single-account mode ([ADR 0003](../../../../docs/adr/0003-oidc-over-saml-for-mobile-authentication.md)).
