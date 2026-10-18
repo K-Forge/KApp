@@ -149,9 +149,14 @@ a debug build at it. Start it from `app/backend/microservices`, with the `.env` 
 [runbook](../../../../docs/RUNBOOK.md) describes:
 
 ```bash
-docker compose --profile core --profile academic --profile map up -d --build
+KAPP_STACK=kotlin docker compose --profile core --profile academic --profile map up -d --build
 curl http://localhost:8080/auth/health    # {"status":"UP"}
+KAPP_STACK=kotlin docker compose --profile core --profile academic --profile map down    # when done
 ```
+
+`KAPP_STACK=kotlin` names the compose project `kapp-kotlin`, so these containers never touch the
+ones another worktree runs. Without it the project is `kapp-back`, Backend's: an `up` there
+recreates its containers and a `down` removes them. Pass it to every compose command.
 
 Then give Gradle two properties, in `~/.gradle/gradle.properties` or with `-P` - never in the
 committed `gradle.properties`, because they are yours, not the project's:
