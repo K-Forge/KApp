@@ -1,8 +1,11 @@
-/** POST /auth/login response, per docs/api/auth.openapi.yaml TokenResponse. */
+/** POST /auth/login, /auth/microsoft and /auth/refresh response, per docs/api/auth.openapi.yaml TokenResponse. */
 export interface TokenResponse {
   accessToken: string;
   tokenType: 'Bearer';
   expiresIn: number;
+  /** Null only for a visitor pass, which the portal never holds. */
+  refreshToken: string | null;
+  refreshExpiresIn: number | null;
   userId: string;
   roles: Role[];
 }
