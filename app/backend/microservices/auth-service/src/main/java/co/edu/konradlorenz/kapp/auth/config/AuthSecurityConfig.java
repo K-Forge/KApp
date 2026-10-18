@@ -63,6 +63,8 @@ public class AuthSecurityConfig {
     static final String[] PUBLIC_AUTH_PATHS = {
             // The Microsoft ID token in the body is the proof.
             "/auth/microsoft",
+            // Asked before anybody has signed in, to know how to.
+            "/auth/sign-in-options",
             "/auth/login",
             // The refresh token in the body is the proof, and the access token it renews may
             // already have expired. Signing out takes the same token.

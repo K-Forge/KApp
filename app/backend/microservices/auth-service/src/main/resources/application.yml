@@ -89,6 +89,8 @@ kapp:
       issuers: ${KAPP_MICROSOFT_ISSUERS:}
       jwks-uri: ${KAPP_MICROSOFT_JWKS_URI:}
       client-ids: ${KAPP_MICROSOFT_CLIENT_IDS:}
+      # The one the admin portal signs in as; empty means the first of client-ids.
+      portal-client-id: ${KAPP_MICROSOFT_PORTAL_CLIENT_ID:}
       profile-claim: ${KAPP_MICROSOFT_PROFILE_CLAIM:roles}
       student-values: ${KAPP_MICROSOFT_STUDENT_VALUES:Student}
       professor-values: ${KAPP_MICROSOFT_PROFESSOR_VALUES:Professor}
