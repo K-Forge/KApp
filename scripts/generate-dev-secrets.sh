@@ -7,8 +7,8 @@
 #   ../../../scripts/generate-dev-secrets.sh [stack] > .env
 #
 # `stack` names the checkout this .env belongs to - back (default), front, swift, kotlin. It
-# becomes KAPP_STACK, which names the containers and the image tags, so two worktrees can run
-# at once without taking each other's names, ports or images.
+# becomes KAPP_STACK, which names the containers, the image tags and the Compose project, so two
+# worktrees can run at once without taking each other's containers, names, ports or images.
 #
 # THE DATABASE IS NOT GENERATED HERE. There is no local MongoDB any more: the four
 # MONGO_*_URI values come from the shared Atlas cluster, one per service, and you paste them

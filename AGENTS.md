@@ -166,7 +166,7 @@ docker compose --profile full --profile dev down
 ```
 
 Only the gateway (8080) is published among the JVMs. Reaching a service directly is meant to fail. Containers are
-named after the worktree they came from (`KAPP_STACK` in `.env`), so two worktrees' stacks never collide.
+named after the worktree they came from (`KAPP_STACK` in `.env`), and so is the Compose project (`kapp-<stack>`), so one worktree's `up` or `down` never touches another's containers.
 
 ```bash
 # Validate the API contracts the clients build against

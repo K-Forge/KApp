@@ -109,8 +109,8 @@ mongo_for() {
 }
 
 # The network the stack is on, asked of Compose rather than assumed: the network name comes
-# from the project name, and the project name is KAPP_STACK - `back` here, `swift` in the iOS
-# worktree - so no container name can be hardcoded.
+# from the project name, and the project name comes from KAPP_STACK - `kapp-back` here,
+# `kapp-swift` in the iOS worktree - so no network name can be hardcoded.
 AUTH_CONTAINER=$(docker compose ps -q auth-service 2>/dev/null | head -1)
 COMPOSE_NETWORK=$([ -n "$AUTH_CONTAINER" ] && docker inspect "$AUTH_CONTAINER" \
   --format '{{range $k, $v := .NetworkSettings.Networks}}{{$k}}{{end}}' 2>/dev/null || true)
