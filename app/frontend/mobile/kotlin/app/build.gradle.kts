@@ -43,8 +43,17 @@ android {
         // Release has its own value so it can never point at a mock. KApp has no deployed server
         // yet, so the host is a placeholder until there is one; it is HTTPS because release
         // refuses plain HTTP.
+        //
+        // Two Gradle properties move a debug build from the mocks to the real services on the same
+        // computer, with sign-in through the compose file's fake OIDC server. Set them in
+        // ~/.gradle/gradle.properties or with -P, never in the committed gradle.properties:
+        //   kapp.api.baseUrl=http://10.0.2.2:8080/
+        //   kapp.dev.oidcIssuer=http://10.0.2.2:8090/kapp
+        // See "Running against the local backend" in the module README.
         debug {
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:4000/\"")
+            val property = { name: String, default: String -> providers.gradleProperty(name).getOrElse(default) }
+            buildConfigField("String", "API_BASE_URL", "\"${property("kapp.api.baseUrl", "http://10.0.2.2:4000/")}\"")
+            buildConfigField("String", "DEV_OIDC_ISSUER", "\"${property("kapp.dev.oidcIssuer", "")}\"")
         }
         release {
             buildConfigField("String", "API_BASE_URL", "\"https://kapp.konradlorenz.edu.co/\"")
