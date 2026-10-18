@@ -122,6 +122,16 @@ curl http://localhost:4000/auth/health    # {"status":"UP"}
 The mocks speak plain HTTP. Only the debug build allows it, and only for `10.0.2.2` and
 `localhost`: `src/debug/res/xml/network_security_config.xml`, merged by `src/debug/AndroidManifest.xml`.
 
+**On Android 17 a debug build asks for local network access the first time it opens.** The app
+targets API 37, and Android 17 blocks connections to private addresses - `10.0.2.2`, a LAN IP -
+for apps that target it, unless they hold `ACCESS_LOCAL_NETWORK`. The system words the dialog as
+*"find, connect to, and determine the relative position of nearby devices"*, because it files local
+network access with the other nearby-device permissions; it is the one that lets the app reach the
+mocks. Tap **Allow**. With **Don't allow**, every request times out and the login says *"No pudimos
+conectar con el servidor"*: grant it again under *Settings > Apps > KApp > Permissions > Nearby
+devices*. `LocalNetworkAccess` in `src/debug` asks; the release build talks to a public host, never
+declares the permission and never asks. Older Android versions do not ask at all.
+
 A debug build with no Microsoft tenant configured (see below) signs in with a fake ID token, which
 the mocks accept, so pressing **Ingresar con Microsoft** goes straight in. Under the button it
 offers **Perfil de prueba en los mocks**: Estudiante, Profesor or Administrativo picks the named
