@@ -188,27 +188,45 @@ so there is no profile picker under the button. The ID token it returns goes to
 ## Microsoft sign-in
 
 Through MSAL, in single-account mode ([ADR 0003](../../../../docs/adr/0003-oidc-over-saml-for-mobile-authentication.md)).
-It needs three values from the university's app registration (issue #62), read from Gradle
-properties so none of them is committed. Put them in `~/.gradle/gradle.properties`:
+It needs three values, read from Gradle properties. The first two identify the app registration
+for the test tenant (issue #62): they are not secrets, but they point at a personal tenant and this
+repository is public, so they are not written here. Brian gives them to you privately. The third is
+yours. Put all three in `~/.gradle/gradle.properties`, never in the committed `gradle.properties`:
+with a client id set, a debug build stops using the mocks' made-up token, so it is an opt-in for
+whoever is working on sign-in.
 
 ```properties
 kapp.msal.clientId=<application (client) id>
-kapp.msal.tenantId=<directory (tenant) id>
-kapp.msal.signatureHash=<base64 SHA-1 of the signing certificate>
+kapp.msal.tenantId=<tenant id>
+kapp.msal.signatureHash=<your debug key's hash, below>
 ```
 
-The signature hash is per signing key, so every developer's debug keystore needs its own entry in
-the registration's Android redirect URIs, `msauth://co.edu.konradlorenz.kapp/<hash>`:
+**Each developer registers their own key.** Microsoft redirects back to
+`msauth://co.edu.konradlorenz.kapp/<hash>`, and the hash is the SHA-1 of the certificate that
+signed the build. Every computer's debug keystore is different, so every developer has their own
+hash, and the team does not share a keystore. Get yours with:
 
 ```bash
 keytool -exportcert -alias androiddebugkey -keystore ~/.android/debug.keystore -storepass android \
   | openssl sha1 -binary | openssl base64
 ```
 
-| Build | No client id | With a client id |
-|---|---|---|
-| Debug | Fake ID token, accepted by the mocks only | Microsoft's sign-in |
-| Release | "todavía no tiene configurado el ingreso con Microsoft" | Microsoft's sign-in |
+Send it to Brian, who adds it in the app registration under *Authentication > Android*, with the
+package `co.edu.konradlorenz.kapp`. Until it is registered, Microsoft will not send the sign-in back
+to the app. A debug build logs MSAL's own messages to logcat (tag `MSAL`, never with personal
+data), which is where a misconfiguration shows up: from the app it looks like a cancelled sign-in.
+
+Which sign-in a build uses:
+
+| Build | `kapp.msal.clientId` set | `kapp.dev.oidcIssuer` set | Neither |
+|---|---|---|---|
+| Debug | Microsoft's sign-in | The local backend's fake OIDC server | Made-up token, mocks only |
+| Release | Microsoft's sign-in | Ignored | "todavía no tiene configurado el ingreso con Microsoft" |
+
+A real ID token works against the mocks too, since they accept any token, so Microsoft's sign-in
+can be tried without running the backend. Against the local backend, auth-service has to trust the
+tenant first: `KAPP_MICROSOFT_*` in its `.env`, as the
+[fake OIDC server's README](../../../backend/microservices/fake-oidc/README.md) describes.
 
 The session, in `data/session/`:
 
