@@ -46,13 +46,18 @@ The token's issuer is the address the client used to reach the server, and auth-
 
 ## Against the real tenant
 
-In `.env`, set all four. An empty value would fall back to this fake server, since that is the compose default:
+In `.env`, set all six. An empty value would fall back to this fake server, since that is the compose default:
 
 ```
 KAPP_MICROSOFT_TENANT_ID=<tenant id>
 KAPP_MICROSOFT_ISSUERS=https://login.microsoftonline.com/<tenant id>/v2.0
 KAPP_MICROSOFT_JWKS_URI=https://login.microsoftonline.com/<tenant id>/discovery/v2.0/keys
 KAPP_MICROSOFT_CLIENT_IDS=<application (client) id>
+KAPP_MICROSOFT_PORTAL_CLIENT_ID=<application (client) id>
+KAPP_FIRST_ADMINS=<your address in the tenant>
 ```
+
+Then `docker compose up -d auth-service`. The portal at `http://localhost:4300` sends you to Microsoft,
+which needs `http://localhost:4300/auth/callback` registered as a single-page application redirect.
 
 None of them is a secret. Issue #62 lists the steps to create the test tenant.

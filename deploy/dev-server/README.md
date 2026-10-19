@@ -37,6 +37,10 @@ Any Linux host with Docker (and the compose plugin), curl, python3 and systemd, 
    - The portal calls the gateway at its own host name and port 8080, so publish both on one name.
    - `KAPP_DEV_URL` is that name, as the browser shows it.
 
+To sign in with Microsoft, add the tenant to the same `.env` (see [`env.example`](env.example))
+and register `<KAPP_DEV_URL>/auth/callback` as a single-page application redirect in the tenant.
+The portal shows "Sign in with Microsoft" as soon as auth-service has a tenant.
+
 Everything here listens on 127.0.0.1 and nothing is published with `ports:`: the host decides
 what leaves it. The limits in `compose.yaml` suit a host that is lent for other things too. Every
 JVM stays small, and the kernel and the scheduler put the services last. A host with room can
