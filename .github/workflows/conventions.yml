@@ -14,9 +14,12 @@ on:
 permissions:
   contents: read
 
+# Runs queue instead of cancelling each other. Opening a pull request with its label fires `opened` and
+# `labeled` at once, and a cancelled run leaves a cancelled "Git conventions" on the commit, which the
+# merge queue reads as failing. A run takes seconds, so waiting costs nothing.
 concurrency:
   group: conventions-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   git:
