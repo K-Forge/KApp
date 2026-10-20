@@ -5,6 +5,8 @@ import co.edu.konradlorenz.kapp.data.network.HealthStatus
 import co.edu.konradlorenz.kapp.data.network.MicrosoftSignInRequest
 import co.edu.konradlorenz.kapp.data.network.RefreshRequest
 import co.edu.konradlorenz.kapp.data.network.TokenResponse
+import co.edu.konradlorenz.kapp.data.network.VisitorPassRedemptionRequest
+import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -17,7 +19,6 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import retrofit2.HttpException
 import retrofit2.Response
-import java.io.IOException
 
 /**
  * The rules of "Keeping the session" in issue #46, each against a fake server. The clock is a
@@ -217,6 +218,9 @@ class SessionManagerTest {
             logouts += request.refreshToken
             return Response.success(204, Unit)
         }
+
+        override suspend fun redeemVisitorPass(code: String, request: VisitorPassRedemptionRequest): TokenResponse =
+            error("not used here")
 
         private fun issue(): TokenResponse {
             issued++

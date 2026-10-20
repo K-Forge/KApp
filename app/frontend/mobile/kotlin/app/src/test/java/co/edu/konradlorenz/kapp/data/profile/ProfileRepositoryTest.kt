@@ -8,17 +8,18 @@ import co.edu.konradlorenz.kapp.data.network.TokenResponse
 import co.edu.konradlorenz.kapp.data.network.UserApi
 import co.edu.konradlorenz.kapp.data.network.UserProfile
 import co.edu.konradlorenz.kapp.data.network.UserProfileUpdate
+import co.edu.konradlorenz.kapp.data.network.VisitorPassRedemptionRequest
 import co.edu.konradlorenz.kapp.data.session.ProfileRole
 import co.edu.konradlorenz.kapp.data.session.Session
 import co.edu.konradlorenz.kapp.data.session.SessionManager
 import co.edu.konradlorenz.kapp.data.session.SessionStore
+import java.io.IOException
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import retrofit2.Response
-import java.io.IOException
 
 /** How the profile is read once, shared, and how it settles the tabs. */
 class ProfileRepositoryTest {
@@ -139,6 +140,9 @@ class ProfileRepositoryTest {
 
         override suspend fun logout(request: RefreshRequest): Response<Unit> =
             Response.success(204, Unit)
+
+        override suspend fun redeemVisitorPass(code: String, request: VisitorPassRedemptionRequest): TokenResponse =
+            error("not used here")
     }
 
     private class MemoryStore : SessionStore {
