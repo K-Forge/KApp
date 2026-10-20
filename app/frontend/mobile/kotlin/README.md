@@ -60,10 +60,7 @@ there is a repository, `HomeViewModel` serves `HomeSampleData.kt`, which is the 
 artboard is drawn with.
 
 The bar at the bottom navigates, and so does everything on Inicio that names another screen: the
-four shortcuts, the two section links, **Cómo llegar** and the button on each empty state. What
-they open is `PlaceholderScreen` — the same band and card as Inicio, with the contract that will
-fill that screen printed on it. One placeholder for the four of them: there is nothing to tell
-apart yet, and four identical files would only be four files to delete.
+four shortcuts, the two section links, **Cómo llegar** and the button on each empty state.
 
 The bar shows the tabs of the profile role, as issue #46's table has it: a student sees all five,
 a professor has no Semáforo, staff have neither Semáforo nor Horario. Inicio leaves out the cards
@@ -118,9 +115,11 @@ debug with every API call answered from the contracts' examples, in `app/src/dem
 - **It keeps nothing.** A plan created or a course moved in the Semáforo answers with the example
   plan, and the next read shows the example again.
 - **It sits next to a debug build**, as `co.edu.konradlorenz.kapp.demo`, with its own session.
-- **The files are the Prism mocks' answers.** After an example changes in `docs/api/`, start the
-  mocks and run `scripts/capture-demo-data.sh` to copy them again. `DemoBackend` decides which file
-  answers which call; `DemoBackendTest` checks every call the screens make has one.
+- **The files are the Prism mocks' answers**, except Mapa's building list: the contract's example
+  has one building, so that file is the campus out of map-service's seeds. After an example changes
+  in `docs/api/`, start the mocks and run `scripts/capture-demo-data.sh` to copy them again.
+  `DemoBackend` decides which file answers which call; `DemoBackendTest` checks every call the
+  screens make has one.
 
 ## Running against the mocks
 
@@ -297,7 +296,7 @@ the server refused (`401`), failed (`5xx`), was not there (`404`) or never answe
 Every `@Preview` renders at 360x800, which is the size the mockups are drawn at, so the two can be
 compared side by side without a device. `HomeScreen.kt` has four — the screen and the three states
 of `EstadosHome.dc.html` — `LoginScreen.kt` two, as a release build and as a debug build with an
-error showing, `ProfileScreen.kt` two, loaded and failed, and `PlaceholderScreen.kt` one. The Semáforo has none: it is too long for one 800 dp frame, and the emulator against the mocks shows it better.
+error showing and `ProfileScreen.kt` two, loaded and failed. The Semáforo has none: it is too long for one 800 dp frame, and the emulator against the mocks shows it better.
 
 ## Layout
 
@@ -321,7 +320,7 @@ app/src/main/java/co/edu/konradlorenz/kapp/
     ├── profile/                 ProfileScreen + ProfileViewModel
     ├── semaphore/               SemaphoreScreen + SemaphoreViewModel
     ├── schedule/                ScheduleScreen + ScheduleViewModel
-    ├── placeholder/             Mapa, the one tab not built yet
+    ├── map/                     Mapa: the buildings, until the interactive map
     └── invitation/              stub
 ```
 
@@ -348,7 +347,7 @@ names that sheet assigns. Two rules worth not rediscovering:
 | Visitor passes | `ROLE_GUEST` and `POST /auth/visitor-passes/{code}/redeem`. No issue asks for them in the app yet |
 | Hilt | It earns its place when there are two implementations to swap, not before |
 | A monochrome launcher icon | Themed icons need a single-colour version of the crest, which is a design asset we do not have |
-| Mapa | The one route left on `PlaceholderScreen`. No issue asks for the Kotlin map yet; a class's room is shown from the map API in the timetable's sheet, without drawing the floor |
+| Mapa | The interactive map. For now Mapa says it comes in the next phase and lists the buildings from `GET /api/map/buildings`, with the code a class's room carries in Horario; a class's room is shown from the map API in the timetable's sheet, without drawing the floor |
 | A mockup for the Horario | None exists; the screen is Inicio's band, card and class rows |
 | The period switcher | `GET /api/schedule/me/periods`. Not in issue #45's list; the timetable is the current period's |
 | A mockup for the Semáforo | None exists; the screen is Inicio's band and card with one row per item |

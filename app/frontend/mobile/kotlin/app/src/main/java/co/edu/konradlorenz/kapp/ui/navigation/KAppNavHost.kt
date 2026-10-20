@@ -13,7 +13,7 @@ import co.edu.konradlorenz.kapp.AppContainer
 import co.edu.konradlorenz.kapp.ui.home.HomeScreen
 import co.edu.konradlorenz.kapp.ui.invitation.InvitationScreen
 import co.edu.konradlorenz.kapp.ui.login.LoginScreen
-import co.edu.konradlorenz.kapp.ui.placeholder.PlaceholderScreen
+import co.edu.konradlorenz.kapp.ui.map.MapScreen
 import co.edu.konradlorenz.kapp.ui.profile.ProfileScreen
 import co.edu.konradlorenz.kapp.ui.schedule.ScheduleScreen
 import co.edu.konradlorenz.kapp.ui.semaphore.SemaphoreScreen
@@ -66,8 +66,7 @@ fun KAppNavHost(container: AppContainer) {
             InvitationScreen(onBack = { navController.popBackStack() })
         }
 
-        // The tabs, each inside the shell that draws the bar over it. Every one but Mapa has a
-        // screen of its own; Mapa is still the placeholder.
+        // The tabs, each inside the shell that draws the bar over it.
         KAppDestination.entries.forEach { destination ->
             composable(destination.route) {
                 MainShell(
@@ -83,7 +82,7 @@ fun KAppNavHost(container: AppContainer) {
                         KAppDestination.Profile -> ProfileScreen()
                         KAppDestination.Semaphore -> SemaphoreScreen()
                         KAppDestination.Schedule -> ScheduleScreen()
-                        else -> PlaceholderScreen(destination)
+                        KAppDestination.Map -> MapScreen()
                     }
                 }
             }
