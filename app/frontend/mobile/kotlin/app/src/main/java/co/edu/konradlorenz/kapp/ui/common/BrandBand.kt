@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.edu.konradlorenz.kapp.R
@@ -81,7 +82,12 @@ fun BrandBand(title: String, trailing: @Composable (() -> Unit)? = null) {
                 fontWeight = FontWeight.Bold,
                 letterSpacing = (-0.4).sp,
                 color = Color.White,
+                // One line, cut with an ellipsis. maxLines alone still breaks at the space, so a
+                // name too long for what is left of the line - "administrativo.prueba" - went to a
+                // second line the band hides, and the greeting read "Hola,".
                 maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
             )
             trailing?.invoke()
         }
