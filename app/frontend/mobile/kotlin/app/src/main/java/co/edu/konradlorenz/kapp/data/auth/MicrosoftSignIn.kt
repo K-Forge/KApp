@@ -5,6 +5,7 @@ import android.content.Context
 import co.edu.konradlorenz.kapp.BuildConfig
 import com.microsoft.identity.client.AuthenticationCallback
 import com.microsoft.identity.client.IAuthenticationResult
+import com.microsoft.identity.client.Logger
 import com.microsoft.identity.client.IPublicClientApplication
 import com.microsoft.identity.client.ISingleAccountPublicClientApplication
 import com.microsoft.identity.client.PublicClientApplication
@@ -145,6 +146,13 @@ private class MsalSignIn(
         }
 
     private suspend fun create(): ISingleAccountPublicClientApplication {
+        // MSAL logs nothing by default, and a misconfigured registration usually shows up only as
+        // a cancelled sign-in. A debug build sends its log to logcat (tag MSAL), never with PII.
+        if (BuildConfig.DEBUG) {
+            Logger.getInstance().setEnableLogcatLog(true)
+            Logger.getInstance().setLogLevel(Logger.LogLevel.INFO)
+            Logger.getInstance().setEnablePII(false)
+        }
         val config = withContext(Dispatchers.IO) {
             File(context.noBackupFilesDir, "msal_config.json").apply { writeText(configJson()) }
         }
