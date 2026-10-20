@@ -38,6 +38,19 @@ describe('authGuard', () => {
     expect(run()).toBe(true);
   });
 
+  // Any permission opens the portal, as POST /auth/microsoft decides for the PORTAL client.
+  it('lets reception in, with no administrator in sight', () => {
+    store.set(token(Date.now() + 60_000, ['ROLE_STAFF', 'ROLE_RECEPTION']));
+
+    expect(run()).toBe(true);
+  });
+
+  it('sends a profile role with no permission back to sign in, saying why', () => {
+    store.set(token(Date.now() + 60_000, ['ROLE_STAFF']));
+
+    expect(loginReason(run())).toBe('/login?reason=no-permission');
+  });
+
   // A tab reopened after lunch: the access token is gone, the session is not.
   it('renews an expired token when the session still can be', async () => {
     store.start({ accessToken: token(Date.now() - 1_000), refreshToken: 'rt_1' });

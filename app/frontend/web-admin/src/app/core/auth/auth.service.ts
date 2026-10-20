@@ -6,6 +6,7 @@ import { ApiConfigService } from '../config/api-config.service';
 import { parseApiError } from '../http/api-error.util';
 import { AppHttpError } from '../http/api-http-error';
 import type { TokenResponse } from './auth.model';
+import { PORTAL_PERMISSIONS } from './permissions';
 import { TokenStore } from './token.store';
 
 /**
@@ -13,8 +14,6 @@ import { TokenStore } from './token.store';
  * attach, and it is also where a bad base URL first becomes visible, so its errors go through
  * the same AppHttpError/ApiError path as everything else rather than a special case.
  */
-/** Who may sign in to this portal. Later, some administrative staff too. */
-export const PORTAL_ROLES = ['ROLE_ADMIN'];
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -25,9 +24,9 @@ export class AuthService {
   private renewal: Promise<boolean> | null = null;
 
   login(email: string, password: string): Observable<TokenResponse> {
-    // The portal is for administrators: the server refuses any other account here, before it
+    // The portal is for accounts with a permission: the server refuses any other here, before it
     // offers to replace a temporary password - a student's is replaced in the app, not here.
-    return this.http.post<TokenResponse>(`${this.config.baseUrl()}/auth/login`, { email, password, allowedRoles: PORTAL_ROLES }).pipe(
+    return this.http.post<TokenResponse>(`${this.config.baseUrl()}/auth/login`, { email, password, allowedRoles: PORTAL_PERMISSIONS }).pipe(
       tap((response) => this.tokenStore.start(response)),
       catchError((err) => throwError(() => new AppHttpError(parseApiError(err)))),
     );
@@ -39,7 +38,7 @@ export class AuthService {
    */
   changePassword(email: string, currentPassword: string, newPassword: string): Observable<TokenResponse> {
     return this.http
-      .post<TokenResponse>(`${this.config.baseUrl()}/auth/password`, { email, currentPassword, newPassword, allowedRoles: PORTAL_ROLES })
+      .post<TokenResponse>(`${this.config.baseUrl()}/auth/password`, { email, currentPassword, newPassword, allowedRoles: PORTAL_PERMISSIONS })
       .pipe(
       tap((response) => this.tokenStore.start(response)),
       catchError((err) => throwError(() => new AppHttpError(parseApiError(err)))),

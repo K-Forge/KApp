@@ -2,11 +2,13 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router, UrlTree } from '@angular/router';
 import { AuthService } from './auth.service';
 import { isTokenExpired } from './jwt.util';
+import { opensPortal } from './permissions';
 import { TokenStore } from './token.store';
 
 /**
- * Keeps every screen except `/login` behind a valid, unexpired **administrator** token, renewing
- * an expired one first when the session still can be.
+ * Keeps every screen except `/login` behind a valid, unexpired token that holds a **permission** -
+ * administration, reception, maintenance, moderation or Bienestar - renewing an expired one first
+ * when the session still can be. Which sections each permission sees is `sectionGuard`'s.
  *
  * <p>The role check is the point. Requiring only a valid token was not enough: an invitation
  * code lets somebody create a `ROLE_STUDENT` account for the mobile app, and that account's
@@ -17,12 +19,9 @@ import { TokenStore } from './token.store';
  *
  * <p>This is the client's own check and it is not a security control — anyone can edit their
  * own browser. The control is the `@PreAuthorize` on each endpoint, which is asserted per role
- * in the backend's tests. This stops the portal from *showing* an administration console to
- * somebody who is not an administrator.
- *
- * <p><strong>To sign in as a student while testing</strong> — which is a real thing to want,
- * since the API console and the role inspector exist for exactly that — remove `ROLE_ADMIN`
- * from the check below. It is deliberately one line.
+ * in the backend's tests. This stops the portal from *showing* its screens to somebody whose
+ * account the server would refuse here anyway: `POST /auth/microsoft` for the portal asks for the
+ * same permissions.
  */
 export const authGuard: CanActivateFn = (_route, state) => {
   const tokenStore = inject(TokenStore);
@@ -56,10 +55,10 @@ export const authGuard: CanActivateFn = (_route, state) => {
 };
 
 function admitted(tokenStore: TokenStore, router: Router): true | UrlTree {
-  if (!tokenStore.roles().includes('ROLE_ADMIN')) {
+  if (!opensPortal(tokenStore.roles())) {
     // `reason` rather than a silent bounce: landing back on the sign-in page having just
     // signed in successfully reads as a broken login, not as a refusal.
-    return router.createUrlTree(['/login'], { queryParams: { reason: 'admin-only' } });
+    return router.createUrlTree(['/login'], { queryParams: { reason: 'no-permission' } });
   }
   return true;
 }
