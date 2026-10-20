@@ -33,6 +33,9 @@ android {
         buildConfigField("String", "MSAL_SIGNATURE_HASH", "\"${msal("signatureHash")}\"")
         // The redirect path BrowserTabActivity answers to, in AndroidManifest.xml.
         manifestPlaceholders["msalSignatureHash"] = msal("signatureHash")
+
+        // The demo build type turns it on; see below.
+        buildConfigField("Boolean", "DEMO", "false")
     }
 
     buildTypes {
@@ -63,6 +66,25 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+        }
+        // The class delivery's build (issue #159): a debug build whose every API call is answered
+        // from the contracts' examples in src/demo/assets, so it runs with no Docker, no backend
+        // and no Microsoft account. The default on a fresh clone, so opening the project and
+        // pressing Run is enough; pick debug in Build Variants to work against the mocks.
+        //
+        // Its own application id, so it sits next to a debug build rather than replacing it, and
+        // none of the sign-in properties: whatever ~/.gradle/gradle.properties says, the demo signs
+        // in with the made-up token and the profile picker.
+        create("demo") {
+            initWith(getByName("debug"))
+            isDefault = true
+            applicationIdSuffix = ".demo"
+            matchingFallbacks += "debug"
+            buildConfigField("Boolean", "DEMO", "true")
+            // Never reached: DemoBackend answers before OkHttp opens a connection.
+            buildConfigField("String", "API_BASE_URL", "\"https://demo.invalid/\"")
+            buildConfigField("String", "DEV_OIDC_ISSUER", "\"\"")
+            buildConfigField("String", "MSAL_CLIENT_ID", "\"\"")
         }
     }
 
