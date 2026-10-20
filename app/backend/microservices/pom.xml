@@ -39,7 +39,7 @@
         <spring-cloud.version>2025.0.3</spring-cloud.version>
 
         <!-- springdoc 2.x is the Boot 3.x line; 3.x targets Boot 4. -->
-        <springdoc.version>2.9.0</springdoc.version>
+        <springdoc.version>2.9.1</springdoc.version>
 
         <!--
           Mongock provides versioned MongoDB migrations, distributed locking and an
