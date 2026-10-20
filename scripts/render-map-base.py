@@ -7,7 +7,7 @@ out with the same geometry the portal uses (web-admin's features/data/ground/gro
     scripts/render-map-base.py                                  # campus, EC P1 and P2
     scripts/render-map-base.py --building EC --floors 1,2,3 --out /tmp/renders
 
-By default the files go to docs/entrega/primera-entrega/mapa-base/: campus.svg, ec-p1.svg and
+By default the files go to docs/entrega/segunda-entrega/mapa-base/: campus.svg, ec-p1.svg and
 ec-p2.svg, each with its .png. The seeds are the snapshot scripts/export-map-snapshot.py writes from
 the API, so what is drawn is what the database held at the last export.
 
@@ -29,7 +29,7 @@ RESOURCES = os.path.join(REPO, "app", "backend", "microservices", "map-service",
 SEEDS = os.path.join(RESOURCES, "seed", "map")
 STRUCTURES = os.path.join(RESOURCES, "seed", "structures")
 GROUND = os.path.join(RESOURCES, "ground")
-DEFAULT_OUT = os.path.join(REPO, "docs", "entrega", "primera-entrega", "mapa-base")
+DEFAULT_OUT = os.path.join(REPO, "docs", "entrega", "segunda-entrega", "mapa-base")
 
 # ground.ts: a campus is small enough for the plane through its middle to stand in for the earth.
 METRES_PER_DEGREE_LAT = 110574
