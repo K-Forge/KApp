@@ -11,7 +11,7 @@ import { ThemeService } from '../../core/theme/theme.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TokenCountdownComponent } from '../../shared/ui/token-countdown/token-countdown.component';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
-import { NAV_GROUPS } from '../nav';
+import { navFor } from '../nav';
 
 
 /** Nav + header shared by every authenticated screen. Login stays outside so it renders alone. */
@@ -137,7 +137,7 @@ import { NAV_GROUPS } from '../nav';
           <div class="nav-backdrop" (click)="closeDrawer()" aria-hidden="true"></div>
         }
         <nav id="shell-nav" class="shell-nav" [attr.aria-label]="'Sections' | t">
-          @for (group of groups; track group.title) {
+          @for (group of groups(); track group.title) {
             <p class="nav-group-title">{{ group.title | t }}</p>
             @for (link of group.links; track link.path) {
               <a
@@ -608,7 +608,8 @@ export class ShellComponent {
   protected readonly theme = inject(ThemeService);
   private readonly i18n = inject(I18nService);
 
-  readonly groups = NAV_GROUPS;
+  /** Only the sections this account's permissions open: reception sees visitor passes, not users. */
+  readonly groups = computed(() => navFor(this.tokenStore.roles()));
 
   /** The host alone. The full URL is in the tooltip; the button only has to say which machine. */
   readonly shortBaseUrl = () => {

@@ -1,8 +1,9 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router, UrlTree } from '@angular/router';
+import { CanActivateChildFn, CanActivateFn, Router, UrlTree } from '@angular/router';
+import { sectionRoles } from '../../layout/nav';
 import { AuthService } from './auth.service';
 import { isTokenExpired } from './jwt.util';
-import { opensPortal } from './permissions';
+import { mayOpen, opensPortal } from './permissions';
 import { TokenStore } from './token.store';
 
 /**
@@ -62,3 +63,13 @@ function admitted(tokenStore: TokenStore, router: Router): true | UrlTree {
   }
   return true;
 }
+
+/**
+ * Keeps each section to the permissions its sidebar entry names, for an address typed or bookmarked
+ * as much as for a click: the sidebar only hides what the account cannot open. Anything else lands
+ * on the account's own token, which every account may see.
+ */
+export const sectionGuard: CanActivateChildFn = (_route, state) => {
+  const roles = inject(TokenStore).roles();
+  return mayOpen(roles, sectionRoles(state.url)) || inject(Router).createUrlTree(['/my-token']);
+};

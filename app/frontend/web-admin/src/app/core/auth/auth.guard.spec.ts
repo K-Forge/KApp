@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { authGuard } from './auth.guard';
+import { authGuard, sectionGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { TokenStore } from './token.store';
 
@@ -75,5 +75,16 @@ describe('authGuard', () => {
 
     expect(loginReason(run())).toBe('/login?reason=expired&returnUrl=%2Fdata%2Fusers');
     expect(renew).not.toHaveBeenCalled();
+  });
+
+  // The sidebar hides what an account cannot open; a typed address must not open it either.
+  it('sends reception from the users page to its own token, and lets it into visitor passes', () => {
+    store.set(token(Date.now() + 60_000, ['ROLE_STAFF', 'ROLE_RECEPTION']));
+    const section = (url: string) =>
+      TestBed.runInInjectionContext(() => sectionGuard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot));
+
+    expect(loginReason(section('/data/users'))).toBe('/my-token');
+    expect(section('/data/visitor-passes')).toBe(true);
+    expect(section('/api-console')).toBe(true);
   });
 });
