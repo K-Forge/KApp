@@ -1,0 +1,26 @@
+[
+    {
+        "pensumItemCode": "59085",
+        "sinuCode": "59085",
+        "name": "Electiva III",
+        "level": 7,
+        "credits": 3,
+        "weeklyHours": 3,
+        "totalHours": 48,
+        "area": "ISA",
+        "isElectiveSlot": true,
+        "prerequisites": []
+    },
+    {
+        "pensumItemCode": "59088",
+        "sinuCode": "59088",
+        "name": "Electiva IV",
+        "level": 7,
+        "credits": 3,
+        "weeklyHours": 3,
+        "totalHours": 48,
+        "area": "ISA",
+        "isElectiveSlot": true,
+        "prerequisites": []
+    }
+]

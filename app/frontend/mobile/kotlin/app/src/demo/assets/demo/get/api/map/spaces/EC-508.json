@@ -1,0 +1,112 @@
+{
+    "id": "string",
+    "code": "302",
+    "doorCode": "302",
+    "baseCode": "302",
+    "wing": "C",
+    "name": "Laboratorio de Sistemas",
+    "typeCode": "LAB",
+    "typeName": "Laboratorio",
+    "category": "TEACHING",
+    "buildingId": "string",
+    "buildingCode": "A",
+    "campus": "Sede Principal",
+    "floorCode": "P3",
+    "floorLevel": 3,
+    "aliases": [
+        "string"
+    ],
+    "shape": [
+        {
+            "x": 280,
+            "y": 200
+        },
+        {
+            "x": 400,
+            "y": 200
+        },
+        {
+            "x": 400,
+            "y": 280
+        },
+        {
+            "x": 280,
+            "y": 280
+        }
+    ],
+    "bounds": {
+        "x": 80,
+        "y": 80,
+        "width": 160,
+        "height": 80
+    },
+    "doors": [
+        {
+            "from": {
+                "x": 120,
+                "y": 48
+            },
+            "to": {
+                "x": 120,
+                "y": 48
+            }
+        }
+    ],
+    "accessVia": "ASC-CENTRAL",
+    "accessibility": "STEP_FREE",
+    "effectiveAccessibility": "STEP_FREE",
+    "note": "Solo por la escalera norte, desde el P5.",
+    "capacity": 25,
+    "floor": {
+        "code": "MEZZ",
+        "level": 1.5,
+        "name": "Mezzanine",
+        "status": "UNMAPPED",
+        "accessibility": "STEP_FREE",
+        "note": "Solo por la escalera, desde la recepción.",
+        "width": 1640,
+        "height": 590,
+        "top": "NORTH",
+        "outline": [
+            {
+                "x": 120,
+                "y": 48
+            }
+        ],
+        "corridors": [
+            {
+                "code": "PAS-CENTRAL",
+                "name": "Pasillo central",
+                "color": "#5B8DEF",
+                "path": [
+                    {
+                        "x": 120,
+                        "y": 48
+                    }
+                ]
+            }
+        ],
+        "version": 3
+    },
+    "building": {
+        "id": "string",
+        "code": "A",
+        "name": "Bloque A",
+        "campus": "Sede Principal",
+        "description": "string",
+        "aliases": [
+            "string"
+        ],
+        "wings": [
+            {
+                "code": "S",
+                "name": "Ala sur",
+                "doorSuffix": "-S",
+                "note": "Se cruza por el P1 o por la terraza."
+            }
+        ],
+        "sinuSedes": [
+            "string"
+        ]
+    }
+}

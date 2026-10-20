@@ -87,7 +87,14 @@ class HomeViewModel(
         val Factory = viewModelFactory {
             initializer {
                 val container = (this[APPLICATION_KEY] as KAppApplication).container
-                HomeViewModel(container.profile, container.session, container.semaphore, container.schedule)
+                HomeViewModel(
+                    container.profile,
+                    container.session,
+                    container.semaphore,
+                    container.schedule,
+                    container.today,
+                    container.now,
+                )
             }
         }
     }

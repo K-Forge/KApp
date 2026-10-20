@@ -1,0 +1,24 @@
+[
+    {
+        "id": "66f0a1c2e4b0a91d3c5e7f21",
+        "name": "Mi plan",
+        "pensumCode": "1015",
+        "primary": true,
+        "placements": [
+            {
+                "pensumItemCode": "17070",
+                "plannedLevel": 9,
+                "electiveSinuCode": null,
+                "electiveOffered": null
+            },
+            {
+                "pensumItemCode": "59085",
+                "plannedLevel": 9,
+                "electiveSinuCode": "59214",
+                "electiveOffered": true
+            }
+        ],
+        "createdAt": "2026-09-02T21:10:00Z",
+        "updatedAt": "2026-10-01T18:45:00Z"
+    }
+]

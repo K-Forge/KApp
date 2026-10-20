@@ -3,6 +3,8 @@ package co.edu.konradlorenz.kapp
 import android.app.Application
 import android.content.Context
 import co.edu.konradlorenz.kapp.data.auth.MicrosoftSignIn
+import co.edu.konradlorenz.kapp.data.demo.DemoBackend
+import co.edu.konradlorenz.kapp.data.demo.DemoClock
 import co.edu.konradlorenz.kapp.data.network.KAppApi
 import co.edu.konradlorenz.kapp.data.profile.MockProfilePreference
 import co.edu.konradlorenz.kapp.data.profile.ProfileRepository
@@ -15,6 +17,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.time.LocalDate
+import java.time.LocalTime
 
 /**
  * Holds the one instance of everything that must be shared: two clients sending different tokens,
@@ -25,8 +29,15 @@ import kotlinx.coroutines.runBlocking
  */
 class AppContainer(context: Context) {
 
+    /** The demo build answers every call from its assets (issue #159); every other build, nothing. */
+    private val demo = if (BuildConfig.DEMO) DemoBackend(context.assets) else null
+
+    /** What Inicio and Horario take as today and now: the device's, or the demo's fixed day. */
+    val today: () -> LocalDate = if (BuildConfig.DEMO) { { DemoClock.today } } else LocalDate::now
+    val now: () -> LocalTime = if (BuildConfig.DEMO) { { DemoClock.now } } else LocalTime::now
+
     /** The auth endpoints only. No token, no renewal - see AuthApi. */
-    private val publicApi = KAppApi(accessToken = { null })
+    private val publicApi = KAppApi(accessToken = { null }, answerLocally = demo)
 
     val session = SessionManager(publicApi.auth, KeystoreSessionStore(context))
 
@@ -37,6 +48,7 @@ class AppContainer(context: Context) {
     val api = KAppApi(
         accessToken = { runBlocking { session.accessToken() } },
         renewAfterRejection = { rejected -> runBlocking { session.renewAfterRejection(rejected) } },
+        answerLocally = demo,
     )
 
     val microsoft = MicrosoftSignIn.forThisBuild(context)
