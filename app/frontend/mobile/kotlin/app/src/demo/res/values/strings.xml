@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The demo has no mocks: the picker chooses who signs in, out of the contracts' examples. -->
+    <!--
+      The demo signs in with no Microsoft account and no server: the picker chooses who, out of the
+      contracts' examples. The login says so rather than offering a Microsoft sign-in it never opens.
+    -->
+    <string name="login_intro_title">Ingresa con un perfil de demostración</string>
+    <string name="login_intro_body">Esta versión de demostración no usa tu cuenta %1$s ni se conecta a ningún servidor: elige un perfil abajo y entra con sus datos de ejemplo.</string>
+    <string name="login_submit">Ingresar con el perfil de demostración</string>
     <string name="login_mock_profile_label">Perfil de demostración</string>
 </resources>
