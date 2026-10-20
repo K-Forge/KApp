@@ -72,6 +72,7 @@ class DemoBackendTest {
             answer("GET", "/api/schedule/me/week"),
             answer("GET", "/api/map/spaces/405", buildingCode = "EC"),
             answer("PUT", "/api/semaphore/me/plans/x/placements/y"),
+            answer("POST", "/auth/visitor-passes/KL-V-7K2M-QX9P/redeem"),
         )
         calls.filterIsInstance<DemoAnswer.Asset>().forEach {
             assertTrue("missing ${it.path}", File(assets, it.path).isFile)
