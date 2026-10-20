@@ -59,9 +59,9 @@ export function notForThisPortal(error: ApiError | null): boolean {
 
         @if (refusedAsNonAdmin() || notAdmin()) {
           <div class="card api-error" role="alert">
-            <strong>{{ 'That account is not an administrator.' | t }}</strong>
+            <strong>{{ 'This account has no permission for the portal.' | t }}</strong>
             <p style="margin:0.35rem 0 0">
-              {{ notAdmin() ? ('The password is right, but this portal is only for administrators: students and professors sign in in the KApp app. Nothing about the account changed.' | t) : ('The sign-in worked; this portal is admin-only.' | t) }}
+              {{ notAdmin() ? ('The password is right, but an administrator of KApp has not given this account any permission. Students and professors use the KApp app. Nothing about the account changed.' | t) : ('Microsoft signed you in, but an administrator of KApp has not given this account any permission. Students and professors use the KApp app.' | t) }}
             </p>
           </div>
         }
@@ -265,7 +265,7 @@ export class LoginPage {
    * appears at the one moment it exists for.
    */
   protected readonly refusedAsNonAdmin = toSignal(
-    this.route.queryParamMap.pipe(map((params) => params.get('reason') === 'admin-only')),
+    this.route.queryParamMap.pipe(map((params) => params.get('reason') === 'no-permission')),
     { initialValue: false },
   );
 
