@@ -56,6 +56,27 @@ save GET api/schedule/me
 save GET "api/schedule/me/day?date=2026-10-23"
 save GET "api/schedule/me/week?date=2026-10-19"
 
+# Mapa's list. The contract's example has a single building, so this one is the campus as
+# map-service serves it, out of its seeds (db/seed/map, one file per building), with the fields a
+# building has in the API and without the drawing, which the list does not use. Ordered by code,
+# as the API answers.
+mkdir -p "$out/get/api/map"
+python3 -I - "$(cd "$(dirname "$0")/../../../../.." && pwd)/app/backend/microservices/map-service/src/main/resources/db/seed/map" \
+  > "$out/get/api/map/buildings.json" <<'PY'
+import json, pathlib, sys
+fields = ("code", "name", "campus", "description", "address", "aliases")
+buildings = []
+for seed in sorted(pathlib.Path(sys.argv[1]).glob("*.json")):
+    b = json.loads(seed.read_text(encoding="utf-8"))
+    building = {k: b[k] for k in fields if k in b}
+    building["wings"] = [{k: w[k] for k in ("code", "name", "note") if k in w} for w in b.get("wings", [])]
+    building["floors"] = [{k: f[k] for k in ("code", "level", "name") if k in f} for f in b.get("floors", [])]
+    buildings.append(building)
+buildings.sort(key=lambda b: b["code"])
+print(json.dumps(buildings, ensure_ascii=False, indent=4))
+PY
+echo "$out/get/api/map/buildings.json"
+
 # Every room of the day and the week, so tapping a class finds its room offline. Those two rather
 # than the full timetable because each class there carries its building and room together.
 python3 -I - "$out/get/api/schedule/me/day.json" "$out/get/api/schedule/me/week.json" <<'PY' | while read -r building room; do
