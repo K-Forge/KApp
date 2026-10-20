@@ -1,3 +1,5 @@
+import { mayOpen } from '../core/auth/permissions';
+
 /** The portal's sections, as the sidebar lists them: also where a page finds its own icon. */
 export interface NavLink {
   path: string;
@@ -5,12 +7,19 @@ export interface NavLink {
   /** Inline SVG path data, 24x24. Emoji render differently on every platform and read as
       decoration; a stroked glyph reads as an icon and inherits the current text colour. */
   icon: string;
+  /**
+   * The roles any one of which opens the section: the contract's `x-roles` for what the page is
+   * there to change. None means every account the portal lets in.
+   */
+  roles?: readonly string[];
 }
 
 export interface NavGroup {
   title: string;
   links: NavLink[];
 }
+
+const ADMIN = ['ROLE_ADMIN'];
 
 // Grouped because eleven flat entries is a list to read, not a menu to use. The three groups
 // are the three reasons somebody opens this portal: to check who they are, to look after the
@@ -19,26 +28,26 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     title: /* i18n */ 'Academic',
     links: [
-      { path: '/data/programs', label: /* i18n */ 'Programs', icon: 'M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4' },
-      { path: '/data/pensums', label: /* i18n */ 'Pensums', icon: 'M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2zM8 7h8M8 11h8M8 15h5' },
+      { path: '/data/programs', label: /* i18n */ 'Programs', icon: 'M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4', roles: ADMIN },
+      { path: '/data/pensums', label: /* i18n */ 'Pensums', icon: 'M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2zM8 7h8M8 11h8M8 15h5', roles: ADMIN },
     ],
   },
   {
     title: /* i18n */ 'Campus',
     links: [
-      { path: '/data/campus', label: /* i18n */ 'Campus map', icon: 'M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14' },
-      { path: '/data/survey', label: /* i18n */ 'Survey', icon: 'M3 17 17 3l4 4L7 21zM7 13l2 2M10 10l2 2M13 7l2 2' },
-      { path: '/data/buildings', label: /* i18n */ 'Buildings', icon: 'M3 21h18M5 21V5a2 2 0 012-2h6a2 2 0 012 2v16M9 7h2M9 11h2M9 15h2M15 21v-8h4v8' },
-      { path: '/data/floors', label: /* i18n */ 'Floor editor', icon: 'M3 3h18v18H3zM3 9h18M9 9v12M15 15h6' },
-      { path: '/data/spaces', label: /* i18n */ 'Spaces', icon: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z' },
+      { path: '/data/campus', label: /* i18n */ 'Campus map', icon: 'M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14', roles: ADMIN },
+      { path: '/data/survey', label: /* i18n */ 'Survey', icon: 'M3 17 17 3l4 4L7 21zM7 13l2 2M10 10l2 2M13 7l2 2', roles: ADMIN },
+      { path: '/data/buildings', label: /* i18n */ 'Buildings', icon: 'M3 21h18M5 21V5a2 2 0 012-2h6a2 2 0 012 2v16M9 7h2M9 11h2M9 15h2M15 21v-8h4v8', roles: ADMIN },
+      { path: '/data/floors', label: /* i18n */ 'Floor editor', icon: 'M3 3h18v18H3zM3 9h18M9 9v12M15 15h6', roles: ADMIN },
+      { path: '/data/spaces', label: /* i18n */ 'Spaces', icon: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z', roles: ADMIN },
     ],
   },
   {
     title: /* i18n */ 'People and access',
     links: [
-      { path: '/data/users', label: /* i18n */ 'Users', icon: 'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 21v-2a4 4 0 00-3-3.87' },
-      { path: '/data/invitation-codes', label: /* i18n */ 'Invitation codes', icon: 'M15 7a4 4 0 11-5.66 5.66L3 19v2h2l6.34-6.34A4 4 0 0115 7zM16 8h.01' },
-      { path: '/data/visitor-passes', label: /* i18n */ 'Visitor passes', icon: 'M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2zM3 11h18M7 15h4' },
+      { path: '/data/users', label: /* i18n */ 'Users', icon: 'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 21v-2a4 4 0 00-3-3.87', roles: ADMIN },
+      { path: '/data/invitation-codes', label: /* i18n */ 'Invitation codes', icon: 'M15 7a4 4 0 11-5.66 5.66L3 19v2h2l6.34-6.34A4 4 0 0115 7zM16 8h.01', roles: ADMIN },
+      { path: '/data/visitor-passes', label: /* i18n */ 'Visitor passes', icon: 'M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2zM3 11h18M7 15h4', roles: ['ROLE_ADMIN', 'ROLE_RECEPTION'] },
     ],
   },
   {
@@ -63,4 +72,20 @@ export function navEntryFor(url: string): { group: NavGroup; link: NavLink } | n
     }
   }
   return best;
+}
+
+/**
+ * The roles any one of which opens the page at `url`: its sidebar entry's. A page with no entry - a
+ * block's editor, say - is an administrator's, so a section added without saying who it is for
+ * stays closed rather than open to everybody.
+ */
+export function sectionRoles(url: string): readonly string[] | undefined {
+  const entry = navEntryFor(url);
+  return entry ? entry.link.roles : ADMIN;
+}
+
+/** The sidebar as an account holding `roles` sees it: only the sections it may open. */
+export function navFor(roles: readonly string[]): NavGroup[] {
+  return NAV_GROUPS.map((group) => ({ ...group, links: group.links.filter((link) => mayOpen(roles, link.roles)) }))
+    .filter((group) => group.links.length > 0);
 }

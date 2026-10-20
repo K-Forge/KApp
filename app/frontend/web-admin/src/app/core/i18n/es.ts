@@ -970,9 +970,8 @@ export const ES: Record<string, string> = {
   'Admin Portal': 'Portal de administración',
   'Your session expired.': 'Su sesión expiró.',
   'The portal signs out as soon as the token runs out. Sign in again to go back to where you were.': 'El portal cierra la sesión apenas vence el token. Inicie sesión de nuevo para volver a donde estaba.',
-  'That account is not an administrator.': 'Esa cuenta no es de administrador.',
-  'The password is right, but this portal is only for administrators: students and professors sign in in the KApp app. Nothing about the account changed.': 'La contraseña es correcta, pero este portal es solo para administradores: estudiantes y profesores entran en la app KApp. No se cambió nada de la cuenta.',
-  'The sign-in worked; this portal is admin-only.': 'El inicio de sesión funcionó, pero este portal es solo para administradores.',
+  'The password is right, but an administrator of KApp has not given this account any permission. Students and professors use the KApp app. Nothing about the account changed.':
+    'La contraseña es correcta, pero ningún administrador de KApp le ha dado un permiso a esta cuenta. Estudiantes y profesores usan la app KApp. No se cambió nada de la cuenta.',
   'Choose your password': 'Elija su contraseña',
   'The one you were given is temporary. The one you choose now is the one you will use from here on; your iPhone or Mac will offer to save it.': 'La que le dieron es temporal. La que elija ahora es la que usará de aquí en adelante; su iPhone o su Mac le ofrecerán guardarla.',
   'New password': 'Contraseña nueva',

@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { Router, type Routes } from '@angular/router';
-import { authGuard } from './core/auth/auth.guard';
+import { authGuard, sectionGuard } from './core/auth/auth.guard';
 
 // Grows one feature at a time as each is built (see AGENTS commit history) - a route is only
 // added here once the component behind it exists, so the app always builds at every commit.
@@ -17,6 +17,7 @@ export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
+    canActivateChild: [sectionGuard],
     loadComponent: () => import('./layout/shell/shell.component').then((m) => m.ShellComponent),
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'my-token' },

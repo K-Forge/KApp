@@ -261,6 +261,37 @@ The session, in `data/session/`:
 - **Signed out** with `POST /auth/logout`, then both tokens are forgotten even if the server could
   not be reached.
 
+## Running against the dev server
+
+the-hive runs `develop` with the real services, at `https://the-hive.tail1e5d4e.ts.net` (see the
+[dev server's README](../../../../deploy/dev-server/README.md)). It is reachable only through the
+team's Tailscale network, and it signs in only with Microsoft: no fake OIDC server and no
+passwords. So a debug build pointed at it needs the three `kapp.msal.*` values above, your hash
+registered, and a test user of the tenant (Brian creates them, one per profile role):
+
+```bash
+./gradlew installDebug -Pkapp.api.baseUrl=https://the-hive.tail1e5d4e.ts.net:8080/
+```
+
+- **Port 8080 is the API.** The address without a port is the admin portal, which answers every
+  path with its own page, so a build pointed there fails on the first call that expects JSON.
+- **The emulator needs Tailscale's DNS.** It resolves names through the host's default servers,
+  which do not know `*.ts.net`, so start it with MagicDNS as its server:
+
+  ```bash
+  emulator -avd <your AVD> -dns-server 100.100.100.100
+  ```
+
+  A phone with the Tailscale app connected needs nothing extra.
+- **One profile role per user.** The tabs follow the role the tenant gives the user, so trying
+  another role means signing out and back in as another user; Microsoft keeps the last account
+  in its picker under *Use another account*.
+
+A debug build writes one logcat line per API call, tag `KAppHttp`: method, path and status, or the
+kind of failure that kept it from an answer. It never writes the query, headers or body, so no
+token or personal data reaches it. When a screen says "No pudimos cargar…", that line says whether
+the server refused (`401`), failed (`5xx`), was not there (`404`) or never answered.
+
 ## Previews
 
 Every `@Preview` renders at 360x800, which is the size the mockups are drawn at, so the two can be
