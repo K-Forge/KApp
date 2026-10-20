@@ -32,6 +32,8 @@ describe('UsersPage', () => {
   const create = vi.fn((request: AccountRequest) => of(issued(request.email, request.profileRole)));
   const issueTemporaryPassword = vi.fn(() => of(issued('pepita@kforge.dev', 'ROLE_STUDENT')));
   const deleteAccount = vi.fn(() => of(undefined));
+  const setRoles = vi.fn((userId: string, request: { profileRole: string; permissions: string[] }) =>
+    of({ userId, roles: [request.profileRole, ...request.permissions] }));
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -43,7 +45,7 @@ describe('UsersPage', () => {
           provide: TokenStore,
           useValue: { decoded: () => ({ claims: { sub: 'me' } }) },
         },
-        { provide: AccountsService, useValue: { create, issueTemporaryPassword, delete: deleteAccount } },
+        { provide: AccountsService, useValue: { create, issueTemporaryPassword, delete: deleteAccount, setRoles } },
       ],
     }).compileComponents();
     page = TestBed.createComponent(UsersPage).componentInstance;
@@ -93,5 +95,52 @@ describe('UsersPage', () => {
     confirm.mockReturnValue(true);
     page.deleteAccount(profile('someone-else'));
     expect(deleteAccount).toHaveBeenCalledWith('someone-else');
+  });
+
+  it('opens the permissions of an account as it holds them, and sends exactly what is chosen', () => {
+    const someone = { ...profile('someone-else'), roles: ['ROLE_PROFESSOR', 'ROLE_RECEPTION'] } as DirectoryEntry;
+    page.result.set({ content: [someone], page: 0, size: 20, totalElements: 1, totalPages: 1, first: true, last: true });
+
+    page.editRoles(someone);
+    expect(page.profileRole()).toBe('ROLE_PROFESSOR');
+    expect(page.chosen()).toEqual(['ROLE_RECEPTION']);
+
+    page.toggle('ROLE_RECEPTION');
+    page.toggle('ROLE_WELLBEING');
+    page.toggle('ROLE_ADMIN');
+    page.saveRoles();
+
+    // In the contract's order, whatever order they were ticked in.
+    expect(setRoles).toHaveBeenCalledWith('someone-else', { profileRole: 'ROLE_PROFESSOR', permissions: ['ROLE_ADMIN', 'ROLE_WELLBEING'] });
+    expect(page.result()?.content[0].roles).toEqual(['ROLE_PROFESSOR', 'ROLE_ADMIN', 'ROLE_WELLBEING']);
+  });
+
+  // The server refuses it (400); the box is locked so nobody has to find out that way.
+  it('locks your own administration, and only that', () => {
+    expect(page.locked(profile('me'), 'ROLE_ADMIN')).toBe(true);
+    expect(page.locked(profile('me'), 'ROLE_RECEPTION')).toBe(false);
+    expect(page.locked(profile('someone-else'), 'ROLE_ADMIN')).toBe(false);
+  });
+
+  // Saving went through the form's own submit, which the page has to catch: a plain form with no
+  // formGroup gets no ngSubmit, and the browser reloaded the page instead of sending anything.
+  it('saves when the dialog form is submitted, without leaving the page', () => {
+    // jsdom has no <dialog> methods; the dialog closes after a save.
+    const proto = HTMLDialogElement.prototype as { close?: () => void };
+    const had = proto.close;
+    proto.close ??= () => undefined;
+    const fixture = TestBed.createComponent(UsersPage);
+    const users = fixture.componentInstance;
+    users.editing.set(profile('someone-else'));
+    users.chosen.set(['ROLE_RECEPTION']);
+    fixture.detectChanges();
+    setRoles.mockClear();
+
+    const submit = new Event('submit', { cancelable: true });
+    fixture.nativeElement.querySelector('form.roles-form').dispatchEvent(submit);
+
+    expect(submit.defaultPrevented).toBe(true);
+    expect(setRoles).toHaveBeenCalledWith('someone-else', { profileRole: 'ROLE_STAFF', permissions: ['ROLE_RECEPTION'] });
+    proto.close = had;
   });
 });

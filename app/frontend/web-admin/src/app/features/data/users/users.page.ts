@@ -18,6 +18,16 @@ import { formatDate } from '@angular/common';
 import { LocalDatePipe } from '../../../core/i18n/local-date.pipe';
 import { CopyButtonComponent } from '../../../shared/ui/copy-button/copy-button.component';
 import { ACCOUNT_ROLES, AccountsService, type AccountRole, type TemporaryPassword } from './accounts.service';
+import { PORTAL_PERMISSIONS } from '../../../core/auth/permissions';
+
+/** The permissions an administrator grants here, and what each opens in the portal today. */
+const PERMISSION_CHOICES = [
+  { role: 'ROLE_ADMIN', name: /* i18n */ 'Administration', opens: /* i18n */ 'everything in this portal' },
+  { role: 'ROLE_RECEPTION', name: /* i18n */ 'Reception', opens: /* i18n */ 'visitor passes' },
+  { role: 'ROLE_MAINTENANCE', name: /* i18n */ 'Maintenance', opens: /* i18n */ 'nothing yet: its screens come with damage reports' },
+  { role: 'ROLE_MODERATION', name: /* i18n */ 'Moderation', opens: /* i18n */ 'nothing yet: its screens come with the community features' },
+  { role: 'ROLE_WELLBEING', name: /* i18n */ 'Bienestar', opens: /* i18n */ 'nothing yet: its screens come with events and clubs' },
+];
 
 const PAGE_SIZE = 20;
 
@@ -123,6 +133,9 @@ const PAGE_SIZE = 20;
                 </td>
                 <td class="row">
                   <button type="button" class="btn btn-sm" (click)="view(user)">{{ 'View' | t }}</button>
+                  <button type="button" class="btn btn-sm" [disabled]="updatingId() === user.id" (click)="editRoles(user)">
+                    {{ 'Permissions' | t }}
+                  </button>
                   <button
                     type="button"
                     class="btn btn-sm"
@@ -159,6 +172,44 @@ const PAGE_SIZE = 20;
           <p><strong>{{ user.firstName }} {{ user.lastName }}</strong> · {{ user.email }}</p>
           <app-json-view [value]="user" />
         </div>
+      }
+    </app-modal>
+
+    <app-modal #rolesModal [title]="'Profile and permissions' | t" (closed)="rolesError.set(null)">
+      @if (editing(); as user) {
+        <app-api-error-banner [error]="rolesError()" />
+        <!-- No formGroup here, so no ngSubmit: a plain submit, kept from reloading the page. -->
+        <form (submit)="$event.preventDefault(); saveRoles()" class="stack roles-form">
+          <p style="margin:0"><strong>{{ user.firstName }} {{ user.lastName }}</strong> · {{ user.email }}</p>
+          <div class="field">
+            <label for="roles-profile">{{ 'Profile' | t }}</label>
+            <select id="roles-profile" (change)="profileRole.set($any($event.target).value)">
+              @for (role of accountRoles; track role) {
+                <option [value]="role" [selected]="role === profileRole()">{{ roleLabel(role) }}</option>
+              }
+            </select>
+            <span class="hint">{{ 'What the KApp app shows. It overrides what the Microsoft directory says about this account.' | t }}</span>
+          </div>
+          <fieldset class="field permissions">
+            <legend>{{ 'Permissions' | t }}</legend>
+            @for (choice of permissionChoices; track choice.role) {
+              <label class="permission">
+                <input type="checkbox" [checked]="chosen().includes(choice.role)" [disabled]="locked(user, choice.role)" (change)="toggle(choice.role)" />
+                <span><strong>{{ choice.name | t }}</strong> · {{ choice.opens | t }}</span>
+              </label>
+            }
+            @if (isSelf(user)) {
+              <span class="hint">{{ 'You cannot take administration away from yourself: the portal always keeps somebody who can manage it.' | t }}</span>
+            }
+          </fieldset>
+          <p class="hint" style="margin:0">{{ 'The change reaches their sessions when they next renew, within the hour.' | t }}</p>
+          <div class="row">
+            <button type="submit" class="btn btn-primary" [disabled]="savingRoles()">
+              {{ savingRoles() ? ('Saving…' | t) : ('Save' | t) }}
+            </button>
+            <button type="button" class="btn" (click)="rolesModal.close()">{{ 'Cancel' | t }}</button>
+          </div>
+        </form>
       }
     </app-modal>
 
@@ -203,6 +254,20 @@ const PAGE_SIZE = 20;
     </app-modal>
   `,
   styles: `
+    .permissions {
+      border: 0;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .permission {
+      display: flex;
+      gap: 0.5rem;
+      align-items: baseline;
+      font-weight: normal;
+    }
     .issued {
       border-color: var(--primary-brand);
     }
@@ -257,6 +322,15 @@ export class UsersPage {
 
   @ViewChild('detailModal') private detailModal?: ModalComponent;
   @ViewChild('createModal') private createModal?: ModalComponent;
+  @ViewChild('rolesModal') private rolesModal?: ModalComponent;
+
+  readonly permissionChoices = PERMISSION_CHOICES;
+  /** The account whose roles are being edited, its profile role and its permissions as chosen so far. */
+  readonly editing = signal<DirectoryEntry | null>(null);
+  readonly profileRole = signal<AccountRole>('ROLE_STAFF');
+  readonly chosen = signal<string[]>([]);
+  readonly savingRoles = signal(false);
+  readonly rolesError = signal<ApiError | null>(null);
 
   private readonly accounts = inject(AccountsService);
   readonly accountRoles = ACCOUNT_ROLES;
@@ -416,6 +490,48 @@ export class UsersPage {
       error: (err: unknown) => {
         this.updatingId.set(null);
         this.error.set(err instanceof AppHttpError ? err.apiError : null);
+      },
+    });
+  }
+
+  editRoles(user: DirectoryEntry): void {
+    this.editing.set(user);
+    this.profileRole.set((user.roles.find((role) => (ACCOUNT_ROLES as readonly string[]).includes(role)) as AccountRole) ?? 'ROLE_STAFF');
+    this.chosen.set(user.roles.filter((role) => PORTAL_PERMISSIONS.includes(role)));
+    this.rolesError.set(null);
+    this.rolesModal?.open();
+  }
+
+  toggle(role: string): void {
+    this.chosen.update((roles) => (roles.includes(role) ? roles.filter((r) => r !== role) : [...roles, role]));
+  }
+
+  /** Your own administration, which the server will not let you drop: the box says so first. */
+  locked(user: DirectoryEntry, role: string): boolean {
+    return role === 'ROLE_ADMIN' && this.isSelf(user);
+  }
+
+  /** Exactly the profile role and permissions chosen; the row shows the roles the server answers with. */
+  saveRoles(): void {
+    const user = this.editing();
+    if (!user || this.savingRoles()) {
+      return;
+    }
+    this.savingRoles.set(true);
+    this.rolesError.set(null);
+    const permissions = PORTAL_PERMISSIONS.filter((role) => this.chosen().includes(role));
+    this.accounts.setRoles(user.id, { profileRole: this.profileRole(), permissions }).subscribe({
+      next: (answer) => {
+        this.savingRoles.set(false);
+        const roles = answer.roles as DirectoryRole[];
+        this.result.update((current) =>
+          current ? { ...current, content: current.content.map((u) => (u.id === user.id ? { ...u, roles } : u)) } : current,
+        );
+        this.rolesModal?.close();
+      },
+      error: (err: unknown) => {
+        this.savingRoles.set(false);
+        this.rolesError.set(err instanceof AppHttpError ? err.apiError : null);
       },
     });
   }
