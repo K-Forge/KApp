@@ -24,14 +24,19 @@ import java.util.concurrent.TimeUnit
  * [renewAfterRejection] is asked once when a request that carried a token comes back `401`: it
  * answers the token to retry with, or `null` to let the `401` through. Both run on OkHttp's threads
  * and may block - SessionManager renews inside them.
+ *
+ * [answerLocally], when there is one, answers every call itself and nothing goes out: the demo
+ * build's DemoBackend.
  */
 class KAppApi(
     accessToken: () -> String?,
     renewAfterRejection: ((rejected: String) -> String?)? = null,
     baseUrl: String = BuildConfig.API_BASE_URL,
+    answerLocally: Interceptor? = null,
 ) {
     private val client = OkHttpClient.Builder()
         .addInterceptor(bearer(accessToken))
+        .apply { answerLocally?.let { addInterceptor(it) } }
         .apply { renewAfterRejection?.let { authenticator(retryOnce(it)) } }
         // Short on purpose: against the mocks, a server that has not answered in a few seconds is
         // a server that is not running, and the developer should hear about it now.

@@ -3,6 +3,7 @@ package co.edu.konradlorenz.kapp
 import android.app.Application
 import android.content.Context
 import co.edu.konradlorenz.kapp.data.auth.MicrosoftSignIn
+import co.edu.konradlorenz.kapp.data.demo.DemoBackend
 import co.edu.konradlorenz.kapp.data.network.KAppApi
 import co.edu.konradlorenz.kapp.data.profile.MockProfilePreference
 import co.edu.konradlorenz.kapp.data.profile.ProfileRepository
@@ -25,8 +26,11 @@ import kotlinx.coroutines.runBlocking
  */
 class AppContainer(context: Context) {
 
+    /** The demo build answers every call from its assets (issue #159); every other build, nothing. */
+    private val demo = if (BuildConfig.DEMO) DemoBackend(context.assets) else null
+
     /** The auth endpoints only. No token, no renewal - see AuthApi. */
-    private val publicApi = KAppApi(accessToken = { null })
+    private val publicApi = KAppApi(accessToken = { null }, answerLocally = demo)
 
     val session = SessionManager(publicApi.auth, KeystoreSessionStore(context))
 
@@ -37,6 +41,7 @@ class AppContainer(context: Context) {
     val api = KAppApi(
         accessToken = { runBlocking { session.accessToken() } },
         renewAfterRejection = { rejected -> runBlocking { session.renewAfterRejection(rejected) } },
+        answerLocally = demo,
     )
 
     val microsoft = MicrosoftSignIn.forThisBuild(context)
