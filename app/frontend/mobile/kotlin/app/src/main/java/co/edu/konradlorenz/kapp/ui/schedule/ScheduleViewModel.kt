@@ -137,7 +137,8 @@ class ScheduleViewModel(
     companion object {
         val Factory = viewModelFactory {
             initializer {
-                ScheduleViewModel((this[APPLICATION_KEY] as KAppApplication).container.schedule)
+                val container = (this[APPLICATION_KEY] as KAppApplication).container
+                ScheduleViewModel(container.schedule, container.today())
             }
         }
     }
