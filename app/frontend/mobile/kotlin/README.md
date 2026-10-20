@@ -102,6 +102,26 @@ cd app/frontend/mobile/kotlin
 ./gradlew :app:installDebug         # onto a connected device or a running emulator
 ```
 
+## The demo build
+
+The `demo` build type runs with nothing else: no Docker, no backend, no Microsoft account. It is
+debug with every API call answered from the contracts' examples, in `app/src/demo/assets/demo/`
+(issue #159). On a fresh clone it is the selected variant, so Run is enough; otherwise pick
+**demo** in *Build Variants*, or:
+
+```bash
+./gradlew :app:installDemo
+```
+
+- **Who signs in** is the picker under **Ingresar con Microsoft**: Estudiante, Profesor or
+  Administrativo, the three examples of `GET /api/users/me`. Sign out from Perfil to pick another.
+- **It keeps nothing.** A plan created or a course moved in the Semáforo answers with the example
+  plan, and the next read shows the example again.
+- **It sits next to a debug build**, as `co.edu.konradlorenz.kapp.demo`, with its own session.
+- **The files are the Prism mocks' answers.** After an example changes in `docs/api/`, start the
+  mocks and run `scripts/capture-demo-data.sh` to copy them again. `DemoBackend` decides which file
+  answers which call; `DemoBackendTest` checks every call the screens make has one.
+
 ## Running against the mocks
 
 The app talks to the API through one base URL with the gateway's routes, `BuildConfig.API_BASE_URL`,
