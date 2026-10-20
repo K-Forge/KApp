@@ -1,0 +1,12 @@
+{
+    "id": "6b2d9e40-1c3f-4a57-8e69-0d1f2a3b4c5d",
+    "email": "laura.gomez@konradlorenz.edu.co",
+    "firstName": "Laura Marcela",
+    "lastName": "Gómez Restrepo",
+    "avatarUrl": null,
+    "roles": [
+        "ROLE_PROFESSOR"
+    ],
+    "active": true,
+    "academic": null
+}

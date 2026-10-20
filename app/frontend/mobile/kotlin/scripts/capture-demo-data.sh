@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# Copies the contracts' examples into the demo variant's assets, by asking the Prism mocks for
+# every call the app makes. Run it after a docs/api/*.openapi.yaml example changes, with the mocks
+# up (README, "Running against the mocks"):
+#
+#   app/frontend/mobile/kotlin/scripts/capture-demo-data.sh
+#
+# A file lands at <method>/<path>.json - get/api/semaphore/me.json - which is where
+# DemoBackend looks for it. /api/users/me gets one file per profile: me.student.json and so on.
+set -euo pipefail
+
+base="${KAPP_MOCKS:-http://localhost:4000}"
+out="$(cd "$(dirname "$0")/.." && pwd)/app/src/demo/assets/demo"
+auth='Authorization: Bearer demo-access-token-not-a-real-one'
+
+save() { # <method> <path> [extra curl args...]
+  local method="$1" path="$2"; shift 2
+  local file="$out/$(echo "$method" | tr '[:upper:]' '[:lower:]')/${path%%\?*}.json"
+  mkdir -p "$(dirname "$file")"
+  curl -sf -X "$method" -H "$auth" -H 'Content-Type: application/json' "$@" "$base/$path" \
+    | python3 -I -m json.tool --no-ensure-ascii > "$file"
+  echo "$file"
+}
+
+rm -rf "$out"
+
+save POST auth/microsoft -d '{"idToken":"demo-id-token-0123456789","client":"APP"}'
+save POST auth/refresh -d '{"refreshToken":"demo-refresh-token"}'
+
+for example in student professor staffAdmin; do
+  save GET api/users/me -H "Prefer: example=$example"
+  mv "$out/get/api/users/me.json" "$out/get/api/users/me.$example.json"
+done
+
+save GET api/semaphore/me
+save GET api/semaphore/me/summary
+save GET api/semaphore/me/eligible
+save GET api/semaphore/me/plans
+pensum=$(python3 -I -c 'import json,sys; print(json.load(sys.stdin)["pensumCode"])' < "$out/get/api/semaphore/me.json")
+save GET "api/catalog/pensums/$pensum"
+save GET "api/catalog/pensums/$pensum/electives"
+
+# Planning answers with the example plan whatever it is asked: the demo keeps no state. The ids in
+# a path are not part of the file name, so any plan and any course find these two. "any" rather
+# than "_" because the Android build leaves out asset folders whose name starts with one.
+save POST api/semaphore/me/plans -d "{\"name\":\"Mi plan\",\"pensumCode\":\"$pensum\"}"
+plan=$(python3 -I -c 'import json,sys; print(json.load(sys.stdin)[0]["id"])' < "$out/get/api/semaphore/me/plans.json")
+save PUT "api/semaphore/me/plans/$plan/placements/17070" -d '{"plannedLevel":9}'
+mkdir -p "$out/put/api/semaphore/me/plans/any/placements"
+mv "$out/put/api/semaphore/me/plans/$plan/placements/17070.json" "$out/put/api/semaphore/me/plans/any/placements/any.json"
+rm -r "$out/put/api/semaphore/me/plans/$plan"
+
+save GET api/schedule/me
+# The examples are one day and one week, whichever date is asked for; DemoBackend serves them
+# for every date.
+save GET "api/schedule/me/day?date=2026-10-23"
+save GET "api/schedule/me/week?date=2026-10-19"
+
+# Every room of the day and the week, so tapping a class finds its room offline. Those two rather
+# than the full timetable because each class there carries its building and room together.
+python3 -I - "$out/get/api/schedule/me/day.json" "$out/get/api/schedule/me/week.json" <<'PY' | while read -r building room; do
+import json, sys
+rooms = set()
+def walk(node):
+    if isinstance(node, dict):
+        if node.get("buildingCode") and node.get("room"):
+            rooms.add((node["buildingCode"], node["room"]))
+        for value in node.values():
+            walk(value)
+    elif isinstance(node, list):
+        for value in node:
+            walk(value)
+for path in sys.argv[1:]:
+    walk(json.load(open(path)))
+for building, room in sorted(rooms):
+    print(building, room)
+PY
+  save GET "api/map/spaces/$room?buildingCode=$building"
+  mv "$out/get/api/map/spaces/$room.json" "$out/get/api/map/spaces/$building-$room.json"
+done

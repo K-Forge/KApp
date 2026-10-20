@@ -1,0 +1,11 @@
+{
+    "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImV4YW1wbGUta2V5In0.eyJzdWIiOiIzZjhhMWMyZS03YjRkLTRlNWEtOWM2Zi0yZDFiOGUwYTRjNzMiLCJpc3MiOiJodHRwczovL2thcHAua29ucmFkbG9yZW56LmVkdS5jbyIsImlhdCI6MTc2ODQ4OTIwMCwiZXhwIjoxNzY4NDkyODAwLCJlbWFpbCI6InBlcGl0by5wZXJlekBrb25yYWRsb3JlbnouZWR1LmNvIiwicm9sZXMiOlsiUk9MRV9TVFVERU5UIl19.DbIGwPyHTgR3wlzHHuAzgqSYybOA41FW7IkUBCjv5M4ndXLPkbr3OIwe604vUmkvr48ixeunege-L9ypBJJ5s1dig1NlMyDs0c3fxV75cwCoTCcdJiWBS7gmln9oMl1VITiPXg6T7-IJ8I5QD2Y6k6n3dhD8fkY59mdNAYXclVDOCQnyyDqKY9xkWjKWVo19i4wdVJMfai0KVST5ccGj0SmXnDNbgzgT0kLb7lxjS71_XUJsTZ_9TXiIvuWvQ7Ikoo4wnropg7EHtLb7dLBjY6Fo2Tab3alCP86aT10x5w6BgaSTT1LB3mVCc8o1IC3mY3CHqPk9iuaoMSWU7zsEPg",
+    "tokenType": "Bearer",
+    "expiresIn": 3600,
+    "refreshToken": "rt_Vb3Nq8Lw2Zx6Jk1Mp9Rt4Ys7Hc0Gd5F",
+    "refreshExpiresIn": 2592000,
+    "userId": "3f8a1c2e-7b4d-4e5a-9c6f-2d1b8e0a4c73",
+    "roles": [
+        "ROLE_STUDENT"
+    ]
+}

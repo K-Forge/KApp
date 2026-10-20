@@ -1,0 +1,17 @@
+{
+    "id": "3f8a1c2e-7b4d-4e5a-9c6f-2d1b8e0a4c73",
+    "email": "pepito.perez@konradlorenz.edu.co",
+    "firstName": "Pepito",
+    "lastName": "Perez Gomez",
+    "avatarUrl": "https://cdn.kapp.konradlorenz.edu.co/avatars/3f8a1c2e.jpg",
+    "roles": [
+        "ROLE_STUDENT"
+    ],
+    "active": true,
+    "academic": {
+        "programCode": "506",
+        "programName": "Ingeniería de Sistemas",
+        "pensumCode": "1015",
+        "currentLevel": 8
+    }
+}

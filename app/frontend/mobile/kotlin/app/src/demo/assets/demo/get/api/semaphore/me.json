@@ -1,0 +1,145 @@
+{
+    "userId": "507f1f77bcf86cd799439011",
+    "programCode": "506",
+    "pensumCode": "1015",
+    "currentLevel": 8,
+    "source": "SINU",
+    "readAt": "2026-10-05T14:32:11Z",
+    "courses": [
+        {
+            "pensumItemCode": "11015",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20191",
+            "grade": 41,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "41025",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20191",
+            "grade": 47,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "12015",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20192",
+            "grade": 34,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "31013",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20192",
+            "grade": 45,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "31014",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20201",
+            "grade": 43,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "47022",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20252",
+            "grade": 44,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "59075",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20252",
+            "grade": 46,
+            "resolvedSinuCode": "59211",
+            "resolvedName": "Computación en la Nube"
+        },
+        {
+            "pensumItemCode": "17070",
+            "status": "FAILED",
+            "sinuStatus": "PERDIDA",
+            "period": "20261",
+            "grade": 26,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "48022",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20261",
+            "grade": 42,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "59085",
+            "status": "PENDING",
+            "sinuStatus": null,
+            "period": null,
+            "grade": null,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "59088",
+            "status": "PENDING",
+            "sinuStatus": null,
+            "period": null,
+            "grade": null,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "59096",
+            "status": "POSTPONED",
+            "sinuStatus": "APLAZADA",
+            "period": "20261",
+            "grade": null,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "59035",
+            "status": "IN_PROGRESS",
+            "sinuStatus": "EN CURSO",
+            "period": "20262",
+            "grade": null,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "56201",
+            "status": "IN_PROGRESS",
+            "sinuStatus": "EN CURSO",
+            "period": "20262",
+            "grade": null,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "59098",
+            "status": "IN_PROGRESS",
+            "sinuStatus": "EN CURSO",
+            "period": "20262",
+            "grade": null,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        }
+    ]
+}

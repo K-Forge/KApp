@@ -1,0 +1,173 @@
+{
+    "pensumCode": "1015",
+    "programCode": "506",
+    "programName": "Ingeniería de Sistemas",
+    "faculty": "Facultad de Matemáticas e Ingenierías",
+    "reform": "Plan de estudios 2019-1",
+    "status": "ACTIVE",
+    "totalCredits": 143,
+    "totalHours": 194,
+    "levels": 9,
+    "areas": [
+        {
+            "code": "CB",
+            "name": "Ciencias Básicas",
+            "color": "#539392",
+            "credits": 36,
+            "hours": 44
+        },
+        {
+            "code": "BIS",
+            "name": "Básicas de Ingeniería de Sistemas",
+            "color": "#522567",
+            "credits": 22,
+            "hours": 29
+        },
+        {
+            "code": "ISA",
+            "name": "Ingeniería de Sistemas Aplicadas",
+            "color": "#C9D329",
+            "credits": 67,
+            "hours": 92
+        },
+        {
+            "code": "SI",
+            "name": "Sociedad e Interculturalidad",
+            "color": "#D51A65",
+            "credits": 18,
+            "hours": 29
+        }
+    ],
+    "courses": [
+        {
+            "pensumItemCode": "11015",
+            "sinuCode": "11015",
+            "name": "Precálculo",
+            "level": 1,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "CB",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "41025",
+            "sinuCode": "41025",
+            "name": "Fundamentos de Programación",
+            "level": 1,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "BIS",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "12015",
+            "sinuCode": "12015",
+            "name": "Cálculo I",
+            "level": 2,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "CB",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "11015"
+            ]
+        },
+        {
+            "pensumItemCode": "31013",
+            "sinuCode": "31013",
+            "name": "Técnicas de Programación I",
+            "level": 2,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "BIS",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "41025"
+            ]
+        },
+        {
+            "pensumItemCode": "31014",
+            "sinuCode": "31014",
+            "name": "Técnicas de Programación II",
+            "level": 3,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "BIS",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "31013"
+            ]
+        },
+        {
+            "pensumItemCode": "47022",
+            "sinuCode": "47022",
+            "name": "Ingeniería de Software I",
+            "level": 6,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "31404"
+            ]
+        },
+        {
+            "pensumItemCode": "48022",
+            "sinuCode": "48022",
+            "name": "Ingeniería de Software II",
+            "level": 7,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "47022"
+            ]
+        },
+        {
+            "pensumItemCode": "59035",
+            "sinuCode": "59035",
+            "name": "Desarrollo de Aplicaciones Móviles",
+            "level": 8,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "56201",
+            "sinuCode": "56201",
+            "name": "Metodología de Investigación",
+            "level": 8,
+            "credits": 2,
+            "weeklyHours": 2,
+            "totalHours": 32,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "59098",
+            "sinuCode": "59098",
+            "name": "Electiva VI",
+            "level": 8,
+            "credits": 3,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "ISA",
+            "isElectiveSlot": true,
+            "prerequisites": []
+        }
+    ]
+}
