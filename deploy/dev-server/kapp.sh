@@ -5,20 +5,20 @@
 #   kapp status          what runs, how much each takes, and how much the host has left
 #   kapp stop            stop the whole server, the map's four and the extras; it stays stopped
 #   kapp start           start the map's four again, and the extras if they were on
-#   kapp extras on       start users and the semaphore (users, programs, pensums), if there is room
+#   kapp extras on       start users, the semaphore and the timetable, if there is room
 #   kapp extras off      stop them again
 #   kapp extras          whether they are on
 #
-# The extras are off unless switched on. They ask the host for up to ~550 MB more, so `on` checks
+# The extras are off unless switched on. They ask the host for up to ~800 MB more, so `on` checks
 # it has that and a margin before starting them, and the agent switches them off on its own if the
 # host later runs short: whatever else the host runs comes first.
 set -euo pipefail
 cd /opt/kapp 2>/dev/null || { echo "KApp is not installed here (/opt/kapp)" >&2; exit 1; }
 [[ $EUID -eq 0 ]] || exec sudo "$0" "$@"
 
-EXTRAS=(user-service semaphore-service)
-# What the two may take (their mem_limit) and what the host keeps besides: below this, no.
-NEED_MB=$((256 + 288 + 400))
+EXTRAS=(user-service semaphore-service schedule-service)
+# What the three may take (their mem_limit) and what the host keeps besides: below this, no.
+NEED_MB=$((256 + 288 + 256 + 400))
 
 available_mb() { awk '/^MemAvailable:/ {print int($2 / 1024)}' /proc/meminfo; }
 is_on() { [[ -e .extras ]]; }
@@ -46,7 +46,7 @@ extras_on() {
     echo "Whatever else runs here comes first. Try again when it has more room." >&2
     exit 1
   fi
-  echo "Pulling users and the semaphore..."
+  echo "Pulling users, the semaphore and the timetable..."
   if ! COMPOSE_PROFILES=extras docker compose pull -q "${EXTRAS[@]}"; then
     echo "Their images are not published for this branch yet: GitHub Actions builds them on the next push." >&2
     exit 1
@@ -83,7 +83,7 @@ start_all() {
 extras_off() {
   rm -f .extras .extras-auto-off
   COMPOSE_PROFILES=extras docker compose rm -sf "${EXTRAS[@]}" >/dev/null 2>&1 || true
-  echo "Off: users and the semaphore are stopped. The map, the portal and signing in keep running."
+  echo "Off: users, the semaphore and the timetable are stopped. The map, the portal and signing in keep running."
 }
 
 case "${1:-status} ${2:-}" in

@@ -46,10 +46,11 @@ what leaves it. The limits in `compose.yaml` suit a host that is lent for other 
 JVM stays small, and the kernel and the scheduler put the services last. A host with room can
 relax that in `.env`.
 
-## Users and the semaphore, on demand
+## Users, the semaphore and the timetable, on demand
 
-The map's four services always run. The **extras** - user-service and semaphore-service, which
-the portal's *Users*, *Programs* and *Pensums* pages and registration need - are off until
+The map's four services always run. The **extras** - user-service, semaphore-service and
+schedule-service, which the portal's *Users*, *Programs* and *Pensums* pages and the apps' Perfil,
+Semáforo and Horario need - are off until
 somebody switches them on, on the host (an SSH session from a phone will do):
 
 ```bash
@@ -60,7 +61,7 @@ kapp stop            # the whole server down, and it stays down (the agent leave
 kapp start           # the map's four up again, and the extras if they were on
 ```
 
-- `on` refuses when the host has under ~950 MB available: the two may take up to ~550 MB, and
+- `on` refuses when the host has under ~1.2 GB available: the three may take up to ~800 MB, and
   the rest is the margin the host keeps.
 - While they are on, the agent keeps them on the branch's images like the rest. If the host's
   available memory falls under 300 MB it switches them off itself, and `kapp status` says when

@@ -12,7 +12,7 @@
 # install, by a person, not by whoever pushes next. A server stopped on purpose - README.md's
 # `stop` leaves /opt/kapp/.stopped - stays stopped.
 #
-# The extras (users and the semaphore) follow the branch too while somebody has them on
+# The extras (users, the semaphore and the timetable) follow the branch too while somebody has them on
 # (`kapp extras on` leaves /opt/kapp/.extras). When the host's available memory drops under
 # EXTRAS_FLOOR_MB the agent switches them off itself, and says so in the journal and in
 # `kapp status`: whatever else the host runs comes first.
@@ -30,7 +30,7 @@ if [[ -e .extras ]]; then
   available=$(awk '/^MemAvailable:/ {print int($2 / 1024)}' /proc/meminfo)
   if (( available < EXTRAS_FLOOR_MB )); then
     rm -f .extras
-    COMPOSE_PROFILES=extras docker compose rm -sf user-service semaphore-service >/dev/null 2>&1 || true
+    COMPOSE_PROFILES=extras docker compose rm -sf user-service semaphore-service schedule-service >/dev/null 2>&1 || true
     echo "switched off on $(date '+%F %R') by the agent: only $available MB were left on the host" > .extras-auto-off
     echo "extras switched off: only $available MB available on the host" >&2
   else

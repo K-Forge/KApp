@@ -7,7 +7,7 @@
 # (env.example lists what goes in it). Puts compose.yaml and agent.sh in /opt/kapp, starts
 # kapp-dev-agent.timer, applies compose.yaml to what is running, and runs the agent once. Run it
 # again after compose.yaml or the agent change: the agent itself never touches them. It also installs `kapp` (kapp.sh), to switch the
-# extras - users and the semaphore - on and off by hand.
+# extras - users, the semaphore and the timetable - on and off by hand.
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 [[ $EUID -eq 0 ]] || { echo "run it as root" >&2; exit 1; }

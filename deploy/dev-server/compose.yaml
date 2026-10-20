@@ -7,12 +7,12 @@
 # names a host.
 #
 #   - The map's services always: gateway, auth, map and the portal.
-#   - user-service and semaphore-service (users, programs and pensums) only when somebody switches
-#     them on: they are the `extras` profile, and `kapp extras on` (kapp.sh) starts them after
-#     checking the host has room. The agent switches them off again on its own when the host runs
-#     short. No schedule service and no mocks.
+#   - user-service, semaphore-service and schedule-service (users, programs, pensums, and what the
+#     apps' Perfil, Semáforo and Horario read) only when somebody switches them on: they are the
+#     `extras` profile, and `kapp extras on` (kapp.sh) starts them after checking the host has
+#     room. The agent switches them off again on its own when the host runs short. No mocks.
 #   - Small heaps, the serial GC and the C1 compiler only: each JVM stays at ~200 MB, the four under
-#     1 GB and the extras under 560 MB more, so a shared host (the first one also runs a
+#     1 GB and the extras under 820 MB more, so a shared host (the first one also runs a
 #     Minecraft server) lends little.
 #   - oom_score_adj and cpu_shares make this the first thing the host drops when it runs short, and
 #     the last to get the CPU. Both can be set in .env for a host that has room to spare.
@@ -167,6 +167,27 @@ services:
       JAVA_OPTS: "-Xmx112m -XX:MaxDirectMemorySize=16m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:CICompilerCount=1 -XX:ReservedCodeCacheSize=48m -XX:MaxMetaspaceSize=160m -Xss512k"
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8083/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 180s
+
+  # The timetable, from the test SINU: no database of its own.
+  schedule-service:
+    <<: *jvm
+    profiles: [extras]
+    image: ${KAPP_DEV_IMAGES:-ghcr.io/k-forge/kapp}-schedule-service:${KAPP_DEV_TAG:?set KAPP_DEV_TAG in .env}
+    container_name: kapp-schedule-service
+    mem_limit: 256m
+    memswap_limit: 256m
+    environment:
+      SERVER_PORT: 8084
+      SERVER_ADDRESS: 127.0.0.1
+      KAPP_JWKS_URI: http://127.0.0.1:8081/.well-known/jwks.json
+      KAPP_LOG_LEVEL: INFO
+      JAVA_OPTS: "-Xmx96m -XX:MaxDirectMemorySize=16m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:CICompilerCount=1 -XX:ReservedCodeCacheSize=48m -XX:MaxMetaspaceSize=160m -Xss512k"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8084/actuator/health || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 10
