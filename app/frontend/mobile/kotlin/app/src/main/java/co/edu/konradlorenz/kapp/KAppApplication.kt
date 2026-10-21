@@ -2,24 +2,28 @@ package co.edu.konradlorenz.kapp
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Bitmap
+import android.net.Uri
 import co.edu.konradlorenz.kapp.data.auth.MicrosoftSignIn
 import co.edu.konradlorenz.kapp.data.demo.DemoBackend
 import co.edu.konradlorenz.kapp.data.demo.DemoClock
 import co.edu.konradlorenz.kapp.data.network.KAppApi
+import co.edu.konradlorenz.kapp.data.profile.LocalAvatar
 import co.edu.konradlorenz.kapp.data.profile.MockProfilePreference
 import co.edu.konradlorenz.kapp.data.profile.ProfileRepository
+import co.edu.konradlorenz.kapp.data.profile.decodePicture
 import co.edu.konradlorenz.kapp.data.schedule.ScheduleRepository
 import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreRepository
 import co.edu.konradlorenz.kapp.data.session.KeystoreSessionStore
 import co.edu.konradlorenz.kapp.data.session.SessionManager
 import co.edu.konradlorenz.kapp.data.visitor.VisitorPassRepository
+import java.time.LocalDate
+import java.time.LocalTime
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.time.LocalDate
-import java.time.LocalTime
 
 /**
  * Holds the one instance of everything that must be shared: two clients sending different tokens,
@@ -65,6 +69,12 @@ class AppContainer(context: Context) {
         session = session,
         prefer = { if (microsoft.isFake) "example=${mockProfile.example}" else null },
     )
+
+    /** The profile photo picked on this phone, which the API has nowhere to upload yet. */
+    val localAvatar = LocalAvatar(context)
+
+    /** Reads a picture the photo picker returned. */
+    val decodePicture: (Uri) -> Bitmap? = { decodePicture(context, it) }
 
     /** A student's only: the tab and Inicio's semester card ask for it, nobody else does. */
     val semaphore = SemaphoreRepository(api.semaphore)
