@@ -5,9 +5,10 @@ Native Android client, Kotlin and Jetpack Compose. This is the product, not a pr
 
 ## Segunda entrega (Desarrollo de Aplicaciones Móviles, 23-10-2026)
 
-Esta sección es para correr la app sin haber abierto nunca el proyecto. Se usa la variante
-**demo**: no necesita Docker, ni servidor, ni cuenta de Microsoft, ni internet. Los datos que muestra
-son los ejemplos de los contratos del API, guardados dentro de la app.
+Esta sección es para correr la app sin haber abierto nunca el proyecto, a partir del ZIP
+`Frontend_KApp.zip`. Se usa la variante **demo**: no necesita Docker, ni servidor, ni cuenta de
+Microsoft, ni internet. Los datos que muestra son los ejemplos de los contratos del API, guardados
+dentro de la app.
 
 ### Qué necesitas
 
@@ -19,20 +20,26 @@ son los ejemplos de los contratos del API, guardados dentro de la app.
   Virtual Device > Pixel 6*, con la imagen de sistema de API 37. Si Android Studio ofrece instalar la
   plataforma 37 del SDK, acéptalo.
 
-### Correrla
+### Correrla desde el ZIP
 
-1. Clona el repositorio: `git clone https://github.com/K-Forge/KApp.git`
-2. En Android Studio, *Open* y elige la carpeta **`app/frontend/mobile/kotlin`**. No elijas `KApp`
-   ni `kotlin/app`.
+1. Descomprime `Frontend_KApp.zip`. Queda una carpeta `Frontend_KApp`.
+2. En Android Studio, *File > Open* y elige esa carpeta `Frontend_KApp`, la que tiene
+   `settings.gradle.kts` adentro. Si pregunta si confías en el proyecto, elige *Trust Project*.
 3. Espera a que termine la sincronización de Gradle. La primera vez descarga Gradle y las
    dependencias, y puede tardar varios minutos.
 4. Revisa que la variante sea **demo**: *Build > Select Build Variant…*, módulo `app`, columna
-   *Active Build Variant*. En un clon nuevo debería venir ya en `demo`; si no, elígela ahí.
+   *Active Build Variant*. El proyecto la marca como predeterminada, así que al abrirlo por primera
+   vez debería venir ya en `demo`; si no, elígela ahí.
 5. Elige el emulador y dale **Run** (▶). La primera vez que abre, la app puede tardar hasta dos
    minutos en mostrar la primera pantalla; las siguientes veces es inmediato.
 
-Desde la terminal, con el emulador abierto: `./gradlew :app:installDemo` (en Windows,
-`gradlew.bat :app:installDemo`).
+No hace falta `local.properties` ni ninguna otra configuración: el ZIP compila tal cual, y Android
+Studio escribe por su cuenta la ruta del SDK al abrirlo. Desde una terminal, después de abrirlo una
+vez en Android Studio y con el emulador abierto, dentro de `Frontend_KApp`: `./gradlew
+:app:installDemo` (en Windows, `gradlew.bat :app:installDemo`).
+
+**Para el equipo, desde el repositorio:** `git clone -b develop https://github.com/K-Forge/KApp.git`
+y abre la carpeta `app/frontend/mobile/kotlin`. A partir de ahí, los pasos 3 a 5 son los mismos.
 
 ### Cambiar de perfil
 
@@ -67,8 +74,8 @@ próxima clase y Horario abre en un día con clases.
   que 2026.1.4: actualízalo.
 - **Falta la plataforma 37 o la imagen del emulador.** Instálalas desde *Settings > Languages &
   Frameworks > Android SDK*.
-- **Abriste otra carpeta y no aparece el botón Run.** Cierra el proyecto y abre
-  `app/frontend/mobile/kotlin`.
+- **No aparece el botón Run o no hay módulo `app`.** Abriste otra carpeta: la de afuera que contiene
+  a `Frontend_KApp`, o `Frontend_KApp/app`. Cierra el proyecto y abre `Frontend_KApp`.
 - **Las pantallas dicen "No pudimos cargar…".** Estás en la variante `debug`, que busca un
   servidor. Cambia a `demo` (paso 4).
 - **Android pide el permiso de dispositivos cercanos o de red local.** Eso solo lo pide la variante
@@ -76,7 +83,7 @@ próxima clase y Horario abre en un día con clases.
 - **El emulador va muy lento o se cierra.** Cierra otros programas pesados, revisa que tenga
   aceleración de hardware y, si sigue, borra sus datos en *Device Manager > Wipe Data*.
 
-### El ZIP del código
+### Cómo se arma el ZIP
 
 Desde la raíz del repositorio, con todo guardado en git:
 
@@ -84,9 +91,8 @@ Desde la raíz del repositorio, con todo guardado en git:
 git archive --format=zip --prefix=Frontend_KApp/ -o Frontend_KApp.zip HEAD:app/frontend/mobile/kotlin
 ```
 
-Crea `Frontend_KApp.zip` (unos 240 KB) con el proyecto completo y sin compilados. Descomprimido, se
-abre en Android Studio y corre la variante `demo` igual que desde el repositorio. El enlace al
-repositorio es <https://github.com/K-Forge/KApp>.
+Crea `Frontend_KApp.zip` (unos 240 KB) con el proyecto completo y sin compilados: el código, el
+wrapper de Gradle y los datos de la demo. El repositorio es <https://github.com/K-Forge/KApp>.
 
 ## State
 
