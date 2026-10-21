@@ -8,7 +8,8 @@
     "build": "pnpm run generate:openapi && ng build",
     "watch": "pnpm run generate:openapi && ng build --watch --configuration development",
     "check:i18n": "node scripts/check-i18n.mjs",
-    "test": "pnpm run generate:openapi && pnpm run check:i18n && ng test"
+    "check:headers": "node scripts/check-security-headers.mjs",
+    "test": "pnpm run generate:openapi && pnpm run check:i18n && pnpm run check:headers && ng test"
   },
   "private": true,
   "packageManager": "pnpm@10.33.0",
