@@ -28,6 +28,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -273,11 +275,22 @@ private fun PlanBar(data: SemaphoreData, plan: AcademicPlan?, viewModel: Semapho
                 label = { Text(each.name, maxLines = 1) },
             )
         }
-        FilterChip(
-            selected = false,
+        // An action, not one of the set: pink, the colour of what can be touched, rather than an
+        // unselected chip that read as switched off.
+        AssistChip(
             onClick = viewModel::startNaming,
             enabled = !viewModel.saving,
-            label = { Text("+ " + stringResource(R.string.semaphore_new_plan)) },
+            label = {
+                Text(
+                    "+ " + stringResource(R.string.semaphore_new_plan),
+                    fontWeight = FontWeight.SemiBold,
+                )
+            },
+            colors = AssistChipDefaults.assistChipColors(labelColor = MaterialTheme.colorScheme.primary),
+            border = AssistChipDefaults.assistChipBorder(
+                enabled = !viewModel.saving,
+                borderColor = MaterialTheme.colorScheme.primary,
+            ),
         )
     }
     if (plan != null) {
