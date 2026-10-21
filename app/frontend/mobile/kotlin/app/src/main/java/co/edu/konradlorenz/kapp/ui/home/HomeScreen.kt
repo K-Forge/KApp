@@ -121,7 +121,7 @@ private fun HomeContent(
     ) {
         // The band runs to the very top of the display and the system paints the status bar over
         // it, which is why MainActivity forces white status icons: they are always on purple.
-        HomeBand(student = state.student)
+        HomeBand(student = state.student, onAvatar = { onOpen(KAppDestination.Profile) })
 
         // The band is 80 dp of content below the status bar, and the headline card climbs 24 dp
         // back into it. Starting the scrolling column 24 dp short of the band's edge puts the card
@@ -195,7 +195,12 @@ private fun HomeContent(
             }
         }
         // Over the content, so what scrolls up goes under the greeting (BrandBand).
-        HomeBand(student = state.student, cover = true, scrolled = coverScrolled { scroll.value })
+        HomeBand(
+            student = state.student,
+            onAvatar = { onOpen(KAppDestination.Profile) },
+            cover = true,
+            scrolled = coverScrolled { scroll.value },
+        )
     }
 }
 
@@ -204,7 +209,12 @@ private fun HomeContent(
  * profile is here it says only "Hola", and the circle waits for initials to put in it.
  */
 @Composable
-private fun HomeBand(student: Student?, cover: Boolean = false, scrolled: Dp = 0.dp) {
+private fun HomeBand(
+    student: Student?,
+    onAvatar: () -> Unit,
+    cover: Boolean = false,
+    scrolled: Dp = 0.dp,
+) {
     if (student == null) {
         BrandBand(title = stringResource(R.string.home_greeting_anonymous), cover = cover, scrolled = scrolled)
         return
@@ -214,13 +224,15 @@ private fun HomeBand(student: Student?, cover: Boolean = false, scrolled: Dp = 0
         cover = cover,
         scrolled = scrolled,
     ) {
-        // Initials rather than a photo: user.openapi.yaml carries a name and no picture.
+        // Initials rather than a photo: user.openapi.yaml carries a name and no picture. Tapping
+        // them opens Perfil, which is whose they are.
         Box(
             modifier = Modifier
                 .size(34.dp)
                 .clip(CircleShape)
                 .background(Color.White.copy(alpha = 0.18f))
-                .border(1.dp, Color.White.copy(alpha = 0.28f), CircleShape),
+                .border(1.dp, Color.White.copy(alpha = 0.28f), CircleShape)
+                .clickable(onClickLabel = stringResource(R.string.home_open_profile), onClick = onAvatar),
             contentAlignment = Alignment.Center,
         ) {
             Text(
