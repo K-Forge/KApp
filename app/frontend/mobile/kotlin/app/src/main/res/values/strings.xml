@@ -25,6 +25,11 @@
     <string name="login_mock_student">Estudiante</string>
     <string name="login_mock_professor">Profesor</string>
     <string name="login_mock_staff">Administrativo</string>
+    <!-- The demo build's own entry, under the product's login (LoginScreen's DemoSection). -->
+    <string name="login_demo_toggle">Modo demostración</string>
+    <string name="login_demo_body">Entra sin cuenta ni servidor, con uno de los perfiles de ejemplo.</string>
+    <string name="login_demo_submit">Ingresar con el perfil de demostración</string>
+    <string name="login_demo_microsoft_unavailable">El ingreso con Microsoft no está disponible en esta demostración. Entra desde «Modo demostración», más abajo.</string>
     <string name="login_first_time">¿Vienes de visita?</string>
     <string name="login_invitation_link">Usa tu código de invitación</string>
     <string name="login_copyright">© 2026 Fundación Universitaria Konrad Lorenz</string>

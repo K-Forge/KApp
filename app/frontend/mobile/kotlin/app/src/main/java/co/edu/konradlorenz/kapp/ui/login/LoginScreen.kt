@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.ui.login
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,8 +23,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -78,12 +85,21 @@ fun LoginScreen(
     viewModel: LoginViewModel = viewModel(factory = LoginViewModel.Factory),
 ) {
     val activity = LocalActivity.current
+    val signIn: () -> Unit = { activity?.let { viewModel.signIn(it, onSignIn) } }
+    // The demo build looks like the product: the Microsoft button is there but does not sign in,
+    // and the demo's own entry waits under "Modo demostración".
     LoginContent(
         signingIn = viewModel.signingIn,
         error = viewModel.error,
-        onSubmit = { activity?.let { viewModel.signIn(it, onSignIn) } },
-        mockProfile = viewModel.mockProfile.takeIf { viewModel.offersMockProfiles },
+        onSubmit = if (BuildConfig.DEMO) viewModel::onMicrosoftInDemo else signIn,
+        microsoftUnavailable = viewModel.microsoftUnavailable,
+        mockProfile = viewModel.mockProfile.takeIf { viewModel.offersMockProfiles && !BuildConfig.DEMO },
         onMockProfileChange = viewModel::onMockProfileChange,
+        demoEntry = if (BuildConfig.DEMO) {
+            DemoEntry(viewModel.mockProfile, viewModel::onMockProfileChange, onEnter = signIn)
+        } else {
+            null
+        },
         onUseInvitationCode = onUseInvitationCode.takeIf { BuildConfig.DEBUG },
         modifier = modifier,
     )
@@ -92,8 +108,9 @@ fun LoginScreen(
 /**
  * The screen without its view model, so the previews can draw every state.
  *
- * [mockProfile] is `null` unless the sign-in is the debug build's fake, and [onUseInvitationCode]
- * is `null` outside debug builds; each row is drawn only when it has something to do.
+ * [mockProfile] is `null` unless the sign-in is the debug build's fake against the mocks,
+ * [demoEntry] is `null` outside the demo build, and [onUseInvitationCode] is `null` outside debug
+ * builds; each row is drawn only when it has something to do.
  */
 @Composable
 private fun LoginContent(
@@ -104,6 +121,8 @@ private fun LoginContent(
     onMockProfileChange: (MockProfile) -> Unit,
     onUseInvitationCode: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    microsoftUnavailable: Boolean = false,
+    demoEntry: DemoEntry? = null,
 ) {
     Box(
         modifier = modifier
@@ -147,10 +166,14 @@ private fun LoginContent(
                 Intro()
                 SignInButton(signingIn = signingIn, onClick = onSubmit)
                 if (error != null) ErrorMessage(error)
+                if (microsoftUnavailable) MicrosoftUnavailable()
                 if (mockProfile != null) {
                     MockProfileRow(selected = mockProfile, onSelect = onMockProfileChange)
                 }
                 if (onUseInvitationCode != null) InvitationRow(onClick = onUseInvitationCode)
+                if (demoEntry != null) {
+                    DemoSection(entry = demoEntry, signingIn = signingIn, opened = microsoftUnavailable)
+                }
             }
 
             Footer()
@@ -314,6 +337,69 @@ private fun MockProfileRow(selected: MockProfile, onSelect: (MockProfile) -> Uni
     }
 }
 
+/** What the demo build's entry needs: who signs in, and how. */
+class DemoEntry(
+    val profile: MockProfile,
+    val onProfileChange: (MockProfile) -> Unit,
+    val onEnter: () -> Unit,
+)
+
+/** Under the Microsoft button in the demo build, once it was tapped: why nothing opened. */
+@Composable
+private fun MicrosoftUnavailable() {
+    Text(
+        text = stringResource(R.string.login_demo_microsoft_unavailable),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+    )
+}
+
+/**
+ * The demo build's own way in, folded away so the login looks like the product's: the profile
+ * picker and a button that signs in as that profile, with no account and no server. It opens by
+ * itself when the Microsoft button was tapped, which is the moment somebody is looking for it.
+ */
+@Composable
+private fun DemoSection(entry: DemoEntry, signingIn: Boolean, opened: Boolean) {
+    var open by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(opened) { if (opened) open = true }
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.login_demo_toggle) + if (open) " ▴" else " ▾",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .clickable { open = !open }
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+        )
+        AnimatedVisibility(visible = open) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = stringResource(R.string.login_demo_body),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                MockProfileRow(selected = entry.profile, onSelect = entry.onProfileChange)
+                OutlinedButton(
+                    onClick = entry.onEnter,
+                    enabled = !signingIn,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Text(stringResource(if (signingIn) R.string.login_signing_in else R.string.login_demo_submit))
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun InvitationRow(onClick: () -> Unit) {
     Row(
@@ -378,6 +464,23 @@ private fun LoginDebugOfflinePreview() {
             mockProfile = MockProfile.Professor,
             onMockProfileChange = {},
             onUseInvitationCode = {},
+        )
+    }
+}
+
+@Preview(name = "Login · demo, modo demostración abierto", showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+private fun LoginDemoPreview() {
+    KAppTheme {
+        LoginContent(
+            signingIn = false,
+            error = null,
+            onSubmit = {},
+            mockProfile = null,
+            onMockProfileChange = {},
+            onUseInvitationCode = {},
+            microsoftUnavailable = true,
+            demoEntry = DemoEntry(MockProfile.Student, onProfileChange = {}, onEnter = {}),
         )
     }
 }

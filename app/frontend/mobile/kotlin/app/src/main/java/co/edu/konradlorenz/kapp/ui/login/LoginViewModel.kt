@@ -88,10 +88,24 @@ class LoginViewModel(
         mockProfiles.example = profile.example
     }
 
+    /**
+     * The demo build only: "Ingresar con Microsoft" is there because the product has it, and
+     * tapping it says the demo does not sign in that way. Its own entry is under "Modo
+     * demostración".
+     */
+    var microsoftUnavailable by mutableStateOf(false)
+        private set
+
+    fun onMicrosoftInDemo() {
+        error = null
+        microsoftUnavailable = true
+    }
+
     fun signIn(activity: Activity, onSignedIn: () -> Unit) {
         if (signingIn) return
         signingIn = true
         error = null
+        microsoftUnavailable = false
         viewModelScope.launch {
             try {
                 session.signIn(microsoft.idToken(activity))
