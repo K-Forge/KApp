@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import co.edu.konradlorenz.kapp.ui.common.LocalGoHome
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
 import co.edu.konradlorenz.kapp.ui.theme.BorderSoft
 import co.edu.konradlorenz.kapp.ui.theme.Brand
@@ -69,7 +71,10 @@ fun MainShell(
     content: @Composable () -> Unit,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        content()
+        // The crest on every tab's band goes to Inicio (BrandBand).
+        CompositionLocalProvider(LocalGoHome provides { onSelect(KAppDestination.Home) }) {
+            content()
+        }
         KAppBottomBar(
             current = current,
             destinations = destinations,
