@@ -183,4 +183,30 @@ class SemaphoreGridTest {
         assertEquals("4", formatHours(4.0))
         assertEquals("4,5", formatHours(4.5))
     }
+
+    private fun plan(vararg levels: Int) = AcademicPlan(
+        id = "plan",
+        name = "Mi plan",
+        pensumCode = "1015",
+        primary = true,
+        placements = levels.mapIndexed { i, level -> Placement("item$i", level, null, null) },
+    )
+
+    @Test
+    fun `a plan can use one level after the pensum's last`() {
+        assertEquals(1..10, plannableLevels(9, null))
+        assertEquals(1..10, plannableLevels(9, plan(3, 8)))
+    }
+
+    @Test
+    fun `once a plan uses the extra level, the next one opens`() {
+        assertEquals(1..11, plannableLevels(9, plan(10)))
+        assertEquals(1..12, plannableLevels(9, plan(10, 11)))
+    }
+
+    @Test
+    fun `never past the contract's twelve`() {
+        assertEquals(1..12, plannableLevels(9, plan(12)))
+        assertEquals(1..12, plannableLevels(12, null))
+    }
 }

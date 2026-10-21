@@ -121,6 +121,19 @@ fun buildSemaphore(
 }
 
 /** `"20191"` as people write it: `"2019-1"`. Anything not in that shape is returned as it came. */
+/** The furthest level semaphore 2.0 accepts in a placement: `plannedLevel` runs 1 to 12. */
+const val MAX_PLANNED_LEVEL = 12
+
+/**
+ * The levels a plan can put a course at (issue #176): the pensum's, and one after the furthest
+ * level already used - the pensum's last, or a level the plan has already gone past it to - so a
+ * plan can stretch past the nominal length one semester at a time, up to [MAX_PLANNED_LEVEL].
+ */
+fun plannableLevels(pensumLevels: Int, plan: AcademicPlan?): IntRange {
+    val furthest = maxOf(pensumLevels, plan?.placements?.maxOfOrNull { it.plannedLevel } ?: 0)
+    return 1..minOf(MAX_PLANNED_LEVEL, furthest + 1)
+}
+
 fun formatPeriod(period: String): String =
     if (Regex("""\d{4}[12]""").matches(period)) "${period.take(4)}-${period.last()}" else period
 
