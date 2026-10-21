@@ -71,7 +71,15 @@
     <string name="profile_level">Semestre</string>
     <string name="profile_pensum">Pensum</string>
     <string name="profile_remove_avatar">Quitar foto</string>
-    <string name="profile_remove_avatar_failed">No pudimos quitar la foto. Inténtalo otra vez.</string>
+    <string name="profile_avatar_failed">No pudimos cambiar la foto. Inténtalo otra vez.</string>
+    <string name="profile_edit_avatar">Cambiar foto de perfil</string>
+    <string name="profile_avatar_pick">Agregar o cambiar foto</string>
+    <string name="profile_avatar_adjust">Ajustar foto</string>
+    <string name="profile_avatar_local_note">Por ahora la foto se guarda solo en este teléfono: KApp todavía no puede subirla.</string>
+    <string name="avatar_adjust_title">Ajustar foto</string>
+    <string name="avatar_adjust_hint">Arrastra para moverla y pellizca, o usa la barra, para acercarla.</string>
+    <string name="avatar_adjust_save">Guardar</string>
+    <string name="avatar_adjust_cancel">Cancelar</string>
     <string name="profile_where_from">Tu nombre y tu correo vienen de tu cuenta de Microsoft. Si algo no está bien, se corrige allá.</string>
     <string name="profile_where_from_student">Tu nombre y tu correo vienen de tu cuenta de Microsoft, y tus datos académicos de SINU. Si algo no está bien, se corrige allá.</string>
     <string name="profile_failed">No pudimos cargar tu perfil</string>

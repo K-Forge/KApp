@@ -1,8 +1,14 @@
 package co.edu.konradlorenz.kapp.ui.profile
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,19 +27,28 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -77,25 +92,54 @@ private val AvatarSize = 88.dp
 @Composable
 fun ProfileScreen(viewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)) {
     val state by viewModel.profile.collectAsState()
+    var editing by rememberSaveable { mutableStateOf(false) }
+    // The system's photo picker: no storage permission, and only images.
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        uri?.let(viewModel::onPicked)
+    }
     ProfileContent(
         state = state,
-        removingAvatar = viewModel.removingAvatar,
-        avatarError = viewModel.avatarError,
+        localPhoto = viewModel.localPhoto,
+        avatarError = viewModel.avatarError || viewModel.pickFailed,
         signingOut = viewModel.signingOut,
         onRetry = viewModel::retry,
-        onRemoveAvatar = viewModel::removeAvatar,
+        onEditAvatar = { editing = true },
         onSignOut = viewModel::signOut,
     )
+    val profile = (state as? ProfileState.Ready)?.profile
+    if (editing && profile != null) {
+        AvatarSheet(
+            hasLocalPhoto = viewModel.localPhoto != null,
+            hasPhoto = viewModel.localPhoto != null || profile.avatarUrl != null,
+            removing = viewModel.removingAvatar,
+            onPick = {
+                editing = false
+                picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
+            onAdjust = {
+                editing = false
+                viewModel.adjust()
+            },
+            onRemove = {
+                editing = false
+                viewModel.removePhoto()
+            },
+            onDismiss = { editing = false },
+        )
+    }
+    viewModel.adjusting?.let { picture ->
+        AvatarAdjustDialog(picture, onSave = viewModel::saveCrop, onCancel = viewModel::cancelAdjust)
+    }
 }
 
 @Composable
 private fun ProfileContent(
     state: ProfileState,
-    removingAvatar: Boolean,
+    localPhoto: ImageBitmap?,
     avatarError: Boolean,
     signingOut: Boolean,
     onRetry: () -> Unit,
-    onRemoveAvatar: () -> Unit,
+    onEditAvatar: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     val scroll = rememberScrollState()
@@ -132,9 +176,9 @@ private fun ProfileContent(
                     ProfileState.Failed -> FailedCard(onRetry)
                     is ProfileState.Ready -> ProfileCard(
                         profile = state.profile,
-                        removingAvatar = removingAvatar,
+                        localPhoto = localPhoto,
                         avatarError = avatarError,
-                        onRemoveAvatar = onRemoveAvatar,
+                        onEditAvatar = onEditAvatar,
                     )
                 }
             }
@@ -185,11 +229,31 @@ private fun ProfileContent(
 @Composable
 private fun ProfileCard(
     profile: UserProfile,
-    removingAvatar: Boolean,
+    localPhoto: ImageBitmap?,
     avatarError: Boolean,
-    onRemoveAvatar: () -> Unit,
+    onEditAvatar: () -> Unit,
 ) {
-    Avatar(profile)
+    Box {
+        Avatar(profile, localPhoto)
+        // The pencil: everything about the photo is behind it (AvatarSheet).
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
+                .clickable(onClickLabel = stringResource(R.string.profile_edit_avatar), onClick = onEditAvatar),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_pencil),
+                contentDescription = stringResource(R.string.profile_edit_avatar),
+                modifier = Modifier.size(16.dp),
+                tint = Color.White,
+            )
+        }
+    }
     Spacer(Modifier.height(12.dp))
     Text(
         text = "${profile.firstName} ${profile.lastName}",
@@ -224,17 +288,10 @@ private fun ProfileCard(
         AcademicRows(academic)
     }
 
-    // Only removing: user 1.0.0 takes a picture as a URL, and there is no endpoint yet to upload
-    // one to. Picking a photo on the phone waits for that endpoint.
-    if (profile.avatarUrl != null) {
-        Spacer(Modifier.height(12.dp))
-        TextButton(onClick = onRemoveAvatar, enabled = !removingAvatar) {
-            Text(stringResource(R.string.profile_remove_avatar))
-        }
-    }
     if (avatarError) {
+        Spacer(Modifier.height(12.dp))
         Text(
-            text = stringResource(R.string.profile_remove_avatar_failed),
+            text = stringResource(R.string.profile_avatar_failed),
             fontSize = 13.sp,
             color = MaterialTheme.colorScheme.error,
             textAlign = TextAlign.Center,
@@ -243,12 +300,23 @@ private fun ProfileCard(
 }
 
 /**
- * The picture when there is one and it loads; the initials, as on Inicio, when there is none or
- * it does not. The mocks' picture lives on a host that does not exist, so a debug build always
- * shows the initials.
+ * The photo picked on this phone first; then the account's picture when there is one and it
+ * loads; the initials, as on Inicio, when there is neither. The mocks' picture lives on a host
+ * that does not exist, so a debug build shows the initials until a photo is picked.
  */
 @Composable
-private fun Avatar(profile: UserProfile) {
+private fun Avatar(profile: UserProfile, localPhoto: ImageBitmap?) {
+    if (localPhoto != null) {
+        Image(
+            bitmap = localPhoto,
+            contentDescription = stringResource(R.string.profile_avatar_description),
+            modifier = Modifier
+                .size(AvatarSize)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop,
+        )
+        return
+    }
     val initials = @Composable {
         Box(
             modifier = Modifier
@@ -278,6 +346,54 @@ private fun Avatar(profile: UserProfile) {
             contentScale = ContentScale.Crop,
             loading = { initials() },
             error = { initials() },
+        )
+    }
+}
+
+/**
+ * What the pencil opens: add or change the photo, adjust the one there is, or remove it. The
+ * note says the truth about where it goes - user 1.0.0 has nowhere to upload a picture, so it
+ * stays on this phone.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AvatarSheet(
+    hasLocalPhoto: Boolean,
+    hasPhoto: Boolean,
+    removing: Boolean,
+    onPick: () -> Unit,
+    onAdjust: () -> Unit,
+    onRemove: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 24.dp)) {
+            SheetAction(R.string.profile_avatar_pick, onClick = onPick)
+            if (hasLocalPhoto) SheetAction(R.string.profile_avatar_adjust, onClick = onAdjust)
+            if (hasPhoto) SheetAction(R.string.profile_remove_avatar, enabled = !removing, onClick = onRemove)
+            Text(
+                text = stringResource(R.string.profile_avatar_local_note),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                fontSize = 13.sp,
+                lineHeight = 18.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SheetAction(@StringRes label: Int, enabled: Boolean = true, onClick: () -> Unit) {
+    TextButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+    ) {
+        Text(
+            text = stringResource(label),
+            modifier = Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.bodyLarge,
         )
     }
 }
@@ -362,11 +478,11 @@ private fun ProfilePreview(state: ProfileState) {
         MainShell(current = KAppDestination.Profile, onSelect = {}) {
             ProfileContent(
                 state = state,
-                removingAvatar = false,
+                localPhoto = null,
                 avatarError = false,
                 signingOut = false,
                 onRetry = {},
-                onRemoveAvatar = {},
+                onEditAvatar = {},
                 onSignOut = {},
             )
         }
