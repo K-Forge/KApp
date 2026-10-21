@@ -66,7 +66,7 @@ próxima clase y Horario abre en un día con clases.
 | Semáforo | Pestaña *Semáforo* (solo el estudiante). |
 | Horario | Pestaña *Horario* (estudiante y profesor). |
 | Perfil | Pestaña *Perfil*. Ahí está *Cerrar sesión*. |
-| Mapa | Pestaña *Mapa* (los tres perfiles). |
+| Mapa | Pestaña *Mapa* (los tres perfiles): la lista de los 9 edificios de la sede con código, nombre, dirección y niveles; el mapa interactivo llega en la siguiente fase. |
 
 ### Problemas comunes
 
