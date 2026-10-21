@@ -134,6 +134,7 @@
     <string name="schedule_view_day">Día</string>
     <string name="schedule_view_two_days">2 días</string>
     <string name="schedule_view_week">Semana</string>
+    <string name="schedule_view_month">Mes</string>
     <!-- "21 sep – 27 sep". -->
     <string name="schedule_week_range">%1$d %2$s – %3$d %4$s</string>
     <string name="schedule_no_classes">Sin clases</string>
