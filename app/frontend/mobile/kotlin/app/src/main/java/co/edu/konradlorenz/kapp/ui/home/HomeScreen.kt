@@ -75,9 +75,7 @@ private val TileShape = RoundedCornerShape(16.dp)
  * Inicio.
  *
  * Everything that names another screen opens it through [onOpen]: the four shortcuts, the two
- * section links, "Como llegar", and the button on each of the empty states. All four of those
- * screens are still placeholders, so what the student lands on is a card naming the contract that
- * will fill it - which is the honest version of the destination, not a dead tap.
+ * section links, "Como llegar", and the button on each of the empty states.
  *
  * The bar itself is not here: it belongs to every tab, so it lives in MainShell and this screen
  * only leaves room for it.
@@ -295,7 +293,7 @@ private fun NextClassCard(next: NextClass, onOpen: (KAppDestination) -> Unit) {
  * "Como llegar".
  *
  * The only pink thing on the card, so the only thing on the card that is touchable. It opens the
- * map, which is still a placeholder: the room it should centre on arrives with map-service.
+ * map, which for now lists the buildings: centring on the room comes with the interactive map.
  */
 @Composable
 private fun DirectionsButton(onClick: () -> Unit) {

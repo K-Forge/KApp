@@ -71,6 +71,7 @@ class DemoBackendTest {
             answer("GET", "/api/schedule/me/day"),
             answer("GET", "/api/schedule/me/week"),
             answer("GET", "/api/map/spaces/405", buildingCode = "EC"),
+            answer("GET", "/api/map/buildings"),
             answer("PUT", "/api/semaphore/me/plans/x/placements/y"),
             answer("POST", "/auth/visitor-passes/KL-V-7K2M-QX9P/redeem"),
         )

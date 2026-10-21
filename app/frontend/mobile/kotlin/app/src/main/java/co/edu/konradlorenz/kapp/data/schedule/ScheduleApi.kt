@@ -1,5 +1,6 @@
 package co.edu.konradlorenz.kapp.data.schedule
 
+import co.edu.konradlorenz.kapp.data.map.Building
 import kotlinx.serialization.Serializable
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -31,6 +32,10 @@ interface ScheduleApi {
  * one building (EC and BI both have a 301), and without it the answer is a `409`.
  */
 interface MapApi {
+
+    /** Every building on the map, ordered by code: Mapa's list. */
+    @GET("api/map/buildings")
+    suspend fun buildings(): List<Building>
 
     @GET("api/map/spaces/{code}")
     suspend fun space(

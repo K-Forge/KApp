@@ -161,12 +161,14 @@
     <string name="schedule_room_not_mapped">Esta sede todavía no está en el mapa.</string>
     <string name="schedule_room_failed">No pudimos buscar el salón en el mapa.</string>
 
-    <string name="placeholder_pending">Esta pantalla todavía no existe</string>
-    <string name="placeholder_profile_contract">Se alimentará de GET /api/users/me.</string>
-    <string name="placeholder_semaphore_contract">Se alimentará de GET /api/semaphore/me.</string>
-    <string name="placeholder_map_contract">Se alimentará de GET /api/map/buildings.</string>
-    <string name="placeholder_schedule_contract">Se alimentará de GET /api/schedule/me/week.</string>
-    <string name="placeholder_home_contract">Se alimentará de GET /api/schedule/me/day.</string>
+    <string name="map_next_title">El mapa interactivo del campus llega en la siguiente fase</string>
+    <string name="map_next_body">Mientras tanto, estos son los edificios de la sede, con el código que ves junto al salón en tu horario.</string>
+    <plurals name="map_levels">
+        <item quantity="one">%d nivel</item>
+        <item quantity="other">%d niveles</item>
+    </plurals>
+    <string name="map_failed">No pudimos cargar los edificios.</string>
+    <string name="map_retry">Reintentar</string>
 
     <string name="invitation_band">Invitación</string>
     <string name="invitation_title">Código de invitación</string>

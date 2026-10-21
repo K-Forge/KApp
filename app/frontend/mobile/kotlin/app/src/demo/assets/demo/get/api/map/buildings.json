@@ -1,0 +1,330 @@
+[
+    {
+        "code": "BI",
+        "name": "Bienestar Institucional",
+        "campus": "Sede Principal",
+        "description": "Dos alas unidas por el piso 1 y la terraza: la occidental es la de bienestar (juegos, música, danza, gimnasio y terraza); la oriental, de salones y laboratorios.",
+        "address": "Cl. 62 # 9-81",
+        "aliases": [
+            "Bienestar"
+        ],
+        "wings": [
+            {
+                "code": "O",
+                "name": "Ala occidental",
+                "note": "Bienestar: juegos, música, danza, gimnasio y la terraza."
+            },
+            {
+                "code": "E",
+                "name": "Ala oriental",
+                "note": "Salones y laboratorios. Se cruza desde el ala occidental por el piso 1 y por la terraza."
+            }
+        ],
+        "floors": [
+            {
+                "code": "P1",
+                "level": 1,
+                "name": "Piso 1"
+            },
+            {
+                "code": "P2",
+                "level": 2,
+                "name": "Piso 2"
+            },
+            {
+                "code": "P3",
+                "level": 3,
+                "name": "Piso 3"
+            },
+            {
+                "code": "P4",
+                "level": 4,
+                "name": "Piso 4"
+            },
+            {
+                "code": "P5",
+                "level": 5,
+                "name": "Terraza"
+            }
+        ]
+    },
+    {
+        "code": "CPC1",
+        "name": "Centro de Psicología Clínica 1",
+        "campus": "Sede Principal",
+        "description": "Cinco pisos de consultorios y laboratorios de psicología clínica, en un solo bloque.",
+        "address": "Cra. 9 # 61-38",
+        "aliases": [
+            "CPC 1"
+        ],
+        "wings": [],
+        "floors": [
+            {
+                "code": "P1",
+                "level": 1,
+                "name": "Piso 1"
+            },
+            {
+                "code": "P2",
+                "level": 2,
+                "name": "Piso 2"
+            },
+            {
+                "code": "P3",
+                "level": 3,
+                "name": "Piso 3"
+            },
+            {
+                "code": "P4",
+                "level": 4,
+                "name": "Piso 4"
+            },
+            {
+                "code": "P5",
+                "level": 5,
+                "name": "Piso 5"
+            }
+        ]
+    },
+    {
+        "code": "CPC2",
+        "name": "Centro de Psicología Clínica 2",
+        "campus": "Sede Principal",
+        "description": "El CPC 2 ocupa el cuarto piso del Edificio Corpocentro, en la Carrera 8 # 64-42; el resto del edificio no es de la universidad. Sin visitar.",
+        "address": "Cra. 8 # 64-42, piso 4",
+        "aliases": [
+            "CPC 2",
+            "Edificio Corpocentro"
+        ],
+        "wings": [],
+        "floors": [
+            {
+                "code": "P4",
+                "level": 4,
+                "name": "Piso 4"
+            }
+        ]
+    },
+    {
+        "code": "EA",
+        "name": "Edificio Administrativo",
+        "campus": "Sede Principal",
+        "description": "Oficinas administrativas: contabilidad, recursos humanos, nómina, planta física, TIC y direcciones de investigación y prácticas.",
+        "address": "Cra. 9A # 62-27",
+        "aliases": [
+            "Edificio Luna"
+        ],
+        "wings": [],
+        "floors": [
+            {
+                "code": "P1",
+                "level": 1,
+                "name": "Piso 1"
+            },
+            {
+                "code": "P2",
+                "level": 2,
+                "name": "Piso 2"
+            },
+            {
+                "code": "P3",
+                "level": 3,
+                "name": "Piso 3"
+            },
+            {
+                "code": "P4",
+                "level": 4,
+                "name": "Piso 4"
+            }
+        ]
+    },
+    {
+        "code": "EC",
+        "name": "Edificio Central",
+        "campus": "Sede Principal",
+        "description": "Tres alas sobre un sótano de parqueadero. El auditorio Sonia Fajardo Forero ocupa los pisos 1 y 2 del ala sur, y el ala sur sigue encima con oficinas y aulas hasta el piso 6.",
+        "address": "Cra. 9 Bis # 62-43",
+        "aliases": [],
+        "wings": [
+            {
+                "code": "C",
+                "name": "Ala central"
+            },
+            {
+                "code": "N",
+                "name": "Ala norte",
+                "note": "Expansión de cinco pisos. Su terraza, en el piso 6, solo se alcanza por la escalera norte desde el piso 5."
+            },
+            {
+                "code": "S",
+                "name": "Ala sur",
+                "note": "Construida sobre el auditorio: oficinas y aulas del piso 3 al 6."
+            }
+        ],
+        "floors": [
+            {
+                "code": "S1",
+                "level": -1,
+                "name": "Sótano"
+            },
+            {
+                "code": "P1",
+                "level": 1,
+                "name": "Piso 1"
+            },
+            {
+                "code": "P2",
+                "level": 2,
+                "name": "Piso 2"
+            },
+            {
+                "code": "P3",
+                "level": 3,
+                "name": "Piso 3"
+            },
+            {
+                "code": "P4",
+                "level": 4,
+                "name": "Piso 4"
+            },
+            {
+                "code": "P5",
+                "level": 5,
+                "name": "Piso 5"
+            },
+            {
+                "code": "P6",
+                "level": 6,
+                "name": "Piso 6"
+            },
+            {
+                "code": "P7",
+                "level": 7,
+                "name": "Piso 7"
+            },
+            {
+                "code": "P8",
+                "level": 8,
+                "name": "Piso 8"
+            }
+        ]
+    },
+    {
+        "code": "JAAB",
+        "name": "Centro de Investigaciones Juan Alberto Aragón Bateman",
+        "campus": "Sede Principal",
+        "description": "Edificio de ladrillo rojo con una ventana alta en arco: laboratorios, direcciones de investigación y el archivo institucional en el sótano.",
+        "address": "Cra. 10 # 64-65",
+        "aliases": [
+            "EDI",
+            "Centro de Investigaciones",
+            "Juan Alberto Aragón Bateman"
+        ],
+        "wings": [],
+        "floors": [
+            {
+                "code": "S1",
+                "level": -1,
+                "name": "Sótano"
+            },
+            {
+                "code": "P1",
+                "level": 1,
+                "name": "Piso 1"
+            },
+            {
+                "code": "MEZZ",
+                "level": 1.5,
+                "name": "Mezzanine"
+            },
+            {
+                "code": "P2",
+                "level": 2,
+                "name": "Piso 2"
+            },
+            {
+                "code": "P3",
+                "level": 3,
+                "name": "Piso 3"
+            },
+            {
+                "code": "P4",
+                "level": 4,
+                "name": "Piso 4"
+            },
+            {
+                "code": "P5",
+                "level": 5,
+                "name": "Piso 5"
+            },
+            {
+                "code": "P6",
+                "level": 6,
+                "name": "Piso 6"
+            }
+        ]
+    },
+    {
+        "code": "MU",
+        "name": "Casa Medio Universitario",
+        "campus": "Sede Principal",
+        "description": "Casa antigua de tres niveles: el Servicio Médico a nivel de la calle y las oficinas de Medio Universitario arriba, a las que se sube por una escalera exterior.",
+        "address": "Cl. 62 # 9-65",
+        "aliases": [
+            "Medio Universitario",
+            "Casita blanca"
+        ],
+        "wings": [],
+        "floors": [
+            {
+                "code": "P0",
+                "level": 0,
+                "name": "Piso 0"
+            },
+            {
+                "code": "P1",
+                "level": 1,
+                "name": "Piso 1"
+            },
+            {
+                "code": "P2",
+                "level": 2,
+                "name": "Piso 2"
+            }
+        ]
+    },
+    {
+        "code": "RH",
+        "name": "Edificio de Recursos Humanos",
+        "campus": "Sede Principal",
+        "description": "Sin ubicar. La web de la universidad ubica al Departamento de Talento Humano en la Cra. 9A # 62-12, junto a la Casa de Francisco de Paula Vélez, que es patrimonio y no una oficina; puede estar en las oficinas de la Tienda K, al lado o en su segundo piso. Por confirmar.",
+        "aliases": [
+            "Talento Humano",
+            "Recursos Humanos"
+        ],
+        "wings": [],
+        "floors": [
+            {
+                "code": "P1",
+                "level": 1,
+                "name": "Piso 1"
+            }
+        ]
+    },
+    {
+        "code": "TK",
+        "name": "Tienda K",
+        "campus": "Sede Principal",
+        "description": "La tienda de la universidad: uniformes y artículos de la Konrad. Ocupa la esquina de la Carrera 9A con la Calle 62, junto a la Casa de Francisco de Paula Vélez, y tiene oficinas al lado y en su segundo piso. Sin visitar.",
+        "address": "Cra. 9A # 62-02",
+        "aliases": [],
+        "wings": [],
+        "floors": [
+            {
+                "code": "P1",
+                "level": 1,
+                "name": "Piso 1"
+            }
+        ]
+    }
+]
