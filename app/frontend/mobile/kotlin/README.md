@@ -41,10 +41,12 @@ vez en Android Studio y con el emulador abierto, dentro de `Frontend_KApp`: `./g
 **Para el equipo, desde el repositorio:** `git clone -b develop https://github.com/K-Forge/KApp.git`
 y abre la carpeta `app/frontend/mobile/kotlin`. A partir de ahí, los pasos 3 a 5 son los mismos.
 
-### Cambiar de perfil
+### Entrar y cambiar de perfil
 
-En el login, debajo del botón **Ingresar con el perfil de demostración**, el selector *Perfil de
-demostración* tiene tres opciones:
+El login se ve como el del producto, con **Ingresar con Microsoft**, pero en la demo ese botón no
+inicia sesión: avisa que no está disponible. Para entrar, toca **Modo demostración ▾**, debajo del
+enlace de invitación, elige un perfil en *Perfil de demostración* y toca **Ingresar con el perfil
+de demostración**:
 
 | Perfil | Quién es | Pestañas |
 |---|---|---|
@@ -60,7 +62,7 @@ próxima clase y Horario abre en un día con clases.
 
 | Pantalla | Cómo llegar |
 |---|---|
-| Login | Es la primera al abrir la app sin sesión. |
+| Login | Es la primera al abrir la app sin sesión. La entrada de la demo está en *Modo demostración ▾*. |
 | Invitación | En el login, *¿Vienes de visita? Usa tu código de invitación*. En la demo funciona el código `KL-V-7K2M-QX9P`; cualquier otro dice que no existe. |
 | Inicio | La que abre al ingresar, en el centro de la barra. |
 | Semáforo | Pestaña *Semáforo* (solo el estudiante). |

@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--
-      The demo signs in with no Microsoft account and no server: the picker chooses who, out of the
-      contracts' examples. The login says so rather than offering a Microsoft sign-in it never opens.
+      The demo's login keeps the product's texts and button; its own entry is folded under "Modo
+      demostración". The picker there chooses who signs in, out of the contracts' examples.
     -->
-    <string name="login_intro_title">Ingresa con un perfil de demostración</string>
-    <string name="login_intro_body">Esta versión de demostración no usa tu cuenta %1$s ni se conecta a ningún servidor: elige un perfil abajo y entra con sus datos de ejemplo.</string>
-    <string name="login_submit">Ingresar con el perfil de demostración</string>
     <string name="login_mock_profile_label">Perfil de demostración</string>
     <string name="invitation_demo_hint" translatable="false">En esta demostración funciona el código KL-V-7K2M-QX9P; cualquier otro dice que no existe.</string>
 </resources>
