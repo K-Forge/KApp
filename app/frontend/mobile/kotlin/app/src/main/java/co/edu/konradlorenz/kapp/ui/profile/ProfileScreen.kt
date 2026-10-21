@@ -47,6 +47,7 @@ import co.edu.konradlorenz.kapp.data.session.ProfileRole
 import co.edu.konradlorenz.kapp.ui.common.BandContentHeight
 import co.edu.konradlorenz.kapp.ui.common.BrandBand
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
+import co.edu.konradlorenz.kapp.ui.common.coverScrolled
 import co.edu.konradlorenz.kapp.ui.home.toStudent
 import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
 import co.edu.konradlorenz.kapp.ui.navigation.KAppDestination
@@ -95,6 +96,7 @@ private fun ProfileContent(
     onRemoveAvatar: () -> Unit,
     onSignOut: () -> Unit,
 ) {
+    val scroll = rememberScrollState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -107,7 +109,7 @@ private fun ProfileContent(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .padding(top = BandContentHeight - 24.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scroll)
                 .padding(start = ScreenPadding, end = ScreenPadding, bottom = BarContentPadding)
                 .navigationBarsPadding(),
         ) {
@@ -166,6 +168,12 @@ private fun ProfileContent(
                 Text(text = stringResource(R.string.sign_out))
             }
         }
+        // Over the content, so what scrolls up goes under the title (BrandBand).
+        BrandBand(
+            title = stringResource(R.string.home_shortcut_profile),
+            cover = true,
+            scrolled = coverScrolled { scroll.value },
+        )
     }
 }
 

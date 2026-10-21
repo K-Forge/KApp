@@ -50,6 +50,7 @@ import co.edu.konradlorenz.kapp.R
 import co.edu.konradlorenz.kapp.ui.common.BandContentHeight
 import co.edu.konradlorenz.kapp.ui.common.BrandBand
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
+import co.edu.konradlorenz.kapp.ui.common.coverScrolled
 import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
 import co.edu.konradlorenz.kapp.ui.navigation.KAppDestination
 import co.edu.konradlorenz.kapp.ui.navigation.MainShell
@@ -57,8 +58,8 @@ import co.edu.konradlorenz.kapp.ui.theme.Border
 import co.edu.konradlorenz.kapp.ui.theme.BorderSoft
 import co.edu.konradlorenz.kapp.ui.theme.Brand
 import co.edu.konradlorenz.kapp.ui.theme.InProgress
-import co.edu.konradlorenz.kapp.ui.theme.Passed
 import co.edu.konradlorenz.kapp.ui.theme.KAppTheme
+import co.edu.konradlorenz.kapp.ui.theme.Passed
 import co.edu.konradlorenz.kapp.ui.theme.Placeholder
 import co.edu.konradlorenz.kapp.ui.theme.Subject
 import kotlin.math.roundToInt
@@ -112,6 +113,7 @@ private fun HomeContent(
     val hasSchedule = KAppDestination.Schedule in destinations
     val hasSemaphore = KAppDestination.Semaphore in destinations
 
+    val scroll = rememberScrollState()
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -130,7 +132,7 @@ private fun HomeContent(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .padding(top = BandContentHeight - CardOverlap)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scroll)
                 .padding(
                     start = ScreenPadding,
                     end = ScreenPadding,
@@ -192,6 +194,8 @@ private fun HomeContent(
                 }
             }
         }
+        // Over the content, so what scrolls up goes under the greeting (BrandBand).
+        HomeBand(student = state.student, cover = true, scrolled = coverScrolled { scroll.value })
     }
 }
 
@@ -200,12 +204,16 @@ private fun HomeContent(
  * profile is here it says only "Hola", and the circle waits for initials to put in it.
  */
 @Composable
-private fun HomeBand(student: Student?) {
+private fun HomeBand(student: Student?, cover: Boolean = false, scrolled: Dp = 0.dp) {
     if (student == null) {
-        BrandBand(title = stringResource(R.string.home_greeting_anonymous))
+        BrandBand(title = stringResource(R.string.home_greeting_anonymous), cover = cover, scrolled = scrolled)
         return
     }
-    BrandBand(title = stringResource(R.string.home_greeting, student.firstName)) {
+    BrandBand(
+        title = stringResource(R.string.home_greeting, student.firstName),
+        cover = cover,
+        scrolled = scrolled,
+    ) {
         // Initials rather than a photo: user.openapi.yaml carries a name and no picture.
         Box(
             modifier = Modifier
