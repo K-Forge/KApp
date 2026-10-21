@@ -1,5 +1,7 @@
 package co.edu.konradlorenz.kapp.data.demo
 
+import co.edu.konradlorenz.kapp.data.network.KAppApi
+import co.edu.konradlorenz.kapp.data.semaphore.AcademicPlan
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -78,5 +80,16 @@ class DemoBackendTest {
         calls.filterIsInstance<DemoAnswer.Asset>().forEach {
             assertTrue("missing ${it.path}", File(assets, it.path).isFile)
         }
+    }
+
+    @Test
+    fun `a new plan in the demo has its own id and the name asked for`() {
+        val body = """{"name":"Plan B","pensumCode":"1015"}"""
+        val first = KAppApi.json.decodeFromString<AcademicPlan>(DemoBackend.newPlan(body))
+        val second = KAppApi.json.decodeFromString<AcademicPlan>(DemoBackend.newPlan(body))
+        assertEquals("Plan B", first.name)
+        assertEquals("1015", first.pensumCode)
+        assertTrue(first.placements.isEmpty())
+        assertTrue(first.id != second.id)
     }
 }

@@ -1,13 +1,18 @@
 package co.edu.konradlorenz.kapp.data.demo
 
 import android.content.res.AssetManager
+import co.edu.konradlorenz.kapp.data.network.KAppApi
+import co.edu.konradlorenz.kapp.data.semaphore.AcademicPlan
+import co.edu.konradlorenz.kapp.data.semaphore.AcademicPlanRequest
+import java.io.IOException
+import java.util.UUID
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
-import java.io.IOException
+import okio.Buffer
 
 /**
  * The demo build's whole backend (issue #159): answers every API call from the contracts' examples
@@ -21,6 +26,11 @@ class DemoBackend(private val assets: AssetManager) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
+        // A new plan gets an id of its own and the name it was asked for, so the demo can hold
+        // more than one plan and switch between them (issue #176). Everything else is a file.
+        if (request.method == "POST" && request.url.encodedPath.trim('/') == "api/semaphore/me/plans") {
+            return request.respond(201, newPlan(Buffer().also { request.body?.writeTo(it) }.readUtf8()))
+        }
         val answer = answerFor(
             method = request.method,
             path = request.url.encodedPath,
@@ -62,6 +72,22 @@ class DemoBackend(private val assets: AssetManager) : Interceptor {
                 verb == "delete" -> DemoAnswer.NoContent
                 else -> DemoAnswer.Asset("$verb/$route.json")
             }
+        }
+
+        /**
+         * The plan `POST /api/semaphore/me/plans` creates out of its request [body]: empty, named
+         * as asked, with a fresh id.
+         */
+        fun newPlan(body: String): String {
+            val asked = KAppApi.json.decodeFromString<AcademicPlanRequest>(body)
+            val plan = AcademicPlan(
+                id = "demo-${UUID.randomUUID()}",
+                name = asked.name,
+                pensumCode = asked.pensumCode,
+                primary = false,
+                placements = emptyList(),
+            )
+            return KAppApi.json.encodeToString(plan)
         }
 
         private val PLACEMENT = Regex("api/semaphore/me/plans/[^/]+/placements/[^/]+")
