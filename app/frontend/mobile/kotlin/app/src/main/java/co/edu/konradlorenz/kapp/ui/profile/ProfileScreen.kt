@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.ui.profile
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +49,7 @@ import co.edu.konradlorenz.kapp.data.session.ProfileRole
 import co.edu.konradlorenz.kapp.ui.common.BandContentHeight
 import co.edu.konradlorenz.kapp.ui.common.BrandBand
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
+import co.edu.konradlorenz.kapp.ui.common.coverScrolled
 import co.edu.konradlorenz.kapp.ui.home.toStudent
 import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
 import co.edu.konradlorenz.kapp.ui.navigation.KAppDestination
@@ -95,6 +98,7 @@ private fun ProfileContent(
     onRemoveAvatar: () -> Unit,
     onSignOut: () -> Unit,
 ) {
+    val scroll = rememberScrollState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -107,7 +111,7 @@ private fun ProfileContent(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .padding(top = BandContentHeight - 24.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scroll)
                 .padding(start = ScreenPadding, end = ScreenPadding, bottom = BarContentPadding)
                 .navigationBarsPadding(),
         ) {
@@ -155,6 +159,7 @@ private fun ProfileContent(
 
             // Always there, even when the profile could not be read: signing out must never depend
             // on the server answering.
+            // Pink like everything else that can be touched: grey read as unavailable.
             OutlinedButton(
                 onClick = onSignOut,
                 enabled = !signingOut,
@@ -162,10 +167,18 @@ private fun ProfileContent(
                     .fillMaxWidth()
                     .height(48.dp),
                 shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
             ) {
-                Text(text = stringResource(R.string.sign_out))
+                Text(text = stringResource(R.string.sign_out), fontWeight = FontWeight.SemiBold)
             }
         }
+        // Over the content, so what scrolls up goes under the title (BrandBand).
+        BrandBand(
+            title = stringResource(R.string.home_shortcut_profile),
+            cover = true,
+            scrolled = coverScrolled { scroll.value },
+        )
     }
 }
 

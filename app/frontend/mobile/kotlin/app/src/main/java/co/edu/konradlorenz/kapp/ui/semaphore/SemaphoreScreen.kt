@@ -28,6 +28,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -70,6 +72,7 @@ import co.edu.konradlorenz.kapp.data.semaphore.formatPeriod
 import co.edu.konradlorenz.kapp.ui.common.BandContentHeight
 import co.edu.konradlorenz.kapp.ui.common.BrandBand
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
+import co.edu.konradlorenz.kapp.ui.common.coverScrolled
 import co.edu.konradlorenz.kapp.ui.common.hexColor
 import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
 import co.edu.konradlorenz.kapp.ui.theme.Brand
@@ -100,6 +103,7 @@ private val ItemShape = RoundedCornerShape(12.dp)
 fun SemaphoreScreen(viewModel: SemaphoreViewModel = viewModel(factory = SemaphoreViewModel.Factory)) {
     val state by viewModel.state.collectAsState()
 
+    val scroll = rememberScrollState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -112,7 +116,7 @@ fun SemaphoreScreen(viewModel: SemaphoreViewModel = viewModel(factory = Semaphor
                 .fillMaxSize()
                 .statusBarsPadding()
                 .padding(top = BandContentHeight - 24.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scroll)
                 .padding(start = ScreenPadding, end = ScreenPadding, bottom = BarContentPadding)
                 .navigationBarsPadding(),
         ) {
@@ -136,6 +140,12 @@ fun SemaphoreScreen(viewModel: SemaphoreViewModel = viewModel(factory = Semaphor
                 is SemaphoreState.Ready -> Ready(current.data, viewModel)
             }
         }
+        // Over the content, so what scrolls up goes under the title (BrandBand).
+        BrandBand(
+            title = stringResource(R.string.home_shortcut_semaphore),
+            cover = true,
+            scrolled = coverScrolled { scroll.value },
+        )
     }
 }
 
@@ -265,11 +275,22 @@ private fun PlanBar(data: SemaphoreData, plan: AcademicPlan?, viewModel: Semapho
                 label = { Text(each.name, maxLines = 1) },
             )
         }
-        FilterChip(
-            selected = false,
+        // An action, not one of the set: pink, the colour of what can be touched, rather than an
+        // unselected chip that read as switched off.
+        AssistChip(
             onClick = viewModel::startNaming,
             enabled = !viewModel.saving,
-            label = { Text("+ " + stringResource(R.string.semaphore_new_plan)) },
+            label = {
+                Text(
+                    "+ " + stringResource(R.string.semaphore_new_plan),
+                    fontWeight = FontWeight.SemiBold,
+                )
+            },
+            colors = AssistChipDefaults.assistChipColors(labelColor = MaterialTheme.colorScheme.primary),
+            border = AssistChipDefaults.assistChipBorder(
+                enabled = !viewModel.saving,
+                borderColor = MaterialTheme.colorScheme.primary,
+            ),
         )
     }
     if (plan != null) {

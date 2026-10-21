@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,6 +42,7 @@ import co.edu.konradlorenz.kapp.data.map.Building
 import co.edu.konradlorenz.kapp.ui.common.BandContentHeight
 import co.edu.konradlorenz.kapp.ui.common.BrandBand
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
+import co.edu.konradlorenz.kapp.ui.common.coverScrolled
 import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
 import co.edu.konradlorenz.kapp.ui.theme.Brand
 
@@ -51,6 +53,7 @@ import co.edu.konradlorenz.kapp.ui.theme.Brand
  */
 @Composable
 fun MapScreen(viewModel: MapViewModel = viewModel(factory = MapViewModel.Factory)) {
+    val list = rememberLazyListState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -59,6 +62,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(factory = MapViewModel.Factory
         BrandBand(title = stringResource(R.string.home_shortcut_map))
         // The card climbs 24 dp back into the band, as the one on Inicio does.
         LazyColumn(
+            state = list,
             modifier = Modifier
                 .fillMaxSize()
                 .statusBarsPadding()
@@ -87,6 +91,15 @@ fun MapScreen(viewModel: MapViewModel = viewModel(factory = MapViewModel.Factory
                 is BuildingsState.Ready -> items(state.buildings, key = { it.code }) { BuildingRow(it) }
             }
         }
+        // Over the content, so what scrolls up goes under the title (BrandBand).
+        BrandBand(
+            title = stringResource(R.string.home_shortcut_map),
+            cover = true,
+            // Past the first item the whole overlap is used up.
+            scrolled = coverScrolled {
+                if (list.firstVisibleItemIndex > 0) Int.MAX_VALUE else list.firstVisibleItemScrollOffset
+            },
+        )
     }
 }
 

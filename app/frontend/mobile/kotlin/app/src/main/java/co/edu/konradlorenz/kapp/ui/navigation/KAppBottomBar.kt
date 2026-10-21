@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -125,8 +126,16 @@ private fun RowScope.Tab(
             .weight(1f)
             .clip(TabShape)
             // selectable rather than clickable: a tab is one of a set, and this is what makes
-            // TalkBack say "selected" instead of reading five buttons that all look alike.
-            .selectable(selected = active, role = Role.Tab, onClick = onClick),
+            // TalkBack say "selected" instead of reading five buttons that all look alike. The
+            // press ripples in the brand's pink, the colour the pill turns, rather than Android's
+            // grey, which clashed with it.
+            .selectable(
+                selected = active,
+                interactionSource = null,
+                indication = ripple(color = MaterialTheme.colorScheme.primary),
+                role = Role.Tab,
+                onClick = onClick,
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {

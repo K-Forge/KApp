@@ -56,6 +56,7 @@ import co.edu.konradlorenz.kapp.data.schedule.WeekDays
 import co.edu.konradlorenz.kapp.ui.common.BandContentHeight
 import co.edu.konradlorenz.kapp.ui.common.BrandBand
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
+import co.edu.konradlorenz.kapp.ui.common.coverScrolled
 import co.edu.konradlorenz.kapp.ui.common.hexColor
 import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
 import co.edu.konradlorenz.kapp.ui.theme.Brand
@@ -78,6 +79,7 @@ private val ClassShape = RoundedCornerShape(14.dp)
 fun ScheduleScreen(viewModel: ScheduleViewModel = viewModel(factory = ScheduleViewModel.Factory)) {
     val schedule by viewModel.schedule.collectAsState()
 
+    val scroll = rememberScrollState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -90,7 +92,7 @@ fun ScheduleScreen(viewModel: ScheduleViewModel = viewModel(factory = ScheduleVi
                 .fillMaxSize()
                 .statusBarsPadding()
                 .padding(top = BandContentHeight - 24.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scroll)
                 .padding(start = ScreenPadding, end = ScreenPadding, bottom = BarContentPadding)
                 .navigationBarsPadding(),
         ) {
@@ -121,6 +123,12 @@ fun ScheduleScreen(viewModel: ScheduleViewModel = viewModel(factory = ScheduleVi
         }
 
         viewModel.openClass?.let { ClassSheet(it, viewModel.room, onDismiss = viewModel::close) }
+        // Over the content, so what scrolls up goes under the title (BrandBand).
+        BrandBand(
+            title = stringResource(R.string.home_shortcut_schedule),
+            cover = true,
+            scrolled = coverScrolled { scroll.value },
+        )
     }
 }
 
