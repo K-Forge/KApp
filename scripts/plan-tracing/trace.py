@@ -87,14 +87,36 @@ def write_bmp(path, pixels, width, height):
     open(path, "wb").write(out)
 
 
+# Where the survey's full-size photos live, outside the repository: one folder per building, its
+# evacuation, plaque and sanitary-route plans in Originales/ and the sketches drawn over them in
+# Sketchs/. docs/map/fuentes/ keeps a light copy of each (export-sources.py).
+DEFAULT_SURVEY = "~/Documents/KApp/levantamiento edificios"
+
+
+def survey_folder():
+    """$KAPP_SURVEY, or DEFAULT_SURVEY; a clear stop when neither is on this machine."""
+    folder = os.path.expanduser(os.environ.get("KAPP_SURVEY", DEFAULT_SURVEY))
+    if not os.path.isdir(folder):
+        sys.exit(f"no survey folder at {folder}: set KAPP_SURVEY to the folder with one folder per building")
+    return folder
+
+
 def survey_file(spec_path, name):
-    """A photo the spec names: next to the spec, or in the survey folder - $KAPP_SURVEY, by default
-    ~/Desktop/map, where the survey photos were taken to. The full-size originals stay out of the
-    repository; docs/map/fuentes/ keeps a light copy of each (export-sources.py)."""
+    """A photo the spec names - "Edificio Central/EC-P1-PE.HEIC" - next to the spec, or in the survey
+    folder: where the name says, or by its file name anywhere in the building's folder named, which
+    is where Originales/ and Sketchs/ are."""
     beside = os.path.join(os.path.dirname(os.path.abspath(spec_path)), name)
     if os.path.exists(beside):
         return beside
-    return os.path.join(os.path.expanduser(os.environ.get("KAPP_SURVEY", "~/Desktop/map")), name)
+    folder = survey_folder()
+    if os.path.exists(os.path.join(folder, name)):
+        return os.path.join(folder, name)
+    within = os.path.join(folder, os.path.dirname(name))
+    found = sorted(os.path.join(d, f) for d, _, files in os.walk(within) for f in files if f == os.path.basename(name))
+    if len(found) != 1:
+        sys.exit(f"{name}: {'not in' if not found else 'more than once in'} {within}" +
+                 "".join(f"\n  {path}" for path in found))
+    return found[0]
 
 
 def as_bmp(photo, prefix, width=2800):
