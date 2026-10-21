@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.ui.profile
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -157,6 +159,7 @@ private fun ProfileContent(
 
             // Always there, even when the profile could not be read: signing out must never depend
             // on the server answering.
+            // Pink like everything else that can be touched: grey read as unavailable.
             OutlinedButton(
                 onClick = onSignOut,
                 enabled = !signingOut,
@@ -164,8 +167,10 @@ private fun ProfileContent(
                     .fillMaxWidth()
                     .height(48.dp),
                 shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
             ) {
-                Text(text = stringResource(R.string.sign_out))
+                Text(text = stringResource(R.string.sign_out), fontWeight = FontWeight.SemiBold)
             }
         }
         // Over the content, so what scrolls up goes under the title (BrandBand).
