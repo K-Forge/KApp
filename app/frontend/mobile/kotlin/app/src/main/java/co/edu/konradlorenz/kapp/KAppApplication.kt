@@ -12,6 +12,7 @@ import co.edu.konradlorenz.kapp.data.schedule.ScheduleRepository
 import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreRepository
 import co.edu.konradlorenz.kapp.data.session.KeystoreSessionStore
 import co.edu.konradlorenz.kapp.data.session.SessionManager
+import co.edu.konradlorenz.kapp.data.visitor.VisitorPassRepository
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -50,6 +51,9 @@ class AppContainer(context: Context) {
         renewAfterRejection = { rejected -> runBlocking { session.renewAfterRejection(rejected) } },
         answerLocally = demo,
     )
+
+    /** Public too: a visitor has no session. */
+    val visitorPasses = VisitorPassRepository(publicApi.auth)
 
     val microsoft = MicrosoftSignIn.forThisBuild(context)
 

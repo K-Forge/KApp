@@ -26,6 +26,10 @@ rm -rf "$out"
 
 save POST auth/microsoft -d '{"idToken":"demo-id-token-0123456789","client":"APP"}'
 save POST auth/refresh -d '{"refreshToken":"demo-refresh-token"}'
+# The contract's example pass is the one the demo accepts; any other code has no file, and the
+# demo answers 404 - "Ese código no existe" on Invitación.
+save POST auth/visitor-passes/KL-V-7K2M-QX9P/redeem \
+  -d '{"documentType":"CC","documentNumber":"1032456789","visitorName":"Pepita Perez"}'
 
 for example in student professor staffAdmin; do
   save GET api/users/me -H "Prefer: example=$example"

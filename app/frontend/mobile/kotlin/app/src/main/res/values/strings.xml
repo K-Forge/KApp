@@ -25,7 +25,7 @@
     <string name="login_mock_student">Estudiante</string>
     <string name="login_mock_professor">Profesor</string>
     <string name="login_mock_staff">Administrativo</string>
-    <string name="login_first_time">¿Primera vez?</string>
+    <string name="login_first_time">¿Vienes de visita?</string>
     <string name="login_invitation_link">Usa tu código de invitación</string>
     <string name="login_copyright">© 2026 Fundación Universitaria Konrad Lorenz</string>
 
@@ -168,9 +168,44 @@
     <string name="placeholder_schedule_contract">Se alimentará de GET /api/schedule/me/week.</string>
     <string name="placeholder_home_contract">Se alimentará de GET /api/schedule/me/day.</string>
 
+    <string name="invitation_band">Invitación</string>
     <string name="invitation_title">Código de invitación</string>
-    <string name="invitation_pending">El registro con código de invitación todavía no existe. Su contrato es POST /auth/register en docs/api/auth.openapi.yaml.</string>
+    <string name="invitation_body">Recepción te entrega un código de visitante. Con él entras al mapa del campus durante 24 horas, sin crear una cuenta.</string>
+    <!-- Empty except in the demo build, which says which code its data accepts. -->
+    <string name="invitation_demo_hint" translatable="false"></string>
+    <string name="invitation_code_label">Código</string>
+    <string name="invitation_code_help">Tiene la forma KL-V-XXXX-XXXX.</string>
+    <string name="invitation_type_label">Tipo de documento</string>
+    <string name="invitation_type_cc">Cédula de ciudadanía</string>
+    <string name="invitation_type_ce">Cédula de extranjería</string>
+    <string name="invitation_type_ti">Tarjeta de identidad</string>
+    <string name="invitation_type_pasaporte">Pasaporte</string>
+    <string name="invitation_type_ppt">Permiso por protección temporal</string>
+    <string name="invitation_number_label">Número de documento</string>
+    <string name="invitation_number_help">Solo letras y números, sin puntos ni guiones.</string>
+    <string name="invitation_name_label">Nombre completo</string>
+    <string name="invitation_privacy">Recepción guarda tu documento y tu nombre como registro de la visita. Se borran solos a los 30 días (Ley 1581 de 2012).</string>
+    <string name="invitation_submit">Validar código</string>
+    <string name="invitation_sending">Validando…</string>
     <string name="invitation_back">Volver</string>
+    <string name="invitation_error_code_empty">Escribe el código que te dio recepción.</string>
+    <string name="invitation_error_code_confusable">Los códigos no usan 0, O, 1 ni I. Revisa esos caracteres.</string>
+    <string name="invitation_error_code_format">El código tiene la forma KL-V-XXXX-XXXX.</string>
+    <string name="invitation_error_type_missing">Elige el tipo de documento.</string>
+    <string name="invitation_error_number_empty">Escribe el número de tu documento.</string>
+    <string name="invitation_error_number_characters">Solo letras y números, sin puntos, guiones ni espacios.</string>
+    <string name="invitation_error_number_short">El número tiene al menos 4 caracteres.</string>
+    <string name="invitation_error_number_long">El número tiene como máximo 20 caracteres.</string>
+    <string name="invitation_error_name_empty">Escribe tu nombre completo.</string>
+    <string name="invitation_error_name_long">El nombre tiene como máximo 120 caracteres.</string>
+    <string name="invitation_result_not_found">Ese código no existe. Revísalo con recepción.</string>
+    <string name="invitation_result_used">Ese pase ya se usó. Pide uno nuevo en recepción.</string>
+    <string name="invitation_result_expired">Ese pase venció. Pide uno nuevo en recepción.</string>
+    <string name="invitation_result_offline">No pudimos conectar con el servidor. Revisa tu conexión e inténtalo otra vez.</string>
+    <string name="invitation_result_failed">No pudimos validar el código. Inténtalo otra vez.</string>
+    <string name="invitation_done_title">¡Listo, %1$s!</string>
+    <string name="invitation_done_body">Tu pase de visitante quedó activo por 24 horas. El mapa para visitantes llega en la siguiente fase de KApp.</string>
+    <string name="invitation_done_back">Volver al inicio de sesión</string>
 
     <!--
       The semester card counts credits, which is what GET /api/semaphore/me/summary returns. Only

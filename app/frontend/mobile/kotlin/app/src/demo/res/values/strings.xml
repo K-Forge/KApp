@@ -8,4 +8,5 @@
     <string name="login_intro_body">Esta versión de demostración no usa tu cuenta %1$s ni se conecta a ningún servidor: elige un perfil abajo y entra con sus datos de ejemplo.</string>
     <string name="login_submit">Ingresar con el perfil de demostración</string>
     <string name="login_mock_profile_label">Perfil de demostración</string>
+    <string name="invitation_demo_hint" translatable="false">En esta demostración funciona el código KL-V-7K2M-QX9P; cualquier otro dice que no existe.</string>
 </resources>

@@ -19,6 +19,15 @@ data class MicrosoftSignInRequest(
     val client: String = "APP",
 )
 
+/** `VisitorPassRedemptionRequest` in auth.openapi.yaml: who is using the pass, for reception's record. */
+@Serializable
+data class VisitorPassRedemptionRequest(
+    /** `DocumentType`: CC, CE, TI, PASAPORTE or PPT. */
+    val documentType: String,
+    val documentNumber: String,
+    val visitorName: String,
+)
+
 /** `RefreshRequest` in auth.openapi.yaml. The body of both `POST /auth/refresh` and `/auth/logout`. */
 @Serializable
 data class RefreshRequest(val refreshToken: String)

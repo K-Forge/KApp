@@ -1,0 +1,11 @@
+{
+    "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImV4YW1wbGUta2V5In0.eyJzdWIiOiJ2aXNpdG9yOjljMWYwYTcyLTRiM2UtNGQ1MS04YTIwLTc3ZTFiMmM5ZDY0MCIsImlzcyI6Imh0dHBzOi8va2FwcC5rb25yYWRsb3JlbnouZWR1LmNvIiwiaWF0IjoxNzY4NDg5MjAwLCJleHAiOjE3Njg1NzU2MDAsInJvbGVzIjpbIlJPTEVfR1VFU1QiXX0.LCpNu8-8A1jPqadvGGmjx_vjwLppk8ghjCZUQMfBRaT5x8DQEgcpZyYBWwKRcS2eFTWCPUXh1HC9lIEf6TAtOxl4KqjDHIu4ZKmPBqS8S8UnAOKE3X6z-vufmKMJ3yaNa_ij7l0ewsJU2DqN2KUwIGI0Qj6ksjnV_4aAnTpNUPOoF1G7oFg6-Z-Of3-W6KG0JEHpA2WJOd-eQKURUSu3FuQbabE77F_UgUvwaN_Tv0HRlfODzT-WbowcFjh4xAoXnMPpLkJ1MhrTI1GyLdri6FStUPdSoLj85dQSSjOINaRoAsJKrk-Y62jaGkZXOuNmRG4NnDreMKCYiZef8zYTPw",
+    "tokenType": "Bearer",
+    "expiresIn": 86400,
+    "refreshToken": null,
+    "refreshExpiresIn": null,
+    "userId": "visitor:9c1f0a72-4b3e-4d51-8a20-77e1b2c9d640",
+    "roles": [
+        "ROLE_GUEST"
+    ]
+}
