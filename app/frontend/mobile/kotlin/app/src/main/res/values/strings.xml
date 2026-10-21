@@ -175,6 +175,7 @@
     <string name="map_failed">No pudimos cargar los edificios.</string>
     <string name="map_retry">Reintentar</string>
 
+    <string name="band_go_home">Ir a Inicio</string>
     <string name="invitation_band">Invitación</string>
     <string name="invitation_title">Código de invitación</string>
     <string name="invitation_body">Recepción te entrega un código de visitante. Con él entras al mapa del campus durante 24 horas, sin crear una cuenta.</string>
