@@ -3,6 +3,97 @@
 Native Android client, Kotlin and Jetpack Compose. This is the product, not a prototype — see
 `AGENTS.md`.
 
+## Segunda entrega (Desarrollo de Aplicaciones Móviles, 23-10-2026)
+
+Esta sección es para correr la app sin haber abierto nunca el proyecto, a partir del ZIP
+`Frontend_KApp.zip`. Se usa la variante **demo**: no necesita Docker, ni servidor, ni cuenta de
+Microsoft, ni internet. Los datos que muestra son los ejemplos de los contratos del API, guardados
+dentro de la app.
+
+### Qué necesitas
+
+- **Android Studio 2026.1.4 (Quail 4) o más nuevo.** Uno más viejo no puede sincronizar el
+  proyecto. Revisa la versión en *Android Studio > About* (en Windows, *Help > About*).
+- **JDK:** no instales nada aparte. Android Studio trae el suyo, y si hiciera falta otro, Gradle lo
+  descarga solo.
+- **Emulador recomendado:** Pixel 6 con **API 37 (Android 17)**. Créalo en *Device Manager > Create
+  Virtual Device > Pixel 6*, con la imagen de sistema de API 37. Si Android Studio ofrece instalar la
+  plataforma 37 del SDK, acéptalo.
+
+### Correrla desde el ZIP
+
+1. Descomprime `Frontend_KApp.zip`. Queda una carpeta `Frontend_KApp`.
+2. En Android Studio, *File > Open* y elige esa carpeta `Frontend_KApp`, la que tiene
+   `settings.gradle.kts` adentro. Si pregunta si confías en el proyecto, elige *Trust Project*.
+3. Espera a que termine la sincronización de Gradle. La primera vez descarga Gradle y las
+   dependencias, y puede tardar varios minutos.
+4. Revisa que la variante sea **demo**: *Build > Select Build Variant…*, módulo `app`, columna
+   *Active Build Variant*. El proyecto la marca como predeterminada, así que al abrirlo por primera
+   vez debería venir ya en `demo`; si no, elígela ahí.
+5. Elige el emulador y dale **Run** (▶). La primera vez que abre, la app puede tardar hasta dos
+   minutos en mostrar la primera pantalla; las siguientes veces es inmediato.
+
+No hace falta `local.properties` ni ninguna otra configuración: el ZIP compila tal cual, y Android
+Studio escribe por su cuenta la ruta del SDK al abrirlo. Desde una terminal, después de abrirlo una
+vez en Android Studio y con el emulador abierto, dentro de `Frontend_KApp`: `./gradlew
+:app:installDemo` (en Windows, `gradlew.bat :app:installDemo`).
+
+**Para el equipo, desde el repositorio:** `git clone -b develop https://github.com/K-Forge/KApp.git`
+y abre la carpeta `app/frontend/mobile/kotlin`. A partir de ahí, los pasos 3 a 5 son los mismos.
+
+### Cambiar de perfil
+
+En el login, debajo del botón **Ingresar con el perfil de demostración**, el selector *Perfil de
+demostración* tiene tres opciones:
+
+| Perfil | Quién es | Pestañas |
+|---|---|---|
+| Estudiante | Pepito Perez Gomez, Ingeniería de Sistemas, semestre 8 | Perfil, Semáforo, Inicio, Mapa, Horario |
+| Profesor | Laura Marcela Gómez Restrepo | Perfil, Inicio, Mapa, Horario |
+| Administrativo | Ana Ruiz Mejía | Perfil, Inicio, Mapa |
+
+Para cambiar de perfil: *Perfil > Cerrar sesión*, elige otro y vuelve a entrar. La demo vive el
+**lunes 21 de septiembre de 2026 a las 10:00**, la fecha de los ejemplos, así que Inicio muestra la
+próxima clase y Horario abre en un día con clases.
+
+### Dónde está cada pantalla
+
+| Pantalla | Cómo llegar |
+|---|---|
+| Login | Es la primera al abrir la app sin sesión. |
+| Invitación | En el login, *¿Vienes de visita? Usa tu código de invitación*. En la demo funciona el código `KL-V-7K2M-QX9P`; cualquier otro dice que no existe. |
+| Inicio | La que abre al ingresar, en el centro de la barra. |
+| Semáforo | Pestaña *Semáforo* (solo el estudiante). |
+| Horario | Pestaña *Horario* (estudiante y profesor). |
+| Perfil | Pestaña *Perfil*. Ahí está *Cerrar sesión*. |
+| Mapa | Pestaña *Mapa* (los tres perfiles): la lista de los 9 edificios de la sede con código, nombre, dirección y niveles; el mapa interactivo llega en la siguiente fase. |
+
+### Problemas comunes
+
+- **La sincronización falla o pide otra versión del plugin de Android.** Android Studio es más viejo
+  que 2026.1.4: actualízalo.
+- **Falta la plataforma 37 o la imagen del emulador.** Instálalas desde *Settings > Languages &
+  Frameworks > Android SDK*.
+- **No aparece el botón Run o no hay módulo `app`.** Abriste otra carpeta: la de afuera que contiene
+  a `Frontend_KApp`, o `Frontend_KApp/app`. Cierra el proyecto y abre `Frontend_KApp`.
+- **Las pantallas dicen "No pudimos cargar…".** Estás en la variante `debug`, que busca un
+  servidor. Cambia a `demo` (paso 4).
+- **Android pide el permiso de dispositivos cercanos o de red local.** Eso solo lo pide la variante
+  `debug` en Android 17; la `demo` no se conecta a nada. Si aparece, también estás en `debug`.
+- **El emulador va muy lento o se cierra.** Cierra otros programas pesados, revisa que tenga
+  aceleración de hardware y, si sigue, borra sus datos en *Device Manager > Wipe Data*.
+
+### Cómo se arma el ZIP
+
+Desde la raíz del repositorio, con todo guardado en git:
+
+```bash
+git archive --format=zip --prefix=Frontend_KApp/ -o Frontend_KApp.zip HEAD:app/frontend/mobile/kotlin
+```
+
+Crea `Frontend_KApp.zip` (unos 240 KB) con el proyecto completo y sin compilados: el código, el
+wrapper de Gradle y los datos de la demo. El repositorio es <https://github.com/K-Forge/KApp>.
+
 ## State
 
 **Sign-in and the session** are built (issue #46): **Ingresar con Microsoft** runs Microsoft's
