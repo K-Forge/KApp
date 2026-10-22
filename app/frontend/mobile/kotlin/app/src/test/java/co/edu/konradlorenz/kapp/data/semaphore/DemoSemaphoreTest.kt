@@ -53,4 +53,15 @@ class DemoSemaphoreTest {
             .filter { it.status.plannable }
         assertTrue(ahead.size >= 4)
     }
+
+    @Test
+    fun `the summary Inicio and Semáforo show adds up from the semáforo`() {
+        val summary: ProgressSummary = read("semaphore/me/summary.json")
+        val status = semaphore.courses.associate { it.pensumItemCode to it.status }
+        fun credits(state: String) = pensum.courses.filter { status[it.pensumItemCode] == state }.sumOf { it.credits }
+        assertEquals(credits("PASSED"), summary.creditsPassed)
+        assertEquals(credits("IN_PROGRESS"), summary.creditsInProgress)
+        assertEquals(pensum.courses.sumOf { it.credits }, summary.totalCredits)
+        assertEquals(summary.totalCredits, summary.creditsPassed + summary.creditsInProgress + summary.creditsRemaining)
+    }
 }
