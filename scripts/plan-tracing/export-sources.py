@@ -5,7 +5,8 @@ them but the picture.
 
     scripts/plan-tracing/export-sources.py [survey folder] [out folder]
 
-The survey folder is $KAPP_SURVEY, by default ~/Desktop/map; the out folder, docs/map/fuentes.
+The survey folder is $KAPP_SURVEY, by default trace.DEFAULT_SURVEY; the out folder, docs/map/fuentes.
+A building's photos may sit in its folder or in a folder inside it (Originales/, Sketchs/).
 Each photo lands in its building's folder (ec, cpc-1, jaab, bi, mu, ea - the names of
 docs/map/levantamiento/) as NAME.jpg:
 
@@ -26,6 +27,8 @@ import struct
 import subprocess
 import sys
 import tempfile
+
+import trace  # this folder's trace.py, for the survey folder
 
 FOLDERS = {"Edificio Central": "ec", "CPC 1": "cpc-1", "Centro de Investigaciones": "jaab",
            "Bienestar Institucional": "bi", "Casa Medio Universitario": "mu",
@@ -92,8 +95,7 @@ def export(photo, dest, tmp):
 
 def main():
     root = pathlib.Path(__file__).resolve().parents[2]
-    survey = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else
-                          os.path.expanduser(os.environ.get("KAPP_SURVEY", "~/Desktop/map")))
+    survey = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else trace.survey_folder())
     out = pathlib.Path(sys.argv[2]) if len(sys.argv) > 2 else root / "docs/map/fuentes"
     total = 0
     with tempfile.TemporaryDirectory() as tmp:
@@ -101,7 +103,7 @@ def main():
             rel = photo.relative_to(survey)
             if photo.suffix.lower() not in (".heic", ".jpeg", ".jpg") or "VISTA" in photo.stem.upper():
                 continue
-            if len(rel.parts) != 2 or rel.parts[0] not in FOLDERS:
+            if len(rel.parts) < 2 or rel.parts[0] not in FOLDERS:
                 print(f"skipped {rel}: not in a building's folder", file=sys.stderr)
                 continue
             dest = out / FOLDERS[rel.parts[0]] / (photo.stem.upper().replace(" ", "-") + ".jpg")

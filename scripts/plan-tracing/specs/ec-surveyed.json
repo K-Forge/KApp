@@ -53,6 +53,26 @@
       "width": 2400,
       "y": [[574, 479], [2217, 2107]],
       "y why": "The plan's first row of rooms goes a wall inside the tower's front on the Carrera 9 Bis, and its last a wall inside the back wall, 5.48 m from the Carrera 9A curb (survey 53). The plan's depth between the two, 1643 units, is the measured one, 1638: the plan was only laid 3 m too far back, onto the cadastre's lot line.",
+      "drop": {
+        "P1-15": "Open floor north of the Cafetería No. 1 in Brian's sketch of 2026-10-21, between the shop and the lifts by the bathrooms; no room.",
+        "P1-16": "The food court the plan's tracing drew; in Brian's sketch of 2026-10-21 it is part of the Cafetería No. 1.",
+        "P1-22": "The plan's box beside the treasury is the Tienda in Brian's sketch of 2026-10-21 (P1-TIENDA).",
+        "P1-24": "The plan's long block east of the food court; in Brian's sketch of 2026-10-21 it is part of the Cafetería No. 1.",
+        "P1-25": "The plan's strip along the Calle 63 is the Cafetería No. 2 in Brian's sketch of 2026-10-21 (P1-CAFETERIA-NO-2).",
+        "P1-33": "In Brian's sketch of 2026-10-21 this corner is part of the Cocina and of the box by the ramp.",
+        "P1-34": "In Brian's sketch of 2026-10-21 this box is the south end of the Cocina (P1-COCINA).",
+        "P1-CAFETERIA-NO-2": "Brian, 2026-10-21: the food court is one cafeteria, P1-CAFETERIA, and its north extension P1-CAFETERIA-NORTE; no second cafeteria.",
+        "P1-ZONA-ESPARCIMIENT": "The sanitary route plan's name for the food court's hall, which is the cafeteria: an alias of P1-CAFETERIA now."
+      },
+      "yield": {
+        "P1-17": "A small box Brian drew between the north lift and the wall; squared on its own its outline folds, so it is refitted to the room it has.",
+        "P1-RECEPCION": "Sketched round the box beside it (P1-13); the box keeps its wall.",
+        "P1-RAMPA-VEHICULAR": "The emergency stair beside it keeps its wall.",
+        "P1-CAFETERIA": "Brian outlined the cafeteria round the rooms it reaches - the treasury, the shop, the boxes by the lifts; they keep their walls and it takes the floor between them."
+      },
+      "outside": {
+        "P1-PATIO": "Brian, 2026-10-21: an open patio beside the building, between the ramp and the gate on the Carrera 9A, not under its roof. It keeps the shape he sketched; the floor's surveyed margin stays as measured."
+      },
       "groups": [
         {
           "spaces": ["P1-AUD-TAQUILLA", "P1-AUD-ANTESALA-N", "P1-AUDITORIO-SONIA", "P1-AUD-ESCENARIO", "P1-AUD-AUDIOVISUALES", "P1-AUD-ESCALERA", "P1-AUD-UTILERIA", "P1-AUD-SALIDA-SUR", "P1-20", "P1-23", "P1-26", "P1-27", "P1-28", "P1-29"],
@@ -173,6 +193,6 @@
       }
     }
   },
-  "marked": "traced/ec-{floor}-auditorio.json",
+  "marked": ["traced/ec-{floor}-auditorio.json", "traced/ec-{floor}-boceto.json"],
   "by hand": "traced/ec-{floor}-a-mano.json"
 }

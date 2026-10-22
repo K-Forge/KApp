@@ -27,12 +27,13 @@ The spec:
                                            from there again, so a floor registered once can be
                                            registered anew when the building is measured. Without
                                            it the floor in the seed is what moves
-     "marked": "traced/ec-{floor}-auditorio.json",
+     "marked": ["traced/ec-{floor}-auditorio.json", "traced/ec-{floor}-boceto.json"],
                                            rooms somebody outlined by hand over the plan's photo
                                            (strokes.py), in the drawing's units too: laid over the
                                            traced floor before anything moves. A room it names
                                            takes its outline, name and doors from there; one it
-                                           gives no outline ("shape": null) is left for "add"
+                                           gives no outline ("shape": null) is left for "add".
+                                           One file or several; a floor without one is skipped
      "by hand": "traced/ec-{floor}-a-mano.json",
                                            what somebody changed in the floor editor afterwards,
                                            in the building's own units: its "spaces" replace the
@@ -70,6 +71,11 @@ The spec:
                                            other two, where the building steps in. "side" cuts
                                            a room along a slanted wall: it keeps the side of the
                                            line through the two points that the point "of" is on
+        "outside": {"P1-PATIO": "..."},     spaces beside the building rather than in it - an open
+                                           patio - which the fit leaves as drawn, with why
+        "yield": {"P1-CAFETERIA": "..."},  rooms that give way, in this order, after the fit: each
+                                           is cut off every other room, so one sketched round its
+                                           neighbours does not end up overlapping them, with why
         "corridors": [{"code": "PAS-CENTRAL", "name": "...", "color": "#5B8DEF",
                        "path": [[660, 540], [660, 1870]]}]
                                            walkable routes to add, in the drawing's units - the
@@ -380,7 +386,7 @@ def fit(spec, rules, building, floor, code):
     slanted = lambda code: any(fnmatch.fnmatch(code, k) for k in keep)
     unplaced, gone = [], []
     for sp in list(floor["spaces"]):
-        if not sp.get("shape") or sp["code"] in stacked:
+        if not sp.get("shape") or sp["code"] in stacked or sp["code"] in rules.get("outside", {}):
             continue
         poly = [(p["x"], p["y"]) for p in sp["shape"]]
         terrace = sp.get("typeCode") == "TERRACE"
@@ -438,6 +444,27 @@ def fit(spec, rules, building, floor, code):
         if grown is not poly:
             sp["shape"] = [{"x": round(x), "y": round(y)} for x, y in grown]
             notes.append(f"  {target} out to the facade: x {min(p[0] for p in poly):.0f} -> {min(p[0] for p in grown):.0f}")
+    # Rooms that give way, in the order named: each is cut off every other room as it now stands,
+    # so a room sketched round its neighbours does not come out of the squaring on top of them.
+    for target in rules.get("yield", {}):
+        sp = spaces.get(target)
+        if not sp or not sp.get("shape"):
+            sys.exit(f"{code} has no drawn space {target} to give way")
+        others = margin.blank(tight)
+        for other in floor["spaces"]:
+            if other is not sp and other.get("shape"):
+                others.paint([(p["x"], p["y"]) for p in other["shape"]])
+        poly = [(p["x"], p["y"]) for p in sp["shape"]]
+        # A cell further off them: a cell is theirs by its centre, so one their edge only crosses
+        # would still let this room in by up to a cell along a whole wall.
+        cut = margin.clip(poly, loose, tight, others.grown(1), square=not slanted(target), slack=0)
+        if cut is None:
+            sys.exit(f"{code}: {target} has little left once it gives way")
+        if cut is not poly:
+            shape = tidy(cut)
+            sp["shape"] = [{"x": round(x), "y": round(y)} for x, y in shape]
+            sp["doors"] = [d for d in sp.get("doors") or [] if on_edge(shape, (d["from"]["x"], d["from"]["y"]), (d["to"]["x"], d["to"]["y"]))]
+            notes.append(f"  {target} gives way to its neighbours")
     notes.append(f"  fitted to the margin: {len(clipped)} room(s) drawn")
     return notes
 
@@ -462,17 +489,25 @@ def main():
         source = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
                               spec["traced"].format(floor=args.floor.lower()))
         marks = None
-        if spec.get("marked"):
+        marked = spec.get("marked") or []
+        for pattern in [marked] if isinstance(marked, str) else marked:
             path_of_marks = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
-                                         spec["marked"].format(floor=args.floor.lower()))
-            marks = json.load(open(path_of_marks)) if os.path.exists(path_of_marks) else None
+                                         pattern.format(floor=args.floor.lower()))
+            if os.path.exists(path_of_marks):
+                # One sketch of a part, another of the whole floor: their rooms together, the later
+                # one's taking a code both name.
+                these = json.load(open(path_of_marks))["spaces"]
+                ours = {sp["code"] for sp in these}
+                marks = {"spaces": [sp for sp in (marks or {}).get("spaces", []) if sp["code"] not in ours] + these}
         later = {a["code"] for a in rules.get("add", [])}
         if spec.get("by hand"):
             path_by_hand = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
                                         spec["by hand"].format(floor=args.floor.lower()))
             if os.path.exists(path_by_hand):
-                # Rooms the editor's own changes drew come back at the end, as the editor has them.
-                later |= {sp["code"] for sp in json.load(open(path_by_hand)).get("spaces", [])}
+                # Rooms the editor's own changes drew come back at the end, as the editor has them,
+                # and those it removed go then.
+                by_hand = json.load(open(path_by_hand))
+                later |= {sp["code"] for sp in by_hand.get("spaces", [])} | set(by_hand.get("removed", []))
         back = start_over(floor, json.load(open(source)), later, marks)
     elif width and floor["width"] == width:
         sys.exit(f"{args.floor} is {width} wide already: it has been registered")
@@ -486,10 +521,8 @@ def main():
 
     # Shapes the plan draws that are not this floor's - a wing's silhouette above its roof - go;
     # a traced shape that is an inventoried space takes that space's name.
-    dropped = set(rules.get("drop", {}))
-    for code in dropped:
-        if not any(sp["code"] == code for sp in floor["spaces"]):
-            sys.exit(f"{args.floor} has no space {code} to drop")
+    # A space dropped by an earlier run is gone from the seed already: registering again is fine.
+    dropped = {code for code in rules.get("drop", {}) if any(sp["code"] == code for sp in floor["spaces"])}
     floor["spaces"] = [sp for sp in floor["spaces"] if sp["code"] not in dropped]
     for traced, named in rules.get("becomes", {}).items():
         a = next((sp for sp in floor["spaces"] if sp["code"] == traced), None)

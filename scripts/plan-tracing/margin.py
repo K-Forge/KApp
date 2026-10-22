@@ -168,7 +168,7 @@ def blank(like):
     return out
 
 
-def clip(poly, loose, tight, blocked, square=True):
+def clip(poly, loose, tight, blocked, square=True, slack=2):
     """The room cut to the margin, a wall inside, and off the cells set in `blocked`.
 
     Returns the polygon unchanged when it already fits (to within a cell), a new one fitted with
@@ -179,7 +179,7 @@ def clip(poly, loose, tight, blocked, square=True):
         return None
     # A room that strays a cell or two - a corner rounding over a step of the facade, far less
     # than a wall - fits: fitting it again would redraw its whole outline for a few centimetres.
-    if sum(1 for i, j in cells if not loose.get(i, j) or blocked.get(i, j)) <= 2:
+    if sum(1 for i, j in cells if not loose.get(i, j) or blocked.get(i, j)) <= slack:
         return poly
     kept = {(i, j) for i, j in cells if tight.get(i, j) and not blocked.get(i, j)}
     if len(kept) < 0.2 * len(cells):
