@@ -3,7 +3,7 @@
  "out": "../traced/ec-p1-boceto.json",
  "building": "EC",
  "floor": "P1",
- "why": "The first floor as Brian outlined it by hand over its evacuation plan on 2026-10-21 (Sketchs/EC-P1-PE.HEIC): a loop round every space and its name inside, \"?\" for one he could not identify. In the drawing's units, before register.py moves anything; the auditorium keeps its own sketch (ec-au-p1-strokes.json). Where a loop shares a wall with another space's, the neighbour's pen closes it too, and \"within\" keeps apart the small boxes whose shared lines his pen drew thin. The box he marked \"?\" by the parking ramp is where the plan prints the emergency stair, so it keeps that name.",
+ "why": "The first floor as Brian outlined it by hand over its evacuation plan on 2026-10-21 (Sketchs/EC-P1-PE.HEIC): a loop round every space and its name inside, \"?\" for one he could not identify. In the drawing's units, before register.py moves anything; the auditorium keeps its own sketch (ec-au-p1-strokes.json). Where a loop shares a wall with another space's, the neighbour's pen closes it too, and \"within\" keeps apart the small boxes whose shared lines his pen drew thin. The box he marked \"?\" by the parking ramp is where the plan prints the emergency stair, so it keeps that name. Brian, after the trace: the food court is one cafeteria. The part along the Calle 63 is the north extension, a few steps down, which he outlined apart; the sanitary route plan predates it. The lift by the bathrooms is the Ascensor central.",
  "rooms": [
   {
    "code": "P1-12",
@@ -305,11 +305,11 @@
   },
   {
    "code": "P1-ASC-BANOS",
-   "name": "Ascensor de los baños",
+   "name": "Ascensor central",
    "typeCode": "ELEVATOR",
    "aliases": [
-    "ascensor central",
-    "ascensor"
+    "ascensor",
+    "ascensor junto a los baños"
    ],
    "strokes": [
     "blue"
@@ -383,12 +383,14 @@
    ]
   },
   {
-   "code": "P1-CAFETERIA-NO-2",
-   "name": "Cafetería No. 2",
+   "code": "P1-CAFETERIA-NORTE",
+   "name": "Cafetería · zona norte",
    "typeCode": "CAFETERIA",
    "aliases": [
-    "cafetería"
+    "cafetería",
+    "cafetería no. 2"
    ],
+   "note": "Parte de la cafetería: la ampliación norte, unos escalones más abajo que el resto.",
    "strokes": [
     "red",
     "black",
@@ -519,12 +521,14 @@
    "close": 5
   },
   {
-   "code": "P1-CAFETERIA-NO-1",
-   "name": "Cafetería No. 1",
+   "code": "P1-CAFETERIA",
+   "name": "Cafetería",
    "typeCode": "CAFETERIA",
    "aliases": [
     "cafetería",
-    "zona de comidas"
+    "zona de comidas",
+    "zona de esparcimiento",
+    "cafetería no. 1"
    ],
    "strokes": [
     "red",

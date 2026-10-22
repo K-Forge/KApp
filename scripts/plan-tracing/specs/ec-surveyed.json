@@ -60,7 +60,12 @@
         "P1-24": "The plan's long block east of the food court; in Brian's sketch of 2026-10-21 it is part of the Cafetería No. 1.",
         "P1-25": "The plan's strip along the Calle 63 is the Cafetería No. 2 in Brian's sketch of 2026-10-21 (P1-CAFETERIA-NO-2).",
         "P1-33": "In Brian's sketch of 2026-10-21 this corner is part of the Cocina and of the box by the ramp.",
-        "P1-34": "In Brian's sketch of 2026-10-21 this box is the south end of the Cocina (P1-COCINA)."
+        "P1-34": "In Brian's sketch of 2026-10-21 this box is the south end of the Cocina (P1-COCINA).",
+        "P1-CAFETERIA-NO-2": "Brian, 2026-10-21: the food court is one cafeteria, P1-CAFETERIA, and its north extension P1-CAFETERIA-NORTE; no second cafeteria.",
+        "P1-ZONA-ESPARCIMIENT": "The sanitary route plan's name for the food court's hall, which is the cafeteria: an alias of P1-CAFETERIA now."
+      },
+      "outside": {
+        "P1-PATIO": "Brian, 2026-10-21: an open patio beside the building, between the ramp and the gate on the Carrera 9A, not under its roof. It keeps the shape he sketched; the floor's surveyed margin stays as measured."
       },
       "groups": [
         {
