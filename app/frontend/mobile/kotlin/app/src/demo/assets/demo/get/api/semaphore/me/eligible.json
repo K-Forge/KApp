@@ -1,5 +1,19 @@
 [
     {
+        "pensumItemCode": "17070",
+        "sinuCode": "17070",
+        "name": "Inferencia Estadística",
+        "level": 7,
+        "credits": 3,
+        "weeklyHours": 3,
+        "totalHours": 48,
+        "area": "CB",
+        "isElectiveSlot": false,
+        "prerequisites": [
+            "17018"
+        ]
+    },
+    {
         "pensumItemCode": "59085",
         "sinuCode": "59085",
         "name": "Electiva III",
@@ -21,6 +35,68 @@
         "totalHours": 48,
         "area": "ISA",
         "isElectiveSlot": true,
+        "prerequisites": []
+    },
+    {
+        "pensumItemCode": "48050",
+        "sinuCode": "48050",
+        "name": "Arquitectura de Software",
+        "level": 8,
+        "credits": 3,
+        "weeklyHours": 4,
+        "totalHours": 64,
+        "area": "ISA",
+        "isElectiveSlot": false,
+        "prerequisites": [
+            "48022"
+        ]
+    },
+    {
+        "pensumItemCode": "59045",
+        "sinuCode": "59045",
+        "name": "Taller de emprendimiento",
+        "level": 8,
+        "credits": 3,
+        "weeklyHours": 4,
+        "totalHours": 64,
+        "area": "ISA",
+        "isElectiveSlot": false,
+        "prerequisites": []
+    },
+    {
+        "pensumItemCode": "59096",
+        "sinuCode": "59096",
+        "name": "Electiva V",
+        "level": 8,
+        "credits": 3,
+        "weeklyHours": 3,
+        "totalHours": 48,
+        "area": "ISA",
+        "isElectiveSlot": true,
+        "prerequisites": []
+    },
+    {
+        "pensumItemCode": "9a020",
+        "sinuCode": "9a020",
+        "name": "Práctica Profesional",
+        "level": 9,
+        "credits": 8,
+        "weeklyHours": 24,
+        "totalHours": 384,
+        "area": "ISA",
+        "isElectiveSlot": false,
+        "prerequisites": []
+    },
+    {
+        "pensumItemCode": "4a033",
+        "sinuCode": "4a033",
+        "name": "Gerencia de Proyectos TIC",
+        "level": 9,
+        "credits": 2,
+        "weeklyHours": 3,
+        "totalHours": 48,
+        "area": "ISA",
+        "isElectiveSlot": false,
         "prerequisites": []
     }
 ]

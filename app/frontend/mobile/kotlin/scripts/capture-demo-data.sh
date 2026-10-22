@@ -44,6 +44,76 @@ pensum=$(python3 -I -c 'import json,sys; print(json.load(sys.stdin)["pensumCode"
 save GET "api/catalog/pensums/$pensum"
 save GET "api/catalog/pensums/$pensum/electives"
 
+# Semáforo's pensum. The contract's example has ten of its courses, all passed or in progress, so a
+# demo plan had nothing to move (issue #176). The demo's pensum is the whole published one, out of
+# semaphore-service's seed, and the student's semáforo is made to agree with it: the example's own
+# entries stay as they are - passed, failed, postponed, in progress - a course of levels 1 to 7 it
+# does not mention is passed, since the student is in level 8, and levels 8 and 9 are what is left.
+# "Puedes tomarla" is worked out again: whatever is not passed or in progress and has every
+# prerequisite passed. And the summary Inicio and Semáforo show is summed from that semáforo, so
+# both screens give the same credits.
+python3 -I - "$(cd "$(dirname "$0")/../../../../.." && pwd)/app/backend/microservices/semaphore-service/src/main/resources/db/seed/pensums/pensum-$pensum.json" \
+  "$out/get/api/catalog/pensums/$pensum.json" "$out/get/api/semaphore/me.json" "$out/get/api/semaphore/me/eligible.json" \
+  "$out/get/api/semaphore/me/summary.json" <<'PY'
+import json, sys
+seed_path, pensum_path, semaphore_path, eligible_path, summary_path = sys.argv[1:]
+seed = json.load(open(seed_path, encoding="utf-8"))
+fields = ("pensumItemCode", "sinuCode", "name", "level", "credits", "weeklyHours", "totalHours",
+          "area", "isElectiveSlot", "prerequisites")
+courses = []
+for c in seed["courses"]:
+    c = dict(c, totalHours=round(c["weeklyHours"] * 16))  # 16 weeks, as the contract counts hours
+    courses.append({k: c[k] for k in fields if k in c})
+pensum = {k: seed[k] for k in seed if k != "courses"}
+pensum["courses"] = courses
+
+semaphore = json.load(open(semaphore_path, encoding="utf-8"))
+current = semaphore["currentLevel"]
+known = {e["pensumItemCode"] for e in semaphore["courses"]}
+# The period each level was passed in, counting back from the example's level 7 in 2026-1.
+periods = {1: "20191", 2: "20192", 3: "20201", 4: "20202", 5: "20211", 6: "20252", 7: "20261"}
+for c in courses:
+    if c["pensumItemCode"] in known or c["level"] >= current:
+        continue
+    semaphore["courses"].append({
+        "pensumItemCode": c["pensumItemCode"],
+        "status": "PASSED",
+        "sinuStatus": "APROBADA",
+        "period": periods.get(c["level"], "20261"),
+        "grade": 35 + sum(map(ord, c["pensumItemCode"])) % 14,  # 3,5 to 4,8, the same every run
+        "resolvedSinuCode": None,
+        "resolvedName": None,
+    })
+status = {e["pensumItemCode"]: e["status"] for e in semaphore["courses"]}
+eligible = [c for c in courses
+            if status.get(c["pensumItemCode"], "PENDING") not in ("PASSED", "IN_PROGRESS")
+            and all(status.get(p) == "PASSED" for p in c["prerequisites"])]
+
+def credits(courses, *statuses):
+    return sum(c["credits"] for c in courses if status.get(c["pensumItemCode"], "PENDING") in statuses)
+
+summary = json.load(open(summary_path, encoding="utf-8"))
+total = sum(c["credits"] for c in courses)
+summary["creditsPassed"] = credits(courses, "PASSED")
+summary["creditsInProgress"] = credits(courses, "IN_PROGRESS")
+summary["creditsRemaining"] = total - summary["creditsPassed"] - summary["creditsInProgress"]
+summary["totalCredits"] = total
+summary["percentComplete"] = round(100 * summary["creditsPassed"] / total, 1)
+summary["byArea"] = [
+    {"area": area["code"],
+     "creditsPassed": credits([c for c in courses if c["area"] == area["code"]], "PASSED"),
+     "creditsTotal": sum(c["credits"] for c in courses if c["area"] == area["code"])}
+    for area in pensum["areas"]
+]
+summary["currentLevel"] = current
+
+for path, data in ((pensum_path, pensum), (semaphore_path, semaphore), (eligible_path, eligible),
+                   (summary_path, summary)):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+        f.write("\n")
+PY
+
 # Planning answers with the example plan whatever it is asked: the demo keeps no state. The ids in
 # a path are not part of the file name, so any plan and any course find these two. "any" rather
 # than "_" because the Android build leaves out asset folders whose name starts with one.

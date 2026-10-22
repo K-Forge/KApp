@@ -1,13 +1,13 @@
 {
-    "creditsPassed": 112,
+    "creditsPassed": 103,
     "creditsInProgress": 8,
-    "creditsRemaining": 23,
+    "creditsRemaining": 32,
     "totalCredits": 143,
-    "percentComplete": 78.3,
+    "percentComplete": 72.0,
     "byArea": [
         {
             "area": "CB",
-            "creditsPassed": 30,
+            "creditsPassed": 33,
             "creditsTotal": 36
         },
         {
@@ -17,12 +17,12 @@
         },
         {
             "area": "ISA",
-            "creditsPassed": 48,
+            "creditsPassed": 30,
             "creditsTotal": 67
         },
         {
             "area": "SI",
-            "creditsPassed": 12,
+            "creditsPassed": 18,
             "creditsTotal": 18
         }
     ],

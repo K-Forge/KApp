@@ -52,6 +52,18 @@
             "prerequisites": []
         },
         {
+            "pensumItemCode": "21012",
+            "sinuCode": "21012",
+            "name": "Lógica Matemática",
+            "level": 1,
+            "credits": 3,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "CB",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
             "pensumItemCode": "41025",
             "sinuCode": "41025",
             "name": "Fundamentos de Programación",
@@ -60,6 +72,42 @@
             "weeklyHours": 4,
             "totalHours": 64,
             "area": "BIS",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "41012",
+            "sinuCode": "41012",
+            "name": "Introducción a la Ingeniería de Sistemas",
+            "level": 1,
+            "credits": 3,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "BIS",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "71181",
+            "sinuCode": "71181",
+            "name": "Inglés Intermedio Bajo",
+            "level": 1,
+            "credits": 2,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "SI",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "71071",
+            "sinuCode": "71071",
+            "name": "Habilidades comunicativas",
+            "level": 1,
+            "credits": 2,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "SI",
             "isElectiveSlot": false,
             "prerequisites": []
         },
@@ -78,6 +126,32 @@
             ]
         },
         {
+            "pensumItemCode": "63202",
+            "sinuCode": "63202",
+            "name": "Álgebra Lineal I",
+            "level": 2,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "CB",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "21012"
+            ]
+        },
+        {
+            "pensumItemCode": "23012",
+            "sinuCode": "23012",
+            "name": "Matemáticas Discretas",
+            "level": 2,
+            "credits": 3,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "CB",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
             "pensumItemCode": "31013",
             "sinuCode": "31013",
             "name": "Técnicas de Programación I",
@@ -92,6 +166,58 @@
             ]
         },
         {
+            "pensumItemCode": "72081",
+            "sinuCode": "72081",
+            "name": "Inglés Intermedio Medio",
+            "level": 2,
+            "credits": 2,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "SI",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "71181"
+            ]
+        },
+        {
+            "pensumItemCode": "71221",
+            "sinuCode": "71221",
+            "name": "Cultura I",
+            "level": 2,
+            "credits": 2,
+            "weeklyHours": 2,
+            "totalHours": 32,
+            "area": "SI",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "13015",
+            "sinuCode": "13015",
+            "name": "Cálculo II",
+            "level": 3,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "CB",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "12015"
+            ]
+        },
+        {
+            "pensumItemCode": "54034",
+            "sinuCode": "54034",
+            "name": "Cinemática",
+            "level": 3,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "CB",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
             "pensumItemCode": "31014",
             "sinuCode": "31014",
             "name": "Técnicas de Programación II",
@@ -103,6 +229,218 @@
             "isElectiveSlot": false,
             "prerequisites": [
                 "31013"
+            ]
+        },
+        {
+            "pensumItemCode": "54033",
+            "sinuCode": "54033",
+            "name": "Estructuras de Datos",
+            "level": 3,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "BIS",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "31013"
+            ]
+        },
+        {
+            "pensumItemCode": "73081",
+            "sinuCode": "73081",
+            "name": "Inglés Intermedio Alto",
+            "level": 3,
+            "credits": 2,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "SI",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "72081"
+            ]
+        },
+        {
+            "pensumItemCode": "76011",
+            "sinuCode": "76011",
+            "name": "Cátedra de Cultura II",
+            "level": 3,
+            "credits": 2,
+            "weeklyHours": 2,
+            "totalHours": 32,
+            "area": "SI",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "14015",
+            "sinuCode": "14015",
+            "name": "Cálculo III",
+            "level": 4,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "CB",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "13015"
+            ]
+        },
+        {
+            "pensumItemCode": "54044",
+            "sinuCode": "54044",
+            "name": "Electromagnetismo",
+            "level": 4,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "CB",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "54043",
+            "sinuCode": "54043",
+            "name": "Análisis y Diseño de Sistemas",
+            "level": 4,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "BIS",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "31014"
+            ]
+        },
+        {
+            "pensumItemCode": "31506",
+            "sinuCode": "31506",
+            "name": "Lógica Digital y Microprocesadores",
+            "level": 4,
+            "credits": 2,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "BIS",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "45012",
+            "sinuCode": "45012",
+            "name": "Bases de Datos I",
+            "level": 4,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "74081",
+            "sinuCode": "74081",
+            "name": "Inglés Avanzado",
+            "level": 4,
+            "credits": 2,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "SI",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "73081"
+            ]
+        },
+        {
+            "pensumItemCode": "13013",
+            "sinuCode": "13013",
+            "name": "Ecuaciones Diferenciales",
+            "level": 5,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "CB",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "14015"
+            ]
+        },
+        {
+            "pensumItemCode": "46033",
+            "sinuCode": "46033",
+            "name": "Sistemas Operacionales",
+            "level": 5,
+            "credits": 2,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "BIS",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "31404",
+            "sinuCode": "31404",
+            "name": "Diseño de Interfaces de usuario",
+            "level": 5,
+            "credits": 3,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "31614",
+            "sinuCode": "31614",
+            "name": "Nuevas Tecnologías de Desarrollo",
+            "level": 5,
+            "credits": 3,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "54043"
+            ]
+        },
+        {
+            "pensumItemCode": "46012",
+            "sinuCode": "46012",
+            "name": "Bases de Datos II",
+            "level": 5,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "45012"
+            ]
+        },
+        {
+            "pensumItemCode": "75081",
+            "sinuCode": "75081",
+            "name": "Inglés Proficiencia",
+            "level": 5,
+            "credits": 2,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "SI",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "74081"
+            ]
+        },
+        {
+            "pensumItemCode": "17018",
+            "sinuCode": "17080",
+            "name": "Estadística Descriptiva",
+            "level": 6,
+            "credits": 3,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "CB",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "13013"
             ]
         },
         {
@@ -120,6 +458,70 @@
             ]
         },
         {
+            "pensumItemCode": "31750",
+            "sinuCode": "31750",
+            "name": "Redes de Comunicación I",
+            "level": 6,
+            "credits": 2,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "31506"
+            ]
+        },
+        {
+            "pensumItemCode": "59075",
+            "sinuCode": "59075",
+            "name": "Electiva I",
+            "level": 6,
+            "credits": 3,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "ISA",
+            "isElectiveSlot": true,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "59078",
+            "sinuCode": "59078",
+            "name": "Electiva II",
+            "level": 6,
+            "credits": 3,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "ISA",
+            "isElectiveSlot": true,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "9a032",
+            "sinuCode": "9a032",
+            "name": "Cátedra de cultura III: ética profesional",
+            "level": 6,
+            "credits": 2,
+            "weeklyHours": 2,
+            "totalHours": 32,
+            "area": "SI",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "17070",
+            "sinuCode": "17070",
+            "name": "Inferencia Estadística",
+            "level": 7,
+            "credits": 3,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "CB",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "17018"
+            ]
+        },
+        {
             "pensumItemCode": "48022",
             "sinuCode": "48022",
             "name": "Ingeniería de Software II",
@@ -134,9 +536,85 @@
             ]
         },
         {
+            "pensumItemCode": "31850",
+            "sinuCode": "31850",
+            "name": "Redes de Comunicación II",
+            "level": 7,
+            "credits": 2,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "31750"
+            ]
+        },
+        {
+            "pensumItemCode": "40012",
+            "sinuCode": "40012",
+            "name": "Gestión en TIC",
+            "level": 7,
+            "credits": 2,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "59085",
+            "sinuCode": "59085",
+            "name": "Electiva III",
+            "level": 7,
+            "credits": 3,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "ISA",
+            "isElectiveSlot": true,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "59088",
+            "sinuCode": "59088",
+            "name": "Electiva IV",
+            "level": 7,
+            "credits": 3,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "ISA",
+            "isElectiveSlot": true,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "48050",
+            "sinuCode": "48050",
+            "name": "Arquitectura de Software",
+            "level": 8,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "48022"
+            ]
+        },
+        {
             "pensumItemCode": "59035",
             "sinuCode": "59035",
             "name": "Desarrollo de Aplicaciones Móviles",
+            "level": 8,
+            "credits": 3,
+            "weeklyHours": 4,
+            "totalHours": 64,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "59045",
+            "sinuCode": "59045",
+            "name": "Taller de emprendimiento",
             "level": 8,
             "credits": 3,
             "weeklyHours": 4,
@@ -158,6 +636,18 @@
             "prerequisites": []
         },
         {
+            "pensumItemCode": "59096",
+            "sinuCode": "59096",
+            "name": "Electiva V",
+            "level": 8,
+            "credits": 3,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "ISA",
+            "isElectiveSlot": true,
+            "prerequisites": []
+        },
+        {
             "pensumItemCode": "59098",
             "sinuCode": "59098",
             "name": "Electiva VI",
@@ -167,6 +657,44 @@
             "totalHours": 48,
             "area": "ISA",
             "isElectiveSlot": true,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "9a020",
+            "sinuCode": "9a020",
+            "name": "Práctica Profesional",
+            "level": 9,
+            "credits": 8,
+            "weeklyHours": 24,
+            "totalHours": 384,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": []
+        },
+        {
+            "pensumItemCode": "39020",
+            "sinuCode": "39020",
+            "name": "Trabajo de grado",
+            "level": 9,
+            "credits": 4,
+            "weeklyHours": 2,
+            "totalHours": 32,
+            "area": "ISA",
+            "isElectiveSlot": false,
+            "prerequisites": [
+                "56201"
+            ]
+        },
+        {
+            "pensumItemCode": "4a033",
+            "sinuCode": "4a033",
+            "name": "Gerencia de Proyectos TIC",
+            "level": 9,
+            "credits": 2,
+            "weeklyHours": 3,
+            "totalHours": 48,
+            "area": "ISA",
+            "isElectiveSlot": false,
             "prerequisites": []
         }
     ]
