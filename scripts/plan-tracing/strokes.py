@@ -205,12 +205,17 @@ def main():
     pw, ph = frame["plaque"]
     to_drawing_matrix = T.homography(frame["corners"], [(0, 0), (pw, 0), (pw, ph), (0, ph)])
     zoom = frame.get("resample", 2800) / w
+    # The drawing is the part of the rectified plaque the frame's "crop" keeps, at its "scale", as
+    # trace.py writes it: a frame that trims the plaque puts every room that much further up-left.
+    u0, v0 = frame.get("crop", [0, 0])[:2]
+    scale = frame.get("scale", 1)
 
     def to_drawing(p):
         x, y = p[0] * zoom, p[1] * zoom
         m = to_drawing_matrix
         d = m[2][0] * x + m[2][1] * y + m[2][2]
-        return ((m[0][0] * x + m[0][1] * y + m[0][2]) / d, (m[1][0] * x + m[1][1] * y + m[1][2]) / d)
+        u, v = (m[0][0] * x + m[0][1] * y + m[0][2]) / d, (m[1][0] * x + m[1][1] * y + m[1][2]) / d
+        return ((u - u0 * pw) * scale, (v - v0 * ph) * scale)
 
     pens = {}
     for y in range(h):
@@ -225,6 +230,7 @@ def main():
         to_photo_matrix = T.homography([(0, 0), (pw, 0), (pw, ph), (0, ph)], frame["corners"])
 
         def to_photo(p):
+            p = (p[0] / scale + u0 * pw, p[1] / scale + v0 * ph)
             m = to_photo_matrix
             d = m[2][0] * p[0] + m[2][1] * p[1] + m[2][2]
             return ((m[0][0] * p[0] + m[0][1] * p[1] + m[0][2]) / d / zoom, (m[1][0] * p[0] + m[1][1] * p[1] + m[1][2]) / d / zoom)
@@ -341,6 +347,12 @@ def main():
     for i, v in enumerate(lab):
         if v:
             cells_of.setdefault(v, []).append((i % w, i // w))
+    for number, code in enumerate(order, 1):
+        if number not in cells_of:
+            # Another room's loop took all of this one: two loops that read as one, or a point that
+            # falls in the wrong loop.
+            takers = sorted({order[lab[y * w + x] - 1] for x, y in regions[code] if lab[y * w + x]})
+            sys.exit(f"{code}: nothing is left of it - {', '.join(takers)} took its cells; give each a \"within\"")
 
     def at_corner(x, y):
         """How many rooms, the outside counted, meet at a corner of the lattice."""
