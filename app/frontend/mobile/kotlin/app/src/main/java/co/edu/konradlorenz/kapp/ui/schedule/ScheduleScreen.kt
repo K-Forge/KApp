@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -49,10 +52,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import co.edu.konradlorenz.kapp.R
 import co.edu.konradlorenz.kapp.data.schedule.ClassOccurrence
+import co.edu.konradlorenz.kapp.data.schedule.Schedule
 import co.edu.konradlorenz.kapp.data.schedule.ScheduleResult
 import co.edu.konradlorenz.kapp.data.schedule.SpaceDetail
 import co.edu.konradlorenz.kapp.data.schedule.WeekAgenda
 import co.edu.konradlorenz.kapp.data.schedule.WeekDays
+import co.edu.konradlorenz.kapp.data.schedule.classesPerDay
+import co.edu.konradlorenz.kapp.data.schedule.monthGrid
 import co.edu.konradlorenz.kapp.ui.common.BandContentHeight
 import co.edu.konradlorenz.kapp.ui.common.BrandBand
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
@@ -63,6 +69,9 @@ import co.edu.konradlorenz.kapp.ui.theme.Brand
 import co.edu.konradlorenz.kapp.ui.theme.InProgress
 import co.edu.konradlorenz.kapp.ui.theme.Subject
 import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.TextStyle
+import java.util.Locale
 
 private val CardShape = RoundedCornerShape(18.dp)
 private val ClassShape = RoundedCornerShape(14.dp)
@@ -117,7 +126,7 @@ fun ScheduleScreen(viewModel: ScheduleViewModel = viewModel(factory = ScheduleVi
                     WeekCard(week.value, viewModel)
                     val source = (schedule as? ScheduleResult.Ready)?.value?.source
                     if (source == "TEST") TestNotice()
-                    Week(week.value, viewModel)
+                    Week(week.value, viewModel, (schedule as? ScheduleResult.Ready)?.value)
                 }
             }
         }
@@ -138,27 +147,34 @@ private fun WeekCard(week: WeekAgenda, viewModel: ScheduleViewModel) {
     val months = stringArrayResource(R.array.months_short)
     val start = LocalDate.parse(week.weekStart)
     val end = LocalDate.parse(week.weekEnd)
+    val inMonth = viewModel.view == ScheduleView.Month
     Card {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = viewModel::previousWeek) { Text("‹", fontSize = 22.sp) }
+            val previous = if (inMonth) viewModel::previousMonth else viewModel::previousWeek
+            TextButton(onClick = previous) { Text("‹", fontSize = 22.sp) }
             Text(
-                text = stringResource(
-                    R.string.schedule_week_range,
-                    start.dayOfMonth,
-                    months[start.monthValue - 1],
-                    end.dayOfMonth,
-                    months[end.monthValue - 1],
-                ),
+                text = if (inMonth) {
+                    monthTitle(viewModel.month)
+                } else {
+                    stringResource(
+                        R.string.schedule_week_range,
+                        start.dayOfMonth,
+                        months[start.monthValue - 1],
+                        end.dayOfMonth,
+                        months[end.monthValue - 1],
+                    )
+                },
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
             )
-            TextButton(onClick = viewModel::nextWeek) { Text("›", fontSize = 22.sp) }
+            val next = if (inMonth) viewModel::nextMonth else viewModel::nextWeek
+            TextButton(onClick = next) { Text("›", fontSize = 22.sp) }
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
         ) {
             ScheduleView.entries.forEach { view ->
                 FilterChip(
@@ -171,6 +187,7 @@ private fun WeekCard(week: WeekAgenda, viewModel: ScheduleViewModel) {
                                     ScheduleView.Day -> R.string.schedule_view_day
                                     ScheduleView.TwoDays -> R.string.schedule_view_two_days
                                     ScheduleView.Week -> R.string.schedule_view_week
+                                    ScheduleView.Month -> R.string.schedule_view_month
                                 },
                             ),
                         )
@@ -198,7 +215,7 @@ private fun TestNotice() {
 }
 
 @Composable
-private fun Week(week: WeekAgenda, viewModel: ScheduleViewModel) {
+private fun Week(week: WeekAgenda, viewModel: ScheduleViewModel, schedule: Schedule?) {
     val start = LocalDate.parse(week.weekStart)
     val names = stringArrayResource(R.array.weekdays)
     val classesOf = { day: Int -> week.days[WeekDays[day]].orEmpty() }
@@ -229,6 +246,13 @@ private fun Week(week: WeekAgenda, viewModel: ScheduleViewModel) {
                 }
             }
         }
+        ScheduleView.Month -> MonthCalendar(
+            month = viewModel.month,
+            // Until the whole timetable is here the month draws without its marks.
+            classes = schedule?.let { classesPerDay(it, viewModel.month) }.orEmpty(),
+            today = viewModel.today,
+            onOpen = viewModel::openDay,
+        )
         ScheduleView.Week -> (0..6).forEach { day ->
             Text(
                 text = label(day),
@@ -239,6 +263,88 @@ private fun Week(week: WeekAgenda, viewModel: ScheduleViewModel) {
             DayColumn(classesOf(day), compact = false, onOpen = viewModel::open)
         }
     }
+}
+
+/**
+ * The Mes view: the month in rows of seven, a dot under each day with classes - one per class, up
+ * to three - and today in the brand's colour. Tapping a day opens it in Día.
+ */
+@Composable
+private fun MonthCalendar(
+    month: YearMonth,
+    classes: Map<LocalDate, Int>,
+    today: LocalDate,
+    onOpen: (LocalDate) -> Unit,
+) {
+    val names = stringArrayResource(R.array.weekdays)
+    Column(modifier = Modifier.padding(top = 12.dp)) {
+        Row {
+            names.forEach { name ->
+                Text(
+                    text = name,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+        monthGrid(month).forEach { week ->
+            Row(modifier = Modifier.padding(top = 4.dp)) {
+                week.forEach { date ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(1f),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (date != null) MonthDay(date, classes[date] ?: 0, date == today, onOpen)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MonthDay(date: LocalDate, classes: Int, isToday: Boolean, onOpen: (LocalDate) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(2.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (isToday) Brand else Color.Transparent)
+            .clickable { onOpen(date) },
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = date.dayOfMonth.toString(),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = if (classes > 0 || isToday) FontWeight.SemiBold else FontWeight.Normal,
+            color = if (isToday) Color.White else MaterialTheme.colorScheme.onSurface,
+        )
+        Row(
+            modifier = Modifier.height(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            repeat(classes.coerceAtMost(3)) {
+                Box(
+                    modifier = Modifier
+                        .size(5.dp)
+                        .clip(CircleShape)
+                        .background(if (isToday) Color.White else Subject),
+                )
+            }
+        }
+    }
+}
+
+/** "Septiembre 2026": the month's own name, as Colombia writes it, capitalised. */
+private fun monthTitle(month: YearMonth): String {
+    val name = month.month.getDisplayName(TextStyle.FULL_STANDALONE, Locale.forLanguageTag("es-CO"))
+    return "${name.replaceFirstChar { it.titlecase(Locale.forLanguageTag("es-CO")) }} ${month.year}"
 }
 
 /** The seven days of the week, Monday first, to pick the one the day views start on. */
