@@ -140,6 +140,285 @@
             "grade": null,
             "resolvedSinuCode": null,
             "resolvedName": null
+        },
+        {
+            "pensumItemCode": "21012",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20191",
+            "grade": 43,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "41012",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20191",
+            "grade": 45,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "71181",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20191",
+            "grade": 41,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "71071",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20191",
+            "grade": 39,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "63202",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20192",
+            "grade": 36,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "23012",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20192",
+            "grade": 45,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "72081",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20192",
+            "grade": 41,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "71221",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20192",
+            "grade": 36,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "13015",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20201",
+            "grade": 47,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "54034",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20201",
+            "grade": 39,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "54033",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20201",
+            "grade": 38,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "73081",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20201",
+            "grade": 42,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "76011",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20201",
+            "grade": 38,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "14015",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20202",
+            "grade": 48,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "54044",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20202",
+            "grade": 40,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "54043",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20202",
+            "grade": 39,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "31506",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20202",
+            "grade": 38,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "45012",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20202",
+            "grade": 35,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "74081",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20202",
+            "grade": 43,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "13013",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20211",
+            "grade": 45,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "46033",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20211",
+            "grade": 39,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "31404",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20211",
+            "grade": 35,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "31614",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20211",
+            "grade": 38,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "46012",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20211",
+            "grade": 36,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "75081",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20211",
+            "grade": 44,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "17018",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20252",
+            "grade": 40,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "31750",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20252",
+            "grade": 39,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "59078",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20252",
+            "grade": 38,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "9a032",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20252",
+            "grade": 44,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "31850",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20261",
+            "grade": 40,
+            "resolvedSinuCode": null,
+            "resolvedName": null
+        },
+        {
+            "pensumItemCode": "40012",
+            "status": "PASSED",
+            "sinuStatus": "APROBADA",
+            "period": "20261",
+            "grade": 44,
+            "resolvedSinuCode": null,
+            "resolvedName": null
         }
     ]
 }
