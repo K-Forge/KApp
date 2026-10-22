@@ -73,6 +73,9 @@ The spec:
                                            line through the two points that the point "of" is on
         "outside": {"P1-PATIO": "..."},     spaces beside the building rather than in it - an open
                                            patio - which the fit leaves as drawn, with why
+        "yield": {"P1-CAFETERIA": "..."},  rooms that give way, in this order, after the fit: each
+                                           is cut off every other room, so one sketched round its
+                                           neighbours does not end up overlapping them, with why
         "corridors": [{"code": "PAS-CENTRAL", "name": "...", "color": "#5B8DEF",
                        "path": [[660, 540], [660, 1870]]}]
                                            walkable routes to add, in the drawing's units - the
@@ -441,6 +444,27 @@ def fit(spec, rules, building, floor, code):
         if grown is not poly:
             sp["shape"] = [{"x": round(x), "y": round(y)} for x, y in grown]
             notes.append(f"  {target} out to the facade: x {min(p[0] for p in poly):.0f} -> {min(p[0] for p in grown):.0f}")
+    # Rooms that give way, in the order named: each is cut off every other room as it now stands,
+    # so a room sketched round its neighbours does not come out of the squaring on top of them.
+    for target in rules.get("yield", {}):
+        sp = spaces.get(target)
+        if not sp or not sp.get("shape"):
+            sys.exit(f"{code} has no drawn space {target} to give way")
+        others = margin.blank(tight)
+        for other in floor["spaces"]:
+            if other is not sp and other.get("shape"):
+                others.paint([(p["x"], p["y"]) for p in other["shape"]])
+        poly = [(p["x"], p["y"]) for p in sp["shape"]]
+        # A cell further off them: a cell is theirs by its centre, so one their edge only crosses
+        # would still let this room in by up to a cell along a whole wall.
+        cut = margin.clip(poly, loose, tight, others.grown(1), square=not slanted(target), slack=0)
+        if cut is None:
+            sys.exit(f"{code}: {target} has little left once it gives way")
+        if cut is not poly:
+            shape = tidy(cut)
+            sp["shape"] = [{"x": round(x), "y": round(y)} for x, y in shape]
+            sp["doors"] = [d for d in sp.get("doors") or [] if on_edge(shape, (d["from"]["x"], d["from"]["y"]), (d["to"]["x"], d["to"]["y"]))]
+            notes.append(f"  {target} gives way to its neighbours")
     notes.append(f"  fitted to the margin: {len(clipped)} room(s) drawn")
     return notes
 
@@ -497,10 +521,8 @@ def main():
 
     # Shapes the plan draws that are not this floor's - a wing's silhouette above its roof - go;
     # a traced shape that is an inventoried space takes that space's name.
-    dropped = set(rules.get("drop", {}))
-    for code in dropped:
-        if not any(sp["code"] == code for sp in floor["spaces"]):
-            sys.exit(f"{args.floor} has no space {code} to drop")
+    # A space dropped by an earlier run is gone from the seed already: registering again is fine.
+    dropped = {code for code in rules.get("drop", {}) if any(sp["code"] == code for sp in floor["spaces"])}
     floor["spaces"] = [sp for sp in floor["spaces"] if sp["code"] not in dropped]
     for traced, named in rules.get("becomes", {}).items():
         a = next((sp for sp in floor["spaces"] if sp["code"] == traced), None)
