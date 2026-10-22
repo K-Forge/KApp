@@ -104,7 +104,8 @@ def survey_folder():
 def survey_file(spec_path, name):
     """A photo the spec names - "Edificio Central/EC-P1-PE.HEIC" - next to the spec, or in the survey
     folder: where the name says, or by its file name anywhere in the building's folder named, which
-    is where Originales/ and Sketchs/ are."""
+    is where Originales/ and Sketchs/ are. A name found in both is the one in Originales/; a sketch
+    is named with its folder, "Edificio Central/Sketchs/EC-P1-PE.HEIC"."""
     beside = os.path.join(os.path.dirname(os.path.abspath(spec_path)), name)
     if os.path.exists(beside):
         return beside
@@ -113,6 +114,11 @@ def survey_file(spec_path, name):
         return os.path.join(folder, name)
     within = os.path.join(folder, os.path.dirname(name))
     found = sorted(os.path.join(d, f) for d, _, files in os.walk(within) for f in files if f == os.path.basename(name))
+    # A sketch keeps the name of the plan it is drawn on, in Sketchs/: a spec that names the plan
+    # alone means the original, and names a sketch by its folder.
+    originals = [path for path in found if os.path.basename(os.path.dirname(path)) == "Originales"]
+    if len(found) > 1 and len(originals) == 1:
+        return originals[0]
     if len(found) != 1:
         sys.exit(f"{name}: {'not in' if not found else 'more than once in'} {within}" +
                  "".join(f"\n  {path}" for path in found))
