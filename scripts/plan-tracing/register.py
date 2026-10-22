@@ -27,12 +27,13 @@ The spec:
                                            from there again, so a floor registered once can be
                                            registered anew when the building is measured. Without
                                            it the floor in the seed is what moves
-     "marked": "traced/ec-{floor}-auditorio.json",
+     "marked": ["traced/ec-{floor}-auditorio.json", "traced/ec-{floor}-boceto.json"],
                                            rooms somebody outlined by hand over the plan's photo
                                            (strokes.py), in the drawing's units too: laid over the
                                            traced floor before anything moves. A room it names
                                            takes its outline, name and doors from there; one it
-                                           gives no outline ("shape": null) is left for "add"
+                                           gives no outline ("shape": null) is left for "add".
+                                           One file or several; a floor without one is skipped
      "by hand": "traced/ec-{floor}-a-mano.json",
                                            what somebody changed in the floor editor afterwards,
                                            in the building's own units: its "spaces" replace the
@@ -462,17 +463,25 @@ def main():
         source = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
                               spec["traced"].format(floor=args.floor.lower()))
         marks = None
-        if spec.get("marked"):
+        marked = spec.get("marked") or []
+        for pattern in [marked] if isinstance(marked, str) else marked:
             path_of_marks = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
-                                         spec["marked"].format(floor=args.floor.lower()))
-            marks = json.load(open(path_of_marks)) if os.path.exists(path_of_marks) else None
+                                         pattern.format(floor=args.floor.lower()))
+            if os.path.exists(path_of_marks):
+                # One sketch of a part, another of the whole floor: their rooms together, the later
+                # one's taking a code both name.
+                these = json.load(open(path_of_marks))["spaces"]
+                ours = {sp["code"] for sp in these}
+                marks = {"spaces": [sp for sp in (marks or {}).get("spaces", []) if sp["code"] not in ours] + these}
         later = {a["code"] for a in rules.get("add", [])}
         if spec.get("by hand"):
             path_by_hand = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
                                         spec["by hand"].format(floor=args.floor.lower()))
             if os.path.exists(path_by_hand):
-                # Rooms the editor's own changes drew come back at the end, as the editor has them.
-                later |= {sp["code"] for sp in json.load(open(path_by_hand)).get("spaces", [])}
+                # Rooms the editor's own changes drew come back at the end, as the editor has them,
+                # and those it removed go then.
+                by_hand = json.load(open(path_by_hand))
+                later |= {sp["code"] for sp in by_hand.get("spaces", [])} | set(by_hand.get("removed", []))
         back = start_over(floor, json.load(open(source)), later, marks)
     elif width and floor["width"] == width:
         sys.exit(f"{args.floor} is {width} wide already: it has been registered")
