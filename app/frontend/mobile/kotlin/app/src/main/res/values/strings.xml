@@ -106,6 +106,8 @@
     <string name="semaphore_moved_from">Movida del semestre %1$d</string>
     <string name="semaphore_original">Pensum</string>
     <string name="semaphore_new_plan">Nuevo plan</string>
+    <string name="semaphore_plan_picker">Plan: %1$s</string>
+    <string name="semaphore_extra_level">Para las materias que dejes para después. Abre una materia que te falte y elige el semestre %1$d.</string>
     <string name="semaphore_plan_name">Nombre del plan</string>
     <string name="semaphore_plan_default_name">Mi plan</string>
     <string name="semaphore_create">Crear</string>

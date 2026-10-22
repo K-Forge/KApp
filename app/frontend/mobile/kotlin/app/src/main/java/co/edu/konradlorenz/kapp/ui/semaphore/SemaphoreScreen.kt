@@ -31,6 +31,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -69,6 +71,7 @@ import co.edu.konradlorenz.kapp.data.semaphore.buildSemaphore
 import co.edu.konradlorenz.kapp.data.semaphore.formatGrade
 import co.edu.konradlorenz.kapp.data.semaphore.formatHours
 import co.edu.konradlorenz.kapp.data.semaphore.formatPeriod
+import co.edu.konradlorenz.kapp.data.semaphore.plannableLevels
 import co.edu.konradlorenz.kapp.ui.common.BandContentHeight
 import co.edu.konradlorenz.kapp.ui.common.BrandBand
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
@@ -165,6 +168,13 @@ private fun Ready(data: SemaphoreData, viewModel: SemaphoreViewModel) {
     // plan that moved everything out of it, and the sheet is where things are moved back.
     levels.filter { it.items.isNotEmpty() }.forEach { level ->
         LevelSection(level, current = level.level == data.semaphore.currentLevel, onOpen = viewModel::open)
+    }
+    // In a plan, the level after the furthest one used is always there, empty until a course is
+    // moved to it: where the courses left for later go (issue #176).
+    if (plan != null) {
+        val extra = plannableLevels(data.pensum.levels, plan).last
+        val lastUsed = levels.lastOrNull { it.items.isNotEmpty() }?.level ?: 0
+        if (extra > lastUsed) ExtraLevel(extra)
     }
 
     val open = levels.flatMap { it.items }.firstOrNull { it.course.pensumItemCode == viewModel.openItem }
@@ -268,13 +278,7 @@ private fun PlanBar(data: SemaphoreData, plan: AcademicPlan?, viewModel: Semapho
             onClick = viewModel::showOriginal,
             label = { Text(stringResource(R.string.semaphore_original)) },
         )
-        data.plans.forEach { each ->
-            FilterChip(
-                selected = each.id == plan?.id,
-                onClick = { viewModel.showPlan(each.id) },
-                label = { Text(each.name, maxLines = 1) },
-            )
-        }
+        if (data.plans.isNotEmpty()) PlanPicker(data, plan, viewModel)
         // An action, not one of the set: pink, the colour of what can be touched, rather than an
         // unselected chip that read as switched off.
         AssistChip(
@@ -363,6 +367,76 @@ private fun LevelSection(level: SemaphoreLevel, current: Boolean, onOpen: (Semap
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         level.items.forEach { item -> ItemRow(item, onClick = { onOpen(item) }) }
     }
+}
+
+/**
+ * The plans, one chip: "Plan: <name> ▾" names the one shown, or the first while Pensum is, and
+ * opens a menu of all of them with the current one marked, plus "+ Nuevo plan". Switching between
+ * plans is a tap on the chip and one on the plan, however many there are (issue #176).
+ */
+@Composable
+private fun PlanPicker(data: SemaphoreData, plan: AcademicPlan?, viewModel: SemaphoreViewModel) {
+    var open by remember { mutableStateOf(false) }
+    val named = plan ?: data.plans.first()
+    Box {
+        FilterChip(
+            selected = plan != null,
+            onClick = { open = true },
+            label = { Text(stringResource(R.string.semaphore_plan_picker, named.name) + " ▾", maxLines = 1) },
+        )
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            data.plans.forEach { each ->
+                val current = each.id == plan?.id
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = (if (current) "✓ " else "") + each.name,
+                            fontWeight = if (current) FontWeight.SemiBold else FontWeight.Normal,
+                        )
+                    },
+                    onClick = {
+                        open = false
+                        viewModel.showPlan(each.id)
+                    },
+                )
+            }
+            HorizontalDivider()
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = "+ " + stringResource(R.string.semaphore_new_plan),
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                },
+                onClick = {
+                    open = false
+                    viewModel.startNaming()
+                },
+            )
+        }
+    }
+}
+
+/** The level after the furthest used, empty: says what it is for and how to fill it. */
+@Composable
+private fun ExtraLevel(level: Int) {
+    Text(
+        text = stringResource(R.string.semaphore_level, level),
+        modifier = Modifier.padding(top = 20.dp, bottom = 8.dp),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+    )
+    Text(
+        text = stringResource(R.string.semaphore_extra_level, level),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+            .padding(14.dp),
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 /**
@@ -564,7 +638,7 @@ private fun PlanSection(
         modifier = Modifier.padding(top = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        (1..data.pensum.levels).forEach { level ->
+        plannableLevels(data.pensum.levels, plan).forEach { level ->
             FilterChip(
                 selected = level == item.level,
                 onClick = { if (level != item.level) viewModel.move(plan, item, level) },
