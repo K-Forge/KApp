@@ -71,6 +71,8 @@ The spec:
                                            other two, where the building steps in. "side" cuts
                                            a room along a slanted wall: it keeps the side of the
                                            line through the two points that the point "of" is on
+        "outside": {"P1-PATIO": "..."},     spaces beside the building rather than in it - an open
+                                           patio - which the fit leaves as drawn, with why
         "corridors": [{"code": "PAS-CENTRAL", "name": "...", "color": "#5B8DEF",
                        "path": [[660, 540], [660, 1870]]}]
                                            walkable routes to add, in the drawing's units - the
@@ -381,7 +383,7 @@ def fit(spec, rules, building, floor, code):
     slanted = lambda code: any(fnmatch.fnmatch(code, k) for k in keep)
     unplaced, gone = [], []
     for sp in list(floor["spaces"]):
-        if not sp.get("shape") or sp["code"] in stacked:
+        if not sp.get("shape") or sp["code"] in stacked or sp["code"] in rules.get("outside", {}):
             continue
         poly = [(p["x"], p["y"]) for p in sp["shape"]]
         terrace = sp.get("typeCode") == "TERRACE"

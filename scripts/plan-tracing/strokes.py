@@ -28,7 +28,7 @@ spec: {"frame": "ec-au-p1-pe.json",       the trace spec of the same photo: its 
        "building": "EC", "floor": "P1", "why": "...",
        "rooms": [{
           "code": "P1-AUD-TAQUILLA",       the space; its other fields are copied to the output
-          "name": "...", "typeCode": "...", "wing": "S", "aliases": [],
+          "name": "...", "typeCode": "...", "wing": "S", "aliases": [], "note": "...",
           "strokes": ["green"],            the colours of the strokes that close the room
           "at": [0.457, 0.170],            a point inside it, as fractions of the photo's width
                                            and height
@@ -439,7 +439,7 @@ def main():
             if "--draft" not in sys.argv:
                 sys.exit(f"{code}: its outline crosses itself once drawn with few corners")
             print(f"  {code}: crosses itself")
-        space = {key: room[key] for key in ("code", "wing", "name", "typeCode", "aliases") if key in room}
+        space = {key: room[key] for key in ("code", "wing", "name", "typeCode", "aliases", "note") if key in room}
         space["shape"] = shape
         doors = []
         for at in room.get("doors", []):
