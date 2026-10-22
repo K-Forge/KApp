@@ -33,6 +33,7 @@ RUN pnpm run build
 FROM nginx:1.31-alpine AS runtime
 
 COPY app/frontend/web-admin/nginx.conf /etc/nginx/conf.d/default.conf
+COPY app/frontend/web-admin/security-headers.conf /etc/nginx/security-headers.conf
 COPY --from=build /repo/app/frontend/web-admin/dist/web-admin/browser /usr/share/nginx/html
 
 # nginx runs as its own user and serves nothing it cannot read. A file that arrives with a
