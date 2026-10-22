@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.ui.common
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,6 +41,13 @@ val ScreenPadding = 16.dp
 
 /** The band below the status bar. The 24 dp a card climbs back into it is the caller's business. */
 val BandContentHeight = 80.dp
+
+/**
+ * What the crest on the band does: go to Inicio. MainShell provides it, so the five tabs get it
+ * without passing it down; a screen outside the tabs, like Invitación, has none and its crest is
+ * only a picture.
+ */
+val LocalGoHome = staticCompositionLocalOf<(() -> Unit)?> { null }
 
 /** How far the first card of a screen climbs back into the band. */
 val BandOverlap = 24.dp
@@ -78,11 +87,20 @@ fun BrandBand(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val goHome = LocalGoHome.current
+            val goHomeLabel = stringResource(R.string.band_go_home)
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White),
+                    .background(Color.White)
+                    .then(
+                        if (goHome != null) {
+                            Modifier.clickable(onClickLabel = goHomeLabel, onClick = goHome)
+                        } else {
+                            Modifier
+                        },
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
