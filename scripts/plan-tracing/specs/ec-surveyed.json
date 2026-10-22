@@ -64,6 +64,12 @@
         "P1-CAFETERIA-NO-2": "Brian, 2026-10-21: the food court is one cafeteria, P1-CAFETERIA, and its north extension P1-CAFETERIA-NORTE; no second cafeteria.",
         "P1-ZONA-ESPARCIMIENT": "The sanitary route plan's name for the food court's hall, which is the cafeteria: an alias of P1-CAFETERIA now."
       },
+      "yield": {
+        "P1-17": "A small box Brian drew between the north lift and the wall; squared on its own its outline folds, so it is refitted to the room it has.",
+        "P1-RECEPCION": "Sketched round the box beside it (P1-13); the box keeps its wall.",
+        "P1-RAMPA-VEHICULAR": "The emergency stair beside it keeps its wall.",
+        "P1-CAFETERIA": "Brian outlined the cafeteria round the rooms it reaches - the treasury, the shop, the boxes by the lifts; they keep their walls and it takes the floor between them."
+      },
       "outside": {
         "P1-PATIO": "Brian, 2026-10-21: an open patio beside the building, between the ramp and the gate on the Carrera 9A, not under its roof. It keeps the shape he sketched; the floor's surveyed margin stays as measured."
       },
