@@ -328,6 +328,35 @@ class TracedCampusTest {
     }
 
     @Test
+    @DisplayName("the Edificio Central's first floor is put as Brian sketched it over a saved one, which is kept aside whole")
+    void theCentralGroundFloorIsRedrawnFromTheSketch() {
+        MongoTemplate fresh = new MongoTemplate(client, "traced_v016_" + UUID.randomUUID().toString().substring(0, 8));
+        V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.parse("2026-09-20T10:00:00Z"));
+        BuildingDocument central = fresh.findOne(query(where("code").is("EC")), BuildingDocument.class);
+        // Saved in the portal since, with the food court as the editor had it: one box, P1-16.
+        fresh.getCollection("buildings").updateOne(
+                new Document("_id", central.id()).append("floors.code", "P1"),
+                new Document("$set", new Document("floors.$.version", 6L)));
+        Instant later = Instant.parse("2026-10-02T10:00:00Z");
+        fresh.insert(new SpaceDocument(UUID.randomUUID().toString(), "P1-16", null, null, null, "Cafetería",
+                "CAFETERIA", central.id(), central.code(), central.campus(), "P1", 1, List.of(), null, List.of(),
+                null, null, null, null, false, later, later));
+
+        int keptAside = V016_CentralGroundFloorFromSketch.apply(fresh, SNAPSHOT, Instant.now());
+
+        Query onP1 = query(where("buildingId").is(central.id()).and("floorCode").is("P1"));
+        List<String> codes = fresh.find(onP1, SpaceDocument.class).stream().map(SpaceDocument::code).toList();
+        assertThat(codes).contains("P1-CAFETERIA", "P1-CAFETERIA-NORTE", "P1-COCINA", "P1-PATIO", "P1-PORTERIA")
+                .doesNotContain("P1-16", "P1-CAFETERIA-NO-2");
+        assertThat(fresh.findOne(query(where("code").is("EC")), BuildingDocument.class).floor("P1").orElseThrow()
+                .version()).as("as a load leaves it").isZero();
+        Document old = fresh.getCollection(V008_RedrawnCentralGroundFloor.REPLACED).find().first();
+        assertThat(old.get("floor", Document.class).getLong("version")).isEqualTo(6L);
+        assertThat(old.getList("spaces", Document.class)).hasSize(keptAside)
+                .anyMatch(sp -> "P1-16".equals(sp.getString("code")));
+    }
+
+    @Test
     @DisplayName("a floor somebody named is redrawn with their names on the new drawing, and kept aside whole first")
     void namesGoOntoTheRedrawnFloor() {
         MongoTemplate fresh = new MongoTemplate(client, "traced_merge_" + UUID.randomUUID().toString().substring(0, 8));
