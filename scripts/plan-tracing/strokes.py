@@ -59,7 +59,8 @@ spec: {"frame": "ec-au-p1-pe.json",       the trace spec of the same photo: its 
                                            marks change: a name, other names; "shape": null for
                                            one the plan does not draw at all
 
-Colours are the ink's, picked by hue: green, cyan, blue, navy, purple, orange, red, black.
+Colours are the ink's, picked by hue: green, cyan, blue, navy, purple, violet, magenta, orange,
+amber, yellow, red, black (see INKS).
 Standard library only; sips (macOS) reads the photo.
 """
 import colorsys
@@ -79,25 +80,34 @@ LETTER = 4               # half the width of a pen stroke of writing, in pixels:
 GROW = 6                 # pixels from the inner edge of a loop to the middle of its pen
 MEET = 14                # how far a room is grown to meet one drawn beside it: half the widest wall
 EPS = 3.0                # pixels an outline may stray from the pen once drawn with few corners
+# A pixel is every pen whose hues it falls in, so a pen named here never takes ink from another.
+# purple and orange are as wide as the auditorium's sketch needed (2026-10-02). magenta and yellow
+# came with the floor sketches of 2026-10-21, measured on EC-P1-PE: purple 280-292 beside magenta
+# 296-316, orange 32-40 beside yellow 44-50. violet and amber are purple and orange without them,
+# for a room drawn in one beside a room drawn in the other.
 INKS = {
     "green": lambda h, s, v: 100 <= h < 150,
     "cyan": lambda h, s, v: 165 <= h < 195,
     "blue": lambda h, s, v: 196 <= h < 224,
     "navy": lambda h, s, v: 226 <= h < 255,
     "purple": lambda h, s, v: 270 <= h < 305,
+    "violet": lambda h, s, v: 270 <= h < 294,
+    "magenta": lambda h, s, v: 294 <= h < 335,
     "orange": lambda h, s, v: 24 <= h < 52 and s > 0.8 and v > 0.8,
+    "amber": lambda h, s, v: 24 <= h < 42 and s > 0.8 and v > 0.8,
+    "yellow": lambda h, s, v: 42 <= h < 62 and s > 0.6 and v > 0.8,
     "red": lambda h, s, v: (h < 8 or h > 352) and s > 0.85 and v > 0.8,
 }
 
 
 def ink(r, g, b):
-    """Which pen a pixel is, or None: the printed plan's colours are duller than any of them."""
+    """The pens a pixel is, none for the printed plan: its colours are duller than any of them."""
     h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
     if v < 0.22 and max(r, g, b) - min(r, g, b) < 40:
-        return "black"
+        return ["black"]
     if s < 0.6 or v < 0.55:
-        return None
-    return next((name for name, is_it in INKS.items() if is_it(h * 360, s, v)), None)
+        return []
+    return [name for name, is_it in INKS.items() if is_it(h * 360, s, v)]
 
 
 def inside(mask, w, h, seed, code):
@@ -205,8 +215,7 @@ def main():
     pens = {}
     for y in range(h):
         for x in range(w):
-            name = ink(*rgb(x, y))
-            if name:
+            for name in ink(*rgb(x, y)):
                 pens.setdefault(name, bytearray(w * h))[y * w + x] = 1
 
     regions = {}
