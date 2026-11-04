@@ -176,6 +176,8 @@ Requires:
   *Android Studio > About* and update before pulling a change that moves AGP. Google's
   [compatibility table](https://developer.android.com/build/releases/about-agp) gives the oldest
   Android Studio each AGP release works with.
+- **AGP follows the Android Studio the team uses.** It moves by hand once that Android Studio
+  supports the new version; Dependabot only proposes AGP patches (`.github/dependabot.yml`).
 - The Android SDK with **platform 37**, which is `compileSdk`. Android Studio offers to install it
   on the first sync.
 - A JDK 25: `gradle/gradle-daemon-jvm.properties` asks for one and Gradle downloads it when the

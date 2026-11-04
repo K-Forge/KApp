@@ -46,6 +46,13 @@ updates:
     groups:
       gradle-minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # AGP moves only when the Android Studio the team uses supports it, and by hand: a newer AGP
+      # than Android Studio knows stops the project from opening (#189 took it to 9.5.0 ahead of it).
+      - dependency-name: "com.android.application"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
+      - dependency-name: "com.android.tools.build:gradle"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
 
   - package-ecosystem: npm
     directories:
