@@ -99,6 +99,7 @@ KApp/
 │   ├── RUNBOOK.md                   # How to run everything — start here
 │   ├── ONBOARDING.md                # A new machine, in Spanish
 │   ├── PROGRESS.md                  # Implementation status — read before large changes
+│   ├── state/                       # Live state of each agent session's area — read first, every session
 │   ├── SINU-ALIGNMENT.md            # What KApp reads from SINU, and what it must never store
 │   ├── ti/                          # What KApp asks of the IT office, in Spanish; .docx built by scripts/build-ti-docs.sh
 │   ├── REQUIREMENTS.md  SRS.md  DESIGN.md  MICROSERVICES-IDEAS.md
@@ -368,7 +369,8 @@ closes when both are done. Kotlin goes first; Swift resumes when the Android app
 
 ## Current State
 
-Read `docs/PROGRESS.md` for the detailed status before proposing large changes.
+Read `docs/PROGRESS.md` for the detailed status before proposing large changes. What each area is doing right now,
+what waits on whom and what comes next is in [`docs/state/`](docs/state/README.md), which is newer than this section.
 
 - **Contracts:** the 2.0 set (#42) — semaphore 2.0, schedule 2.0, auth 1.0, user 1.0, map 3.6.
   `docs/api/CHANGELOG.md` holds the history. Write the spec first; springdoc output is a drift check against it,
@@ -406,6 +408,9 @@ through `area/kotlin` and `area/swift` issues.
 
 ## AI Agent Instructions
 
+- **Start every session with [`docs/state/README.md`](docs/state/README.md)**, then read your area's file there.
+  Sessions do not share memory, local or cloud, so that folder is how one session learns what the others did.
+  Update your area's file before you end a piece of work.
 - **Never modify** `.env` files (contains secrets).
 - **Backend location:** all backend work goes in `app/backend/microservices/`. The original monolith was deleted once the migration completed; it is only retrievable from the git history and must not be resurrected.
 - **Schema:** changes go in Mongock change units (see Data), never in a hand-written schema file.
