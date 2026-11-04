@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.data.schedule
 
 import co.edu.konradlorenz.kapp.data.map.Building
+import co.edu.konradlorenz.kapp.data.map.FloorPlan
 import co.edu.konradlorenz.kapp.ui.home.DayState
 import co.edu.konradlorenz.kapp.ui.home.dayOf
 import kotlinx.coroutines.runBlocking
@@ -153,6 +154,8 @@ class ScheduleTest {
         }
 
         override suspend fun buildings(): List<Building> = error("not used here")
+
+        override suspend fun floor(building: String, floor: String): FloorPlan = error("not used here")
 
         override suspend fun space(room: String, buildingCode: String): SpaceDetail {
             error?.let { throw it }
