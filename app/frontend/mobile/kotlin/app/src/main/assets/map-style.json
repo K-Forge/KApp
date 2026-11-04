@@ -1,0 +1,211 @@
+{
+  "version": 1,
+  "description": "How every KApp client draws a floor from map-service data. See docs/design/MAP-STYLE.md.",
+  "layers": [
+    "floor",
+    "spaces",
+    "corridors",
+    "doors",
+    "outline",
+    "icons",
+    "labels",
+    "selection"
+  ],
+  "floor": {
+    "light": {
+      "fill": "#FFFFFF",
+      "background": "#F1F3F5"
+    },
+    "dark": {
+      "fill": "#2A2F36",
+      "background": "#1C2128"
+    }
+  },
+  "outline": {
+    "light": {
+      "stroke": "#5B6470"
+    },
+    "dark": {
+      "stroke": "#9AA4B0"
+    },
+    "widthDp": 2
+  },
+  "spaces": {
+    "strokeWidthDp": 1,
+    "light": {
+      "stroke": "#FFFFFF"
+    },
+    "dark": {
+      "stroke": "#1C2128"
+    },
+    "unplaced": "List beside the drawing, never drop it."
+  },
+  "categories": {
+    "TEACHING": {
+      "light": "#CFE0FF",
+      "dark": "#34507A"
+    },
+    "PUBLIC_SERVICE": {
+      "light": "#F6E2C8",
+      "dark": "#6B5233"
+    },
+    "OFFICE": {
+      "light": "#E6DCFF",
+      "dark": "#4D4275"
+    },
+    "SOCIAL": {
+      "light": "#D6F0D8",
+      "dark": "#2F5E3A"
+    },
+    "FACILITIES": {
+      "light": "#DFE4EA",
+      "dark": "#454D57"
+    },
+    "CIRCULATION": {
+      "light": "#FFF3A8",
+      "dark": "#6B6227"
+    },
+    "OTHER": {
+      "light": "#FFD9D4",
+      "dark": "#6E3F3A"
+    }
+  },
+  "fallbackCategory": "OTHER",
+  "typeIcons": {
+    "ELEVATOR": {
+      "material": "elevator",
+      "sfSymbol": "arrow.up.arrow.down.square"
+    },
+    "STAIRS": {
+      "material": "stairs",
+      "sfSymbol": "figure.stairs"
+    },
+    "RAMP": {
+      "material": "accessible",
+      "sfSymbol": "figure.roll"
+    },
+    "ENTRANCE": {
+      "material": "door_front",
+      "sfSymbol": "door.left.hand.open"
+    },
+    "RESTROOM": {
+      "material": "wc",
+      "sfSymbol": "toilet"
+    },
+    "CAFETERIA": {
+      "material": "restaurant",
+      "sfSymbol": "fork.knife"
+    },
+    "LIBRARY": {
+      "material": "local_library",
+      "sfSymbol": "books.vertical"
+    },
+    "NURSING": {
+      "material": "medical_services",
+      "sfSymbol": "cross.case"
+    },
+    "MEDICAL_OFFICE": {
+      "material": "medical_services",
+      "sfSymbol": "cross.case"
+    },
+    "RECEPTION": {
+      "material": "support_agent",
+      "sfSymbol": "person.crop.circle.badge.questionmark"
+    },
+    "GYM": {
+      "material": "fitness_center",
+      "sfSymbol": "dumbbell"
+    },
+    "AUDITORIUM": {
+      "material": "theater_comedy",
+      "sfSymbol": "theatermasks"
+    },
+    "COMPUTER_LAB": {
+      "material": "computer",
+      "sfSymbol": "desktopcomputer"
+    },
+    "LACTATION_ROOM": {
+      "material": "child_friendly",
+      "sfSymbol": "figure.and.child.holdinghands"
+    },
+    "PARKING": {
+      "material": "local_parking",
+      "sfSymbol": "parkingsign"
+    }
+  },
+  "icons": {
+    "sizeDp": 18,
+    "light": {
+      "fill": "#FFFFFF",
+      "glyph": "#1C2128"
+    },
+    "dark": {
+      "fill": "#1C2128",
+      "glyph": "#FFFFFF"
+    }
+  },
+  "labels": {
+    "text": "doorCode, else name. Never code.",
+    "anchor": "labelPoint when the response has it, else the centre of bounds",
+    "light": {
+      "color": "#1C2128",
+      "halo": "#FFFFFF"
+    },
+    "dark": {
+      "color": "#F1F3F5",
+      "halo": "#1C2128"
+    },
+    "minSizeSp": 10,
+    "maxSizeSp": 14,
+    "hideWhenWiderThanSpace": true,
+    "priority": [
+      "typeIcons",
+      "TEACHING",
+      "PUBLIC_SERVICE",
+      "SOCIAL",
+      "OFFICE",
+      "FACILITIES",
+      "CIRCULATION",
+      "OTHER"
+    ]
+  },
+  "doors": {
+    "light": {
+      "stroke": "#FFFFFF"
+    },
+    "dark": {
+      "stroke": "#2A2F36"
+    },
+    "widthDp": 3
+  },
+  "corridors": {
+    "light": {
+      "stroke": "#E3E7EB"
+    },
+    "dark": {
+      "stroke": "#353B43"
+    },
+    "widthDp": 6
+  },
+  "selection": {
+    "light": {
+      "stroke": "#D51A65",
+      "fillAlpha": 0.12
+    },
+    "dark": {
+      "stroke": "#F06A9E",
+      "fillAlpha": 0.18
+    },
+    "widthDp": 3
+  },
+  "route": {
+    "light": {
+      "stroke": "#539392"
+    },
+    "dark": {
+      "stroke": "#7FBFBE"
+    },
+    "widthDp": 5,
+    "note": "Reserved for point-to-point routes; not drawn yet."
+  }
+}
