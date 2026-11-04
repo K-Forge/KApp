@@ -17,6 +17,9 @@ data class Building(
     val floors: List<BuildingFloor> = emptyList(),
 )
 
-/** One level of a building: a basement, a mezzanine and a terrace count as levels too. */
+/**
+ * One level of a building: a basement, a mezzanine and a terrace count as levels too. [level] only
+ * orders them, and is decimal so a mezzanine sits between its floors.
+ */
 @Serializable
-data class BuildingFloor(val code: String, val name: String)
+data class BuildingFloor(val code: String, val name: String, val level: Double = 0.0)

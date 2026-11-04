@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.ui.map
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,12 +48,22 @@ import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
 import co.edu.konradlorenz.kapp.ui.theme.Brand
 
 /**
- * Mapa until the interactive map exists: a card that says it is coming, and the campus's
- * buildings with the code a class's room carries in Horario. Everything on it comes from the map
- * API; nothing is drawn by hand.
+ * Mapa: the campus's buildings with the code a class's room carries in Horario, and, once one is
+ * tapped, its floors (FloorScreen). Everything on it comes from the map API; nothing is drawn by
+ * hand.
  */
 @Composable
 fun MapScreen(viewModel: MapViewModel = viewModel(factory = MapViewModel.Factory)) {
+    val opened = viewModel.opened
+    if (opened != null) {
+        FloorScreen(
+            opened = opened,
+            style = viewModel.style,
+            onFloor = { viewModel.showFloor(opened.building, it) },
+            onBack = viewModel::close,
+        )
+        return
+    }
     val list = rememberLazyListState()
     Box(
         modifier = Modifier
@@ -88,7 +99,9 @@ fun MapScreen(viewModel: MapViewModel = viewModel(factory = MapViewModel.Factory
                         TextButton(onClick = viewModel::retry) { Text(stringResource(R.string.map_retry)) }
                     }
                 }
-                is BuildingsState.Ready -> items(state.buildings, key = { it.code }) { BuildingRow(it) }
+                is BuildingsState.Ready -> items(state.buildings, key = { it.code }) {
+                    BuildingRow(it, onClick = { viewModel.open(it) })
+                }
             }
         }
         // Over the content, so what scrolls up goes under the title (BrandBand).
@@ -103,7 +116,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(factory = MapViewModel.Factory
     }
 }
 
-/** What Mapa will be, said plainly, at the top. */
+/** What Mapa does, said plainly, at the top. */
 @Composable
 private fun ComingNext() {
     Column(
@@ -140,13 +153,17 @@ private fun ComingNext() {
     }
 }
 
-/** One building: its code in a badge, its name, its address when there is one, and its levels. */
+/**
+ * One building: its code in a badge, its name, its address when there is one, and its levels.
+ * Tapping it opens its floors.
+ */
 @Composable
-private fun BuildingRow(building: Building) {
+private fun BuildingRow(building: Building, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RowShape)
+            .clickable(onClick = onClick)
             .background(MaterialTheme.colorScheme.surface)
             .padding(14.dp),
         horizontalArrangement = Arrangement.spacedBy(14.dp),

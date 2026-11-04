@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.data.schedule
 
 import co.edu.konradlorenz.kapp.data.map.Building
+import co.edu.konradlorenz.kapp.data.map.FloorPlan
 import kotlinx.serialization.Serializable
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -36,6 +37,10 @@ interface MapApi {
     /** Every building on the map, ordered by code: Mapa's list. */
     @GET("api/map/buildings")
     suspend fun buildings(): List<Building>
+
+    /** One floor and every space on it: what the floor renderer draws. */
+    @GET("api/map/buildings/{code}/floors/{floorCode}")
+    suspend fun floor(@Path("code") building: String, @Path("floorCode") floor: String): FloorPlan
 
     @GET("api/map/spaces/{code}")
     suspend fun space(

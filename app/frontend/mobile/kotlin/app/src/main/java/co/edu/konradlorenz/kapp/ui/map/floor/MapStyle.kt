@@ -43,6 +43,9 @@ data class MapStyle(
     }
 
     companion object {
+        /** Where the app keeps its copy, in src/main/assets. */
+        const val ASSET = "map-style.json"
+
         private val json = Json { ignoreUnknownKeys = true }
 
         fun parse(text: String): MapStyle = json.decodeFromString(text)
