@@ -151,6 +151,49 @@ print(json.dumps(buildings, ensure_ascii=False, indent=4))
 PY
 echo "$out/get/api/map/buildings.json"
 
+# Every floor, as GET /api/map/buildings/{code}/floors/{floorCode} answers it (FloorDetail), out of
+# the same seeds: the contract's example is a single room, too little to see a renderer at work.
+# A space's typeName and category come from the type catalogue map-service seeds itself
+# (V004_MapModelV2.CATALOGUE), and its bounds from its shape, as the service works them out.
+python3 -I - "$(cd "$(dirname "$0")/../../../../.." && pwd)/app/backend/microservices/map-service/src/main" "$out/get/api/map/buildings" <<'PY'
+import json, pathlib, re, sys
+service, out = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+source = (service / "java/co/edu/konradlorenz/kapp/map/migration/V004_MapModelV2.java").read_text(encoding="utf-8")
+# The entries read: a category, then code and name pairs until the next category.
+catalogue, category, strings = {}, None, []
+for category_token, string in re.findall(r'SpaceCategory\.([A-Z_]+)|"([^"]*)"', source.split("CATALOGUE = catalogue(")[1].split(");")[0]):
+    if category_token:
+        category = category_token
+        continue
+    strings.append(string)
+    if len(strings) == 2:
+        catalogue[strings[0]] = (strings[1], category)
+        strings = []
+for seed in sorted((service / "resources/db/seed/map").glob("*.json")):
+    b = json.loads(seed.read_text(encoding="utf-8"))
+    for f in b["floors"]:
+        spaces = []
+        for s in sorted(f.get("spaces", []), key=lambda s: s["code"]):
+            type_name, type_category = catalogue.get(s["typeCode"], (s["typeCode"], "OTHER"))
+            space = dict(s, id=f"demo-{b['code']}-{s['code']}", typeName=type_name, category=type_category,
+                         buildingId=f"demo-{b['code']}", buildingCode=b["code"], campus=b["campus"],
+                         floorCode=f["code"], floorLevel=f["level"], doors=s.get("doors", []),
+                         effectiveAccessibility=s.get("accessibility", f.get("accessibility", "UNKNOWN")))
+            if s.get("shape"):
+                xs, ys = [p["x"] for p in s["shape"]], [p["y"] for p in s["shape"]]
+                space["bounds"] = {"x": min(xs), "y": min(ys), "width": max(xs) - min(xs), "height": max(ys) - min(ys)}
+            spaces.append(space)
+        floor = {k: f[k] for k in ("code", "level", "name", "status", "accessibility", "note", "width", "height", "top") if k in f}
+        floor.update(outline=f.get("outline", []), corridors=f.get("corridors", []), version=0,
+                     buildingId=f"demo-{b['code']}", buildingCode=b["code"], buildingName=b["name"], campus=b["campus"],
+                     wings=b.get("wings", []), spaces=spaces)
+        path = out / b["code"] / "floors" / f"{f['code']}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        # One line per file: a floor is thousands of points that nobody reads in a diff.
+        path.write_text(json.dumps(floor, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+        print(path)
+PY
+
 # Every room of the day and the week, so tapping a class finds its room offline. Those two rather
 # than the full timetable because each class there carries its building and room together.
 python3 -I - "$out/get/api/schedule/me/day.json" "$out/get/api/schedule/me/week.json" <<'PY' | while read -r building room; do
