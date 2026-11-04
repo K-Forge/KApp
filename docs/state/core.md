@@ -61,6 +61,12 @@ and other npm patches), and #189 (AGP 9.5.0, Gradle 9.8.2, okhttp 5.5.1, kotlinx
   figures date from 2026-10-29: 331 commits, 104 merged pull requests, 5 contracts, about 900 backend, 234 portal
   and 118 Android tests. Refresh them right before it is handed in. Keep separating what was tested against real
   services from what only runs on simulated data.
+- **References for the thesis proposal's future work** (Brian, 2026-11-04):
+  - **Mappedin** (https://www.mappedin.com): the reference for the indoor map, for its flat, clean 2D style and its
+    point-to-point wayfinding. MapsIndoors was considered and set aside, because its 3D style is not the goal;
+  - **IMDF**, the Indoor Mapping Data Format (OGC Community Standard 20-094, https://docs.ogc.org/cs/20-094/): the
+    reference for the map's data model.
+  - Cite both where the proposal describes the map and its routes.
 
 ---
 

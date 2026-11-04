@@ -77,6 +77,20 @@
   - apply it to P1;
   - render before and after again, and attach the renders to the pull request so Brian can see them without his
     Mac.
+- **Visual reference** (Brian, 2026-11-04): Mappedin and similar flat 2D indoor maps, not 3D ones like
+  MapsIndoors. Their traits:
+  - rectilinear units that share walls;
+  - white walkways;
+  - a small set of category colours;
+  - a label point inside each unit;
+  - amenity icons;
+  - a level switcher.
+- **The goal after the shapes:** **point-to-point routes**, from one space to another, across floors. So the data
+  must grow toward that:
+  - walkways as real spaces;
+  - openings that connect units to walkways;
+  - vertical connections (stairs, elevators, ramps) between levels.
+  - IMDF (OGC CS 20-094) is the reference model. Use it as a reference, not adopted wholesale.
 - **Size:** keep it to one purpose. If the regularization grows, it is a pull request of its own, stacked on #183.
 - **Inputs:** the sketches and the survey are only on Brian's Mac (see `core.md`). A cloud session needs Brian to
   attach them, or a local session to do the rendering.
