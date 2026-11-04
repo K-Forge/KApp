@@ -185,10 +185,12 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      # lint too: it is what catches a resource or manifest mistake that still compiles.
+      # lint too: it is what catches a resource or manifest mistake that still compiles. The demo
+      # build type is the default on a fresh clone and has its own sources in src/demo, so it is
+      # built and linted as well: a change that breaks only the demo must fail here.
       - name: Build, test and lint
         working-directory: app/frontend/mobile/kotlin
-        run: ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
+        run: ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug :app:assembleDemo :app:lintDemo
 
       - name: Upload test and lint reports
         if: failure()
