@@ -1,7 +1,6 @@
 # Kotlin State
 
-> Owner: Kotlin. As of 2026-11-04, `develop` at `a1e4b17`. Built from Kotlin's report of 2026-10-30, plus the
-> merges of 2026-11-04.
+> Owner: Kotlin. As of 2026-11-04, `develop` at `ba7e8ca`. Checked against the code on `develop` on 2026-11-04.
 
 ---
 
@@ -31,8 +30,8 @@ The last feature merged was #187 (2026-10-22). Kotlin has no open pull requests 
   - MVVM with Compose (Material 3), Retrofit 3 and OkHttp 5;
   - the session is kept with AES-GCM in the Android Keystore;
   - 118 unit tests.
-- **CI:** the Android job runs `:app:testDebugUnitTest :app:assembleDebug :app:lintDebug`
-  (`.github/workflows/ci.yml`). The demo variant is not built or linted in CI.
+- **CI:** the Android job runs `:app:testDebugUnitTest :app:assembleDebug :app:lintDebug :app:assembleDemo
+  :app:lintDemo` (`.github/workflows/ci.yml`). The demo variant is built and linted since #191.
 
 ---
 
@@ -41,10 +40,8 @@ The last feature merged was #187 (2026-10-22). Kotlin has no open pull requests 
 1. **#155:** prove the timetable on the dev server, signed in as the test student and the test professor. This needs
    Brian's Mac (emulator plus Tailscale), and Brian types the passwords. Once it passes, the timetable moves from
    "simulated" to "tested against the dev server" in the thesis proposal.
-2. **The demo variant in CI:** add `:app:assembleDemo :app:lintDemo` to the Android job. **Waiting for Brian's
-   approval.** A cloud container has no Android SDK, so CI on the pull request is the verification.
-3. **Sign in once on a device** to check MSAL 8.6.0, which came in with #189.
-4. **The interactive map**, after the EC floors (#183) and the map mockup. It closes the last item of #132.
+2. **Sign in once on a device** to check MSAL 8.6.0, which came in with #189.
+3. **The interactive map**, after the EC floors (#183) and the map mockup. It closes the last item of #132.
    Meanwhile, tick the boxes of #132 that can be checked.
 
 ---
