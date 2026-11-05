@@ -21,9 +21,9 @@ seeds); #183 and #193 (EC floor 1, squared). **#155 is closed:** Horario works o
 
 Open work:
 
-- **#204, the whole app follows the system's dark mode** (Brian chose it): Kotlin | Cloud left a draft PR on
-  `feature/follow-the-system-dark-mode`, with where it stopped in its description and in `kotlin.md`. Kotlin |
-  Local continues it.
+- **#204, the whole app follows the system's dark mode** (Brian chose it): #207 (the theme, Inicio and Mapa) is
+  ready for review, and #208 (Semáforo, Horario, Perfil and the login), stacked on it, is a draft. Their
+  descriptions and `kotlin.md` say where Kotlin | Cloud stopped. Kotlin | Local continues them.
 - **#194, the generic map renderer:** Kotlin's next parts are type icons and selection (#196). Backend's part is
   #195 (`labelPoint`, an example floor). Swift (#197) and the portal (#198) come later.
 - **Route animation decided:** a fluorescent line that pulses in the direction of travel (comment on #194).
