@@ -102,6 +102,7 @@ import sys
 from bisect import bisect_right
 
 import margin
+import regular
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 RESOURCES = os.path.join(REPO, "app", "backend", "microservices", "map-service", "src", "main", "resources")
@@ -469,6 +470,24 @@ def fit(spec, rules, building, floor, code):
     return notes
 
 
+def regular_floor(spec, rules, floor):
+    """The fitted rooms made regular (regular.py): walls level or plumb, or along the facades of a
+    wing that stands askew, no steps, shared walls on one line. The stairs and lifts that climb
+    the building stay put, and each door goes back onto the wall it was on."""
+    code = floor["code"]
+    anchors = {stack["spaces"][code] for stack in spec.get("stack", {}).values() if code in stack["spaces"]}
+    frames = [(regular.Frame(*(tuple(map(tuple, w[k])) for k in ("top", "bottom"))), regular.matcher(w["spaces"]))
+              for w in rules.get("askew", [])]
+    drawn = [sp for sp in floor["spaces"] if sp.get("shape")]
+    notes = regular.regularize(drawn, spec["regular"], anchors, frames)
+    for sp in drawn:
+        shape = [(p["x"], p["y"]) for p in sp["shape"]]
+        if sp.get("doors"):
+            jambs = [hung(shape, (d["from"]["x"], d["from"]["y"]), (d["to"]["x"], d["to"]["y"])) for d in sp["doors"]]
+            sp["doors"] = [{"from": {"x": a[0], "y": a[1]}, "to": {"x": b[0], "y": b[1]}} for a, b in jambs if a != b]
+    return notes
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("spec", help="the building's registration spec")
@@ -643,6 +662,8 @@ def main():
         floor["width"] = width
     if spec.get("fit"):
         moved += fit(spec, rules, building, floor, args.floor)
+    if spec.get("regular"):
+        moved += regular_floor(spec, rules, floor)
 
     drawn = [s for s in floor["spaces"] if s.get("shape")]
     settled = settle([[(p["x"], p["y"]) for p in s["shape"]] for s in drawn])

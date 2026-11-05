@@ -50,6 +50,22 @@
   },
   "floors": {
     "P1": {
+      "askew": [
+        {
+          "spaces": ["P1-AUDITORIO-SONIA", "P1-AUD-ANTESALA-N", "P1-AUD-AUDIOVISUALES", "P1-AUD-ESCALERA",
+                     "P1-AUD-ESCENARIO", "P1-AUD-SALIDA-SUR", "P1-AUD-TAQUILLA", "P1-AUD-UTILERIA",
+                     "P1-20", "P1-23", "P1-26", "P1-27", "P1-28", "P1-29"],
+          "top": [[1699, 581], [2252, 740]],
+          "bottom": [[1505, 1023], [2355, 1186]],
+          "why": "The auditorium's wing stands askew to the tower: the survey measures its front on the Carrera 9 Bis at 16 degrees and its back, on the covered patio, at 11. Its rooms, but the lobby, which stands in the tower, are squared between those two facades, so a wall across the wing runs along them and one down it stays plumb, and nothing is left as a wedge against the street."
+        },
+        {
+          "spaces": ["P1-PATIO-CUBIERTO"],
+          "top": [[1505, 1023], [2355, 1186]],
+          "bottom": [[1506, 1125], [2350, 1317]],
+          "why": "The covered patio behind the auditorium runs between the wing's back, at 11 degrees, and the one-floor part the survey measures under its roof, at 13."
+        }
+      ],
       "width": 2400,
       "y": [[574, 479], [2217, 2107]],
       "y why": "The plan's first row of rooms goes a wall inside the tower's front on the Carrera 9 Bis, and its last a wall inside the back wall, 5.48 m from the Carrera 9A curb (survey 53). The plan's depth between the two, 1643 units, is the measured one, 1638: the plan was only laid 3 m too far back, onto the cadastre's lot line.",
@@ -194,5 +210,10 @@
     }
   },
   "marked": ["traced/ec-{floor}-auditorio.json", "traced/ec-{floor}-boceto.json"],
-  "by hand": "traced/ec-{floor}-a-mano.json"
+  "by hand": "traced/ec-{floor}-a-mano.json",
+  "regular": {
+    "jog": 30,
+    "share": 8,
+    "why": "Brian, 2026-11-04: the map is for the portal and both apps, so every space is rectilinear and still fits the building. Shapes follow his pencil lines, regularized: walls level or plumb, and in the auditorium's wing, which stands askew on the Carrera 9 Bis, plumb or along its two facades as the survey measures them; steps under 0.9 m go; two walls under 0.25 m apart that run side by side become one. The stairs and lifts that climb the building do not move."
+  }
 }
