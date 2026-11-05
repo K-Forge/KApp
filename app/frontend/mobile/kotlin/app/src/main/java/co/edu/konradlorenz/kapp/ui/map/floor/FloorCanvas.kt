@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
@@ -133,7 +134,8 @@ private fun DrawScope.drawLabels(
     FloorLabels.place(candidates, style.labels.hideWhenWiderThanSpace).forEach { label ->
         val topLeft = Offset(label.box.left, label.box.top)
         drawText(label.item, color = palette.labelHalo, topLeft = topLeft, drawStyle = halo)
-        drawText(label.item, color = palette.label, topLeft = topLeft)
+        // Fill said outright: without it the text keeps the halo's stroke, and the label is a blot.
+        drawText(label.item, color = palette.label, topLeft = topLeft, drawStyle = Fill)
     }
 }
 
