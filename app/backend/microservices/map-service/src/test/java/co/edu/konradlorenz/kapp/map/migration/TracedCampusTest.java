@@ -357,6 +357,36 @@ class TracedCampusTest {
     }
 
     @Test
+    @DisplayName("the Edificio Central's first floor is redrawn with its auditorium turned over a saved one, kept aside whole")
+    void theCentralGroundFloorIsRedrawnWithItsAuditoriumTurned() {
+        MongoTemplate fresh = new MongoTemplate(client, "traced_v017_" + UUID.randomUUID().toString().substring(0, 8));
+        V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.parse("2026-10-22T10:00:00Z"));
+        BuildingDocument central = fresh.findOne(query(where("code").is("EC")), BuildingDocument.class);
+        // Saved in the portal since, with the hall moved by hand.
+        Query hall = query(where("buildingId").is(central.id()).and("code").is("P1-AUDITORIO-SONIA"));
+        List<Point> moved = List.of(new Point(1700, 700), new Point(2100, 700), new Point(2100, 1000), new Point(1700, 1000));
+        fresh.updateFirst(hall, new Update().set("shape", moved).set("updatedAt", Instant.parse("2026-11-05T10:00:00Z")),
+                SpaceDocument.class);
+        fresh.getCollection("buildings").updateOne(
+                new Document("_id", central.id()).append("floors.code", "P1"),
+                new Document("$set", new Document("floors.$.version", 3L)));
+
+        int keptAside = V017_TurnedAuditorium.apply(fresh, SNAPSHOT, Instant.now());
+
+        SurveySnapshot.SnapshotFloor p1 = SNAPSHOT.stream().filter(b -> b.code().equals("EC")).findFirst().orElseThrow()
+                .floors().stream().filter(f -> f.code().equals("P1")).findFirst().orElseThrow();
+        LayoutSpaceDto turned = p1.spaces().stream().filter(sp -> sp.code().equals("P1-AUDITORIO-SONIA")).findFirst()
+                .orElseThrow();
+        assertThat(fresh.findOne(hall, SpaceDocument.class).shape()).isEqualTo(MapMapper.toPoints(turned.shape()));
+        Floor redrawn = fresh.findOne(query(where("code").is("EC")), BuildingDocument.class).floor("P1").orElseThrow();
+        assertThat(redrawn.version()).as("as a load leaves it").isZero();
+        assertThat(redrawn.outline()).as("the floor's walls, with the passage to the Carrera 9A").isNotEmpty();
+        Document old = fresh.getCollection(V008_RedrawnCentralGroundFloor.REPLACED).find().first();
+        assertThat(old.get("floor", Document.class).getLong("version")).isEqualTo(3L);
+        assertThat(old.getList("spaces", Document.class)).hasSize(keptAside);
+    }
+
+    @Test
     @DisplayName("a floor somebody named is redrawn with their names on the new drawing, and kept aside whole first")
     void namesGoOntoTheRedrawnFloor() {
         MongoTemplate fresh = new MongoTemplate(client, "traced_merge_" + UUID.randomUUID().toString().substring(0, 8));
