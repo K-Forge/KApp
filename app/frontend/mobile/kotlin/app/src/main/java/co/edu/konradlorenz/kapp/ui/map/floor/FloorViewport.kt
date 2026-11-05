@@ -21,6 +21,10 @@ data class FloorViewport(
     fun screenX(x: Float) = x * scale + offsetX
     fun screenY(y: Float) = y * scale + offsetY
 
+    /** The drawing point under the screen point ([x], [y]): where a tap lands on the floor. */
+    fun drawingX(x: Float) = (x - offsetX) / scale
+    fun drawingY(y: Float) = (y - offsetY) / scale
+
     fun panned(dx: Float, dy: Float) = copy(offsetX = offsetX + dx, offsetY = offsetY + dy)
 
     /**
