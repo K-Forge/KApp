@@ -393,7 +393,8 @@ class MapBusinessRulesTest {
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.shape").doesNotExist());
+                .andExpect(jsonPath("$.shape").doesNotExist())
+                .andExpect(jsonPath("$.labelPoint").doesNotExist());
 
         mockMvc.perform(get("/api/map/spaces/search").param("q", "formacion cientifica").with(guest()))
                 .andExpect(status().isOk())

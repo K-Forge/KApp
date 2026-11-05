@@ -7,6 +7,7 @@ import co.edu.konradlorenz.kapp.map.domain.Door;
 import co.edu.konradlorenz.kapp.map.domain.Floor;
 import co.edu.konradlorenz.kapp.map.domain.FootprintPart;
 import co.edu.konradlorenz.kapp.map.domain.GeoPoint;
+import co.edu.konradlorenz.kapp.map.domain.LabelPoint;
 import co.edu.konradlorenz.kapp.map.domain.Placement;
 import co.edu.konradlorenz.kapp.map.domain.Point;
 import co.edu.konradlorenz.kapp.map.domain.Shape;
@@ -166,6 +167,7 @@ public final class MapMapper {
                 space.aliases(),
                 toPointDtos(space.shape()),
                 bounds(space.shape()),
+                labelPoint(space.shape()),
                 toDoorDtos(space.doors()),
                 space.accessVia(),
                 space.accessibility(),
@@ -194,6 +196,7 @@ public final class MapMapper {
                 space.aliases(),
                 toPointDtos(space.shape()),
                 bounds(space.shape()),
+                labelPoint(space.shape()),
                 toDoorDtos(space.doors()),
                 space.accessVia(),
                 space.accessibility(),
@@ -260,6 +263,15 @@ public final class MapMapper {
         }
         var box = Shape.bounds(shape);
         return new BoundsDto((int) box.getX(), (int) box.getY(), (int) box.getWidth(), (int) box.getHeight());
+    }
+
+    /** @return where the space's label goes, or null for no shape at all */
+    static PointDto labelPoint(List<Point> shape) {
+        if (shape == null || shape.size() < 3) {
+            return null;
+        }
+        Point point = LabelPoint.of(shape);
+        return new PointDto(point.x(), point.y());
     }
 
     static String blankToNull(String value) {

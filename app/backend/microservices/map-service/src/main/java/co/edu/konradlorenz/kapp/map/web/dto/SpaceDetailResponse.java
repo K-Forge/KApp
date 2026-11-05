@@ -41,6 +41,9 @@ public record SpaceDetailResponse(
         List<PointDto> shape,
         @Schema(description = "The rectangle around the shape. Absent with it.", accessMode = Schema.AccessMode.READ_ONLY)
         BoundsDto bounds,
+        @Schema(description = "Where the label and icon go: the point inside the shape farthest from its "
+                + "walls. Absent with the shape.", accessMode = Schema.AccessMode.READ_ONLY)
+        PointDto labelPoint,
         @Schema(description = "Its ways in, each on the shape's outline. Empty until marked.")
         List<DoorDto> doors,
         String accessVia,

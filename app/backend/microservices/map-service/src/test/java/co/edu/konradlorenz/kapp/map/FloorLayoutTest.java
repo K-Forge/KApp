@@ -210,7 +210,12 @@ class FloorLayoutTest {
                 .andExpect(jsonPath("$.spaces[?(@.code == '701')].shape.length()").value(6))
                 .andExpect(jsonPath("$.spaces[?(@.code == '701')].shape[3].x").value(80))
                 .andExpect(jsonPath("$.spaces[?(@.code == '701')].bounds.width").value(200))
-                .andExpect(jsonPath("$.spaces[?(@.code == '701')].bounds.height").value(200));
+                .andExpect(jsonPath("$.spaces[?(@.code == '701')].bounds.height").value(200))
+                // The centre of 701's box, (100, 100), is in 702; its label goes in the L's corner.
+                .andExpect(jsonPath("$.spaces[?(@.code == '701')].labelPoint.x").value(47))
+                .andExpect(jsonPath("$.spaces[?(@.code == '701')].labelPoint.y").value(47))
+                .andExpect(jsonPath("$.spaces[?(@.code == '702')].labelPoint.x").value(140))
+                .andExpect(jsonPath("$.spaces[?(@.code == '702')].labelPoint.y").value(140));
     }
 
     @Test
