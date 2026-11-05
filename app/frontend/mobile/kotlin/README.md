@@ -12,8 +12,10 @@ dentro de la app.
 
 ### Qué necesitas
 
-- **Android Studio 2026.1.4 (Quail 4) o más nuevo.** Uno más viejo no puede sincronizar el
-  proyecto. Revisa la versión en *Android Studio > About* (en Windows, *Help > About*).
+- **Android Studio 2026.2.2 (Rabbit 2) o más nuevo.** Uno más viejo no puede sincronizar el
+  proyecto. Revisa la versión en *Android Studio > About* (en Windows, *Help > About*). Si tienes
+  Quail 4 o Rabbit 1, actualízalo antes de abrir el proyecto: desde el 4 de noviembre de 2026 (#189) el
+  proyecto usa AGP 9.5, que esas versiones no abren.
 - **JDK:** no instales nada aparte. Android Studio trae el suyo, y si hiciera falta otro, Gradle lo
   descarga solo.
 - **Emulador recomendado:** Pixel 6 con **API 37 (Android 17)**. Créalo en *Device Manager > Create
@@ -73,7 +75,7 @@ próxima clase y Horario abre en un día con clases.
 ### Problemas comunes
 
 - **La sincronización falla o pide otra versión del plugin de Android.** Android Studio es más viejo
-  que 2026.1.4: actualízalo.
+  que 2026.2.2 (Rabbit 2): actualízalo.
 - **Falta la plataforma 37 o la imagen del emulador.** Instálalas desde *Settings > Languages &
   Frameworks > Android SDK*.
 - **No aparece el botón Run o no hay módulo `app`.** Abriste otra carpeta: la de afuera que contiene
@@ -171,11 +173,14 @@ destinations to somebody who has not signed in.
 
 Requires:
 
-- **Android Studio 2026.1.4 (Quail 4) or newer.** The build uses AGP 9.4, and an older Android
-  Studio cannot sync it: the project fails to open instead of building with something else. Check
+- **Android Studio 2026.2.2 (Rabbit 2) or newer.** The build uses AGP 9.5, and an older Android
+  Studio cannot sync it: the project fails to open instead of building with something else. Quail 4
+  and Rabbit 1 stop at AGP 9.4, so whoever still has one updates before pulling. Check
   *Android Studio > About* and update before pulling a change that moves AGP. Google's
   [compatibility table](https://developer.android.com/build/releases/about-agp) gives the oldest
   Android Studio each AGP release works with.
+- **AGP follows the Android Studio the team uses.** It moves by hand once that Android Studio
+  supports the new version; Dependabot only proposes AGP patches (`.github/dependabot.yml`).
 - The Android SDK with **platform 37**, which is `compileSdk`. Android Studio offers to install it
   on the first sync.
 - A JDK 25: `gradle/gradle-daemon-jvm.properties` asks for one and Gradle downloads it when the
