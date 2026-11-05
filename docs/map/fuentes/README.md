@@ -16,12 +16,15 @@ One folder per building, with the same names as [`../levantamiento/`](../levanta
 
 A photo somebody has drawn on keeps the name of the plan underneath and adds what the drawing
 covers. For example, `ec/EC-AU-P1-PE.jpg` is the auditorium marked by hand over the P1 evacuation
-plan, which `scripts/plan-tracing/strokes.py` reads.
+plan, and `ec/EC-P1-PE-BOCETO.jpg` a whole floor sketched over it: a closed loop round every
+space with its name inside, which `scripts/plan-tracing/strokes.py` reads.
 
 ## How they are made
 
 [`scripts/plan-tracing/export-sources.py`](../../../scripts/plan-tracing/export-sources.py)
-writes them from the originals in `~/Desktop/map`:
+writes them from the originals in the survey folder, `$KAPP_SURVEY`, by default
+`~/Documents/KApp/levantamiento edificios`. It has one folder per building, with the plans in
+`Originales/` and the sketches in `Sketchs/`:
 
 - each photo is turned upright;
 - the long side is at most 2000 px, at about 400 KB;
@@ -32,9 +35,9 @@ Run it again when new photos arrive, and commit what changed.
 
 ## What is not here
 
-- **The full-size originals.** They stay in `~/Desktop/map`, and the tracing scripts read them
-  from there.
+- **The full-size originals.** They stay in the survey folder, outside git, and the tracing
+  scripts find them there by name.
 - **The views of the buildings,** with `VISTA` in their names. They are screenshots of Street View
   and of the university's own photos and renders, which are not ours to publish.
 - **Anything with personal data.** Documents with a name, an ID number or a student code stay in
-  `~/Desktop/KApp-privado/`, outside git.
+  `~/Documents/KApp/`, outside git.
