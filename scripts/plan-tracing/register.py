@@ -590,7 +590,7 @@ def main():
                 these = json.load(open(path_of_marks))["spaces"]
                 ours = {sp["code"] for sp in these}
                 marks = {"spaces": [sp for sp in (marks or {}).get("spaces", []) if sp["code"] not in ours] + these}
-        later = {a["code"] for a in rules.get("add", [])}
+        later = {a["code"] for a in rules.get("add", [])} | {sp["code"] for sp in rules.get("turned", {}).get("spaces", [])}
         if spec.get("by hand"):
             path_by_hand = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
                                         spec["by hand"].format(floor=args.floor.lower()))
