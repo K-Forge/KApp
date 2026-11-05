@@ -28,6 +28,13 @@ data class FloorPlan(
     val unplaced: List<FloorSpace> get() = spaces.filter { it.shape.size < 3 }
 
     /**
+     * The placed space under the drawing point ([x], [y]), or null when there is none. Where shapes
+     * overlap, the smallest wins: a room drawn over a bigger one is the one meant.
+     */
+    fun spaceAt(x: Float, y: Float): FloorSpace? =
+        placed.filter { it.contains(x, y) }.minByOrNull { space -> space.box?.let { it.width.toLong() * it.height } ?: 0L }
+
+    /**
      * The part of the drawing there is something on: the outline's box once it is traced, else the
      * box around every placed space, else the whole drawing. What the screen is fitted to, so a
      * floor drawn in a corner of a large photograph still fills the view.
@@ -81,6 +88,18 @@ data class FloorSpace(
     /** Where the label and icon go: the point inside [shape] farthest from its walls (map 3.7.0). */
     val labelPoint: MapPoint? = null,
 ) {
+    /** Whether the drawing point ([x], [y]) is inside [shape], by even-odd ray casting. */
+    fun contains(x: Float, y: Float): Boolean {
+        if (shape.size < 3) return false
+        var inside = false
+        shape.indices.forEach { i ->
+            val a = shape[i]
+            val b = shape[(i + shape.size - 1) % shape.size]
+            if ((a.y > y) != (b.y > y) && x < (b.x - a.x).toFloat() * (y - a.y) / (b.y - a.y) + a.x) inside = !inside
+        }
+        return inside
+    }
+
     /** [bounds], or worked out from [shape] when the answer leaves it out. */
     val box: MapBounds?
         get() = bounds ?: shape.takeIf { it.isNotEmpty() }?.let { corners ->
