@@ -354,11 +354,12 @@ the person who finds this pull request a year from now.
 
 **The way to merge**
 
-1. Open the pull request as a **draft** as soon as the branch has its first commit, and push at least once a day.
-   Work that exists only on one laptop is work that can be lost.
-2. Mark it ready when it meets the five points above and CI is green.
-3. The Docs/Chore chat reviews agent pull requests against this section and tells the lead which are ready. The
-   lead reviews the people's. The lead merges with "Merge when ready".
+1. Push the branch as soon as it has its first commit, and at least once a day: work that exists only on one laptop
+   is work that can be lost. People may open a draft early to show progress. **An agent opens its pull request
+   ready for review, never as a draft**, once it meets the five points above (it cannot mark a draft ready).
+2. CI must be green before it merges.
+3. Core reviews agent pull requests against this section and tells Brian which are ready. The lead reviews the
+   people's. Brian merges.
 
 **Work shared by both clients.** A feature both apps need is a parent issue without a client label, with one
 sub-issue per client: `[Kotlin] ...` labelled `area/kotlin` and `[Swift] ...` labelled `area/swift` (as in #44 to
@@ -411,10 +412,17 @@ through `area/kotlin` and `area/swift` issues.
 - **Start every session with [`docs/state/README.md`](docs/state/README.md)**, then read your area's file there.
   Sessions do not share memory, local or cloud, so that folder is how one session learns what the others did.
   Update your area's file before you end a piece of work.
-- **One session, one purpose.** Core coordinates; Backend, Kotlin and Swift do the work. When a session's purpose is
-  done, or the conversation has grown long, it tells Brian to start a new one with a specific purpose, hands over
-  through `docs/state/`, and is archived once he confirms; the new one keeps the same name. The details are in
+- **One session, one purpose, and Core rotates.** Core coordinates and is the long-lived session; Backend, Kotlin
+  and Swift do the work, one purpose each. When a worker's purpose is done or its conversation has grown long, it
+  hands over through `docs/state/` and sends Core its opening message; Core asks Brian and, on his yes, starts the
+  new session with the same name and archives the old one. The details are in
   [`docs/state/README.md`](docs/state/README.md), "One session, one purpose".
+- **Pull requests: the worker opens, Core reviews, Brian merges.** A worker pushes its branch from the first commit
+  and opens the pull request **ready for review, never as a draft**, once the work is done and tested: an agent's
+  permission to mark a draft ready is denied, so a draft would wait on Brian. Then it sends Core everything (the
+  link, what changes, how it was tested, what is left). Core reviews it, posts "Revisión de Docs/Chore" and tells
+  Brian which pull requests to merge. Workers never ask Brian to review; they ask him directly only for something
+  only he can do on the emulator or in the admin portal (a real Microsoft sign-in, for example).
 - **Never modify** `.env` files (contains secrets).
 - **Backend location:** all backend work goes in `app/backend/microservices/`. The original monolith was deleted once the migration completed; it is only retrievable from the git history and must not be resurrected.
 - **Schema:** changes go in Mongock change units (see Data), never in a hand-written schema file.
