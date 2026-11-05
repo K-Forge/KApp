@@ -19,7 +19,10 @@
 #   - Host networking, everything on 127.0.0.1: a host publishes the portal (4300) and the gateway
 #     (8080) itself, over HTTPS - install.sh does it with `tailscale serve` when asked to. With no
 #     service registry and no Docker DNS on the host network, each service is told where the others
-#     listen: the KAPP_*_SERVICE_URL variables below.
+#     listen: the KAPP_*_SERVICE_URL variables below. A service that calls another needs its URL
+#     here, or it falls back to the other's name, which resolves nowhere on the host network: each
+#     lookup then takes about 10 s to fail (#155). Check a service's application.yml for every
+#     KAPP_*_SERVICE_URL it reads when adding it here.
 #   - No privilege beyond what each process needs: no capabilities for the JVMs, none gained later.
 #
 # The database is the shared Atlas development cluster: a dev server shows what every laptop shows.
@@ -184,6 +187,9 @@ services:
       SERVER_PORT: 8084
       SERVER_ADDRESS: 127.0.0.1
       KAPP_JWKS_URI: http://127.0.0.1:8081/.well-known/jwks.json
+      # The catalogue and the buildings: by name they resolve nowhere on the host network.
+      KAPP_SEMAPHORE_SERVICE_URL: http://127.0.0.1:8083
+      KAPP_MAP_SERVICE_URL: http://127.0.0.1:8085
       KAPP_LOG_LEVEL: INFO
       JAVA_OPTS: "-Xmx96m -XX:MaxDirectMemorySize=16m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:CICompilerCount=1 -XX:ReservedCodeCacheSize=48m -XX:MaxMetaspaceSize=160m -Xss512k"
     healthcheck:

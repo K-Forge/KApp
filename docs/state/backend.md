@@ -1,7 +1,7 @@
 # Backend State
 
-> Owner: Backend. As of 2026-11-04, `develop` at `a1e4b17`. Built from Backend's report of 2026-10-29, plus the
-> merges of 2026-11-04.
+> Owner: Backend. As of 2026-11-05, `develop` at `3966192`. Built from Backend's report of 2026-10-29, the merges of
+> 2026-11-04, and the work on #183, #193 and #155 since.
 
 ---
 
@@ -13,7 +13,7 @@
 | user-service | user 1.1.0 | Profiles without identity document or phone. `academic` is read-only from the test SINU (#76–#80). `PUT /internal/users/{id}/roles` | V003 |
 | semaphore-service | semaphore 2.0.1 | SINU course statuses, read-only through `SinuRecordPort` and `FakeSinuRecordAdapter` (#79). Editable plans at `/me/plans` (`plannedLevel` 1 to 12). The catalogue of the 23 pensums | V010 |
 | schedule-service | schedule 2.0.1 | Current classes only: `/me`, `/me/day`, `/me/week`, `/me/periods`, from the test SINU (`SinuTimetablePort`, #78). No database | none |
-| map-service | map 3.6.0 | Buildings, floors, layouts, spaces, types, campuses, ground, structures and survey. ETag. `sinuSedes` (#77) | V015 (V016 is in #183) |
+| map-service | map 3.6.0 | Buildings, floors, layouts, spaces, types, campuses, ground, structures and survey. ETag. `sinuSedes` (#77) | V015 (V016 is in #183; #193 squares its rooms) |
 | api-gateway | none | Routes by name, with no registry (#64). Answers 500 when a service is down (#157) | none |
 
 - **Local helpers:** fake OIDC (mock-oauth2-server on `:8090`, with test users for student, professor and staff;
@@ -63,20 +63,17 @@
     source for doors;
   - V016 redraws P1 over the saved floor and keeps the old floor whole in `map_replaced_floors`, so the change can
     be undone.
-- **Brian's review on 2026-11-04, not merged:**
-  - the after render places the patio and many dimensions well;
-  - but the spaces come out with **very irregular shapes**, worst next to **Carrera 9 Bis**.
-- **The goal:** spaces that are **rectilinear, with right angles ("squared"), and still fit reality**, so that the
-  map works in the portal and in both apps. The pencil lines on the sketches show how each space works; shapes
-  follow them, regularized, instead of the irregular outline the fit to the surveyed footprint leaves.
-- **The rule this refines:** "the map's shapes come from the evacuation plans, never by eye". Shapes still come
-  from the plans and sketches, but snapped to right angles.
-- **Next:**
-  - propose the regularization: orthogonal snapping per space, shared edges between neighbours, and what to do
-    where the measured footprint is not rectangular along Carrera 9 Bis;
-  - apply it to P1;
-  - render before and after again, and attach the renders to the pull request so Brian can see them without his
-    Mac.
+- **Brian's review on 2026-11-04:** the shapes came out irregular, worst next to the Carrera 9 Bis. Fixed in #193.
+- **#193, stacked on #183 (`feature/central-floor-one-square-rooms`), ready for review:**
+  - `scripts/plan-tracing/regular.py`, run by `register.py` after the fit: walls level or plumb, steps under 0.9 m
+    gone, neighbours' walls within 0.23 m on one line, stacked stairs and lifts as fixed anchors;
+  - the auditorium's wing is squared between its two measured facades (`askew`), so it comes out as trapezoids.
+    **Brian approved the trapezoids on 2026-11-05**;
+  - P1 goes from 526 corners and 209 slanted edges to 200 and 43; the same 12 doors; no overlaps; 143 map-service
+    tests green.
+- **Merge path:** #183 first, then #193 (the restack bot retargets it). Both merge cleanly into `develop`.
+- **Re-registering P1 later** regenerates it from the sketch: copy any room edited in the portal into
+  `traced/ec-p1-a-mano.json` first (after `export-map-snapshot.py`), or it is lost.
 - **Visual reference** (Brian, 2026-11-04): Mappedin and similar flat 2D indoor maps, not 3D ones like
   MapsIndoors. Their traits:
   - rectilinear units that share walls;
@@ -91,7 +88,6 @@
   - openings that connect units to walkways;
   - vertical connections (stairs, elevators, ramps) between levels.
   - IMDF (OGC CS 20-094) is the reference model. Use it as a reference, not adopted wholesale.
-- **Size:** keep it to one purpose. If the regularization grows, it is a pull request of its own, stacked on #183.
 - **Inputs:** the sketches and the survey are only on Brian's Mac (see `core.md`). A cloud session needs Brian to
   attach them, or a local session to do the rendering.
 
@@ -117,7 +113,10 @@
 
 ## Known debt
 
-- #155: Kotlin still has to confirm the timetable on the dev server.
+- #155: on the dev server every `GET /api/schedule/me*` answered 504 after 10 s. Fixed in
+  `bugfix/timetable-waits-on-slow-neighbours`: the Feign timeouts were under a prefix OpenFeign 4 ignores, the
+  pensum was read once per class, and the dev server's compose gave schedule-service no address for its
+  neighbours. Brian confirms Horario on the-hive after the merge, then closes #155 by hand.
 - #157: the gateway should answer 503, not 500.
 - #143: one program name; the catalogue and SINU spell it differently.
 - Not in an issue yet:
@@ -129,7 +128,8 @@
 
 ## Next
 
-1. Regularize the shapes of EC P1 in #183, render it again, and get Brian's approval. Then merge it, let V016 run
-   on the dev server, and verify P1 through the API.
-2. #157 (gateway 503) and #143 (one program name).
-3. EC P2 as soon as Brian sketches it. Otherwise, start phase 4 (#57).
+1. Merge #183, then #193. Let V016 run on the dev server, and verify P1 through the API.
+2. Merge the #155 fix, redeploy the dev server, and have Brian open Horario as the test student.
+3. #195: `labelPoint` (and `verticalCode` if it stays small) in map 3.7.0, contract first.
+4. #157 (gateway 503) and #143 (one program name).
+5. EC P2 as soon as Brian sketches it. Otherwise, start phase 4 (#57).
