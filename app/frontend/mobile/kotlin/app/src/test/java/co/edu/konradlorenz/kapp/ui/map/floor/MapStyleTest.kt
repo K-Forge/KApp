@@ -39,6 +39,7 @@ class MapStyleTest {
                 style.floor.pick(dark).fill, style.floor.pick(dark).background, style.outline.color(dark),
                 style.spaces.stroke(dark), style.doors.color(dark), style.corridors.color(dark),
                 style.labels.colors(dark).color, style.labels.colors(dark).halo,
+                style.icons.colors(dark).fill, style.icons.colors(dark).glyph,
             ).forEach { assertNotNull(it, argbOf(it)) }
         }
     }
