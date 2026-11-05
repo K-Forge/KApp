@@ -62,14 +62,21 @@ class KAppTones(
     val borderSoft: Color,
     /** Hint text inside an empty field. */
     val placeholder: Color,
+    /**
+     * Text and icons on the lime's pale tint (a class about to start, a free day): the purple in
+     * light, 9.9:1; in dark the tint turns olive and the purple, even toned, falls to 2.3:1, so it
+     * is the light text there, 5.7:1.
+     */
+    val onLime: Color,
     val dark: Boolean,
 )
 
-private val LightTones = KAppTones(borderSoft = BorderSoft, placeholder = Placeholder, dark = false)
+private val LightTones = KAppTones(borderSoft = BorderSoft, placeholder = Placeholder, onLime = Brand, dark = false)
 private val DarkTones = KAppTones(
     borderSoft = Color(0xFF30363E),
     // 4.6:1 on the dark surface.
     placeholder = Color(0xFF8E97A2),
+    onLime = DarkText,
     dark = true,
 )
 

@@ -279,7 +279,7 @@ private fun NextClassCard(next: NextClass, onOpen: (KAppDestination) -> Unit) {
                             .padding(horizontal = 9.dp, vertical = 5.dp),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Brand.toned(),
+                        color = tones.onLime,
                     )
                 }
             }
@@ -350,7 +350,7 @@ private fun DirectionsButton(onClick: () -> Unit) {
 @Composable
 private fun FreeDayCard(onOpen: (KAppDestination) -> Unit, done: Boolean = false) {
     CenteredCard(height = HeadlineCardHeight) {
-        IconBubble(R.drawable.ic_free_day, colour = InProgress, alpha = 0.30f, iconColour = Brand.toned())
+        IconBubble(R.drawable.ic_free_day, colour = InProgress, alpha = 0.30f, iconColour = tones.onLime)
         Spacer(Modifier.height(10.dp))
         Text(
             text = stringResource(if (done) R.string.home_done_title else R.string.home_free_day_title),
