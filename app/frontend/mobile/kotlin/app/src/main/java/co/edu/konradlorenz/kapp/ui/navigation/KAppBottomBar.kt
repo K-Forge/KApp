@@ -34,7 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import co.edu.konradlorenz.kapp.ui.common.LocalGoHome
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
-import co.edu.konradlorenz.kapp.ui.theme.BorderSoft
+import co.edu.konradlorenz.kapp.ui.theme.tones
 import co.edu.konradlorenz.kapp.ui.theme.Brand
 
 // Read off the bar of docs/design/mobile/HomeAndroid.dc.html, drawn on a 360x800 canvas.
@@ -100,7 +100,7 @@ private fun KAppBottomBar(
             .shadow(12.dp, BarShape, ambientColor = Brand, spotColor = Brand)
             .clip(BarShape)
             .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, BorderSoft, BarShape)
+            .border(1.dp, tones.borderSoft, BarShape)
             .padding(start = 4.dp, end = 4.dp, top = 6.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

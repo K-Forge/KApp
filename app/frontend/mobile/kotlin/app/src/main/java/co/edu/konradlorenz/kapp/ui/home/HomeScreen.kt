@@ -54,14 +54,13 @@ import co.edu.konradlorenz.kapp.ui.common.coverScrolled
 import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
 import co.edu.konradlorenz.kapp.ui.navigation.KAppDestination
 import co.edu.konradlorenz.kapp.ui.navigation.MainShell
-import co.edu.konradlorenz.kapp.ui.theme.Border
-import co.edu.konradlorenz.kapp.ui.theme.BorderSoft
 import co.edu.konradlorenz.kapp.ui.theme.Brand
 import co.edu.konradlorenz.kapp.ui.theme.InProgress
 import co.edu.konradlorenz.kapp.ui.theme.KAppTheme
 import co.edu.konradlorenz.kapp.ui.theme.Passed
-import co.edu.konradlorenz.kapp.ui.theme.Placeholder
 import co.edu.konradlorenz.kapp.ui.theme.Subject
+import co.edu.konradlorenz.kapp.ui.theme.tones
+import co.edu.konradlorenz.kapp.ui.theme.toned
 import kotlin.math.roundToInt
 
 // Every measurement below is read off docs/design/mobile/HomeAndroid.dc.html, which is drawn on a
@@ -280,7 +279,7 @@ private fun NextClassCard(next: NextClass, onOpen: (KAppDestination) -> Unit) {
                             .padding(horizontal = 9.dp, vertical = 5.dp),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Brand,
+                        color = Brand.toned(),
                     )
                 }
             }
@@ -351,7 +350,7 @@ private fun DirectionsButton(onClick: () -> Unit) {
 @Composable
 private fun FreeDayCard(onOpen: (KAppDestination) -> Unit, done: Boolean = false) {
     CenteredCard(height = HeadlineCardHeight) {
-        IconBubble(R.drawable.ic_free_day, colour = InProgress, alpha = 0.30f, iconColour = Brand)
+        IconBubble(R.drawable.ic_free_day, colour = InProgress, alpha = 0.30f, iconColour = Brand.toned())
         Spacer(Modifier.height(10.dp))
         Text(
             text = stringResource(if (done) R.string.home_done_title else R.string.home_free_day_title),
@@ -378,7 +377,7 @@ private fun FreeDayCard(onOpen: (KAppDestination) -> Unit, done: Boolean = false
 @Composable
 private fun DayUnavailableCard(onRetry: () -> Unit) {
     CenteredCard(height = HeadlineCardHeight) {
-        IconBubble(R.drawable.ic_calendar, colour = Subject, alpha = 0.16f)
+        IconBubble(R.drawable.ic_calendar, colour = Subject.toned(), alpha = 0.16f)
         Spacer(Modifier.height(10.dp))
         Text(
             text = stringResource(R.string.home_day_unavailable),
@@ -408,7 +407,7 @@ private fun DayUnavailableCard(onRetry: () -> Unit) {
 @Composable
 private fun NoScheduleCard(onOpen: (KAppDestination) -> Unit) {
     CenteredCard(height = 208.dp) {
-        IconBubble(R.drawable.ic_calendar_plus, colour = Subject, alpha = 0.16f)
+        IconBubble(R.drawable.ic_calendar_plus, colour = Subject.toned(), alpha = 0.16f)
         Spacer(Modifier.height(10.dp))
         Text(
             text = stringResource(R.string.home_no_schedule_title),
@@ -459,8 +458,8 @@ private fun HeadlineSkeleton() {
         ) {
             SkeletonBar(width = 104.dp, height = 11.dp, radius = 6.dp)
             SkeletonBar(width = 188.dp, height = 20.dp, radius = 7.dp)
-            SkeletonBar(width = 236.dp, height = 13.dp, color = BorderSoft, radius = 6.dp)
-            SkeletonBar(width = 142.dp, height = 44.dp, color = BorderSoft, radius = 14.dp)
+            SkeletonBar(width = 236.dp, height = 13.dp, color = tones.borderSoft, radius = 6.dp)
+            SkeletonBar(width = 142.dp, height = 44.dp, color = tones.borderSoft, radius = 14.dp)
         }
     }
 }
@@ -510,7 +509,7 @@ private fun RowScope.Shortcut(
                 .fillMaxWidth()
                 .height(52.dp)
                 .clip(TileShape)
-                .background(destination.colour.copy(alpha = alpha)),
+                .background(destination.colour.toned().copy(alpha = alpha)),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -518,7 +517,7 @@ private fun RowScope.Shortcut(
                 // The label below says the same thing.
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint = destination.colour,
+                tint = destination.colour.toned(),
             )
         }
         Text(
@@ -621,7 +620,7 @@ private fun SemesterCard(semester: SemesterState.Ready) {
                     lineHeight = 28.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = (-0.5).sp,
-                    color = Brand,
+                    color = Brand.toned(),
                 )
             }
             Spacer(Modifier.height(12.dp))
@@ -635,7 +634,7 @@ private fun SemesterCard(semester: SemesterState.Ready) {
             ) {
                 Legend(Passed, R.plurals.home_credits_passed, semester.creditsPassed)
                 Legend(InProgress, R.plurals.home_credits_in_progress, semester.creditsInProgress)
-                Legend(Border, R.plurals.home_credits_remaining, semester.creditsRemaining)
+                Legend(MaterialTheme.colorScheme.outlineVariant, R.plurals.home_credits_remaining, semester.creditsRemaining)
             }
         }
     }
@@ -658,7 +657,7 @@ private fun ProgressBar(semester: SemesterState.Ready) {
             .fillMaxWidth()
             .height(8.dp)
             .clip(RoundedCornerShape(4.dp))
-            .background(Border),
+            .background(MaterialTheme.colorScheme.outlineVariant),
     ) {
         if (passed > 0f) {
             Box(Modifier.weight(passed).fillMaxHeight().background(Passed))
@@ -713,8 +712,8 @@ private fun SemesterSkeleton() {
                 SkeletonBar(width = 96.dp, height = 14.dp, radius = 7.dp)
                 SkeletonBar(width = 54.dp, height = 22.dp, radius = 7.dp)
             }
-            SkeletonBar(width = null, height = 10.dp, color = BorderSoft, radius = 5.dp)
-            SkeletonBar(width = 220.dp, height = 11.dp, color = BorderSoft, radius = 6.dp)
+            SkeletonBar(width = null, height = 10.dp, color = tones.borderSoft, radius = 5.dp)
+            SkeletonBar(width = 220.dp, height = 11.dp, color = tones.borderSoft, radius = 6.dp)
         }
     }
 }
@@ -747,7 +746,7 @@ private fun UpcomingRow(upcoming: UpcomingClass) {
                     text = upcoming.endTime,
                     fontSize = 12.sp,
                     lineHeight = 15.sp,
-                    color = Placeholder,
+                    color = tones.placeholder,
                 )
             }
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -873,7 +872,7 @@ private fun IconBubble(
 private fun SkeletonBar(
     width: Dp?,
     height: Dp,
-    color: Color = Border,
+    color: Color = MaterialTheme.colorScheme.outlineVariant,
     radius: Dp = height / 2,
 ) {
     val sizing = if (width == null) Modifier.fillMaxWidth() else Modifier.width(width)
