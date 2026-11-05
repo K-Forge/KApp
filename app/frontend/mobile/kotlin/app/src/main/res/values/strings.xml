@@ -196,6 +196,8 @@
     </plurals>
     <string name="map_unplaced_title">Todavía sin dibujar</string>
     <string name="map_unplaced_close">Cerrar</string>
+    <string name="map_space_door">Puerta %1$s</string>
+    <string name="map_space_close">Cerrar la información del espacio</string>
 
     <string name="band_go_home">Ir a Inicio</string>
     <string name="home_open_profile">Abrir Perfil</string>
