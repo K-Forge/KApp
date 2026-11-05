@@ -116,9 +116,11 @@ These are the rules agents most often get wrong. `AGENTS.md` and `CONTRIBUTING.m
 4. **Branch names follow CONTRIBUTING:** `feature/`, `bugfix/`, `chore/`, `test/` or `release/x.y.z`, in English,
    kebab-case, from `develop`. The random `<tool>/<words>` branch a cloud environment may create for you fails
    the `Git conventions` check, so never open a pull request from one; start a correctly named branch instead.
-5. **One pull request, one purpose**, about 100 to 400 lines to read and 3 to 8 atomic commits. Open it as a draft
-   with its first commit, with the template, an `area/*` label and `Refs #N`. Pull request bodies are in Spanish;
-   commits, issues for agents, and repository docs are in English.
+5. **One pull request, one purpose**, about 100 to 400 lines to read and 3 to 8 atomic commits, with the template,
+   an `area/*` label and `Refs #N`. Push the branch from its first commit, and open the pull request **ready for
+   review, never as a draft**, once the work is done and tested: an agent's permission to mark a draft ready is
+   denied, so a draft waits on Brian. Pull request bodies are in Spanish; commits, issues for agents, and
+   repository docs are in English.
 6. **Never print or edit `.env` files**, not even masked lines. To learn something about them, ask Brian a yes or no
    question.
 7. **Brian merges.** He uses "Squash and merge" with the bypass box. Never use "Enable auto-merge": with the current
@@ -126,6 +128,9 @@ These are the rules agents most often get wrong. `AGENTS.md` and `CONTRIBUTING.m
    merge.
 8. **Brian does not see the text written before a question**, only the question itself. Put everything he needs to
    decide inside the question.
+9. **Workers report to Core, not to Brian.** When a pull request is ready, the worker sends Core the link, what
+   changes, how it was tested and what is left. Core reviews it, posts "Revisión de Docs/Chore" and tells Brian what
+   to merge. A worker asks Brian directly only for something only he can do on the emulator or in the admin portal.
 
 ---
 
