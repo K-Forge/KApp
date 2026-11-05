@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.edu.konradlorenz.kapp.R
 import co.edu.konradlorenz.kapp.data.map.FloorPlan
+import co.edu.konradlorenz.kapp.data.map.FloorSpace
 import co.edu.konradlorenz.kapp.data.map.MapPoint
 import co.edu.konradlorenz.kapp.ui.common.hexColor
 
@@ -58,10 +60,19 @@ import co.edu.konradlorenz.kapp.ui.common.hexColor
  * nothing here knows a building, a floor or a room. It starts fitted to what is drawn, and pans,
  * pinch-zooms, zooms in on a double tap and with its + and - buttons. The layers follow the
  * style's order and any it does not know are skipped, so a later one, such as a route, only needs
- * its name in the style and its case here. Selection comes in a later change.
+ * its name in the style and its case here. A tap on a space hands it to [onSelect], a tap on
+ * nothing hands null, and the space whose code is [selected] is outlined on top of everything.
  */
 @Composable
-fun FloorCanvas(plan: FloorPlan, style: MapStyle, dark: Boolean, modifier: Modifier = Modifier) {
+fun FloorCanvas(
+    plan: FloorPlan,
+    style: MapStyle,
+    dark: Boolean,
+    modifier: Modifier = Modifier,
+    selected: String? = null,
+    onSelect: (FloorSpace?) -> Unit = {},
+) {
+    val select by rememberUpdatedState(onSelect)
     val measurer = rememberTextMeasurer()
     val padding = with(LocalDensity.current) { FloorPadding.toPx() }
     var size by remember { mutableStateOf(IntSize.Zero) }
@@ -85,10 +96,16 @@ fun FloorCanvas(plan: FloorPlan, style: MapStyle, dark: Boolean, modifier: Modif
                 .fillMaxSize()
                 .onSizeChanged { size = it }
                 .pointerInput(fit) {
-                    detectTapGestures(onDoubleTap = { at ->
-                        val start = fit ?: return@detectTapGestures
-                        viewport = viewport?.doubleTapped(at.x, at.y, start)
-                    })
+                    detectTapGestures(
+                        onTap = { at ->
+                            val view = viewport ?: return@detectTapGestures
+                            select(plan.spaceAt(view.drawingX(at.x), view.drawingY(at.y)))
+                        },
+                        onDoubleTap = { at ->
+                            val start = fit ?: return@detectTapGestures
+                            viewport = viewport?.doubleTapped(at.x, at.y, start)
+                        },
+                    )
                 }
                 .pointerInput(fit) {
                     detectTransformGestures { centroid, pan, zoom, _ ->
@@ -128,6 +145,11 @@ fun FloorCanvas(plan: FloorPlan, style: MapStyle, dark: Boolean, modifier: Modif
                         mark.item.icon?.let { drawIcon(it, box, palette) }
                     }
                     "labels" -> drawLabels(marks, palette)
+                    "selection" -> plan.placed.firstOrNull { it.code == selected }?.let { space ->
+                        val shape = path(space.shape, view)
+                        drawPath(shape, palette.selection.copy(alpha = palette.selectionFillAlpha))
+                        drawPath(shape, palette.selection, style = Stroke(style.selection.widthDp.dp.toPx(), join = StrokeJoin.Round))
+                    }
                 }
             }
         }
@@ -245,6 +267,8 @@ private class FloorPalette(style: MapStyle, dark: Boolean) {
     val labelHalo = color(style.labels.colors(dark).halo)
     val iconFill = color(style.icons.colors(dark).fill)
     val iconGlyph = color(style.icons.colors(dark).glyph)
+    val selection = color(style.selection.colors(dark).stroke)
+    val selectionFillAlpha = style.selection.colors(dark).fillAlpha
     private val categories = style.categories.mapValues { color(it.value.pick(dark)) }
     private val fallback = color(style.categoryColor(null, dark))
 
