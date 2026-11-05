@@ -2,7 +2,6 @@ package co.edu.konradlorenz.kapp.ui.map
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,12 +33,13 @@ import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
 import co.edu.konradlorenz.kapp.ui.map.floor.FloorCanvas
 import co.edu.konradlorenz.kapp.ui.map.floor.MapStyle
 import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
+import co.edu.konradlorenz.kapp.ui.theme.tones
 
 /**
  * A building's floors: the purple band with the building's name, as on every tab (so the white
  * status bar icons stay readable), its levels to choose from, and the chosen one drawn by
  * [FloorCanvas] over all the room left above the bottom bar. Back returns to the list of buildings.
- * The screen follows the system theme, as the shared style asks; KAppNavHost darkens the bar too.
+ * The drawing follows the app's theme, which follows the system, as the shared style asks.
  */
 @Composable
 fun FloorScreen(opened: OpenedBuilding, style: MapStyle, onFloor: (String) -> Unit, onBack: () -> Unit) {
@@ -86,7 +86,7 @@ fun FloorScreen(opened: OpenedBuilding, style: MapStyle, onFloor: (String) -> Un
                     TextButton(onClick = { onFloor(opened.floorCode) }) { Text(stringResource(R.string.map_retry)) }
                 }
                 is FloorState.Ready -> {
-                    FloorCanvas(floor.plan, style, isSystemInDarkTheme(), Modifier.fillMaxSize().clipToBounds())
+                    FloorCanvas(floor.plan, style, tones.dark, Modifier.fillMaxSize().clipToBounds())
                     if (floor.plan.placed.isEmpty()) {
                         Text(
                             stringResource(R.string.map_floor_not_drawn),
