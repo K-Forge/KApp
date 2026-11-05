@@ -1,6 +1,6 @@
 # Kotlin State
 
-> Owner: Kotlin. As of 2026-11-05, `develop` at `59052f0`. Checked against the code on `develop` on 2026-11-05.
+> Owner: Kotlin. As of 2026-11-05, `develop` at `942d46a`. Checked against the code on `develop` on 2026-11-05.
 
 ---
 
@@ -48,11 +48,12 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
    including the class with no room on 2026-09-21, and then ticking the boxes.
 3. **The rest of the floor renderer (#196):** an icon per `typeCode` and selecting a space. The `ETag` cache, the
    unplaced list, the label fixes and the back arrow on the left came in #206.
-4. **#204, the whole app follows the system's dark mode** (Brian chose it on 2026-11-05; no in-app toggle). #207
-   has the theme, Inicio, Mapa and the bottom bar, with the floor screen's dark scheme from #200 folded into the app
-   theme. #208, stacked on it, does Semáforo, Horario, Perfil and the login, and opens in dark mode without a white
-   flash. Both were tried on the emulator in light and dark, with screenshots on each pull request. They merge
-   together; after #207 is squashed, `develop` comes into #208 so its diff does not repeat #207.
+4. **#204, the whole app follows the system's dark mode** (Brian chose it on 2026-11-05; no in-app toggle). #207,
+   merged, has the theme, Inicio, Mapa and the bottom bar, with the floor screen's dark scheme from #200 folded into
+   the app theme. #208 does Semáforo, Horario, Perfil and the login, and opens in dark mode without a white flash.
+   Both were tried on the emulator in light and dark; the screenshots are in
+   `app/frontend/mobile/kotlin/docs/screenshots/dark-mode/`. Until #208 merges, those four screens keep some
+   light-only colours in dark mode.
 
 ---
 
