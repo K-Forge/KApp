@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -102,11 +103,13 @@ private fun Color.toned(dark: Boolean): Color = if (dark) lerp(this, Color.White
 /** The app's theme, light or dark as the system is. */
 @Composable
 fun KAppTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+    val scheme = if (dark) KAppDarkColorScheme else KAppColorScheme
     CompositionLocalProvider(LocalTones provides if (dark) DarkTones else LightTones) {
-        MaterialTheme(
-            colorScheme = if (dark) KAppDarkColorScheme else KAppColorScheme,
-            typography = KAppTypography,
-            content = content,
-        )
+        MaterialTheme(colorScheme = scheme, typography = KAppTypography) {
+            // Text and icons with no colour of their own take LocalContentColor, which is black
+            // unless a Surface sets it. Most screens draw on plain backgrounds, not Surfaces, so
+            // without this their default text would stay black on the dark cards.
+            CompositionLocalProvider(LocalContentColor provides scheme.onBackground, content = content)
+        }
     }
 }
