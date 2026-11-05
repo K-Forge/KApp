@@ -52,7 +52,7 @@ fun FloorScreen(opened: OpenedBuilding, style: MapStyle, onFloor: (String) -> Un
     ) {
         BrandBand(
             title = opened.building.name,
-            trailing = {
+            leading = {
                 TextButton(onClick = onBack, modifier = Modifier.semantics { contentDescription = back }) {
                     Text("‹", fontSize = 26.sp, color = Color.White)
                 }
