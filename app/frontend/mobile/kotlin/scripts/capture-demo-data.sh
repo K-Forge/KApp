@@ -151,13 +151,18 @@ print(json.dumps(buildings, ensure_ascii=False, indent=4))
 PY
 echo "$out/get/api/map/buildings.json"
 
-# Every floor, as GET /api/map/buildings/{code}/floors/{floorCode} answers it (FloorDetail), out of
-# the same seeds: the contract's example is a single room, too little to see a renderer at work.
+# Every floor, as GET /api/map/buildings/{code}/floors/{floorCode} answers it (FloorDetail), and
+# every room the day and the week name, as GET /api/map/spaces/{room}?buildingCode= answers it
+# (SpaceDetail), out of the same seeds. The contract has one example floor and one example room,
+# so the mocks answered every room with that one: Horario opened 508 and showed 302. A room the
+# seeds do not have gets no file, and the demo answers 404, as map-service does.
 # A space's typeName and category come from the type catalogue map-service seeds itself
 # (V004_MapModelV2.CATALOGUE), and its bounds from its shape, as the service works them out.
-python3 -I - "$(cd "$(dirname "$0")/../../../../.." && pwd)/app/backend/microservices/map-service/src/main" "$out/get/api/map/buildings" <<'PY'
+python3 -I - "$(cd "$(dirname "$0")/../../../../.." && pwd)/app/backend/microservices/map-service/src/main" "$out/get/api/map" \
+  "$out/get/api/schedule/me/day.json" "$out/get/api/schedule/me/week.json" <<'PY'
 import json, pathlib, re, sys
 service, out = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+timetables = sys.argv[3:]
 source = (service / "java/co/edu/konradlorenz/kapp/map/migration/V004_MapModelV2.java").read_text(encoding="utf-8")
 # The entries read: a category, then code and name pairs until the next category.
 catalogue, category, strings = {}, None, []
@@ -169,8 +174,11 @@ for category_token, string in re.findall(r'SpaceCategory\.([A-Z_]+)|"([^"]*)"', 
     if len(strings) == 2:
         catalogue[strings[0]] = (strings[1], category)
         strings = []
+rooms = {}
 for seed in sorted((service / "resources/db/seed/map").glob("*.json")):
     b = json.loads(seed.read_text(encoding="utf-8"))
+    summary = {k: b[k] for k in ("code", "name", "campus", "description", "aliases", "wings", "sinuSedes") if k in b}
+    summary["id"] = f"demo-{b['code']}"
     for f in b["floors"]:
         spaces = []
         for s in sorted(f.get("spaces", []), key=lambda s: s["code"]):
@@ -187,32 +195,35 @@ for seed in sorted((service / "resources/db/seed/map").glob("*.json")):
         floor.update(outline=f.get("outline", []), corridors=f.get("corridors", []), version=0,
                      buildingId=f"demo-{b['code']}", buildingCode=b["code"], buildingName=b["name"], campus=b["campus"],
                      wings=b.get("wings", []), spaces=spaces)
-        path = out / b["code"] / "floors" / f"{f['code']}.json"
+        for space in spaces:
+            rooms[(b["code"], space["code"])] = dict(space, building=summary, floor={
+                k: floor[k] for k in ("code", "level", "name", "status", "accessibility", "note", "width", "height",
+                                      "top", "outline", "corridors", "version") if k in floor})
+        path = out / "buildings" / b["code"] / "floors" / f"{f['code']}.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         # One line per file: a floor is thousands of points that nobody reads in a diff.
         path.write_text(json.dumps(floor, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
         print(path)
-PY
 
-# Every room of the day and the week, so tapping a class finds its room offline. Those two rather
-# than the full timetable because each class there carries its building and room together.
-python3 -I - "$out/get/api/schedule/me/day.json" "$out/get/api/schedule/me/week.json" <<'PY' | while read -r building room; do
-import json, sys
-rooms = set()
+asked = set()
 def walk(node):
     if isinstance(node, dict):
         if node.get("buildingCode") and node.get("room"):
-            rooms.add((node["buildingCode"], node["room"]))
+            asked.add((node["buildingCode"], node["room"]))
         for value in node.values():
             walk(value)
     elif isinstance(node, list):
         for value in node:
             walk(value)
-for path in sys.argv[1:]:
-    walk(json.load(open(path)))
-for building, room in sorted(rooms):
-    print(building, room)
+for timetable in timetables:
+    walk(json.load(open(timetable, encoding="utf-8")))
+for building, room in sorted(asked):
+    if (building, room) not in rooms:
+        print(f"no {building} {room} in the map seeds: the demo answers 404", file=sys.stderr)
+        continue
+    path = out / "spaces" / f"{building}-{room}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(rooms[(building, room)], ensure_ascii=False, indent=4) + "\n", encoding="utf-8")
+    print(path)
 PY
-  save GET "api/map/spaces/$room?buildingCode=$building"
-  mv "$out/get/api/map/spaces/$room.json" "$out/get/api/map/spaces/$building-$room.json"
-done
+

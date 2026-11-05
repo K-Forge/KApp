@@ -1,0 +1,562 @@
+{
+ "frame": "ec-p1-pe.json",
+ "out": "../traced/ec-p1-boceto.json",
+ "building": "EC",
+ "floor": "P1",
+ "why": "The first floor as Brian outlined it by hand over its evacuation plan on 2026-10-21 (Sketchs/EC-P1-PE.HEIC): a loop round every space and its name inside, \"?\" for one he could not identify. In the drawing's units, before register.py moves anything; the auditorium keeps its own sketch (ec-au-p1-strokes.json). Where a loop shares a wall with another space's, the neighbour's pen closes it too, and \"within\" keeps apart the small boxes whose shared lines his pen drew thin. The box he marked \"?\" by the parking ramp is where the plan prints the emergency stair, so it keeps that name. Brian, after the trace: the food court is one cafeteria. The part along the Calle 63 is the north extension, a few steps down, which he outlined apart; the sanitary route plan predates it. The lift by the bathrooms is the Ascensor central.",
+ "rooms": [
+  {
+   "code": "P1-12",
+   "name": "Escalera por identificar",
+   "typeCode": "STAIRS",
+   "aliases": [],
+   "strokes": [
+    "yellow"
+   ],
+   "at": [
+    0.2685,
+    0.2347
+   ]
+  },
+  {
+   "code": "P1-13",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "at": [
+    0.3169,
+    0.2054
+   ],
+   "within": [
+    [
+     0.3037,
+     0.1907
+    ],
+    [
+     0.3587,
+     0.2265
+    ]
+   ]
+  },
+  {
+   "code": "P1-14",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "at": [
+    0.3169,
+    0.2435
+   ],
+   "within": [
+    [
+     0.3037,
+     0.2265
+    ],
+    [
+     0.3587,
+     0.2612
+    ]
+   ]
+  },
+  {
+   "code": "P1-RECEPCION",
+   "name": "Recepción",
+   "typeCode": "RECEPTION",
+   "aliases": [
+    "recepción principal"
+   ],
+   "strokes": [
+    "green"
+   ],
+   "at": [
+    0.3631,
+    0.2553
+   ]
+  },
+  {
+   "code": "P1-ASC-CENTRAL",
+   "name": "Ascensores centrales",
+   "typeCode": "ELEVATOR",
+   "aliases": [
+    "ascensores"
+   ],
+   "strokes": [
+    "blue"
+   ],
+   "at": [
+    0.4225,
+    0.2523
+   ]
+  },
+  {
+   "code": "P1-ESC-PRINCIPAL",
+   "name": "Escalera principal",
+   "typeCode": "STAIRS",
+   "aliases": [],
+   "strokes": [
+    "yellow"
+   ],
+   "at": [
+    0.4525,
+    0.2582
+   ]
+  },
+  {
+   "code": "P1-17",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black",
+    "magenta"
+   ],
+   "at": [
+    0.2685,
+    0.3239
+   ],
+   "within": [
+    [
+     0.2606,
+     0.3087
+    ],
+    [
+     0.276,
+     0.3427
+    ]
+   ],
+   "pen": 3
+  },
+  {
+   "code": "P1-ASC-NORTE",
+   "name": "Ascensor norte",
+   "typeCode": "ELEVATOR",
+   "aliases": [
+    "ascensor"
+   ],
+   "strokes": [
+    "blue"
+   ],
+   "at": [
+    0.2852,
+    0.3239
+   ],
+   "within": [
+    [
+     0.2755,
+     0.3087
+    ],
+    [
+     0.294,
+     0.3427
+    ]
+   ],
+   "pen": 3
+  },
+  {
+   "code": "P1-35",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "at": [
+    0.2984,
+    0.3239
+   ],
+   "within": [
+    [
+     0.2931,
+     0.3087
+    ],
+    [
+     0.3033,
+     0.3427
+    ]
+   ],
+   "pen": 3
+  },
+  {
+   "code": "P1-18",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "at": [
+    0.3081,
+    0.3198
+   ],
+   "within": [
+    [
+     0.3024,
+     0.3087
+    ],
+    [
+     0.3288,
+     0.3586
+    ]
+   ]
+  },
+  {
+   "code": "P1-36",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "at": [
+    0.3081,
+    0.3668
+   ],
+   "within": [
+    [
+     0.3024,
+     0.3574
+    ],
+    [
+     0.3288,
+     0.3908
+    ]
+   ]
+  },
+  {
+   "code": "P1-37",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "at": [
+    0.3081,
+    0.3991
+   ],
+   "within": [
+    [
+     0.3024,
+     0.3897
+    ],
+    [
+     0.3288,
+     0.4261
+    ]
+   ]
+  },
+  {
+   "code": "P1-21",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "at": [
+    0.2685,
+    0.3492
+   ],
+   "within": [
+    [
+     0.2597,
+     0.3404
+    ],
+    [
+     0.3033,
+     0.4261
+    ]
+   ]
+  },
+  {
+   "code": "P1-TESORERIA",
+   "name": "Tesorería",
+   "typeCode": "ADMIN_OFFICE",
+   "aliases": [],
+   "strokes": [
+    "amber"
+   ],
+   "at": [
+    0.3323,
+    0.3198
+   ]
+  },
+  {
+   "code": "P1-TIENDA",
+   "name": "Tienda",
+   "typeCode": "OTHER",
+   "aliases": [
+    "tiendita"
+   ],
+   "strokes": [
+    "violet",
+    "amber"
+   ],
+   "at": [
+    0.3521,
+    0.358
+   ]
+  },
+  {
+   "code": "P1-ASC-BANOS",
+   "name": "Ascensor central",
+   "typeCode": "ELEVATOR",
+   "aliases": [
+    "ascensor",
+    "ascensor junto a los baños"
+   ],
+   "strokes": [
+    "blue"
+   ],
+   "at": [
+    0.4137,
+    0.3216
+   ]
+  },
+  {
+   "code": "P1-19",
+   "name": "Sin identificar",
+   "typeCode": "OTHER",
+   "aliases": [],
+   "strokes": [
+    "black"
+   ],
+   "at": [
+    0.4137,
+    0.3568
+   ]
+  },
+  {
+   "code": "P1-BANO-M",
+   "name": "Baño de mujeres",
+   "typeCode": "RESTROOM",
+   "aliases": [
+    "baño"
+   ],
+   "strokes": [
+    "cyan"
+   ],
+   "at": [
+    0.471,
+    0.3216
+   ],
+   "within": [
+    [
+     0.4437,
+     0.3134
+    ],
+    [
+     0.478,
+     0.3415
+    ]
+   ]
+  },
+  {
+   "code": "P1-BANO-H",
+   "name": "Baño de hombres",
+   "typeCode": "RESTROOM",
+   "aliases": [
+    "baño"
+   ],
+   "strokes": [
+    "cyan"
+   ],
+   "at": [
+    0.4688,
+    0.3609
+   ],
+   "within": [
+    [
+     0.4331,
+     0.338
+    ],
+    [
+     0.478,
+     0.3697
+    ]
+   ]
+  },
+  {
+   "code": "P1-CAFETERIA-NORTE",
+   "name": "Cafetería · zona norte",
+   "typeCode": "CAFETERIA",
+   "aliases": [
+    "cafetería",
+    "cafetería no. 2"
+   ],
+   "note": "Parte de la cafetería: la ampliación norte, unos escalones más abajo que el resto.",
+   "strokes": [
+    "red",
+    "black",
+    "blue",
+    "magenta"
+   ],
+   "at": [
+    0.2883,
+    0.446
+   ],
+   "close": 5,
+   "within": [
+    [
+     0.2544,
+     0.4237
+    ],
+    [
+     0.2993,
+     0.6937
+    ]
+   ]
+  },
+  {
+   "code": "P1-COCINA",
+   "name": "Cocina",
+   "typeCode": "OTHER",
+   "aliases": [
+    "cocina de la cafetería"
+   ],
+   "strokes": [
+    "blue",
+    "black",
+    "red"
+   ],
+   "at": [
+    0.3037,
+    0.5047
+   ],
+   "close": 10,
+   "within": [
+    [
+     0.2967,
+     0.4918
+    ],
+    [
+     0.3327,
+     0.6737
+    ]
+   ]
+  },
+  {
+   "code": "P1-ESC-EMERGENCIA",
+   "name": "Escalera de emergencia",
+   "typeCode": "STAIRS",
+   "aliases": [],
+   "strokes": [
+    "black",
+    "blue",
+    "yellow"
+   ],
+   "at": [
+    0.3389,
+    0.6162
+   ],
+   "close": 10,
+   "within": [
+    [
+     0.3257,
+     0.5927
+    ],
+    [
+     0.3543,
+     0.6937
+    ]
+   ]
+  },
+  {
+   "code": "P1-RAMPA-VEHICULAR",
+   "name": "Rampa vehicular al parqueadero",
+   "typeCode": "RAMP",
+   "aliases": [
+    "parqueadero",
+    "parking"
+   ],
+   "strokes": [
+    "yellow"
+   ],
+   "at": [
+    0.3609,
+    0.6162
+   ],
+   "within": [
+    [
+     0.3521,
+     0.6045
+    ],
+    [
+     0.4146,
+     0.7007
+    ]
+   ]
+  },
+  {
+   "code": "P1-PATIO",
+   "name": "Patio",
+   "typeCode": "SOCIAL_AREA",
+   "aliases": [],
+   "strokes": [
+    "green",
+    "blue",
+    "red",
+    "yellow"
+   ],
+   "at": [
+    0.4912,
+    0.6667
+   ],
+   "within": [
+    [
+     0.4102,
+     0.6373
+    ],
+    [
+     0.5,
+     0.6972
+    ]
+   ],
+   "close": 5
+  },
+  {
+   "code": "P1-CAFETERIA",
+   "name": "Cafetería",
+   "typeCode": "CAFETERIA",
+   "aliases": [
+    "cafetería",
+    "zona de comidas",
+    "zona de esparcimiento",
+    "cafetería no. 1"
+   ],
+   "strokes": [
+    "red",
+    "violet",
+    "black",
+    "green",
+    "yellow"
+   ],
+   "at": [
+    0.4754,
+    0.534
+   ],
+   "close": 5
+  },
+  {
+   "code": "P1-PORTERIA",
+   "name": "Portería",
+   "typeCode": "RECEPTION",
+   "aliases": [
+    "portería"
+   ],
+   "strokes": [
+    "blue"
+   ],
+   "at": [
+    0.5106,
+    0.6661
+   ]
+  }
+ ]
+}
