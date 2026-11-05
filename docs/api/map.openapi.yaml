@@ -1863,7 +1863,7 @@ components:
       summary: The first floor of the Edificio Central, as the dev server serves it
       description: |
         A real floor, traced from its evacuation plan and Brian's sketch: the building's outline,
-        rooms in L, an auditorium turned to the rest of the building, a stage with a curved front,
+        rooms in L, an auditorium wing that follows its own plan's walls, a stage with a curved front,
         doors, corridors, spaces drawn but not identified yet, and four inventoried but not drawn.
         The mocks serve it, so every client renders the same input.
       value:
@@ -1928,8 +1928,8 @@ components:
           - { id: e230beed-dfe3-408f-856a-f53820c69ece, code: P1-20, name: "Sin identificar", typeCode: OTHER, typeName: "Sin identificar", category: OTHER,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: [],
-              shape: [{ x: 1657, y: 920 }, { x: 1743, y: 945 }, { x: 1727, y: 1004 }, { x: 1640, y: 979 }],
-              bounds: { x: 1640, y: 920, width: 103, height: 84 }, labelPoint: { x: 1678, y: 958 },
+              shape: [{ x: 1643, y: 927 }, { x: 1645, y: 982 }, { x: 1637, y: 989 }, { x: 1734, y: 1008 }, { x: 1735, y: 1014 }, { x: 1740, y: 1008 }, { x: 1737, y: 946 }],
+              bounds: { x: 1637, y: 927, width: 103, height: 87 }, labelPoint: { x: 1679, y: 966 },
               doors: [], effectiveAccessibility: UNKNOWN }
           - { id: e269fee3-39eb-4a1e-bbce-39e300f2b419, code: P1-21, name: "Sin identificar", typeCode: OTHER, typeName: "Sin identificar", category: OTHER,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
@@ -1940,32 +1940,32 @@ components:
           - { id: ba580c91-196c-41c3-9123-fe4318e67779, code: P1-23, name: "Sin identificar", typeCode: OTHER, typeName: "Sin identificar", category: OTHER,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: [],
-              shape: [{ x: 2023, y: 1026 }, { x: 2147, y: 1061 }, { x: 2130, y: 1120 }, { x: 2005, y: 1084 }],
-              bounds: { x: 2005, y: 1026, width: 142, height: 94 }, labelPoint: { x: 2105, y: 1081 },
+              shape: [{ x: 2032, y: 1088 }, { x: 2037, y: 1096 }, { x: 2088, y: 1108 }, { x: 2110, y: 1107 }, { x: 2171, y: 1125 }, { x: 2184, y: 1125 }, { x: 2191, y: 1090 }, { x: 2201, y: 1074 }, { x: 2191, y: 1061 }, { x: 2154, y: 1053 }, { x: 2150, y: 1047 }, { x: 2124, y: 1048 }, { x: 2039, y: 1025 }, { x: 2027, y: 1025 }, { x: 2017, y: 1050 }, { x: 2013, y: 1079 }, { x: 2007, y: 1087 }],
+              bounds: { x: 2007, y: 1025, width: 194, height: 100 }, labelPoint: { x: 2060, y: 1066 },
               doors: [], effectiveAccessibility: UNKNOWN }
           - { id: 23034b38-5c26-4569-9dcc-f71b464c757d, code: P1-26, name: "Sin identificar", typeCode: OTHER, typeName: "Sin identificar", category: OTHER,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: [],
-              shape: [{ x: 1643, y: 680 }, { x: 1704, y: 595 }, { x: 1747, y: 607 }, { x: 1726, y: 680 }],
-              bounds: { x: 1643, y: 595, width: 104, height: 85 }, labelPoint: { x: 1703, y: 649 },
+              shape: [{ x: 1800, y: 648 }, { x: 1798, y: 636 }, { x: 1735, y: 614 }, { x: 1716, y: 613 }, { x: 1684, y: 682 }, { x: 1703, y: 681 }, { x: 1739, y: 666 }, { x: 1801, y: 654 }, { x: 1805, y: 653 }, { x: 1804, y: 633 }, { x: 1803, y: 633 }],
+              bounds: { x: 1684, y: 613, width: 121, height: 69 }, labelPoint: { x: 1732, y: 641 },
               doors: [], effectiveAccessibility: UNKNOWN }
           - { id: 0f15e970-21c1-4783-b338-0cf64456b0a5, code: P1-27, name: "Sin identificar", typeCode: OTHER, typeName: "Sin identificar", category: OTHER,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: [],
-              shape: [{ x: 1810, y: 625 }, { x: 1872, y: 643 }, { x: 1861, y: 682 }, { x: 1799, y: 664 }],
-              bounds: { x: 1799, y: 625, width: 73, height: 57 }, labelPoint: { x: 1835, y: 653 },
+              shape: [{ x: 1832, y: 681 }, { x: 1862, y: 681 }, { x: 1860, y: 644 }, { x: 1834, y: 637 }, { x: 1808, y: 636 }, { x: 1803, y: 630 }, { x: 1803, y: 633 }, { x: 1804, y: 633 }, { x: 1805, y: 653 }, { x: 1817, y: 659 }],
+              bounds: { x: 1803, y: 630, width: 59, height: 51 }, labelPoint: { x: 1841, y: 659 },
               doors: [], effectiveAccessibility: UNKNOWN }
           - { id: 6bb02c35-7b53-4dea-907c-cabfcb95e4f9, code: P1-28, name: "Sin identificar", typeCode: OTHER, typeName: "Sin identificar", category: OTHER,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: [],
-              shape: [{ x: 2012, y: 684 }, { x: 2108, y: 711 }, { x: 2099, y: 742 }, { x: 2004, y: 714 }],
-              bounds: { x: 2004, y: 684, width: 104, height: 58 }, labelPoint: { x: 2084, y: 721 },
+              shape: [{ x: 2102, y: 724 }, { x: 2099, y: 711 }, { x: 2029, y: 691 }, { x: 2018, y: 691 }, { x: 2016, y: 715 }, { x: 2026, y: 715 }, { x: 2065, y: 735 }],
+              bounds: { x: 2016, y: 691, width: 86, height: 44 }, labelPoint: { x: 2066, y: 718 },
               doors: [], effectiveAccessibility: UNKNOWN }
           - { id: 7dbd5f6c-6633-4172-9956-16688a55b7e8, code: P1-29, name: "Sin identificar", typeCode: OTHER, typeName: "Sin identificar", category: OTHER,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: [],
-              shape: [{ x: 2141, y: 721 }, { x: 2237, y: 749 }, { x: 2219, y: 811 }],
-              bounds: { x: 2141, y: 721, width: 96, height: 90 }, labelPoint: { x: 2208, y: 764 },
+              shape: [{ x: 2213, y: 813 }, { x: 2214, y: 797 }, { x: 2235, y: 792 }, { x: 2229, y: 786 }, { x: 2232, y: 773 }, { x: 2230, y: 758 }, { x: 2136, y: 733 }, { x: 2143, y: 749 }, { x: 2199, y: 805 }],
+              bounds: { x: 2136, y: 733, width: 99, height: 80 }, labelPoint: { x: 2203, y: 775 },
               doors: [], effectiveAccessibility: UNKNOWN }
           - { id: f7e2ed95-f361-4b8a-9b72-10f929d818b1, code: P1-35, name: "Sin identificar", typeCode: OTHER, typeName: "Sin identificar", category: OTHER,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
@@ -2010,45 +2010,45 @@ components:
           - { id: cf300ca0-6e74-40ed-be84-383b9f3cf998, code: P1-AUD-ANTESALA-N, wing: S, name: "Antesala norte del auditorio", typeCode: CORRIDOR, typeName: "Pasillo", category: CIRCULATION,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: ["antesala"],
-              shape: [{ x: 1471, y: 790 }, { x: 1573, y: 790 }, { x: 1573, y: 680 }, { x: 1726, y: 680 }, { x: 1640, y: 979 }, { x: 1471, y: 979 }],
-              bounds: { x: 1471, y: 680, width: 255, height: 299 }, labelPoint: { x: 1567, y: 884 },
-              doors: [{ from: { x: 1471, y: 790 }, to: { x: 1471, y: 830 } }, { from: { x: 1682, y: 833 }, to: { x: 1674, y: 860 } }, { from: { x: 1585, y: 979 }, to: { x: 1615, y: 979 } }], effectiveAccessibility: UNKNOWN }
+              shape: [{ x: 1538, y: 780 }, { x: 1538, y: 978 }, { x: 1641, y: 978 }, { x: 1641, y: 706 }, { x: 1566, y: 706 }, { x: 1566, y: 780 }],
+              bounds: { x: 1538, y: 706, width: 103, height: 272 }, labelPoint: { x: 1589, y: 842 },
+              doors: [{ from: { x: 1538, y: 816 }, to: { x: 1538, y: 786 } }, { from: { x: 1641, y: 821 }, to: { x: 1641, y: 851 } }, { from: { x: 1615, y: 978 }, to: { x: 1585, y: 978 } }], effectiveAccessibility: UNKNOWN }
           - { id: 22c9d827-7191-460e-9540-34d929d656fa, code: P1-AUD-AUDIOVISUALES, wing: S, name: "Audiovisuales del auditorio", typeCode: IT_ROOM, typeName: "Cuarto de TI", category: FACILITIES,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: ["audiovisuales"],
-              shape: [{ x: 1901, y: 652 }, { x: 2012, y: 684 }, { x: 1986, y: 772 }, { x: 1876, y: 740 }],
-              bounds: { x: 1876, y: 652, width: 136, height: 120 }, labelPoint: { x: 1948, y: 713 },
+              shape: [{ x: 2004, y: 716 }, { x: 2004, y: 695 }, { x: 1923, y: 677 }, { x: 1893, y: 679 }, { x: 1900, y: 748 }, { x: 1944, y: 756 }, { x: 1968, y: 765 }, { x: 1988, y: 765 }],
+              bounds: { x: 1893, y: 677, width: 111, height: 88 }, labelPoint: { x: 1961, y: 723 },
               doors: [], effectiveAccessibility: UNKNOWN }
           - { id: ed994777-2aad-4689-92ed-ed82ffd74944, code: P1-AUD-ESCALERA, wing: S, name: "Escalera del auditorio", typeCode: STAIRS, typeName: "Escalera", category: CIRCULATION,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: [],
-              shape: [{ x: 2290, y: 866 }, { x: 2342, y: 866 }, { x: 2342, y: 1090 }, { x: 2290, y: 1090 }],
-              bounds: { x: 2290, y: 866, width: 52, height: 224 }, labelPoint: { x: 2316, y: 978 },
+              shape: [{ x: 2310, y: 1097 }, { x: 2310, y: 866 }, { x: 2264, y: 866 }, { x: 2264, y: 1097 }],
+              bounds: { x: 2264, y: 866, width: 46, height: 231 }, labelPoint: { x: 2287, y: 981 },
               doors: [], effectiveAccessibility: UNKNOWN }
           - { id: 7bd2f102-8738-4bd9-a899-236700bc0ef8, code: P1-AUD-ESCENARIO, wing: S, name: "Tarima del auditorio", typeCode: OTHER, typeName: "Sin identificar", category: OTHER,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: ["tarima", "escenario", "escenario del auditorio"],
-              shape: [{ x: 1727, y: 1004 }, { x: 1749, y: 925 }, { x: 1786, y: 904 }, { x: 1826, y: 891 }, { x: 1867, y: 889 }, { x: 1909, y: 895 }, { x: 1948, y: 912 }, { x: 1981, y: 936 }, { x: 2009, y: 968 }, { x: 2028, y: 1006 }, { x: 2005, y: 1084 }],
-              bounds: { x: 1727, y: 889, width: 301, height: 195 }, labelPoint: { x: 1887, y: 970 },
+              shape: [{ x: 2024, y: 1017 }, { x: 2030, y: 984 }, { x: 2029, y: 971 }, { x: 1983, y: 929 }, { x: 1909, y: 892 }, { x: 1814, y: 893 }, { x: 1784, y: 899 }, { x: 1741, y: 915 }, { x: 1742, y: 940 }, { x: 1737, y: 946 }, { x: 1740, y: 1008 }, { x: 1735, y: 1015 }, { x: 2007, y: 1079 }, { x: 2007, y: 1087 }, { x: 2013, y: 1079 }, { x: 2017, y: 1050 }, { x: 2027, y: 1025 }],
+              bounds: { x: 1735, y: 892, width: 295, height: 195 }, labelPoint: { x: 1891, y: 971 },
               doors: [], effectiveAccessibility: UNKNOWN }
           - { id: d9115759-a714-4c8e-b80d-50bd0829a598, code: P1-AUD-SALIDA-SUR, wing: S, name: "Antesala sur del auditorio", typeCode: CORRIDOR, typeName: "Pasillo", category: CIRCULATION,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: ["antesala", "salida sur del auditorio"],
-              shape: [{ x: 2226, y: 788 }, { x: 2342, y: 821 }, { x: 2342, y: 866 }, { x: 2290, y: 866 }, { x: 2290, y: 1090 }, { x: 2139, y: 1090 }],
-              bounds: { x: 2139, y: 788, width: 203, height: 302 }, labelPoint: { x: 2225, y: 1025 },
-              doors: [{ from: { x: 2245, y: 793 }, to: { x: 2274, y: 802 } }, { from: { x: 2163, y: 1005 }, to: { x: 2155, y: 1035 } }], effectiveAccessibility: UNKNOWN }
+              shape: [{ x: 2264, y: 1092 }, { x: 2264, y: 866 }, { x: 2310, y: 866 }, { x: 2310, y: 867 }, { x: 2311, y: 867 }, { x: 2311, y: 810 }, { x: 2241, y: 789 }, { x: 2234, y: 791 }, { x: 2235, y: 792 }, { x: 2214, y: 797 }, { x: 2213, y: 813 }, { x: 2206, y: 814 }, { x: 2213, y: 898 }, { x: 2138, y: 1047 }, { x: 2150, y: 1047 }, { x: 2154, y: 1053 }, { x: 2191, y: 1061 }, { x: 2201, y: 1073 }],
+              bounds: { x: 2138, y: 789, width: 173, height: 303 }, labelPoint: { x: 2213, y: 1014 },
+              doors: [{ from: { x: 2146, y: 1031 }, to: { x: 2160, y: 1004 } }, { from: { x: 2241, y: 789 }, to: { x: 2275, y: 799 } }], effectiveAccessibility: UNKNOWN }
           - { id: ff8b6701-ff1a-4236-a188-a2196c77e761, code: P1-AUD-TAQUILLA, wing: S, name: "Taquilla del auditorio", typeCode: ADMIN_OFFICE, typeName: "Ventanilla de atención", category: PUBLIC_SERVICE,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: ["taquilla"],
-              shape: [{ x: 1471, y: 680 }, { x: 1573, y: 680 }, { x: 1573, y: 790 }, { x: 1471, y: 790 }],
-              bounds: { x: 1471, y: 680, width: 102, height: 110 }, labelPoint: { x: 1522, y: 735 },
+              shape: [{ x: 1566, y: 683 }, { x: 1471, y: 683 }, { x: 1471, y: 780 }, { x: 1566, y: 780 }],
+              bounds: { x: 1471, y: 683, width: 95, height: 97 }, labelPoint: { x: 1518, y: 731 },
               doors: [], effectiveAccessibility: UNKNOWN }
           - { id: 7fd8ef05-ab8a-4e17-ab4d-30c8e81fc58a, code: P1-AUD-UTILERIA, wing: S, name: "Utilería del auditorio", typeCode: STORAGE, typeName: "Bodega", category: FACILITIES,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: ["utilería"],
-              shape: [{ x: 2139, y: 1090 }, { x: 2342, y: 1090 }, { x: 2342, y: 1181 }, { x: 2130, y: 1120 }],
-              bounds: { x: 2130, y: 1090, width: 212, height: 91 }, labelPoint: { x: 2303, y: 1129 },
-              doors: [{ from: { x: 2250, y: 1155 }, to: { x: 2281, y: 1163 } }], effectiveAccessibility: UNKNOWN }
+              shape: [{ x: 2264, y: 1092 }, { x: 2202, y: 1074 }, { x: 2190, y: 1131 }, { x: 2310, y: 1152 }, { x: 2310, y: 1097 }, { x: 2264, y: 1097 }],
+              bounds: { x: 2190, y: 1074, width: 120, height: 78 }, labelPoint: { x: 2225, y: 1109 },
+              doors: [{ from: { x: 2286, y: 1148 }, to: { x: 2254, y: 1142 } }], effectiveAccessibility: UNKNOWN }
           - { id: a79bef16-f3c4-483b-88bb-85b710dd4470, code: P1-AUD-VESTIBULO, wing: S, name: "Lobby del auditorio", typeCode: SOCIAL_AREA, typeName: "Zona social", category: SOCIAL,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: ["lobby", "vestíbulo del auditorio", "foyer del auditorio"],
@@ -2058,9 +2058,9 @@ components:
           - { id: afaa9fa4-b6f7-4852-a81f-4c9dd3d2e712, code: P1-AUDITORIO-SONIA, wing: S, name: "Auditorio Sonia Fajardo Forero", typeCode: AUDITORIUM, typeName: "Auditorio", category: TEACHING,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: ["auditorio", "Sonia Fajardo Forero"],
-              shape: [{ x: 1747, y: 607 }, { x: 1810, y: 625 }, { x: 1799, y: 664 }, { x: 1861, y: 682 }, { x: 1872, y: 643 }, { x: 1901, y: 652 }, { x: 1876, y: 740 }, { x: 1986, y: 772 }, { x: 2003, y: 715 }, { x: 2099, y: 742 }, { x: 2108, y: 711 }, { x: 2141, y: 721 }, { x: 2219, y: 811 }, { x: 2147, y: 1061 }, { x: 2023, y: 1025 }, { x: 2028, y: 1006 }, { x: 2009, y: 968 }, { x: 1981, y: 936 }, { x: 1948, y: 912 }, { x: 1909, y: 895 }, { x: 1867, y: 889 }, { x: 1826, y: 891 }, { x: 1786, y: 904 }, { x: 1749, y: 925 }, { x: 1743, y: 945 }, { x: 1657, y: 920 }],
-              bounds: { x: 1657, y: 607, width: 562, height: 454 }, labelPoint: { x: 2078, y: 862 },
-              doors: [{ from: { x: 1682, y: 833 }, to: { x: 1674, y: 860 } }, { from: { x: 2163, y: 1005 }, to: { x: 2155, y: 1035 } }], effectiveAccessibility: UNKNOWN }
+              shape: [{ x: 2030, y: 984 }, { x: 2024, y: 1017 }, { x: 2027, y: 1025 }, { x: 2039, y: 1025 }, { x: 2124, y: 1048 }, { x: 2138, y: 1047 }, { x: 2213, y: 898 }, { x: 2206, y: 814 }, { x: 2212, y: 813 }, { x: 2199, y: 805 }, { x: 2143, y: 749 }, { x: 2136, y: 733 }, { x: 2140, y: 734 }, { x: 2140, y: 730 }, { x: 2135, y: 730 }, { x: 2134, y: 727 }, { x: 2134, y: 730 }, { x: 2128, y: 730 }, { x: 2134, y: 732 }, { x: 2133, y: 738 }, { x: 2121, y: 726 }, { x: 2108, y: 725 }, { x: 2107, y: 719 }, { x: 2102, y: 724 }, { x: 2065, y: 735 }, { x: 2026, y: 716 }, { x: 2016, y: 716 }, { x: 2011, y: 709 }, { x: 2004, y: 716 }, { x: 1988, y: 766 }, { x: 1968, y: 766 }, { x: 1950, y: 760 }, { x: 1944, y: 756 }, { x: 1900, y: 748 }, { x: 1894, y: 701 }, { x: 1871, y: 701 }, { x: 1871, y: 692 }, { x: 1860, y: 686 }, { x: 1823, y: 688 }, { x: 1818, y: 682 }, { x: 1817, y: 662 }, { x: 1807, y: 659 }, { x: 1782, y: 662 }, { x: 1747, y: 670 }, { x: 1689, y: 688 }, { x: 1683, y: 693 }, { x: 1681, y: 701 }, { x: 1670, y: 701 }, { x: 1663, y: 711 }, { x: 1664, y: 707 }, { x: 1658, y: 707 }, { x: 1656, y: 713 }, { x: 1655, y: 704 }, { x: 1641, y: 746 }, { x: 1643, y: 927 }, { x: 1737, y: 946 }, { x: 1741, y: 939 }, { x: 1741, y: 915 }, { x: 1784, y: 899 }, { x: 1814, y: 893 }, { x: 1909, y: 892 }, { x: 1957, y: 914 }, { x: 1983, y: 929 }, { x: 2029, y: 971 }],
+              bounds: { x: 1641, y: 659, width: 572, height: 389 }, labelPoint: { x: 2079, y: 854 },
+              doors: [{ from: { x: 1642, y: 851 }, to: { x: 1642, y: 821 } }, { from: { x: 2157, y: 1009 }, to: { x: 2143, y: 1036 } }], effectiveAccessibility: UNKNOWN }
           - { id: e3955b8c-3460-450e-9133-15bedecd44ac, code: P1-BANO-H, wing: C, name: "Baño de hombres", typeCode: RESTROOM, typeName: "Baño", category: FACILITIES,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: ["baño"],
@@ -2124,8 +2124,8 @@ components:
           - { id: 5a46e855-9b93-4e94-9163-55ca9becc68f, code: P1-PATIO-CUBIERTO, wing: S, name: "Patio cubierto", typeCode: SOCIAL_AREA, typeName: "Zona social", category: SOCIAL,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: [],
-              shape: [{ x: 1516, y: 989 }, { x: 1638, y: 989 }, { x: 2340, y: 1191 }, { x: 2340, y: 1302 }, { x: 1516, y: 1114 }],
-              bounds: { x: 1516, y: 989, width: 824, height: 313 }, labelPoint: { x: 1631, y: 1064 },
+              shape: [{ x: 1516, y: 989 }, { x: 1516, y: 1114 }, { x: 2340, y: 1302 }, { x: 2340, y: 1100 }, { x: 2320, y: 1095 }, { x: 2320, y: 1164 }, { x: 2178, y: 1139 }, { x: 2109, y: 1117 }, { x: 2087, y: 1118 }, { x: 2031, y: 1105 }, { x: 2026, y: 1098 }, { x: 1997, y: 1097 }, { x: 1997, y: 1087 }, { x: 1725, y: 1023 }, { x: 1725, y: 1017 }, { x: 1615, y: 995 }, { x: 1623, y: 988 }],
+              bounds: { x: 1516, y: 988, width: 824, height: 314 }, labelPoint: { x: 1684, y: 1080 },
               doors: [], effectiveAccessibility: UNKNOWN }
           - { id: 9d8e884a-dd0c-48c9-88e5-d28713ddce7b, code: P1-PORTERIA, name: "Portería", typeCode: RECEPTION, typeName: "Recepción", category: PUBLIC_SERVICE,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,

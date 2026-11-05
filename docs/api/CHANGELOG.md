@@ -18,7 +18,7 @@ that follow. Until a service has caught up, its contract describes where it is g
   mocks serve it, so every client draws the same real floor: rooms in L, a trapezoid wing, doors,
   corridors, spaces not identified yet and four spaces not drawn yet (#195).
 - **Example updated (#218):** `CentralGroundFloor` follows the floor as it is redrawn: the
-  auditorium is a block turned along the Carrera 9 Bis, the floor has its `outline` (the building's
+  auditorium's wing follows the walls of its own plan, the floor has its `outline` (the building's
   walls, with the passage to the Carrera 9A), and only the two corridors that run where the floor
   is open are left. The shapes and label points of the auditorium's wing change; the schema does
   not.
