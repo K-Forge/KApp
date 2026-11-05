@@ -373,7 +373,7 @@ closes when both are done. Kotlin goes first; Swift resumes when the Android app
 Read `docs/PROGRESS.md` for the detailed status before proposing large changes. What each area is doing right now,
 what waits on whom and what comes next is in [`docs/state/`](docs/state/README.md), which is newer than this section.
 
-- **Contracts:** the 2.0 set (#42) — semaphore 2.0, schedule 2.0, auth 1.0, user 1.0, map 3.6.
+- **Contracts:** the 2.0 set (#42) — semaphore 2.0.1, schedule 2.0.1, auth 1.1, user 1.1, map 3.7.
   `docs/api/CHANGELOG.md` holds the history. Write the spec first; springdoc output is a drift check against it,
   not the other way round.
 - **Backend:** phase 1 removed Eureka and the frozen services; phase 2 made the academic data read-only, behind the

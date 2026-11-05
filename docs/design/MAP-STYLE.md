@@ -5,7 +5,7 @@
 
 ## The rule: clients paint the map, they do not transcribe it
 
-A floor is data that map-service serves (`GET /api/map/buildings/{code}/floors/{floorCode}`, map 3.6.0). Every
+A floor is data that map-service serves (`GET /api/map/buildings/{code}/floors/{floorCode}`, map 3.7.0). Every
 client has **one generic renderer** that knows nothing about any particular building, floor or room. It draws
 whatever the response holds, with the style in this folder. So a floor redrawn in the portal reaches the apps without
 a release, and the Android and iOS maps look the same.
@@ -51,8 +51,9 @@ The category fills are the ones the portal's floor editor already uses (`CATEGOR
 ## Labels
 
 - **Text:** `doorCode`, else `name`. Never `code`; the contract explains why.
-- **Anchor:** `labelPoint` once the contract has it: a point inside the shape, computed by the server. Until then,
-  the centre of `bounds`, which can fall outside an L-shaped space.
+- **Anchor:** `labelPoint` (map 3.7.0): the point inside the shape farthest from its walls, computed by the server.
+  Never the centre of `bounds`, which can fall outside an L-shaped space; use it only as a fallback when a server
+  does not send `labelPoint` yet.
 - **Fit:** a label wider than its space is hidden at that zoom, and appears when zooming in. When labels collide,
   the one earlier in `labels.priority` wins.
 - **Size:** between `minSizeSp` and `maxSizeSp`, growing with zoom.
