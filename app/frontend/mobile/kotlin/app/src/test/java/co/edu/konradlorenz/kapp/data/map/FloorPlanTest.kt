@@ -31,6 +31,15 @@ class FloorPlanTest {
     }
 
     @Test
+    fun `the spaces not drawn yet are kept apart, never dropped`() {
+        val drawn = space(square(0, 0, 10))
+        val notYet = space(emptyList())
+        val floor = FloorPlan(code = "P3", level = 3.0, name = "Piso 3", width = 100, height = 100, spaces = listOf(drawn, notYet))
+        assertEquals(listOf(drawn), floor.placed)
+        assertEquals(listOf(notYet), floor.unplaced)
+    }
+
+    @Test
     fun `a floor with nothing drawn is its whole drawing`() {
         val floor = FloorPlan(code = "S1", level = -1.0, name = "Sótano", width = 1525, height = 629)
         assertEquals(MapBounds(0, 0, 1525, 629), floor.drawnBounds)
