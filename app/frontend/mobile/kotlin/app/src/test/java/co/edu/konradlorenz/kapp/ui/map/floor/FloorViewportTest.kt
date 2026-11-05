@@ -42,6 +42,17 @@ class FloorViewportTest {
     }
 
     @Test
+    fun `a double tap zooms in twice around the tap, and once all the way in goes back to the fit`() {
+        val once = fit.doubleTapped(300f, 900f, fit)
+        assertEquals(2f, once.zoom, DELTA)
+        val x = (300f - fit.offsetX) / fit.scale
+        assertEquals(300f, once.screenX(x), DELTA)
+        val allIn = once.doubleTapped(300f, 900f, fit).doubleTapped(300f, 900f, fit)
+        assertEquals(FloorViewport.MAX_ZOOM, allIn.zoom, DELTA)
+        assertEquals(fit, allIn.doubleTapped(300f, 900f, fit))
+    }
+
+    @Test
     fun `zooming keeps the point under the fingers where it is`() {
         val zoomed = fit.zoomed(2f, pivotX = 300f, pivotY = 900f)
         val x = (300f - fit.offsetX) / fit.scale

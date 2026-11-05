@@ -188,6 +188,8 @@
     <string name="map_back">Volver a los edificios</string>
     <string name="map_floor_failed">No pudimos cargar este piso.</string>
     <string name="map_floor_not_drawn">Este piso todavía no está dibujado.</string>
+    <string name="map_zoom_in">Acercar el mapa</string>
+    <string name="map_zoom_out">Alejar el mapa</string>
 
     <string name="band_go_home">Ir a Inicio</string>
     <string name="home_open_profile">Abrir Perfil</string>

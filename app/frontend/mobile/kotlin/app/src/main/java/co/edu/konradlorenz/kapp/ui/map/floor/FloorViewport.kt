@@ -37,8 +37,23 @@ data class FloorViewport(
         )
     }
 
+    /**
+     * A double tap at ([x], [y]): twice as close around that point, or back to [fit] once it is as
+     * close as it goes, so double taps alone can always get back out.
+     */
+    fun doubleTapped(x: Float, y: Float, fit: FloorViewport): FloorViewport =
+        if (zoom >= MAX_ZOOM - ZOOM_EPSILON) fit else zoomed(DOUBLE_TAP_ZOOM, x, y)
+
     companion object {
         const val MAX_ZOOM = 8f
+
+        /** How much a double tap zooms in. */
+        const val DOUBLE_TAP_ZOOM = 2f
+
+        /** How much the + and - buttons zoom in and out. */
+        const val BUTTON_ZOOM = 1.5f
+
+        private const val ZOOM_EPSILON = 0.01f
 
         /**
          * [bounds] of a drawing in a [viewWidth] x [viewHeight] view, [padding] pixels in from
