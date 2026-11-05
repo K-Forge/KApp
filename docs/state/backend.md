@@ -1,7 +1,7 @@
 # Backend State
 
-> Owner: Backend. As of 2026-11-05, `develop` at `6ac0ea0`. Backend | Local: EC P1's auditorium redrawn as a turned
-> block, with the floor's outline and the Carrera 9A passage (#218).
+> Owner: Backend. As of 2026-11-05, `develop` at `6ac0ea0`. Backend | Local: EC P1's auditorium redrawn from its own
+> plan's walls, with the floor's outline and the Carrera 9A passage (#218).
 
 ---
 
@@ -66,8 +66,10 @@
 
 - **EC P1's auditorium, outline and Carrera 9A exit (#218, `feature/ec-p1-turned-auditorium`):**
   - The auditorium's plan laid over the floor's fits by scale, a quarter turn and a shift (corners within 0.8%);
-    on the surveyed corners the hall is a block along the Carrera 9 Bis. `register.py` gained `"turned"` (rooms
-    drawn in a block's own frame, u along its front, v across) and `"outline"`; `ec-surveyed.json` uses both.
+    the wing is Brian's outline over that plan, laid by the survey similarity, with every seat the plan prints
+    inside the hall (`scripts/plan-tracing/wip/aud_walls.py`; a first version as a square block was refused).
+    `register.py` gained `"turned"` (a block's own frame), `"drawn"` (rooms given in floor units) and
+    `"outline"`; `ec-surveyed.json` uses `"drawn"` and `"outline"`.
   - The floor's `outline` is the surveyed parts on P1, the open patio and the passage between the tower and the
     Casa de Francisco de Paula Vélez's lot line, out to the sidewalk: no contract change was needed for the
     casa's wall. The gate onto the Carrera 9A is 2.5 m, as the survey measured it (a-10).
@@ -76,7 +78,7 @@
   - `render-map-base.py` now draws a floor's outline, corridors and doors. Review images:
     `~/Documents/KApp/mapa-pisos/ec-p1-218/` on Brian's Mac.
   - After merge: Kotlin re-runs `capture-demo-data.sh` so the demo serves the new example.
-  - Next: P2's gallery on the turned hall (#220).
+  - Next: P2's gallery over the hall as now drawn (#220).
 - **`verticalCode` (#213):** issue open, not started. Contract, service, seed data and portal, one PR each.
 - **EC P1 on the dev server, verified 2026-11-05:** the API returns exactly what V016 seeds (46 spaces, 42 drawn,
   4 corridors, same doors), and the portal draws it whole. To check the dev server through the portal or the API,
@@ -105,7 +107,7 @@
 | 0–2 | #54, #55 | Done |
 | 3 · Microsoft sign-in, refresh tokens, roles and permissions | #56 | Done and closed (#141, #142, #169, #172, #179, #148, #156) |
 | 4 · End-to-end journeys per profile | #57 | Not started |
-| 5 · EC floors faithful to reality | #58 | P1 done (#183, #193; auditorium turned in #218). P2 to P8 wait for Brian's sketches |
+| 5 · EC floors faithful to reality | #58 | P1 done (#183, #193; auditorium from its plan in #218). P2 to P8 wait for Brian's sketches |
 | 6 · Kubernetes with kind, and production | #59 | Branch stale. Production waits on IT's server decision |
 | 7 · notification-service | #60 | Not started. Needs Firebase, and APNs needs the Apple account |
 | 8 · Points, voice, damage reports, lost and found | #61 | Not started |
