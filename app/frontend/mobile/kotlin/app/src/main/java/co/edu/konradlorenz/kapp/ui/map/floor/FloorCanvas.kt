@@ -72,7 +72,10 @@ fun FloorCanvas(
     selected: String? = null,
     onSelect: (FloorSpace?) -> Unit = {},
 ) {
+    // The tap handler outlives a recomposition when the fit stays the same, as it does between
+    // floors that share a traced outline, so it reads the floor and the callback as they are now.
     val select by rememberUpdatedState(onSelect)
+    val current by rememberUpdatedState(plan)
     val measurer = rememberTextMeasurer()
     val padding = with(LocalDensity.current) { FloorPadding.toPx() }
     var size by remember { mutableStateOf(IntSize.Zero) }
@@ -99,7 +102,7 @@ fun FloorCanvas(
                     detectTapGestures(
                         onTap = { at ->
                             val view = viewport ?: return@detectTapGestures
-                            select(plan.spaceAt(view.drawingX(at.x), view.drawingY(at.y)))
+                            select(current.spaceAt(view.drawingX(at.x), view.drawingY(at.y)))
                         },
                         onDoubleTap = { at ->
                             val start = fit ?: return@detectTapGestures
