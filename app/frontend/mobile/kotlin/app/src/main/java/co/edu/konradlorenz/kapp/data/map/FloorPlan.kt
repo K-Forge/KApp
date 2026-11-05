@@ -24,6 +24,9 @@ data class FloorPlan(
     /** The spaces with a shape to draw. The others are listed beside the drawing. */
     val placed: List<FloorSpace> get() = spaces.filter { it.shape.size >= 3 }
 
+    /** The spaces on the floor that are not drawn yet: listed beside the drawing, never dropped. */
+    val unplaced: List<FloorSpace> get() = spaces.filter { it.shape.size < 3 }
+
     /**
      * The part of the drawing there is something on: the outline's box once it is traced, else the
      * box around every placed space, else the whole drawing. What the screen is fitted to, so a

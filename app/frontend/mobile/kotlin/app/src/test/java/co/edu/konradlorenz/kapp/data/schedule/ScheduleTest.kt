@@ -155,7 +155,8 @@ class ScheduleTest {
 
         override suspend fun buildings(): List<Building> = error("not used here")
 
-        override suspend fun floor(building: String, floor: String): FloorPlan = error("not used here")
+        override suspend fun floor(building: String, floor: String, etag: String?): Response<FloorPlan> =
+            error("not used here")
 
         override suspend fun space(room: String, buildingCode: String): SpaceDetail {
             error?.let { throw it }

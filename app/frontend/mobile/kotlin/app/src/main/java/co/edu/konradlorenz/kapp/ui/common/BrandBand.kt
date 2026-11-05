@@ -70,6 +70,7 @@ fun BrandBand(
     title: String,
     cover: Boolean = false,
     scrolled: Dp = 0.dp,
+    leading: @Composable (() -> Unit)? = null,
     trailing: @Composable (() -> Unit)? = null,
 ) {
     Box(
@@ -87,6 +88,8 @@ fun BrandBand(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            // Before the crest: where Android puts the way back, on a screen that has one.
+            leading?.invoke()
             val goHome = LocalGoHome.current
             val goHomeLabel = stringResource(R.string.band_go_home)
             Box(
