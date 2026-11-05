@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Map API
-  version: 3.6.0
+  version: 3.7.0
   summary: Schematic campus map and space search for Fundacion Universitaria Konrad Lorenz.
   description: |
     Digital campus map for Fundacion Universitaria Konrad Lorenz (Bogota, Colombia).
@@ -130,8 +130,11 @@ info:
     Every placed space has a **`shape`**: three or more corners, in order, on the drawing. It encloses
     some area, never crosses itself and never overlaps another space's shape - two rooms that share
     a wall share the edge, and that is not an overlap. `bounds`, in responses, is the rectangle
-    around the shape, for labels and hit tests. A space without `shape` is on the floor but not
-    drawn yet: list it beside the drawing rather than dropping it.
+    around the shape, for framing and hit tests. **`labelPoint`**, also in responses, is where the
+    space's label and icon go: a point inside the shape, as far from its walls as the shape allows.
+    The centre of `bounds` can fall outside an L-shaped room, so draw labels at `labelPoint`, never
+    at the centre of `bounds`. A space without `shape` is on the floor but not drawn yet: list it
+    beside the drawing rather than dropping it.
 
     **`doors`** are the stretches of a space's outline its doors take up, jamb to jamb; both ends of
     each lie on the space's shape. A door between two rooms is on both. Corridors are polylines
@@ -1521,6 +1524,9 @@ components:
         bounds:
           $ref: '#/components/schemas/Bounds'
           description: The box around `shape`, for lists and search results that only need a position. Absent with `shape`.
+        labelPoint:
+          $ref: '#/components/schemas/Point'
+          description: Where the label and icon go - the point inside `shape` farthest from its walls, in whole units. Computed by the server. Absent with `shape`.
         doors:
           type: array
           description: Openings on the room's walls. Empty when none is drawn yet.
@@ -1847,6 +1853,7 @@ components:
             aliases: [interactividad]
             shape: [{ x: 80, y: 80 }, { x: 240, y: 80 }, { x: 240, y: 160 }, { x: 80, y: 160 }]
             bounds: { x: 80, y: 80, width: 160, height: 80 }
+            labelPoint: { x: 160, y: 120 }
             doors: [{ from: { x: 140, y: 160 }, to: { x: 160, y: 160 } }]
             accessVia: B-ESC
             effectiveAccessibility: STAIRS_ONLY
@@ -1872,6 +1879,7 @@ components:
             aliases: [sala de sistemas, lab 302, laboratorio 302]
             shape: [{ x: 280, y: 200 }, { x: 400, y: 200 }, { x: 400, y: 280 }, { x: 280, y: 280 }]
             bounds: { x: 280, y: 200, width: 120, height: 80 }
+            labelPoint: { x: 340, y: 240 }
             doors: [{ from: { x: 280, y: 230 }, to: { x: 280, y: 250 } }]
             accessVia: ASC-CENTRAL
             effectiveAccessibility: STEP_FREE
