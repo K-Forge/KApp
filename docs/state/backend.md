@@ -1,7 +1,7 @@
 # Backend State
 
-> Owner: Backend. As of 2026-11-05, `develop` at `3966192`. Built from Backend's report of 2026-10-29, the merges of
-> 2026-11-04, and the work on #183, #193 and #155 since.
+> Owner: Backend. As of 2026-11-05, `develop` at `f36878b` plus #193 and #206. Written by Core when the cloud sessions
+> closed: #183, #193 and #203 are merged, and #155 is closed. Backend | Local continues from here.
 
 ---
 
@@ -13,7 +13,7 @@
 | user-service | user 1.1.0 | Profiles without identity document or phone. `academic` is read-only from the test SINU (#76–#80). `PUT /internal/users/{id}/roles` | V003 |
 | semaphore-service | semaphore 2.0.1 | SINU course statuses, read-only through `SinuRecordPort` and `FakeSinuRecordAdapter` (#79). Editable plans at `/me/plans` (`plannedLevel` 1 to 12). The catalogue of the 23 pensums | V010 |
 | schedule-service | schedule 2.0.1 | Current classes only: `/me`, `/me/day`, `/me/week`, `/me/periods`, from the test SINU (`SinuTimetablePort`, #78). No database | none |
-| map-service | map 3.6.0 | Buildings, floors, layouts, spaces, types, campuses, ground, structures and survey. ETag. `sinuSedes` (#77) | V015 (V016 is in #183; #193 squares its rooms) |
+| map-service | map 3.6.0 | Buildings, floors, layouts, spaces, types, campuses, ground, structures and survey. ETag. `sinuSedes` (#77) | V016 (EC P1 from Brian's sketch, squared: #183, #193) |
 | api-gateway | none | Routes by name, with no registry (#64). Answers 500 when a service is down (#157) | none |
 
 - **Local helpers:** fake OIDC (mock-oauth2-server on `:8090`, with test users for student, professor and staff;
@@ -51,45 +51,26 @@
 
 ---
 
-## In progress
+## Done on 2026-11-05
 
-### #183: EC floor 1 from Brian's sketch, plus V016 (`feature/central-building-floors-1-and-2`)
-
-- **What it does:**
-  - traces the 26 spaces of Brian's floor 1 sketch under their existing codes, with Brian's answers applied: one
-    cafeteria plus a north zone, "Ascensor central", the open patio outside the surveyed footprint, the "?" rooms as
-    "Sin identificar", and Parking as the ramp;
-  - registers the sketch onto the building as measured with the tape (`ec-surveyed.json`). The RS plan stays the
-    source for doors;
-  - V016 redraws P1 over the saved floor and keeps the old floor whole in `map_replaced_floors`, so the change can
-    be undone.
-- **Brian's review on 2026-11-04:** the shapes came out irregular, worst next to the Carrera 9 Bis. Fixed in #193.
-- **#193, stacked on #183 (`feature/central-floor-one-square-rooms`), ready for review:**
-  - `scripts/plan-tracing/regular.py`, run by `register.py` after the fit: walls level or plumb, steps under 0.9 m
-    gone, neighbours' walls within 0.23 m on one line, stacked stairs and lifts as fixed anchors;
-  - the auditorium's wing is squared between its two measured facades (`askew`), so it comes out as trapezoids.
-    **Brian approved the trapezoids on 2026-11-05**;
-  - P1 goes from 526 corners and 209 slanted edges to 200 and 43; the same 12 doors; no overlaps; 143 map-service
-    tests green.
-- **Merge path:** #183 first, then #193 (the restack bot retargets it). Both merge cleanly into `develop`.
+- **EC floor 1** (#183, then #193): traced from Brian's sketch, with rooms squared by `scripts/plan-tracing/regular.py`
+  (walls level or plumb, shared walls on one line, stacked stairs and lifts as anchors; the auditorium wing as
+  trapezoids along its two measured facades, as Brian approved). V016 loads it and keeps the old floor in
+  `map_replaced_floors`.
 - **Re-registering P1 later** regenerates it from the sketch: copy any room edited in the portal into
   `traced/ec-p1-a-mano.json` first (after `export-map-snapshot.py`), or it is lost.
-- **Visual reference** (Brian, 2026-11-04): Mappedin and similar flat 2D indoor maps, not 3D ones like
-  MapsIndoors. Their traits:
-  - rectilinear units that share walls;
-  - white walkways;
-  - a small set of category colours;
-  - a label point inside each unit;
-  - amenity icons;
-  - a level switcher.
-- **The goal after the shapes:** **point-to-point routes**, from one space to another, across floors. So the data
-  must grow toward that:
-  - walkways as real spaces;
-  - openings that connect units to walkways;
-  - vertical connections (stairs, elevators, ramps) between levels.
-  - IMDF (OGC CS 20-094) is the reference model. Use it as a reference, not adopted wholesale.
-- **Inputs:** the sketches and the survey are only on Brian's Mac (see `core.md`). A cloud session needs Brian to
-  attach them, or a local session to do the rendering.
+- **#155 closed:** Horario works on the dev server for the Microsoft-signed-in test student (#203: the dev server's
+  compose gave schedule-service its neighbours' URLs, Feign timeouts are read again, the pensum is read once).
+  Brian verified it on the emulator.
+
+## Map direction (Brian, 2026-11-04)
+
+- **Visual reference:** Mappedin and similar flat 2D indoor maps, not 3D. The shared style is
+  `docs/design/map-style.json`, and the renderer plan is issue #194.
+- **Goal after the shapes: point-to-point routes across floors.** Data must grow toward walkways as real spaces,
+  openings that connect units to walkways, and vertical connections between levels. IMDF (OGC CS 20-094) is the
+  reference model, not adopted wholesale. Backend's proposal for this is the last comment on #183.
+- **Inputs:** the sketches and the survey live only on Brian's Mac (see `core.md`).
 
 ### Other
 
@@ -104,7 +85,7 @@
 | 0–2 | #54, #55 | Done |
 | 3 · Microsoft sign-in, refresh tokens, roles and permissions | #56 | Done and closed (#141, #142, #169, #172, #179, #148, #156) |
 | 4 · End-to-end journeys per profile | #57 | Not started |
-| 5 · EC floors faithful to reality | #58 | P1 in #183, under revision. P2 to P8 wait for Brian's sketches |
+| 5 · EC floors faithful to reality | #58 | P1 done (#183, #193). P2 to P8 wait for Brian's sketches |
 | 6 · Kubernetes with kind, and production | #59 | Branch stale. Production waits on IT's server decision |
 | 7 · notification-service | #60 | Not started. Needs Firebase, and APNs needs the Apple account |
 | 8 · Points, voice, damage reports, lost and found | #61 | Not started |
@@ -113,10 +94,6 @@
 
 ## Known debt
 
-- #155: on the dev server every `GET /api/schedule/me*` answered 504 after 10 s. Fixed in
-  `bugfix/timetable-waits-on-slow-neighbours`: the Feign timeouts were under a prefix OpenFeign 4 ignores, the
-  pensum was read once per class, and the dev server's compose gave schedule-service no address for its
-  neighbours. Brian confirms Horario on the-hive after the merge, then closes #155 by hand.
 - #157: the gateway should answer 503, not 500.
 - #143: one program name; the catalogue and SINU spell it differently.
 - Not in an issue yet:
@@ -128,8 +105,7 @@
 
 ## Next
 
-1. Merge #183, then #193. Let V016 run on the dev server, and verify P1 through the API.
-2. Merge the #155 fix, redeploy the dev server, and have Brian open Horario as the test student.
-3. #195: `labelPoint` (and `verticalCode` if it stays small) in map 3.7.0, contract first.
-4. #157 (gateway 503) and #143 (one program name).
-5. EC P2 as soon as Brian sketches it. Otherwise, start phase 4 (#57).
+1. Verify EC P1 on the dev server through the API and the portal, now that V016 ran there.
+2. #195: `labelPoint` (and `verticalCode` if it stays small) in map 3.7.0, contract first.
+3. #157 (gateway 503) and #143 (one program name).
+4. EC P2 as soon as Brian sketches it. Otherwise, start phase 4 (#57).

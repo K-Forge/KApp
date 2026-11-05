@@ -1,39 +1,44 @@
 # Core State
 
-> Owner: Core. As of 2026-11-04, `develop` at `a1e4b17`.
+> Owner: Core. As of 2026-11-05, when the cloud trial closed. Core \| Local continues from here.
 
 Core orchestrates. It asks the other sessions for their state, orders the work, reviews every agent pull request
 (as a comment titled "Revisión de Docs/Chore"), and tells Brian which ones are ready to merge. Brian merges and
 decides. Decisions are recorded in issues or pull requests.
 
-Since 2026-11-04 there are two Cores. Core \| Local orchestrates the sessions on Brian's Mac, and Core \| Cloud
-orchestrates the cloud sessions (Backend \| Cloud and Kotlin \| Cloud, plus Swift \| Cloud later). Kotlin goes first,
-and Swift resumes when the Android app is finished.
+From 2026-11-05 all sessions are local (see the README). Kotlin goes first, and Swift resumes when the Android
+app is finished. Core recommends a new, single-purpose session whenever a purpose is done (README, "One session,
+one purpose").
 
 ---
 
-## Open pull requests
+## Where things stand (2026-11-05)
 
-| Pull request | Area | State | What it needs |
-|---|---|---|---|
-| #183 EC floor 1 from Brian's sketch, plus V016 | backend | CI green and mergeable, but **do not merge yet** | Brian's review on 2026-11-04: the "after" render places the patio and many sizes well, but the spaces have irregular shapes, worst next to Carrera 9 Bis. They must be rectilinear ("squared") and still fit reality, following the pencil lines on the sketches. Backend regularizes the shapes and renders them again. See `backend.md` |
-| #153 vitest 4 to 5 (Dependabot) | portal | A rebase was requested on 2026-11-04 after #152 merged | Merge once the portal job passes on the rebased branch. `@angular/build` accepts vitest `^4 \|\| ^5` |
+Merged on 2026-11-04 and 11-05: #150, #151, #152, #153, #189 (dependencies); #190 (this folder); #191 (demo variant
+in CI); #192; #199 (shared map style); #200 and #206 (floor renderer, first parts); #202 (AGP moves only with
+Android Studio; the team needs Android Studio 2026.2.2 Rabbit 2); #203 (#155 fix); #205 (demo rooms from the map
+seeds); #183 and #193 (EC floor 1, squared). **#155 is closed:** Horario works on the dev server.
 
-Merged on 2026-11-04: #150 (springdoc 2.10.0), #151 (create-github-app-token 3.3.0), #152 (Angular 22.2.4/22.2.5
-and other npm patches), and #189 (AGP 9.5.0, Gradle 9.8.2, okhttp 5.5.1, kotlinx-serialization 1.12.0, MSAL 8.6.0).
-**After #189, someone should sign in on a device once**, because MSAL is the Microsoft sign-in library.
+Open work:
+
+- **#204, the whole app follows the system's dark mode** (Brian chose it): Kotlin | Cloud left a draft PR on
+  `feature/follow-the-system-dark-mode`, with where it stopped in its description and in `kotlin.md`. Kotlin |
+  Local continues it.
+- **#194, the generic map renderer:** Kotlin's next parts are type icons and selection (#196). Backend's part is
+  #195 (`labelPoint`, an example floor). Swift (#197) and the portal (#198) come later.
+- **Route animation decided:** a fluorescent line that pulses in the direction of travel (comment on #194).
+
+The Vercel project `kapp` has its builds turned off (Ignored Build Step `exit 0`) since 2026-11-05: nothing in the
+repo deploys there since the prototype was removed (#97). Turn it back on for the public prototype (#92).
 
 ---
 
 ## Waiting on Brian
 
-- **#183:** check the regularized floor 1 when Backend renders it again. After the merge, decide whether
-  `docs/entrega/segunda-entrega/mapa-base/ec-p1.png` is regenerated with the new floor.
+- **`docs/entrega/segunda-entrega/mapa-base/ec-p1.png`:** decide whether it is regenerated with the new floor 1.
 - **Sketches for EC floors 2 to 8**, in `Sketchs/`, keeping each original plan's file name (phase 5, #58).
-- **#155:** sign in on the Android app against the dev server as the test student and the test professor, to prove
-  the timetable there. Only Brian types those passwords.
-- **Kotlin:** approve adding `:app:assembleDemo :app:lintDemo` to the Android CI job, so that a change cannot break
-  the demo build without anyone noticing.
+- **Housekeeping to confirm:** close #158 and #163 to #165 (the delivery of 2026-10-23 is done) and #43 (done by
+  #40).
 - **Swift git debt:** two old commits on `feature/mobile-swift` use the type `ios:` and carry a tool trailer. Either
   rewrite them, or resume Swift from a clean branch off `develop`.
 - **Outside the repository:**
@@ -60,7 +65,8 @@ and other npm patches), and #189 (AGP 9.5.0, Gradle 9.8.2, okhttp 5.5.1, kotlinx
 - **Thesis proposal (anteproyecto):** the "current state of the project" draft is on Brian's Mac (see below). Its
   figures date from 2026-10-29: 331 commits, 104 merged pull requests, 5 contracts, about 900 backend, 234 portal
   and 118 Android tests. Refresh them right before it is handed in. Keep separating what was tested against real
-  services from what only runs on simulated data.
+  services from what only runs on simulated data. Since 2026-11-05 the timetable is **tested against the dev
+  server** (#155), no longer simulated only. Core \| Local added the Mappedin and IMDF references to the draft.
 - **References for the thesis proposal's future work** (Brian, 2026-11-04):
   - **Mappedin** (https://www.mappedin.com): the reference for the indoor map, for its flat, clean 2D style and its
     point-to-point wayfinding. MapsIndoors was considered and set aside, because its 3D style is not the goal;
@@ -90,7 +96,8 @@ Cloud sessions cannot read these. Ask a local session, or ask Brian to attach th
 
 ## Next for Core
 
-1. Review the pull requests that Backend and Kotlin open from the cloud, and tell Brian which are ready.
-2. Merge path for #153 once its rebase is green.
-3. The housekeeping above: close #43, #158 and #163–#165, then refresh `PROGRESS.md` and `AGENTS.md`.
-4. Keep this folder current after each batch of merges.
+1. Review the pull requests Backend and Kotlin open, and tell Brian which are ready.
+2. With Brian's yes, the housekeeping above: close #43, #158 and #163–#165, then refresh `PROGRESS.md` and the
+   "Current State" of `AGENTS.md` from this folder.
+3. Keep this folder current after each batch of merges.
+4. Recommend a new, single-purpose session whenever a purpose is done, as the README says, and for itself too.
