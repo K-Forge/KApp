@@ -1,5 +1,6 @@
 package co.edu.konradlorenz.kapp.ui.map.floor
 
+import co.edu.konradlorenz.kapp.data.map.MapBounds
 import kotlin.math.min
 
 /**
@@ -40,16 +41,17 @@ data class FloorViewport(
         const val MAX_ZOOM = 8f
 
         /**
-         * The whole [width] x [height] drawing in a [viewWidth] x [viewHeight] view, [padding]
-         * pixels in from every edge and centred.
+         * [bounds] of a drawing in a [viewWidth] x [viewHeight] view, [padding] pixels in from
+         * every edge and centred.
          */
-        fun fit(width: Int, height: Int, viewWidth: Float, viewHeight: Float, padding: Float): FloorViewport {
-            val room = (viewWidth - 2 * padding).coerceAtLeast(1f) to (viewHeight - 2 * padding).coerceAtLeast(1f)
-            val scale = min(room.first / width.coerceAtLeast(1), room.second / height.coerceAtLeast(1))
+        fun fit(bounds: MapBounds, viewWidth: Float, viewHeight: Float, padding: Float): FloorViewport {
+            val roomX = (viewWidth - 2 * padding).coerceAtLeast(1f)
+            val roomY = (viewHeight - 2 * padding).coerceAtLeast(1f)
+            val scale = min(roomX / bounds.width.coerceAtLeast(1), roomY / bounds.height.coerceAtLeast(1))
             return FloorViewport(
                 scale = scale,
-                offsetX = (viewWidth - width * scale) / 2,
-                offsetY = (viewHeight - height * scale) / 2,
+                offsetX = (viewWidth - bounds.width * scale) / 2 - bounds.x * scale,
+                offsetY = (viewHeight - bounds.height * scale) / 2 - bounds.y * scale,
             )
         }
     }

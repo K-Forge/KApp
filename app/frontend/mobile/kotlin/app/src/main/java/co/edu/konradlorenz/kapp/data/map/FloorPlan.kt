@@ -23,6 +23,20 @@ data class FloorPlan(
 ) {
     /** The spaces with a shape to draw. The others are listed beside the drawing. */
     val placed: List<FloorSpace> get() = spaces.filter { it.shape.size >= 3 }
+
+    /**
+     * The part of the drawing there is something on: the outline's box once it is traced, else the
+     * box around every placed space, else the whole drawing. What the screen is fitted to, so a
+     * floor drawn in a corner of a large photograph still fills the view.
+     */
+    val drawnBounds: MapBounds
+        get() {
+            val points = if (outline.size >= 3) outline else placed.flatMap { it.shape }
+            if (points.isEmpty()) return MapBounds(0, 0, width, height)
+            val left = points.minOf { it.x }
+            val top = points.minOf { it.y }
+            return MapBounds(left, top, points.maxOf { it.x } - left, points.maxOf { it.y } - top)
+        }
 }
 
 /** A point on a floor's drawing, in the floor's own units. */

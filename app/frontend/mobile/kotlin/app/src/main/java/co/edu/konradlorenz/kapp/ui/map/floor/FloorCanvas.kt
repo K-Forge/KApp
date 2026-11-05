@@ -9,7 +9,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -34,8 +33,8 @@ import co.edu.konradlorenz.kapp.ui.common.hexColor
 
 /**
  * Any floor, drawn from what the map API answers with the shared style (docs/design/MAP-STYLE.md):
- * nothing here knows a building, a floor or a room. It starts fitted to the view, and pans and
- * pinch-zooms. The layers follow the style's order; icons and selection come in a later change.
+ * nothing here knows a building, a floor or a room. It starts fitted to what is drawn, and pans
+ * and pinch-zooms. The layers follow the style's order; icons and selection come in a later change.
  */
 @Composable
 fun FloorCanvas(plan: FloorPlan, style: MapStyle, dark: Boolean, modifier: Modifier = Modifier) {
@@ -44,7 +43,7 @@ fun FloorCanvas(plan: FloorPlan, style: MapStyle, dark: Boolean, modifier: Modif
     var size by remember { mutableStateOf(IntSize.Zero) }
     val fit = remember(plan, size) {
         if (size == IntSize.Zero) null
-        else FloorViewport.fit(plan.width, plan.height, size.width.toFloat(), size.height.toFloat(), padding)
+        else FloorViewport.fit(plan.drawnBounds, size.width.toFloat(), size.height.toFloat(), padding)
     }
     // Back to the fit whenever the floor or the view changes.
     var viewport by remember(fit) { mutableStateOf(fit) }
@@ -59,11 +58,13 @@ fun FloorCanvas(plan: FloorPlan, style: MapStyle, dark: Boolean, modifier: Modif
                 }
             },
     ) {
-        drawRect(palette.background)
+        // A floor nobody has traced yet has no outside: all of it is floor, not a box on a
+        // background.
+        drawRect(if (plan.outline.size >= 3) palette.background else palette.floor)
         val view = viewport ?: return@Canvas
         style.layers.forEach { layer ->
             when (layer) {
-                "floor" -> drawFloor(plan, view, palette)
+                "floor" -> if (plan.outline.size >= 3) drawPath(path(plan.outline, view), palette.floor)
                 "spaces" -> drawSpaces(plan, view, palette, style)
                 "corridors" -> plan.corridors.filter { it.path.size >= 2 }.forEach {
                     drawPath(
@@ -81,19 +82,6 @@ fun FloorCanvas(plan: FloorPlan, style: MapStyle, dark: Boolean, modifier: Modif
                 "labels" -> drawLabels(plan, view, palette, style, measurer)
             }
         }
-    }
-}
-
-/** The floor's outline filled; a floor nobody has traced yet is its whole drawing. */
-private fun DrawScope.drawFloor(plan: FloorPlan, view: FloorViewport, palette: FloorPalette) {
-    if (plan.outline.size >= 3) {
-        drawPath(path(plan.outline, view), palette.floor)
-    } else {
-        drawRect(
-            palette.floor,
-            topLeft = Offset(view.screenX(0f), view.screenY(0f)),
-            size = Size(plan.width * view.scale, plan.height * view.scale),
-        )
     }
 }
 
