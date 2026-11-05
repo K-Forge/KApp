@@ -1,10 +1,12 @@
 package co.edu.konradlorenz.kapp.ui.navigation
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,9 +16,11 @@ import co.edu.konradlorenz.kapp.ui.home.HomeScreen
 import co.edu.konradlorenz.kapp.ui.invitation.InvitationScreen
 import co.edu.konradlorenz.kapp.ui.login.LoginScreen
 import co.edu.konradlorenz.kapp.ui.map.MapScreen
+import co.edu.konradlorenz.kapp.ui.map.MapViewModel
 import co.edu.konradlorenz.kapp.ui.profile.ProfileScreen
 import co.edu.konradlorenz.kapp.ui.schedule.ScheduleScreen
 import co.edu.konradlorenz.kapp.ui.semaphore.SemaphoreScreen
+import co.edu.konradlorenz.kapp.ui.theme.KAppTheme
 
 // The two routes outside the bar. The other five are in KAppDestination, which is also what the
 // bar iterates, so a destination cannot be added to one and forgotten in the other.
@@ -69,20 +73,31 @@ fun KAppNavHost(container: AppContainer) {
         // The tabs, each inside the shell that draws the bar over it.
         KAppDestination.entries.forEach { destination ->
             composable(destination.route) {
-                MainShell(
-                    current = destination,
-                    destinations = destinations,
-                    onSelect = { navController.openTab(it) },
-                ) {
-                    when (destination) {
-                        KAppDestination.Home -> HomeScreen(
-                            destinations = destinations,
-                            onOpen = { navController.openTab(it) },
-                        )
-                        KAppDestination.Profile -> ProfileScreen()
-                        KAppDestination.Semaphore -> SemaphoreScreen()
-                        KAppDestination.Schedule -> ScheduleScreen()
-                        KAppDestination.Map -> MapScreen()
+                // A floor of Mapa follows the system theme, and the bar around it with it. The
+                // view model is the one MapScreen gets: same back stack entry, same instance.
+                val dark = if (destination == KAppDestination.Map) {
+                    val map = viewModel<MapViewModel>(factory = MapViewModel.Factory)
+                    val systemDark = isSystemInDarkTheme()
+                    systemDark && map.opened != null
+                } else {
+                    false
+                }
+                KAppTheme(dark = dark) {
+                    MainShell(
+                        current = destination,
+                        destinations = destinations,
+                        onSelect = { navController.openTab(it) },
+                    ) {
+                        when (destination) {
+                            KAppDestination.Home -> HomeScreen(
+                                destinations = destinations,
+                                onOpen = { navController.openTab(it) },
+                            )
+                            KAppDestination.Profile -> ProfileScreen()
+                            KAppDestination.Semaphore -> SemaphoreScreen()
+                            KAppDestination.Schedule -> ScheduleScreen()
+                            KAppDestination.Map -> MapScreen()
+                        }
                     }
                 }
             }

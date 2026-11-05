@@ -16,7 +16,7 @@ The last feature merged was #187 (2026-10-22). Kotlin has no open pull requests 
 | Semáforo | The pensum with each course's status. Plans: create, switch, and move courses, even past the last semester (#186). The demo has the real 1015 pensum (#187) | Dev server for the semáforo. Plan editing only simulated |
 | Timetable | Day, two days, week and month views (#184). Tapping a class opens its room from `GET /api/map/spaces/{room}` | Simulated data. On the dev server it fails today: #155 |
 | Profile | Microsoft and SINU data, a profile photo (add, crop, remove; #185), and sign-out | Dev server. The photo stays on the phone, because user 1.x has no upload endpoint |
-| Map | A list of the buildings with code, address and levels (#174). **No interactive map yet** | Simulated data |
+| Map | A list of the buildings with code, address and levels (#174). Tapping one opens its floors, one chip per level, drawn by the generic floor renderer with the shared style (#196, first part): spaces by category, corridors, doors, labels, pan and zoom, light and dark. No icons, selection, `ETag` cache or list of unplaced spaces yet | Demo floors built from map-service's seeds. Not tried on the dev server |
 
 - **Build variants:**
   - `demo`, the default: no network, `DemoBackend` serves the demo assets by API path, and `DemoClock` is fixed on a
