@@ -46,6 +46,7 @@ import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
 import co.edu.konradlorenz.kapp.ui.common.coverScrolled
 import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
 import co.edu.konradlorenz.kapp.ui.theme.Brand
+import co.edu.konradlorenz.kapp.ui.theme.toned
 
 /**
  * Mapa: the campus's buildings with the code a class's room carries in Horario, and, once one is
@@ -132,10 +133,10 @@ private fun ComingNext() {
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(Brand.copy(alpha = 0.14f)),
+                .background(Brand.toned().copy(alpha = 0.14f)),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(painterResource(R.drawable.ic_pin), contentDescription = null, tint = Brand, modifier = Modifier.size(24.dp))
+            Icon(painterResource(R.drawable.ic_pin), contentDescription = null, tint = Brand.toned(), modifier = Modifier.size(24.dp))
         }
         Spacer(Modifier.height(10.dp))
         Text(
@@ -174,11 +175,11 @@ private fun BuildingRow(building: Building, onClick: () -> Unit) {
                 // One width for every code, up to JAAB's four letters, so the names line up.
                 .width(64.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(Brand.copy(alpha = 0.12f))
+                .background(Brand.toned().copy(alpha = 0.12f))
                 .padding(vertical = 10.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text(building.code, color = Brand, fontWeight = FontWeight.Bold)
+            Text(building.code, color = Brand.toned(), fontWeight = FontWeight.Bold)
         }
         Column(Modifier.weight(1f)) {
             Text(building.name, style = MaterialTheme.typography.titleSmall)
