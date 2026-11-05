@@ -7,6 +7,20 @@ The contracts are the source of truth: the mocks serve them as soon as they merg
 (`app/backend/microservices/mock/README.md`), and the services implement them in the pull requests
 that follow. Until a service has caught up, its contract describes where it is going, not where it is.
 
+## November 2026: map 3.7.0 (additive)
+
+- **New:** `Space.labelPoint`, on every space that has a `shape`: in a floor, in a space's detail
+  and in search results. It is where the label and icon go, the point inside the shape farthest
+  from its walls (the pole of inaccessibility, as the polylabel algorithm finds it), in whole
+  units. The centre of `bounds` falls outside an L-shaped room; `labelPoint` never does.
+- **New example:** `CentralGroundFloor`, the first floor of the Edificio Central as the dev server
+  serves it, is now the first example of `GET /api/map/buildings/{code}/floors/{floorCode}`. The
+  mocks serve it, so every client draws the same real floor: rooms in L, a trapezoid wing, doors,
+  corridors, spaces not identified yet and four spaces not drawn yet (#195).
+
+**Migrating a client:** draw each label and icon at `labelPoint`. Keep the centre of `bounds` only
+as a fallback for a server that does not send it yet.
+
 ## October 2026: auth 1.1.0 (additive)
 
 - **New:** `GET /auth/sign-in-options`, public. It says where Microsoft's sign-in is for the server, and
