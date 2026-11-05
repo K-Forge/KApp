@@ -1,7 +1,7 @@
 # Backend State
 
-> Owner: Backend. As of 2026-11-05, `develop` at `b4530ea`. Backend | Local: EC P1 verified on the dev server, and
-> map 3.7.0 (#195) in two stacked draft pull requests, #211 and #212.
+> Owner: Backend. As of 2026-11-05, `develop` at `942d46a`. Backend | Local: EC P1 verified on the dev server, the
+> map 3.7.0 contract merged (#211), and its implementation in #212.
 
 ---
 
@@ -13,7 +13,7 @@
 | user-service | user 1.1.0 | Profiles without identity document or phone. `academic` is read-only from the test SINU (#76–#80). `PUT /internal/users/{id}/roles` | V003 |
 | semaphore-service | semaphore 2.0.1 | SINU course statuses, read-only through `SinuRecordPort` and `FakeSinuRecordAdapter` (#79). Editable plans at `/me/plans` (`plannedLevel` 1 to 12). The catalogue of the 23 pensums | V010 |
 | schedule-service | schedule 2.0.1 | Current classes only: `/me`, `/me/day`, `/me/week`, `/me/periods`, from the test SINU (`SinuTimetablePort`, #78). No database | none |
-| map-service | map 3.6.0 (3.7.0 in #211, #212) | Buildings, floors, layouts, spaces, types, campuses, ground, structures and survey. ETag. `sinuSedes` (#77) | V016 (EC P1 from Brian's sketch, squared: #183, #193) |
+| map-service | map 3.6.0 (contract 3.7.0 merged in #211; service in #212) | Buildings, floors, layouts, spaces, types, campuses, ground, structures and survey. ETag. `sinuSedes` (#77) | V016 (EC P1 from Brian's sketch, squared: #183, #193) |
 | api-gateway | none | Routes by name, with no registry (#64). Answers 500 when a service is down (#157) | none |
 
 - **Local helpers:** fake OIDC (mock-oauth2-server on `:8090`, with test users for student, professor and staff;
@@ -66,12 +66,12 @@
 ## In flight
 
 - **map 3.7.0, `labelPoint` (#195):**
-  - #211 (`feature/map-label-point`, draft): the contract. `Space.labelPoint`, the `CentralGroundFloor` example
-    (EC P1 as the dev server serves it) first in `getFloor`, and the CHANGELOG entry.
-  - #212 (`feature/map-label-point-service`, stacked on #211, draft): `LabelPoint` (polylabel, precision 1, then
-    the best whole point around it) in every response with a `shape`. Tests: every seeded space's label is
-    inside its shape, and the contract example equals what the service computes.
-  - Merge #211 first; `restack` moves #212 onto `develop`.
+  - #211, merged: the contract. `Space.labelPoint`, the `CentralGroundFloor` example (EC P1 as the dev server
+    serves it) first in `getFloor`, so the mocks serve it, and the CHANGELOG entry.
+  - #212 (`feature/map-label-point-service`): `LabelPoint` (polylabel, precision 1, then the best whole point
+    around it) in every response with a `shape`. Tests: every seeded space's label is inside its shape, and the
+    contract example equals what the service computes. Until it merges, the dev server sends no `labelPoint`.
+- **`verticalCode` (#213):** issue open, not started. Contract, service, seed data and portal, one PR each.
 - **EC P1 on the dev server, verified 2026-11-05:** the API returns exactly what V016 seeds (46 spaces, 42 drawn,
   4 corridors, same doors), and the portal draws it whole. To check the dev server through the portal or the API,
   Brian signs in as `administrativo.prueba`, the test account that holds ADMIN there; the other test accounts have
@@ -119,7 +119,7 @@
 
 ## Next
 
-1. #211 and #212 out of draft once CI is green, then Brian merges #211 before #212.
-2. `verticalCode`: its own issue. It needs each floor's stairs and lifts tied across floors, not only a field.
-3. #157 (gateway 503) and #143 (one program name).
+1. #212 merged once its CI is green.
+2. #157 (gateway 503), in a new Backend | Local session. Then #143 (one program name).
+3. #213 (`verticalCode`), contract first.
 4. EC P2 as soon as Brian sketches it. Otherwise, start phase 4 (#57).
