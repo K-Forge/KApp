@@ -411,6 +411,10 @@ through `area/kotlin` and `area/swift` issues.
 - **Start every session with [`docs/state/README.md`](docs/state/README.md)**, then read your area's file there.
   Sessions do not share memory, local or cloud, so that folder is how one session learns what the others did.
   Update your area's file before you end a piece of work.
+- **One session, one purpose.** Core coordinates; Backend, Kotlin and Swift do the work. When a session's purpose is
+  done, or the conversation has grown long, it tells Brian to start a new one with a specific purpose, hands over
+  through `docs/state/`, and is archived once he confirms; the new one keeps the same name. The details are in
+  [`docs/state/README.md`](docs/state/README.md), "One session, one purpose".
 - **Never modify** `.env` files (contains secrets).
 - **Backend location:** all backend work goes in `app/backend/microservices/`. The original monolith was deleted once the migration completed; it is only retrievable from the git history and must not be resurrected.
 - **Schema:** changes go in Mongock change units (see Data), never in a hand-written schema file.

@@ -35,23 +35,52 @@ should be checked against GitHub before acting on it.
 
 ## Sessions
 
-KApp is worked on by one session per area, in two places. Each place has its own **Core**, which orchestrates the
-others there.
+Since 2026-11-05 KApp is worked on from **local sessions on Brian's Mac only**. The cloud sessions were a trial
+(2026-11-04 to 11-05): almost every change needs the Android emulator, Tailscale to the dev server or Docker, which
+only the Mac has, and running both sets doubled the token cost. A cloud session is the exception, for a long task
+while the Mac is off.
 
-| Area | Local session (Brian's Mac) | Cloud session | Works on |
-|---|---|---|---|
-| Core | Core \| Local | Core \| Cloud | `docs/`, `.github/`, `README.md`, `AGENTS.md`, `scripts/` for the repository, reviewing every agent pull request, telling Brian what to merge |
-| Backend | Backend \| Local | Backend \| Cloud | `app/backend/`, `app/frontend/web-admin/`, `docs/api/`, `docs/map/`, `docs/pensums/` |
-| Kotlin | Kotlin \| Local | Kotlin \| Cloud | `app/frontend/mobile/kotlin/` |
-| Swift | Swift \| Local | Swift \| Cloud (later) | `app/frontend/mobile/swift/`. Paused |
-| Delivery | Segunda Entrega D.A.M. | none | Speaks for Brian about university deliveries and edits the shared `.docx`. Talks only to Core. Never runs the app |
+| Session | Role | Works on |
+|---|---|---|
+| Core \| Local | **Coordinates.** Plans, keeps this folder current, reviews every agent pull request, tells Brian what to merge, writes issues. Does not write feature code | `docs/`, `.github/`, `README.md`, `AGENTS.md`, `scripts/` for the repository |
+| Backend \| Local | **Works** | `app/backend/`, `app/frontend/web-admin/`, `docs/api/`, `docs/map/`, `docs/pensums/` |
+| Kotlin \| Local | **Works.** The only one that runs the emulator, and turns it off when done | `app/frontend/mobile/kotlin/` |
+| Swift \| Local | **Works** (paused until Android is finished) | `app/frontend/mobile/swift/` |
+| Segunda Entrega D.A.M. | Speaks for Brian about university deliveries and edits the shared `.docx`. Talks only to Core. Never runs the app | Outside the repo |
 
-What only a local session can do: anything that needs Brian's Mac. That means the Android emulator, Tailscale to
-reach the dev server, Docker, Xcode, the `.env` files, and the files under `~/Documents/KApp/`, such as the survey
-sketches and renders. `core.md` lists those files.
+The Mac-only files (survey sketches, renders, the thesis proposal draft, `.env` files) are listed in `core.md`.
 
-What a cloud session can do: everything that needs only the repository and GitHub. A cloud container has no Android
-SDK and no Xcode, so CI is what verifies a client build there.
+---
+
+## One session, one purpose
+
+Every message a session receives re-reads its whole history, so a long session spends more tokens on each turn than
+a fresh one with the same knowledge. The knowledge does not live in the history: it lives in this folder, in the
+issues and in the pull requests. So sessions are kept short, one purpose each.
+
+**When to recommend a new session.** A session tells Brian, in one short line at the end of its reply, that it is
+time to start a new one when any of these is true:
+
+- the purpose it was opened for is done: its pull request is merged or ready, or its question is answered;
+- the next task is a different purpose, even in the same area (a new issue, a new pull request);
+- the conversation is long: it has been compacted, or it is past roughly 50 turns or a few hours of work.
+
+**How it hands over.** Before recommending, the session:
+
+1. updates its area's file in this folder: what is done, what is in flight with branch and PR numbers, and the exact
+   next step;
+2. pushes everything: work that exists only in a session is lost when it ends;
+3. writes the **opening message for the new session** in its reply, in a code block Brian can copy: its name, its one
+   purpose (an issue or PR number), and "read `docs/state/README.md` and `docs/state/<area>.md` first".
+
+**What happens when Brian confirms.** The old session is archived, not left idle: in the Claude desktop app, Archive;
+from the command line, `/exit`. A new session starts **with the same name** (Core \| Local, Backend \| Local, Kotlin
+\| Local, Swift \| Local) and, where the app groups sessions, in the same group, with Remote Control on so Core and
+Brian's phone can reach it. If the session has a tool that archives or starts sessions, it may do it itself after
+Brian's yes; otherwise Brian does it. A session never archives itself without that yes.
+
+Core recommends the same for itself. Its coordination does not depend on its history either: it reads this folder and
+the open pull requests at the start of each session.
 
 ---
 
@@ -59,12 +88,10 @@ SDK and no Xcode, so CI is what verifies a client build there.
 
 | From | To | Channel |
 |---|---|---|
-| Core \| Cloud | the cloud sessions it created | A direct message to the session |
-| a cloud session | Core \| Cloud | A comment on its pull request or issue, plus its state file. Cloud sessions cannot message back yet, so Core reads their pull requests, their history, and this folder |
-| a local session | another local session | Peer messages by session name |
+| a local session | another local session, Core included | `ListAgents`, then `SendMessage` to the session's name |
+| a worker session | Core | `SendMessage` to "Core \| Local" when a task Core gave it is done: the result, links, what Brian must do |
 | any session | everyone, durably | A GitHub issue or pull request comment. A closed session receives nothing, so anything that must survive goes to GitHub |
 
-Core \| Cloud creates the cloud sessions itself, because it cannot message a cloud session that was opened by hand.
 A session's usage limit can stop it mid-task. That is one more reason to push work and write state often.
 
 ---
