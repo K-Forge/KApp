@@ -101,6 +101,9 @@ The spec:
                                            last, before "by hand", over whatever the rest of the
                                            spec drew for those codes; a code the floor lacks is
                                            added with the name, type and wing given
+        "drawn": {"spaces": [{"code": "P1-AUDITORIO-SONIA", "shape": [[1650, 700], ...]}]}
+                                           the same without a frame: rooms traced elsewhere, in
+                                           the building's units, laid as they are
         "outline": [[x, y], ...]           the floor's outline - the building's walls round it -
                                            in the building's units
      }}}
@@ -521,8 +524,9 @@ def turned_frame(front):
 
 
 def lay_turned(floor, turned):
-    """The spaces of a turned block put on the floor, over what the spec drew for them before."""
-    at = turned_frame(turned["front"])
+    """The spaces of a turned block - or, without a "front", of a part drawn outright in the
+    building's units - put on the floor, over what the spec drew for them before."""
+    at = turned_frame(turned["front"]) if "front" in turned else turned_frame([[0, 0], [1, 0]])
     notes = []
     for room in turned["spaces"]:
         shape = tidy([at(p) for p in room["shape"]])
@@ -537,7 +541,8 @@ def lay_turned(floor, turned):
             floor["spaces"].append(sp)
         sp["shape"] = [{"x": x, "y": y} for x, y in shape]
         sp["doors"] = [{"from": {"x": a[0], "y": a[1]}, "to": {"x": b[0], "y": b[1]}} for a, b in doors if a != b]
-        notes.append(f"  {room['code']:<24} turned: {len(shape)} corners, {len(sp['doors'])} door(s)")
+        notes.append(f"  {room['code']:<24} {'turned' if 'front' in turned else 'drawn'}: {len(shape)} corners, "
+                     f"{len(sp['doors'])} door(s)")
     floor["spaces"].sort(key=lambda sp: sp["code"])
     return notes
 
@@ -590,7 +595,7 @@ def main():
                 these = json.load(open(path_of_marks))["spaces"]
                 ours = {sp["code"] for sp in these}
                 marks = {"spaces": [sp for sp in (marks or {}).get("spaces", []) if sp["code"] not in ours] + these}
-        later = {a["code"] for a in rules.get("add", [])} | {sp["code"] for sp in rules.get("turned", {}).get("spaces", [])}
+        later = {a["code"] for a in rules.get("add", [])} | {sp["code"] for key in ("turned", "drawn") for sp in rules.get(key, {}).get("spaces", [])}
         if spec.get("by hand"):
             path_by_hand = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(args.spec))),
                                         spec["by hand"].format(floor=args.floor.lower()))
@@ -741,11 +746,12 @@ def main():
                 jambs = [hung(shape, (d["from"]["x"], d["from"]["y"]), (d["to"]["x"], d["to"]["y"])) for d in space["doors"]]
                 space["doors"] = [{"from": {"x": a[0], "y": a[1]}, "to": {"x": b[0], "y": b[1]}} for a, b in jambs if a != b]
     settle_floor()
-    if rules.get("turned"):
-        # A block turned to the building, drawn in its own frame, over what the steps above made
-        # of its rooms; its corners round to whole units, so they settle again.
-        moved += lay_turned(floor, rules["turned"])
-        settle_floor()
+    for key in ("turned", "drawn"):
+        if rules.get(key):
+            # A part drawn in its own frame, or outright, over what the steps above made of its
+            # rooms; its corners round to whole units, so they settle again.
+            moved += lay_turned(floor, rules[key])
+            settle_floor()
     if rules.get("outline"):
         floor["outline"] = [{"x": x, "y": y} for x, y in rules["outline"]]
         in_export_order(floor)
