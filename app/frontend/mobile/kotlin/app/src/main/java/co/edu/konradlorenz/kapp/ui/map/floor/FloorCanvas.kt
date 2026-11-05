@@ -19,19 +19,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -50,7 +58,7 @@ import co.edu.konradlorenz.kapp.ui.common.hexColor
  * nothing here knows a building, a floor or a room. It starts fitted to what is drawn, and pans,
  * pinch-zooms, zooms in on a double tap and with its + and - buttons. The layers follow the
  * style's order and any it does not know are skipped, so a later one, such as a route, only needs
- * its name in the style and its case here. Icons and selection come in a later change.
+ * its name in the style and its case here. Selection comes in a later change.
  */
 @Composable
 fun FloorCanvas(plan: FloorPlan, style: MapStyle, dark: Boolean, modifier: Modifier = Modifier) {
@@ -64,6 +72,9 @@ fun FloorCanvas(plan: FloorPlan, style: MapStyle, dark: Boolean, modifier: Modif
     // Back to the fit whenever the floor or the view changes.
     var viewport by remember(fit) { mutableStateOf(fit) }
     val palette = remember(style, dark) { FloorPalette(style, dark) }
+    val icons = FloorIcons.forTypes(style).mapValues { (_, drawable) ->
+        rememberVectorPainter(ImageVector.vectorResource(drawable))
+    }
     val zoomAroundCentre = { factor: Float ->
         viewport = viewport?.zoomed(factor, size.width / 2f, size.height / 2f)
     }
@@ -89,6 +100,12 @@ fun FloorCanvas(plan: FloorPlan, style: MapStyle, dark: Boolean, modifier: Modif
             // background.
             drawRect(if (plan.outline.size >= 3) palette.background else palette.floor)
             val view = viewport ?: return@Canvas
+            // Icons and labels make room for each other, so both layers draw from one placement.
+            val marks = if ("icons" in style.layers || "labels" in style.layers) {
+                placeMarks(plan, view, style, measurer, icons)
+            } else {
+                emptyList()
+            }
             style.layers.forEach { layer ->
                 when (layer) {
                     "floor" -> if (plan.outline.size >= 3) drawPath(path(plan.outline, view), palette.floor)
@@ -106,7 +123,11 @@ fun FloorCanvas(plan: FloorPlan, style: MapStyle, dark: Boolean, modifier: Modif
                     "outline" -> if (plan.outline.size >= 3) {
                         drawPath(path(plan.outline, view), palette.outline, style = Stroke(style.outline.widthDp.dp.toPx()))
                     }
-                    "labels" -> drawLabels(plan, view, palette, style, measurer)
+                    "icons" -> marks.forEach { mark ->
+                        val box = mark.icon ?: return@forEach
+                        mark.item.icon?.let { drawIcon(it, box, palette) }
+                    }
+                    "labels" -> drawLabels(marks, palette)
                 }
             }
         }
@@ -143,36 +164,62 @@ private fun DrawScope.drawSpaces(plan: FloorPlan, view: FloorViewport, palette: 
     }
 }
 
-/** The labels that fit at this zoom, with a halo, in the style's priority. */
-private fun DrawScope.drawLabels(
+/** What a space shows at its anchor: its type's icon, its label, or both. */
+private class Mark(val icon: Painter?, val label: TextLayoutResult?)
+
+/**
+ * The icons and labels that fit at this zoom, in the style's priority: an icon at the anchor with
+ * the label just below it, or the label alone centred there.
+ */
+private fun DrawScope.placeMarks(
     plan: FloorPlan,
     view: FloorViewport,
-    palette: FloorPalette,
     style: MapStyle,
     measurer: TextMeasurer,
-) {
+    icons: Map<String, Painter>,
+): List<LabelCandidate<Mark>> {
     val text = TextStyle(fontSize = FloorLabels.sizeSp(view.zoom, style.labels).sp, fontWeight = FontWeight.Medium)
+    val iconSize = style.icons.sizeDp.dp.toPx()
+    val gap = LabelGap.toPx()
     val candidates = plan.placed.mapNotNull { space ->
-        val label = FloorLabels.text(space) ?: return@mapNotNull null
         val (x, y) = FloorLabels.anchor(space) ?: return@mapNotNull null
         val box = space.box ?: return@mapNotNull null
-        val layout = measurer.measure(label, style = text, maxLines = 1, softWrap = false)
-        LabelCandidate(
-            item = layout,
-            box = LabelBox.centredOn(
-                view.screenX(x), view.screenY(y), layout.size.width.toFloat(), layout.size.height.toFloat(),
-            ),
-            spaceWidth = box.width * view.scale,
-            rank = style.labelRank(space),
-        )
+        val painter = icons[space.typeCode]
+        val layout = FloorLabels.text(space)?.let { measurer.measure(it, style = text, maxLines = 1, softWrap = false) }
+        if (painter == null && layout == null) return@mapNotNull null
+        val icon = painter?.let { LabelBox.centredOn(view.screenX(x), view.screenY(y), iconSize, iconSize) }
+        val label = layout?.let {
+            val width = it.size.width.toFloat()
+            val height = it.size.height.toFloat()
+            if (icon != null) FloorLabels.below(icon, width, height, gap)
+            else LabelBox.centredOn(view.screenX(x), view.screenY(y), width, height)
+        }
+        LabelCandidate(Mark(painter, layout), label, box.width * view.scale, style.labelRank(space), icon)
     }
-    val halo = Stroke(width = HaloWidth.toPx(), join = StrokeJoin.Round)
     val screen = LabelBox(0f, 0f, size.width, size.height)
-    FloorLabels.place(candidates, style.labels.hideWhenWiderThanSpace, screen).forEach { label ->
-        val topLeft = Offset(label.box.left, label.box.top)
-        drawText(label.item, color = palette.labelHalo, topLeft = topLeft, drawStyle = halo)
+    return FloorLabels.place(candidates, style.labels.hideWhenWiderThanSpace, screen)
+}
+
+/** A round mark in the icons' fill with the type's glyph on it, tinted. */
+private fun DrawScope.drawIcon(painter: Painter, box: LabelBox, palette: FloorPalette) {
+    val centre = Offset((box.left + box.right) / 2, (box.top + box.bottom) / 2)
+    drawCircle(palette.iconFill, radius = box.width / 2, center = centre)
+    val glyph = box.width * GlyphShare
+    translate(centre.x - glyph / 2, centre.y - glyph / 2) {
+        with(painter) { draw(Size(glyph, glyph), colorFilter = ColorFilter.tint(palette.iconGlyph)) }
+    }
+}
+
+/** The placed labels, with a halo. */
+private fun DrawScope.drawLabels(marks: List<LabelCandidate<Mark>>, palette: FloorPalette) {
+    val halo = Stroke(width = HaloWidth.toPx(), join = StrokeJoin.Round)
+    marks.forEach { mark ->
+        val box = mark.box ?: return@forEach
+        val layout = mark.item.label ?: return@forEach
+        val topLeft = Offset(box.left, box.top)
+        drawText(layout, color = palette.labelHalo, topLeft = topLeft, drawStyle = halo)
         // Fill said outright: without it the text keeps the halo's stroke, and the label is a blot.
-        drawText(label.item, color = palette.label, topLeft = topLeft, drawStyle = Fill)
+        drawText(layout, color = palette.label, topLeft = topLeft, drawStyle = Fill)
     }
 }
 
@@ -196,6 +243,8 @@ private class FloorPalette(style: MapStyle, dark: Boolean) {
     val outline = color(style.outline.color(dark))
     val label = color(style.labels.colors(dark).color)
     val labelHalo = color(style.labels.colors(dark).halo)
+    val iconFill = color(style.icons.colors(dark).fill)
+    val iconGlyph = color(style.icons.colors(dark).glyph)
     private val categories = style.categories.mapValues { color(it.value.pick(dark)) }
     private val fallback = color(style.categoryColor(null, dark))
 
@@ -206,3 +255,7 @@ private class FloorPalette(style: MapStyle, dark: Boolean) {
 
 private val FloorPadding = 16.dp
 private val HaloWidth = 3.dp
+private val LabelGap = 2.dp
+
+/** How much of an icon's round mark its glyph takes up. */
+private const val GlyphShare = 0.7f
