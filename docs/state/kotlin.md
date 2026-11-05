@@ -16,7 +16,7 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
 | Semáforo | The pensum with each course's status. Plans: create, switch, and move courses, even past the last semester (#186). The demo has the real 1015 pensum (#187) | Dev server for the semáforo. Plan editing only simulated |
 | Timetable | Day, two days, week and month views (#184). Tapping a class opens its room from `GET /api/map/spaces/{room}` | Simulated data. On the dev server it fails today: #155 |
 | Profile | Microsoft and SINU data, a profile photo (add, crop, remove; #185), and sign-out | Dev server. The photo stays on the phone, because user 1.x has no upload endpoint |
-| Map | A list of the buildings with code, address and levels (#174). Tapping one opens its floors, one chip per level, drawn by the generic floor renderer with the shared style (#196, first part, #200): spaces by category, corridors, doors, labels, pinch, double-tap and +/- zoom, and the system theme on that screen. No icons, selection, `ETag` cache or list of unplaced spaces yet | Demo floors built from map-service's seeds. Not tried on the dev server |
+| Map | A list of the buildings with code, address and levels (#174). Tapping one opens its floors, one chip per level, drawn by the generic floor renderer with the shared style (#196, first part, #200): spaces by category, corridors, doors, labels, pinch, double-tap and +/- zoom, and the system theme on that screen. Floors read again by their `ETag`, the spaces not drawn yet listed under the levels, no label on unidentified spaces or at the screen edge (#206). No icons or selection yet | Demo floors built from map-service's seeds. Not tried on the dev server |
 
 - **Build variants:**
   - `demo`, the default: no network, `DemoBackend` serves the demo assets by API path, and `DemoClock` is fixed on a
@@ -29,7 +29,7 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
   - since #189: AGP 9.5.0, Gradle 9.8.2, okhttp 5.5.1, kotlinx-serialization 1.12.0, MSAL 8.6.0;
   - MVVM with Compose (Material 3), Retrofit 3 and OkHttp 5;
   - the session is kept with AES-GCM in the Android Keystore;
-  - 148 unit tests.
+  - 157 unit tests.
 - **CI:** the Android job runs `:app:testDebugUnitTest :app:assembleDebug :app:lintDebug :app:assembleDemo
   :app:lintDemo` (`.github/workflows/ci.yml`). The demo variant is built and linted since #191.
 
@@ -50,8 +50,8 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
    room. The demo's rooms come from map-service's seeds (`EC-405`, `EC-508`); `BI 301` is not on the map, so the demo
    answers `404` for it, as the service does. What is left is checking it against the 2.0.0 mock on Brian's Mac,
    including the class with no room on 2026-09-21, and then ticking the boxes.
-4. **The next floor renderer pull request (#196):** `ETag` caching, the list of unplaced spaces, no label for
-   spaces with no real name, labels kept inside the view, and the back arrow on the left of the band.
+4. **The rest of the floor renderer (#196):** an icon per `typeCode` and selecting a space. The `ETag` cache, the
+   unplaced list, the label fixes and the back arrow on the left came in #206.
 5. **#204, the whole app follows the system's dark mode** (Brian chose it on 2026-11-05; no in-app toggle). The
    floor screen's own dark scheme from #200 folds into the app theme. Its own pull requests, split past about 400
    lines: the theme and two screens first, then the rest.

@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import co.edu.konradlorenz.kapp.KAppApplication
 import co.edu.konradlorenz.kapp.data.map.Building
 import co.edu.konradlorenz.kapp.data.map.FloorPlan
+import co.edu.konradlorenz.kapp.data.map.FloorRepository
 import co.edu.konradlorenz.kapp.data.schedule.MapApi
 import co.edu.konradlorenz.kapp.ui.map.floor.MapStyle
 import kotlinx.coroutines.CancellationException
@@ -21,7 +22,11 @@ import kotlinx.coroutines.launch
  * Mapa: the campus's buildings out of `GET /api/map/buildings`, and a building's floors drawn one at
  * a time with the shared [style].
  */
-class MapViewModel(private val map: MapApi, val style: MapStyle) : ViewModel() {
+class MapViewModel(
+    private val map: MapApi,
+    private val floors: FloorRepository,
+    val style: MapStyle,
+) : ViewModel() {
 
     var state by mutableStateOf<BuildingsState>(BuildingsState.Loading)
         private set
@@ -52,7 +57,7 @@ class MapViewModel(private val map: MapApi, val style: MapStyle) : ViewModel() {
         opened = OpenedBuilding(building, floorCode, FloorState.Loading)
         floorLoad = viewModelScope.launch {
             val floor = try {
-                FloorState.Ready(map.floor(building.code, floorCode))
+                FloorState.Ready(floors.floor(building.code, floorCode))
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
@@ -85,7 +90,7 @@ class MapViewModel(private val map: MapApi, val style: MapStyle) : ViewModel() {
             initializer {
                 val app = this[APPLICATION_KEY] as KAppApplication
                 val style = app.assets.open(MapStyle.ASSET).bufferedReader().use { MapStyle.parse(it.readText()) }
-                MapViewModel(app.container.api.map, style)
+                MapViewModel(app.container.api.map, app.container.floors, style)
             }
         }
     }

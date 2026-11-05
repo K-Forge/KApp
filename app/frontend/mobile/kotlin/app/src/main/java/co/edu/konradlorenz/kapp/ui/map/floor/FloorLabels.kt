@@ -8,9 +8,16 @@ import co.edu.konradlorenz.kapp.data.map.FloorSpace
  */
 object FloorLabels {
 
-    /** `doorCode`, else `name`. Never `code`: a generated code looks exactly like a real one. */
-    fun text(space: FloorSpace): String? =
-        space.doorCode?.takeIf { it.isNotBlank() } ?: space.name.takeIf { it.isNotBlank() }
+    /**
+     * `doorCode`, else `name`. Never `code`: a generated code looks exactly like a real one. A space
+     * of the `OTHER` category with no door code has no label: it is drawn but not yet known, its
+     * name says only that, and its colour already does.
+     */
+    fun text(space: FloorSpace): String? {
+        space.doorCode?.takeIf { it.isNotBlank() }?.let { return it }
+        if (space.category == UNIDENTIFIED) return null
+        return space.name.takeIf { it.isNotBlank() }
+    }
 
     /** `labelPoint` when the answer has it, else the centre of the space's bounds. */
     fun anchor(space: FloorSpace): Pair<Float, Float>? =
@@ -25,12 +32,18 @@ object FloorLabels {
 
     /**
      * The labels to draw out of [candidates]: in priority order, a label wider than its space is
-     * left out, and so is one that would overlap a label already placed.
+     * left out, so is one not wholly inside [view] (the screen) rather than cut at its edge, and
+     * so is one that would overlap a label already placed.
      */
-    fun <T> place(candidates: List<LabelCandidate<T>>, hideWhenWiderThanSpace: Boolean = true): List<LabelCandidate<T>> {
+    fun <T> place(
+        candidates: List<LabelCandidate<T>>,
+        hideWhenWiderThanSpace: Boolean = true,
+        view: LabelBox? = null,
+    ): List<LabelCandidate<T>> {
         val placed = mutableListOf<LabelCandidate<T>>()
         for (candidate in candidates.sortedBy { it.rank }) {
             if (hideWhenWiderThanSpace && candidate.box.width > candidate.spaceWidth) continue
+            if (view != null && !view.contains(candidate.box)) continue
             if (placed.any { it.box.overlaps(candidate.box) }) continue
             placed += candidate
         }
@@ -38,6 +51,9 @@ object FloorLabels {
     }
 
     private const val FULL_SIZE_ZOOM = 4f
+
+    /** The contract's category for a space drawn on a plan whose use nobody knows yet. */
+    private const val UNIDENTIFIED = "OTHER"
 }
 
 /** A label that could be drawn: its [box] on screen, the width of its space there, and its rank. */
@@ -49,6 +65,10 @@ data class LabelBox(val left: Float, val top: Float, val right: Float, val botto
 
     fun overlaps(other: LabelBox) =
         left < other.right && other.left < right && top < other.bottom && other.top < bottom
+
+    /** Whether [other] lies wholly inside this box. */
+    fun contains(other: LabelBox) =
+        other.left >= left && other.right <= right && other.top >= top && other.bottom <= bottom
 
     companion object {
         /** A [width] x [height] box centred on ([x], [y]). */

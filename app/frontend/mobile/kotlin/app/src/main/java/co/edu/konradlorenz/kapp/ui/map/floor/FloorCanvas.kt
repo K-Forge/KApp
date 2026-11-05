@@ -167,7 +167,8 @@ private fun DrawScope.drawLabels(
         )
     }
     val halo = Stroke(width = HaloWidth.toPx(), join = StrokeJoin.Round)
-    FloorLabels.place(candidates, style.labels.hideWhenWiderThanSpace).forEach { label ->
+    val screen = LabelBox(0f, 0f, size.width, size.height)
+    FloorLabels.place(candidates, style.labels.hideWhenWiderThanSpace, screen).forEach { label ->
         val topLeft = Offset(label.box.left, label.box.top)
         drawText(label.item, color = palette.labelHalo, topLeft = topLeft, drawStyle = halo)
         // Fill said outright: without it the text keeps the halo's stroke, and the label is a blot.

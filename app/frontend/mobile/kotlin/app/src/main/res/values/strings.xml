@@ -190,6 +190,12 @@
     <string name="map_floor_not_drawn">Este piso todavía no está dibujado.</string>
     <string name="map_zoom_in">Acercar el mapa</string>
     <string name="map_zoom_out">Alejar el mapa</string>
+    <plurals name="map_unplaced">
+        <item quantity="one">%d espacio de este piso todavía no está dibujado</item>
+        <item quantity="other">%d espacios de este piso todavía no están dibujados</item>
+    </plurals>
+    <string name="map_unplaced_title">Todavía sin dibujar</string>
+    <string name="map_unplaced_close">Cerrar</string>
 
     <string name="band_go_home">Ir a Inicio</string>
     <string name="home_open_profile">Abrir Perfil</string>

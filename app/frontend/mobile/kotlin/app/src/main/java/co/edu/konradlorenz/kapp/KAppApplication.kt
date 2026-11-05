@@ -7,6 +7,7 @@ import android.net.Uri
 import co.edu.konradlorenz.kapp.data.auth.MicrosoftSignIn
 import co.edu.konradlorenz.kapp.data.demo.DemoBackend
 import co.edu.konradlorenz.kapp.data.demo.DemoClock
+import co.edu.konradlorenz.kapp.data.map.FloorRepository
 import co.edu.konradlorenz.kapp.data.network.KAppApi
 import co.edu.konradlorenz.kapp.data.profile.LocalAvatar
 import co.edu.konradlorenz.kapp.data.profile.MockProfilePreference
@@ -78,6 +79,9 @@ class AppContainer(context: Context) {
 
     /** A student's only: the tab and Inicio's semester card ask for it, nobody else does. */
     val semaphore = SemaphoreRepository(api.semaphore)
+
+    /** The floors Mapa has read, by their ETag, for as long as the app runs. */
+    val floors = FloorRepository(api.map)
 
     /** A student's or a professor's: staff have no timetable, and get 403. */
     val schedule = ScheduleRepository(api.schedule, api.map)
