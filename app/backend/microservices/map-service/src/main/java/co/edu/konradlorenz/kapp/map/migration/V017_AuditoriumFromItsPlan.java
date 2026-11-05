@@ -12,36 +12,37 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Puts the first floor of the Edificio Central with its auditorium turned, in place of the
- * database's, once.
+ * Puts the first floor of the Edificio Central with its auditorium drawn from its own plan, in place
+ * of the database's, once.
  *
- * <p>Brian found the auditorium drawn as trapezoids (#218). Its own evacuation plan, laid over the
- * floor's, shows a block turned along the Carrera 9 Bis, and the snapshot now draws it so, with the
- * floor's outline and the passage to the Carrera 9A beside the Casa de Francisco de Paula Vélez. A
- * floor nobody saved since {@link V016_CentralGroundFloorFromSketch} is redrawn by
- * {@link V007_TracedCampus} anyway; one somebody saved would only have their changes merged onto
- * the new drawing, and he asked for the drawing itself, as V016 did.
+ * <p>Brian found the auditorium drawn as trapezoids, and then as a square block, neither of which the
+ * plan shows (#218). The snapshot now draws the wing as he outlined it over the auditorium's plan,
+ * laid on the floor by scale, turn and shift alone, with every seat the plan prints inside the hall;
+ * and the floor's outline, with the passage to the Carrera 9A beside the Casa de Francisco de Paula
+ * Vélez. A floor nobody saved since {@link V016_CentralGroundFloorFromSketch} is redrawn by
+ * {@link V007_TracedCampus} anyway; one somebody saved would only have their changes merged onto the
+ * new drawing, and he asked for the drawing itself, as V016 did.
  *
  * <p>What it replaces is not lost: the floor as it was, with every one of its spaces, is kept whole in
  * {@code map_replaced_floors} first.
  */
-@ChangeUnit(id = "map-ec-p1-turned-auditorium-v017", order = "017", author = "kapp")
-public class V017_TurnedAuditorium {
+@ChangeUnit(id = "map-ec-p1-auditorium-from-plan-v017", order = "017", author = "kapp")
+public class V017_AuditoriumFromItsPlan {
 
     static final String BUILDING = "EC";
     static final String FLOOR = "P1";
 
-    private static final Logger log = LoggerFactory.getLogger(V017_TurnedAuditorium.class);
+    private static final Logger log = LoggerFactory.getLogger(V017_AuditoriumFromItsPlan.class);
 
     @Execution
     public void execute(MongoTemplate mongo, Environment environment) {
         if (!environment.getProperty(V007_TracedCampus.ENABLED, Boolean.class, true)) {
-            log.info("{} {} not redrawn with its auditorium turned: {} is false", BUILDING, FLOOR,
+            log.info("{} {} not redrawn with its auditorium from its plan: {} is false", BUILDING, FLOOR,
                     V007_TracedCampus.ENABLED);
             return;
         }
         int kept = apply(mongo, SurveySnapshot.load(), Instant.now());
-        log.info("{} {} redrawn with its auditorium turned; the floor it replaced and its {} space(s) are in {}",
+        log.info("{} {} redrawn with its auditorium from its plan; the floor it replaced and its {} space(s) are in {}",
                 BUILDING, FLOOR, kept, V008_RedrawnCentralGroundFloor.REPLACED);
     }
 

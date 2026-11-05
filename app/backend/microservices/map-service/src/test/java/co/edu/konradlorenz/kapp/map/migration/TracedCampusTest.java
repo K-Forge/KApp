@@ -357,8 +357,8 @@ class TracedCampusTest {
     }
 
     @Test
-    @DisplayName("the Edificio Central's first floor is redrawn with its auditorium turned over a saved one, kept aside whole")
-    void theCentralGroundFloorIsRedrawnWithItsAuditoriumTurned() {
+    @DisplayName("the Edificio Central's first floor is redrawn with its auditorium from its plan over a saved one, kept aside whole")
+    void theCentralGroundFloorIsRedrawnWithItsAuditoriumFromItsPlan() {
         MongoTemplate fresh = new MongoTemplate(client, "traced_v017_" + UUID.randomUUID().toString().substring(0, 8));
         V007_TracedCampus.apply(fresh, SNAPSHOT, Instant.parse("2026-10-22T10:00:00Z"));
         BuildingDocument central = fresh.findOne(query(where("code").is("EC")), BuildingDocument.class);
@@ -371,13 +371,13 @@ class TracedCampusTest {
                 new Document("_id", central.id()).append("floors.code", "P1"),
                 new Document("$set", new Document("floors.$.version", 3L)));
 
-        int keptAside = V017_TurnedAuditorium.apply(fresh, SNAPSHOT, Instant.now());
+        int keptAside = V017_AuditoriumFromItsPlan.apply(fresh, SNAPSHOT, Instant.now());
 
         SurveySnapshot.SnapshotFloor p1 = SNAPSHOT.stream().filter(b -> b.code().equals("EC")).findFirst().orElseThrow()
                 .floors().stream().filter(f -> f.code().equals("P1")).findFirst().orElseThrow();
-        LayoutSpaceDto turned = p1.spaces().stream().filter(sp -> sp.code().equals("P1-AUDITORIO-SONIA")).findFirst()
+        LayoutSpaceDto traced = p1.spaces().stream().filter(sp -> sp.code().equals("P1-AUDITORIO-SONIA")).findFirst()
                 .orElseThrow();
-        assertThat(fresh.findOne(hall, SpaceDocument.class).shape()).isEqualTo(MapMapper.toPoints(turned.shape()));
+        assertThat(fresh.findOne(hall, SpaceDocument.class).shape()).isEqualTo(MapMapper.toPoints(traced.shape()));
         Floor redrawn = fresh.findOne(query(where("code").is("EC")), BuildingDocument.class).floor("P1").orElseThrow();
         assertThat(redrawn.version()).as("as a load leaves it").isZero();
         assertThat(redrawn.outline()).as("the floor's walls, with the passage to the Carrera 9A").isNotEmpty();
