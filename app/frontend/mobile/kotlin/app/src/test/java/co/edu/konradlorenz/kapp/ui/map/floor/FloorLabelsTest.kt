@@ -19,6 +19,22 @@ class FloorLabelsTest {
     }
 
     @Test
+    fun `a space nobody has identified yet has no label, unless its door has a number`() {
+        assertNull(FloorLabels.text(space(name = "Sin identificar", category = "OTHER")))
+        assertEquals("214", FloorLabels.text(space(name = "Sin identificar", doorCode = "214", category = "OTHER")))
+        assertEquals("Escalera por identificar", FloorLabels.text(space(name = "Escalera por identificar", category = "CIRCULATION")))
+    }
+
+    @Test
+    fun `a label not wholly on screen is hidden rather than cut at the edge`() {
+        val screen = LabelBox(0f, 0f, 1080f, 1920f)
+        val inside = candidate("inside", LabelBox.centredOn(540f, 960f, 200f, 40f))
+        val cut = candidate("cut", LabelBox.centredOn(1050f, 960f, 200f, 40f))
+        assertEquals(listOf("inside"), FloorLabels.place(listOf(inside, cut), view = screen).map { it.item })
+        assertEquals(2, FloorLabels.place(listOf(inside, cut)).size)
+    }
+
+    @Test
     fun `the anchor is the label point, else the centre of the bounds, else of the shape`() {
         val box = MapBounds(80, 80, 160, 80)
         assertEquals(160f to 120f, FloorLabels.anchor(space(bounds = box)))
@@ -64,8 +80,9 @@ class FloorLabelsTest {
         bounds: MapBounds? = null,
         shape: List<MapPoint> = emptyList(),
         labelPoint: MapPoint? = null,
+        category: String? = null,
     ) = FloorSpace(
-        code = "GENERATED-01", name = name, typeCode = "OFFICE", doorCode = doorCode,
+        code = "GENERATED-01", name = name, typeCode = "OFFICE", doorCode = doorCode, category = category,
         bounds = bounds, shape = shape, labelPoint = labelPoint,
     )
 
