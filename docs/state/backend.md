@@ -1,7 +1,7 @@
 # Backend State
 
-> Owner: Backend. As of 2026-11-05, `develop` at `942d46a`. Backend | Local: EC P1 verified on the dev server, the
-> map 3.7.0 contract merged (#211), and its implementation in #212.
+> Owner: Backend. As of 2026-11-05, `develop` at `6ac0ea0`. Backend | Local: EC P1's auditorium redrawn as a turned
+> block, with the floor's outline and the Carrera 9A passage (#218).
 
 ---
 
@@ -13,7 +13,7 @@
 | user-service | user 1.1.0 | Profiles without identity document or phone. `academic` is read-only from the test SINU (#76–#80). `PUT /internal/users/{id}/roles` | V003 |
 | semaphore-service | semaphore 2.0.1 | SINU course statuses, read-only through `SinuRecordPort` and `FakeSinuRecordAdapter` (#79). Editable plans at `/me/plans` (`plannedLevel` 1 to 12). The catalogue of the 23 pensums | V010 |
 | schedule-service | schedule 2.0.1 | Current classes only: `/me`, `/me/day`, `/me/week`, `/me/periods`, from the test SINU (`SinuTimetablePort`, #78). No database | none |
-| map-service | map 3.6.0 (contract 3.7.0 merged in #211; service in #212) | Buildings, floors, layouts, spaces, types, campuses, ground, structures and survey. ETag. `sinuSedes` (#77) | V016 (EC P1 from Brian's sketch, squared: #183, #193) |
+| map-service | map 3.7.0 (#211, #212) | Buildings, floors, layouts, spaces, types, campuses, ground, structures and survey. ETag. `sinuSedes` (#77). `labelPoint` on every drawn space | V016 (EC P1 from Brian's sketch, squared: #183, #193); V017 in #218 |
 | api-gateway | none | Routes by name, with no registry (#64). Answers 500 when a service is down (#157) | none |
 
 - **Local helpers:** fake OIDC (mock-oauth2-server on `:8090`, with test users for student, professor and staff;
@@ -54,9 +54,8 @@
 ## Done on 2026-11-05
 
 - **EC floor 1** (#183, then #193): traced from Brian's sketch, with rooms squared by `scripts/plan-tracing/regular.py`
-  (walls level or plumb, shared walls on one line, stacked stairs and lifts as anchors; the auditorium wing as
-  trapezoids along its two measured facades, as Brian approved). V016 loads it and keeps the old floor in
-  `map_replaced_floors`.
+  (walls level or plumb, shared walls on one line, stacked stairs and lifts as anchors). V016 loads it and keeps the
+  old floor in `map_replaced_floors`. #218 redraws its auditorium wing (below).
 - **Re-registering P1 later** regenerates it from the sketch: copy any room edited in the portal into
   `traced/ec-p1-a-mano.json` first (after `export-map-snapshot.py`), or it is lost.
 - **#155 closed:** Horario works on the dev server for the Microsoft-signed-in test student (#203: the dev server's
@@ -65,12 +64,19 @@
 
 ## In flight
 
-- **map 3.7.0, `labelPoint` (#195):**
-  - #211, merged: the contract. `Space.labelPoint`, the `CentralGroundFloor` example (EC P1 as the dev server
-    serves it) first in `getFloor`, so the mocks serve it, and the CHANGELOG entry.
-  - #212 (`feature/map-label-point-service`): `LabelPoint` (polylabel, precision 1, then the best whole point
-    around it) in every response with a `shape`. Tests: every seeded space's label is inside its shape, and the
-    contract example equals what the service computes. Until it merges, the dev server sends no `labelPoint`.
+- **EC P1's auditorium, outline and Carrera 9A exit (#218, `feature/ec-p1-turned-auditorium`):**
+  - The auditorium's plan laid over the floor's fits by scale, a quarter turn and a shift (corners within 0.8%);
+    on the surveyed corners the hall is a block along the Carrera 9 Bis. `register.py` gained `"turned"` (rooms
+    drawn in a block's own frame, u along its front, v across) and `"outline"`; `ec-surveyed.json` uses both.
+  - The floor's `outline` is the surveyed parts on P1, the open patio and the passage between the tower and the
+    Casa de Francisco de Paula Vélez's lot line, out to the sidewalk: no contract change was needed for the
+    casa's wall. The gate onto the Carrera 9A is 2.5 m, as the survey measured it (a-10).
+  - Corridors: only `PAS-TRANSVERSAL` and `PAS-SALIDA-9A`; the two through the cafeteria went.
+  - V017 puts the floor in place even over a saved one; the contract example and its label points follow.
+  - `render-map-base.py` now draws a floor's outline, corridors and doors. Review images:
+    `~/Documents/KApp/mapa-pisos/ec-p1-218/` on Brian's Mac.
+  - After merge: Kotlin re-runs `capture-demo-data.sh` so the demo serves the new example.
+  - Next: P2's gallery on the turned hall (#220).
 - **`verticalCode` (#213):** issue open, not started. Contract, service, seed data and portal, one PR each.
 - **EC P1 on the dev server, verified 2026-11-05:** the API returns exactly what V016 seeds (46 spaces, 42 drawn,
   4 corridors, same doors), and the portal draws it whole. To check the dev server through the portal or the API,
@@ -99,7 +105,7 @@
 | 0–2 | #54, #55 | Done |
 | 3 · Microsoft sign-in, refresh tokens, roles and permissions | #56 | Done and closed (#141, #142, #169, #172, #179, #148, #156) |
 | 4 · End-to-end journeys per profile | #57 | Not started |
-| 5 · EC floors faithful to reality | #58 | P1 done (#183, #193). P2 to P8 wait for Brian's sketches |
+| 5 · EC floors faithful to reality | #58 | P1 done (#183, #193; auditorium turned in #218). P2 to P8 wait for Brian's sketches |
 | 6 · Kubernetes with kind, and production | #59 | Branch stale. Production waits on IT's server decision |
 | 7 · notification-service | #60 | Not started. Needs Firebase, and APNs needs the Apple account |
 | 8 · Points, voice, damage reports, lost and found | #61 | Not started |
@@ -119,7 +125,7 @@
 
 ## Next
 
-1. #212 merged once its CI is green.
+1. #218 merged once its CI is green; then #220 (P2's gallery).
 2. #157 (gateway 503), in a new Backend | Local session. Then #143 (one program name).
 3. #213 (`verticalCode`), contract first.
 4. EC P2 as soon as Brian sketches it. Otherwise, start phase 4 (#57).
