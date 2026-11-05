@@ -184,6 +184,9 @@ services:
       SERVER_PORT: 8084
       SERVER_ADDRESS: 127.0.0.1
       KAPP_JWKS_URI: http://127.0.0.1:8081/.well-known/jwks.json
+      # The catalogue and the buildings: by name they resolve nowhere on the host network.
+      KAPP_SEMAPHORE_SERVICE_URL: http://127.0.0.1:8083
+      KAPP_MAP_SERVICE_URL: http://127.0.0.1:8085
       KAPP_LOG_LEVEL: INFO
       JAVA_OPTS: "-Xmx96m -XX:MaxDirectMemorySize=16m -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -XX:CICompilerCount=1 -XX:ReservedCodeCacheSize=48m -XX:MaxMetaspaceSize=160m -Xss512k"
     healthcheck:
