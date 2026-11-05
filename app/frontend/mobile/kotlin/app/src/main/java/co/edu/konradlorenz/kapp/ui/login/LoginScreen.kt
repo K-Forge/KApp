@@ -52,8 +52,8 @@ import co.edu.konradlorenz.kapp.ui.theme.Brand
 import co.edu.konradlorenz.kapp.ui.theme.InProgress
 import co.edu.konradlorenz.kapp.ui.theme.KAppTheme
 import co.edu.konradlorenz.kapp.ui.theme.OnBrandSoft
-import co.edu.konradlorenz.kapp.ui.theme.Placeholder
 import co.edu.konradlorenz.kapp.ui.theme.Subject
+import co.edu.konradlorenz.kapp.ui.theme.tones
 
 // Every measurement below is read off docs/design/mobile/LoginAndroid.dc.html, which is drawn on a
 // 360x800 canvas. The pixels there are dp here.
@@ -127,7 +127,7 @@ private fun LoginContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(MaterialTheme.colorScheme.surface),
     ) {
         // The band runs to the very top of the display. Nothing is drawn for the status bar: the
         // system paints it over this, which is what canvas.json asks for.
@@ -269,7 +269,7 @@ private fun SignInButton(signingIn: Boolean, onClick: () -> Unit) {
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = Color.White,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
     ) {
@@ -430,7 +430,7 @@ private fun ColumnScope.Footer() {
     Text(
         text = stringResource(R.string.login_copyright),
         style = MaterialTheme.typography.labelSmall,
-        color = Placeholder,
+        color = tones.placeholder,
         modifier = Modifier
             .align(Alignment.CenterHorizontally)
             .navigationBarsPadding()
