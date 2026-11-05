@@ -19,6 +19,7 @@ data class MapStyle(
     val categories: Map<String, Themed<String>>,
     val fallbackCategory: String,
     val typeIcons: Map<String, TypeIcon> = emptyMap(),
+    val icons: IconsStyle,
     val labels: LabelsStyle,
     val doors: StrokeStyle,
     val corridors: StrokeStyle,
@@ -76,6 +77,15 @@ data class SpacesStyle(val light: StrokeColor, val dark: StrokeColor, val stroke
 
 @Serializable
 data class TypeIcon(val material: String, val sfSymbol: String)
+
+@Serializable
+data class IconColors(val fill: String, val glyph: String)
+
+/** The round mark a typed space carries: [sizeDp] across, a [IconColors.glyph] on a [IconColors.fill]. */
+@Serializable
+data class IconsStyle(val sizeDp: Float, val light: IconColors, val dark: IconColors) {
+    fun colors(dark: Boolean) = if (dark) this.dark else light
+}
 
 @Serializable
 data class LabelColors(val color: String, val halo: String)
