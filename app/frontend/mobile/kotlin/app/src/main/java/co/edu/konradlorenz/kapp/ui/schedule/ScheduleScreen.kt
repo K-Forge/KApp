@@ -68,6 +68,8 @@ import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
 import co.edu.konradlorenz.kapp.ui.theme.Brand
 import co.edu.konradlorenz.kapp.ui.theme.InProgress
 import co.edu.konradlorenz.kapp.ui.theme.Subject
+import co.edu.konradlorenz.kapp.ui.theme.tones
+import co.edu.konradlorenz.kapp.ui.theme.toned
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -111,7 +113,7 @@ fun ScheduleScreen(viewModel: ScheduleViewModel = viewModel(factory = ScheduleVi
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .padding(vertical = 32.dp),
-                        color = Brand,
+                        color = Brand.toned(),
                     )
                 }
                 ScheduleResult.NoSchedule -> Card { Message(R.string.schedule_none) }
@@ -210,7 +212,7 @@ private fun TestNotice() {
             .padding(12.dp),
         fontSize = 13.sp,
         lineHeight = 18.sp,
-        color = Brand,
+        color = tones.onLime,
     )
 }
 
@@ -502,7 +504,7 @@ private fun ClassSheet(occurrence: ClassOccurrence, room: RoomState, onDismiss: 
                     Detail(R.string.schedule_detail_room, occurrence.room.orEmpty())
                     Note(R.string.schedule_room_not_mapped)
                 }
-                RoomState.Loading -> CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Brand)
+                RoomState.Loading -> CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Brand.toned())
                 RoomState.Failed -> {
                     Detail(R.string.schedule_detail_room, occurrence.room.orEmpty())
                     Note(R.string.schedule_room_failed)

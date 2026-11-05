@@ -86,6 +86,8 @@ import co.edu.konradlorenz.kapp.ui.theme.Passed
 import co.edu.konradlorenz.kapp.ui.theme.Pending
 import co.edu.konradlorenz.kapp.ui.theme.Postponed
 import co.edu.konradlorenz.kapp.ui.theme.TextSoft
+import co.edu.konradlorenz.kapp.ui.theme.tones
+import co.edu.konradlorenz.kapp.ui.theme.toned
 import kotlin.math.roundToInt
 
 private val CardShape = RoundedCornerShape(18.dp)
@@ -129,7 +131,7 @@ fun SemaphoreScreen(viewModel: SemaphoreViewModel = viewModel(factory = Semaphor
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .padding(vertical = 32.dp),
-                        color = Brand,
+                        color = Brand.toned(),
                     )
                 }
                 SemaphoreState.NoProgram -> Card { Message(R.string.semaphore_no_program) }
@@ -214,7 +216,7 @@ private fun Summary(data: SemaphoreData) {
                 text = "${summary.percentComplete.roundToInt()}%",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
-                color = Brand,
+                color = Brand.toned(),
             )
         }
         Spacer(Modifier.height(12.dp))
@@ -233,7 +235,7 @@ private fun CreditsBar(passed: Int, inProgress: Int, total: Int) {
             .fillMaxWidth()
             .height(8.dp)
             .clip(RoundedCornerShape(4.dp))
-            .background(Pending),
+            .background(MaterialTheme.colorScheme.outlineVariant),
     ) {
         if (total > 0) {
             if (passed > 0) Box(Modifier.weight(passed.toFloat()).fillMaxHeight().background(Passed))
@@ -259,7 +261,7 @@ private fun TestNotice() {
             .padding(12.dp),
         fontSize = 13.sp,
         lineHeight = 18.sp,
-        color = Brand,
+        color = tones.onLime,
     )
 }
 
@@ -453,7 +455,7 @@ private fun ItemRow(item: SemaphoreItem, onClick: () -> Unit) {
             .background(background)
             .then(
                 if (item.status == CourseStatus.Eligible) {
-                    Modifier.border(BorderStroke(1.5.dp, Passed), ItemShape)
+                    Modifier.border(BorderStroke(1.5.dp, Passed.toned()), ItemShape)
                 } else {
                     Modifier
                 },
@@ -685,7 +687,7 @@ private fun ElectiveSection(item: SemaphoreItem, plan: AcademicPlan, viewModel: 
         Text(
             text = stringResource(R.string.semaphore_elective_not_offered),
             fontSize = 13.sp,
-            color = ErrorRed,
+            color = MaterialTheme.colorScheme.error,
         )
     }
     Row {
@@ -714,12 +716,12 @@ private fun ElectiveSection(item: SemaphoreItem, plan: AcademicPlan, viewModel: 
         when (bank) {
             ElectiveBank.NotAsked, ElectiveBank.Loading -> CircularProgressIndicator(
                 modifier = Modifier.size(24.dp),
-                color = Brand,
+                color = Brand.toned(),
             )
             ElectiveBank.Failed -> Text(
                 text = stringResource(R.string.semaphore_elective_bank_failed),
                 fontSize = 13.sp,
-                color = ErrorRed,
+                color = MaterialTheme.colorScheme.error,
             )
             is ElectiveBank.Ready -> {
                 // An offering fills any slot unless it names the ones it fills.
@@ -750,7 +752,11 @@ private fun ElectiveSection(item: SemaphoreItem, plan: AcademicPlan, viewModel: 
                                 .size(10.dp)
                                 .clip(CircleShape)
                                 .background(
-                                    if (offering.sinuCode == chosen?.sinuCode) Passed else Pending,
+                                    if (offering.sinuCode == chosen?.sinuCode) {
+                                        Passed.toned()
+                                    } else {
+                                        MaterialTheme.colorScheme.outlineVariant
+                                    },
                                 ),
                         )
                         Spacer(Modifier.width(10.dp))
@@ -829,7 +835,7 @@ private fun SaveFailed() {
         text = stringResource(R.string.semaphore_save_failed),
         modifier = Modifier.padding(top = 8.dp),
         fontSize = 13.sp,
-        color = ErrorRed,
+        color = MaterialTheme.colorScheme.error,
     )
 }
 
@@ -867,7 +873,7 @@ private fun Swatch(status: CourseStatus, modifier: Modifier) {
             .background(background)
             .then(
                 if (status == CourseStatus.Eligible) {
-                    Modifier.border(1.5.dp, Passed, RoundedCornerShape(3.dp))
+                    Modifier.border(1.5.dp, Passed.toned(), RoundedCornerShape(3.dp))
                 } else {
                     Modifier
                 },
@@ -877,17 +883,25 @@ private fun Swatch(status: CourseStatus, modifier: Modifier) {
 
 /**
  * Background and text colour per status. Green, lime, red and grey are the K's; white never goes
- * on the lime (1.5:1), purple does. *Eligible* is white with a green edge - free to take, not yet
- * taken - and *blocked* the grey of a course not taken, with softened text.
+ * on the lime (1.5:1), purple does. *Eligible* is the card's own colour with a green edge - free to
+ * take, not yet taken - and *blocked* the grey of a course not taken, with softened text. The
+ * coloured statuses carry their own contrast and look the same in both themes; the white and the
+ * grey ones follow the theme, so a dark grid has no light islands (6.5:1 and more in dark).
  */
-private fun coloursOf(status: CourseStatus): Pair<Color, Color> = when (status) {
-    CourseStatus.Passed -> Passed to Color.White
-    CourseStatus.InProgress -> InProgress to Brand
-    CourseStatus.Eligible -> Color.White to Color(0xFF1C1420)
-    CourseStatus.Blocked -> Pending to TextSoft
-    CourseStatus.Failed -> ErrorRed to Color.White
-    CourseStatus.Postponed -> Postponed to OnPostponed
-    CourseStatus.Other -> Pending to Color(0xFF1C1420)
+@Composable
+private fun coloursOf(status: CourseStatus): Pair<Color, Color> {
+    val scheme = MaterialTheme.colorScheme
+    val dark = tones.dark
+    return when (status) {
+        CourseStatus.Passed -> Passed to Color.White
+        CourseStatus.InProgress -> InProgress to Brand
+        CourseStatus.Eligible -> scheme.surface to scheme.onSurface
+        CourseStatus.Blocked ->
+            if (dark) scheme.outlineVariant to scheme.onSurface.copy(alpha = 0.75f) else Pending to TextSoft
+        CourseStatus.Failed -> ErrorRed to Color.White
+        CourseStatus.Postponed -> Postponed to OnPostponed
+        CourseStatus.Other -> if (dark) scheme.outlineVariant to scheme.onSurface else Pending to scheme.onSurface
+    }
 }
 
 @StringRes

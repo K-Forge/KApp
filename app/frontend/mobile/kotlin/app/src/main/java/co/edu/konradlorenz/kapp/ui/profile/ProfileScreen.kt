@@ -45,7 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -72,6 +71,7 @@ import co.edu.konradlorenz.kapp.ui.navigation.MainShell
 import co.edu.konradlorenz.kapp.ui.theme.Brand
 import co.edu.konradlorenz.kapp.ui.theme.KAppTheme
 import co.edu.konradlorenz.kapp.ui.theme.Person
+import co.edu.konradlorenz.kapp.ui.theme.toned
 import coil3.compose.SubcomposeAsyncImage
 
 private val CardShape = RoundedCornerShape(18.dp)
@@ -171,7 +171,7 @@ private fun ProfileContent(
                 when (state) {
                     ProfileState.Loading -> CircularProgressIndicator(
                         modifier = Modifier.padding(vertical = 40.dp),
-                        color = Brand,
+                        color = Brand.toned(),
                     )
                     ProfileState.Failed -> FailedCard(onRetry)
                     is ProfileState.Ready -> ProfileCard(
@@ -250,7 +250,7 @@ private fun ProfileCard(
                 painter = painterResource(R.drawable.ic_pencil),
                 contentDescription = stringResource(R.string.profile_edit_avatar),
                 modifier = Modifier.size(16.dp),
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onPrimary,
             )
         }
     }
@@ -274,11 +274,11 @@ private fun ProfileCard(
             text = stringResource(label),
             modifier = Modifier
                 .clip(RoundedCornerShape(50))
-                .background(Person.copy(alpha = 0.12f))
+                .background(Person.toned().copy(alpha = 0.12f))
                 .padding(horizontal = 12.dp, vertical = 4.dp),
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color = Person,
+            color = Person.toned(),
         )
     }
 
@@ -322,14 +322,14 @@ private fun Avatar(profile: UserProfile, localPhoto: ImageBitmap?) {
             modifier = Modifier
                 .size(AvatarSize)
                 .clip(CircleShape)
-                .background(Person.copy(alpha = 0.14f)),
+                .background(Person.toned().copy(alpha = 0.14f)),
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = profile.toStudent().initials,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Person,
+                color = Person.toned(),
             )
         }
     }
