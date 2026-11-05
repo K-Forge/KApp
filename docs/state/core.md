@@ -7,8 +7,8 @@ Core orchestrates. It asks the other sessions for their state, orders the work, 
 decides. Decisions are recorded in issues or pull requests.
 
 From 2026-11-05 all sessions are local (see the README). Kotlin goes first, and Swift resumes when the Android
-app is finished. Core recommends a new, single-purpose session whenever a purpose is done (README, "One session,
-one purpose").
+app is finished. Core rotates the worker sessions when a purpose is done or they get heavy, and stays the
+long-lived session itself (README, "One session, one purpose").
 
 ---
 
@@ -100,4 +100,5 @@ Cloud sessions cannot read these. Ask a local session, or ask Brian to attach th
 2. With Brian's yes, the housekeeping above: close #43, #158 and #163–#165, then refresh `PROGRESS.md` and the
    "Current State" of `AGENTS.md` from this folder.
 3. Keep this folder current after each batch of merges.
-4. Recommend a new, single-purpose session whenever a purpose is done, as the README says, and for itself too.
+4. Rotate a worker session, with Brian's yes, whenever its purpose is done or it gets heavy, as the README says.
+   Recommend Core's own rotation only when this session is compacted or very long.

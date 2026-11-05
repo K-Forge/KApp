@@ -42,7 +42,7 @@ while the Mac is off.
 
 | Session | Role | Works on |
 |---|---|---|
-| Core \| Local | **Coordinates.** Plans, keeps this folder current, reviews every agent pull request, tells Brian what to merge, writes issues. Does not write feature code | `docs/`, `.github/`, `README.md`, `AGENTS.md`, `scripts/` for the repository |
+| Core \| Local | **Coordinates.** Plans, keeps this folder current, reviews every agent pull request, tells Brian what to merge, writes issues, and rotates the worker sessions. The long-lived session. Does not write feature code | `docs/`, `.github/`, `README.md`, `AGENTS.md`, `scripts/` for the repository |
 | Backend \| Local | **Works** | `app/backend/`, `app/frontend/web-admin/`, `docs/api/`, `docs/map/`, `docs/pensums/` |
 | Kotlin \| Local | **Works.** The only one that runs the emulator, and turns it off when done | `app/frontend/mobile/kotlin/` |
 | Swift \| Local | **Works** (paused until Android is finished) | `app/frontend/mobile/swift/` |
@@ -56,31 +56,37 @@ The Mac-only files (survey sketches, renders, the thesis proposal draft, `.env` 
 
 Every message a session receives re-reads its whole history, so a long session spends more tokens on each turn than
 a fresh one with the same knowledge. The knowledge does not live in the history: it lives in this folder, in the
-issues and in the pull requests. So sessions are kept short, one purpose each.
+issues and in the pull requests. So the **worker sessions** (Backend, Kotlin, Swift) are kept short, one purpose
+each, and **Core rotates them**. Core itself is the long-lived session: it is the one that holds the picture of all
+four, so it is not rotated after each purpose (see the end of this section).
 
-**When to recommend a new session.** A session tells Brian, in one short line at the end of its reply, that it is
-time to start a new one when any of these is true:
+**When a worker session is rotated.** Any of these:
 
 - the purpose it was opened for is done: its pull request is merged or ready, or its question is answered;
 - the next task is a different purpose, even in the same area (a new issue, a new pull request);
 - the conversation is long: it has been compacted, or it is past roughly 50 turns or a few hours of work.
 
-**How it hands over.** Before recommending, the session:
+Core watches for this, and a worker that notices it first tells Core (`SendMessage` to "Core \| Local").
+
+**How the worker hands over.** Before it is rotated, the worker:
 
 1. updates its area's file in this folder: what is done, what is in flight with branch and PR numbers, and the exact
    next step;
 2. pushes everything: work that exists only in a session is lost when it ends;
-3. writes the **opening message for the new session** in its reply, in a code block Brian can copy: its name, its one
-   purpose (an issue or PR number), and "read `docs/state/README.md` and `docs/state/<area>.md` first".
+3. sends Core the **opening message for the new session**: its name, its one purpose (an issue or PR number), and
+   "read `docs/state/README.md` and `docs/state/<area>.md` first".
 
-**What happens when Brian confirms.** The old session is archived, not left idle: in the Claude desktop app, Archive;
-from the command line, `/exit`. A new session starts **with the same name** (Core \| Local, Backend \| Local, Kotlin
-\| Local, Swift \| Local) and, where the app groups sessions, in the same group, with Remote Control on so Core and
-Brian's phone can reach it. If the session has a tool that archives or starts sessions, it may do it itself after
-Brian's yes; otherwise Brian does it. A session never archives itself without that yes.
+**Who rotates it.** Core asks Brian, in a question, whether to rotate the session. On his yes, Core starts the new
+session **with the same name** (Backend \| Local, Kotlin \| Local, Swift \| Local) and the opening message, in the
+same group where the app groups sessions and with Remote Control on, then archives the old one: archived, not left
+idle. When Core has no tool for this, Brian does it: in the Claude desktop app, Archive; from the command line,
+`/exit`. No session is archived without Brian's yes.
 
-Core recommends the same for itself. Its coordination does not depend on its history either: it reads this folder and
-the open pull requests at the start of each session.
+**Core's own session.** Core does not ask to be rotated when a review, a question or a batch of merges is done: its
+value is the context it keeps across the four sessions. It recommends its own rotation only when the conversation is
+heavy (it has been compacted, or it is very long), and then hands over the same way, by updating `core.md` and
+writing its opening message for Brian. Even so, its coordination never depends on its history alone: a new Core reads
+this folder and the open pull requests first.
 
 ---
 
