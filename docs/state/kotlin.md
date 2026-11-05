@@ -50,8 +50,9 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
    unplaced list, the label fixes and the back arrow on the left came in #206.
 4. **#204, the whole app follows the system's dark mode** (Brian chose it on 2026-11-05; no in-app toggle). #207
    has the theme, Inicio, Mapa and the bottom bar, with the floor screen's dark scheme from #200 folded into the app
-   theme. A second pull request does Semáforo, Horario, Perfil, Login and Invitación; until it lands, those screens
-   keep some light-only colours in dark mode, so the two should merge together.
+   theme. #208, stacked on it, does Semáforo, Horario, Perfil and the login, and opens in dark mode without a white
+   flash. Both were tried on the emulator in light and dark, with screenshots on each pull request. They merge
+   together; after #207 is squashed, `develop` comes into #208 so its diff does not repeat #207.
 
 ---
 
