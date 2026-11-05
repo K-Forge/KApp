@@ -51,8 +51,10 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
    answers `404` for it, as the service does. What is left is checking it against the 2.0.0 mock on Brian's Mac,
    including the class with no room on 2026-09-21, and then ticking the boxes.
 4. **The next floor renderer pull request (#196):** `ETag` caching, the list of unplaced spaces, no label for
-   spaces with no real name, labels kept inside the view, and the back arrow on the left of the band. Whether the
-   whole app follows the system theme, or only the floor screen, waits for Brian.
+   spaces with no real name, labels kept inside the view, and the back arrow on the left of the band.
+5. **#204, the whole app follows the system's dark mode** (Brian chose it on 2026-11-05; no in-app toggle). The
+   floor screen's own dark scheme from #200 folds into the app theme. Its own pull requests, split past about 400
+   lines: the theme and two screens first, then the rest.
 
 ---
 
