@@ -84,80 +84,80 @@
         }
       ],
       "drawn": {
-        "why": "Brian, 2026-11-05 (#218): the hall is not square, it follows the plan. Each room is the one he outlined over the auditorium's plan (traced/ec-p1-auditorio.json), laid on the floor by the similarity that takes the plan onto the four surveyed corners above (scale and turn alone, so its walls keep their angles; 0.1 to 0.3 m off them), not by the four-corner warp. The plan's seats, its grey rows, are read off the photo the same way, and the hall keeps every one of them inside, 1.5 units clear of its walls (checked pixel by pixel: none outside). Walls two rooms share are simplified once, to 6 units, and every room is in whole units. scripts/plan-tracing/wip/aud_walls.py makes them.",
+        "why": "Brian, 2026-11-05 (#218): the hall is not square, it follows the plan. Each room is the one he outlined over the auditorium's plan (traced/ec-p1-auditorio.json), laid on the floor by the similarity that takes the plan onto the four surveyed corners above (scale and turn alone, so its walls keep their angles; 0.1 to 0.3 m off them), not by the four-corner warp. The plan's seats, its grey rows, are read off the photo the same way, and the hall keeps every one of them inside, 1.5 units clear of its walls (checked pixel by pixel: none outside). The rooms then make one tiling, so two neighbours share each wall exactly, and each wall is one straight stretch, level or plumb where it runs within 4 degrees of it; nothing moves more than 0.35 m from the outlines, and every room is in whole units. scripts/plan-tracing/wip/aud_walls.py makes them.",
         "spaces": [
           {
             "code": "P1-AUDITORIO-SONIA",
-            "shape": [[2030, 984], [2024, 1017], [2027, 1025], [2039, 1025], [2124, 1048], [2138, 1047], [2213, 898], [2206, 814], [2212, 813], [2199, 805], [2143, 749], [2136, 733], [2140, 734], [2140, 730], [2135, 730], [2134, 727], [2134, 730], [2128, 730], [2134, 732], [2133, 738], [2121, 726], [2108, 725], [2107, 719], [2102, 724], [2065, 735], [2026, 716], [2016, 716], [2011, 709], [2004, 716], [1988, 766], [1968, 766], [1950, 760], [1944, 756], [1900, 748], [1894, 701], [1871, 701], [1871, 692], [1860, 686], [1823, 688], [1818, 682], [1817, 662], [1807, 659], [1782, 662], [1747, 670], [1689, 688], [1683, 693], [1681, 701], [1670, 701], [1663, 711], [1664, 707], [1658, 707], [1656, 713], [1655, 704], [1641, 746], [1643, 927], [1737, 946], [1742, 939], [1741, 915], [1784, 899], [1814, 893], [1909, 892], [1957, 914], [1983, 929], [2029, 971]],
-            "doors": [[[1642, 851], [1642, 821]], [[2157, 1009], [2143, 1036]]],
+            "shape": [[1686, 686], [1647, 706], [1642, 745], [1642, 928], [1738, 947], [1742, 916], [1812, 894], [1911, 894], [1983, 929], [2028, 971], [2028, 1026], [2132, 1048], [2138, 1048], [2212, 899], [2212, 813], [2144, 750], [2142, 733], [2104, 719], [2064, 735], [2011, 703], [1988, 766], [1903, 749], [1893, 698], [1862, 684], [1830, 684], [1808, 657], [1801, 657]],
+            "doors": [[[1642, 851], [1642, 821]], [[2157, 1009], [2144, 1036]]],
             "why": "The seats: Brian's outline of the hall, cut on the plan's east wall (fitted), and every seat the plan prints inside it with 1.5 units to spare; less the rooms round it."
           },
           {
             "code": "P1-AUD-ESCENARIO",
-            "shape": [[2024, 1017], [2030, 984], [2029, 971], [1983, 929], [1909, 892], [1814, 893], [1784, 899], [1741, 915], [1742, 940], [1737, 946], [1740, 1008], [1735, 1015], [2007, 1079], [2007, 1087], [2013, 1079], [2017, 1050], [2027, 1025]],
+            "shape": [[1738, 947], [1730, 1015], [1732, 1020], [1990, 1080], [2002, 1087], [2008, 1087], [2028, 1026], [2028, 971], [1983, 929], [1911, 894], [1812, 894], [1742, 916]],
             "why": "The stage, as Brian outlined it."
           },
           {
             "code": "P1-20",
-            "shape": [[1643, 927], [1645, 982], [1637, 989], [1734, 1008], [1735, 1014], [1740, 1008], [1737, 946]],
+            "shape": [[1630, 984], [1730, 1015], [1738, 947], [1642, 928]],
             "why": "As Brian outlined it."
           },
           {
             "code": "P1-23",
-            "shape": [[2032, 1088], [2037, 1096], [2088, 1108], [2110, 1107], [2171, 1125], [2184, 1125], [2191, 1090], [2201, 1074], [2191, 1061], [2154, 1053], [2150, 1047], [2124, 1048], [2039, 1025], [2027, 1025], [2017, 1050], [2013, 1079], [2007, 1087]],
+            "shape": [[2008, 1087], [2002, 1087], [2037, 1102], [2184, 1133], [2202, 1074], [2151, 1048], [2132, 1048], [2028, 1026]],
             "why": "As Brian outlined it."
           },
           {
             "code": "P1-26",
-            "shape": [[1800, 648], [1798, 636], [1735, 614], [1716, 613], [1684, 682], [1703, 681], [1739, 666], [1801, 654], [1805, 653], [1804, 633], [1803, 633]],
+            "shape": [[1686, 686], [1801, 657], [1808, 657], [1804, 634], [1797, 634], [1716, 613]],
             "why": "As Brian outlined it."
           },
           {
             "code": "P1-27",
-            "shape": [[1832, 681], [1862, 681], [1860, 644], [1834, 637], [1808, 636], [1803, 630], [1803, 633], [1804, 633], [1805, 653], [1817, 659]],
+            "shape": [[1804, 634], [1808, 657], [1830, 684], [1862, 684], [1862, 644]],
             "why": "As Brian outlined it."
           },
           {
             "code": "P1-AUD-AUDIOVISUALES",
-            "shape": [[2004, 716], [2004, 695], [1923, 677], [1893, 679], [1900, 748], [1944, 756], [1968, 765], [1988, 765]],
+            "shape": [[1893, 698], [1903, 749], [1988, 766], [2011, 703], [2011, 698], [1893, 679]],
             "why": "As Brian outlined it."
           },
           {
             "code": "P1-28",
-            "shape": [[2102, 724], [2099, 711], [2029, 691], [2018, 691], [2016, 715], [2026, 715], [2065, 735]],
+            "shape": [[2011, 698], [2011, 703], [2064, 735], [2104, 719]],
             "why": "As Brian outlined it."
           },
           {
             "code": "P1-29",
-            "shape": [[2213, 813], [2214, 797], [2235, 792], [2229, 786], [2232, 773], [2230, 758], [2137, 733], [2143, 749], [2199, 805]],
+            "shape": [[2212, 813], [2235, 789], [2231, 758], [2142, 733], [2144, 750]],
             "why": "As Brian outlined it."
           },
           {
             "code": "P1-AUD-TAQUILLA",
-            "shape": [[1566, 683], [1471, 683], [1471, 780], [1566, 780]],
+            "shape": [[1567, 683], [1471, 683], [1471, 781], [1567, 781]],
             "why": "Squared to the building, as both plans draw it, and off the lobby."
           },
           {
             "code": "P1-AUD-ANTESALA-N",
-            "shape": [[1538, 780], [1538, 978], [1641, 978], [1641, 706], [1566, 706], [1566, 780]],
-            "doors": [[[1538, 816], [1538, 786]], [[1641, 821], [1641, 851]], [[1615, 978], [1585, 978]]],
+            "shape": [[1567, 706], [1567, 781], [1538, 781], [1538, 985], [1630, 984], [1642, 928], [1642, 745], [1647, 706]],
+            "doors": [[[1538, 816], [1538, 786]], [[1642, 821], [1642, 851]], [[1616, 984], [1585, 984]]],
             "why": "Squared to the building, as both plans draw it; between it and the lobby is the thick wall Brian described."
           },
           {
             "code": "P1-AUD-SALIDA-SUR",
-            "shape": [[2264, 1092], [2264, 866], [2310, 866], [2310, 867], [2311, 867], [2311, 810], [2241, 789], [2234, 791], [2235, 792], [2214, 797], [2213, 813], [2206, 814], [2213, 898], [2138, 1047], [2150, 1047], [2154, 1053], [2191, 1061], [2201, 1073]],
-            "doors": [[[2146, 1031], [2160, 1004]], [[2235, 792], [2275, 799]]],
+            "shape": [[2138, 1048], [2151, 1048], [2202, 1074], [2265, 1093], [2265, 868], [2311, 868], [2311, 810], [2235, 789], [2212, 813], [2212, 899]],
+            "doors": [[[2146, 1031], [2160, 1004]], [[2245, 792], [2275, 800]]],
             "why": "What is left between the hall, the stair, the prop room and the front, to the door on the front's step (survey 65-67)."
           },
           {
             "code": "P1-AUD-ESCALERA",
-            "shape": [[2310, 1097], [2310, 866], [2264, 866], [2264, 1097]],
+            "shape": [[2265, 1097], [2311, 1097], [2311, 868], [2265, 868]],
             "why": "Squared to the building, along the Calle 62 wall, as both plans draw it."
           },
           {
             "code": "P1-AUD-UTILERIA",
-            "shape": [[2264, 1092], [2202, 1074], [2190, 1131], [2310, 1152], [2310, 1097], [2264, 1097]],
-            "doors": [[[2286, 1148], [2254, 1142]]],
+            "shape": [[2184, 1133], [2316, 1157], [2316, 1097], [2265, 1097], [2265, 1093], [2202, 1074]],
+            "doors": [[[2285, 1151], [2254, 1146]]],
             "why": "Brian's corners: its top along the plan's wall from the hall's east wall to the stair, its back the wing's."
           },
           {
@@ -165,7 +165,7 @@
             "name": "Patio cubierto",
             "typeCode": "SOCIAL_AREA",
             "wing": "S",
-            "shape": [[1516, 989], [1516, 1114], [2340, 1302], [2340, 1100], [2320, 1095], [2320, 1164], [2178, 1139], [2109, 1117], [2087, 1118], [2031, 1105], [2026, 1098], [1997, 1097], [1997, 1087], [1725, 1023], [1725, 1017], [1615, 995], [1623, 988]],
+            "shape": [[2184, 1133], [2037, 1102], [2002, 1087], [1990, 1080], [1732, 1020], [1730, 1015], [1630, 984], [1538, 985], [1538, 984], [1516, 989], [1516, 1115], [2341, 1303], [2341, 1100], [2316, 1097], [2316, 1157]],
             "why": "Brian: behind the auditorium, between it and the Casa de Francisco de Paula Velez, a patio with a sliding roof and tables runs from the tower to the neighbours' building. One floor. From a wall behind the wing to a wall inside the lot line with the casa, which it follows."
           }
         ]

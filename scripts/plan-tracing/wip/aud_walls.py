@@ -20,8 +20,10 @@ How:
     regular.py, as both plans draw them; the hall is cut on the plan's east wall, fitted on its
     lines; the south anteroom is what is left between the hall, the stair, the prop room and the
     front.
- 5. Walls two rooms share are simplified once (to 6 units), everything is rounded to whole units,
-    and a room rounding pushes onto another gives way.
+ 5. The rooms are made one tiling - gaps the pen left between them go to the nearest room - and
+    simplified as one coverage, so two neighbours share each wall exactly; every corner is then
+    moved once for all the rooms that meet there (short walls collapse, near-level and near-plumb
+    walls are made so) and rounded, and a room rounding pushes onto another gives way.
 
 Not standard library: numpy, opencv-python-headless, shapely >= 2.1 and pillow. A one-off kept so
 the wing can be drawn again the same way; see README.md.
@@ -118,6 +120,125 @@ def fit_line(mask, p, q, w):
     c = sel.mean(0)
     dd = np.linalg.svd(sel - c, full_matrices=False)[2][0]
     return np.array([X0 + c[0] / K, Y0 + c[1] / K]), dd
+
+
+def tiled(G):
+    """The rooms as one tiling: every gap between them narrower than 14 units (a wall the pen left
+    between two rooms) goes to the nearest room, so neighbours meet on one edge. The stair keeps
+    the plan's width: the floor between it and the Calle 62 wall goes to the south anteroom."""
+    x0, y0, x1, y1 = 1440, 560, 2360, 1320
+    codes = list(G)
+    lab = np.zeros((y1 - y0, x1 - x0), np.int32)
+    for i, c in enumerate(codes, 1):
+        pts = np.round(np.array(G[c].exterior.coords) - [x0, y0]).astype(np.int32)
+        cv2.fillPoly(lab, [pts], i)
+    occupied = (lab > 0).astype(np.uint8)
+    envelope = cv2.morphologyEx(occupied, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15)))
+    _, nearest = cv2.distanceTransformWithLabels(1 - occupied, cv2.DIST_L2, 5, labelType=cv2.DIST_LABEL_PIXEL)
+    ys, xs = np.nonzero(occupied)
+    owner = np.zeros(nearest.max() + 1, np.int32)
+    owner[nearest[ys, xs]] = lab[ys, xs]
+    full = np.where(envelope > 0, owner[nearest], 0)
+    stair, anteroom = codes.index("P1-AUD-ESCALERA") + 1, codes.index("P1-AUD-SALIDA-SUR") + 1
+    full[(full == stair) & (np.arange(x1 - x0)[None, :] + x0 > 2311)] = anteroom
+
+    def region(i):          # whole pixels, row by row, so two rooms share their pixel edges exactly
+        cells = []
+        for y in range(y1 - y0):
+            row = np.concatenate([[0], (full[y] == i).astype(np.int8), [0]])
+            d = np.diff(row)
+            cells += [box(x0 + a, y0 + y, x0 + b, y0 + y + 1) for a, b in zip(np.nonzero(d == 1)[0], np.nonzero(d == -1)[0])]
+        return Polygon(largest(unary_union(cells)).exterior)
+    return {c: region(i) for i, c in enumerate(codes, 1)}
+
+
+def straightened(G):
+    """Each wall one straight stretch, the same one for both rooms on it (Brian, #218): the tiling
+    simplified as one coverage; then every corner, shared by all the rooms that meet there, moved
+    once - walls shorter than 4 units collapse to a point, walls within 4 degrees of level or plumb
+    are made so - and rounded; no point is left in the middle of a straight wall."""
+    codes = list(G)
+    cover = coverage_simplify([g for g in tiled(G).values()], 20, simplify_boundary=True)
+    key = lambda p: (round(p[0], 1), round(p[1], 1))
+    corner, rings = {}, {}
+    for c, g in zip(codes, cover):
+        rings[c] = [key(p) for p in list(g.exterior.coords)[:-1]]
+        for k in rings[c]:
+            corner.setdefault(k, list(k))
+
+    def walls():
+        for r in rings.values():
+            for i in range(len(r)):
+                yield r[i], r[(i + 1) % len(r)]
+
+    def collapse(shortest):
+        parent = {k: k for k in corner}
+
+        def find(k):
+            while parent[k] != k:
+                parent[k] = parent[parent[k]]
+                k = parent[k]
+            return k
+        for a, b in walls():
+            if corner[a] is not corner[b] and math.dist(corner[a], corner[b]) < shortest:
+                parent[find(a)] = find(b)
+        groups = {}
+        for k in corner:
+            groups.setdefault(find(k), []).append(k)
+        for g in groups.values():
+            mid = [sum(corner[k][0] for k in g) / len(g), sum(corner[k][1] for k in g) / len(g)]
+            for k in g:
+                corner[k] = mid          # one list for the whole group: moving it moves every room
+        for c, r in rings.items():
+            kept = []
+            for k in r:
+                if not kept or corner[kept[-1]] is not corner[k]:
+                    kept.append(k)
+            if len(kept) > 1 and corner[kept[0]] is corner[kept[-1]]:
+                kept.pop()
+            rings[c] = kept
+
+    def square():
+        for _ in range(4):
+            for a, b in walls():
+                p, q = corner[a], corner[b]
+                if p is q:
+                    continue
+                slope = math.degrees(math.atan2(abs(q[1] - p[1]), abs(q[0] - p[0])))
+                if slope < 4:
+                    p[1] = q[1] = (p[1] + q[1]) / 2
+                elif slope > 86:
+                    p[0] = q[0] = (p[0] + q[0]) / 2
+    collapse(4)
+    square()
+    collapse(4)
+    out = {}
+    for c, r in rings.items():
+        pts = []
+        for k in r:
+            p = (round(corner[k][0]), round(corner[k][1]))
+            if not pts or pts[-1] != p:
+                pts.append(p)
+        if pts[0] == pts[-1]:
+            pts.pop()
+        straight = True
+        while straight and len(pts) > 3:
+            straight = False
+            for i in range(len(pts)):
+                a, b, d = pts[i - 1], pts[i], pts[(i + 1) % len(pts)]
+                if (b[0] - a[0]) * (d[1] - a[1]) - (b[1] - a[1]) * (d[0] - a[0]) == 0:
+                    pts.pop(i)
+                    straight = True
+                    break
+        out[c] = Polygon(pts)
+    # A corner the rounding put a unit inside a neighbour: the lesser room gives way, the patio first,
+    # then the south anteroom, then the hall, which keeps its seats 1.5 units clear anyway.
+    lesser = ["P1-PATIO-CUBIERTO", "P1-AUD-SALIDA-SUR", "P1-AUDITORIO-SONIA"]
+    for c in lesser:
+        for o in codes:
+            if o != c and (o not in lesser or lesser.index(o) > lesser.index(c)) and out[c].intersection(out[o]).area > 0.2:
+                out[c] = largest(set_precision(out[c].difference(out[o]), 1.0))
+    return out
 
 
 def main():
@@ -219,6 +340,7 @@ def main():
     patio = Polygon([(1516, 900), (2340, 1100), (2340, 1302), (1516, 1114)]).difference(wing).difference(lobby)
     patio = largest(patio.difference(thick).buffer(-8, join_style="mitre").buffer(8, join_style="mitre"))
     G["P1-PATIO-CUBIERTO"] = set_precision(patio.simplify(2), 1.0)
+    G = straightened(G)
 
     rooms = {}
     doors = {sp["code"]: sp.get("doors") or [] for sp in strokes["spaces"]}
@@ -235,6 +357,13 @@ def main():
     pts = np.stack([X0 + (xs + 0.5) / K, Y0 + (ys + 0.5) / K], 1)
     out_of_hall = (~contains_xy(Polygon(rooms["P1-AUDITORIO-SONIA"]["shape"]), pts[:, 0], pts[:, 1])).sum()
     print(f"seat pixels: {len(pts)}, outside the hall: {out_of_hall}", file=sys.stderr)
+    shapes = {c: Polygon(r["shape"]) for c, r in rooms.items()}
+    shared = sum(1 for a in shapes for b in shapes if a < b and shapes[a].intersection(shapes[b]).area > 0.01)
+    outside = [c for c, g in shapes.items() if g.difference(outline).area > 0.5 or not g.is_valid]
+    off = [c for c, r in rooms.items() for d in r["doors"]
+           if max(shapes[c].exterior.distance(Point(e)) for e in d) > 1]
+    print(f"overlapping pairs: {shared}, outside the outline or invalid: {outside}, doors off their wall: {off}",
+          file=sys.stderr)
     json.dump(rooms, sys.stdout, indent=1)
 
 
