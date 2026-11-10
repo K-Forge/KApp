@@ -30,6 +30,8 @@ SEEDS = os.path.join(RESOURCES, "seed", "map")
 STRUCTURES = os.path.join(RESOURCES, "seed", "structures")
 GROUND = os.path.join(RESOURCES, "ground")
 DEFAULT_OUT = os.path.join(REPO, "docs", "entrega", "segunda-entrega", "mapa-base")
+# How every client draws a floor's outline, corridors and doors (docs/design/MAP-STYLE.md).
+MAP_STYLE = os.path.join(REPO, "docs", "design", "map-style.json")
 
 # ground.ts: a campus is small enough for the plane through its middle to stand in for the earth.
 METRES_PER_DEGREE_LAT = 110574
@@ -396,6 +398,13 @@ def render_floor(building, floor, ground):
         parts = [[project(c) for c in part["ring"]] for part in building.get("footprint") or [] if reaches(part, level)]
         if parts:
             body.append(outlined(parts, "#ffffff", "#8b8496", 4))
+    # The floor's own outline, when traced, drawn as the apps draw it: filled as floor under the
+    # spaces, and stroked as the building's walls over them, with the corridors and doors between.
+    style = json.load(open(MAP_STYLE))
+    dp = 2  # pixels a density-independent pixel of the style takes here
+    outline = [px((p["x"], p["y"])) for p in floor.get("outline") or []]
+    if len(outline) >= 3:
+        body.append(f'<path d="{path(outline)}" fill="{style["floor"]["light"]["fill"]}"/>')
     categories = set()
     labels = []
     unplaced = []
@@ -425,6 +434,18 @@ def render_floor(building, floor, ground):
             if fitted:
                 labels.append(label(cx, cy, fitted[1], fitted[0], rotate=rotate))
                 break
+    for corridor in floor.get("corridors") or []:
+        line = " ".join(f"{x:.1f},{y:.1f}" for x, y in (px((p["x"], p["y"])) for p in corridor["path"]))
+        body.append(f'<polyline points="{line}" fill="none" stroke="{style["corridors"]["light"]["stroke"]}" '
+                    f'stroke-width="{style["corridors"]["widthDp"] * dp}" stroke-linecap="round" stroke-linejoin="round"/>')
+    for space in floor["spaces"]:
+        for door in space.get("doors") or []:
+            (ax, ay), (bx, by) = px((door["from"]["x"], door["from"]["y"])), px((door["to"]["x"], door["to"]["y"]))
+            body.append(f'<line x1="{ax:.1f}" y1="{ay:.1f}" x2="{bx:.1f}" y2="{by:.1f}" '
+                        f'stroke="{style["doors"]["light"]["stroke"]}" stroke-width="{style["doors"]["widthDp"] * dp}"/>')
+    if len(outline) >= 3:
+        body.append(f'<path d="{path(outline)}" fill="none" stroke="{style["outline"]["light"]["stroke"]}" '
+                    f'stroke-width="{style["outline"]["widthDp"] * dp}" stroke-linejoin="round"/>')
     if placement:
         body += street_labels(ground, project, view)
     body += labels
