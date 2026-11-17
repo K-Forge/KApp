@@ -1,6 +1,6 @@
 # Backend State
 
-> Owner: Backend. As of 2026-11-05, `develop` at `6ac0ea0`. Backend | Local: EC P1's auditorium redrawn from its own
+> Owner: Backend. As of 2026-11-16, `develop` at `6ac0ea0`. Backend | Local: EC P1's auditorium redrawn from its own
 > plan's walls, with the floor's outline and the Carrera 9A passage (#218).
 
 ---
@@ -66,10 +66,12 @@
 
 - **EC P1's auditorium, outline and Carrera 9A exit (#218, `feature/ec-p1-turned-auditorium`):**
   - The auditorium's plan laid over the floor's fits by scale, a quarter turn and a shift (corners within 0.8%);
-    the wing is Brian's outline over that plan, laid by the survey similarity, with every seat the plan prints
-    inside the hall (`scripts/plan-tracing/wip/aud_walls.py`; a first version as a square block was refused).
-    `register.py` gained `"turned"` (a block's own frame), `"drawn"` (rooms given in floor units) and
-    `"outline"`; `ec-surveyed.json` uses `"drawn"` and `"outline"`.
+    the wing is built from straight lines: the outline's (the tape's) for the north wall, chamfer and Calle 62, and
+    lines fitted on that plan for the south wall, the hall's east wall and the stage; each room is an intersection of
+    them and the hall what is left, with every seat the plan prints inside it (`scripts/plan-tracing/wip/aud_walls.py`;
+    a square block and then Brian's traced outlines were refused). `register.py` gained `"turned"`, `"drawn"` (rooms
+    given in floor units) and `"outline"`; `ec-surveyed.json` uses `"drawn"` and `"outline"`. The guard's booth is
+    now the tape's (1.52 x 1.69 m); the passage's width waits on Brian (point 14 of Core's review).
   - The floor's `outline` is the surveyed parts on P1, the open patio and the passage between the tower and the
     Casa de Francisco de Paula Vélez's lot line, out to the sidewalk: no contract change was needed for the
     casa's wall. The gate onto the Carrera 9A is 2.5 m, as the survey measured it (a-10).
