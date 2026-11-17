@@ -47,9 +47,10 @@ uploaded on Thursday 2026-11-19 and presented on Friday 2026-11-20. Parent issue
 
 1. **#228:** finish #219 (select a space on the floor). #217 was squashed into `develop`, so rebase the branch and
    keep only its own three commits.
-2. **#229:** one shared debug build that signs in on the dev server, for the testers. Brian shares the dev server's
-   machine on Tailscale with Santiago, Iván and Alejandro, limited to the API's port, and registers the build's
-   signature hash. The APK goes to the team's WhatsApp group, never to the repository or an issue.
+2. **#229:** a Spanish guide, posted on WhatsApp today, Tuesday 2026-11-17, so Iván and Alejandro run the debug build from
+   `develop` against the dev server on the emulator of their own computers (they have iPhones). Brian shares the
+   dev server's machine on Tailscale, limited to the API's port, and registers each tester's signature hash. No
+   shared APK: one is built only if the course asks for it (#232).
 3. **#230:** every screen against the dev server, as the test student and the test professor (the professor has
    never been tried there), and fix what fails. Record the result in this file.
 4. **#231:** a room that is not on the map says so instead of "No pudimos buscar el salón en el mapa", and Inicio
