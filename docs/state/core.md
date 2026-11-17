@@ -1,6 +1,6 @@
 # Core State
 
-> Owner: Core. As of 2026-11-05, when the cloud trial closed. Core \| Local continues from here.
+> Owner: Core. As of 2026-11-05, `develop` at `4d94141`, after #207, #208, #211, #214 and #215 merged.
 
 Core orchestrates. It asks the other sessions for their state, orders the work, reviews every agent pull request
 (as a comment titled "Revisión de Docs/Chore"), and tells Brian which ones are ready to merge. Brian merges and
@@ -19,13 +19,21 @@ in CI); #192; #199 (shared map style); #200 and #206 (floor renderer, first part
 Android Studio; the team needs Android Studio 2026.2.2 Rabbit 2); #203 (#155 fix); #205 (demo rooms from the map
 seeds); #183 and #193 (EC floor 1, squared). **#155 is closed:** Horario works on the dev server.
 
+Merged later on 2026-11-05: #210 and #214 (session rules: Core is the long-lived session and rotates the
+workers; agents open pull requests ready for review, never as drafts, and report to Core); #207 and #208 (the whole
+app follows the system's dark mode; **#204 is closed**); #211 (map 3.7.0, `Space.labelPoint`, and EC P1 as the
+floor example); #215 (`MAP-STYLE.md` anchors labels at `labelPoint`).
+
 Open work:
 
-- **#204, the whole app follows the system's dark mode** (Brian chose it): #207 (the theme, Inicio and Mapa) is
-  ready for review, and #208 (Semáforo, Horario, Perfil and the login), stacked on it, is a draft. Their
-  descriptions and `kotlin.md` say where Kotlin | Cloud stopped. Kotlin | Local continues them.
-- **#194, the generic map renderer:** Kotlin's next parts are type icons and selection (#196). Backend's part is
-  #195 (`labelPoint`, an example floor). Swift (#197) and the portal (#198) come later.
+- **#195, `labelPoint` in map-service:** #212, approved by Core. It merges once its full backend CI, with the
+  Testcontainers tests, is green on `develop`. Backend \| Local reports it, with the opening message for its next
+  session (#157). Close #195 by hand after the merge.
+- **#196, the rest of Kotlin's floor renderer:** type icons, selecting a space, labels at `labelPoint`. A new
+  Kotlin \| Local started on it on 2026-11-05.
+- **#213, `verticalCode`:** stairs, lifts and ramps tied across floors, in four pull requests (contract, service,
+  data, portal). Backend, after #157.
+- **#194, the generic map renderer:** Swift (#197) and the portal (#198) come later.
 - **Route animation decided:** a fluorescent line that pulses in the direction of travel (comment on #194).
 
 The Vercel project `kapp` has its builds turned off (Ignored Build Step `exit 0`) since 2026-11-05: nothing in the
