@@ -65,6 +65,11 @@
 
 ## In flight
 
+- **Survey of the Cra 9A exit (`feature/survey-cra-9a-passage`):** 11 new distances in the portal's survey sheet,
+  `in-09` to `in-19` (numbers 84 to 94), for the corridor, ramp and stairs Brian found in the passage on 2026-11-17:
+  their widths, lengths, where each starts and ends, and how the booth lines up with the ramp. Once he takes them,
+  #221 draws the passage from them.
+
 - **map 3.7.0, `labelPoint` (#195):**
   - #211, merged: the contract. `Space.labelPoint`, the `CentralGroundFloor` example (EC P1 as the dev server
     serves it) first in `getFloor`, so the mocks serve it, and the CHANGELOG entry.
