@@ -78,7 +78,7 @@ data class FloorSpace(
     val shape: List<MapPoint> = emptyList(),
     val bounds: MapBounds? = null,
     val doors: List<SpaceDoor> = emptyList(),
-    /** A point inside the shape for the label, once the contract has it. */
+    /** Where the label and icon go: the point inside [shape] farthest from its walls (map 3.7.0). */
     val labelPoint: MapPoint? = null,
 ) {
     /** [bounds], or worked out from [shape] when the answer leaves it out. */

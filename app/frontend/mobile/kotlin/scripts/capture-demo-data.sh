@@ -157,10 +157,72 @@ echo "$out/get/api/map/buildings.json"
 # so the mocks answered every room with that one: Horario opened 508 and showed 302. A room the
 # seeds do not have gets no file, and the demo answers 404, as map-service does.
 # A space's typeName and category come from the type catalogue map-service seeds itself
-# (V004_MapModelV2.CATALOGUE), and its bounds from its shape, as the service works them out.
+# (V004_MapModelV2.CATALOGUE), and its bounds and labelPoint from its shape, as the service works
+# them out (map 3.7.0; label_point is map-service's LabelPoint, step by step).
 python3 -I - "$(cd "$(dirname "$0")/../../../../.." && pwd)/app/backend/microservices/map-service/src/main" "$out/get/api/map" \
   "$out/get/api/schedule/me/day.json" "$out/get/api/schedule/me/week.json" <<'PY'
-import json, pathlib, re, sys
+import heapq, json, math, pathlib, re, sys
+
+def signed_distance(x, y, shape):
+    """How far (x, y) is from the shape's walls: positive inside, negative outside."""
+    inside, nearest = False, math.inf
+    for i in range(len(shape)):
+        a, b = shape[i], shape[i - 1]
+        if (a["y"] > y) != (b["y"] > y) and x < (b["x"] - a["x"]) * (y - a["y"]) / (b["y"] - a["y"]) + a["x"]:
+            inside = not inside
+        px, py, dx, dy = a["x"], a["y"], b["x"] - a["x"], b["y"] - a["y"]
+        if dx or dy:
+            t = ((x - px) * dx + (y - py) * dy) / (dx * dx + dy * dy)
+            if t > 1:
+                px, py = b["x"], b["y"]
+            elif t > 0:
+                px, py = px + dx * t, py + dy * t
+        nearest = min(nearest, (x - px) ** 2 + (y - py) ** 2)
+    return math.sqrt(nearest) if inside else -math.sqrt(nearest)
+
+def label_point(shape):
+    """The point inside the shape farthest from its walls (polylabel, precision 1), in whole units."""
+    def cell(x, y, half, order):
+        d = signed_distance(x, y, shape)
+        return (-(d + half * math.sqrt(2)), order, x, y, half, d)
+    xs, ys = [p["x"] for p in shape], [p["y"] for p in shape]
+    width, height = max(xs) - min(xs), max(ys) - min(ys)
+    size = min(width, height)
+    if size == 0:
+        pole = (min(xs), min(ys))
+    else:
+        queue, order, h = [], 0, size / 2
+        x = min(xs)
+        while x < max(xs):
+            y = min(ys)
+            while y < max(ys):
+                heapq.heappush(queue, cell(x + h, y + h, h, order)); order += 1
+                y += size
+            x += size
+        area = cx = cy = 0
+        for i in range(len(shape)):
+            a, b = shape[i], shape[i - 1]
+            f = a["x"] * b["y"] - b["x"] * a["y"]
+            cx, cy, area = cx + (a["x"] + b["x"]) * f, cy + (a["y"] + b["y"]) * f, area + f * 3
+        best = cell(cx / area, cy / area, 0, -1) if area else cell(shape[0]["x"], shape[0]["y"], 0, -1)
+        box = cell(min(xs) + width / 2, min(ys) + height / 2, 0, -1)
+        if box[5] > best[5]:
+            best = box
+        while queue:
+            c = heapq.heappop(queue)
+            if c[5] > best[5]:
+                best = c
+            if -c[0] - best[5] <= 1:
+                continue
+            half = c[4] / 2
+            for sx, sy in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
+                heapq.heappush(queue, cell(c[2] + sx * half, c[3] + sy * half, half, order)); order += 1
+        pole = (best[2], best[3])
+    x, y = math.floor(pole[0]), math.floor(pole[1])
+    candidates = [(x, y), (x + 1, y), (x, y + 1), (x + 1, y + 1)]
+    best = max(candidates, key=lambda p: (signed_distance(p[0], p[1], shape), -candidates.index(p)))
+    return {"x": best[0], "y": best[1]}
+
 service, out = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
 timetables = sys.argv[3:]
 source = (service / "java/co/edu/konradlorenz/kapp/map/migration/V004_MapModelV2.java").read_text(encoding="utf-8")
@@ -190,6 +252,8 @@ for seed in sorted((service / "resources/db/seed/map").glob("*.json")):
             if s.get("shape"):
                 xs, ys = [p["x"] for p in s["shape"]], [p["y"] for p in s["shape"]]
                 space["bounds"] = {"x": min(xs), "y": min(ys), "width": max(xs) - min(xs), "height": max(ys) - min(ys)}
+                if len(s["shape"]) >= 3:
+                    space["labelPoint"] = label_point(s["shape"])
             spaces.append(space)
         floor = {k: f[k] for k in ("code", "level", "name", "status", "accessibility", "note", "width", "height", "top") if k in f}
         floor.update(outline=f.get("outline", []), corridors=f.get("corridors", []), version=0,
