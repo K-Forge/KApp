@@ -44,7 +44,8 @@ while the Mac is off.
 |---|---|---|
 | Core \| Local | **Coordinates.** Plans, keeps this folder current, reviews every agent pull request, tells Brian what to merge, writes issues, and rotates the worker sessions. The long-lived session. Does not write feature code | `docs/`, `.github/`, `README.md`, `AGENTS.md`, `scripts/` for the repository |
 | Backend \| Local | **Works** | `app/backend/`, `app/frontend/web-admin/`, `docs/api/`, `docs/map/`, `docs/pensums/` |
-| Kotlin \| Local | **Works.** The only one that runs the emulator, and turns it off when done | `app/frontend/mobile/kotlin/` |
+| Kotlin \| Local | **Works.** The only one that runs the emulator on Brian's Mac, and turns it off when done | `app/frontend/mobile/kotlin/` |
+| Santiago's session | **Works**, on Santiago's own machine, since 2026-11-17: owns the Kotlin client for the Tercera entrega (#234). Reports in its pull requests | `app/frontend/mobile/kotlin/` |
 | Swift \| Local | **Works** (paused until Android is finished) | `app/frontend/mobile/swift/` |
 | Segunda Entrega D.A.M. | Speaks for Brian about university deliveries and edits the shared `.docx`. Talks only to Core. Never runs the app | Outside the repo |
 

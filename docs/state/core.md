@@ -1,6 +1,6 @@
 # Core State
 
-> Owner: Core. As of 2026-11-05, `develop` at `4d94141`, after #207, #208, #211, #214 and #215 merged.
+> Owner: Core. As of 2026-11-17, `develop` at `1a08d52`.
 
 Core orchestrates. It asks the other sessions for their state, orders the work, reviews every agent pull request
 (as a comment titled "Revisión de Docs/Chore"), and tells Brian which ones are ready to merge. Brian merges and
@@ -12,29 +12,30 @@ long-lived session itself (README, "One session, one purpose").
 
 ---
 
-## Where things stand (2026-11-05)
+## Where things stand (2026-11-17)
 
-Merged on 2026-11-04 and 11-05: #150, #151, #152, #153, #189 (dependencies); #190 (this folder); #191 (demo variant
-in CI); #192; #199 (shared map style); #200 and #206 (floor renderer, first parts); #202 (AGP moves only with
-Android Studio; the team needs Android Studio 2026.2.2 Rabbit 2); #203 (#155 fix); #205 (demo rooms from the map
-seeds); #183 and #193 (EC floor 1, squared). **#155 is closed:** Horario works on the dev server.
+Merged since 2026-11-05: #212 (map-service sends `labelPoint`; **#195 is closed**), #217 (an icon per space type on
+the floor), #216 (this file), and the Dependabot bumps #224, #225 and #227. `develop` is green.
 
-Merged later on 2026-11-05: #210 and #214 (session rules: Core is the long-lived session and rotates the
-workers; agents open pull requests ready for review, never as drafts, and report to Core); #207 and #208 (the whole
-app follows the system's dark mode; **#204 is closed**); #211 (map 3.7.0, `Space.labelPoint`, and EC P1 as the
-floor example); #215 (`MAP-STYLE.md` anchors labels at `labelPoint`).
+**The Tercera entrega comes first** (parent #234, milestone 2): the Kotlin app on the real backend, uploaded on
+Thursday 2026-11-19 and presented on Friday 2026-11-20.
 
-Open work:
+- **Santiago owns the Kotlin client** from 2026-11-17, with his own agent session on his machine: #228 to #232
+  (`kotlin.md`, "Next"). He reports in his pull requests; Core reviews them like any other.
+- **Iván and Alejandro test** the mobile app on the dev server and report in the team's WhatsApp group, one short
+  message per bug: screen, what they did, what they expected, what happened, and a screenshot. Alejandro also
+  draws the EC floor sketches.
+- **Access:** Brian shares the dev server's machine on Tailscale with the three of them, limited to the API's port.
 
-- **#195, `labelPoint` in map-service:** #212, approved by Core. It merges once its full backend CI, with the
-  Testcontainers tests, is green on `develop`. Backend \| Local reports it, with the opening message for its next
-  session (#157). Close #195 by hand after the merge.
-- **#196, the rest of Kotlin's floor renderer:** type icons, selecting a space, labels at `labelPoint`. A new
-  Kotlin \| Local started on it on 2026-11-05.
-- **#213, `verticalCode`:** stairs, lifts and ramps tied across floors, in four pull requests (contract, service,
-  data, portal). Backend, after #157.
-- **#194, the generic map renderer:** Swift (#197) and the portal (#198) come later.
-- **Route animation decided:** a fluorescent line that pulses in the direction of travel (comment on #194).
+Open pull requests:
+
+- **#219, selecting a space:** Santiago finishes it (#228).
+- **#221, EC P1 redrawn from the plans (#218):** waits for Brian's measures and his notes on the auditorium plan.
+  The map resumes when Brian says so, after the delivery work is started.
+- **#235, the survey sheet asks for the Cra 9A exit's corridor, ramp and stairs:** approved, for Brian's measures.
+- **#226, Gradle 9.9.1 and AGP 9.5.1:** held until after the delivery.
+
+Next for Backend after #221: #220 (EC P2's gallery), #157 (503, not 500), #213 (`verticalCode`).
 
 The Vercel project `kapp` has its builds turned off (Ignored Build Step `exit 0`) since 2026-11-05: nothing in the
 repo deploys there since the prototype was removed (#97). Turn it back on for the public prototype (#92).
@@ -43,6 +44,9 @@ repo deploys there since the prototype was removed (#97). Turn it back on for th
 
 ## Waiting on Brian
 
+- **Developer accounts:** one test-tenant account per team member, with a profile role and the ADMIN permission,
+  so `administrativo.prueba` can lose ADMIN and stay an ordinary office account.
+- **What the course asks for on 2026-11-19** (document, ZIP, APK or video), to finish #232.
 - **`docs/entrega/segunda-entrega/mapa-base/ec-p1.png`:** decide whether it is regenerated with the new floor 1.
 - **Sketches for EC floors 2 to 8**, in `Sketchs/`, keeping each original plan's file name (phase 5, #58).
 - **Housekeeping to confirm:** close #158 and #163 to #165 (the delivery of 2026-10-23 is done) and #43 (done by
