@@ -2,6 +2,7 @@ package co.edu.konradlorenz.kapp.ui.home
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.PluralsRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -120,7 +123,7 @@ private fun HomeContent(
     ) {
         // The band runs to the very top of the display and the system paints the status bar over
         // it, which is why MainActivity forces white status icons: they are always on purple.
-        HomeBand(student = state.student, onAvatar = { onOpen(KAppDestination.Profile) })
+        HomeBand(student = state.student, photo = state.photo, onAvatar = { onOpen(KAppDestination.Profile) })
 
         // The band is 80 dp of content below the status bar, and the headline card climbs 24 dp
         // back into it. Starting the scrolling column 24 dp short of the band's edge puts the card
@@ -196,6 +199,7 @@ private fun HomeContent(
         // Over the content, so what scrolls up goes under the greeting (BrandBand).
         HomeBand(
             student = state.student,
+            photo = state.photo,
             onAvatar = { onOpen(KAppDestination.Profile) },
             cover = true,
             scrolled = coverScrolled { scroll.value },
@@ -204,12 +208,14 @@ private fun HomeContent(
 }
 
 /**
- * The band of BrandBand, with the greeting in it and the person's initials on the end. Until the
- * profile is here it says only "Hola", and the circle waits for initials to put in it.
+ * The band of BrandBand, with the greeting in it and the person's photo on the end, or their
+ * initials when they have not picked one in Perfil. Until the profile is here it says only "Hola",
+ * and the circle waits for initials to put in it.
  */
 @Composable
 private fun HomeBand(
     student: Student?,
+    photo: ImageBitmap?,
     onAvatar: () -> Unit,
     cover: Boolean = false,
     scrolled: Dp = 0.dp,
@@ -223,8 +229,8 @@ private fun HomeBand(
         cover = cover,
         scrolled = scrolled,
     ) {
-        // Initials rather than a photo: user.openapi.yaml carries a name and no picture. Tapping
-        // them opens Perfil, which is whose they are.
+        // The photo stays on this phone (LocalAvatar): user 1.x has nowhere to upload one. Tapping
+        // the circle opens Perfil, which is where it is changed.
         Box(
             modifier = Modifier
                 .size(34.dp)
@@ -234,12 +240,21 @@ private fun HomeBand(
                 .clickable(onClickLabel = stringResource(R.string.home_open_profile), onClick = onAvatar),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = student.initials,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White,
-            )
+            if (photo != null) {
+                Image(
+                    bitmap = photo,
+                    contentDescription = stringResource(R.string.profile_avatar_description),
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
+            } else {
+                Text(
+                    text = student.initials,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                )
+            }
         }
     }
 }
