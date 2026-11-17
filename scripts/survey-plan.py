@@ -283,6 +283,27 @@ length('in-07', IN, END, (-29.77, 43.80), "The wall that closes the passage's fa
 # The auditorium's plan, laid on the blue wall without stretching it, ends 0.5 to 1.3 m short of the lot
 # line the cadastre gives the south wing: the patio behind it may be that much wider than drawn.
 length('in-08', IN, (-32.23, 55.31), (-35.36, 55.31), "The covered patio behind the auditorium: its width, from the auditorium's back wall to the casa's wall")
+# Brian, 2026-11-17, over the sketch of the exit (#218): from the patio to the gate the passage holds
+# three things side by side - a level corridor along the central wing that leads to the patio, a ramp
+# going down in the middle, in line with the guard's booth, and wide stairs going down along the casa's
+# wall. Nothing else stands between the central wing's step and the booth, and the gate is 46's width.
+# Each is asked for its width across, its length along the passage, and where it starts and ends
+# measured from the gate, the booth or its neighbour. The corners are a guess from his drawing, so the
+# sheet puts every line about where it goes; the expected lengths are the drawing's, not the model's.
+CUT = -52.0                          # where the three widths are taken across, about halfway along
+RAMP_IN, STAIRS_IN = 38.30, 40.00    # where the ramp and the stairs start across, from the central wing
+RAMP_FOOT, STAIRS_FOOT, TOP = -56.20, -55.60, -46.40
+length('in-09', IN, (CUT, 36.29), (CUT, RAMP_IN), 'The corridor beside the ramp: its width, from the central wing\'s wall to the ramp')
+length('in-10', IN, (CUT, RAMP_IN), (CUT, STAIRS_IN), 'The ramp: its width, from the corridor to the stairs')
+length('in-11', IN, (CUT, STAIRS_IN), (CUT, casa(CUT)), "The stairs: their width, from the ramp to the casa's wall")
+length('in-12', IN, (GATE, 42.4), (STAIRS_FOOT, 42.4), 'From the gate to the foot of the stairs, along the passage')
+length('in-13', IN, (STAIRS_FOOT, 41.80), (TOP, 41.80), 'The stairs: their length along the passage, from the bottom step to the top one')
+length('in-14', IN, (BOOTH[3][0], 39.3), (RAMP_FOOT, 39.3), "From the booth's back to the foot of the ramp, along the passage")
+length('in-15', IN, (RAMP_FOOT, 39.30), (TOP, 39.30), 'The ramp: its length along the passage, from its foot to its top')
+length('in-16', IN, (-57.4, RAMP_IN), (-57.4, BOOTH[1][1]), "The ramp and the booth: across the passage, from the ramp's edge on the corridor's side to the booth's side on that side")
+length('in-17', IN, (TOP, 40.60), (TOP + 0.60, 40.60), "Where the ramp and the stairs end at the top: from the top of the stairs to the top of the ramp, along the passage")
+length('in-18', IN, (GATE + 0.80, 37.20), (-45.00, 37.20), 'The corridor: its length along the passage, from its end by the gate to where it reaches the patio')
+length('in-19', IN, (-45.00, 36.29), (-45.00, 34.80), 'Where the corridor reaches the patio: the width of that opening')
 
 # ---- Calle 63, east, back to the start: the north wing's front, from the corner to the admissions
 # door, past the door to the stairs, and past the stairs to the corner on the plaza.
@@ -306,7 +327,8 @@ NUMBERED = ['bis-01', 'bis-02', 'bis-03', 'bis-04', 'bis-05', 'bis-06', 'bis-07'
             'a-06', 'a-07', 'a-08', 'a-09', 'a-10', 'a-11', 'a-12', 'a-13', 'a-14', 'a-15', 'a-16', 'a-17', 'a-18',
             'a-19', 'c63-01', 'c63-02', 'c63-03', 'c63-04', 'c63-05', 'c63-06', 'c63-07', 'c63-08', 'c63-09',
             'bis-32', 'bis-33', 'bis-34', 'bis-35', 'a-20', 'a-21', 'a-22', 'a-23', 'a-24', 'bis-36', 'a-25',
-            'in-01', 'in-02', 'in-03', 'in-04', 'in-05', 'in-06', 'in-07', 'in-08']
+            'in-01', 'in-02', 'in-03', 'in-04', 'in-05', 'in-06', 'in-07', 'in-08', 'in-09', 'in-10', 'in-11',
+            'in-12', 'in-13', 'in-14', 'in-15', 'in-16', 'in-17', 'in-18', 'in-19']
 # The numbers people wrote down on site: a distance taken off the plan leaves its number unused, and a
 # new one is added at the end of this list, never in between.
 for d in PLAN:
@@ -325,6 +347,17 @@ HINTS = {
     'a-25': "New: the wall with the two rows of windows between the north wing and the parking entrance stands behind the planters. Measure from the planters' front, in line with the parking entrance's column, straight back to that wall. The outline draws it 2.1 m.",
     'c63-01': 'Street View (2023): the planters wrap round the corner. Measure from the wall, behind them.',
     'in-08': 'New, and inside: the patio with the sliding roof, behind the auditorium. Nobody has measured where the auditorium ends and the patio starts. Measure straight across the patio, anywhere along it.',
+    'in-09': 'New, and inside: from the patio to the gate the passage holds a level corridor along the central wing, a ramp going down in the middle and wide stairs going down along the casa. 84 to 86 are taken straight across, about halfway along. Here: from the central wing\'s wall to the ramp\'s edge.',
+    'in-10': "From the ramp's edge on the corridor's side to its edge on the stairs' side, straight across.",
+    'in-11': "From the stairs' edge on the ramp's side to the casa's wall, straight across.",
+    'in-12': "From the gate's line to the bottom step of the stairs, straight in along the passage. If the stairs start right at the gate, write 0.",
+    'in-13': 'From the edge of the bottom step to the edge of the top one, along the passage, not along the slope.',
+    'in-14': "From the booth's back wall to where the ramp starts going down, along the passage. If there is a step between them, say how high in the note.",
+    'in-15': 'From where the ramp starts going down to where it is level again, along the passage, not along the slope.',
+    'in-16': "Brian drew the booth in line with the ramp. From the ramp's edge on the corridor's side to the booth's side wall on that side, straight across. Write 0 if they line up; in the note, say which one stands further towards the corridor.",
+    'in-17': "Along the passage, from the top step of the stairs to where the ramp is level again. Write 0 if they end together; in the note, say which one goes further in.",
+    'in-18': 'From the corridor\'s end by the gate, beside the booth, to where it opens onto the patio, along the passage.',
+    'in-19': "Where the corridor turns into the patio: from one side of that opening to the other. In the note, say which wall it is in.",
     'in-01': 'New, and inside: walk in through the gate on Cra 9A. 76 to 82 are taken in the open passage between the building and the casa. If a wall is not where the sketch draws it, say so in the note.',
 }
 for d in PLAN:
