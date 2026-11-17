@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import co.edu.konradlorenz.kapp.KAppApplication
 import co.edu.konradlorenz.kapp.data.schedule.ClassOccurrence
+import co.edu.konradlorenz.kapp.data.schedule.RoomLookup
 import co.edu.konradlorenz.kapp.data.schedule.Schedule
 import co.edu.konradlorenz.kapp.data.schedule.ScheduleRepository
 import co.edu.konradlorenz.kapp.data.schedule.ScheduleResult
@@ -34,6 +35,11 @@ sealed interface RoomState {
 
     data object Loading : RoomState
     data class Ready(val space: SpaceDetail) : RoomState
+
+    /** The building is on the map, this room is not yet (`404`). Said as such, not as a failure. */
+    data object NotOnMap : RoomState
+
+    /** The map could not be asked: no network, or the server failed. */
     data object Failed : RoomState
 }
 
@@ -141,7 +147,11 @@ class ScheduleViewModel(
         }
         if (number != null && building != null) {
             roomJob = viewModelScope.launch {
-                room = repository.space(number, building)?.let { RoomState.Ready(it) } ?: RoomState.Failed
+                room = when (val found = repository.space(number, building)) {
+                    is RoomLookup.Found -> RoomState.Ready(found.space)
+                    RoomLookup.NotOnMap -> RoomState.NotOnMap
+                    RoomLookup.Failed -> RoomState.Failed
+                }
             }
         }
     }
