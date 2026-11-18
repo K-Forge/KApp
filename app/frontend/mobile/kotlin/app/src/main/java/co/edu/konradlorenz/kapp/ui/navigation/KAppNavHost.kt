@@ -46,6 +46,10 @@ fun KAppNavHost(container: AppContainer) {
             navController.navigate(LOGIN) {
                 popUpTo(navController.graph.id) { inclusive = true }
             }
+            // openTab saves each tab it leaves, ViewModel included, and popping to the login does
+            // not drop those. Without this, the next person to sign in on the phone opens Horario
+            // and gets the previous one's week, restored without a single request.
+            KAppDestination.entries.forEach { navController.clearBackStack(it.route) }
         }
     }
 
@@ -96,7 +100,8 @@ fun KAppNavHost(container: AppContainer) {
  * The tabs sit side by side rather than stacking: every move pops back to Inicio first, so the bar
  * never builds a history of itself and Back from any tab leaves for Inicio rather than retracing
  * which ones were visited. `saveState` and `restoreState` keep what a tab had on it - a scroll
- * position, later a loaded list - so returning to one is not a reload.
+ * position, later a loaded list - so returning to one is not a reload. They are kept only for the
+ * session: signing out clears them.
  *
  * Tapping the tab you are already on lands on the same destination and `launchSingleTop` keeps it
  * rather than putting a second copy on the stack.
