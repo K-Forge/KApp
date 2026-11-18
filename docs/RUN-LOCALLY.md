@@ -92,8 +92,8 @@ password; leave the claims box empty.
 | `profesor` | A professor, Laura Marcela Gómez Restrepo | In the app: home, timetable, map and profile |
 | `administrativo` | An administrative employee, Ana Ruiz Mejía | The admin portal, as its administrator |
 
-Any other name signs in too, but as nobody in particular: with no role, it sees only the map and
-its profile.
+Any other name signs in too, as an administrative employee with no permissions: in the app, only
+the map and the profile.
 
 ## 3. The admin portal
 
@@ -176,7 +176,7 @@ with MongoDB Compass or `mongosh`, connect to `mongodb://localhost:27017/?direct
   member's, for Atlas. Move it aside to run locally; the script never overwrites it.
 - **On the emulator, the browser is slow or drops letters.** The backend and the emulator together
   need a lot of the computer. Type the user name slowly and check it before pressing **Sign-in**: a
-  misspelt name signs in as nobody in particular, with only the map and the profile.
+  misspelt name signs in as somebody else, with only the map and the profile.
 - **Everything is stuck, or you want a clean start:** `scripts/run-locally.sh reset`, then start again.
 - **A ZIP of the code opened on macOS** with the `unzip` command can garble file names with accents
   (only under `docs/researches`). Finder opens it correctly.

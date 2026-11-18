@@ -40,7 +40,9 @@
   - project `kapp-<KAPP_STACK>` (#146);
   - profiles `mock`, `core`, `academic`, `map`, `full` and `dev`;
   - every service reaches the shared Atlas development cluster;
-  - fake OIDC by default.
+  - fake OIDC by default;
+  - `local-db` (ADR 0010, #240): a local MongoDB for evaluation and offline runs only, started by
+    `scripts/run-locally.sh` or `.ps1` with secrets generated on that computer. Walkthrough in `docs/RUN-LOCALLY.md`.
 - **Dev server (the-hive):**
   - follows `develop` through GHCR images (`dev-images` publishes 7 services, schedule included; #156) and the agent
     in `deploy/dev-server/`;
