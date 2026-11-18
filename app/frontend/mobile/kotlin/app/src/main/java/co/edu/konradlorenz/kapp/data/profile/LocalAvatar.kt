@@ -9,6 +9,10 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.io.File
 import kotlin.math.max
 
@@ -20,10 +24,16 @@ import kotlin.math.max
  * One pair of files per account, so whoever signs in next on the same phone does not inherit the
  * last person's face: the [photo] as cropped, and the [original] it was cropped from, so Ajustar
  * can start again from the whole picture.
+ *
+ * [changes] moves on every save and removal, so Inicio, which stays alive behind Perfil, shows the
+ * new photo when it is next on screen.
  */
-class LocalAvatar(context: Context) {
+class LocalAvatar(private val folder: File) {
 
-    private val folder = File(context.filesDir, "avatars")
+    constructor(context: Context) : this(File(context.filesDir, "avatars"))
+
+    private val changed = MutableStateFlow(0)
+    val changes: StateFlow<Int> = changed.asStateFlow()
 
     fun photo(userId: String): Bitmap? = read(file(userId, "photo"))
 
@@ -33,11 +43,13 @@ class LocalAvatar(context: Context) {
         folder.mkdirs()
         write(file(userId, "original"), original)
         write(file(userId, "photo"), photo)
+        changed.update { it + 1 }
     }
 
     fun remove(userId: String) {
         file(userId, "photo").delete()
         file(userId, "original").delete()
+        changed.update { it + 1 }
     }
 
     /** The id is the API's, a UUID or `visitor:<id>`: only its letters, digits and dashes are kept. */

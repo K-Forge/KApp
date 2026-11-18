@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.ui.home
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import co.edu.konradlorenz.kapp.data.network.UserProfile
 
 /**
@@ -19,6 +20,8 @@ data class HomeUiState(
     val student: Student?,
     val day: DayState,
     val semester: SemesterState,
+    /** The photo picked in Perfil on this phone (LocalAvatar), drawn instead of the initials. */
+    val photo: ImageBitmap? = null,
 )
 
 /**

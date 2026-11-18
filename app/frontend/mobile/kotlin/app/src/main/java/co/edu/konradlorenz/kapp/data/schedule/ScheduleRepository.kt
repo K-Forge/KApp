@@ -20,6 +20,17 @@ sealed interface ScheduleResult<out T> {
     data object Failed : ScheduleResult<Nothing>
 }
 
+/** What the map answered for a class's room. */
+sealed interface RoomLookup {
+    data class Found(val space: SpaceDetail) : RoomLookup
+
+    /** `404`: the building is mapped but this room is not on it yet, as `BI 301`. */
+    data object NotOnMap : RoomLookup
+
+    /** No network, a `5xx`, or anything else that kept the map from answering. */
+    data object Failed : RoomLookup
+}
+
 /**
  * The timetable (docs/api/schedule.openapi.yaml): the whole schedule once - for `source` and the
  * person's period - and the resolved day and week views as they are asked for. Weeks are kept by
@@ -52,13 +63,15 @@ class ScheduleRepository(private val api: ScheduleApi, private val map: MapApi) 
         }
     }
 
-    /** The room of a class, for its sheet. `null` if it could not be read. */
-    suspend fun space(room: String, buildingCode: String): SpaceDetail? = try {
-        map.space(room, buildingCode)
+    /** The room of a class, for its sheet. A `404` is a room the map has not drawn yet, not a failure. */
+    suspend fun space(room: String, buildingCode: String): RoomLookup = try {
+        RoomLookup.Found(map.space(room, buildingCode))
     } catch (e: CancellationException) {
         throw e
+    } catch (e: HttpException) {
+        if (e.code() == 404) RoomLookup.NotOnMap else RoomLookup.Failed
     } catch (_: Exception) {
-        null
+        RoomLookup.Failed
     }
 
     /** Forgets everything. Called when the session ends. */
