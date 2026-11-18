@@ -20,7 +20,7 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
 | Semáforo | The pensum with each course's status. Plans: create, switch, and move courses, even past the last semester (#186). The demo has the real 1015 pensum (#187) | Dev server for the semáforo. Plan editing only simulated |
 | Timetable | Day, two days, week and month views (#184). Tapping a class opens its room from `GET /api/map/spaces/{room}` | Dev server, as the Microsoft-signed-in test student, since #203 fixed #155 (closed 2026-11-05). The test professor not tried yet |
 | Profile | Microsoft and SINU data, a profile photo (add, crop, remove; #185), and sign-out | Dev server. The photo stays on the phone, because user 1.x has no upload endpoint |
-| Map | A list of the buildings with code, address and levels (#174). Tapping one opens its floors, one chip per level, drawn by the generic floor renderer with the shared style (#196, first part, #200): spaces by category, corridors, doors, labels, pinch, double-tap and +/- zoom, and the system theme on that screen. Floors read again by their `ETag`, the spaces not drawn yet listed under the levels, no label on unidentified spaces or at the screen edge (#206). An icon per `typeCode` at `labelPoint` with the label below, and demo floors with `labelPoint` (#217, merged 2026-11-17). Selecting a space is #219, open (#228) | Demo floors built from map-service's seeds. Not tried on the dev server |
+| Map | A list of the buildings with code, address and levels (#174). Tapping one opens its floors, one chip per level, drawn by the generic floor renderer with the shared style (#196, first part, #200): spaces by category, corridors, doors, labels, pinch, double-tap and +/- zoom, and the system theme on that screen. Floors read again by their `ETag`, the spaces not drawn yet listed under the levels, no label on unidentified spaces or at the screen edge (#206). An icon per `typeCode` at `labelPoint` with the label below, and demo floors with `labelPoint` (#217, merged 2026-11-17). Tapping a space selects it: outlined in the selection colour, with a card for its name, type and door code; Back or a tap on nothing clears it (#219, rebased for #228) | Demo floors built from map-service's seeds. Not tried on the dev server |
 
 - **Build variants:**
   - `demo`, the default: no network, `DemoBackend` serves the demo assets by API path, and `DemoClock` is fixed on a
@@ -33,7 +33,7 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
   - since #189: AGP 9.5.0, Gradle 9.8.2, okhttp 5.5.1, kotlinx-serialization 1.12.0, MSAL 8.6.0;
   - MVVM with Compose (Material 3), Retrofit 3 and OkHttp 5;
   - the session is kept with AES-GCM in the Android Keystore;
-  - 164 unit tests on `feature/floor-type-icons`.
+  - 167 unit tests on `feature/floor-space-selection` (164 in `develop` since #217).
 - **CI:** the Android job runs `:app:testDebugUnitTest :app:assembleDebug :app:lintDebug :app:assembleDemo
   :app:lintDemo` (`.github/workflows/ci.yml`). The demo variant is built and linted since #191.
 

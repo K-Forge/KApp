@@ -106,7 +106,9 @@ data class LabelsStyle(
 data class SelectionColors(val stroke: String, val fillAlpha: Float)
 
 @Serializable
-data class SelectionStyle(val light: SelectionColors, val dark: SelectionColors, val widthDp: Float)
+data class SelectionStyle(val light: SelectionColors, val dark: SelectionColors, val widthDp: Float) {
+    fun colors(dark: Boolean) = if (dark) this.dark else light
+}
 
 /** `#RRGGBB` as an opaque ARGB value, or null when it is not one. */
 fun argbOf(hex: String): Long? = hex.removePrefix("#")
