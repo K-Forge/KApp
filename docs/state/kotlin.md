@@ -1,7 +1,8 @@
 # Kotlin State
 
 > Owner: Kotlin. Refreshed by Core on 2026-11-17, `develop` at `1a08d52`. The screens table was checked against the
-> code on 2026-11-05; Inicio and Mapa against `develop` on 2026-11-17.
+> code on 2026-11-05; Inicio and Mapa against `develop` on 2026-11-17. Every screen checked on the dev server on
+> 2026-11-17 as the test student and the test professor (#230), with #238's branch on the emulator.
 >
 > **Since 2026-11-17 Santiago owns the Kotlin client**, working with his own agent session from the issues of the
 > Tercera entrega (#234). Start with "Next" below.
@@ -16,17 +17,19 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
 |---|---|---|
 | Sign-in | MSAL. FakeSignIn or DevOidc in debug. In the demo build, a "Modo demostración" menu (#180) | Test tenant and the dev server |
 | Invitation | Redeems a visitor pass with a 4-field visual check (#173). No visitor session yet | Simulated data |
-| Home | Greeting with the photo picked in Perfil, or the initials without one (#231), next class (from `GET /api/schedule/me/day`, in `HomeViewModel`), semester progress, shortcuts by role | Dev server for profile and progress. Next class not checked on the dev server yet (#230) |
-| Semáforo | The pensum with each course's status. Plans: create, switch, and move courses, even past the last semester (#186). The demo has the real 1015 pensum (#187) | Dev server for the semáforo. Plan editing only simulated |
-| Timetable | Day, two days, week and month views (#184). Tapping a class opens its room from `GET /api/map/spaces/{room}`; a `404` says the room is not on the map yet, and only a network or server failure says the search failed (#231) | Dev server, as the Microsoft-signed-in test student, since #203 fixed #155 (closed 2026-11-05). The test professor not tried yet |
+| Home | Greeting with the photo picked in Perfil, or the initials without one (#231), next class (from `GET /api/schedule/me/day`, in `HomeViewModel`), semester progress, shortcuts by role | Dev server, student and professor (#230) |
+| Semáforo | The pensum with each course's status. Plans: create, switch, and move courses, even past the last semester (#186). The demo has the real 1015 pensum (#187) | Dev server, including creating a plan and moving a course in it (#230) |
+| Timetable | Day, two days, week and month views (#184). Tapping a class opens its room from `GET /api/map/spaces/{room}`; a `404` says the room is not on the map yet, and only a network or server failure says the search failed (#231) | Dev server, student and professor (#230). Switching between them on one phone showed the previous person's week until `bugfix/forget-tabs-on-sign-out` |
 | Profile | Microsoft and SINU data, a profile photo (add, crop, remove; #185), and sign-out | Dev server. The photo stays on the phone, because user 1.x has no upload endpoint |
-| Map | A list of the buildings with code, address and levels (#174). Tapping one opens its floors, one chip per level, drawn by the generic floor renderer with the shared style (#196, first part, #200): spaces by category, corridors, doors, labels, pinch, double-tap and +/- zoom, and the system theme on that screen. Floors read again by their `ETag`, the spaces not drawn yet listed under the levels, no label on unidentified spaces or at the screen edge (#206). An icon per `typeCode` at `labelPoint` with the label below, and demo floors with `labelPoint` (#217, merged 2026-11-17). Tapping a space selects it: outlined in the selection colour, with a card for its name, type and door code; Back or a tap on nothing clears it (#219, rebased for #228) | Demo floors built from map-service's seeds. Not tried on the dev server |
+| Map | A list of the buildings with code, address and levels (#174). Tapping one opens its floors, one chip per level, drawn by the generic floor renderer with the shared style (#196, first part, #200): spaces by category, corridors, doors, labels, pinch, double-tap and +/- zoom, and the system theme on that screen. Floors read again by their `ETag`, the spaces not drawn yet listed under the levels, no label on unidentified spaces or at the screen edge (#206). An icon per `typeCode` at `labelPoint` with the label below, and demo floors with `labelPoint` (#217, merged 2026-11-17). Tapping a space selects it: outlined in the selection colour, with a card for its name, type and door code; Back or a tap on nothing clears it (#219, rebased for #228) | Dev server: the buildings and the floors of BI, CPC1, EA and EC (#230) |
 
 - **Build variants:**
   - `demo`, the default: no network, `DemoBackend` serves the demo assets by API path, and `DemoClock` is fixed on a
     Monday. It was used for the 2026-10-23 delivery;
   - `debug`: can point at the mocks, at the local backend with fake OIDC, at MSAL with `-Pkapp.msal.*`, or at the
-    dev server (`:8080`; the emulator needs `-dns-server 100.100.100.100` for Tailscale);
+    dev server (`:8080`; the emulator needs `-dns-server 100.100.100.100` for Tailscale, and on Windows the
+    tester's tailnet needs a global nameserver with "Override DNS servers" on, or Microsoft's sign-in does not
+    resolve);
   - `release`.
 - **Stack:**
   - Kotlin 2.4.21, JDK 25, minSdk 26, targetSdk 37;
@@ -52,7 +55,8 @@ uploaded on Thursday 2026-11-19 and presented on Friday 2026-11-20. Parent issue
    dev server's machine on Tailscale, limited to the API's port, and registers each tester's signature hash. No
    shared APK: one is built only if the course asks for it (#232).
 3. **#230:** every screen against the dev server, as the test student and the test professor (the professor has
-   never been tried there), and fix what fails. Record the result in this file.
+   never been tried there), and fix what fails. Record the result in this file. **Checked 2026-11-17**: every
+   screen answers on the dev server for both, recorded in the table above. One fix, `bugfix/forget-tabs-on-sign-out`.
 4. **#231:** a room that is not on the map says so instead of "No pudimos buscar el salón en el mapa", and Inicio
    shows the profile photo.
 5. **#232:** Iván and Alejandro report on WhatsApp until Thursday 10:00. Triage, fix, freeze at 14:00, and cut the
