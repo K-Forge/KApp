@@ -228,6 +228,21 @@ asserts it by connecting with each account against every database
 
 ## Getting Started
 
+### Without any of our accounts
+
+To evaluate KApp, or run it offline, on a computer with nothing but Docker: one command starts the
+whole backend, a local database, a fake Microsoft sign-in and the admin portal, with every secret
+generated on that computer.
+
+```bash
+scripts/run-locally.sh          # macOS, Linux, Git Bash
+.\scripts\run-locally.ps1       # Windows PowerShell
+```
+
+**[`docs/RUN-LOCALLY.md`](docs/RUN-LOCALLY.md)** walks through it, the Android app included.
+
+### For the team
+
 **Docker Desktop and pnpm are both required**, and Docker has to be *running*, not just installed —
 every service and the tests' own database live in containers, and the development database is the shared
 Atlas cluster. Nothing else is:
@@ -364,6 +379,7 @@ KApp/
 | Document | Content |
 | --- | --- |
 | [docs/ONBOARDING.md](docs/ONBOARDING.md) | **Start here on a new machine.** Ten minutes, in Spanish, no Java or MongoDB to install. |
+| [docs/RUN-LOCALLY.md](docs/RUN-LOCALLY.md) | **Running it with none of our accounts**: one command, a local database, a fake sign-in, the app against it. For evaluation and offline runs. |
 | [docs/RUNBOOK.md](docs/RUNBOOK.md) | **How to run it.** Profiles, accounts, and a troubleshooting section where every entry is a failure we actually hit. |
 | [docs/PROGRESS.md](docs/PROGRESS.md) | **What is built**, what each phase delivered, and what is blocked on whom. |
 | [docs/api/](docs/api/) | The OpenAPI 3.1 contracts, one per service. **The source of truth** — linted in CI and served as mocks. |
