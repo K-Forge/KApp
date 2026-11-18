@@ -4,13 +4,18 @@
 # on a 16 GB laptop next to Xcode and Android Studio, plus the Prism mocks that let the
 # mobile team work before any JVM exists.
 #
-# THE DATABASE IS NOT HERE. Every service reaches the shared Atlas cluster through its own
-# MONGO_*_URI, which .env must provide - see docs/ATLAS-SETUP.md. Nothing local to start,
+# THE TEAM'S DATABASE IS NOT HERE. Every service reaches the shared Atlas cluster through its
+# own MONGO_*_URI, which .env must provide - see docs/ATLAS-SETUP.md. Nothing local to start,
 # seed or keep in step, and nobody debugging their own copy of the data. The price is that
 # this stack needs the network and that a destructive experiment is everybody's;
 # docs/adr/0009-atlas-is-the-only-development-database.md records the trade. The tests are
 # the exception and always will be: they start their own MongoDB through Testcontainers, so
 # a test run cannot touch what the team is looking at.
+#
+# The other exception is `local-db`: a MongoDB container for evaluating KApp, or running it,
+# on a computer with none of our accounts - no Atlas, no Microsoft tenant, no Tailscale.
+# scripts/run-locally.sh writes an .env whose MONGO_*_URI point at it, and starts it with the
+# rest. docs/RUN-LOCALLY.md is the walkthrough. The team never starts this profile.
 #
 # Profiles (never run all of them unless you mean to):
 #
@@ -20,6 +25,7 @@
 #   docker compose --profile map       up -d   # core + map
 #   docker compose --profile full      up -d   # everything, mocks included
 #   docker compose --profile dev       up -d   # the admin portal
+#   docker compose --profile local-db  up -d   # a local MongoDB, for evaluation - see above
 #
 # The shared services (api-gateway, auth-service, user-service) list every non-mock
 # profile, so any of `core`/`academic`/`map`/`full` brings them up.
@@ -30,7 +36,9 @@
 # Published host ports (defaults; every one is overridable - see KAPP_STACK below):
 #
 #   8080         api-gateway   the only JVM port on the host - see the note below
+#   8090         fake-oidc     the stand-in for Microsoft's sign-in
 #   4300         web-admin     the admin portal, with the `dev` profile
+#   27017        mongo         the local database, with the `local-db` profile (127.0.0.1 only)
 #   4010-4014    Prism mocks   auth, user, semaphore, schedule, map (in that order)
 #
 # ---------------------------------------------------------------------------------------------
@@ -53,7 +61,7 @@
 #
 # Two stacks at once also need different ports. Set these in the same .env:
 #
-#   KAPP_GATEWAY_PORT   KAPP_PORTAL_PORT   KAPP_MOCK_PORT   KAPP_FAKE_OIDC_PORT
+#   KAPP_GATEWAY_PORT   KAPP_PORTAL_PORT   KAPP_MOCK_PORT   KAPP_FAKE_OIDC_PORT   KAPP_MONGO_PORT
 #   KAPP_MOCK_AUTH_PORT   KAPP_MOCK_USER_PORT   KAPP_MOCK_SEMAPHORE_PORT
 #   KAPP_MOCK_SCHEDULE_PORT   KAPP_MOCK_MAP_PORT
 #
@@ -85,6 +93,64 @@ x-prism: &prism
   networks: [kapp]
 
 services:
+  # ---------------------------------------------------------------------------------
+  # mongo - ONLY with the `local-db` profile: a database for evaluating KApp, or running it
+  # offline, without the team's Atlas cluster (ADR 0009's exception; docs/RUN-LOCALLY.md).
+  # One database and one account per service, as on Atlas (ADR 0005): mongo-init/rs-init.js
+  # creates them from the passwords scripts/run-locally.sh generates. The services' Mongock
+  # migrations then fill each database on their first start - the map and the pensums from
+  # their seeds.
+  #
+  # A single-node replica set, as Atlas and the tests run: map-service saves a floor's layout
+  # in a transaction, which a standalone mongod refuses. Auth on a replica set requires a
+  # keyFile, even with one member; it must be mode 400 and owned by mongod's user, which a host
+  # bind mount cannot guarantee, so it is generated inside the container, on the config volume:
+  # same lifecycle as the data, so `scripts/run-locally.sh reset` clears both.
+  # ---------------------------------------------------------------------------------
+  mongo:
+    image: mongo:8.0
+    container_name: ${KAPP_STACK:-back}-mongo
+    profiles: ["local-db"]
+    entrypoint:
+      - bash
+      - -c
+      - |
+        set -e
+        KEYFILE=/data/configdb/kapp-keyfile
+        if [ ! -s "$$KEYFILE" ]; then
+          openssl rand -base64 756 > "$$KEYFILE"
+        fi
+        chmod 400 "$$KEYFILE"
+        chown mongodb:mongodb "$$KEYFILE"
+        exec docker-entrypoint.sh mongod --replSet rs0 --bind_ip_all --wiredTigerCacheSizeGB 0.5 --auth --keyFile "$$KEYFILE"
+    environment:
+      MONGO_ROOT_USER: ${MONGO_ROOT_USER:-kapp_root}
+      MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-}
+      MONGO_AUTH_PASSWORD: ${MONGO_AUTH_PASSWORD:-}
+      MONGO_USER_PASSWORD: ${MONGO_USER_PASSWORD:-}
+      MONGO_SEMAPHORE_PASSWORD: ${MONGO_SEMAPHORE_PASSWORD:-}
+      MONGO_MAP_PASSWORD: ${MONGO_MAP_PASSWORD:-}
+    ports:
+      # For Compass or mongosh on this computer only; nothing in the stack uses it. The set
+      # advertises its member as `mongo:27017`, which the host cannot resolve, so a host client
+      # pins the connection: mongodb://localhost:27017/?directConnection=true
+      - "127.0.0.1:${KAPP_MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+      - ./mongo-init:/scripts:ro
+    mem_limit: 1g
+    healthcheck:
+      # Double duty: it initiates the replica set on first start, creates the users, and only
+      # reports healthy once the node is PRIMARY - so no service starts against a database it
+      # cannot write to yet.
+      test: ["CMD", "mongosh", "--quiet", "--file", "/scripts/rs-init.js"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 20s
+    networks: [kapp]
+
   # ---------------------------------------------------------------------------------
   # The ONLY service published to the host. Everything else talks over the `kapp`
   # network by service name.
@@ -133,7 +199,7 @@ services:
       # The whole connection string in one variable, and no default: each service reaches
       # the cluster with its OWN account, which has readWrite on its OWN database. Compose
       # refuses to start rather than fall back to something that is not the cluster.
-      MONGODB_URI: ${MONGO_AUTH_URI:?set it in .env - docs/ATLAS-SETUP.md}
+      MONGODB_URI: ${MONGO_AUTH_URI:?set it in .env - docs/RUN-LOCALLY.md, or docs/ATLAS-SETUP.md for the team}
       # Points at itself - auth-service validates the tokens it issues.
       KAPP_JWKS_URI: http://auth-service:8081/.well-known/jwks.json
       KAPP_LOG_LEVEL: ${KAPP_LOG_LEVEL:-INFO}
@@ -189,6 +255,12 @@ services:
       timeout: 5s
       retries: 10
       start_period: 60s
+    # Waits for the local database when the `local-db` profile runs; with Atlas there is none,
+    # and `required: false` lets the service start without it.
+    depends_on:
+      mongo:
+        condition: service_healthy
+        required: false
     networks: [kapp]
 
   # A stand-in for Microsoft's sign-in, for development and CI: a client signs in through it as
@@ -216,7 +288,7 @@ services:
     profiles: ["core", "academic", "map", "full"]
     environment:
       SERVER_PORT: 8082
-      MONGODB_URI: ${MONGO_USER_URI:?set it in .env - docs/ATLAS-SETUP.md}
+      MONGODB_URI: ${MONGO_USER_URI:?set it in .env - docs/RUN-LOCALLY.md, or docs/ATLAS-SETUP.md for the team}
       KAPP_JWKS_URI: http://auth-service:8081/.well-known/jwks.json
       KAPP_LOG_LEVEL: ${KAPP_LOG_LEVEL:-INFO}
       # Shared secret guarding POST /internal/users, which auth-service calls during
@@ -229,6 +301,12 @@ services:
       timeout: 5s
       retries: 10
       start_period: 60s
+    # Waits for the local database when the `local-db` profile runs; with Atlas there is none,
+    # and `required: false` lets the service start without it.
+    depends_on:
+      mongo:
+        condition: service_healthy
+        required: false
     networks: [kapp]
 
   # ---------------------------------------------------------------------------------
@@ -243,7 +321,7 @@ services:
     profiles: ["academic", "full"]
     environment:
       SERVER_PORT: 8083
-      MONGODB_URI: ${MONGO_SEMAPHORE_URI:?set it in .env - docs/ATLAS-SETUP.md}
+      MONGODB_URI: ${MONGO_SEMAPHORE_URI:?set it in .env - docs/RUN-LOCALLY.md, or docs/ATLAS-SETUP.md for the team}
       KAPP_JWKS_URI: http://auth-service:8081/.well-known/jwks.json
       KAPP_LOG_LEVEL: ${KAPP_LOG_LEVEL:-INFO}
     mem_limit: 512m
@@ -253,6 +331,12 @@ services:
       timeout: 5s
       retries: 10
       start_period: 60s
+    # Waits for the local database when the `local-db` profile runs; with Atlas there is none,
+    # and `required: false` lets the service start without it.
+    depends_on:
+      mongo:
+        condition: service_healthy
+        required: false
     networks: [kapp]
 
   schedule-service:
@@ -285,7 +369,7 @@ services:
     profiles: ["map", "full"]
     environment:
       SERVER_PORT: 8085
-      MONGODB_URI: ${MONGO_MAP_URI:?set it in .env - docs/ATLAS-SETUP.md}
+      MONGODB_URI: ${MONGO_MAP_URI:?set it in .env - docs/RUN-LOCALLY.md, or docs/ATLAS-SETUP.md for the team}
       KAPP_JWKS_URI: http://auth-service:8081/.well-known/jwks.json
       KAPP_LOG_LEVEL: ${KAPP_LOG_LEVEL:-INFO}
     mem_limit: 512m
@@ -295,6 +379,12 @@ services:
       timeout: 5s
       retries: 10
       start_period: 60s
+    # Waits for the local database when the `local-db` profile runs; with Atlas there is none,
+    # and `required: false` lets the service start without it.
+    depends_on:
+      mongo:
+        condition: service_healthy
+        required: false
     networks: [kapp]
 
   # ---------------------------------------------------------------------------------
@@ -407,3 +497,8 @@ services:
 networks:
   kapp:
     driver: bridge
+
+# Only the `local-db` profile's mongo uses them.
+volumes:
+  mongo-data:
+  mongo-config:
