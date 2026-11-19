@@ -47,7 +47,7 @@ while the Mac is off.
 | Kotlin \| Local | **Works.** The only one that runs the emulator on Brian's Mac, and turns it off when done | `app/frontend/mobile/kotlin/` |
 | Santiago's session | **Works**, on Santiago's own machine, since 2026-11-17: owns the Kotlin client for the Tercera entrega (#234). Reports in its pull requests | `app/frontend/mobile/kotlin/` |
 | Swift \| Local | **Works** (paused until Android is finished) | `app/frontend/mobile/swift/` |
-| Segunda Entrega D.A.M. | Speaks for Brian about university deliveries and edits the shared `.docx`. Talks only to Core. Never runs the app | Outside the repo |
+| Tercera Entrega D.A.M. | Writes the final course document (`.docx`) for the Tercera entrega; Brian exports the PDF. Talks only to Core. Never runs the app or edits code | Outside the repo |
 
 The Mac-only files (survey sketches, renders, the thesis proposal draft, `.env` files) are listed in `core.md`.
 
