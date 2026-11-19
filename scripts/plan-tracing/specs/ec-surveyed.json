@@ -162,8 +162,8 @@
           },
           {
             "code": "P1-PORTERIA",
-            "shape": [[1350, 1993], [1402, 1993], [1402, 2051], [1350, 2051]],
-            "why": "The guard's booth by the gate: 1.52 m of front (survey a-20) by 1.69 m (a-22), its front 7.38 m from the curb (a-21), aligned with the central wing (Brian, a-22); survey-plan.py's BOOTH."
+            "shape": [[1316, 1993], [1368, 1993], [1368, 2051], [1316, 2051]],
+            "why": "The guard's booth by the gate: 1.52 m of front (survey a-20) by 1.69 m (a-22), its front on the line 7.38 m from the curb (a-21). Brian, 2026-11-17: it stands under the ramp, its corridor-side edge on the ramp's, with the level corridor between it and the central wing; the tape had put it against the central wing (a-20, survey-plan.py's BOOTH)."
           },
           {
             "code": "P1-9A-PASILLO",
@@ -194,8 +194,8 @@
           }
         ]
       },
-      "outline": [[247, 425], [247, 2115], [432, 2115], [432, 2044], [617, 2044], [617, 2117], [986, 2117], [986, 2109], [1251, 2109], [1251, 2051], [1402, 2051], [1402, 2215], [1497, 2215], [1486, 1118], [1506, 1125], [2350, 1317], [2355, 1186], [2353, 812], [2241, 779], [2252, 740], [1699, 581], [1637, 668], [1244, 668], [1242, 467], [617, 473], [433, 472], [433, 425]],
-      "outline why": "Brian (#218): the way out to the Carrera 9A is part of the Edificio Central, as wide as the plans show it, with the wall it shares with the Casa de Francisco de Paula Velez. The outline is the building's surveyed parts that reach this floor, the open patio by the ramp, and that passage: from the lobby's back wall, between the tower's east face and the casa's lot line, past the gate beside the booth to the Carrera 9A sidewalk. The plan of the floor draws the passage down to the street between the tower and a line that meets the patio behind the auditorium; that line is the casa's lot line, which the city's map puts 7 m from the tower.",
+      "outline": [[247, 425], [247, 2115], [432, 2115], [432, 2044], [617, 2044], [617, 2117], [986, 2117], [986, 2109], [1251, 2109], [1251, 2051], [1495, 2051], [1486, 1118], [1506, 1125], [2350, 1317], [2355, 1186], [2353, 812], [2241, 779], [2252, 740], [1699, 581], [1637, 668], [1244, 668], [1242, 467], [617, 473], [433, 472], [433, 425]],
+      "outline why": "Brian (#218): the way out to the Carrera 9A is part of the Edificio Central, as wide as the plans show it, with the wall it shares with the Casa de Francisco de Paula Velez. The outline is the building's surveyed parts that reach this floor, the open patio by the ramp, and that passage: from the lobby's back wall, between the tower's east face and the casa's lot line, past the gate beside the booth, to the line of the booth's front and the central wing's step: Brian, 2026-11-17, marks everything from there to the street as sidewalk, so the floor ends there. The plan of the floor draws the passage down to the street between the tower and a line that meets the patio behind the auditorium; that line is the casa's lot line, which the city's map puts 7 m from the tower.",
       "corridors": [
         {
           "code": "PAS-TRANSVERSAL",
@@ -209,8 +209,8 @@
           "name": "Paso a la salida de la Carrera 9A",
           "color": "#5B8DEF",
           "placed": true,
-          "path": [[1357, 1012], [1357, 1960], [1448, 1960], [1448, 2200]],
-          "why": "The PE's route from the lobby's back door down the open passage beside the Casa de Francisco de Paula Velez: down the exit's ramp, between its foot and the guard's booth, and through the gate between the booth and the casa's wall (survey 46, 2.53 m), out to the Carrera 9A sidewalk, where the outline ends."
+          "path": [[1357, 1012], [1357, 1960], [1448, 1960], [1448, 2051]],
+          "why": "The PE's route from the lobby's back door down the open passage beside the Casa de Francisco de Paula Velez: down the exit's ramp, between its foot and the guard's booth, and through the gate between the booth and the casa's wall, to the Carrera 9A sidewalk, where the outline ends."
         }
       ],
       "corridors why": "Only where the floor is open: the hall across the tower and the passage to the Carrera 9A. The PE's other two green routes, down the food court and across the central hall, run through the cafeteria, which Brian made one room (2026-10-21): a line there is drawn over a room, so they are not corridors.",

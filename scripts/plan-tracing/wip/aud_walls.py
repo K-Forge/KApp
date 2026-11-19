@@ -218,7 +218,9 @@ BRIAN = {
 EAST_IN = 2311      # the east wall's inner face: the stair's side, where his black starts
 SOUTH_WALL = 10     # the south wall's thickness, between the rooms and the covered patio
 STAIR = (2265, 868, 2311, 1097)          # the stair, as before: the plan's box of treads
-BOOTH = (1350, 1993, 1402, 2051)         # the guard's booth at the gate (survey-plan.py BOOTH, a-20 to a-22)
+# The guard's booth: the tape's size (a-20, a-22) and front line (a-21), its corridor-side edge on the
+# ramp's, under it, as Brian drew it on 2026-11-17 (the tape put it against the central wing).
+BOOTH = (1316, 1993, 1368, 2051)
 VESTIBULE = (1257, 678, 1538, 1010)      # the lobby, the ticket office in its corner and a solid block below it
 TICKETS_DOWN, BLOCK_FROM = 781, 848
 
@@ -229,7 +231,7 @@ def exit_rooms():
     wing, a ramp in the middle and wide stairs along the casa's wall. Provisional."""
     fx = lambda wy: round(1350 + (wy - 39.30) * 34.35)   # survey metres across -> floor x (the booth's corner)
     fy = lambda wx: round(2051 - (wx + 59.70) * 34.35)   # along the passage -> floor y (the booth's front)
-    casa = lambda y: math.floor(1486 + (y - 1118) * 11 / 1097)  # the outline's edge on the casa's wall
+    casa = lambda y: math.floor(1486 + (y - 1118) * 9 / 933)    # the outline's edge on the casa's wall
     ramp_in, stairs_in, ramp_foot, stairs_foot, top = 38.30, 40.00, -56.20, -55.60, -46.40
     x0, x1, x2 = 1251, fx(ramp_in), fx(stairs_in)          # the corridor starts on the patio's wall
     corridor_top, ramp_top, stairs_top = fy(-45.0), fy(top + 0.6), fy(top)
