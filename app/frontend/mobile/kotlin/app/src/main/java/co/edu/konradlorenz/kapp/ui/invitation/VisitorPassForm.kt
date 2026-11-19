@@ -58,13 +58,37 @@ data class VisitorPassForm(
     fun shownError(field: FormField, left: Boolean): FieldError? =
         errorOf(field)?.takeIf { left || it.whileTyping }
 
-    private companion object {
+    companion object {
+        /** The part every code shares, which the screen shows fixed before the field. */
+        const val CODE_PREFIX = "KL-V-"
+
+        /**
+         * The code from what is typed after [CODE_PREFIX]: the two groups of four, with the hyphen
+         * between them put in by the app (#232). Typed case is kept, so [inputOf] gives back exactly
+         * what was typed; [normalisedCode] upper-cases it. A whole code pasted in, prefix and
+         * hyphens included, comes out the same.
+         */
+        fun codeFromInput(input: String): String {
+            var typed = input.filterNot(Char::isWhitespace)
+            if (typed.uppercase().startsWith(CODE_PREFIX)) typed = typed.drop(CODE_PREFIX.length)
+            val body = typed.filterNot { it == '-' }.take(BODY_LENGTH)
+            if (body.isEmpty()) return ""
+            val second = body.drop(GROUP_LENGTH)
+            return CODE_PREFIX + body.take(GROUP_LENGTH) + if (second.isEmpty()) "" else "-$second"
+        }
+
+        /** What the field holds for [code]: its groups without the prefix or the hyphen. */
+        fun inputOf(code: String): String = code.removePrefix(CODE_PREFIX).filterNot { it == '-' }
+
+        const val GROUP_LENGTH = 4
+        private const val BODY_LENGTH = 8
+
         /**
          * `KL-V-` and two groups of four from the alphabet auth-service draws codes from
          * (VisitorPassService), which leaves out 0, O, 1 and I because they are misread aloud.
          */
-        val CODE = Regex("KL-V-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}")
-        const val CONFUSABLE = "0O1I"
+        private val CODE = Regex("KL-V-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}")
+        private const val CONFUSABLE = "0O1I"
     }
 }
 

@@ -72,6 +72,7 @@
     <string name="profile_role_student">Estudiante</string>
     <string name="profile_role_professor">Profesor</string>
     <string name="profile_role_staff">Administrativo</string>
+    <string name="profile_role_unassigned">Sin rol</string>
     <string name="profile_programme">Programa</string>
     <string name="profile_level">Semestre</string>
     <string name="profile_pensum">Pensum</string>
@@ -94,7 +95,7 @@
     <string name="semaphore_status_in_progress">En curso</string>
     <string name="semaphore_status_eligible">Puedes tomarla</string>
     <string name="semaphore_status_blocked">Bloqueada</string>
-    <string name="semaphore_status_failed">Perdida</string>
+    <string name="semaphore_status_failed">Debe repetirse</string>
     <string name="semaphore_status_postponed">Aplazada</string>
     <string name="semaphore_status_other">Otro estado</string>
     <string name="semaphore_test_notice">Datos de prueba: la universidad todavía no ha conectado SINU, así que nada de esto es tu historia académica real.</string>
@@ -201,6 +202,7 @@
     <string name="map_space_close">Cerrar la información del espacio</string>
 
     <string name="band_go_home">Ir a Inicio</string>
+    <string name="home_no_role">Tu cuenta aún no tiene un rol asignado. Comunícate con TI.</string>
     <string name="home_open_profile">Abrir Perfil</string>
     <string name="invitation_band">Invitación</string>
     <string name="invitation_title">Código de invitación</string>
@@ -280,15 +282,15 @@
         <item quantity="other">%1$d materias en curso</item>
     </plurals>
     <plurals name="home_credits_passed">
-        <item quantity="one">%1$d aprobado</item>
-        <item quantity="other">%1$d aprobados</item>
+        <item quantity="one">%1$d crédito aprobado</item>
+        <item quantity="other">%1$d créditos aprobados</item>
     </plurals>
     <plurals name="home_credits_in_progress">
-        <item quantity="one">%1$d en curso</item>
-        <item quantity="other">%1$d en curso</item>
+        <item quantity="one">%1$d crédito en curso</item>
+        <item quantity="other">%1$d créditos en curso</item>
     </plurals>
     <plurals name="home_credits_remaining">
-        <item quantity="one">%1$d restante</item>
-        <item quantity="other">%1$d restantes</item>
+        <item quantity="one">%1$d crédito restante</item>
+        <item quantity="other">%1$d créditos restantes</item>
     </plurals>
 </resources>

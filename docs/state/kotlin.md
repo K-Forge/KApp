@@ -2,7 +2,8 @@
 
 > Owner: Kotlin. Refreshed by Core on 2026-11-17, `develop` at `1a08d52`. The screens table was checked against the
 > code on 2026-11-05; Inicio and Mapa against `develop` on 2026-11-17. Every screen checked on the dev server on
-> 2026-11-17 as the test student and the test professor (#230), with #238's branch on the emulator.
+> 2026-11-17 as the test student and the test professor (#230), with #238's branch on the emulator. The fixes from
+> testing (#232) checked on the emulator on 2026-11-19 against the dev server and in the demo.
 >
 > **Since 2026-11-17 Santiago owns the Kotlin client**, working with his own agent session from the issues of the
 > Tercera entrega (#234). Start with "Next" below.
@@ -36,7 +37,7 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
   - since #189: AGP 9.5.0, Gradle 9.8.2, okhttp 5.5.1, kotlinx-serialization 1.12.0, MSAL 8.6.0;
   - MVVM with Compose (Material 3), Retrofit 3 and OkHttp 5;
   - the session is kept with AES-GCM in the Android Keystore;
-  - 167 unit tests on `feature/floor-space-selection` (164 in `develop` since #217).
+  - 178 unit tests on `bugfix/delivery-fixes-232`.
 - **CI:** the Android job runs `:app:testDebugUnitTest :app:assembleDebug :app:lintDebug :app:assembleDemo
   :app:lintDemo` (`.github/workflows/ci.yml`). The demo variant is built and linted since #191.
 
@@ -60,7 +61,20 @@ uploaded on Thursday 2026-11-19 and presented on Friday 2026-11-20. Parent issue
 4. **#231:** a room that is not on the map says so instead of "No pudimos buscar el salón en el mapa", and Inicio
    shows the profile photo.
 5. **#232:** Iván and Alejandro report on WhatsApp until Thursday 10:00. Triage, fix, freeze at 14:00, and cut the
-   delivery build.
+   delivery build. **Fixes on `bugfix/delivery-fixes-232` (2026-11-19)**, each checked on the emulator unless noted:
+   - L-05: no network, no Microsoft page: the sign-in says "No pudimos conectar con el servidor" first.
+   - L-02: one Microsoft sign-in at a time, and MSAL's `user_cancelled` and `duplicate_command` read as a cancel.
+     Not reproduced before the fix; eight fast cancel-and-retry rounds after it showed no error.
+   - S-12: an elective slot with no plan shows this semester's bank, read-only.
+   - The semester card says "créditos" in each figure, on two lines when they do not fit.
+   - A plan offers a pending course only the current semester and later ones, and a failed course only the next
+     one (#250 adds the same rules to the API).
+   - The visitor code field shows `KL-V-` fixed and puts in the hyphen after the first four characters.
+   - The demo assets captured again for #221's EC P1.
+   - #249, client side: `ROLE_UNASSIGNED` gets Inicio, Mapa and Perfil, a card on Inicio saying to contact TI,
+     and "Sin rol" on Perfil. Unit tests only until the backend sends the role.
+   - #250, client side: a failed course reads "Debe repetirse". Not seen on the emulator: the test student has no
+     failed course.
 
 After the delivery:
 

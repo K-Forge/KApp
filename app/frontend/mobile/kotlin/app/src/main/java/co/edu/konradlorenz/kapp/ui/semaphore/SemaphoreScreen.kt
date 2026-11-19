@@ -43,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,6 +68,7 @@ import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreData
 import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreItem
 import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreLevel
 import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreState
+import co.edu.konradlorenz.kapp.data.semaphore.allowedLevels
 import co.edu.konradlorenz.kapp.data.semaphore.buildSemaphore
 import co.edu.konradlorenz.kapp.data.semaphore.formatGrade
 import co.edu.konradlorenz.kapp.data.semaphore.formatHours
@@ -582,6 +584,18 @@ private fun ItemSheet(
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    // Without a plan nothing can be chosen, but the bank is still worth reading
+                    // (S-12, #232): what this semester offers for the slot.
+                    if (item.course.isElectiveSlot && item.entry?.resolvedSinuCode == null) {
+                        LaunchedEffect(Unit) { viewModel.loadBank() }
+                        Text(
+                            text = stringResource(R.string.semaphore_elective_bank),
+                            modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        ElectiveBankList(item, viewModel.bank, chosenCode = null, onChoose = null)
+                    }
                 } else {
                     PlanSection(item, data, plan, viewModel)
                 }
@@ -618,7 +632,8 @@ private fun Prerequisites(item: SemaphoreItem, data: SemaphoreData) {
 }
 
 /**
- * Where the item goes in [plan]: any level the pensum has, back to its own, and for an elective
+ * Where the item goes in [plan]: the levels allowedLevels leaves it - never a finished semester -,
+ * back to its own when that is one of them, and for an elective
  * slot which course of this semester's bank. Moving it unlocks nothing - the contract is explicit
  * that eligibility ignores plans - so the colour stays what SINU says.
  */
@@ -630,6 +645,7 @@ private fun PlanSection(
     plan: AcademicPlan,
     viewModel: SemaphoreViewModel,
 ) {
+    val allowed = allowedLevels(item.status, data.semaphore.currentLevel, data.pensum.levels, plan)
     Text(
         text = stringResource(R.string.semaphore_plan_level),
         fontSize = 14.sp,
@@ -640,7 +656,7 @@ private fun PlanSection(
         modifier = Modifier.padding(top = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        plannableLevels(data.pensum.levels, plan).forEach { level ->
+        allowed.forEach { level ->
             FilterChip(
                 selected = level == item.level,
                 onClick = { if (level != item.level) viewModel.move(plan, item, level) },
@@ -649,7 +665,7 @@ private fun PlanSection(
             )
         }
     }
-    item.movedFrom?.let { original ->
+    item.movedFrom?.takeIf { it in allowed }?.let { original ->
         TextButton(onClick = { viewModel.reset(plan, item) }, enabled = !viewModel.saving) {
             Text(stringResource(R.string.semaphore_plan_reset, original))
         }
@@ -713,62 +729,91 @@ private fun ElectiveSection(item: SemaphoreItem, plan: AcademicPlan, viewModel: 
             fontSize = 13.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        when (bank) {
-            ElectiveBank.NotAsked, ElectiveBank.Loading -> CircularProgressIndicator(
-                modifier = Modifier.size(24.dp),
-                color = Brand.toned(),
-            )
-            ElectiveBank.Failed -> Text(
-                text = stringResource(R.string.semaphore_elective_bank_failed),
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.error,
-            )
-            is ElectiveBank.Ready -> {
-                // An offering fills any slot unless it names the ones it fills.
-                val offerings = bank.offerings.filter {
-                    it.slots.isEmpty() || item.course.pensumItemCode in it.slots
+        ElectiveBankList(
+            item = item,
+            bank = bank,
+            chosenCode = chosen?.sinuCode,
+            onChoose = if (viewModel.saving) {
+                null
+            } else {
+                { code ->
+                    choosing = false
+                    viewModel.chooseElective(plan, item, code)
                 }
-                if (offerings.isEmpty()) {
-                    Text(
-                        text = stringResource(R.string.semaphore_elective_bank_empty),
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                offerings.forEach { offering ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(ItemShape)
-                            .clickable(enabled = !viewModel.saving) {
-                                choosing = false
-                                viewModel.chooseElective(plan, item, offering.sinuCode)
-                            }
-                            .padding(vertical = 10.dp, horizontal = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Box(
-                            Modifier
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (offering.sinuCode == chosen?.sinuCode) {
-                                        Passed.toned()
-                                    } else {
-                                        MaterialTheme.colorScheme.outlineVariant
-                                    },
-                                ),
+            },
+        )
+    }
+}
+
+/**
+ * This semester's bank for [item]'s slot. With no [onChoose] it is only to read: the sheet shows it
+ * that way when there is no plan to choose into.
+ */
+@Composable
+private fun ElectiveBankList(
+    item: SemaphoreItem,
+    bank: ElectiveBank,
+    chosenCode: String?,
+    onChoose: ((String) -> Unit)?,
+) {
+    when (bank) {
+        ElectiveBank.NotAsked, ElectiveBank.Loading -> CircularProgressIndicator(
+            modifier = Modifier.size(24.dp),
+            color = Brand.toned(),
+        )
+        ElectiveBank.Failed -> Text(
+            text = stringResource(R.string.semaphore_elective_bank_failed),
+            fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.error,
+        )
+        is ElectiveBank.Ready -> {
+            // An offering fills any slot unless it names the ones it fills.
+            val offerings = bank.offerings.filter {
+                it.slots.isEmpty() || item.course.pensumItemCode in it.slots
+            }
+            if (offerings.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.semaphore_elective_bank_empty),
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            offerings.forEach { offering ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(ItemShape)
+                        .then(
+                            if (onChoose != null) {
+                                Modifier.clickable { onChoose(offering.sinuCode) }
+                            } else {
+                                Modifier
+                            },
                         )
-                        Spacer(Modifier.width(10.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text(offering.name, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
-                            Text(
-                                text = "${offering.sinuCode} · " +
-                                    stringResource(R.string.semaphore_credits, offering.credits),
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                        .padding(vertical = 10.dp, horizontal = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (offering.sinuCode == chosenCode) {
+                                    Passed.toned()
+                                } else {
+                                    MaterialTheme.colorScheme.outlineVariant
+                                },
+                            ),
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(offering.name, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                        Text(
+                            text = "${offering.sinuCode} · " +
+                                stringResource(R.string.semaphore_credits, offering.credits),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }
