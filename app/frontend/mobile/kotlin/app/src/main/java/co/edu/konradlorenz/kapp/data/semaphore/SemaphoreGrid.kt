@@ -134,6 +134,26 @@ fun plannableLevels(pensumLevels: Int, plan: AcademicPlan?): IntRange {
     return 1..minOf(MAX_PLANNED_LEVEL, furthest + 1)
 }
 
+/**
+ * The levels [status] may be moved to in [plan], for a student at [currentLevel].
+ *
+ * Nothing goes into a semester that has already finished: a pending course is offered the current
+ * one and the ones after it (#232). A failed course must be taken again in the next period, so it
+ * is offered only `currentLevel + 1` (#250). The API does not check either rule yet: #250 adds it.
+ */
+fun allowedLevels(
+    status: CourseStatus,
+    currentLevel: Int,
+    pensumLevels: Int,
+    plan: AcademicPlan?,
+): List<Int> {
+    val plannable = plannableLevels(pensumLevels, plan)
+    return when (status) {
+        CourseStatus.Failed -> listOf(currentLevel + 1).filter { it in plannable }
+        else -> plannable.filter { it >= currentLevel }
+    }
+}
+
 fun formatPeriod(period: String): String =
     if (Regex("""\d{4}[12]""").matches(period)) "${period.take(4)}-${period.last()}" else period
 

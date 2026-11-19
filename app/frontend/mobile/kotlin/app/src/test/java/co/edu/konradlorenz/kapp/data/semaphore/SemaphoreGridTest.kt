@@ -209,4 +209,21 @@ class SemaphoreGridTest {
         assertEquals(1..12, plannableLevels(9, plan(12)))
         assertEquals(1..12, plannableLevels(12, null))
     }
+
+    @Test
+    fun `a pending course is offered the current semester and the ones after it, never a finished one`() {
+        assertEquals((5..10).toList(), allowedLevels(CourseStatus.Eligible, 5, 9, null))
+        assertEquals((5..10).toList(), allowedLevels(CourseStatus.Blocked, 5, 9, null))
+        assertEquals((1..10).toList(), allowedLevels(CourseStatus.Postponed, 1, 9, null))
+    }
+
+    @Test
+    fun `a failed course is offered only the next semester`() {
+        assertEquals(listOf(6), allowedLevels(CourseStatus.Failed, 5, 9, null))
+    }
+
+    @Test
+    fun `a failed course past the contract's twelve has nowhere to go`() {
+        assertEquals(emptyList<Int>(), allowedLevels(CourseStatus.Failed, 12, 9, plan(12)))
+    }
 }

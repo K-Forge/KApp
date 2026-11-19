@@ -94,7 +94,7 @@
     <string name="semaphore_status_in_progress">En curso</string>
     <string name="semaphore_status_eligible">Puedes tomarla</string>
     <string name="semaphore_status_blocked">Bloqueada</string>
-    <string name="semaphore_status_failed">Perdida</string>
+    <string name="semaphore_status_failed">Debe repetirse</string>
     <string name="semaphore_status_postponed">Aplazada</string>
     <string name="semaphore_status_other">Otro estado</string>
     <string name="semaphore_test_notice">Datos de prueba: la universidad todavía no ha conectado SINU, así que nada de esto es tu historia académica real.</string>
