@@ -76,15 +76,19 @@
     the hall; the script prints the checks (seats, overlaps, corner caps, short sides, corners on their lines).
   - **Provisional, the way down to the Carrera 9A gate:** `P1-9A-PASILLO` (CORRIDOR), `P1-9A-RAMPA` (RAMP) and
     `P1-9A-ESCALERA` (STAIRS), from Brian's drawing of 2026-11-17 where `survey-plan.py` puts them. Redraw them when he
-    takes `in-09` to `in-19` (84 to 94, in the survey sheet since #235). The guard's booth is the tape's (1.52 x 1.69 m).
+    takes `in-09` to `in-19` (84 to 94, in the survey sheet since #235). The guard's booth keeps the tape's size
+    (1.52 x 1.69 m) but stands under the ramp, as Brian drew it, not against the central wing as the tape had it.
   - `register.py` gained `"turned"`, `"drawn"` (rooms given in floor units) and `"outline"`; `ec-surveyed.json`
     uses `"drawn"` and `"outline"`. The floor's `outline` is the surveyed parts on P1, the open patio and the
-    passage between the tower and the casa's lot line, out to the sidewalk; the gate is 2.53 m (survey 46).
+    passage between the tower and the casa's lot line, cut at the booth's front: Brian marks the rest down to the
+    street as sidewalk.
   - Corridors: only `PAS-TRANSVERSAL` and `PAS-SALIDA-9A`; the two through the cafeteria went.
   - V017 puts the floor in place even over a saved one; the contract example and its label points follow.
   - `render-map-base.py` now draws a floor's outline, corridors and doors. Review images:
     `~/Documents/KApp/mapa-pisos/ec-p1-218/` on Brian's Mac.
-  - After merge: Kotlin re-runs `capture-demo-data.sh` so the demo serves the new example.
+  - **Not before the delivery:** V017 changes the dev server's floor while the testers use it. Brian merges after
+    Friday 2026-11-20.
+  - After merge: Santiago re-runs `capture-demo-data.sh` so the demo serves the new example.
   - Next: P2's gallery over the hall as now drawn (#220).
 
 - **map 3.7.0, `labelPoint` (#195):**

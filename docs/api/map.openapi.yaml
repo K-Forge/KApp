@@ -1875,10 +1875,10 @@ components:
         width: 2400
         height: 2320
         top: EAST
-        outline: [{ x: 247, y: 425 }, { x: 247, y: 2115 }, { x: 432, y: 2115 }, { x: 432, y: 2044 }, { x: 617, y: 2044 }, { x: 617, y: 2117 }, { x: 986, y: 2117 }, { x: 986, y: 2109 }, { x: 1251, y: 2109 }, { x: 1251, y: 2051 }, { x: 1402, y: 2051 }, { x: 1402, y: 2215 }, { x: 1497, y: 2215 }, { x: 1486, y: 1118 }, { x: 1506, y: 1125 }, { x: 2350, y: 1317 }, { x: 2355, y: 1186 }, { x: 2353, y: 812 }, { x: 2241, y: 779 }, { x: 2252, y: 740 }, { x: 1699, y: 581 }, { x: 1637, y: 668 }, { x: 1244, y: 668 }, { x: 1242, y: 467 }, { x: 617, y: 473 }, { x: 433, y: 472 }, { x: 433, y: 425 }]
+        outline: [{ x: 247, y: 425 }, { x: 247, y: 2115 }, { x: 432, y: 2115 }, { x: 432, y: 2044 }, { x: 617, y: 2044 }, { x: 617, y: 2117 }, { x: 986, y: 2117 }, { x: 986, y: 2109 }, { x: 1251, y: 2109 }, { x: 1251, y: 2051 }, { x: 1495, y: 2051 }, { x: 1486, y: 1118 }, { x: 1506, y: 1125 }, { x: 2350, y: 1317 }, { x: 2355, y: 1186 }, { x: 2353, y: 812 }, { x: 2241, y: 779 }, { x: 2252, y: 740 }, { x: 1699, y: 581 }, { x: 1637, y: 668 }, { x: 1244, y: 668 }, { x: 1242, y: 467 }, { x: 617, y: 473 }, { x: 433, y: 472 }, { x: 433, y: 425 }]
         corridors:
           - { code: PAS-TRANSVERSAL, name: "Pasillo transversal", color: "#5B8DEF", path: [{ x: 266, y: 760 }, { x: 1252, y: 760 }] }
-          - { code: PAS-SALIDA-9A, name: "Paso a la salida de la Carrera 9A", color: "#5B8DEF", path: [{ x: 1357, y: 1012 }, { x: 1357, y: 1960 }, { x: 1448, y: 1960 }, { x: 1448, y: 2200 }] }
+          - { code: PAS-SALIDA-9A, name: "Paso a la salida de la Carrera 9A", color: "#5B8DEF", path: [{ x: 1357, y: 1012 }, { x: 1357, y: 1960 }, { x: 1448, y: 1960 }, { x: 1448, y: 2051 }] }
         version: 0
         buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa
         buildingCode: EC
@@ -2124,8 +2124,8 @@ components:
           - { id: 9d8e884a-dd0c-48c9-88e5-d28713ddce7b, code: P1-PORTERIA, name: "Portería", typeCode: RECEPTION, typeName: "Recepción", category: PUBLIC_SERVICE,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
               aliases: ["portería"],
-              shape: [{ x: 1350, y: 1993 }, { x: 1402, y: 1993 }, { x: 1402, y: 2051 }, { x: 1350, y: 2051 }],
-              bounds: { x: 1350, y: 1993, width: 52, height: 58 }, labelPoint: { x: 1376, y: 2022 },
+              shape: [{ x: 1316, y: 1993 }, { x: 1368, y: 1993 }, { x: 1368, y: 2051 }, { x: 1316, y: 2051 }],
+              bounds: { x: 1316, y: 1993, width: 52, height: 58 }, labelPoint: { x: 1342, y: 2022 },
               doors: [], effectiveAccessibility: UNKNOWN }
           - { id: c102b06e-5a95-42aa-a515-bfc07f5c73b2, code: P1-RAMPA-VEHICULAR, wing: C, name: "Rampa vehicular al parqueadero", typeCode: RAMP, typeName: "Rampa", category: CIRCULATION,
               buildingId: 65b84e22-8b14-4afa-acff-6d82b6b5b1fa, buildingCode: EC, campus: Sede Principal, floorCode: P1, floorLevel: 1,
