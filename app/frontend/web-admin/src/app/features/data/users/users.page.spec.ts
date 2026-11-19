@@ -115,6 +115,24 @@ describe('UsersPage', () => {
     expect(page.result()?.content[0].roles).toEqual(['ROLE_PROFESSOR', 'ROLE_ADMIN', 'ROLE_WELLBEING']);
   });
 
+  // Testers saw an account the directory does not classify as "Administrativo": it has no role now,
+  // and the dialog asks for one instead of quietly saving staff.
+  it('asks for a role for an account with none, and saves the one chosen', () => {
+    const nobody = { ...profile('sin-rol'), roles: ['ROLE_UNASSIGNED'] } as DirectoryEntry;
+    page.result.set({ content: [nobody], page: 0, size: 20, totalElements: 1, totalPages: 1, first: true, last: true });
+    setRoles.mockClear();
+
+    page.editRoles(nobody);
+    expect(page.profileRole()).toBeNull();
+    page.saveRoles();
+    expect(setRoles).not.toHaveBeenCalled();
+
+    page.profileRole.set('ROLE_STUDENT');
+    page.saveRoles();
+    expect(setRoles).toHaveBeenCalledWith('sin-rol', { profileRole: 'ROLE_STUDENT', permissions: [] });
+    expect(page.result()?.content[0].roles).toEqual(['ROLE_STUDENT']);
+  });
+
   // The server refuses it (400); the box is locked so nobody has to find out that way.
   it('locks your own administration, and only that', () => {
     expect(page.locked(profile('me'), 'ROLE_ADMIN')).toBe(true);
