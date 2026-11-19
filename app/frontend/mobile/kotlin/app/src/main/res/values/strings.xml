@@ -72,6 +72,7 @@
     <string name="profile_role_student">Estudiante</string>
     <string name="profile_role_professor">Profesor</string>
     <string name="profile_role_staff">Administrativo</string>
+    <string name="profile_role_unassigned">Sin rol</string>
     <string name="profile_programme">Programa</string>
     <string name="profile_level">Semestre</string>
     <string name="profile_pensum">Pensum</string>
@@ -201,6 +202,7 @@
     <string name="map_space_close">Cerrar la información del espacio</string>
 
     <string name="band_go_home">Ir a Inicio</string>
+    <string name="home_no_role">Tu cuenta aún no tiene un rol asignado. Comunícate con TI.</string>
     <string name="home_open_profile">Abrir Perfil</string>
     <string name="invitation_band">Invitación</string>
     <string name="invitation_title">Código de invitación</string>

@@ -14,6 +14,12 @@ enum class ProfileRole(val apiName: String) {
     Student("ROLE_STUDENT"),
     Professor("ROLE_PROFESSOR"),
     Staff("ROLE_STAFF"),
+
+    /**
+     * A university account the directory did not classify as any of the three (#249). It should
+     * not happen; when it does, the person gets the map and is told to contact TI.
+     */
+    Unassigned("ROLE_UNASSIGNED"),
     ;
 
     companion object {

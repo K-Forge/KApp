@@ -453,6 +453,7 @@ private fun roleLabel(roles: List<String>): Int? = when (ProfileRole.of(roles)) 
     ProfileRole.Student -> R.string.profile_role_student
     ProfileRole.Professor -> R.string.profile_role_professor
     ProfileRole.Staff -> R.string.profile_role_staff
+    ProfileRole.Unassigned -> R.string.profile_role_unassigned
     null -> null
 }
 

@@ -46,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -88,11 +89,13 @@ private val TileShape = RoundedCornerShape(16.dp)
  * The data is [SampleHomeUiState] until there is a repository behind [HomeViewModel].
  *
  * [destinations] are the tabs the profile role sees. A card about a screen the role does not have
- * is left out with it: no semester for a professor, no timetable for staff.
+ * is left out with it: no semester for a professor, no timetable for staff. [noRole] is an account
+ * the directory gave no role (#249): its first card says to contact TI.
  */
 @Composable
 fun HomeScreen(
     destinations: List<KAppDestination>,
+    noRole: Boolean = false,
     onOpen: (KAppDestination) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory),
@@ -100,6 +103,7 @@ fun HomeScreen(
     HomeContent(
         state = viewModel.uiState,
         destinations = destinations,
+        noRole = noRole,
         onOpen = onOpen,
         onRetryDay = viewModel::retryDay,
         modifier = modifier,
@@ -113,6 +117,7 @@ private fun HomeContent(
     modifier: Modifier = Modifier,
     onRetryDay: () -> Unit = {},
     destinations: List<KAppDestination> = KAppDestination.entries,
+    noRole: Boolean = false,
 ) {
     val hasSchedule = KAppDestination.Schedule in destinations
     val hasSemaphore = KAppDestination.Semaphore in destinations
@@ -155,6 +160,9 @@ private fun HomeContent(
                     DayState.Unavailable -> DayUnavailableCard(onRetryDay)
                     is DayState.Classes -> NextClassCard(state.day.next, onOpen)
                 }
+                Spacer(Modifier.height(16.dp))
+            } else if (noRole) {
+                NoRoleCard()
                 Spacer(Modifier.height(16.dp))
             } else {
                 // The column starts inside the band, where the headline card overlaps it. Without
@@ -391,6 +399,21 @@ private fun FreeDayCard(onOpen: (KAppDestination) -> Unit, done: Boolean = false
 }
 
 /** `day` could not be read: no network, or the service did not answer. */
+/** An account with no role (#249): nothing academic to show, and who can fix that. */
+@Composable
+private fun NoRoleCard() {
+    CenteredCard(height = HeadlineCardHeight) {
+        IconBubble(R.drawable.ic_person, colour = Brand.toned(), alpha = 0.16f)
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = stringResource(R.string.home_no_role),
+            style = MaterialTheme.typography.titleMedium.copy(lineHeight = 20.sp),
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
 @Composable
 private fun DayUnavailableCard(onRetry: () -> Unit) {
     CenteredCard(height = HeadlineCardHeight) {
@@ -600,6 +623,7 @@ private fun ProgrammeLine(programme: String) {
 
 /** Credits through the pensum: passed, being taken, and the rest of the track. */
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 private fun SemesterCard(semester: SemesterState.Ready) {
     Panel(elevation = 2.dp) {
         Column(modifier = Modifier.padding(14.dp)) {
@@ -623,7 +647,6 @@ private fun SemesterCard(semester: SemesterState.Ready) {
                             semester.coursesInProgress,
                         ),
                         fontSize = 13.sp,
-@OptIn(ExperimentalLayoutApi::class)
                         lineHeight = 16.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -649,7 +672,7 @@ private fun SemesterCard(semester: SemesterState.Ready) {
             // unit in each label ("59 créditos aprobados") the three no longer fit on one line.
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Legend(Passed, R.plurals.home_credits_passed, semester.creditsPassed)
                 Legend(InProgress, R.plurals.home_credits_in_progress, semester.creditsInProgress)

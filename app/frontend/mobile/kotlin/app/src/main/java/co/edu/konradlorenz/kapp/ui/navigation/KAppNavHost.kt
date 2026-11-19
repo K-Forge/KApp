@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import co.edu.konradlorenz.kapp.AppContainer
+import co.edu.konradlorenz.kapp.data.session.ProfileRole
 import co.edu.konradlorenz.kapp.ui.home.HomeScreen
 import co.edu.konradlorenz.kapp.ui.invitation.InvitationScreen
 import co.edu.konradlorenz.kapp.ui.login.LoginScreen
@@ -81,6 +82,7 @@ fun KAppNavHost(container: AppContainer) {
                     when (destination) {
                         KAppDestination.Home -> HomeScreen(
                             destinations = destinations,
+                            noRole = session?.profileRole == ProfileRole.Unassigned,
                             onOpen = { navController.openTab(it) },
                         )
                         KAppDestination.Profile -> ProfileScreen()

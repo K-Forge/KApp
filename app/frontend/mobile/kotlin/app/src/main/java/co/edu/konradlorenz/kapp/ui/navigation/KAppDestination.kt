@@ -43,6 +43,7 @@ enum class KAppDestination(
  * | student | yes | yes | yes |
  * | professor | no | yes (the sections they teach) | yes |
  * | staff | no | no | yes |
+ * | unassigned (#249) | no | no | yes |
  *
  * Inicio and Perfil are everybody's. With no profile role at all - a role this build does not know
  * yet - the safe answer is the tabs every role shares, rather than a student's screens full of
@@ -52,7 +53,7 @@ fun destinationsFor(role: ProfileRole?): List<KAppDestination> {
     val hidden = when (role) {
         ProfileRole.Student -> emptySet()
         ProfileRole.Professor -> setOf(KAppDestination.Semaphore)
-        ProfileRole.Staff, null -> setOf(KAppDestination.Semaphore, KAppDestination.Schedule)
+        ProfileRole.Staff, ProfileRole.Unassigned, null -> setOf(KAppDestination.Semaphore, KAppDestination.Schedule)
     }
     return KAppDestination.entries.filterNot { it in hidden }
 }
