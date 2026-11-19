@@ -12,42 +12,56 @@ long-lived session itself (README, "One session, one purpose").
 
 ---
 
-## Where things stand (2026-11-18)
+## Where things stand (2026-11-19, v0.3.0)
 
-Merged since 2026-11-17: #219 (select a space on the floor; **#196 is closed**), #238 (a room not on the map says
-so, and Inicio shows the profile photo), #239 (sign-out forgets the tabs, and the dev-server check of every screen),
-#235 (the survey sheet asks for the Cra 9A exit), #236 and #237 (this folder). #228, #230 and #231 are closed.
+**The Tercera entrega is v0.3.0** (parent #234, milestone 2). It is uploaded on Thursday 2026-11-19 and presented
+on Friday 2026-11-20. The course asks for the final document, the frontend and backend code, the database and its
+scripts, a working integration, evidence and a README. The professor accepted Kotlin for the frontend and Java
+Spring Boot for the backend.
 
-**The Tercera entrega comes first** (parent #234, milestone 2). It is uploaded on Thursday 2026-11-19 and
-presented on Friday 2026-11-20. The course asks for the final document, the frontend and backend code, the
-database and its scripts, a working integration, evidence and a README. The professor accepted Kotlin for the
-frontend and Java Spring Boot for the backend.
+**Testing.** Iván and Alejandro ran 89 cases on the dev server: 76 passed, 4 failed and 9 were blocked. The 4
+failures are fixed. The blocked ones either need data the test SINU does not have (H-07 to H-09, V-12) or need
+rooms linked to the map (H-06, M-03, #251), and M-05 no longer applies. Brian reviewed the fixes on 2026-11-19.
 
-- **The code goes as one ZIP** of the whole repository, made with `git archive` from `develop`, so no `.env` is in
-  it (#232). The repository stays public.
-- **#240, Backend:** the whole stack runs locally with no Atlas, no tenant and no Tailscale (a `local-db` profile,
-  fake OIDC, generated secrets, scripts for macOS, Linux and Windows), so the professor can run it. English docs in
-  the repository, and a Spanish README only in the ZIP. It is for the delivery; after it, the profile stays as an
-  optional path for evaluators.
-- **The final document:** the session "Tercera Entrega D.A.M." writes `EntregaFinal_KApp.docx`, outside the
-  repository. Brian exports the PDF. What is still pending in it waits for #240's commands and screenshots, and
-  for the testers' summary (#232).
-- **Santiago** owns the Kotlin client: #229 (the testers' guide) and #232 (triage, the 14:00 Thursday freeze, the
-  ZIP) are left.
-- **Iván and Alejandro** test on their own computers' emulators through a Tailscale share limited to the API's
-  port, and report on WhatsApp until Thursday 10:00.
+Merged on 2026-11-19:
 
-Open pull requests:
+- **#221:** EC P1 redrawn from the plans, with the floor's outline and the Carrera 9A exit. The exit is
+  provisional until Brian's measures 84–94. #218 can close.
+- **#252 (#249):** an account the directory does not classify gets `ROLE_UNASSIGNED` ("Sin rol"): the map and its
+  profile, nothing academic. The portal shows it and asks for a role. Guest (`ROLE_GUEST`, a visitor pass) stays a
+  separate type.
+- **#253 (#250):** a plan cannot put a pending course before the student's current level, or a failed course
+  anywhere but the next period.
+- **#254 and #258 (#232):** the Kotlin fixes from testing:
+  - sign-in offline and after a cancel;
+  - electives without a plan;
+  - "Créditos" on the semester card;
+  - plan levels;
+  - the visitor code field and its wording;
+  - the no-role screens;
+  - failed courses placed in the next period on their own;
+  - a redeemed pass opening the visitor map;
+  - Inicio's last data shown offline.
+- **#257 (#255):** the portal's invitation codes page is hidden. The codes are removed for good after the delivery.
 
-- **#221, EC P1 redrawn from the plans (#218):** paused until Brian resumes the map. His measures of the Cra 9A
-  exit and his notes on the auditorium plan wait in `~/Documents/KApp/mapa-pisos/ec-p1-218/`.
-- **#226, Gradle 9.9.1 and AGP 9.5.1:** held until after the delivery.
+**The code goes as one ZIP** of the whole repository, made with `git archive` from the tag `v0.3.0`, with a Spanish
+README at its root that walks an evaluator through running everything locally (`local-db`, fake OIDC,
+`scripts/run-locally.sh` or `.ps1`, the Android client in Android Studio). The repository stays public and in
+English.
 
-**After the delivery:** #242 lists everything Brian approved on 2026-11-18. That covers architecture, CI cost,
-secrets, gateway resilience, observability, the profile photo on the server, a public dev API with a demo
-database, ways of working, releases and housekeeping. It also includes #241 (`KAPP_FIRST_ADMINS` only
-bootstraps ADMIN; on the dev server it now lists only Brian's developer account). Then Backend continues with
-#221, #220 and #213.
+Open pull requests: **#226** (Gradle 9.9.1 and AGP 9.5.1), held until after the delivery.
+
+**After the delivery:**
+
+- #242 lists everything Brian approved on 2026-11-18: architecture, CI cost, secrets, gateway resilience,
+  observability, the profile photo on the server, a public dev API with a demo database, ways of working,
+  releases and housekeeping.
+- #241: `KAPP_FIRST_ADMINS` only bootstraps ADMIN.
+- #245: the Users page redesign. #246: the fake accounts out of Atlas.
+- #248: the gate. The Carrera 9A measures.
+- #251: the building in Horario, which needs the rooms linked to the map.
+- #255: remove invitation codes. #256: an outline on every floor.
+- Then #220 (EC P2) and #213.
 
 The Vercel project `kapp` has its builds turned off (Ignored Build Step `exit 0`) since 2026-11-05: nothing in the
 repo deploys there since the prototype was removed (#97). Turn it back on for the public prototype (#92).
@@ -58,7 +72,7 @@ repo deploys there since the prototype was removed (#97). Turn it back on for th
 
 - **Developer accounts:** created on 2026-11-18. Brian grants ADMIN to the others by hand in the portal, and takes
   it away from `administrativo.prueba`.
-- **Reading the final document** before Thursday's upload.
+- **Reading the final document** and exporting the PDF for the upload of 2026-11-19.
 - **`docs/entrega/segunda-entrega/mapa-base/ec-p1.png`:** decide whether it is regenerated with the new floor 1.
 - **Sketches for EC floors 2 to 8**, in `Sketchs/`, keeping each original plan's file name (phase 5, #58).
 - **Housekeeping to confirm:** close #158 and #163 to #165 (the delivery of 2026-10-23 is done) and #43 (done by

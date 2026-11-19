@@ -1,7 +1,6 @@
 # Backend State
 
-> Owner: Backend. As of 2026-11-16, `develop` at `6ac0ea0`. Backend | Local: EC P1's auditorium redrawn from its own
-> plan's walls, with the floor's outline and the Carrera 9A passage (#218).
+> Owner: Backend. As of 2026-11-19, v0.3.0. Backend | Local: idle after #252, #253 and #257.
 
 ---
 
@@ -9,11 +8,11 @@
 
 | Service | Contract | What it does | Latest migration |
 |---|---|---|---|
-| auth-service | auth 1.1.0 | Microsoft sign-in through `POST /auth/microsoft`, checked by `MicrosoftIdTokenVerifier` (RS256, iss, aud, exp; #102, #104). The PORTAL client requires a permission. Rotating refresh tokens with family revocation on reuse (#82). `GET /auth/sign-in-options` (#141). Password sign-in only behind `KAPP_LOCAL_SIGN_IN`, and 404 when it is off (#83). One profile role (STUDENT, PROFESSOR or STAFF; STAFF when the directory says nothing) plus permissions (ADMIN, RECEPTION, MAINTENANCE, MODERATION, WELLBEING). `KAPP_FIRST_ADMINS` grants the first ADMIN. `PUT /auth/admin/accounts/{id}/roles`, synced to user-service (#103). Admin endpoints for accounts, temporary passwords (#116), invitation codes and visitor passes | V005 |
-| user-service | user 1.1.0 | Profiles without identity document or phone. `academic` is read-only from the test SINU (#76–#80). `PUT /internal/users/{id}/roles` | V003 |
-| semaphore-service | semaphore 2.0.1 | SINU course statuses, read-only through `SinuRecordPort` and `FakeSinuRecordAdapter` (#79). Editable plans at `/me/plans` (`plannedLevel` 1 to 12). The catalogue of the 23 pensums | V010 |
-| schedule-service | schedule 2.0.1 | Current classes only: `/me`, `/me/day`, `/me/week`, `/me/periods`, from the test SINU (`SinuTimetablePort`, #78). No database | none |
-| map-service | map 3.7.0 (#211, #212) | Buildings, floors, layouts, spaces, types, campuses, ground, structures and survey. ETag. `sinuSedes` (#77). `labelPoint` on every drawn space | V016 (EC P1 from Brian's sketch, squared: #183, #193); V017 in #218 |
+| auth-service | auth 1.2.0 | Microsoft sign-in through `POST /auth/microsoft`, checked by `MicrosoftIdTokenVerifier` (RS256, iss, aud, exp; #102, #104). The PORTAL client requires a permission. Rotating refresh tokens with family revocation on reuse (#82). `GET /auth/sign-in-options` (#141). Password sign-in only behind `KAPP_LOCAL_SIGN_IN`, and 404 when it is off (#83). One profile role (STUDENT, PROFESSOR, STAFF, or UNASSIGNED when the directory says nothing, #252) plus permissions (ADMIN, RECEPTION, MAINTENANCE, MODERATION, WELLBEING). `KAPP_FIRST_ADMINS` grants the first ADMIN. `PUT /auth/admin/accounts/{id}/roles`, synced to user-service (#103). Admin endpoints for accounts, temporary passwords (#116), invitation codes (hidden in the portal, #257; removed in #255) and visitor passes | V005 |
+| user-service | user 1.2.0 | Profiles without identity document or phone. `academic` is read-only from the test SINU (#76–#80). `PUT /internal/users/{id}/roles` | V003 |
+| semaphore-service | semaphore 2.0.2 | SINU course statuses, read-only through `SinuRecordPort` and `FakeSinuRecordAdapter` (#79). Editable plans at `/me/plans` (`plannedLevel` 1 to 12; a pending course not before the current level, a failed one only in the next period, #253). The catalogue of the 23 pensums | V010 |
+| schedule-service | schedule 2.0.2 | Current classes only: `/me`, `/me/day`, `/me/week`, `/me/periods`, from the test SINU (`SinuTimetablePort`, #78). No database | none |
+| map-service | map 3.8.0 (#252) | Buildings, floors, layouts, spaces, types, campuses, ground, structures and survey. ETag. `sinuSedes` (#77). `labelPoint` on every drawn space | V017 (EC P1's auditorium, outline and Carrera 9A exit, #221) |
 | api-gateway | none | Routes by name, with no registry (#64). Answers 500 when a service is down (#157) | none |
 
 - **Local helpers:** fake OIDC (mock-oauth2-server on `:8090`, with test users for student, professor and staff;
@@ -64,44 +63,18 @@
   compose gave schedule-service its neighbours' URLs, Feign timeouts are read again, the pensum is read once).
   Brian verified it on the emulator.
 
+## Done on 2026-11-19
+
+- **#221 (#218):** EC P1's auditorium redrawn from its plan's walls (`scripts/plan-tracing/wip/aud_walls.py`), the
+  floor's outline, and the Carrera 9A exit. `P1-9A-PASILLO`, `P1-9A-RAMPA` and `P1-9A-ESCALERA` and the booth's
+  place are **provisional** until Brian takes `in-09` to `in-19` (84 to 94 in the survey sheet). The gate is #248.
+- **#252 (#249):** `ROLE_UNASSIGNED`, read access to the map and `/api/users/me` only; the portal shows "Sin rol".
+- **#253 (#250):** the two plan level rules in `AcademicPlanService.place`, from `PlanLevels`.
+- **#257 (#255):** the portal's invitation codes page hidden.
+
 ## In flight
 
-- **EC P1's auditorium, outline and Carrera 9A exit (#218, PR #221, `feature/ec-p1-turned-auditorium`):**
-  - The wing is built from straight lines (`scripts/plan-tracing/wip/aud_walls.py`): the outline's (the tape's) for
-    the north wall and the Calle 62, lines fitted on the auditorium's plan for the south wall, the hall's east walls
-    and the stage's arc, and, since 2026-11-18, lines fitted on Brian's marks over that plan
-    (`~/Documents/KApp/mapa-pisos/ec-p1-218/3-despues-sobre-plano-AU.jpg`, matched to the plan's photo) for the
-    hall's north side, Audiovisuales, the lobby and the doors. Nothing is drawn where he painted solid concrete:
-    `P1-26` to `P1-29` are dropped, and the south and east walls are a wall thick. Every seat of the plan is inside
-    the hall; the script prints the checks (seats, overlaps, corner caps, short sides, corners on their lines).
-  - **Provisional, the way down to the Carrera 9A gate:** `P1-9A-PASILLO` (CORRIDOR), `P1-9A-RAMPA` (RAMP) and
-    `P1-9A-ESCALERA` (STAIRS), from Brian's drawing of 2026-11-17 where `survey-plan.py` puts them. Redraw them when he
-    takes `in-09` to `in-19` (84 to 94, in the survey sheet since #235). The guard's booth keeps the tape's size
-    (1.52 x 1.69 m) but stands under the ramp, as Brian drew it, not against the central wing as the tape had it.
-  - `register.py` gained `"turned"`, `"drawn"` (rooms given in floor units) and `"outline"`; `ec-surveyed.json`
-    uses `"drawn"` and `"outline"`. The floor's `outline` is the surveyed parts on P1, the open patio and the
-    passage between the tower and the casa's lot line, cut at the booth's front: Brian marks the rest down to the
-    street as sidewalk.
-  - Corridors: only `PAS-TRANSVERSAL` and `PAS-SALIDA-9A`; the two through the cafeteria went.
-  - V017 puts the floor in place even over a saved one; the contract example and its label points follow.
-  - `render-map-base.py` now draws a floor's outline, corridors and doors. Review images:
-    `~/Documents/KApp/mapa-pisos/ec-p1-218/` on Brian's Mac.
-  - **Not before the delivery:** V017 changes the dev server's floor while the testers use it. Brian merges after
-    Friday 2026-11-20.
-  - After merge: Santiago re-runs `capture-demo-data.sh` so the demo serves the new example.
-  - Next: P2's gallery over the hall as now drawn (#220).
-
-- **map 3.7.0, `labelPoint` (#195):**
-  - #211, merged: the contract. `Space.labelPoint`, the `CentralGroundFloor` example (EC P1 as the dev server
-    serves it) first in `getFloor`, so the mocks serve it, and the CHANGELOG entry.
-  - #212 (`feature/map-label-point-service`): `LabelPoint` (polylabel, precision 1, then the best whole point
-    around it) in every response with a `shape`. Tests: every seeded space's label is inside its shape, and the
-    contract example equals what the service computes. Until it merges, the dev server sends no `labelPoint`.
 - **`verticalCode` (#213):** issue open, not started. Contract, service, seed data and portal, one PR each.
-- **EC P1 on the dev server, verified 2026-11-05:** the API returns exactly what V016 seeds (46 spaces, 42 drawn,
-  4 corridors, same doors), and the portal draws it whole. To check the dev server through the portal or the API,
-  Brian signs in as `administrativo.prueba`, the test account that holds ADMIN there; the other test accounts have
-  no portal permission.
 
 ## Map direction (Brian, 2026-11-04)
 
@@ -145,7 +118,7 @@
 
 ## Next
 
-1. #218 merged once its CI is green; then #220 (P2's gallery).
+1. After the delivery: #255 (remove invitation codes), #256 (outlines on every floor), #220 (P2's gallery), the 9A measures.
 2. #157 (gateway 503), in a new Backend | Local session. Then #143 (one program name).
 3. #213 (`verticalCode`), contract first.
 4. EC P2 as soon as Brian sketches it. Otherwise, start phase 4 (#57).
