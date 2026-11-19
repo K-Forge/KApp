@@ -95,11 +95,28 @@ class MicrosoftSignInIntegrationTest extends AbstractAuthIntegrationTest {
     }
 
     @Test
-    @DisplayName("an account the directory does not classify signs in as staff")
-    void unclassified_isStaff() throws Exception {
+    @DisplayName("an account the directory does not classify signs in with no role, not as staff")
+    void unclassified_isUnassigned() throws Exception {
         signsInAs(OID, EMAIL, null);
 
-        signIn("APP").andExpect(status().isOk()).andExpect(jsonPath("$.roles", contains("ROLE_STAFF")));
+        signIn("APP").andExpect(status().isOk()).andExpect(jsonPath("$.roles", contains("ROLE_UNASSIGNED")));
+        verify(userProfileClient).upsert(new InternalUserUpsert(EMAIL, "Pepito", "Perez Gomez", List.of("ROLE_UNASSIGNED")));
+    }
+
+    @Test
+    @DisplayName("an account with no role keeps the role an administrator gives it, though the directory still says nothing")
+    void unassigned_keepsTheAdministratorsRole() throws Exception {
+        signsInAs(OID, EMAIL, null);
+        String userId = userIdOf(signIn("APP").andExpect(status().isOk()));
+        Credential admin = seedCredential("otro.admin@konradlorenz.edu.co", "AdminPassword2026",
+                List.of("ROLE_STAFF", "ROLE_ADMIN"), Credential.Status.ACTIVE, true);
+        mockMvc.perform(put("/auth/admin/accounts/{id}/roles", userId)
+                        .header("Authorization", bearerFor(admin.userId(), admin.email(), "ROLE_STAFF", "ROLE_ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"profileRole": "ROLE_STUDENT", "permissions": []}"""))
+                .andExpect(status().isOk());
+
+        signIn("APP").andExpect(status().isOk()).andExpect(jsonPath("$.roles", contains("ROLE_STUDENT")));
     }
 
     @Test

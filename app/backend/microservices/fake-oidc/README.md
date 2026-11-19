@@ -16,7 +16,7 @@ At its login page, type one of these user names. Leave the claims box empty.
 | `estudiante` | student | `estudiante@kforge.dev` |
 | `profesor` | professor | `profesor@kforge.dev` |
 | `administrativo` | administrative staff | `administrativo@kforge.dev` |
-| anything else | none: KApp gives `ROLE_STAFF` | `<name>@kforge.dev` |
+| anything else | none: KApp gives `ROLE_UNASSIGNED` ("Sin rol") | `<name>@kforge.dev` |
 
 `config.json` holds them. The profile travels in the `roles` claim, as the university's app roles will.
 

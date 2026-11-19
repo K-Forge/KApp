@@ -75,4 +75,33 @@ class VisitorPassFormTest {
             whileTyping,
         )
     }
+
+    @Test
+    fun `the prefix is the app's and the hyphen goes in after the first four`() {
+        assertEquals("", VisitorPassForm.codeFromInput(""))
+        assertEquals("KL-V-7k2", VisitorPassForm.codeFromInput("7k2"))
+        assertEquals("KL-V-7K2M", VisitorPassForm.codeFromInput("7K2M"))
+        assertEquals("KL-V-7K2M-Q", VisitorPassForm.codeFromInput("7K2MQ"))
+        assertEquals("KL-V-7k2m-qx9p", VisitorPassForm.codeFromInput("7k2mqx9p"))
+        assertNull(VisitorPassForm().copy(code = VisitorPassForm.codeFromInput("7k2mqx9p")).codeError)
+    }
+
+    @Test
+    fun `a whole code pasted in, or a hyphen typed by hand, comes out the same`() {
+        assertEquals("KL-V-7K2M-QX9P", VisitorPassForm.codeFromInput("KL-V-7K2M-QX9P"))
+        assertEquals("KL-V-7K2M-QX9P", VisitorPassForm.codeFromInput(" kl-v-7K2M-QX9P "))
+        assertEquals("KL-V-7K2M-QX9P", VisitorPassForm.codeFromInput("7K2M-QX9P"))
+    }
+
+    @Test
+    fun `nothing past the eight characters`() {
+        assertEquals("KL-V-7K2M-QX9P", VisitorPassForm.codeFromInput("7K2MQX9PZZ"))
+    }
+
+    @Test
+    fun `the field gets back exactly what was typed, so deleting never gets stuck`() {
+        listOf("", "7", "7k2m", "7k2mq", "7k2mqx9p").forEach { typed ->
+            assertEquals(typed, VisitorPassForm.inputOf(VisitorPassForm.codeFromInput(typed)))
+        }
+    }
 }

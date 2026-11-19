@@ -31,6 +31,12 @@ class DestinationsForTest {
     }
 
     @Test
+    fun `an account with no role sees Inicio, Mapa and Perfil`() {
+        assertEquals(ProfileRole.Unassigned, ProfileRole.of(listOf("ROLE_UNASSIGNED")))
+        assertEquals(listOf(Profile, Home, Map), destinationsFor(ProfileRole.Unassigned))
+    }
+
+    @Test
     fun `an unknown role gets only what every role shares`() {
         assertEquals(listOf(Profile, Home, Map), destinationsFor(null))
     }

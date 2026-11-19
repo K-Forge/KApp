@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Auth API
-  version: 1.1.0
+  version: 1.2.0
   summary: Sign-in and token service for the KApp platform.
   description: |
     Authentication service for KApp, the mobile application of Fundación
@@ -54,14 +54,16 @@ info:
     | `ROLE_STUDENT` | profile | The Microsoft directory |
     | `ROLE_PROFESSOR` | profile | The Microsoft directory |
     | `ROLE_STAFF` | profile | The Microsoft directory: an administrative employee |
+    | `ROLE_UNASSIGNED` | profile | Nobody: an account the directory does not classify, until an administrator gives it a role |
     | `ROLE_ADMIN` | permission | An administrator, in the portal |
     | `ROLE_RECEPTION`, `ROLE_MAINTENANCE`, `ROLE_MODERATION`, `ROLE_WELLBEING` | permission | An administrator, in the portal |
     | `ROLE_GUEST` | — | Redeeming a visitor day pass: the campus map only |
 
     - **The profile role comes from a claim of the Microsoft directory.** Which attribute the
       university uses is agreed with its IT office and configured, not written in code.
-    - **An account the directory does not classify** signs in as `ROLE_STAFF`, which opens the
-      map and nothing academic, until an administrator sets its profile role.
+    - **An account the directory does not classify** signs in as `ROLE_UNASSIGNED`, which opens
+      the map and its own profile and nothing academic, until an administrator sets its profile
+      role or the directory classifies it. An administrator cannot give `ROLE_UNASSIGNED`.
     - **The first administrators** come from configuration. Every later permission is granted
       through `PUT /auth/admin/accounts/{userId}/roles`.
 
@@ -1156,14 +1158,15 @@ components:
     Role:
       type: string
       description: |
-        A role a token may carry. `ROLE_STUDENT`, `ROLE_PROFESSOR` and `ROLE_STAFF` are profile
-        roles, exactly one per account. `ROLE_ADMIN`, `ROLE_RECEPTION`, `ROLE_MAINTENANCE`,
+        A role a token may carry. `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF` and
+        `ROLE_UNASSIGNED` are profile roles, exactly one per account. `ROLE_ADMIN`, `ROLE_RECEPTION`, `ROLE_MAINTENANCE`,
         `ROLE_MODERATION` and `ROLE_WELLBEING` are permissions, which add to it. `ROLE_GUEST` is
         only ever alone, on a visitor's token.
       enum:
         - ROLE_STUDENT
         - ROLE_PROFESSOR
         - ROLE_STAFF
+        - ROLE_UNASSIGNED
         - ROLE_ADMIN
         - ROLE_RECEPTION
         - ROLE_MAINTENANCE
@@ -1174,7 +1177,9 @@ components:
 
     ProfileRole:
       type: string
-      description: The role that decides what the app shows. Exactly one per account.
+      description: |
+        The role that decides what the app shows. Exactly one per account. `ROLE_UNASSIGNED` is
+        not here: it is what an account holds before anybody chose, never something to give.
       enum: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF]
       example: ROLE_STUDENT
 

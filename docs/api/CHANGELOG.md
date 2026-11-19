@@ -24,6 +24,21 @@ that follow. Until a service has caught up, its contract describes where it is g
 student's level and later. The test SINU's student failed Lógica Digital y Microprocesadores
 (`31506`): it goes to level 6.
 
+## November 2026: auth 1.2.0, user 1.2.0, map 3.8.0, schedule 2.0.2 (additive, #249)
+
+- **New profile role: `ROLE_UNASSIGNED`.** A member the Microsoft directory does not classify signs
+  in with it, instead of `ROLE_STAFF`: testers saw such accounts as "Administrativo". It is still
+  exactly one profile role per account. A profile role an administrator chose still wins, and an
+  administrator cannot give `ROLE_UNASSIGNED` (`ProfileRole` does not list it).
+- **auth 1.2.0 and user 1.2.0:** `Role` lists `ROLE_UNASSIGNED`. `GET` and `PATCH /api/users/me`
+  accept it: the account's own profile, with no academic block.
+- **map 3.8.0:** every read accepts `ROLE_UNASSIGNED`; writes stay `ROLE_ADMIN`.
+- **schedule 2.0.2:** says that `ROLE_UNASSIGNED` is refused everywhere, as it already was. The
+  semáforo and the catalog refuse it too; their `x-roles` never listed it.
+
+**Migrating a client:** treat `ROLE_UNASSIGNED` as a profile role that opens the map and the
+profile, and nothing academic. A client that does not know it yet should not take it for staff.
+
 ## November 2026: map 3.7.0 (additive)
 
 - **New:** `Space.labelPoint`, on every space that has a `shape`: in a floor, in a space's detail

@@ -9,6 +9,7 @@ import co.edu.konradlorenz.kapp.data.demo.DemoBackend
 import co.edu.konradlorenz.kapp.data.demo.DemoClock
 import co.edu.konradlorenz.kapp.data.map.FloorRepository
 import co.edu.konradlorenz.kapp.data.network.KAppApi
+import co.edu.konradlorenz.kapp.data.network.NetworkStatus
 import co.edu.konradlorenz.kapp.data.profile.LocalAvatar
 import co.edu.konradlorenz.kapp.data.profile.MockProfilePreference
 import co.edu.konradlorenz.kapp.data.profile.ProfileRepository
@@ -61,6 +62,8 @@ class AppContainer(context: Context) {
     val visitorPasses = VisitorPassRepository(publicApi.auth)
 
     val microsoft = MicrosoftSignIn.forThisBuild(context)
+
+    val network = NetworkStatus.of(context)
 
     /** Debug against the mocks only. See MockProfilePreference. */
     val mockProfile = MockProfilePreference(context)

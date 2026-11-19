@@ -92,6 +92,7 @@ class AccountRolesIntegrationTest extends AbstractAuthIntegrationTest {
     @ParameterizedTest(name = "{0}")
     @CsvSource(delimiter = '|', textBlock = """
             not a profile role         | '{"profileRole": "ROLE_ADMIN", "permissions": []}'                                 | profileRole
+            no role as the profile role | '{"profileRole": "ROLE_UNASSIGNED", "permissions": []}'                     | profileRole
             a profile role as a permission | '{"profileRole": "ROLE_STAFF", "permissions": ["ROLE_STUDENT"]}'             | permissions
             not a permission           | '{"profileRole": "ROLE_STAFF", "permissions": ["ROLE_DEAN"]}'                      | permissions
             a permission twice         | '{"profileRole": "ROLE_STAFF", "permissions": ["ROLE_ADMIN", "ROLE_ADMIN"]}'       | permissions

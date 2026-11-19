@@ -116,7 +116,7 @@ public class RegistrationService {
         requireAllowedDomain(email);
         requireAvailable(email);
         String role = request.profileRole();
-        if (!KappRoles.PROFILE_ROLES.contains(role)) {
+        if (!KappRoles.ASSIGNABLE_PROFILE_ROLES.contains(role)) {
             throw new BusinessRuleException("An account is created with a profile role",
                     List.of(new ApiError.FieldIssue("profileRole", "ROLE_STUDENT, ROLE_PROFESSOR or ROLE_STAFF")));
         }
@@ -181,7 +181,7 @@ public class RegistrationService {
     /** A permission is never reachable through signup, whatever a code claims. */
     private String roleFrom(InvitationCode code) {
         String role = code.role();
-        if (KappRoles.PROFILE_ROLES.contains(role)) {
+        if (KappRoles.ASSIGNABLE_PROFILE_ROLES.contains(role)) {
             return role;
         }
         log.error("Invitation code {} carries role {}, which registration must not grant",

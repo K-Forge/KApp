@@ -132,8 +132,8 @@ class InternalUserControllerTest extends AbstractUserServiceTest {
     @ParameterizedTest(name = "{0}")
     @CsvSource(delimiter = '|', textBlock = """
             '[]'                                  | must hold the profile role
-            '["ROLE_ADMIN"]'                      | must hold exactly one of ROLE_STUDENT, ROLE_PROFESSOR or ROLE_STAFF
-            '["ROLE_STUDENT", "ROLE_PROFESSOR"]'  | must hold exactly one of ROLE_STUDENT, ROLE_PROFESSOR or ROLE_STAFF
+            '["ROLE_ADMIN"]'                      | must hold exactly one of ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF or ROLE_UNASSIGNED
+            '["ROLE_STUDENT", "ROLE_PROFESSOR"]'  | must hold exactly one of ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF or ROLE_UNASSIGNED
             '["ROLE_GUEST"]'                      | must not hold ROLE_GUEST
             '["ROLE_STUDENT", "ROLE_GUEST"]'      | must not hold ROLE_GUEST
             """)
