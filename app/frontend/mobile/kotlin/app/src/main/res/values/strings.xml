@@ -146,6 +146,8 @@
     <string name="home_semester_unavailable">No pudimos cargar tu semestre.</string>
     <string name="home_day_unavailable">No pudimos cargar tus clases de hoy</string>
     <string name="home_day_retry">Reintentar</string>
+    <!-- Inicio opened with no network shows the last data it saved, and from when (#232). -->
+    <string name="home_offline_note">Sin conexión · datos de las %1$s</string>
     <string name="home_done_title">Ya terminaste las clases de hoy</string>
     <string name="room_number">Salón %1$s</string>
     <string name="room_none">Sin salón asignado</string>

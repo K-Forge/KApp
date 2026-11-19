@@ -22,6 +22,11 @@ data class HomeUiState(
     val semester: SemesterState,
     /** The photo picked in Perfil on this phone (LocalAvatar), drawn instead of the initials. */
     val photo: ImageBitmap? = null,
+    /**
+     * When the oldest of the copies on screen was saved, if any of them came from OfflineCache
+     * because there was no network (#232). `null` when everything is fresh.
+     */
+    val offlineSince: Long? = null,
 )
 
 /**
