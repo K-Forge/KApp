@@ -62,7 +62,11 @@
         "P1-33": "In Brian's sketch of 2026-10-21 this corner is part of the Cocina and of the box by the ramp.",
         "P1-34": "In Brian's sketch of 2026-10-21 this box is the south end of the Cocina (P1-COCINA).",
         "P1-CAFETERIA-NO-2": "Brian, 2026-10-21: the food court is one cafeteria, P1-CAFETERIA, and its north extension P1-CAFETERIA-NORTE; no second cafeteria.",
-        "P1-ZONA-ESPARCIMIENT": "The sanitary route plan's name for the food court's hall, which is the cafeteria: an alias of P1-CAFETERIA now."
+        "P1-ZONA-ESPARCIMIENT": "The sanitary route plan's name for the food court's hall, which is the cafeteria: an alias of P1-CAFETERIA now.",
+        "P1-26": "Brian, 2026-11-17 (#218): solid concrete between the hall and the north wall (black over the plan); nothing is drawn there.",
+        "P1-27": "Brian, 2026-11-17 (#218): solid concrete between the hall and the north wall (black over the plan); nothing is drawn there.",
+        "P1-28": "Brian, 2026-11-17 (#218): solid concrete between the hall and the north wall (black over the plan); nothing is drawn there.",
+        "P1-29": "Brian, 2026-11-17 (#218): solid concrete between the hall and the north wall (black over the plan); nothing is drawn there."
       },
       "yield": {
         "P1-17": "A small box Brian drew between the north lift and the wall; squared on its own its outline folds, so it is refitted to the room it has.",
@@ -75,7 +79,7 @@
       },
       "groups": [
         {
-          "spaces": ["P1-AUD-TAQUILLA", "P1-AUD-ANTESALA-N", "P1-AUDITORIO-SONIA", "P1-AUD-ESCENARIO", "P1-AUD-AUDIOVISUALES", "P1-AUD-ESCALERA", "P1-AUD-UTILERIA", "P1-AUD-SALIDA-SUR", "P1-20", "P1-23", "P1-26", "P1-27", "P1-28", "P1-29"],
+          "spaces": ["P1-AUD-TAQUILLA", "P1-AUD-ANTESALA-N", "P1-AUDITORIO-SONIA", "P1-AUD-ESCENARIO", "P1-AUD-AUDIOVISUALES", "P1-AUD-ESCALERA", "P1-AUD-UTILERIA", "P1-AUD-SALIDA-SUR", "P1-20", "P1-23"],
           "onto": {
             "from": [[1302, 795], [1565, 723], [2157, 912], [2144, 1273]],
             "to": [[1462, 680], [1704, 595], [2343, 779], [2340, 1165]]
@@ -84,7 +88,7 @@
         }
       ],
       "drawn": {
-        "why": "Brian and Core, 2026-11-16 (#218): every wall one straight line from the plan or the tape, not from the pen. The north wall, the chamfer, the front's step and grey stretch and the Calle 62 wall are the outline's (the tape's), a wall inside; the front of the ticket office and the north anteroom is the lobby's; the west wall is plumb where the chamfer meets that front (x = 1642). The south wall, the hall's east wall, the stage's sides and front, and the tops and sides of P1-20 and P1-23 are fitted on the auditorium's plan, laid on the floor by the similarity onto the four surveyed corners of the group above (scale, turn and shift: the plan keeps its angles). Each room is an intersection of those lines and the hall is what is left, so neighbours share their walls; every seat the plan prints is inside the hall. scripts/plan-tracing/wip/aud_walls.py makes them and checks them.",
+        "why": "Brian and Core, 2026-11-16 and 2026-11-17 (#218): every wall one straight line from the plan, the tape or Brian's marks over the plan, not from the pen. His marks (light blue the hall, pink the walls he is sure of, green the doors, black solid concrete, purple Audiovisuales, red the props room, '?' unidentified) are laid on the floor by matching that picture to the plan's photo; the hall's north side, the Audiovisuales booth, the lobby and the doors follow them, and nothing is drawn where he painted black. The south wall is a wall thick: the rooms stop at its inner face and the covered patio starts at its outer one. The north wall, the grey stretch and the Calle 62 wall are the outline's, a wall inside; the west wall is plumb (x = 1642). The south wall, the hall's east walls, the stage's sides and arc, and the tops and sides of P1-20 and P1-23 are fitted on the auditorium's plan, laid on the floor by the similarity onto the four surveyed corners of the group above. The way down to the Carrera 9A gate is Brian's drawing of 2026-11-17, provisional until he measures in-09 to in-19. scripts/plan-tracing/wip/aud_walls.py makes them and checks them.",
         "spaces": [
           {
             "code": "P1-AUD-ESCENARIO",
@@ -94,37 +98,18 @@
           {
             "code": "P1-20",
             "shape": [[1642, 983], [1642, 921], [1737, 946], [1743, 1009]],
-            "why": "Between the west wall, the stage's west side, the south wall and the top the plan draws for it, parallel to the south wall."
+            "why": "Brian (2026-11-17) marks it '?': unidentified. Between the west wall, the stage's west side, the south wall's inner face and the top the plan draws for it, parallel to the south wall."
           },
           {
             "code": "P1-23",
-            "shape": [[2006, 1076], [2018, 1016], [2139, 1047], [2200, 1063], [2191, 1097], [2185, 1122]],
-            "why": "Between the stage's east side, the south wall, its top (parallel to the south wall) and its east side, as the plan draws them; the hall's diagonal wall and the prop room's top meet its sides."
-          },
-          {
-            "code": "P1-26",
-            "shape": [[1669, 640], [1703, 593], [1828, 628]],
-            "why": "The corner between the chamfer and the north wall, closed by a chord behind the first row of seats."
-          },
-          {
-            "code": "P1-27",
-            "shape": [[1828, 628], [1891, 647], [1880, 685], [1817, 667]],
-            "why": "Square to the north wall, east of the first row, 40 deep."
+            "shape": [[2006, 1076], [2018, 1016], [2139, 1047], [2200, 1063], [2185, 1122]],
+            "why": "Brian (2026-11-17) marks it '?': unidentified. Between the stage's east side, the south wall's inner face, its top (one line, parallel to the south wall, the corridor and the props room above it) and its east side, as the plan draws them."
           },
           {
             "code": "P1-AUD-AUDIOVISUALES",
-            "shape": [[1891, 647], [2009, 680], [1989, 748], [1872, 714]],
-            "why": "The booth: a rectangle square to the north wall, 122 along it and 70 deep, clear of the seats."
-          },
-          {
-            "code": "P1-28",
-            "shape": [[2009, 680], [2116, 711], [2054, 725]],
-            "why": "A triangle on the north wall east of the booth, 30 deep at its point."
-          },
-          {
-            "code": "P1-29",
-            "shape": [[2116, 711], [2209, 738], [2211, 813]],
-            "why": "The corner between the north wall and the hall's east wall, closed by a chord."
+            "shape": [[1894, 647], [2025, 685], [2010, 710], [1986, 753], [1894, 736]],
+            "why": "Brian's purple (2026-11-17): from the north wall down, its side on the hall plumb, its other side and its bottom as he drew them; the door from the hall where he marked it.",
+            "doors": [[[1894, 690], [1894, 719]]]
           },
           {
             "code": "P1-AUD-ESCALERA",
@@ -133,21 +118,21 @@
           },
           {
             "code": "P1-AUD-UTILERIA",
-            "shape": [[2191, 1097], [2265, 1097], [2311, 1097], [2345, 1097], [2345, 1163], [2185, 1122]],
-            "doors": [[[2254, 1139], [2285, 1147]]],
-            "why": "Under the stair, from P1-23's east side to the Calle 62 wall, down to the south wall."
+            "shape": [[2200, 1063], [2265, 1079], [2265, 1097], [2311, 1097], [2311, 1154], [2185, 1122]],
+            "doors": [[[2261, 1141], [2301, 1151]]],
+            "why": "Brian's red (2026-11-17): from P1-23's east side to the east wall's inner face, its top on P1-23's line and stepping down under the stair, down to the south wall's inner face; its door to the covered patio where he marked it."
           },
           {
             "code": "P1-AUD-SALIDA-SUR",
-            "shape": [[2209, 738], [2240, 747], [2229, 786], [2311, 810], [2311, 868], [2265, 868], [2265, 1097], [2191, 1097], [2200, 1063], [2139, 1047], [2213, 898], [2211, 813]],
-            "doors": [[[2144, 1036], [2159, 1008]], [[2229, 786], [2273, 799]]],
-            "why": "What is left between the hall's east wall, the front's step and grey stretch, the stair, the prop room and P1-23: from the hall's east door to Punto 66, which starts at the step and is 1.35 m wide (survey bis-34)."
+            "shape": [[2234, 787], [2311, 810], [2311, 868], [2265, 868], [2265, 1079], [2139, 1047], [2217, 891]],
+            "doors": [[[2144, 1036], [2159, 1008]], [[2234, 787], [2278, 800]]],
+            "why": "What is left between the hall's east wall, the solid block in the north-east corner (Brian's black), the grey stretch of the front, the east wall's inner face, the stair, the props room and P1-23: from the hall's east door to Punto 66, which is 1.35 m wide from the corner (survey bis-34)."
           },
           {
             "code": "P1-AUDITORIO-SONIA",
-            "shape": [[1642, 921], [1642, 678], [1669, 640], [1828, 628], [1817, 667], [1880, 685], [1872, 714], [1989, 748], [2009, 680], [2054, 725], [2116, 711], [2211, 813], [2213, 898], [2139, 1047], [2018, 1016], [2027, 974], [2002, 948], [1974, 926], [1942, 909], [1908, 898], [1873, 892], [1837, 891], [1801, 897], [1767, 908], [1735, 924], [1737, 946]],
-            "doors": [[[1642, 866], [1642, 918]], [[2144, 1036], [2159, 1008]]],
-            "why": "The seats: what is left of the wing between its walls and the rooms round it, every seat of the plan inside, 1.5 units clear."
+            "shape": [[1642, 921], [1642, 757], [1685, 680], [1809, 650], [1832, 682], [1894, 682], [1894, 736], [1986, 753], [2010, 710], [2070, 738], [2105, 721], [2163, 759], [2211, 813], [2213, 898], [2139, 1047], [2018, 1016], [2027, 974], [2002, 948], [1974, 926], [1942, 909], [1908, 898], [1873, 892], [1837, 891], [1801, 897], [1767, 908], [1735, 924], [1737, 946]],
+            "doors": [[[1642, 863], [1642, 915]], [[1894, 690], [1894, 719]], [[2144, 1036], [2159, 1008]]],
+            "why": "Brian's light blue (2026-11-17): the hall as a visitor sees it, each wall one straight line fitted on his stroke, round the solid blocks along the north wall (his black, not drawn) and the Audiovisuales booth; the south part, the stage's arc and the east walls fitted on the plan. Every seat of the plan inside, 1.5 units clear."
           },
           {
             "code": "P1-AUD-TAQUILLA",
@@ -156,35 +141,60 @@
           },
           {
             "code": "P1-AUD-ANTESALA-N",
-            "shape": [[1538, 678], [1642, 678], [1642, 921], [1642, 983], [1538, 983]],
-            "doors": [[[1538, 790], [1538, 830]], [[1642, 866], [1642, 918]], [[1585, 983], [1616, 983]]],
-            "why": "A rectangle from the lobby to the west wall, its front on the lobby's; its door to the seats beside P1-20, 1.5 m, as the plan draws it."
+            "shape": [[1538, 678], [1642, 678], [1642, 993], [1538, 993]],
+            "doors": [[[1538, 785], [1538, 839]], [[1642, 863], [1642, 915]], [[1568, 993], [1632, 993]]],
+            "why": "A rectangle from the lobby to the west wall, its front on the lobby's, down to the covered patio; its doors where Brian marked them: to the lobby, to the hall beside P1-20 (1.5 m) and to the covered patio."
           },
           {
             "code": "P1-AUD-VESTIBULO",
-            "shape": [[1257, 678], [1461, 678], [1461, 781], [1538, 781], [1538, 1010], [1257, 1010]],
-            "doors": [[[1257, 740], [1257, 780]], [[1317, 678], [1397, 678]], [[1337, 1010], [1377, 1010]], [[1538, 790], [1538, 830]]],
-            "why": "Brian: the lobby is the south connection's whole ground floor, out to the north anteroom; the strip with the first-aid kit and the door beside the ticket office is part of it. Its doors as he sketched them: to the central wing, the public entrance on the Carrera 9 Bis (survey 15), one at the back and the one to the north anteroom."
+            "shape": [[1257, 678], [1461, 678], [1461, 781], [1538, 781], [1538, 848], [1461, 848], [1461, 1010], [1257, 1010]],
+            "doors": [[[1257, 721], [1257, 810]], [[1313, 678], [1403, 678]], [[1310, 1010], [1411, 1010]], [[1538, 785], [1538, 839]]],
+            "why": "Brian (2026-11-17): the lobby is the box he outlined, less the ticket office in its corner and the solid block below it (his black, not drawn); the strip between them leads to the north anteroom. Its doors where he marked them in green: to the central wing, the Carrera 9 Bis, the open patio and the anteroom."
           },
           {
             "code": "P1-PATIO-CUBIERTO",
             "name": "Patio cubierto",
             "typeCode": "SOCIAL_AREA",
             "wing": "S",
-            "shape": [[1538, 983], [1642, 983], [1743, 1009], [2006, 1076], [2185, 1122], [2345, 1163], [2346, 1306], [1538, 1122]],
-            "why": "From the south wall, where the wing's rooms end, to a wall inside the lot line with the casa; its west side the lobby's east wall."
+            "shape": [[1538, 993], [1642, 993], [2345, 1173], [2346, 1306], [1538, 1122]],
+            "why": "From the south wall's outer face (Brian's black wall, 10 units thick, between it and the wing's rooms) to a wall inside the lot line with the casa; its west side the lobby's east wall, with the opening Brian marked there, and doors to the north anteroom and the props room.",
+            "doors": [[[1568, 993], [1632, 993]], [[2261, 1152], [2301, 1162]], [[1538, 1022], [1538, 1108]]]
           },
           {
             "code": "P1-PORTERIA",
             "shape": [[1350, 1993], [1402, 1993], [1402, 2051], [1350, 2051]],
             "why": "The guard's booth by the gate: 1.52 m of front (survey a-20) by 1.69 m (a-22), its front 7.38 m from the curb (a-21), aligned with the central wing (Brian, a-22); survey-plan.py's BOOTH."
+          },
+          {
+            "code": "P1-9A-PASILLO",
+            "name": "Pasillo de la salida a la Carrera 9A",
+            "typeCode": "CORRIDOR",
+            "wing": null,
+            "aliases": ["pasillo de la salida"],
+            "shape": [[1251, 1546], [1316, 1546], [1316, 2051], [1251, 2051]],
+            "why": "Brian (2026-11-17, green): a level corridor along the central wing to the patio, beside the ramp, down to the booth's front. Provisional: laid out in proportion to his drawing, where survey-plan.py puts it, until he measures in-09 and in-18 to in-19."
+          },
+          {
+            "code": "P1-9A-RAMPA",
+            "name": "Rampa de la salida a la Carrera 9A",
+            "typeCode": "RAMP",
+            "wing": null,
+            "aliases": ["rampa de la salida"],
+            "shape": [[1316, 1574], [1374, 1574], [1374, 1931], [1316, 1931]],
+            "why": "Brian (2026-11-17, blue): a ramp going down in the middle of the passage, in line with the guard's booth. Provisional: where survey-plan.py puts it, until he measures in-10, in-14 to in-17."
+          },
+          {
+            "code": "P1-9A-ESCALERA",
+            "name": "Escalera de la salida a la Carrera 9A",
+            "typeCode": "STAIRS",
+            "wing": null,
+            "aliases": ["escalera de la salida"],
+            "shape": [[1374, 1594], [1490, 1594], [1493, 1910], [1374, 1910]],
+            "why": "Brian (2026-11-17, yellow): wide stairs going down along the casa's wall. Provisional: where survey-plan.py puts them, until he measures in-11 to in-13."
           }
         ]
       },
-      "outline": [[247, 425], [247, 2115], [432, 2115], [432, 2044], [617, 2044], [617, 2117], [986, 2117], [986, 2109],
-                  [1251, 2109], [1251, 2051], [1402, 2051], [1402, 2215], [1497, 2215], [1486, 1118], [1506, 1125],
-                  [2350, 1317], [2355, 1186], [2353, 812], [2241, 779], [2252, 740], [1699, 581], [1637, 668],
-                  [1244, 668], [1242, 467], [617, 473], [433, 472], [433, 425]],
+      "outline": [[247, 425], [247, 2115], [432, 2115], [432, 2044], [617, 2044], [617, 2117], [986, 2117], [986, 2109], [1251, 2109], [1251, 2051], [1402, 2051], [1402, 2215], [1497, 2215], [1486, 1118], [1506, 1125], [2350, 1317], [2355, 1186], [2353, 812], [2241, 779], [2252, 740], [1699, 581], [1637, 668], [1244, 668], [1242, 467], [617, 473], [433, 472], [433, 425]],
       "outline why": "Brian (#218): the way out to the Carrera 9A is part of the Edificio Central, as wide as the plans show it, with the wall it shares with the Casa de Francisco de Paula Velez. The outline is the building's surveyed parts that reach this floor, the open patio by the ramp, and that passage: from the lobby's back wall, between the tower's east face and the casa's lot line, past the gate beside the booth to the Carrera 9A sidewalk. The plan of the floor draws the passage down to the street between the tower and a line that meets the patio behind the auditorium; that line is the casa's lot line, which the city's map puts 7 m from the tower.",
       "corridors": [
         {
@@ -199,8 +209,8 @@
           "name": "Paso a la salida de la Carrera 9A",
           "color": "#5B8DEF",
           "placed": true,
-          "path": [[1357, 1012], [1357, 1880], [1448, 1880], [1448, 2200]],
-          "why": "The PE's route from the lobby's back door down the open passage beside the Casa de Francisco de Paula Velez, drawn where the survey found the way out: round the central wing's one-floor piece and through the gate between the booth at its corner and the casa's wall (survey 69-71), out to the Carrera 9A sidewalk, where the outline ends."
+          "path": [[1357, 1012], [1357, 1960], [1448, 1960], [1448, 2200]],
+          "why": "The PE's route from the lobby's back door down the open passage beside the Casa de Francisco de Paula Velez: down the exit's ramp, between its foot and the guard's booth, and through the gate between the booth and the casa's wall (survey 46, 2.53 m), out to the Carrera 9A sidewalk, where the outline ends."
         }
       ],
       "corridors why": "Only where the floor is open: the hall across the tower and the passage to the Carrera 9A. The PE's other two green routes, down the food court and across the central hall, run through the cafeteria, which Brian made one room (2026-10-21): a line there is drawn over a room, so they are not corridors.",
