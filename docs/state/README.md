@@ -132,6 +132,9 @@ These are the rules agents most often get wrong. `AGENTS.md` and `CONTRIBUTING.m
 9. **Workers report to Core, not to Brian.** When a pull request is ready, the worker sends Core the link, what
    changes, how it was tested and what is left. Core reviews it, posts "Revisión de Docs/Chore" and tells Brian what
    to merge. A worker asks Brian directly only for something only he can do on the emulator or in the admin portal.
+10. **Development runs on Atlas, with Microsoft sign-in against the test tenant.** The `local-db` profile, the fake
+    OIDC server and `scripts/run-locally.sh` are only for evaluators who have none of our accounts (ADR 0010). Never
+    develop against them, and never point fake sign-in at Atlas.
 
 ---
 

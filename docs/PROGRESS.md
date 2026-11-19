@@ -1,6 +1,7 @@
 # Implementation Status
 
-> Read this before proposing large changes. Last updated: 11 October 2026.
+> Read this before proposing large changes. Last updated: 18 November 2026. What is in flight day to day is in
+> [`state/`](state/README.md).
 
 Brian hands in the thesis proposal (_anteproyecto_) at the end of the 2026-2 term, and the product is presented in
 **2027-2**. Between 2 and 5 October 2026 the product was decided again:
@@ -13,8 +14,9 @@ Brian hands in the thesis proposal (_anteproyecto_) at the end of the 2026-2 ter
 - **The scope grew**: Kubernetes, notifications, and the community features — student voice, damage reports, lost
   and found, citizenship points ([`MICROSERVICES-IDEAS.md`](MICROSERVICES-IDEAS.md)).
 
-Backend: Brian. Android: Iván, Alejandro and Santiago. iOS: Brian. Four chats, one area each, coordinate through
-issues labelled `area/*`.
+Backend and iOS: Brian. Android: Santiago, since 2026-11-17; Iván and Alejandro test it and draw the floor sketches.
+Agent sessions, one purpose each, coordinate through issues labelled `area/*` and the [`state/`](state/README.md)
+folder.
 
 ---
 
@@ -23,18 +25,19 @@ issues labelled `area/*`.
 | Area | Status | Notes |
 |---|---|---|
 | Platform foundation | Complete | Boot 3.5, MongoDB Atlas, RS256/JWKS, Mongock, Testcontainers. No service registry (#64) |
-| API contracts | **The 2.0 set** | semaphore 2.0, schedule 2.0, auth 1.0, user 1.0, map 3.6 (#42). Mocks on one port, 4000 (#40). History in [`api/CHANGELOG.md`](api/CHANGELOG.md) |
+| API contracts | **The 2.0 set** | semaphore 2.0.1, schedule 2.0.1, auth 1.1, user 1.1, map 3.7 (`labelPoint`). Mocks on one port, 4000 (#40). History in [`api/CHANGELOG.md`](api/CHANGELOG.md) |
 | Database isolation | Complete | One database and one account per service that stores data. Verified by `scripts/verify-db-isolation.sh` |
 | Academic data | **Read-only, from SINU** | Behind the test SINU adapter (#77–#80). semaphore keeps only the student's plans; schedule has no database |
-| Identity | **In progress** | Backend phase 3 (#56). Merged: rotating refresh tokens with reuse detection (#82), and password sign-in only when local sign-in is enabled (#83). Next: Microsoft sign-in, permissions, and the new roles in every service |
+| Identity | Complete | Backend phase 3 (#56): Microsoft sign-in in the apps and the portal, rotating refresh tokens with reuse detection (#82), one profile role plus permissions, the permissions editor (#172). Password sign-in only when local sign-in is enabled (#83). `KAPP_FIRST_ADMINS` should only bootstrap ADMIN (#241) |
 | User profiles | Merged | user 1.0 (#80): names, picture, roles, active. No identity document, phone or student code. A student's programme is read from SINU |
-| Campus map | Merged | Buildings mapped to their SINU sedes, floors drawn as polygons from the evacuation plans, cacheable reads (#77) |
+| Campus map | Merged, growing | Buildings mapped to their SINU sedes, floors drawn as polygons from the evacuation plans, cacheable reads (#77), a label point per space (#212). EC floor 1 redrawn from its plans in #221; floor 2 is #220 |
 | Admin and developer portal | Merged | Angular, bilingual. CRUD, an API console driven by the specs, a role inspector, and the floor editor |
 | Visitor day pass | Merged | A one-day token that opens the map and nothing else. Identity documents deleted after 30 days by a TTL index |
-| Android (Kotlin) | **In progress** | Merged: the mocks (#69), Microsoft sign-in and session (#70), profile (#71), semáforo with plans (#72), timetable (#73) |
-| iOS (Swift) | In progress | Login, Home, Timetable and Semáforo in its worktree, not merged yet |
-| Dev server | Running | the-hive follows `develop`, with per-branch images on GHCR |
-| Kubernetes and production | Planned | Backend phase 6 (#59) |
+| Android (Kotlin) | **Works on the dev server** | Sign-in, Inicio, Semáforo with plans, Horario, Perfil, Invitación and the map (floors, type icons, selection), checked as the test student and professor (#230). Dark mode (#204). A demo build with no network for evaluators |
+| iOS (Swift) | Paused | Login, Home, Timetable and Semáforo on `feature/mobile-swift`, before the 2.0 contracts. Resumes when Android is finished |
+| Dev server | Running | the-hive follows `develop`, with per-branch images on GHCR, through Tailscale only. Opening its API to the public is in #242 |
+| Running it anywhere | Merged | `scripts/run-locally.sh` (and `.ps1`): the whole stack with a local MongoDB and fake sign-in, for evaluators only (#244, ADR 0010) |
+| Kubernetes and production | To review | Backend phase 6 (#59), reviewed after the Tercera entrega (#242) |
 | Notifications and community | Planned | Backend phases 7 and 8 (#60, #61) |
 
 ---
@@ -47,10 +50,10 @@ One issue per backend phase. The clients follow each contract through `area/kotl
 |---|---|---|
 | 1 · Remove Eureka and the frozen services | #54 | Code merged (#64, #65); the plan material and the two `.docx` remain |
 | 2 · Read-only academic data behind a test SINU | #55 | Merged (#77–#80) |
-| 3 · Microsoft sign-in, rotating refresh tokens, roles and permissions | #56 | In progress: refresh tokens (#82) and local sign-in behind its flag (#83) merged; Microsoft sign-in, permissions, roles and the portal remain. The Entra ID test tenant is #62 |
+| 3 · Microsoft sign-in, rotating refresh tokens, roles and permissions | #56 | Done (#82, #83, #141, #142, #169, #172, #179, #148, #156). The Entra ID test tenant is #62 |
 | 4 · End-to-end journeys per profile | #57 | Planned |
-| 5 · EC floors faithful to the plans | #58 | Blocked on Brian's sketches |
-| 6 · Kubernetes with kind, the guide, and production | #59 | Planned |
+| 5 · EC floors faithful to the plans | #58 | Floor 1 (#183, #193, then #221); floor 2 (#220); floors 3 to 8 wait for the sketches |
+| 6 · Kubernetes with kind, the guide, and production | #59 | To review after the Tercera entrega (#242) |
 | 7 · `notification-service`: inbox, push and an outbox | #60 | Planned |
 | 8 · Points, voice, damage reports, lost and found | #61 | Planned |
 
@@ -142,7 +145,7 @@ Tracked in `docs/SECURITY-AUDIT.md`.
 |---|---|---|
 | Access to SINU | The university's IT director | Real academic data. Until then, and for the presentation if it never comes, the test SINU adapter |
 | Entra ID application registration | The university's IT director | Institutional Microsoft sign-in. Development uses a test tenant (#62) and a fake identity server |
-| Floor sketches of the EC building | Brian | Backend phase 5 (#58) |
+| Floor sketches of the EC building | Alejandro and Brian | Backend phase 5 (#58), floors 3 to 8 |
 | An Apple Developer account | Funding being sought | Push notifications on iOS |
 | Production hardware | The university's IT director | Production. The fallback is Brian's Mac running kind |
 | Telling the IT director that KApp stores visitors' identity documents | Brian | Nothing technical: the summary shared earlier says KApp stores no institutional records |
@@ -168,7 +171,7 @@ Recorded so they read as decisions rather than oversights. [`SRS.md`](SRS.md) gi
 |---|---|
 | Distributed rate limiting | The gateway limits credential endpoints in memory. Correct for one instance; **revisit before running a second** |
 | Spring Cloud Config Server | Configuration is per-service environment variables |
-| Distributed tracing | No Zipkin |
+| Distributed tracing | No Zipkin. OpenTelemetry with a light Grafana stack is in #242 |
 | A cluster per service | One database **and one account** per service, on one cluster. Moving one service to its own cluster is a change to one connection string |
 
 ### Deployment
