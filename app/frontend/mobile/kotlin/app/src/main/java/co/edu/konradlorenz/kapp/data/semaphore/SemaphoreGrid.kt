@@ -24,9 +24,12 @@ enum class CourseStatus {
     Other,
     ;
 
-    /** Whether a plan may move it: only what is still ahead. Passed and current courses stay. */
+    /**
+     * Whether a plan may move it: only what is still ahead. Passed and current courses stay, and a
+     * failed one goes to the next period by itself (#232), so there is nothing to choose.
+     */
     val plannable: Boolean
-        get() = this != Passed && this != InProgress
+        get() = this != Passed && this != InProgress && this != Failed
 
     companion object {
         /**
@@ -85,6 +88,10 @@ data class SemaphoreLevel(val level: Int, val items: List<SemaphoreItem>) {
  * With a [plan], an item it moved is drawn at its planned level - which can be past the last one
  * of the pensum, so the levels run to whichever is further. Without one, this is the *Semáforo
  * Original*.
+ *
+ * A failed course is drawn in the next period ([studentPeriod]), with or without a plan and
+ * whatever placement it had: it must be taken again then, and the API accepts no other level for
+ * it (#232, #253).
  */
 fun buildSemaphore(
     pensum: Pensum,
@@ -95,6 +102,7 @@ fun buildSemaphore(
     val entries = semaphore.courses.associateBy { it.pensumItemCode }
     val placements = plan?.placements.orEmpty().associateBy { it.pensumItemCode }
     val areaColors = pensum.areas.associate { it.code to it.color }
+    val repeatAt = minOf(studentPeriod(pensum, semaphore).next, MAX_PLANNED_LEVEL)
 
     val items = pensum.courses.map { course ->
         val entry = entries[course.pensumItemCode]
@@ -102,7 +110,10 @@ fun buildSemaphore(
         // A plan moves only what is still ahead. A placement left on a course SINU has since
         // passed is ignored rather than drawing a passed course in a future semester.
         val placement = placements[course.pensumItemCode]?.takeIf { status.plannable }
-        val level = placement?.plannedLevel ?: course.level
+        val level = when {
+            status == CourseStatus.Failed -> repeatAt
+            else -> placement?.plannedLevel ?: course.level
+        }
         SemaphoreItem(
             course = course,
             entry = entry,
@@ -120,7 +131,6 @@ fun buildSemaphore(
     return (1..lastLevel).map { level -> SemaphoreLevel(level, items.filter { it.level == level }) }
 }
 
-/** `"20191"` as people write it: `"2019-1"`. Anything not in that shape is returned as it came. */
 /** The furthest level semaphore 2.0 accepts in a placement: `plannedLevel` runs 1 to 12. */
 const val MAX_PLANNED_LEVEL = 12
 
@@ -135,11 +145,34 @@ fun plannableLevels(pensumLevels: Int, plan: AcademicPlan?): IntRange {
 }
 
 /**
- * The levels [status] may be moved to in [plan], for a student at [currentLevel].
+ * Where the student stands, by the rule the API enforces on plans (#253):
+ *
+ * - [current] is the highest pensum level with a course `IN_PROGRESS`; with none in progress, the
+ *   level after the highest one with a course `PASSED`, or 1 if nothing is passed.
+ * - [next] is `current + 1` while a course is in progress, or [current] itself when none is.
+ *
+ * For the test students, level 5 is in progress, so 31506 (level 4, failed) goes to level 6.
+ */
+data class StudentPeriod(val current: Int, val next: Int)
+
+fun studentPeriod(pensum: Pensum, semaphore: StudentSemaphore): StudentPeriod {
+    val statuses = semaphore.courses.associate { it.pensumItemCode to it.status }
+    fun highest(status: String) =
+        pensum.courses.filter { statuses[it.pensumItemCode] == status }.maxOfOrNull { it.level }
+
+    val inProgress = highest("IN_PROGRESS")
+    if (inProgress != null) return StudentPeriod(current = inProgress, next = inProgress + 1)
+    val current = (highest("PASSED") ?: 0) + 1
+    return StudentPeriod(current = current, next = current)
+}
+
+/**
+ * The levels [status] may be moved to in [plan], for a student at [currentLevel]
+ * ([StudentPeriod.current]).
  *
  * Nothing goes into a semester that has already finished: a pending course is offered the current
- * one and the ones after it (#232). A failed course must be taken again in the next period, so it
- * is offered only `currentLevel + 1` (#250). The API does not check either rule yet: #250 adds it.
+ * one and the ones after it (#232). Nothing that is not [CourseStatus.plannable] is offered any:
+ * a failed course already sits in the next period, which is the only level the API takes for it.
  */
 fun allowedLevels(
     status: CourseStatus,
@@ -147,13 +180,11 @@ fun allowedLevels(
     pensumLevels: Int,
     plan: AcademicPlan?,
 ): List<Int> {
-    val plannable = plannableLevels(pensumLevels, plan)
-    return when (status) {
-        CourseStatus.Failed -> listOf(currentLevel + 1).filter { it in plannable }
-        else -> plannable.filter { it >= currentLevel }
-    }
+    if (!status.plannable) return emptyList()
+    return plannableLevels(pensumLevels, plan).filter { it >= currentLevel }
 }
 
+/** `"20191"` as people write it: `"2019-1"`. Anything not in that shape is returned as it came. */
 fun formatPeriod(period: String): String =
     if (Regex("""\d{4}[12]""").matches(period)) "${period.take(4)}-${period.last()}" else period
 

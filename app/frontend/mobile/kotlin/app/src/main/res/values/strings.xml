@@ -97,6 +97,8 @@
     <string name="semaphore_status_eligible">Puedes tomarla</string>
     <string name="semaphore_status_blocked">Bloqueada</string>
     <string name="semaphore_status_failed">Debe repetirse</string>
+    <!-- A failed course is placed in the next period by itself; its sheet says where (#232). -->
+    <string name="semaphore_failed_repeat_at">Se repite en el semestre %1$d, el siguiente periodo. Ese semestre no se puede cambiar.</string>
     <string name="semaphore_status_postponed">Aplazada</string>
     <string name="semaphore_status_other">Otro estado</string>
     <string name="semaphore_test_notice">Datos de prueba: la universidad todavía no ha conectado SINU, así que nada de esto es tu historia académica real.</string>

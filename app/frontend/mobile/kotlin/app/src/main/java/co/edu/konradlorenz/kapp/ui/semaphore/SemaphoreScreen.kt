@@ -69,6 +69,7 @@ import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreItem
 import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreLevel
 import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreState
 import co.edu.konradlorenz.kapp.data.semaphore.allowedLevels
+import co.edu.konradlorenz.kapp.data.semaphore.studentPeriod
 import co.edu.konradlorenz.kapp.data.semaphore.buildSemaphore
 import co.edu.konradlorenz.kapp.data.semaphore.formatGrade
 import co.edu.konradlorenz.kapp.data.semaphore.formatHours
@@ -599,6 +600,17 @@ private fun ItemSheet(
                 } else {
                     PlanSection(item, data, plan, viewModel)
                 }
+            } else if (item.status == CourseStatus.Failed) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                )
+                // Its level is not the plan's to choose: it goes to the next period (#232, #253).
+                Text(
+                    text = stringResource(R.string.semaphore_failed_repeat_at, item.level),
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             if (viewModel.saveFailed) SaveFailed()
         }
@@ -645,7 +657,8 @@ private fun PlanSection(
     plan: AcademicPlan,
     viewModel: SemaphoreViewModel,
 ) {
-    val allowed = allowedLevels(item.status, data.semaphore.currentLevel, data.pensum.levels, plan)
+    val current = studentPeriod(data.pensum, data.semaphore).current
+    val allowed = allowedLevels(item.status, current, data.pensum.levels, plan)
     Text(
         text = stringResource(R.string.semaphore_plan_level),
         fontSize = 14.sp,
