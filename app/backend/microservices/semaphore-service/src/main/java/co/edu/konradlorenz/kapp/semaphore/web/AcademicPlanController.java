@@ -3,6 +3,7 @@ package co.edu.konradlorenz.kapp.semaphore.web;
 import co.edu.konradlorenz.kapp.common.security.CurrentUser;
 import co.edu.konradlorenz.kapp.semaphore.security.StudentOnly;
 import co.edu.konradlorenz.kapp.semaphore.service.AcademicPlanService;
+import co.edu.konradlorenz.kapp.semaphore.sinu.SinuPerson;
 import co.edu.konradlorenz.kapp.semaphore.web.dto.AcademicPlanDto;
 import co.edu.konradlorenz.kapp.semaphore.web.dto.AcademicPlanRequest;
 import co.edu.konradlorenz.kapp.semaphore.web.dto.AcademicPlanUpdate;
@@ -92,7 +93,7 @@ public class AcademicPlanController {
     public AcademicPlanDto placeCourse(@PathVariable String planId,
                                         @PathVariable String pensumItemCode,
                                         @Valid @RequestBody PlacementRequest body) {
-        return planService.view(planService.place(CurrentUser.id(), planId, pensumItemCode,
+        return planService.view(planService.place(new SinuPerson(CurrentUser.id(), CurrentUser.email()), planId, pensumItemCode,
                 body.plannedLevel(), body.electiveSinuCode()));
     }
 

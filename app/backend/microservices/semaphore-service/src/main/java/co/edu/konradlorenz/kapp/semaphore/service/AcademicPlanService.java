@@ -5,17 +5,22 @@ import co.edu.konradlorenz.kapp.common.error.BusinessRuleException;
 import co.edu.konradlorenz.kapp.common.error.ConflictException;
 import co.edu.konradlorenz.kapp.common.error.ResourceNotFoundException;
 import co.edu.konradlorenz.kapp.semaphore.domain.AcademicPlan;
+import co.edu.konradlorenz.kapp.semaphore.domain.CourseStatus;
 import co.edu.konradlorenz.kapp.semaphore.domain.Pensum;
 import co.edu.konradlorenz.kapp.semaphore.domain.PensumCourse;
+import co.edu.konradlorenz.kapp.semaphore.domain.Semaphore;
+import co.edu.konradlorenz.kapp.semaphore.domain.SemaphoreEntry;
 import co.edu.konradlorenz.kapp.semaphore.repository.AcademicPlanRepository;
 import co.edu.konradlorenz.kapp.semaphore.repository.PensumRepository;
 import co.edu.konradlorenz.kapp.semaphore.sinu.SinuElectiveOffering;
+import co.edu.konradlorenz.kapp.semaphore.sinu.SinuPerson;
 import co.edu.konradlorenz.kapp.semaphore.web.dto.AcademicPlanDto;
 import co.edu.konradlorenz.kapp.semaphore.web.dto.AcademicPlanRequest;
 import co.edu.konradlorenz.kapp.semaphore.web.dto.AcademicPlanUpdate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The student's own arrangements of their pensum.
@@ -43,11 +48,14 @@ public class AcademicPlanService {
     private final AcademicPlanRepository plans;
     private final PensumRepository pensums;
     private final ElectiveBank electives;
+    private final SemaphoreService semaphores;
 
-    public AcademicPlanService(AcademicPlanRepository plans, PensumRepository pensums, ElectiveBank electives) {
+    public AcademicPlanService(AcademicPlanRepository plans, PensumRepository pensums, ElectiveBank electives,
+                               SemaphoreService semaphores) {
         this.plans = plans;
         this.pensums = pensums;
         this.electives = electives;
+        this.semaphores = semaphores;
     }
 
     /**
@@ -139,15 +147,22 @@ public class AcademicPlanService {
     /**
      * Pins an item to a level, and an elective slot to the course chosen for it. Idempotent.
      *
+     * <p>Two rules follow the student's semáforo, with the levels of {@link PlanLevels}: a
+     * {@code PENDING} course cannot go before the level the student is in, and a {@code FAILED}
+     * course goes to the next period and nowhere else, since it has to be taken again. They apply
+     * to a plan over the student's own pensum; a plan over another pensum, or a caller SINU has no
+     * program for, has no statuses to follow.
+     *
      * @param electiveSinuCode null, or blank, for no chosen course
      * @throws BusinessRuleException (400) if the item is not in the plan's pensum - a plan carrying a
      *                               placement the grid has no square for would be dropped silently
      *                               by the client while the student believed the move was saved -
-     *                               or if a course is chosen for an item that is not an elective slot
+     *                               if a course is chosen for an item that is not an elective slot,
+     *                               or if the level breaks one of the two rules above
      */
-    public AcademicPlan place(String userId, String planId, String pensumItemCode, int plannedLevel,
+    public AcademicPlan place(SinuPerson caller, String planId, String pensumItemCode, int plannedLevel,
                               String electiveSinuCode) {
-        AcademicPlan plan = requireOwn(userId, planId);
+        AcademicPlan plan = requireOwn(caller.userId(), planId);
         Pensum pensum = pensums.findById(plan.pensumCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Pensum", plan.pensumCode()));
 
@@ -161,7 +176,37 @@ public class AcademicPlanService {
                     "%s is a fixed course: only an elective slot takes a course from the bank".formatted(pensumItemCode),
                     List.of(new ApiError.FieldIssue("electiveSinuCode", "only for an elective slot")));
         }
+        semaphoreOf(caller, pensum).ifPresent(semaphore -> requireLevelAllowed(pensum, semaphore, pensumItemCode, plannedLevel));
         return plans.save(plan.withPlacement(pensumItemCode, plannedLevel, elective));
+    }
+
+    /** The caller's semáforo, when it is over this pensum; empty when SINU has no program for them. */
+    private Optional<Semaphore> semaphoreOf(SinuPerson caller, Pensum pensum) {
+        try {
+            return Optional.of(semaphores.semaphore(caller))
+                    .filter(semaphore -> semaphore.pensumCode().equals(pensum.pensumCode()));
+        } catch (ResourceNotFoundException e) {
+            return Optional.empty();
+        }
+    }
+
+    private static void requireLevelAllowed(Pensum pensum, Semaphore semaphore, String pensumItemCode, int plannedLevel) {
+        CourseStatus status = Optional.ofNullable(semaphore.byPensumItemCode().get(pensumItemCode))
+                .map(SemaphoreEntry::status)
+                .orElse(CourseStatus.PENDING);
+        PlanLevels levels = PlanLevels.of(pensum, semaphore);
+        if (status == CourseStatus.PENDING && plannedLevel < levels.current()) {
+            throw new BusinessRuleException(
+                    "%s is pending: it cannot be planned before level %d, the one the student is in"
+                            .formatted(pensumItemCode, levels.current()),
+                    List.of(new ApiError.FieldIssue("plannedLevel", "must be %d or later".formatted(levels.current()))));
+        }
+        if (status == CourseStatus.FAILED && plannedLevel != levels.next()) {
+            throw new BusinessRuleException(
+                    "%s was failed: it has to be taken again next period, at level %d"
+                            .formatted(pensumItemCode, levels.next()),
+                    List.of(new ApiError.FieldIssue("plannedLevel", "must be %d, the next period".formatted(levels.next()))));
+        }
     }
 
     /**
