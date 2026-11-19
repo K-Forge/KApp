@@ -191,8 +191,8 @@ npx --package=@redocly/cli@latest redocly lint docs/api/*.yaml
 auth 1.0.0 defines them, and backend phase 3 (#56) implements them:
 
 - **One profile role** per member, taken from the university directory at sign-in: `ROLE_STUDENT`,
-  `ROLE_PROFESSOR` or `ROLE_STAFF`. A member the directory does not classify is `ROLE_STAFF`, which sees the map
-  only. The app's tabs follow the profile role.
+  `ROLE_PROFESSOR` or `ROLE_STAFF`. A member the directory does not classify is `ROLE_UNASSIGNED` ("Sin rol"),
+  which sees the map and its own profile only, until an administrator gives it a role in the portal. The app's tabs follow the profile role.
 - **Permissions** on top, granted by an administrator, which only open the portal: `ROLE_ADMIN`, `ROLE_RECEPTION`,
   `ROLE_MAINTENANCE`, `ROLE_MODERATION`, `ROLE_WELLBEING`.
 - `ROLE_GUEST` is a visitor with a one-day pass from reception: the map and nothing else, with no account.
