@@ -16,6 +16,7 @@ import co.edu.konradlorenz.kapp.BuildConfig
 import co.edu.konradlorenz.kapp.data.auth.MicrosoftUnreachableException
 import co.edu.konradlorenz.kapp.data.auth.SignInCancelledException
 import co.edu.konradlorenz.kapp.data.auth.SignInNotConfiguredException
+import co.edu.konradlorenz.kapp.data.network.NetworkStatus
 import co.edu.konradlorenz.kapp.data.profile.MockProfilePreference
 import co.edu.konradlorenz.kapp.data.profile.ProfileRepository
 import co.edu.konradlorenz.kapp.data.session.SessionManager
@@ -65,6 +66,7 @@ class LoginViewModel(
     private val session: SessionManager,
     private val profile: ProfileRepository,
     private val mockProfiles: MockProfilePreference,
+    private val network: NetworkStatus,
 ) : ViewModel() {
 
     var signingIn by mutableStateOf(false)
@@ -103,9 +105,15 @@ class LoginViewModel(
 
     fun signIn(activity: Activity, onSignedIn: () -> Unit) {
         if (signingIn) return
-        signingIn = true
         error = null
         microsoftUnavailable = false
+        // With no network MSAL opens Chrome's offline page instead of failing (L-05, #232), so it
+        // is asked first. Only the first sign-in gets here: a saved session opens the app directly.
+        if (!network.isOnline()) {
+            error = SignInError.Offline
+            return
+        }
+        signingIn = true
         viewModelScope.launch {
             try {
                 session.signIn(microsoft.idToken(activity))
@@ -152,6 +160,7 @@ class LoginViewModel(
                     container.session,
                     container.profile,
                     container.mockProfile,
+                    container.network,
                 )
             }
         }
