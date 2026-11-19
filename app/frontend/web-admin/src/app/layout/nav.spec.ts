@@ -8,6 +8,11 @@ describe('the sidebar by permission', () => {
     expect(paths(['ROLE_STAFF', 'ROLE_ADMIN'])).toEqual(expect.arrayContaining(['/data/users', '/data/floors', '/data/visitor-passes', '/my-token']));
   });
 
+  // Hidden until the final delivery (#255); the page itself is still in the codebase.
+  it('does not show invitation codes, not even to an administrator', () => {
+    expect(paths(['ROLE_STAFF', 'ROLE_ADMIN'])).not.toContain('/data/invitation-codes');
+  });
+
   // Reception issues visitor passes, the one thing auth 1.0 lets it do besides an account's own.
   it('shows reception its visitor passes and what every account sees, and nothing of the administration', () => {
     expect(paths(['ROLE_STAFF', 'ROLE_RECEPTION'])).toEqual(['/data/visitor-passes', '/my-token', '/who-can-do-what', '/api-console']);

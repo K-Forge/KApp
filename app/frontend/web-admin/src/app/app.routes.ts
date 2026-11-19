@@ -86,11 +86,8 @@ export const routes: Routes = [
       { path: 'identity', redirectTo: 'my-token' },
       { path: 'roles', redirectTo: 'who-can-do-what' },
       { path: 'console', redirectTo: 'api-console' },
-      {
-        path: 'data/invitation-codes',
-        loadComponent: () =>
-          import('./features/data/invitation-codes/invitation-codes.page').then((m) => m.InvitationCodesPage),
-      },
+      // Invitation codes are hidden until the final delivery (#255): the page is still in
+      // features/data/invitation-codes, but nothing links to it and no route opens it.
       {
         path: 'data/visitor-passes',
         loadComponent: () =>
