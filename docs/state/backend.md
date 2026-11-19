@@ -66,28 +66,26 @@
 
 ## In flight
 
-- **EC P1's auditorium, outline and Carrera 9A exit (#218, `feature/ec-p1-turned-auditorium`):**
-  - The auditorium's plan laid over the floor's fits by scale, a quarter turn and a shift (corners within 0.8%);
-    the wing is built from straight lines: the outline's (the tape's) for the north wall, chamfer and Calle 62, and
-    lines fitted on that plan for the south wall, the hall's east wall and the stage; each room is an intersection of
-    them and the hall what is left, with every seat the plan prints inside it (`scripts/plan-tracing/wip/aud_walls.py`;
-    a square block and then Brian's traced outlines were refused). `register.py` gained `"turned"`, `"drawn"` (rooms
-    given in floor units) and `"outline"`; `ec-surveyed.json` uses `"drawn"` and `"outline"`. The guard's booth is
-    now the tape's (1.52 x 1.69 m); the passage's width waits on Brian (point 14 of Core's review).
-  - The floor's `outline` is the surveyed parts on P1, the open patio and the passage between the tower and the
-    Casa de Francisco de Paula Vélez's lot line, out to the sidewalk: no contract change was needed for the
-    casa's wall. The gate onto the Carrera 9A is 2.5 m, as the survey measured it (a-10).
+- **EC P1's auditorium, outline and Carrera 9A exit (#218, PR #221, `feature/ec-p1-turned-auditorium`):**
+  - The wing is built from straight lines (`scripts/plan-tracing/wip/aud_walls.py`): the outline's (the tape's) for
+    the north wall and the Calle 62, lines fitted on the auditorium's plan for the south wall, the hall's east walls
+    and the stage's arc, and, since 2026-11-18, lines fitted on Brian's marks over that plan
+    (`~/Documents/KApp/mapa-pisos/ec-p1-218/3-despues-sobre-plano-AU.jpg`, matched to the plan's photo) for the
+    hall's north side, Audiovisuales, the lobby and the doors. Nothing is drawn where he painted solid concrete:
+    `P1-26` to `P1-29` are dropped, and the south and east walls are a wall thick. Every seat of the plan is inside
+    the hall; the script prints the checks (seats, overlaps, corner caps, short sides, corners on their lines).
+  - **Provisional, the way down to the Carrera 9A gate:** `P1-9A-PASILLO` (CORRIDOR), `P1-9A-RAMPA` (RAMP) and
+    `P1-9A-ESCALERA` (STAIRS), from Brian's drawing of 2026-11-17 where `survey-plan.py` puts them. Redraw them when he
+    takes `in-09` to `in-19` (84 to 94, in the survey sheet since #235). The guard's booth is the tape's (1.52 x 1.69 m).
+  - `register.py` gained `"turned"`, `"drawn"` (rooms given in floor units) and `"outline"`; `ec-surveyed.json`
+    uses `"drawn"` and `"outline"`. The floor's `outline` is the surveyed parts on P1, the open patio and the
+    passage between the tower and the casa's lot line, out to the sidewalk; the gate is 2.53 m (survey 46).
   - Corridors: only `PAS-TRANSVERSAL` and `PAS-SALIDA-9A`; the two through the cafeteria went.
   - V017 puts the floor in place even over a saved one; the contract example and its label points follow.
   - `render-map-base.py` now draws a floor's outline, corridors and doors. Review images:
     `~/Documents/KApp/mapa-pisos/ec-p1-218/` on Brian's Mac.
   - After merge: Kotlin re-runs `capture-demo-data.sh` so the demo serves the new example.
   - Next: P2's gallery over the hall as now drawn (#220).
-
-- **Survey of the Cra 9A exit (`feature/survey-cra-9a-passage`):** 11 new distances in the portal's survey sheet,
-  `in-09` to `in-19` (numbers 84 to 94), for the corridor, ramp and stairs Brian found in the passage on 2026-11-17:
-  their widths, lengths, where each starts and ends, and how the booth lines up with the ramp. Once he takes them,
-  #221 draws the passage from them.
 
 - **map 3.7.0, `labelPoint` (#195):**
   - #211, merged: the contract. `Space.labelPoint`, the `CentralGroundFloor` example (EC P1 as the dev server
