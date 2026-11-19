@@ -538,6 +538,8 @@ def lay_turned(floor, turned):
                 sys.exit(f"turned: {room['code']} is not on the floor and has no {', '.join(missing)}")
             sp = {"code": room["code"], "wing": room["wing"], "name": room["name"], "typeCode": room["typeCode"],
                   "aliases": room.get("aliases", [])}
+            if sp["wing"] is None:     # a space outside every wing, like the guard's booth
+                del sp["wing"]
             floor["spaces"].append(sp)
         sp["shape"] = [{"x": x, "y": y} for x, y in shape]
         sp["doors"] = [{"from": {"x": a[0], "y": a[1]}, "to": {"x": b[0], "y": b[1]}} for a, b in doors if a != b]
