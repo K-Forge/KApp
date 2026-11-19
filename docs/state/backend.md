@@ -1,7 +1,7 @@
 # Backend State
 
-> Owner: Backend. As of 2026-11-05, `develop` at `942d46a`. Backend | Local: EC P1 verified on the dev server, the
-> map 3.7.0 contract merged (#211), and its implementation in #212.
+> Owner: Backend. As of 2026-11-16, `develop` at `6ac0ea0`. Backend | Local: EC P1's auditorium redrawn from its own
+> plan's walls, with the floor's outline and the Carrera 9A passage (#218).
 
 ---
 
@@ -13,7 +13,7 @@
 | user-service | user 1.1.0 | Profiles without identity document or phone. `academic` is read-only from the test SINU (#76–#80). `PUT /internal/users/{id}/roles` | V003 |
 | semaphore-service | semaphore 2.0.1 | SINU course statuses, read-only through `SinuRecordPort` and `FakeSinuRecordAdapter` (#79). Editable plans at `/me/plans` (`plannedLevel` 1 to 12). The catalogue of the 23 pensums | V010 |
 | schedule-service | schedule 2.0.1 | Current classes only: `/me`, `/me/day`, `/me/week`, `/me/periods`, from the test SINU (`SinuTimetablePort`, #78). No database | none |
-| map-service | map 3.6.0 (contract 3.7.0 merged in #211; service in #212) | Buildings, floors, layouts, spaces, types, campuses, ground, structures and survey. ETag. `sinuSedes` (#77) | V016 (EC P1 from Brian's sketch, squared: #183, #193) |
+| map-service | map 3.7.0 (#211, #212) | Buildings, floors, layouts, spaces, types, campuses, ground, structures and survey. ETag. `sinuSedes` (#77). `labelPoint` on every drawn space | V016 (EC P1 from Brian's sketch, squared: #183, #193); V017 in #218 |
 | api-gateway | none | Routes by name, with no registry (#64). Answers 500 when a service is down (#157) | none |
 
 - **Local helpers:** fake OIDC (mock-oauth2-server on `:8090`, with test users for student, professor and staff;
@@ -56,9 +56,8 @@
 ## Done on 2026-11-05
 
 - **EC floor 1** (#183, then #193): traced from Brian's sketch, with rooms squared by `scripts/plan-tracing/regular.py`
-  (walls level or plumb, shared walls on one line, stacked stairs and lifts as anchors; the auditorium wing as
-  trapezoids along its two measured facades, as Brian approved). V016 loads it and keeps the old floor in
-  `map_replaced_floors`.
+  (walls level or plumb, shared walls on one line, stacked stairs and lifts as anchors). V016 loads it and keeps the
+  old floor in `map_replaced_floors`. #218 redraws its auditorium wing (below).
 - **Re-registering P1 later** regenerates it from the sketch: copy any room edited in the portal into
   `traced/ec-p1-a-mano.json` first (after `export-map-snapshot.py`), or it is lost.
 - **#155 closed:** Horario works on the dev server for the Microsoft-signed-in test student (#203: the dev server's
@@ -67,10 +66,30 @@
 
 ## In flight
 
-- **Survey of the Cra 9A exit (`feature/survey-cra-9a-passage`):** 11 new distances in the portal's survey sheet,
-  `in-09` to `in-19` (numbers 84 to 94), for the corridor, ramp and stairs Brian found in the passage on 2026-11-17:
-  their widths, lengths, where each starts and ends, and how the booth lines up with the ramp. Once he takes them,
-  #221 draws the passage from them.
+- **EC P1's auditorium, outline and Carrera 9A exit (#218, PR #221, `feature/ec-p1-turned-auditorium`):**
+  - The wing is built from straight lines (`scripts/plan-tracing/wip/aud_walls.py`): the outline's (the tape's) for
+    the north wall and the Calle 62, lines fitted on the auditorium's plan for the south wall, the hall's east walls
+    and the stage's arc, and, since 2026-11-18, lines fitted on Brian's marks over that plan
+    (`~/Documents/KApp/mapa-pisos/ec-p1-218/3-despues-sobre-plano-AU.jpg`, matched to the plan's photo) for the
+    hall's north side, Audiovisuales, the lobby and the doors. Nothing is drawn where he painted solid concrete:
+    `P1-26` to `P1-29` are dropped, and the south and east walls are a wall thick. Every seat of the plan is inside
+    the hall; the script prints the checks (seats, overlaps, corner caps, short sides, corners on their lines).
+  - **Provisional, the way down to the Carrera 9A gate:** `P1-9A-PASILLO` (CORRIDOR), `P1-9A-RAMPA` (RAMP) and
+    `P1-9A-ESCALERA` (STAIRS), from Brian's drawing of 2026-11-17 where `survey-plan.py` puts them. Redraw them when he
+    takes `in-09` to `in-19` (84 to 94, in the survey sheet since #235). The guard's booth keeps the tape's size
+    (1.52 x 1.69 m) but stands under the ramp, as Brian drew it, not against the central wing as the tape had it.
+  - `register.py` gained `"turned"`, `"drawn"` (rooms given in floor units) and `"outline"`; `ec-surveyed.json`
+    uses `"drawn"` and `"outline"`. The floor's `outline` is the surveyed parts on P1, the open patio and the
+    passage between the tower and the casa's lot line, cut at the booth's front: Brian marks the rest down to the
+    street as sidewalk.
+  - Corridors: only `PAS-TRANSVERSAL` and `PAS-SALIDA-9A`; the two through the cafeteria went.
+  - V017 puts the floor in place even over a saved one; the contract example and its label points follow.
+  - `render-map-base.py` now draws a floor's outline, corridors and doors. Review images:
+    `~/Documents/KApp/mapa-pisos/ec-p1-218/` on Brian's Mac.
+  - **Not before the delivery:** V017 changes the dev server's floor while the testers use it. Brian merges after
+    Friday 2026-11-20.
+  - After merge: Santiago re-runs `capture-demo-data.sh` so the demo serves the new example.
+  - Next: P2's gallery over the hall as now drawn (#220).
 
 - **map 3.7.0, `labelPoint` (#195):**
   - #211, merged: the contract. `Space.labelPoint`, the `CentralGroundFloor` example (EC P1 as the dev server
@@ -106,7 +125,7 @@
 | 0–2 | #54, #55 | Done |
 | 3 · Microsoft sign-in, refresh tokens, roles and permissions | #56 | Done and closed (#141, #142, #169, #172, #179, #148, #156) |
 | 4 · End-to-end journeys per profile | #57 | Not started |
-| 5 · EC floors faithful to reality | #58 | P1 done (#183, #193). P2 to P8 wait for Brian's sketches |
+| 5 · EC floors faithful to reality | #58 | P1 done (#183, #193; auditorium from its plan in #218). P2 to P8 wait for Brian's sketches |
 | 6 · Kubernetes with kind, and production | #59 | Branch stale. Production waits on IT's server decision |
 | 7 · notification-service | #60 | Not started. Needs Firebase, and APNs needs the Apple account |
 | 8 · Points, voice, damage reports, lost and found | #61 | Not started |
@@ -126,7 +145,7 @@
 
 ## Next
 
-1. #212 merged once its CI is green.
+1. #218 merged once its CI is green; then #220 (P2's gallery).
 2. #157 (gateway 503), in a new Backend | Local session. Then #143 (one program name).
 3. #213 (`verticalCode`), contract first.
 4. EC P2 as soon as Brian sketches it. Otherwise, start phase 4 (#57).

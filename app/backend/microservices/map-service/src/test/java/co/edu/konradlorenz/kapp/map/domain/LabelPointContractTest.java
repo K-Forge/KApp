@@ -51,7 +51,7 @@ class LabelPointContractTest {
                     .isEqualTo(computed);
             checked++;
         }
-        assertThat(checked).isEqualTo(42);
+        assertThat(checked).isEqualTo(41);
     }
 
     private static Point point(Map<String, Object> p) {
