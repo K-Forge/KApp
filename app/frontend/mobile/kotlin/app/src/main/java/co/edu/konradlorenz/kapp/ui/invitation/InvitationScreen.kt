@@ -91,8 +91,8 @@ private fun Form(viewModel: InvitationViewModel, onBack: () -> Unit) {
     }
 
     FormTextField(
-        value = form.code,
-        onValueChange = { value -> viewModel.edit { it.copy(code = value) } },
+        value = VisitorPassForm.inputOf(form.code),
+        onValueChange = { value -> viewModel.edit { it.copy(code = VisitorPassForm.codeFromInput(value)) } },
         label = R.string.invitation_code_label,
         help = R.string.invitation_code_help,
         error = viewModel.errorShown(FormField.Code),
@@ -102,7 +102,8 @@ private fun Form(viewModel: InvitationViewModel, onBack: () -> Unit) {
             keyboardType = KeyboardType.Ascii,
             imeAction = ImeAction.Next,
         ),
-        display = UpperCase,
+        display = CodeGroups,
+        prefix = VisitorPassForm.CODE_PREFIX,
     )
     DocumentTypePicker(
         selected = form.documentType,
@@ -163,6 +164,7 @@ private fun FormTextField(
     onLeave: () -> Unit,
     keyboard: KeyboardOptions,
     display: VisualTransformation = VisualTransformation.None,
+    prefix: String? = null,
 ) {
     var focused by remember { mutableStateOf(false) }
     OutlinedTextField(
@@ -174,6 +176,7 @@ private fun FormTextField(
         singleLine = true,
         keyboardOptions = keyboard,
         visualTransformation = display,
+        prefix = prefix?.let { { Text(it) } },
         modifier = Modifier
             .fillMaxWidth()
             .onFocusChanged {
@@ -184,11 +187,27 @@ private fun FormTextField(
 }
 
 /**
- * Shows the code in upper case, the way reception reads it out, without touching what was typed:
- * rewriting the value itself while the keyboard is still composing a word loses characters.
- * VisitorPassForm upper-cases it before checking and sending.
+ * Shows the code's two groups in upper case with the hyphen between them, the way reception reads
+ * it out, without touching what was typed: rewriting the value itself while the keyboard is still
+ * composing a word loses characters. The hyphen appears only once the second group starts, so
+ * deleting back over it never gets stuck (#232).
  */
-private val UpperCase = VisualTransformation { TransformedText(AnnotatedString(it.text.uppercase()), OffsetMapping.Identity) }
+private val CodeGroups = VisualTransformation { typed ->
+    val group = VisitorPassForm.GROUP_LENGTH
+    val upper = typed.text.uppercase()
+    if (upper.length <= group) {
+        TransformedText(AnnotatedString(upper), OffsetMapping.Identity)
+    } else {
+        TransformedText(
+            AnnotatedString(upper.take(group) + "-" + upper.drop(group)),
+            object : OffsetMapping {
+                override fun originalToTransformed(offset: Int) = if (offset <= group) offset else offset + 1
+                override fun transformedToOriginal(offset: Int) =
+                    (if (offset <= group) offset else offset - 1).coerceAtMost(upper.length)
+            },
+        )
+    }
+}
 
 /** The five documents the contract accepts, as a menu: nothing to type, so nothing to mistype. */
 @OptIn(ExperimentalMaterial3Api::class)
