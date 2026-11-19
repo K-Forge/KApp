@@ -51,9 +51,9 @@ public class AccountRolesService {
      */
     public List<String> set(String userId, String profileRole, List<String> permissions, String requestedBy) {
         List<ApiError.FieldIssue> issues = new ArrayList<>();
-        if (!KappRoles.PROFILE_ROLES.contains(profileRole)) {
+        if (!KappRoles.ASSIGNABLE_PROFILE_ROLES.contains(profileRole)) {
             issues.add(new ApiError.FieldIssue("profileRole",
-                    "must be one of " + String.join(", ", KappRoles.PROFILE_ROLES)));
+                    "must be one of " + String.join(", ", KappRoles.ASSIGNABLE_PROFILE_ROLES)));
         }
         Set<String> seen = new HashSet<>();
         for (String permission : permissions) {
