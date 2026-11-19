@@ -20,8 +20,10 @@ that follow. Until a service has caught up, its contract describes where it is g
 - **Example updated (#218):** `CentralGroundFloor` follows the floor as it is redrawn: the
   auditorium's wing follows the walls of its own plan, the floor has its `outline` (the building's
   walls, with the passage to the Carrera 9A), and only the two corridors that run where the floor
-  is open are left. The shapes and label points of the auditorium's wing change; the schema does
-  not.
+  is open are left. The auditorium's hall, Audiovisuales and lobby follow Brian's marks over its plan:
+  `P1-26` to `P1-29` are gone (solid concrete, nothing to draw), and the way down to the Carrera 9A
+  gate has three provisional spaces, `P1-9A-PASILLO`, `P1-9A-RAMPA` and `P1-9A-ESCALERA`. The shapes
+  and label points of the wing change; the schema does not.
 
 **Migrating a client:** draw each label and icon at `labelPoint`. Keep the centre of `bounds` only
 as a fallback for a server that does not send it yet.
