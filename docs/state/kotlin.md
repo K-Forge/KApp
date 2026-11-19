@@ -1,6 +1,11 @@
 # Kotlin State
 
-> Owner: Kotlin. As of 2026-11-05, `develop` at `942d46a`. Checked against the code on `develop` on 2026-11-05.
+> Owner: Kotlin. Refreshed by Core on 2026-11-17, `develop` at `1a08d52`. The screens table was checked against the
+> code on 2026-11-05; Inicio and Mapa against `develop` on 2026-11-17. Every screen checked on the dev server on
+> 2026-11-17 as the test student and the test professor (#230), with #238's branch on the emulator.
+>
+> **Since 2026-11-17 Santiago owns the Kotlin client**, working with his own agent session from the issues of the
+> Tercera entrega (#234). Start with "Next" below.
 
 ---
 
@@ -12,24 +17,26 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
 |---|---|---|
 | Sign-in | MSAL. FakeSignIn or DevOidc in debug. In the demo build, a "Modo demostración" menu (#180) | Test tenant and the dev server |
 | Invitation | Redeems a visitor pass with a 4-field visual check (#173). No visitor session yet | Simulated data |
-| Home | Greeting, next class, semester progress, shortcuts by role | Dev server for profile and progress. Next class only simulated |
-| Semáforo | The pensum with each course's status. Plans: create, switch, and move courses, even past the last semester (#186). The demo has the real 1015 pensum (#187) | Dev server for the semáforo. Plan editing only simulated |
-| Timetable | Day, two days, week and month views (#184). Tapping a class opens its room from `GET /api/map/spaces/{room}` | Dev server, as the Microsoft-signed-in test student, since #203 fixed #155 (closed 2026-11-05). The test professor not tried yet |
+| Home | Greeting with the photo picked in Perfil, or the initials without one (#231), next class (from `GET /api/schedule/me/day`, in `HomeViewModel`), semester progress, shortcuts by role | Dev server, student and professor (#230) |
+| Semáforo | The pensum with each course's status. Plans: create, switch, and move courses, even past the last semester (#186). The demo has the real 1015 pensum (#187) | Dev server, including creating a plan and moving a course in it (#230) |
+| Timetable | Day, two days, week and month views (#184). Tapping a class opens its room from `GET /api/map/spaces/{room}`; a `404` says the room is not on the map yet, and only a network or server failure says the search failed (#231) | Dev server, student and professor (#230). Switching between them on one phone showed the previous person's week until `bugfix/forget-tabs-on-sign-out` |
 | Profile | Microsoft and SINU data, a profile photo (add, crop, remove; #185), and sign-out | Dev server. The photo stays on the phone, because user 1.x has no upload endpoint |
-| Map | A list of the buildings with code, address and levels (#174). Tapping one opens its floors, one chip per level, drawn by the generic floor renderer with the shared style (#196, first part, #200): spaces by category, corridors, doors, labels, pinch, double-tap and +/- zoom, and the system theme on that screen. Floors read again by their `ETag`, the spaces not drawn yet listed under the levels, no label on unidentified spaces or at the screen edge (#206). No icons or selection yet | Demo floors built from map-service's seeds. Not tried on the dev server |
+| Map | A list of the buildings with code, address and levels (#174). Tapping one opens its floors, one chip per level, drawn by the generic floor renderer with the shared style (#196, first part, #200): spaces by category, corridors, doors, labels, pinch, double-tap and +/- zoom, and the system theme on that screen. Floors read again by their `ETag`, the spaces not drawn yet listed under the levels, no label on unidentified spaces or at the screen edge (#206). An icon per `typeCode` at `labelPoint` with the label below, and demo floors with `labelPoint` (#217, merged 2026-11-17). Tapping a space selects it: outlined in the selection colour, with a card for its name, type and door code; Back or a tap on nothing clears it (#219, rebased for #228) | Dev server: the buildings and the floors of BI, CPC1, EA and EC (#230) |
 
 - **Build variants:**
   - `demo`, the default: no network, `DemoBackend` serves the demo assets by API path, and `DemoClock` is fixed on a
     Monday. It was used for the 2026-10-23 delivery;
   - `debug`: can point at the mocks, at the local backend with fake OIDC, at MSAL with `-Pkapp.msal.*`, or at the
-    dev server (`:8080`; the emulator needs `-dns-server 100.100.100.100` for Tailscale);
+    dev server (`:8080`; the emulator needs `-dns-server 100.100.100.100` for Tailscale, and on Windows the
+    tester's tailnet needs a global nameserver with "Override DNS servers" on, or Microsoft's sign-in does not
+    resolve);
   - `release`.
 - **Stack:**
   - Kotlin 2.4.21, JDK 25, minSdk 26, targetSdk 37;
   - since #189: AGP 9.5.0, Gradle 9.8.2, okhttp 5.5.1, kotlinx-serialization 1.12.0, MSAL 8.6.0;
   - MVVM with Compose (Material 3), Retrofit 3 and OkHttp 5;
   - the session is kept with AES-GCM in the Android Keystore;
-  - 157 unit tests.
+  - 167 unit tests on `feature/floor-space-selection` (164 in `develop` since #217).
 - **CI:** the Android job runs `:app:testDebugUnitTest :app:assembleDebug :app:lintDebug :app:assembleDemo
   :app:lintDemo` (`.github/workflows/ci.yml`). The demo variant is built and linted since #191.
 
@@ -37,29 +44,34 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
 
 ## Next
 
-1. **Sign in on the dev server as the test professor.** #155 is closed: after #203, the test student's day, week
-   and full timetable calls all answer 200 on the dev server, and the same run signed in with MSAL 8.6.0 (#189) on
-   the emulator. The test professor has not been tried yet (emulator plus Tailscale on Brian's Mac; Brian types
-   the passwords).
-2. **#132 does not wait for the interactive map.** Its open task, "a class opens its room on the map", is already
-   in the code: `ScheduleViewModel` asks `GET /api/map/spaces/{room}?buildingCode=…` and `ScheduleScreen` shows the
-   room. The demo's rooms come from map-service's seeds (`EC-405`, `EC-508`); `BI 301` is not on the map, so the demo
-   answers `404` for it, as the service does. What is left is checking it against the 2.0.0 mock on Brian's Mac,
-   including the class with no room on 2026-09-21, and then ticking the boxes.
-3. **The rest of the floor renderer (#196):** an icon per `typeCode` and selecting a space. The `ETag` cache, the
-   unplaced list, the label fixes and the back arrow on the left came in #206.
-4. **#204, the whole app follows the system's dark mode** (Brian chose it on 2026-11-05; no in-app toggle). #207,
-   merged, has the theme, Inicio, Mapa and the bottom bar, with the floor screen's dark scheme from #200 folded into
-   the app theme. #208 does Semáforo, Horario, Perfil and the login, and opens in dark mode without a white flash.
-   Both were tried on the emulator in light and dark; the screenshots are in
-   `app/frontend/mobile/kotlin/docs/screenshots/dark-mode/`. Until #208 merges, those four screens keep some
-   light-only colours in dark mode.
+The Tercera entrega of Desarrollo de Aplicaciones Móviles shows this app working on the real backend: it is
+uploaded on Thursday 2026-11-19 and presented on Friday 2026-11-20. Parent issue #234, milestone "Tercera entrega ·
+20-11-2026". All of these are Santiago's, in this order:
+
+1. **#228:** finish #219 (select a space on the floor). #217 was squashed into `develop`, so rebase the branch and
+   keep only its own three commits.
+2. **#229:** a Spanish guide, posted on WhatsApp today, Tuesday 2026-11-17, so Iván and Alejandro run the debug build from
+   `develop` against the dev server on the emulator of their own computers (they have iPhones). Brian shares the
+   dev server's machine on Tailscale, limited to the API's port, and registers each tester's signature hash. No
+   shared APK: one is built only if the course asks for it (#232).
+3. **#230:** every screen against the dev server, as the test student and the test professor (the professor has
+   never been tried there), and fix what fails. Record the result in this file. **Checked 2026-11-17**: every
+   screen answers on the dev server for both, recorded in the table above. One fix, `bugfix/forget-tabs-on-sign-out`.
+4. **#231:** a room that is not on the map says so instead of "No pudimos buscar el salón en el mapa", and Inicio
+   shows the profile photo.
+5. **#232:** Iván and Alejandro report on WhatsApp until Thursday 10:00. Triage, fix, freeze at 14:00, and cut the
+   delivery build.
+
+After the delivery:
+
+- **#132:** its open task, "a class opens its room on the map", is in the code (`ScheduleViewModel` asks
+  `GET /api/map/spaces/{room}?buildingCode=…`). Tick its boxes once #230 has checked it on the dev server.
+- **#196:** close it when #219 is merged.
+- **#226:** the Gradle 9.9.1 and AGP 9.5.1 bump waits until after the delivery, so nobody's Android Studio re-syncs
+  this week.
 
 ---
 
 ## Small debt, no issue yet
 
-- Home shows the initials instead of the photo chosen in Profile.
 - The demo timetable has a single sample week.
-- A room that is not on the map (`404`) shows "No pudimos buscar el salón en el mapa", as if the call had failed.
-  It could say the room is not on the map yet, as a building that is not mapped does.

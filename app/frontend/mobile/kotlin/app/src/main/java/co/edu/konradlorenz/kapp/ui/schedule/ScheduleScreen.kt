@@ -505,6 +505,10 @@ private fun ClassSheet(occurrence: ClassOccurrence, room: RoomState, onDismiss: 
                     Note(R.string.schedule_room_not_mapped)
                 }
                 RoomState.Loading -> CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Brand.toned())
+                RoomState.NotOnMap -> {
+                    Detail(R.string.schedule_detail_room, occurrence.room.orEmpty())
+                    Note(R.string.schedule_room_not_on_map)
+                }
                 RoomState.Failed -> {
                     Detail(R.string.schedule_detail_room, occurrence.room.orEmpty())
                     Note(R.string.schedule_room_failed)

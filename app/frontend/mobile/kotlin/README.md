@@ -379,6 +379,12 @@ registered, and a test user of the tenant (Brian creates them, one per profile r
   emulator -avd <your AVD> -dns-server 100.100.100.100
   ```
 
+  On Windows, `100.100.100.100` answers only `*.ts.net` unless your own tailnet has a nameserver
+  to send the rest to, so Microsoft's sign-in fails with "No pudimos conectar con el servidor"
+  (`UnknownHostException` for `login.microsoftonline.com` in logcat). In the admin console, under
+  *DNS*, add a global nameserver (Cloudflare, say) and turn on *Override DNS servers*. Passing
+  two servers to `-dns-server` does not help: the emulator uses only the first.
+
   A phone with the Tailscale app connected needs nothing extra.
 - **One profile role per user.** The tabs follow the role the tenant gives the user, so trying
   another role means signing out and back in as another user; Microsoft keeps the last account

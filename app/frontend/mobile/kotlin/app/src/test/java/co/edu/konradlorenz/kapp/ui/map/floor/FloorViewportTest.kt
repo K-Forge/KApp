@@ -78,4 +78,11 @@ class FloorViewportTest {
     private companion object {
         const val DELTA = 0.001f
     }
+
+    @Test
+    fun `a screen point maps back to the drawing point under it`() {
+        val view = FloorViewport(scale = 0.5f, offsetX = 40f, offsetY = -10f)
+        assertEquals(300f, view.drawingX(view.screenX(300f)), 0.001f)
+        assertEquals(700f, view.drawingY(view.screenY(700f)), 0.001f)
+    }
 }

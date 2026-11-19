@@ -218,8 +218,11 @@ auth 1.0.0 defines them, and backend phase 3 (#56) implements them:
 - **Read SINU, never copy it.** Before adding a field, ask whose datum it is: anything academic belongs to SINU and
   is read, not stored. No identity document, phone or student code is stored for members, and no administrator reads
   students' academic data. `docs/SINU-ALIGNMENT.md` is the reference.
-- MongoDB, one database **and one account** per service. Development uses the shared Atlas cluster; tests start a
-  single-node replica set through Testcontainers, since a standalone `mongod` cannot do multi-document transactions.
+- MongoDB, one database **and one account** per service. **Development runs only on the shared Atlas cluster, with
+  Microsoft sign-in against the test tenant** (ADR 0009). Tests start a single-node replica set through
+  Testcontainers, since a standalone `mongod` cannot do multi-document transactions. The `local-db` profile and the
+  fake OIDC server exist **only for evaluators** who have none of our accounts (ADR 0010, `docs/RUN-LOCALLY.md`):
+  never develop against them, and never point fake sign-in at Atlas (#246).
 - **Schema changes go in Mongock change units**, never applied by hand. They are append-only:
   never edit one that has run, add a new one.
 - Every service that touches MongoDB must carry `@EnableMongock`. Mongock 5.5.1 ships no
@@ -370,21 +373,22 @@ closes when both are done. Kotlin goes first; Swift resumes when the Android app
 
 ## Current State
 
-Read `docs/PROGRESS.md` for the detailed status before proposing large changes. What each area is doing right now,
-what waits on whom and what comes next is in [`docs/state/`](docs/state/README.md), which is newer than this section.
+What each area is doing right now, what waits on whom and what comes next is in
+[`docs/state/`](docs/state/README.md). Milestones are in [`docs/PROGRESS.md`](docs/PROGRESS.md). Both are newer than
+this summary (2026-11-18).
 
-- **Contracts:** the 2.0 set (#42) — semaphore 2.0.1, schedule 2.0.1, auth 1.1, user 1.1, map 3.7.
-  `docs/api/CHANGELOG.md` holds the history. Write the spec first; springdoc output is a drift check against it,
-  not the other way round.
-- **Backend:** phase 1 removed Eureka and the frozen services; phase 2 made the academic data read-only, behind the
-  test SINU adapter. Phase 3 is under way: rotating refresh tokens (#82) and development-only password sign-in
-  (#83) are in; Microsoft sign-in, permissions and the new roles are next.
-- **Android:** sign-in, home, profile, semáforo with plans, and timetable, against the mocks.
-- **iOS:** in progress in its own worktree.
-- **Portal:** built, tested in CI, and used by the team to sign in as a role and reproduce a failing call.
-- **Dev server:** the-hive follows `develop`.
-- The 2025 HTML/JS prototype and the legacy PostgreSQL schema were deleted (#51). A better public demo is planned
-  (#92).
+- **Contracts:** semaphore 2.0.1, schedule 2.0.1, auth 1.1, user 1.1, map 3.7. `docs/api/CHANGELOG.md` holds the
+  history. Write the spec first; springdoc output is a drift check against it, not the other way round.
+- **Backend:** phases 1 to 3 are done: no Eureka, academic data read-only behind the test SINU, Microsoft sign-in
+  with rotating refresh tokens, one profile role plus permissions. Phase 5 (EC floors from the plans) is under way.
+- **Android:** every screen works against the dev server as the test student and professor: sign-in, Inicio,
+  Semáforo with plans, Horario, Perfil, and the map with floors drawn from map-service, type icons and selection.
+  Invitación redeems a visitor pass. Santiago owns the client.
+- **iOS:** paused until Android is finished.
+- **Portal:** Angular, bilingual, Microsoft sign-in, a menu by permission and the permissions editor.
+- **Dev server:** the-hive follows `develop`, reachable through Tailscale only.
+- **Evaluation:** `scripts/run-locally.sh` starts everything on any computer with no account of ours (#244).
+- **Releases:** v0.2.0 (2026-10-12) on `main`; v0.3.0 follows the course's Tercera entrega (#234).
 
 ---
 
@@ -394,11 +398,11 @@ The backend plan is phases 1 to 8, one issue each. Keep this list in sync with `
 
 1. Remove Eureka and the frozen services (#54).
 2. Read-only academic data behind a test SINU (#55).
-3. Microsoft sign-in, rotating refresh tokens, profile roles and permissions (#56). The Entra ID test tenant is #62.
+3. Microsoft sign-in, rotating refresh tokens, profile roles and permissions (#56). Done. The Entra ID test tenant is #62.
 4. End-to-end journeys per profile (#57).
-5. EC floors faithful to the plans (#58), blocked on Brian's sketches.
-6. Kubernetes with kind, its guide, and production (#59). Production hardware is agreed with the university's IT
-   director; the fallback is Brian's Mac running kind.
+5. EC floors faithful to the plans (#58): floor 1 in #221, floor 2 in #220; floors 3 to 8 wait for the sketches.
+6. Kubernetes with kind, its guide, and production (#59). To be reviewed after the Tercera entrega (#242): one host
+   with Compose may be enough until the university's IT director decides the production server.
 7. `notification-service`, with an inbox, push and an outbox (#60).
 8. Points, voice, damage reports and lost and found (#61).
 

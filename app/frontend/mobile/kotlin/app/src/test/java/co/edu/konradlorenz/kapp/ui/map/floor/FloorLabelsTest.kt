@@ -69,6 +69,44 @@ class FloorLabelsTest {
     }
 
     @Test
+    fun `an icon stays when its label is wider than its space, and is not held to that width`() {
+        val icon = LabelBox.centredOn(50f, 50f, 40f, 40f)
+        val lift = candidate("lift", FloorLabels.below(icon, 200f, 20f, 4f), spaceWidth = 30f, icon = icon)
+        val placed = FloorLabels.place(listOf(lift)).single()
+        assertEquals(icon, placed.icon)
+        assertNull(placed.box)
+    }
+
+    @Test
+    fun `an icon and its label keep other marks off both`() {
+        val icon = LabelBox.centredOn(100f, 100f, 40f, 40f)
+        val lift = candidate("lift", FloorLabels.below(icon, 80f, 20f, 4f), icon = icon, rank = 0)
+        val onIcon = candidate("on icon", LabelBox.centredOn(100f, 100f, 30f, 10f), rank = 1)
+        val onLabel = candidate("on label", LabelBox.centredOn(100f, 135f, 30f, 10f), rank = 1)
+        val apart = candidate("apart", LabelBox.centredOn(400f, 400f, 30f, 10f), rank = 1)
+        assertEquals(
+            listOf("lift", "apart"),
+            FloorLabels.place(listOf(onIcon, onLabel, apart, lift)).map { it.item },
+        )
+    }
+
+    @Test
+    fun `an icon cut by the screen edge is hidden with its label`() {
+        val screen = LabelBox(0f, 0f, 1080f, 1920f)
+        val icon = LabelBox.centredOn(1075f, 960f, 40f, 40f)
+        val lift = candidate("lift", FloorLabels.below(icon, 20f, 20f, 4f), icon = icon)
+        assertEquals(emptyList<String>(), FloorLabels.place(listOf(lift), view = screen).map { it.item })
+    }
+
+    @Test
+    fun `the label goes centred under its icon`() {
+        assertEquals(
+            LabelBox(60f, 124f, 140f, 144f),
+            FloorLabels.below(LabelBox(80f, 80f, 120f, 120f), 80f, 20f, 4f),
+        )
+    }
+
+    @Test
     fun `boxes that only touch do not overlap`() {
         assertEquals(false, LabelBox(0f, 0f, 10f, 10f).overlaps(LabelBox(10f, 0f, 20f, 10f)))
         assertEquals(true, LabelBox(0f, 0f, 10f, 10f).overlaps(LabelBox(9f, 9f, 20f, 20f)))
@@ -86,6 +124,11 @@ class FloorLabelsTest {
         bounds = bounds, shape = shape, labelPoint = labelPoint,
     )
 
-    private fun candidate(item: String, box: LabelBox, spaceWidth: Float = 1000f, rank: Int = 0) =
-        LabelCandidate(item, box, spaceWidth, rank)
+    private fun candidate(
+        item: String,
+        box: LabelBox,
+        spaceWidth: Float = 1000f,
+        rank: Int = 0,
+        icon: LabelBox? = null,
+    ) = LabelCandidate(item, box, spaceWidth, rank, icon)
 }

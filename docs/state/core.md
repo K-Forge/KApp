@@ -1,6 +1,6 @@
 # Core State
 
-> Owner: Core. As of 2026-11-05, when the cloud trial closed. Core \| Local continues from here.
+> Owner: Core. As of 2026-11-18, `develop` after #239.
 
 Core orchestrates. It asks the other sessions for their state, orders the work, reviews every agent pull request
 (as a comment titled "Revisión de Docs/Chore"), and tells Brian which ones are ready to merge. Brian merges and
@@ -12,21 +12,42 @@ long-lived session itself (README, "One session, one purpose").
 
 ---
 
-## Where things stand (2026-11-05)
+## Where things stand (2026-11-18)
 
-Merged on 2026-11-04 and 11-05: #150, #151, #152, #153, #189 (dependencies); #190 (this folder); #191 (demo variant
-in CI); #192; #199 (shared map style); #200 and #206 (floor renderer, first parts); #202 (AGP moves only with
-Android Studio; the team needs Android Studio 2026.2.2 Rabbit 2); #203 (#155 fix); #205 (demo rooms from the map
-seeds); #183 and #193 (EC floor 1, squared). **#155 is closed:** Horario works on the dev server.
+Merged since 2026-11-17: #219 (select a space on the floor; **#196 is closed**), #238 (a room not on the map says
+so, and Inicio shows the profile photo), #239 (sign-out forgets the tabs, and the dev-server check of every screen),
+#235 (the survey sheet asks for the Cra 9A exit), #236 and #237 (this folder). #228, #230 and #231 are closed.
 
-Open work:
+**The Tercera entrega comes first** (parent #234, milestone 2). It is uploaded on Thursday 2026-11-19 and
+presented on Friday 2026-11-20. The course asks for the final document, the frontend and backend code, the
+database and its scripts, a working integration, evidence and a README. The professor accepted Kotlin for the
+frontend and Java Spring Boot for the backend.
 
-- **#204, the whole app follows the system's dark mode** (Brian chose it): #207 (the theme, Inicio and Mapa) is
-  ready for review, and #208 (Semáforo, Horario, Perfil and the login), stacked on it, is a draft. Their
-  descriptions and `kotlin.md` say where Kotlin | Cloud stopped. Kotlin | Local continues them.
-- **#194, the generic map renderer:** Kotlin's next parts are type icons and selection (#196). Backend's part is
-  #195 (`labelPoint`, an example floor). Swift (#197) and the portal (#198) come later.
-- **Route animation decided:** a fluorescent line that pulses in the direction of travel (comment on #194).
+- **The code goes as one ZIP** of the whole repository, made with `git archive` from `develop`, so no `.env` is in
+  it (#232). The repository stays public.
+- **#240, Backend:** the whole stack runs locally with no Atlas, no tenant and no Tailscale (a `local-db` profile,
+  fake OIDC, generated secrets, scripts for macOS, Linux and Windows), so the professor can run it. English docs in
+  the repository, and a Spanish README only in the ZIP. It is for the delivery; after it, the profile stays as an
+  optional path for evaluators.
+- **The final document:** the session "Tercera Entrega D.A.M." writes `EntregaFinal_KApp.docx`, outside the
+  repository. Brian exports the PDF. What is still pending in it waits for #240's commands and screenshots, and
+  for the testers' summary (#232).
+- **Santiago** owns the Kotlin client: #229 (the testers' guide) and #232 (triage, the 14:00 Thursday freeze, the
+  ZIP) are left.
+- **Iván and Alejandro** test on their own computers' emulators through a Tailscale share limited to the API's
+  port, and report on WhatsApp until Thursday 10:00.
+
+Open pull requests:
+
+- **#221, EC P1 redrawn from the plans (#218):** paused until Brian resumes the map. His measures of the Cra 9A
+  exit and his notes on the auditorium plan wait in `~/Documents/KApp/mapa-pisos/ec-p1-218/`.
+- **#226, Gradle 9.9.1 and AGP 9.5.1:** held until after the delivery.
+
+**After the delivery:** #242 lists everything Brian approved on 2026-11-18. That covers architecture, CI cost,
+secrets, gateway resilience, observability, the profile photo on the server, a public dev API with a demo
+database, ways of working, releases and housekeeping. It also includes #241 (`KAPP_FIRST_ADMINS` only
+bootstraps ADMIN; on the dev server it now lists only Brian's developer account). Then Backend continues with
+#221, #220 and #213.
 
 The Vercel project `kapp` has its builds turned off (Ignored Build Step `exit 0`) since 2026-11-05: nothing in the
 repo deploys there since the prototype was removed (#97). Turn it back on for the public prototype (#92).
@@ -35,6 +56,9 @@ repo deploys there since the prototype was removed (#97). Turn it back on for th
 
 ## Waiting on Brian
 
+- **Developer accounts:** created on 2026-11-18. Brian grants ADMIN to the others by hand in the portal, and takes
+  it away from `administrativo.prueba`.
+- **Reading the final document** before Thursday's upload.
 - **`docs/entrega/segunda-entrega/mapa-base/ec-p1.png`:** decide whether it is regenerated with the new floor 1.
 - **Sketches for EC floors 2 to 8**, in `Sketchs/`, keeping each original plan's file name (phase 5, #58).
 - **Housekeeping to confirm:** close #158 and #163 to #165 (the delivery of 2026-10-23 is done) and #43 (done by

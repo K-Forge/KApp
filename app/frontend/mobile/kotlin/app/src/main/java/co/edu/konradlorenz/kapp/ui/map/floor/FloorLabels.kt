@@ -3,8 +3,9 @@ package co.edu.konradlorenz.kapp.ui.map.floor
 import co.edu.konradlorenz.kapp.data.map.FloorSpace
 
 /**
- * Which labels a floor shows at a zoom, following the label rules in docs/design/MAP-STYLE.md.
- * The canvas measures the text; everything else is decided here, without Android.
+ * Which labels and icons a floor shows at a zoom, following the label rules in
+ * docs/design/MAP-STYLE.md. The canvas measures the text; everything else is decided here, without
+ * Android.
  */
 object FloorLabels {
 
@@ -31,9 +32,12 @@ object FloorLabels {
     }
 
     /**
-     * The labels to draw out of [candidates]: in priority order, a label wider than its space is
-     * left out, so is one not wholly inside [view] (the screen) rather than cut at its edge, and
-     * so is one that would overlap a label already placed.
+     * The labels and icons to draw out of [candidates], in priority order. A label wider than its
+     * space is left out, so is one not wholly inside [view] (the screen) rather than cut at its
+     * edge, and so is one that would overlap a label or icon already placed. An icon follows the
+     * same rules except the width one, since an elevator is small at the fit and is the mark most
+     * worth seeing there; when its label is left out the icon stays, and the candidate comes back
+     * with no [LabelCandidate.box].
      */
     fun <T> place(
         candidates: List<LabelCandidate<T>>,
@@ -41,13 +45,25 @@ object FloorLabels {
         view: LabelBox? = null,
     ): List<LabelCandidate<T>> {
         val placed = mutableListOf<LabelCandidate<T>>()
+        val taken = mutableListOf<LabelBox>()
+        fun free(box: LabelBox) = (view == null || view.contains(box)) && taken.none { it.overlaps(box) }
         for (candidate in candidates.sortedBy { it.rank }) {
-            if (hideWhenWiderThanSpace && candidate.box.width > candidate.spaceWidth) continue
-            if (view != null && !view.contains(candidate.box)) continue
-            if (placed.any { it.box.overlaps(candidate.box) }) continue
-            placed += candidate
+            val icon = candidate.icon
+            if (icon != null && !free(icon)) continue
+            val label = candidate.box?.takeIf {
+                !(hideWhenWiderThanSpace && it.width > candidate.spaceWidth) && free(it)
+            }
+            if (icon == null && label == null) continue
+            placed += candidate.copy(box = label)
+            taken += listOfNotNull(icon, label)
         }
         return placed
+    }
+
+    /** Where a label [width] x [height] goes under an [icon]: centred below it, [gap] apart. */
+    fun below(icon: LabelBox, width: Float, height: Float, gap: Float): LabelBox {
+        val centre = (icon.left + icon.right) / 2
+        return LabelBox(centre - width / 2, icon.bottom + gap, centre + width / 2, icon.bottom + gap + height)
     }
 
     private const val FULL_SIZE_ZOOM = 4f
@@ -56,8 +72,17 @@ object FloorLabels {
     private const val UNIDENTIFIED = "OTHER"
 }
 
-/** A label that could be drawn: its [box] on screen, the width of its space there, and its rank. */
-data class LabelCandidate<T>(val item: T, val box: LabelBox, val spaceWidth: Float, val rank: Int)
+/**
+ * A space's marks that could be drawn: its label's [box] on screen, if it has a label, the width of
+ * its space there, its rank, and its [icon]'s box, if its type has one.
+ */
+data class LabelCandidate<T>(
+    val item: T,
+    val box: LabelBox?,
+    val spaceWidth: Float,
+    val rank: Int,
+    val icon: LabelBox? = null,
+)
 
 /** A rectangle on screen, in pixels. */
 data class LabelBox(val left: Float, val top: Float, val right: Float, val bottom: Float) {

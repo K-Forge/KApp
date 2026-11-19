@@ -40,7 +40,9 @@
   - project `kapp-<KAPP_STACK>` (#146);
   - profiles `mock`, `core`, `academic`, `map`, `full` and `dev`;
   - every service reaches the shared Atlas development cluster;
-  - fake OIDC by default.
+  - fake OIDC by default;
+  - `local-db` (ADR 0010, #240): a local MongoDB for evaluation and offline runs only, started by
+    `scripts/run-locally.sh` or `.ps1` with secrets generated on that computer. Walkthrough in `docs/RUN-LOCALLY.md`.
 - **Dev server (the-hive):**
   - follows `develop` through GHCR images (`dev-images` publishes 7 services, schedule included; #156) and the agent
     in `deploy/dev-server/`;
@@ -81,6 +83,18 @@
     `~/Documents/KApp/mapa-pisos/ec-p1-218/` on Brian's Mac.
   - After merge: Kotlin re-runs `capture-demo-data.sh` so the demo serves the new example.
   - Next: P2's gallery over the hall as now drawn (#220).
+
+- **Survey of the Cra 9A exit (`feature/survey-cra-9a-passage`):** 11 new distances in the portal's survey sheet,
+  `in-09` to `in-19` (numbers 84 to 94), for the corridor, ramp and stairs Brian found in the passage on 2026-11-17:
+  their widths, lengths, where each starts and ends, and how the booth lines up with the ramp. Once he takes them,
+  #221 draws the passage from them.
+
+- **map 3.7.0, `labelPoint` (#195):**
+  - #211, merged: the contract. `Space.labelPoint`, the `CentralGroundFloor` example (EC P1 as the dev server
+    serves it) first in `getFloor`, so the mocks serve it, and the CHANGELOG entry.
+  - #212 (`feature/map-label-point-service`): `LabelPoint` (polylabel, precision 1, then the best whole point
+    around it) in every response with a `shape`. Tests: every seeded space's label is inside its shape, and the
+    contract example equals what the service computes. Until it merges, the dev server sends no `labelPoint`.
 - **`verticalCode` (#213):** issue open, not started. Contract, service, seed data and portal, one PR each.
 - **EC P1 on the dev server, verified 2026-11-05:** the API returns exactly what V016 seeds (46 spaces, 42 drawn,
   4 corridors, same doors), and the portal draws it whole. To check the dev server through the portal or the API,

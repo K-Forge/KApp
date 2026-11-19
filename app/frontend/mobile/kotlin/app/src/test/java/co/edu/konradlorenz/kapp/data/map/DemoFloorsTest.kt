@@ -9,7 +9,8 @@ import java.io.File
 
 /**
  * The demo build's floors, which scripts/capture-demo-data.sh writes out of map-service's seeds:
- * one per level of every building in Mapa's list, each one a floor the renderer can read.
+ * one per level of every building in Mapa's list, each one a floor the renderer can read, with a
+ * label point on every drawn space as map 3.7.0 sends it.
  */
 class DemoFloorsTest {
 
@@ -44,8 +45,34 @@ class DemoFloorsTest {
     }
 
     @Test
+    fun `every placed space has its label point inside its shape`() {
+        floors().forEach { (path, floor) ->
+            floor.placed.forEach { space ->
+                val point = space.labelPoint
+                assertNotNull("$path ${space.code}", point)
+                assertTrue("$path ${space.code} $point", inside(point!!, space.shape))
+            }
+        }
+    }
+
+    @Test
     fun `the campus has floors with spaces to draw`() {
         assertTrue(floors().count { (_, floor) -> floor.placed.isNotEmpty() } >= 10)
+    }
+
+    /** Even-odd ray casting: whether [point] lies inside the polygon [shape]. */
+    private fun inside(point: MapPoint, shape: List<MapPoint>): Boolean {
+        var inside = false
+        shape.indices.forEach { i ->
+            val a = shape[i]
+            val b = shape[(i + shape.size - 1) % shape.size]
+            if ((a.y > point.y) != (b.y > point.y) &&
+                point.x < (b.x - a.x).toDouble() * (point.y - a.y) / (b.y - a.y) + a.x
+            ) {
+                inside = !inside
+            }
+        }
+        return inside
     }
 
     private fun floors() = File(root, "buildings").walk().filter { it.extension == "json" }
