@@ -667,9 +667,18 @@ private fun SemesterCard(semester: SemesterState.Ready) {
             Spacer(Modifier.height(12.dp))
             ProgressBar(semester)
             Spacer(Modifier.height(12.dp))
+            // The unit once, over the three figures, rather than "créditos" in each of them (#232).
+            Text(
+                text = stringResource(R.string.home_semester_credits),
+                fontSize = 12.sp,
+                lineHeight = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(4.dp))
             // No fixed height: 12 sp text needs about 16 dp, more with the system font scaled up,
-            // and a 14 dp row cut the descenders off every label. A flow row, because with the
-            // unit in each label ("59 créditos aprobados") the three no longer fit on one line.
+            // and a 14 dp row cut the descenders off every label. A flow row, so a large system
+            // font wraps the three figures instead of cutting the last one off.
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),

@@ -31,7 +31,7 @@
     <string name="login_demo_submit">Ingresar con el perfil de demostración</string>
     <string name="login_demo_microsoft_unavailable">El ingreso con Microsoft no está disponible en esta demostración. Entra desde «Modo demostración», más abajo.</string>
     <string name="login_first_time">¿Vienes de visita?</string>
-    <string name="login_invitation_link">Usa tu código de invitación</string>
+    <string name="login_invitation_link">Tengo un código de visitante</string>
     <string name="login_copyright">© 2026 Fundación Universitaria Konrad Lorenz</string>
 
     <string name="home_greeting">Hola, %1$s</string>
@@ -60,6 +60,7 @@
     <string name="home_semester_link">Ver semáforo</string>
     <string name="home_semester_level">Semestre %1$d</string>
     <string name="home_semester_percent">%1$d%%</string>
+    <string name="home_semester_credits">Créditos</string>
 
     <string name="home_rest_title">Resto del día</string>
     <string name="home_rest_link">Ver horario</string>
@@ -204,8 +205,8 @@
     <string name="band_go_home">Ir a Inicio</string>
     <string name="home_no_role">Tu cuenta aún no tiene un rol asignado. Comunícate con TI.</string>
     <string name="home_open_profile">Abrir Perfil</string>
-    <string name="invitation_band">Invitación</string>
-    <string name="invitation_title">Código de invitación</string>
+    <string name="invitation_band">Visitante</string>
+    <string name="invitation_title">Código de visitante</string>
     <string name="invitation_body">Recepción te entrega un código de visitante. Con él entras al mapa del campus durante 24 horas, sin crear una cuenta.</string>
     <!-- Empty except in the demo build, which says which code its data accepts. -->
     <string name="invitation_demo_hint" translatable="false"></string>
@@ -282,15 +283,15 @@
         <item quantity="other">%1$d materias en curso</item>
     </plurals>
     <plurals name="home_credits_passed">
-        <item quantity="one">%1$d crédito aprobado</item>
-        <item quantity="other">%1$d créditos aprobados</item>
+        <item quantity="one">%1$d aprobado</item>
+        <item quantity="other">%1$d aprobados</item>
     </plurals>
     <plurals name="home_credits_in_progress">
-        <item quantity="one">%1$d crédito en curso</item>
-        <item quantity="other">%1$d créditos en curso</item>
+        <item quantity="one">%1$d en curso</item>
+        <item quantity="other">%1$d en curso</item>
     </plurals>
     <plurals name="home_credits_remaining">
-        <item quantity="one">%1$d crédito restante</item>
-        <item quantity="other">%1$d créditos restantes</item>
+        <item quantity="one">%1$d restante</item>
+        <item quantity="other">%1$d restantes</item>
     </plurals>
 </resources>
