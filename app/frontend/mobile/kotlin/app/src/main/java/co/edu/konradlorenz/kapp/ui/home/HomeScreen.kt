@@ -8,6 +8,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -621,6 +623,7 @@ private fun SemesterCard(semester: SemesterState.Ready) {
                             semester.coursesInProgress,
                         ),
                         fontSize = 13.sp,
+@OptIn(ExperimentalLayoutApi::class)
                         lineHeight = 16.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -642,8 +645,9 @@ private fun SemesterCard(semester: SemesterState.Ready) {
             ProgressBar(semester)
             Spacer(Modifier.height(12.dp))
             // No fixed height: 12 sp text needs about 16 dp, more with the system font scaled up,
-            // and a 14 dp row cut the descenders off every label.
-            Row(
+            // and a 14 dp row cut the descenders off every label. A flow row, because with the
+            // unit in each label ("59 créditos aprobados") the three no longer fit on one line.
+            FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

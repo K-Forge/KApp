@@ -280,15 +280,15 @@
         <item quantity="other">%1$d materias en curso</item>
     </plurals>
     <plurals name="home_credits_passed">
-        <item quantity="one">%1$d aprobado</item>
-        <item quantity="other">%1$d aprobados</item>
+        <item quantity="one">%1$d crédito aprobado</item>
+        <item quantity="other">%1$d créditos aprobados</item>
     </plurals>
     <plurals name="home_credits_in_progress">
-        <item quantity="one">%1$d en curso</item>
-        <item quantity="other">%1$d en curso</item>
+        <item quantity="one">%1$d crédito en curso</item>
+        <item quantity="other">%1$d créditos en curso</item>
     </plurals>
     <plurals name="home_credits_remaining">
-        <item quantity="one">%1$d restante</item>
-        <item quantity="other">%1$d restantes</item>
+        <item quantity="one">%1$d crédito restante</item>
+        <item quantity="other">%1$d créditos restantes</item>
     </plurals>
 </resources>
