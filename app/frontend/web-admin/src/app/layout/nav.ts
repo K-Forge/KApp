@@ -46,7 +46,6 @@ export const NAV_GROUPS: NavGroup[] = [
     title: /* i18n */ 'People and access',
     links: [
       { path: '/data/users', label: /* i18n */ 'Users', icon: 'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 21v-2a4 4 0 00-3-3.87', roles: ADMIN },
-      { path: '/data/invitation-codes', label: /* i18n */ 'Invitation codes', icon: 'M15 7a4 4 0 11-5.66 5.66L3 19v2h2l6.34-6.34A4 4 0 0115 7zM16 8h.01', roles: ADMIN },
       { path: '/data/visitor-passes', label: /* i18n */ 'Visitor passes', icon: 'M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2zM3 11h18M7 15h4', roles: ['ROLE_ADMIN', 'ROLE_RECEPTION'] },
     ],
   },
