@@ -25,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,12 +48,20 @@ import co.edu.konradlorenz.kapp.ui.common.BrandBand
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
 
 /**
- * Invitación (issue #160): a visitor redeems the day pass reception gave them. The rules are
+ * Visitante (issue #160): a visitor redeems the day pass reception gave them. The rules are
  * VisitorPassForm's; this screen only says, under each field, what is wrong with it - and keeps
- * the button off until nothing is.
+ * the button off until nothing is. Once the pass is redeemed the visitor session has started, and
+ * [onRedeemed] takes them to the map (#232).
  */
 @Composable
-fun InvitationScreen(onBack: () -> Unit, viewModel: InvitationViewModel = viewModel(factory = InvitationViewModel.Factory)) {
+fun InvitationScreen(
+    onBack: () -> Unit,
+    onRedeemed: () -> Unit,
+    viewModel: InvitationViewModel = viewModel(factory = InvitationViewModel.Factory),
+) {
+    if (viewModel.result == Redemption.Redeemed) {
+        LaunchedEffect(Unit) { onRedeemed() }
+    }
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(modifier = Modifier.fillMaxSize()) {
             // The purple band of the other screens, which is also what keeps the white status bar
@@ -67,11 +76,7 @@ fun InvitationScreen(onBack: () -> Unit, viewModel: InvitationViewModel = viewMo
                     .padding(horizontal = ScreenPadding, vertical = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                if (viewModel.result == Redemption.Redeemed) {
-                    Redeemed(name = viewModel.form.visitorName.trim().substringBefore(' '), onBack = onBack)
-                } else {
-                    Form(viewModel, onBack)
-                }
+                Form(viewModel, onBack)
             }
         }
     }
@@ -251,19 +256,6 @@ private fun DocumentTypePicker(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun Redeemed(name: String, onBack: () -> Unit) {
-    Text(stringResource(R.string.invitation_done_title, name), style = MaterialTheme.typography.headlineSmall)
-    Text(
-        stringResource(R.string.invitation_done_body),
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    Button(onClick = onBack, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(14.dp)) {
-        Text(stringResource(R.string.invitation_done_back))
     }
 }
 

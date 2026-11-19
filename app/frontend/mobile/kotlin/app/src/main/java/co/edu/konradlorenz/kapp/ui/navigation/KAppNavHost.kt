@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,6 +19,8 @@ import co.edu.konradlorenz.kapp.ui.map.MapScreen
 import co.edu.konradlorenz.kapp.ui.profile.ProfileScreen
 import co.edu.konradlorenz.kapp.ui.schedule.ScheduleScreen
 import co.edu.konradlorenz.kapp.ui.semaphore.SemaphoreScreen
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 // The two routes outside the bar. The other five are in KAppDestination, which is also what the
 // bar iterates, so a destination cannot be added to one and forgotten in the other.
@@ -37,8 +40,25 @@ fun KAppNavHost(container: AppContainer) {
     val session by container.session.session.collectAsState()
     val destinations = destinationsFor(session?.profileRole)
 
-    // Decided once: afterwards the session moves the screens, not the start destination.
-    val start = remember { if (session != null) KAppDestination.Home.route else LOGIN }
+    // Decided once: afterwards the session moves the screens, not the start destination. A visitor
+    // has no Inicio: their pass opens on the map.
+    val start = remember {
+        when {
+            session == null -> LOGIN
+            session?.profileRole == ProfileRole.Guest -> KAppDestination.Map.route
+            else -> KAppDestination.Home.route
+        }
+    }
+    val scope = rememberCoroutineScope()
+
+    // A visitor pass does not renew: when its token runs out the session ends, and the effect below
+    // takes the visitor back to the login, whether or not the map was asking for anything (#232).
+    val visitorExpiresAt = session?.takeIf { it.refreshToken == null }?.accessExpiresAt
+    LaunchedEffect(visitorExpiresAt) {
+        if (visitorExpiresAt == null) return@LaunchedEffect
+        delay((visitorExpiresAt - System.currentTimeMillis()).coerceAtLeast(0))
+        container.session.endIfExpired()
+    }
 
     val signedIn = session != null
     LaunchedEffect(signedIn) {
@@ -68,7 +88,15 @@ fun KAppNavHost(container: AppContainer) {
         }
 
         composable(INVITATION) {
-            InvitationScreen(onBack = { navController.popBackStack() })
+            InvitationScreen(
+                onBack = { navController.popBackStack() },
+                // The pass is now a visitor session: straight to the map, with nothing to go back to.
+                onRedeemed = {
+                    navController.navigate(KAppDestination.Map.route) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
+                },
+            )
         }
 
         // The tabs, each inside the shell that draws the bar over it.
@@ -88,7 +116,13 @@ fun KAppNavHost(container: AppContainer) {
                         KAppDestination.Profile -> ProfileScreen()
                         KAppDestination.Semaphore -> SemaphoreScreen()
                         KAppDestination.Schedule -> ScheduleScreen()
-                        KAppDestination.Map -> MapScreen()
+                        KAppDestination.Map -> MapScreen(
+                            onExit = if (session?.profileRole == ProfileRole.Guest) {
+                                { scope.launch { container.session.signOut() } }
+                            } else {
+                                null
+                            },
+                        )
                     }
                 }
             }

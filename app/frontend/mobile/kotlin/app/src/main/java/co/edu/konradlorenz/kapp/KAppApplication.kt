@@ -17,6 +17,7 @@ import co.edu.konradlorenz.kapp.data.profile.decodePicture
 import co.edu.konradlorenz.kapp.data.schedule.ScheduleRepository
 import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreRepository
 import co.edu.konradlorenz.kapp.data.session.KeystoreSessionStore
+import co.edu.konradlorenz.kapp.data.session.ProfileRole
 import co.edu.konradlorenz.kapp.data.session.SessionManager
 import co.edu.konradlorenz.kapp.data.visitor.VisitorPassRepository
 import java.time.LocalDate
@@ -58,8 +59,8 @@ class AppContainer(context: Context) {
         answerLocally = demo,
     )
 
-    /** Public too: a visitor has no session. */
-    val visitorPasses = VisitorPassRepository(publicApi.auth)
+    /** Redeemed through the public client - the pass is the proof - and kept as a visitor session. */
+    val visitorPasses = VisitorPassRepository(publicApi.auth, session)
 
     val microsoft = MicrosoftSignIn.forThisBuild(context)
 
@@ -95,12 +96,13 @@ class AppContainer(context: Context) {
         // semáforo and the timetable are read by the screens that show them, and forgotten with
         // the rest.
         MainScope().launch {
-            session.session.map { it?.userId }.distinctUntilChanged().collect { userId ->
+            session.session.map { it?.userId to it?.profileRole }.distinctUntilChanged().collect { (userId, role) ->
                 if (userId == null) {
                     profile.clear()
                     semaphore.clear()
                     schedule.clear()
-                } else {
+                } else if (role != ProfileRole.Guest) {
+                    // A visitor has no profile: /api/users/me would refuse the pass's token.
                     profile.load()
                 }
             }

@@ -188,6 +188,8 @@
     </plurals>
     <string name="map_failed">No pudimos cargar los edificios.</string>
     <string name="map_retry">Reintentar</string>
+    <!-- A visitor's way out of the map, the only screen a day pass opens (#232). -->
+    <string name="map_visitor_exit">Salir</string>
     <string name="map_back">Volver a los edificios</string>
     <string name="map_floor_failed">No pudimos cargar este piso.</string>
     <string name="map_floor_not_drawn">Este piso todavía no está dibujado.</string>
@@ -240,9 +242,6 @@
     <string name="invitation_result_expired">Ese pase venció. Pide uno nuevo en recepción.</string>
     <string name="invitation_result_offline">No pudimos conectar con el servidor. Revisa tu conexión e inténtalo otra vez.</string>
     <string name="invitation_result_failed">No pudimos validar el código. Inténtalo otra vez.</string>
-    <string name="invitation_done_title">¡Listo, %1$s!</string>
-    <string name="invitation_done_body">Tu pase de visitante quedó activo por 24 horas. El mapa para visitantes llega en la siguiente fase de KApp.</string>
-    <string name="invitation_done_back">Volver al inicio de sesión</string>
 
     <!--
       The semester card counts credits, which is what GET /api/semaphore/me/summary returns. Only

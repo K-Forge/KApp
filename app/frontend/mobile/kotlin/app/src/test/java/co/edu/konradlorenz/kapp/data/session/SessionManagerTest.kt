@@ -177,6 +177,50 @@ class SessionManagerTest {
         assertNull(store.saved)
     }
 
+    private val visitorPass = TokenResponse(
+        accessToken = "visitor-access",
+        tokenType = "Bearer",
+        expiresIn = 86_400,
+        userId = "visitor:9c1f0a72",
+        roles = listOf("ROLE_GUEST"),
+    )
+
+    @Test
+    fun `a redeemed pass is a visitor session that only opens the map`() = runBlocking {
+        val session = manager().startVisitorSession(visitorPass)
+
+        assertEquals(ProfileRole.Guest, session.profileRole)
+        assertNull(session.refreshToken)
+        assertEquals(session, store.saved)
+    }
+
+    @Test
+    fun `a visitor's token is used to its last minute, and then the session ends`() = runBlocking {
+        val manager = manager()
+        manager.startVisitorSession(visitorPass)
+
+        now += 86_400_000 - 60_000
+        assertEquals("visitor-access", manager.accessToken())
+        manager.endIfExpired()
+        assertNotNull(manager.session.value)
+
+        now += 60_000
+        manager.endIfExpired()
+        assertNull(manager.session.value)
+        assertNull(store.saved)
+        assertEquals(emptyList<String>(), server.refreshes)
+    }
+
+    @Test
+    fun `an expired check leaves a session that can still renew alone`() = runBlocking {
+        val manager = manager()
+        manager.signIn(ID_TOKEN)
+        now += 2 * 60 * 60_000
+
+        manager.endIfExpired()
+        assertNotNull(manager.session.value)
+    }
+
     private class MemoryStore : SessionStore {
         var saved: Session? = null
         override fun read() = saved

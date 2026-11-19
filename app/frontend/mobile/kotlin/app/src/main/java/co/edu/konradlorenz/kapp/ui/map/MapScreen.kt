@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -52,9 +53,14 @@ import co.edu.konradlorenz.kapp.ui.theme.toned
  * Mapa: the campus's buildings with the code a class's room carries in Horario, and, once one is
  * tapped, its floors (FloorScreen). Everything on it comes from the map API; nothing is drawn by
  * hand.
+ *
+ * [onExit] is a visitor's way out (#232): the map is all they have, so "Salir" sits on its band.
  */
 @Composable
-fun MapScreen(viewModel: MapViewModel = viewModel(factory = MapViewModel.Factory)) {
+fun MapScreen(
+    onExit: (() -> Unit)? = null,
+    viewModel: MapViewModel = viewModel(factory = MapViewModel.Factory),
+) {
     val opened = viewModel.opened
     if (opened != null) {
         FloorScreen(
@@ -112,6 +118,13 @@ fun MapScreen(viewModel: MapViewModel = viewModel(factory = MapViewModel.Factory
             // Past the first item the whole overlap is used up.
             scrolled = coverScrolled {
                 if (list.firstVisibleItemIndex > 0) Int.MAX_VALUE else list.firstVisibleItemScrollOffset
+            },
+            trailing = onExit?.let { exit ->
+                {
+                    TextButton(onClick = exit) {
+                        Text(stringResource(R.string.map_visitor_exit), color = Color.White, fontWeight = FontWeight.SemiBold)
+                    }
+                }
             },
         )
     }
