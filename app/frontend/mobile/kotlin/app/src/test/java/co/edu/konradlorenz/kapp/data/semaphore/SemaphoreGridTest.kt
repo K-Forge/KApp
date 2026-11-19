@@ -167,11 +167,36 @@ class SemaphoreGridTest {
     }
 
     @Test
-    fun `only what is still ahead can be planned`() {
+    fun `only what is still ahead can be planned, and a failed course is placed by itself`() {
         assertEquals(
-            listOf(CourseStatus.Eligible, CourseStatus.Blocked, CourseStatus.Failed, CourseStatus.Postponed, CourseStatus.Other),
+            listOf(CourseStatus.Eligible, CourseStatus.Blocked, CourseStatus.Postponed, CourseStatus.Other),
             CourseStatus.entries.filter { it.plannable },
         )
+    }
+
+    @Test
+    fun `the current level is the highest one in progress, and the next period the one after`() {
+        assertEquals(StudentPeriod(2, 3), studentPeriod(pensum, semaphore(entry("A", "PASSED"), entry("C", "IN_PROGRESS"))))
+    }
+
+    @Test
+    fun `with nothing in progress, the level after the highest passed is both current and next`() {
+        assertEquals(StudentPeriod(3, 3), studentPeriod(pensum, semaphore(entry("A", "PASSED"), entry("D", "PASSED"))))
+        assertEquals(StudentPeriod(1, 1), studentPeriod(pensum, semaphore()))
+    }
+
+    @Test
+    fun `a failed course is drawn in the next period, with or without a plan`() {
+        // B is level 1, failed; C at level 2 is in progress, so B is repeated at level 3.
+        val sinu = semaphore(entry("A", "PASSED"), entry("B", "FAILED"), entry("C", "IN_PROGRESS"))
+        val plan = AcademicPlan("p", "Mi plan", "1015", true, listOf(Placement("B", plannedLevel = 1)))
+
+        for (levels in listOf(buildSemaphore(pensum, sinu, emptySet(), null), buildSemaphore(pensum, sinu, emptySet(), plan))) {
+            val b = levels.flatMap { it.items }.first { it.course.pensumItemCode == "B" }
+            assertEquals(3, b.level)
+            assertEquals(1, b.movedFrom)
+            assertEquals(listOf("B", "E", "F"), levels.first { it.level == 3 }.items.map { it.course.pensumItemCode })
+        }
     }
 
     @Test
@@ -218,12 +243,7 @@ class SemaphoreGridTest {
     }
 
     @Test
-    fun `a failed course is offered only the next semester`() {
-        assertEquals(listOf(6), allowedLevels(CourseStatus.Failed, 5, 9, null))
-    }
-
-    @Test
-    fun `a failed course past the contract's twelve has nowhere to go`() {
-        assertEquals(emptyList<Int>(), allowedLevels(CourseStatus.Failed, 12, 9, plan(12)))
+    fun `a failed course offers no level to choose`() {
+        assertEquals(emptyList<Int>(), allowedLevels(CourseStatus.Failed, 5, 9, null))
     }
 }

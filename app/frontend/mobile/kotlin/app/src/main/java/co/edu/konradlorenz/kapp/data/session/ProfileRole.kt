@@ -6,9 +6,6 @@ package co.edu.konradlorenz.kapp.data.session
  * `roles` mixes the profile role with permissions (`["ROLE_STAFF", "ROLE_ADMIN"]`). Permissions
  * open parts of the admin portal and change nothing in the app, so only the profile role is kept
  * here: it is what decides the tabs (issue #46, and "Roles" in docs/api/auth.openapi.yaml).
- *
- * `ROLE_GUEST`, a visitor day pass, is not here: the app has no visitor sign-in yet, so no session
- * can carry it.
  */
 enum class ProfileRole(val apiName: String) {
     Student("ROLE_STUDENT"),
@@ -20,6 +17,12 @@ enum class ProfileRole(val apiName: String) {
      * not happen; when it does, the person gets the map and is told to contact TI.
      */
     Unassigned("ROLE_UNASSIGNED"),
+
+    /**
+     * A visitor with a day pass (ADR 0007). The token only opens the map, lasts 24 hours and does
+     * not renew; there is no profile behind it, so `GET /api/users/me` is never asked for (#232).
+     */
+    Guest("ROLE_GUEST"),
     ;
 
     companion object {

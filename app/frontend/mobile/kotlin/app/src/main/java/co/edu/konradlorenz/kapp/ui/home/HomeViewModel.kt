@@ -55,12 +55,21 @@ class HomeViewModel(
     )
         private set
 
+    /** Which of the three cards are showing an offline copy, and since when. */
+    private val offlineSince = mutableMapOf<String, Long>()
+
+    private fun offline(card: String, since: Long?) {
+        if (since == null) offlineSince.remove(card) else offlineSince[card] = since
+        uiState = uiState.copy(offlineSince = offlineSince.values.minOrNull())
+    }
+
     init {
         viewModelScope.launch {
             profile.state.collect { state ->
                 // A profile that failed to load leaves the greeting without a name rather than
                 // with somebody else's. Perfil is where it can be tried again.
                 uiState = uiState.copy(student = (state as? ProfileState.Ready)?.profile?.toStudent())
+                offline("profile", (state as? ProfileState.Ready)?.offlineSince)
             }
         }
         viewModelScope.launch {
@@ -72,7 +81,10 @@ class HomeViewModel(
             }
         }
         viewModelScope.launch {
-            semaphore.state.collect { state -> uiState = uiState.copy(semester = semesterOf(state)) }
+            semaphore.state.collect { state ->
+                uiState = uiState.copy(semester = semesterOf(state))
+                offline("semester", (state as? SemaphoreState.Ready)?.offlineSince)
+            }
         }
         localAvatar?.let { avatar ->
             viewModelScope.launch {
@@ -95,8 +107,9 @@ class HomeViewModel(
     private suspend fun loadDay() {
         // Read first, then copy: copying the state around the call would write back whatever it
         // held when the call began, undoing a greeting that arrived in the meantime.
-        val day = dayOf(schedule.day(today()), now())
-        uiState = uiState.copy(day = day)
+        val result = schedule.day(today())
+        uiState = uiState.copy(day = dayOf(result, now()))
+        offline("day", (result as? ScheduleResult.Ready)?.offlineSince)
     }
 
     companion object {

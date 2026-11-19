@@ -1,5 +1,6 @@
 package co.edu.konradlorenz.kapp.data.profile
 
+import co.edu.konradlorenz.kapp.data.cache.OfflineCache
 import co.edu.konradlorenz.kapp.data.network.UserApi
 import co.edu.konradlorenz.kapp.data.network.UserProfile
 import co.edu.konradlorenz.kapp.data.network.UserProfileUpdate
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 
 /** Where the signed-in person's profile is. */
@@ -16,7 +18,11 @@ sealed interface ProfileState {
     /** Not asked for yet, or on its way. */
     data object Loading : ProfileState
 
-    data class Ready(val profile: UserProfile) : ProfileState
+    /**
+     * [offlineSince] is set when there was no network and this is the copy saved at that moment
+     * (OfflineCache), rather than the server's answer just now.
+     */
+    data class Ready(val profile: UserProfile, val offlineSince: Long? = null) : ProfileState
 
     /** The last attempt failed. The screens that need it offer to try again. */
     data object Failed : ProfileState
@@ -36,6 +42,7 @@ class ProfileRepository(
     private val users: UserApi,
     private val session: SessionManager,
     private val prefer: () -> String?,
+    private val offline: OfflineCache? = null,
 ) {
     private val loading = Mutex()
     private val current = MutableStateFlow<ProfileState>(ProfileState.Loading)
@@ -43,18 +50,26 @@ class ProfileRepository(
     val state: StateFlow<ProfileState> = current.asStateFlow()
 
     /**
-     * Reads the profile, unless it is already here. Concurrent callers wait for the one call rather
-     * than making their own. Never throws, short of cancellation: a failure is [ProfileState.Failed].
+     * Reads the profile, unless it is already here - a copy from [offline] is read again, in case
+     * the network is back. Concurrent callers wait for the one call rather than making their own.
+     * Never throws, short of cancellation: a failure is [ProfileState.Failed].
      */
     suspend fun load(): ProfileState = loading.withLock {
-        current.value.takeIf { it is ProfileState.Ready }?.let { return@withLock it }
+        current.value.takeIf { it is ProfileState.Ready && it.offlineSince == null }?.let { return@withLock it }
         current.value = ProfileState.Loading
         current.value = try {
             val profile = users.me(prefer())
             session.setProfileRoles(profile.roles)
+            offline?.save(CACHE, UserProfile.serializer(), profile)
             ProfileState.Ready(profile)
         } catch (e: CancellationException) {
             throw e
+        } catch (_: IOException) {
+            // No network: the last profile this phone saw, if there is one. The roles in the
+            // session were saved with it, so the tabs are already right.
+            offline?.read(CACHE, UserProfile.serializer())
+                ?.let { ProfileState.Ready(it.value, offlineSince = it.savedAt) }
+                ?: ProfileState.Failed
         } catch (_: Exception) {
             ProfileState.Failed
         }
@@ -72,7 +87,9 @@ class ProfileRepository(
         val profile = (current.value as? ProfileState.Ready)?.profile ?: return false
         return try {
             users.updateMe(UserProfileUpdate(avatarUrl = null))
-            current.value = ProfileState.Ready(profile.copy(avatarUrl = null))
+            val updated = profile.copy(avatarUrl = null)
+            offline?.save(CACHE, UserProfile.serializer(), updated)
+            current.value = ProfileState.Ready(updated)
             true
         } catch (e: CancellationException) {
             throw e
@@ -84,5 +101,9 @@ class ProfileRepository(
     /** Forgets the profile. Called when the session ends, so the next person starts clean. */
     fun clear() {
         current.value = ProfileState.Loading
+    }
+
+    private companion object {
+        const val CACHE = "profile"
     }
 }

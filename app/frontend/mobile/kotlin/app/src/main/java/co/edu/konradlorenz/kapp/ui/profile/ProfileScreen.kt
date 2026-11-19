@@ -454,7 +454,8 @@ private fun roleLabel(roles: List<String>): Int? = when (ProfileRole.of(roles)) 
     ProfileRole.Professor -> R.string.profile_role_professor
     ProfileRole.Staff -> R.string.profile_role_staff
     ProfileRole.Unassigned -> R.string.profile_role_unassigned
-    null -> null
+    // A visitor has no Perfil tab; the label is never asked for.
+    ProfileRole.Guest, null -> null
 }
 
 private val PreviewStudent = UserProfile(

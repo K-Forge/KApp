@@ -13,7 +13,9 @@ import co.edu.konradlorenz.kapp.data.session.ProfileRole
 import co.edu.konradlorenz.kapp.data.session.Session
 import co.edu.konradlorenz.kapp.data.session.SessionManager
 import co.edu.konradlorenz.kapp.data.session.SessionStore
+import co.edu.konradlorenz.kapp.data.cache.OfflineCache
 import java.io.IOException
+import java.nio.file.Files
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -93,6 +95,26 @@ class ProfileRepositoryTest {
 
         assertFalse(repository.removeAvatar())
         assertEquals(ProfileState.Ready(withPicture), repository.state.value)
+    }
+
+    @Test
+    fun `with no network, the last profile saved is shown, and read again once it is back`() = runBlocking {
+        val dir = Files.createTempDirectory("offline").toFile()
+        val cache = OfflineCache(dir, now = { 1_700_000_000_000 })
+        ProfileRepository(users, session, prefer = { null }, offline = cache).load()
+
+        users.offline = true
+        val offline = ProfileRepository(users, session, prefer = { null }, offline = cache)
+        assertEquals(ProfileState.Ready(professor, offlineSince = 1_700_000_000_000), offline.load())
+
+        users.offline = false
+        assertEquals(ProfileState.Ready(professor), offline.load())
+
+        cache.clear()
+        users.offline = true
+        assertEquals(ProfileState.Failed, ProfileRepository(users, session, prefer = { null }, offline = cache).load())
+        dir.deleteRecursively()
+        Unit
     }
 
     @Test

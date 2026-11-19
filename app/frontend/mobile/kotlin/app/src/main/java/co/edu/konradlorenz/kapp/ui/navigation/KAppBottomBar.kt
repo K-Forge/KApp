@@ -60,7 +60,8 @@ val BarContentPadding = BarHeight + BarBottomInset + 14.dp
  * in yet.
  *
  * [destinations] are the tabs the profile role sees (destinationsFor), so a professor's bar has
- * four and staff's three. The tabs share the width, so fewer tabs are wider, not gapped.
+ * four and staff's three. The tabs share the width, so fewer tabs are wider, not gapped. A visitor
+ * has the map alone: no bar at all, and a crest that goes nowhere, since there is no Inicio (#232).
  */
 @Composable
 fun MainShell(
@@ -72,15 +73,22 @@ fun MainShell(
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         // The crest on every tab's band goes to Inicio (BrandBand).
-        CompositionLocalProvider(LocalGoHome provides { onSelect(KAppDestination.Home) }) {
+        val goHome = if (KAppDestination.Home in destinations) {
+            { onSelect(KAppDestination.Home) }
+        } else {
+            null
+        }
+        CompositionLocalProvider(LocalGoHome provides goHome) {
             content()
         }
-        KAppBottomBar(
-            current = current,
-            destinations = destinations,
-            onSelect = onSelect,
-            modifier = Modifier.align(Alignment.BottomCenter),
-        )
+        if (destinations.size > 1) {
+            KAppBottomBar(
+                current = current,
+                destinations = destinations,
+                onSelect = onSelect,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
     }
 }
 

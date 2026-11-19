@@ -17,8 +17,8 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
 | Screen | What it does | Tested against |
 |---|---|---|
 | Sign-in | MSAL. FakeSignIn or DevOidc in debug. In the demo build, a "Modo demostración" menu (#180) | Test tenant and the dev server |
-| Invitation | Redeems a visitor pass with a 4-field visual check (#173). No visitor session yet | Simulated data |
-| Home | Greeting with the photo picked in Perfil, or the initials without one (#231), next class (from `GET /api/schedule/me/day`, in `HomeViewModel`), semester progress, shortcuts by role | Dev server, student and professor (#230) |
+| Visitor | Redeems a visitor pass with a 4-field visual check (#173). The pass's map-only token is a visitor session (`ROLE_GUEST`): Mapa alone, no bar, "Salir" on the band, and back to the login when it expires 24 hours later (#232) | Demo build |
+| Home | Greeting with the photo picked in Perfil, or the initials without one (#231), next class (from `GET /api/schedule/me/day`, in `HomeViewModel`), semester progress, shortcuts by role. With no network it shows the last profile, semáforo and day it saved (`OfflineCache`, `filesDir/offline/`), with "Sin conexión · datos de las HH:MM"; cleared on sign-out (#232) | Dev server, student and professor (#230) |
 | Semáforo | The pensum with each course's status. Plans: create, switch, and move courses, even past the last semester (#186). The demo has the real 1015 pensum (#187) | Dev server, including creating a plan and moving a course in it (#230) |
 | Timetable | Day, two days, week and month views (#184). Tapping a class opens its room from `GET /api/map/spaces/{room}`; a `404` says the room is not on the map yet, and only a network or server failure says the search failed (#231) | Dev server, student and professor (#230). Switching between them on one phone showed the previous person's week until `bugfix/forget-tabs-on-sign-out` |
 | Profile | Microsoft and SINU data, a profile photo (add, crop, remove; #185), and sign-out | Dev server. The photo stays on the phone, because user 1.x has no upload endpoint |
@@ -37,7 +37,7 @@ The last feature merged was #200 (2026-11-05), the first part of the floor rende
   - since #189: AGP 9.5.0, Gradle 9.8.2, okhttp 5.5.1, kotlinx-serialization 1.12.0, MSAL 8.6.0;
   - MVVM with Compose (Material 3), Retrofit 3 and OkHttp 5;
   - the session is kept with AES-GCM in the Android Keystore;
-  - 178 unit tests on `bugfix/delivery-fixes-232`.
+  - 186 unit tests on `bugfix/delivery-review-232`.
 - **CI:** the Android job runs `:app:testDebugUnitTest :app:assembleDebug :app:lintDebug :app:assembleDemo
   :app:lintDemo` (`.github/workflows/ci.yml`). The demo variant is built and linted since #191.
 
@@ -75,6 +75,16 @@ uploaded on Thursday 2026-11-19 and presented on Friday 2026-11-20. Parent issue
      and "Sin rol" on Perfil. Unit tests only until the backend sends the role.
    - #250, client side: a failed course reads "Debe repetirse". Not seen on the emulator: the test student has no
      failed course.
+
+   **Brian's review of #254 (2026-11-19), on `bugfix/delivery-review-232`:**
+   - The visitor screen says "visitante": "Tengo un código de visitante", "Visitante", "Código de visitante".
+   - The semester card says "Créditos" once, over "103 aprobados · 8 en curso · 32 restantes".
+   - A redeemed pass opens the visitor's map (see Visitor above). Checked in the demo, including reopening the app
+     and "Salir".
+   - A failed course is drawn in the next period by itself, in the semáforo and every plan, and its sheet says so
+     instead of offering levels. Current and next follow #253 (`studentPeriod`). Checked in the demo: 17070 goes
+     from 7 to 9, level 8 being in progress. On the dev server 31506 should go to 6.
+   - Inicio offline shows the last data it saved (see Home above). Unit tests; the demo never goes offline.
 
 After the delivery:
 

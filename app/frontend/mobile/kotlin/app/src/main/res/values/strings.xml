@@ -31,7 +31,7 @@
     <string name="login_demo_submit">Ingresar con el perfil de demostración</string>
     <string name="login_demo_microsoft_unavailable">El ingreso con Microsoft no está disponible en esta demostración. Entra desde «Modo demostración», más abajo.</string>
     <string name="login_first_time">¿Vienes de visita?</string>
-    <string name="login_invitation_link">Usa tu código de invitación</string>
+    <string name="login_invitation_link">Tengo un código de visitante</string>
     <string name="login_copyright">© 2026 Fundación Universitaria Konrad Lorenz</string>
 
     <string name="home_greeting">Hola, %1$s</string>
@@ -60,6 +60,7 @@
     <string name="home_semester_link">Ver semáforo</string>
     <string name="home_semester_level">Semestre %1$d</string>
     <string name="home_semester_percent">%1$d%%</string>
+    <string name="home_semester_credits">Créditos</string>
 
     <string name="home_rest_title">Resto del día</string>
     <string name="home_rest_link">Ver horario</string>
@@ -96,6 +97,8 @@
     <string name="semaphore_status_eligible">Puedes tomarla</string>
     <string name="semaphore_status_blocked">Bloqueada</string>
     <string name="semaphore_status_failed">Debe repetirse</string>
+    <!-- A failed course is placed in the next period by itself; its sheet says where (#232). -->
+    <string name="semaphore_failed_repeat_at">Se repite en el semestre %1$d, el siguiente periodo. Ese semestre no se puede cambiar.</string>
     <string name="semaphore_status_postponed">Aplazada</string>
     <string name="semaphore_status_other">Otro estado</string>
     <string name="semaphore_test_notice">Datos de prueba: la universidad todavía no ha conectado SINU, así que nada de esto es tu historia académica real.</string>
@@ -143,6 +146,8 @@
     <string name="home_semester_unavailable">No pudimos cargar tu semestre.</string>
     <string name="home_day_unavailable">No pudimos cargar tus clases de hoy</string>
     <string name="home_day_retry">Reintentar</string>
+    <!-- Inicio opened with no network shows the last data it saved, and from when (#232). -->
+    <string name="home_offline_note">Sin conexión · datos de las %1$s</string>
     <string name="home_done_title">Ya terminaste las clases de hoy</string>
     <string name="room_number">Salón %1$s</string>
     <string name="room_none">Sin salón asignado</string>
@@ -187,6 +192,8 @@
     </plurals>
     <string name="map_failed">No pudimos cargar los edificios.</string>
     <string name="map_retry">Reintentar</string>
+    <!-- A visitor's way out of the map, the only screen a day pass opens (#232). -->
+    <string name="map_visitor_exit">Salir</string>
     <string name="map_back">Volver a los edificios</string>
     <string name="map_floor_failed">No pudimos cargar este piso.</string>
     <string name="map_floor_not_drawn">Este piso todavía no está dibujado.</string>
@@ -204,8 +211,8 @@
     <string name="band_go_home">Ir a Inicio</string>
     <string name="home_no_role">Tu cuenta aún no tiene un rol asignado. Comunícate con TI.</string>
     <string name="home_open_profile">Abrir Perfil</string>
-    <string name="invitation_band">Invitación</string>
-    <string name="invitation_title">Código de invitación</string>
+    <string name="invitation_band">Visitante</string>
+    <string name="invitation_title">Código de visitante</string>
     <string name="invitation_body">Recepción te entrega un código de visitante. Con él entras al mapa del campus durante 24 horas, sin crear una cuenta.</string>
     <!-- Empty except in the demo build, which says which code its data accepts. -->
     <string name="invitation_demo_hint" translatable="false"></string>
@@ -239,9 +246,6 @@
     <string name="invitation_result_expired">Ese pase venció. Pide uno nuevo en recepción.</string>
     <string name="invitation_result_offline">No pudimos conectar con el servidor. Revisa tu conexión e inténtalo otra vez.</string>
     <string name="invitation_result_failed">No pudimos validar el código. Inténtalo otra vez.</string>
-    <string name="invitation_done_title">¡Listo, %1$s!</string>
-    <string name="invitation_done_body">Tu pase de visitante quedó activo por 24 horas. El mapa para visitantes llega en la siguiente fase de KApp.</string>
-    <string name="invitation_done_back">Volver al inicio de sesión</string>
 
     <!--
       The semester card counts credits, which is what GET /api/semaphore/me/summary returns. Only
@@ -282,15 +286,15 @@
         <item quantity="other">%1$d materias en curso</item>
     </plurals>
     <plurals name="home_credits_passed">
-        <item quantity="one">%1$d crédito aprobado</item>
-        <item quantity="other">%1$d créditos aprobados</item>
+        <item quantity="one">%1$d aprobado</item>
+        <item quantity="other">%1$d aprobados</item>
     </plurals>
     <plurals name="home_credits_in_progress">
-        <item quantity="one">%1$d crédito en curso</item>
-        <item quantity="other">%1$d créditos en curso</item>
+        <item quantity="one">%1$d en curso</item>
+        <item quantity="other">%1$d en curso</item>
     </plurals>
     <plurals name="home_credits_remaining">
-        <item quantity="one">%1$d crédito restante</item>
-        <item quantity="other">%1$d créditos restantes</item>
+        <item quantity="one">%1$d restante</item>
+        <item quantity="other">%1$d restantes</item>
     </plurals>
 </resources>

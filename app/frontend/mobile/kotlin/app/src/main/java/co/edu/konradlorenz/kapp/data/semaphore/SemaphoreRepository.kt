@@ -1,5 +1,6 @@
 package co.edu.konradlorenz.kapp.data.semaphore
 
+import co.edu.konradlorenz.kapp.data.cache.OfflineCache
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -8,10 +9,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.Serializable
 import retrofit2.HttpException
+import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 
-/** Everything the semáforo is drawn from, read together. */
+/** Everything the semáforo is drawn from, read together. Serializable for OfflineCache. */
+@Serializable
 data class SemaphoreData(
     val semaphore: StudentSemaphore,
     val summary: ProgressSummary,
@@ -25,7 +29,8 @@ data class SemaphoreData(
 sealed interface SemaphoreState {
     data object Loading : SemaphoreState
 
-    data class Ready(val data: SemaphoreData) : SemaphoreState
+    /** [offlineSince]: with no network, the copy OfflineCache saved then, not a fresh answer. */
+    data class Ready(val data: SemaphoreData, val offlineSince: Long? = null) : SemaphoreState
 
     /** `404`: SINU has no program for this person. Not an error to retry. */
     data object NoProgram : SemaphoreState
@@ -43,7 +48,7 @@ sealed interface SemaphoreState {
  * mocks, which store nothing and answer the same example to every write, it is the only way a move
  * shows up at all.
  */
-class SemaphoreRepository(private val api: SemaphoreApi) {
+class SemaphoreRepository(private val api: SemaphoreApi, private val offline: OfflineCache? = null) {
 
     private val loading = Mutex()
     private val current = MutableStateFlow<SemaphoreState>(SemaphoreState.Loading)
@@ -51,16 +56,23 @@ class SemaphoreRepository(private val api: SemaphoreApi) {
 
     val state: StateFlow<SemaphoreState> = current.asStateFlow()
 
-    /** Reads it all, unless it is already here. Never throws, short of cancellation. */
+    /**
+     * Reads it all, unless it is already here - a copy from [offline] is read again, in case the
+     * network is back. Never throws, short of cancellation.
+     */
     suspend fun load(): SemaphoreState = loading.withLock {
-        current.value.takeIf { it is SemaphoreState.Ready }?.let { return@withLock it }
+        current.value.takeIf { it is SemaphoreState.Ready && it.offlineSince == null }?.let { return@withLock it }
         current.value = SemaphoreState.Loading
         current.value = try {
-            SemaphoreState.Ready(read())
+            SemaphoreState.Ready(read().also { offline?.save(CACHE, SemaphoreData.serializer(), it) })
         } catch (e: CancellationException) {
             throw e
         } catch (e: HttpException) {
             if (e.code() == 404) SemaphoreState.NoProgram else SemaphoreState.Failed
+        } catch (_: IOException) {
+            offline?.read(CACHE, SemaphoreData.serializer())
+                ?.let { SemaphoreState.Ready(it.value, offlineSince = it.savedAt) }
+                ?: SemaphoreState.Failed
         } catch (_: Exception) {
             SemaphoreState.Failed
         }
@@ -145,10 +157,16 @@ class SemaphoreRepository(private val api: SemaphoreApi) {
 
     private fun ready(): SemaphoreData? = (current.value as? SemaphoreState.Ready)?.data
 
+    /** Applies a change the server took, and keeps the offline copy in step with it. */
     private fun update(change: (SemaphoreData) -> SemaphoreData) {
         current.update { state ->
-            if (state is SemaphoreState.Ready) SemaphoreState.Ready(change(state.data)) else state
+            if (state is SemaphoreState.Ready) state.copy(data = change(state.data)) else state
         }
+        ready()?.let { offline?.save(CACHE, SemaphoreData.serializer(), it) }
+    }
+
+    private companion object {
+        const val CACHE = "semaphore"
     }
 
     private fun updatePlan(planId: String, change: (AcademicPlan) -> AcademicPlan) = update { data ->

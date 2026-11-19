@@ -33,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -67,6 +68,9 @@ import co.edu.konradlorenz.kapp.ui.theme.Passed
 import co.edu.konradlorenz.kapp.ui.theme.Subject
 import co.edu.konradlorenz.kapp.ui.theme.tones
 import co.edu.konradlorenz.kapp.ui.theme.toned
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 // Every measurement below is read off docs/design/mobile/HomeAndroid.dc.html, which is drawn on a
@@ -169,6 +173,11 @@ private fun HomeContent(
                 // the card the shortcuts would land on purple, so they start below the band's edge,
                 // as far from it as they sit from the card when there is one.
                 Spacer(Modifier.height(CardOverlap + 16.dp))
+            }
+
+            state.offlineSince?.let {
+                OfflineNote(it)
+                Spacer(Modifier.height(12.dp))
             }
 
             Shortcuts(destinations, onOpen)
@@ -621,6 +630,26 @@ private fun ProgrammeLine(programme: String) {
     )
 }
 
+/**
+ * "Sin conexión · datos de las 07:42": what is on Inicio is the copy saved then, because the phone
+ * has no network now (#232). Small and grey: the data is still right, only not fresh.
+ */
+@Composable
+private fun OfflineNote(savedAt: Long) {
+    val time = remember(savedAt) {
+        Instant.ofEpochMilli(savedAt).atZone(ZoneId.systemDefault()).toLocalTime()
+            .format(DateTimeFormatter.ofPattern("HH:mm"))
+    }
+    Text(
+        text = stringResource(R.string.home_offline_note, time),
+        modifier = Modifier.fillMaxWidth(),
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
 /** Credits through the pensum: passed, being taken, and the rest of the track. */
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
@@ -667,9 +696,18 @@ private fun SemesterCard(semester: SemesterState.Ready) {
             Spacer(Modifier.height(12.dp))
             ProgressBar(semester)
             Spacer(Modifier.height(12.dp))
+            // The unit once, over the three figures, rather than "créditos" in each of them (#232).
+            Text(
+                text = stringResource(R.string.home_semester_credits),
+                fontSize = 12.sp,
+                lineHeight = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(4.dp))
             // No fixed height: 12 sp text needs about 16 dp, more with the system font scaled up,
-            // and a 14 dp row cut the descenders off every label. A flow row, because with the
-            // unit in each label ("59 créditos aprobados") the three no longer fit on one line.
+            // and a 14 dp row cut the descenders off every label. A flow row, so a large system
+            // font wraps the three figures instead of cutting the last one off.
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),

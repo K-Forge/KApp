@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import co.edu.konradlorenz.kapp.data.auth.MicrosoftSignIn
+import co.edu.konradlorenz.kapp.data.cache.OfflineCache
 import co.edu.konradlorenz.kapp.data.demo.DemoBackend
 import co.edu.konradlorenz.kapp.data.demo.DemoClock
 import co.edu.konradlorenz.kapp.data.map.FloorRepository
@@ -17,8 +18,10 @@ import co.edu.konradlorenz.kapp.data.profile.decodePicture
 import co.edu.konradlorenz.kapp.data.schedule.ScheduleRepository
 import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreRepository
 import co.edu.konradlorenz.kapp.data.session.KeystoreSessionStore
+import co.edu.konradlorenz.kapp.data.session.ProfileRole
 import co.edu.konradlorenz.kapp.data.session.SessionManager
 import co.edu.konradlorenz.kapp.data.visitor.VisitorPassRepository
+import java.io.File
 import java.time.LocalDate
 import java.time.LocalTime
 import kotlinx.coroutines.MainScope
@@ -58,8 +61,8 @@ class AppContainer(context: Context) {
         answerLocally = demo,
     )
 
-    /** Public too: a visitor has no session. */
-    val visitorPasses = VisitorPassRepository(publicApi.auth)
+    /** Redeemed through the public client - the pass is the proof - and kept as a visitor session. */
+    val visitorPasses = VisitorPassRepository(publicApi.auth, session)
 
     val microsoft = MicrosoftSignIn.forThisBuild(context)
 
@@ -68,10 +71,14 @@ class AppContainer(context: Context) {
     /** Debug against the mocks only. See MockProfilePreference. */
     val mockProfile = MockProfilePreference(context)
 
+    /** Inicio's last good answers, for when it opens with no network (#232). */
+    private val offline = OfflineCache(File(context.filesDir, "offline"))
+
     val profile = ProfileRepository(
         users = api.users,
         session = session,
         prefer = { if (microsoft.isFake) "example=${mockProfile.example}" else null },
+        offline = offline,
     )
 
     /** The profile photo picked on this phone, which the API has nowhere to upload yet. */
@@ -81,13 +88,13 @@ class AppContainer(context: Context) {
     val decodePicture: (Uri) -> Bitmap? = { decodePicture(context, it) }
 
     /** A student's only: the tab and Inicio's semester card ask for it, nobody else does. */
-    val semaphore = SemaphoreRepository(api.semaphore)
+    val semaphore = SemaphoreRepository(api.semaphore, offline)
 
     /** The floors Mapa has read, by their ETag, for as long as the app runs. */
     val floors = FloorRepository(api.map)
 
     /** A student's or a professor's: staff have no timetable, and get 403. */
-    val schedule = ScheduleRepository(api.schedule, api.map)
+    val schedule = ScheduleRepository(api.schedule, api.map, offline)
 
     init {
         // The profile follows the session: read when somebody is signed in - including a session
@@ -95,12 +102,15 @@ class AppContainer(context: Context) {
         // semáforo and the timetable are read by the screens that show them, and forgotten with
         // the rest.
         MainScope().launch {
-            session.session.map { it?.userId }.distinctUntilChanged().collect { userId ->
+            session.session.map { it?.userId to it?.profileRole }.distinctUntilChanged().collect { (userId, role) ->
                 if (userId == null) {
                     profile.clear()
                     semaphore.clear()
                     schedule.clear()
-                } else {
+                    // Like the tabs (#239): the next person must not open on this one's data.
+                    offline.clear()
+                } else if (role != ProfileRole.Guest) {
+                    // A visitor has no profile: /api/users/me would refuse the pass's token.
                     profile.load()
                 }
             }

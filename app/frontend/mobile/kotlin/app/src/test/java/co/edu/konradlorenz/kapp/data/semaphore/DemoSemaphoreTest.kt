@@ -42,8 +42,15 @@ class DemoSemaphoreTest {
             .filter { it.status != CourseStatus.Passed }
             .map { it.course.pensumItemCode }
             .toSet()
-        // Inferencia Estadística failed, and Electivas III and IV still to take: the example's.
-        assertEquals(setOf("17070", "59085", "59088"), leftBehind)
+        // Electivas III and IV still to take: the example's. Inferencia Estadística, failed, is not
+        // left behind: it is drawn in the next period (#232).
+        assertEquals(setOf("59085", "59088"), leftBehind)
+    }
+
+    @Test
+    fun `the failed course is drawn in the next period`() {
+        val failed = levels.flatMap { it.items }.single { it.course.pensumItemCode == "17070" }
+        assertEquals(studentPeriod(pensum, semaphore).next, failed.level)
     }
 
     @Test
