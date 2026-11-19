@@ -7,6 +7,23 @@ The contracts are the source of truth: the mocks serve them as soon as they merg
 (`app/backend/microservices/mock/README.md`), and the services implement them in the pull requests
 that follow. Until a service has caught up, its contract describes where it is going, not where it is.
 
+## November 2026: semaphore 2.0.2 (#250)
+
+- **Two rules on `PUT /api/semaphore/me/plans/{planId}/placements/{pensumItemCode}`**, for a plan
+  over the student's own pensum, answered with `400` and the issue on `plannedLevel`:
+  - a `PENDING` course cannot be planned before the level the student is in;
+  - a `FAILED` course goes only to the next period, since it has to be taken again.
+
+  The student's level is the highest one with a course `IN_PROGRESS`; with none in progress, the
+  level after the highest one with a course `PASSED`. The next period is the level after it while
+  a course is in progress, and the student's own level between periods.
+- **Access, written down:** the catalog refuses `ROLE_UNASSIGNED` as well as `ROLE_GUEST`. Its
+  `x-roles` never listed it.
+
+**Migrating a client:** offer a failed course only the next period, and a pending one only the
+student's level and later. The test SINU's student failed Lógica Digital y Microprocesadores
+(`31506`): it goes to level 6.
+
 ## November 2026: map 3.7.0 (additive)
 
 - **New:** `Space.labelPoint`, on every space that has a `shape`: in a floor, in a space's detail
