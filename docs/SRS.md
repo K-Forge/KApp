@@ -113,7 +113,8 @@ on top by an administrator, and they only open the portal: the app's tabs follow
 |---|---|---|
 | **Student** | `ROLE_STUDENT` | Their own timetable, semáforo and plans; the map; notifications; the community features |
 | **Professor** | `ROLE_PROFESSOR` | Their own sections; the map; notifications; the community features |
-| **Administrative staff** | `ROLE_STAFF` | The map. Also the default when the directory names no role |
+| **Administrative staff** | `ROLE_STAFF` | The map |
+| **No role yet** | `ROLE_UNASSIGNED` | The map and their own profile, when the directory names no role, until an administrator gives one |
 | **Visitor** | `ROLE_GUEST` | The map, for one day, with a pass from reception. No account |
 
 | Permission | Granted to manage |

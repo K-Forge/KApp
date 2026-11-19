@@ -79,7 +79,7 @@ const PAGE_SIZE = 20;
             <select id="role" (change)="onRoleChange($event)">
               <option value="">{{ 'All roles' | t }}</option>
               @for (role of roles; track role) {
-                <option [value]="role">{{ role }}</option>
+                <option [value]="role">{{ role === 'ROLE_UNASSIGNED' ? ('No role' | t) : role }}</option>
               }
             </select>
           </div>
@@ -184,11 +184,18 @@ const PAGE_SIZE = 20;
           <div class="field">
             <label for="roles-profile">{{ 'Profile' | t }}</label>
             <select id="roles-profile" (change)="profileRole.set($any($event.target).value)">
+              @if (profileRole() === null) {
+                <option value="" disabled selected>{{ 'No role: choose one' | t }}</option>
+              }
               @for (role of accountRoles; track role) {
                 <option [value]="role" [selected]="role === profileRole()">{{ roleLabel(role) }}</option>
               }
             </select>
-            <span class="hint">{{ 'What the KApp app shows. It overrides what the Microsoft directory says about this account.' | t }}</span>
+            @if (profileRole() === null) {
+              <span class="hint">{{ 'The Microsoft directory does not classify this account, so the app shows it only the map and its profile. Choose what it is.' | t }}</span>
+            } @else {
+              <span class="hint">{{ 'What the KApp app shows. It overrides what the Microsoft directory says about this account.' | t }}</span>
+            }
           </div>
           <fieldset class="field permissions">
             <legend>{{ 'Permissions' | t }}</legend>
@@ -204,7 +211,7 @@ const PAGE_SIZE = 20;
           </fieldset>
           <p class="hint" style="margin:0">{{ 'The change reaches their sessions when they next renew, within the hour.' | t }}</p>
           <div class="row">
-            <button type="submit" class="btn btn-primary" [disabled]="savingRoles()">
+            <button type="submit" class="btn btn-primary" [disabled]="savingRoles() || profileRole() === null">
               {{ savingRoles() ? ('Saving…' | t) : ('Save' | t) }}
             </button>
             <button type="button" class="btn" (click)="rolesModal.close()">{{ 'Cancel' | t }}</button>
@@ -327,7 +334,8 @@ export class UsersPage {
   readonly permissionChoices = PERMISSION_CHOICES;
   /** The account whose roles are being edited, its profile role and its permissions as chosen so far. */
   readonly editing = signal<DirectoryEntry | null>(null);
-  readonly profileRole = signal<AccountRole>('ROLE_STAFF');
+  /** Null for an account with no role yet (ROLE_UNASSIGNED): nothing is saved until one is chosen. */
+  readonly profileRole = signal<AccountRole | null>('ROLE_STAFF');
   readonly chosen = signal<string[]>([]);
   readonly savingRoles = signal(false);
   readonly rolesError = signal<ApiError | null>(null);
@@ -496,7 +504,8 @@ export class UsersPage {
 
   editRoles(user: DirectoryEntry): void {
     this.editing.set(user);
-    this.profileRole.set((user.roles.find((role) => (ACCOUNT_ROLES as readonly string[]).includes(role)) as AccountRole) ?? 'ROLE_STAFF');
+    const profileRole = user.roles.find((role) => (ACCOUNT_ROLES as readonly string[]).includes(role)) as AccountRole | undefined;
+    this.profileRole.set(profileRole ?? null);
     this.chosen.set(user.roles.filter((role) => PORTAL_PERMISSIONS.includes(role)));
     this.rolesError.set(null);
     this.rolesModal?.open();
@@ -514,13 +523,14 @@ export class UsersPage {
   /** Exactly the profile role and permissions chosen; the row shows the roles the server answers with. */
   saveRoles(): void {
     const user = this.editing();
-    if (!user || this.savingRoles()) {
+    const profileRole = this.profileRole();
+    if (!user || !profileRole || this.savingRoles()) {
       return;
     }
     this.savingRoles.set(true);
     this.rolesError.set(null);
     const permissions = PORTAL_PERMISSIONS.filter((role) => this.chosen().includes(role));
-    this.accounts.setRoles(user.id, { profileRole: this.profileRole(), permissions }).subscribe({
+    this.accounts.setRoles(user.id, { profileRole, permissions }).subscribe({
       next: (answer) => {
         this.savingRoles.set(false);
         const roles = answer.roles as DirectoryRole[];

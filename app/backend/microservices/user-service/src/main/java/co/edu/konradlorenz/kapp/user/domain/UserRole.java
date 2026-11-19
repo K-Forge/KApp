@@ -7,7 +7,8 @@ import java.util.Set;
  * A role an account holds.
  *
  * <p>An account holds exactly one <em>profile role</em> - {@link #ROLE_STUDENT},
- * {@link #ROLE_PROFESSOR} or {@link #ROLE_STAFF} - which decides what the app shows, and any number
+ * {@link #ROLE_PROFESSOR}, {@link #ROLE_STAFF} or {@link #ROLE_UNASSIGNED}, for a member the
+ * directory does not classify - which decides what the app shows, and any number
  * of <em>permissions</em>, which open parts of the admin portal. All of them travel together in the
  * {@code roles} claim and in a profile's {@code roles}.
  *
@@ -22,6 +23,7 @@ public enum UserRole {
     ROLE_STUDENT,
     ROLE_PROFESSOR,
     ROLE_STAFF,
+    ROLE_UNASSIGNED,
     ROLE_ADMIN,
     ROLE_RECEPTION,
     ROLE_MAINTENANCE,
@@ -29,7 +31,7 @@ public enum UserRole {
     ROLE_WELLBEING,
     ROLE_GUEST;
 
-    public static final Set<UserRole> PROFILE_ROLES = EnumSet.of(ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF);
+    public static final Set<UserRole> PROFILE_ROLES = EnumSet.of(ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_UNASSIGNED);
 
     public boolean isProfileRole() {
         return PROFILE_ROLES.contains(this);

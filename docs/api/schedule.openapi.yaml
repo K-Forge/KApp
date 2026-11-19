@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Schedule API
-  version: 2.0.1
+  version: 2.0.2
   summary: A person's class timetable for one academic period, read from SINU.
   description: |
     The class timetable of a student, or of a professor, at Fundación Universitaria Konrad Lorenz,
@@ -75,8 +75,8 @@ info:
     sections they take; a professor's, the sections they teach. Allowed roles are `ROLE_STUDENT`
     and `ROLE_PROFESSOR`. No route reads somebody else's timetable, administrators included.
 
-    **`ROLE_STAFF` and `ROLE_GUEST` are forbidden everywhere in this service**: they take and teach
-    no classes. Any such token is rejected with `403 Forbidden`.
+    **`ROLE_STAFF`, `ROLE_UNASSIGNED` and `ROLE_GUEST` are forbidden everywhere in this service**:
+    they take and teach no classes. Any such token is rejected with `403 Forbidden`.
 
 servers:
   - url: http://localhost:8080

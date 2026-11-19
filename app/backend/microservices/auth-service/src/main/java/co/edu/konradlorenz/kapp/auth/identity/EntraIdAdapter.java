@@ -37,8 +37,8 @@ import java.util.stream.Collectors;
  *       the account of their address.</li>
  *   <li><strong>The profile role</strong> is the directory's at every sign-in - a student who
  *       starts teaching changes with it - unless an administrator chose one, which then stays. An
- *       account the directory does not classify is {@code ROLE_STAFF}: the map and nothing
- *       academic.</li>
+ *       account the directory does not classify is {@code ROLE_UNASSIGNED}: the map, its own
+ *       profile and nothing academic, until an administrator gives it a role.</li>
  *   <li><strong>Permissions</strong> are never the directory's. They stay as an administrator left
  *       them, and the first administrators come from configuration, so somebody can open the portal
  *       on a new server.</li>
@@ -113,7 +113,7 @@ public class EntraIdAdapter implements IdentityProviderPort {
         String profileRole = existing
                 .filter(Credential::profileRoleIsAdministrators)
                 .flatMap(account -> account.roles().stream().filter(KappRoles.PROFILE_ROLES::contains).findFirst())
-                .orElseGet(() -> person.profile().map(EntraIdAdapter::roleOf).orElse(KappRoles.STAFF));
+                .orElseGet(() -> person.profile().map(EntraIdAdapter::roleOf).orElse(KappRoles.UNASSIGNED));
 
         Set<String> permissions = existing.map(account -> account.roles().stream()
                         .filter(KappRoles.PERMISSIONS::contains)

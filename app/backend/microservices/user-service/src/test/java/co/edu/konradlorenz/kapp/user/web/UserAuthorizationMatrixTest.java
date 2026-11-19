@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -35,6 +36,7 @@ class UserAuthorizationMatrixTest extends AbstractUserServiceTest {
     private static final String PROFESSOR_ID = "a0000000-0000-0000-0000-000000000004";
     private static final String ADMIN_ID = "a0000000-0000-0000-0000-000000000005";
     private static final String STAFF_ID = "a0000000-0000-0000-0000-000000000006";
+    private static final String UNASSIGNED_ID = "a0000000-0000-0000-0000-000000000007";
 
     /** A trivial, always-valid patch body: the one field a person may edit. */
     private static final String TRIVIAL_PATCH = """
@@ -48,6 +50,21 @@ class UserAuthorizationMatrixTest extends AbstractUserServiceTest {
         save(professor(PROFESSOR_ID, "professor@konradlorenz.edu.co", "Professor", "Account"));
         save(admin(ADMIN_ID, "admin@konradlorenz.edu.co", "Admin", "Account"));
         save(profile(STAFF_ID, "staff@konradlorenz.edu.co", "Staff", "Account", UserRole.ROLE_STAFF));
+        save(profile(UNASSIGNED_ID, "sinrol@konradlorenz.edu.co", "Sin", "Rol", UserRole.ROLE_UNASSIGNED));
+    }
+
+    @Test
+    @DisplayName("ROLE_UNASSIGNED reads and edits its own profile, with no academic block, and not the directory")
+    void unassigned_readsItsOwnProfile() throws Exception {
+        mockMvc.perform(get("/api/users/me").with(callerWith(UNASSIGNED_ID, UserRole.ROLE_UNASSIGNED)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_UNASSIGNED"))
+                .andExpect(jsonPath("$.academic").doesNotExist());
+        mockMvc.perform(patch("/api/users/me").with(callerWith(UNASSIGNED_ID, UserRole.ROLE_UNASSIGNED))
+                        .contentType(MediaType.APPLICATION_JSON).content(TRIVIAL_PATCH))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/users").with(callerWith(UNASSIGNED_ID, UserRole.ROLE_UNASSIGNED)))
+                .andExpect(status().isForbidden());
     }
 
     // ---------------------------------------------------------------------------------

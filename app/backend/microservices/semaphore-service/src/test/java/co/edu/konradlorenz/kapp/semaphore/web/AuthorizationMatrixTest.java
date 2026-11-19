@@ -83,6 +83,16 @@ class AuthorizationMatrixTest {
     }
 
     @Test
+    @DisplayName("ROLE_UNASSIGNED sees nothing academic: the catalog, the semáforo and the plans are 403")
+    void unassigned_isRefusedEverywhere() throws Exception {
+        mockMvc.perform(get("/api/catalog/programs").with(unassigned())).andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/catalog/programs/{code}", SEEDED_PROGRAM).with(unassigned())).andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/catalog/pensums/{code}", SEEDED_PENSUM).with(unassigned())).andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/semaphore/me").with(unassigned())).andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/semaphore/me/plans").with(unassigned())).andExpect(status().isForbidden());
+    }
+
+    @Test
     @DisplayName("listPrograms: STUDENT is allowed")
     void listPrograms_student_200() throws Exception {
         mockMvc.perform(get("/api/catalog/programs").with(student("listPrograms-student")))
@@ -1029,6 +1039,10 @@ class AuthorizationMatrixTest {
 
     private static RequestPostProcessor admin(String subject) {
         return jwtWithRole(subject, "ROLE_ADMIN");
+    }
+
+    private static RequestPostProcessor unassigned() {
+        return jwtWithRole("matrix-unassigned", "ROLE_UNASSIGNED");
     }
 
     private static RequestPostProcessor jwtWithRole(String subject, String role) {

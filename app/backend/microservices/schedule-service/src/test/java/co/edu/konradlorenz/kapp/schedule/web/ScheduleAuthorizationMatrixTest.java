@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
+import java.util.List;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -70,6 +72,16 @@ class ScheduleAuthorizationMatrixTest extends AbstractScheduleServiceTest {
         mockMvc.perform(get("/api/schedule/me/week").with(admin(OTHER))).andExpect(status().isForbidden());
         mockMvc.perform(get("/api/schedule/me/week").with(guest(OTHER))).andExpect(status().isForbidden());
         mockMvc.perform(get("/api/schedule/me/week")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("ROLE_UNASSIGNED, a member the directory does not classify, is refused on every route")
+    void unassigned() throws Exception {
+        for (String path : List.of("/api/schedule/me", "/api/schedule/me/periods", "/api/schedule/me/week")) {
+            mockMvc.perform(get(path).with(callerWith(OTHER, KappRoles.UNASSIGNED))).andExpect(status().isForbidden());
+        }
+        mockMvc.perform(get("/api/schedule/me/day").param("date", "2026-10-05").with(callerWith(OTHER, KappRoles.UNASSIGNED)))
+                .andExpect(status().isForbidden());
     }
 
     @Test

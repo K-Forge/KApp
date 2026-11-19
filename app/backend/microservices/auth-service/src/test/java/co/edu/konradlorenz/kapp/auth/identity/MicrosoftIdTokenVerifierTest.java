@@ -107,7 +107,7 @@ class MicrosoftIdTokenVerifierTest {
         assertThat(profileOf(List.of("Professor", "Student"))).contains(DirectoryProfile.STUDENT);
     }
 
-    /** An account the directory does not classify signs in as staff; that is decided by the caller. */
+    /** An account the directory does not classify signs in with ROLE_UNASSIGNED; that is decided by the caller. */
     @Test
     @DisplayName("no profile claim, or a value KApp does not know, gives no profile")
     void unknownProfile_isEmpty() throws Exception {

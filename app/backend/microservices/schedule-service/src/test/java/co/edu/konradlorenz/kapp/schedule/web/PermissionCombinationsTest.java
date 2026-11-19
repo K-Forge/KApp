@@ -40,7 +40,8 @@ class PermissionCombinationsTest extends AbstractScheduleServiceTest {
             List.of("ROLE_PROFESSOR", "ROLE_MODERATION"),
             List.of("ROLE_STAFF", "ROLE_RECEPTION"),
             List.of("ROLE_STAFF", "ROLE_MAINTENANCE", "ROLE_WELLBEING"),
-            List.of("ROLE_STAFF", "ROLE_ADMIN"));
+            List.of("ROLE_STAFF", "ROLE_ADMIN"),
+            List.of("ROLE_UNASSIGNED", "ROLE_RECEPTION"));
 
     /** One route of each kind of access, by the path the contract writes. */
     static final Map<String, Function<String, MockHttpServletRequestBuilder>> ROUTES = Map.of(

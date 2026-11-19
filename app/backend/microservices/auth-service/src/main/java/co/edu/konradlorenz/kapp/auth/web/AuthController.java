@@ -153,7 +153,7 @@ public class AuthController {
 
     /** The roles a client may name in {@code allowedRoles}: every role a token may carry. */
     static final String ROLE_PATTERN =
-            "ROLE_(GUEST|STUDENT|PROFESSOR|STAFF|ADMIN|RECEPTION|MAINTENANCE|MODERATION|WELLBEING)";
+            "ROLE_(GUEST|STUDENT|PROFESSOR|STAFF|UNASSIGNED|ADMIN|RECEPTION|MAINTENANCE|MODERATION|WELLBEING)";
 
     /**
      * {@code allowedRoles}: the roles the client takes, any one of them. The admin portal sends

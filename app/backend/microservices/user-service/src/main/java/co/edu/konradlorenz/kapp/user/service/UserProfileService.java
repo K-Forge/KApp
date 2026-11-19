@@ -214,7 +214,7 @@ public class UserProfileService {
         if (profileRoles != 1) {
             throw new BusinessRuleException("An account holds exactly one profile role",
                     List.of(new ApiError.FieldIssue("roles",
-                            "must hold exactly one of ROLE_STUDENT, ROLE_PROFESSOR or ROLE_STAFF")));
+                            "must hold exactly one of ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF or ROLE_UNASSIGNED")));
         }
         return roles;
     }
