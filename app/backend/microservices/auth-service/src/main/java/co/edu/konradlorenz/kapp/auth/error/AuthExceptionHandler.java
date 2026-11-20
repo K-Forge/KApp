@@ -53,6 +53,25 @@ public class AuthExceptionHandler {
         return ResponseEntity.status(status).body(body);
     }
 
+    @ExceptionHandler(MicrosoftSignInUnavailableException.class)
+    public ResponseEntity<ApiError> handleMicrosoftUnavailable(MicrosoftSignInUnavailableException ex,
+                                                               HttpServletRequest request) {
+        HttpStatus status = HttpStatus.SERVICE_UNAVAILABLE;
+        ApiError body = ApiError.of(status.value(), status.getReasonPhrase(), ex.getMessage(),
+                request.getRequestURI(), List.of());
+        return ResponseEntity.status(status).body(body);
+    }
+
+    @ExceptionHandler(PortalPermissionRequiredException.class)
+    public ResponseEntity<ApiError> handlePortalPermissionRequired(PortalPermissionRequiredException ex,
+                                                                   HttpServletRequest request) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        ApiError body = ApiError.of(status.value(), status.getReasonPhrase(), ex.getMessage(),
+                request.getRequestURI(),
+                List.of(new ApiError.FieldIssue("client", "PORTAL takes an account with a permission. Nothing was issued")));
+        return ResponseEntity.status(status).body(body);
+    }
+
     @ExceptionHandler(AccountDeactivatedException.class)
     public ResponseEntity<ApiError> handleAccountDeactivated(AccountDeactivatedException ex, HttpServletRequest request) {
         HttpStatus status = HttpStatus.FORBIDDEN;

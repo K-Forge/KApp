@@ -2,5 +2,7 @@
 <resources>
     <!-- Only what the platform needs outside Compose. The palette itself lives in ui/theme/Color.kt. -->
     <color name="white">#FFFFFFFF</color>
+    <!-- DarkBackground in ui/theme/Theme.kt: the window behind Compose in dark mode. -->
+    <color name="night_background">#FF1C2128</color>
     <color name="ic_launcher_background">#FFFFFFFF</color>
 </resources>

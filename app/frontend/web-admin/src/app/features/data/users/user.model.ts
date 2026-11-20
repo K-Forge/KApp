@@ -1,11 +1,13 @@
 /**
  * Mirrors Role in docs/api/user.openapi.yaml. An account holds one profile role - student,
- * professor or staff - and any number of permissions.
+ * professor, staff, or unassigned when the Microsoft directory does not classify it - and any
+ * number of permissions.
  */
 export type DirectoryRole =
   | 'ROLE_STUDENT'
   | 'ROLE_PROFESSOR'
   | 'ROLE_STAFF'
+  | 'ROLE_UNASSIGNED'
   | 'ROLE_ADMIN'
   | 'ROLE_RECEPTION'
   | 'ROLE_MAINTENANCE'
@@ -16,6 +18,7 @@ export const DIRECTORY_ROLES: DirectoryRole[] = [
   'ROLE_STUDENT',
   'ROLE_PROFESSOR',
   'ROLE_STAFF',
+  'ROLE_UNASSIGNED',
   'ROLE_ADMIN',
   'ROLE_RECEPTION',
   'ROLE_MAINTENANCE',

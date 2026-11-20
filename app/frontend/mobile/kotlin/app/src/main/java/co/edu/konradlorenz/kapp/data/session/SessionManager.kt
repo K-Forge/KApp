@@ -3,6 +3,7 @@ package co.edu.konradlorenz.kapp.data.session
 import co.edu.konradlorenz.kapp.data.network.AuthApi
 import co.edu.konradlorenz.kapp.data.network.MicrosoftSignInRequest
 import co.edu.konradlorenz.kapp.data.network.RefreshRequest
+import co.edu.konradlorenz.kapp.data.network.TokenResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,6 +49,24 @@ class SessionManager(
         return mutex.withLock { save(tokens.toSession(now())) }
     }
 
+    /**
+     * Keeps the map-only token a redeemed visitor pass answered (#232). It has no refresh token:
+     * once it expires the session is over, through [endIfExpired] or the first call refused.
+     */
+    suspend fun startVisitorSession(tokens: TokenResponse): Session =
+        mutex.withLock { save(tokens.toSession(now())) }
+
+    /**
+     * Ends the session if nothing more can be done with it - a visitor pass past its 24 hours.
+     * A session that can still renew is left alone.
+     */
+    suspend fun endIfExpired() {
+        mutex.withLock {
+            val session = current.value ?: return@withLock
+            if (!session.isUsableAt(now())) end()
+        }
+    }
+
     /** Records what `GET /api/users/me` said the roles are. They decide the tabs. */
     suspend fun setProfileRoles(roles: List<String>) {
         mutex.withLock {
@@ -65,6 +84,8 @@ class SessionManager(
     suspend fun accessToken(): String? = mutex.withLock {
         val session = current.value ?: return@withLock null
         if (now() < session.accessExpiresAt - RENEW_MARGIN_MS) return@withLock session.accessToken
+        // A visitor's token cannot be renewed early, so it is used to its last minute.
+        if (session.refreshToken == null && now() < session.accessExpiresAt) return@withLock session.accessToken
         when (val renewal = renewLocked(session)) {
             is Renewal.Renewed -> renewal.session.accessToken
             Renewal.Ended -> null

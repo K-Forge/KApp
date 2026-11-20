@@ -99,23 +99,29 @@ KApp/
 │   ├── RUNBOOK.md                   # How to run everything — start here
 │   ├── ONBOARDING.md                # A new machine, in Spanish
 │   ├── PROGRESS.md                  # Implementation status — read before large changes
+│   ├── state/                       # Live state of each agent session's area — read first, every session
 │   ├── SINU-ALIGNMENT.md            # What KApp reads from SINU, and what it must never store
+│   ├── ti/                          # What KApp asks of the IT office, in Spanish; .docx built by scripts/build-ti-docs.sh
 │   ├── REQUIREMENTS.md  SRS.md  DESIGN.md  MICROSERVICES-IDEAS.md
 │   ├── INTEGRATION-NOTES.md  SECURITY-AUDIT.md  ATLAS-SETUP.md  K-COLORS.md
 │   └── DOCKER-GUIDE.md              # Superseded by RUNBOOK.md
 ├── scripts/
 │   ├── check-git-conventions.sh     # The git rules as code: CI and the commit-msg hook run it
 │   ├── install-git-hooks.sh         # Once per clone: enables .githooks/
+│   ├── prune-local-branches.sh      # Deletes local branches whose pull request merged (run by the hooks)
 │   ├── sync-contributing.sh         # Refreshes CONTRIBUTING.md from the organization
 │   ├── restack.sh                   # Rebases a stack after its bottom is squash merged
 │   └── generate-dev-secrets.sh  create-dev-accounts.sh  verify-db-isolation.sh
-├── .githooks/commit-msg             # Refuses a commit that breaks CONTRIBUTING.md
+├── .githooks/
+│   ├── commit-msg                   # Refuses a commit that breaks CONTRIBUTING.md
+│   └── post-checkout  post-merge    # Prune merged local branches after a switch to develop or a pull
 ├── .github/
 │   ├── CODEOWNERS                   # The lead reviews every path
 │   ├── dependabot.yml               # Weekly, grouped dependency updates into develop
+│   ├── pull_request_template.md     # Purpose, commits, testing, risks; replaces the organization's
 │   └── workflows/
-│       ├── ci.yml                   # Backend, contracts, portal, Android and the pensum seed
-│       ├── conventions.yml          # Branch, title and commits of every pull request
+│       ├── ci.yml                   # Backend, contracts, portal, Android and the pensum seed, by path
+│       ├── conventions.yml          # Branch, title, commits and area label of every pull request
 │       ├── dev-images.yml           # Per-branch images for the dev server, on GHCR
 │       └── restack.yml              # After a squash merge, rebases the pull requests stacked on it
 ├── CONTRIBUTING.md                  # Verbatim copy of the K-Forge guide. Never edit here
@@ -161,7 +167,7 @@ docker compose --profile full --profile dev down
 ```
 
 Only the gateway (8080) is published among the JVMs. Reaching a service directly is meant to fail. Containers are
-named after the worktree they came from (`KAPP_STACK` in `.env`), so two worktrees' stacks never collide.
+named after the worktree they came from (`KAPP_STACK` in `.env`), and so is the Compose project (`kapp-<stack>`), so one worktree's `up` or `down` never touches another's containers.
 
 ```bash
 # Validate the API contracts the clients build against
@@ -185,8 +191,8 @@ npx --package=@redocly/cli@latest redocly lint docs/api/*.yaml
 auth 1.0.0 defines them, and backend phase 3 (#56) implements them:
 
 - **One profile role** per member, taken from the university directory at sign-in: `ROLE_STUDENT`,
-  `ROLE_PROFESSOR` or `ROLE_STAFF`. A member the directory does not classify is `ROLE_STAFF`, which sees the map
-  only. The app's tabs follow the profile role.
+  `ROLE_PROFESSOR` or `ROLE_STAFF`. A member the directory does not classify is `ROLE_UNASSIGNED` ("Sin rol"),
+  which sees the map and its own profile only, until an administrator gives it a role in the portal. The app's tabs follow the profile role.
 - **Permissions** on top, granted by an administrator, which only open the portal: `ROLE_ADMIN`, `ROLE_RECEPTION`,
   `ROLE_MAINTENANCE`, `ROLE_MODERATION`, `ROLE_WELLBEING`.
 - `ROLE_GUEST` is a visitor with a one-day pass from reception: the map and nothing else, with no account.
@@ -212,8 +218,11 @@ auth 1.0.0 defines them, and backend phase 3 (#56) implements them:
 - **Read SINU, never copy it.** Before adding a field, ask whose datum it is: anything academic belongs to SINU and
   is read, not stored. No identity document, phone or student code is stored for members, and no administrator reads
   students' academic data. `docs/SINU-ALIGNMENT.md` is the reference.
-- MongoDB, one database **and one account** per service. Development uses the shared Atlas cluster; tests start a
-  single-node replica set through Testcontainers, since a standalone `mongod` cannot do multi-document transactions.
+- MongoDB, one database **and one account** per service. **Development runs only on the shared Atlas cluster, with
+  Microsoft sign-in against the test tenant** (ADR 0009). Tests start a single-node replica set through
+  Testcontainers, since a standalone `mongod` cannot do multi-document transactions. The `local-db` profile and the
+  fake OIDC server exist **only for evaluators** who have none of our accounts (ADR 0010, `docs/RUN-LOCALLY.md`):
+  never develop against them, and never point fake sign-in at Atlas (#246).
 - **Schema changes go in Mongock change units**, never applied by hand. They are append-only:
   never edit one that has run, add a new one.
 - Every service that touches MongoDB must carry `@EnableMongock`. Mongock 5.5.1 ships no
@@ -262,12 +271,21 @@ Rules specific to KApp:
 - **KApp has no production deployment, so there are no hotfixes.** A defect is a `bugfix/*` into `develop`.
 - **Nobody pushes to `main` or `develop`**, administrators included. Admins may bypass only when merging a pull
   request, never to push. Every pull request needs the lead's review: `.github/CODEOWNERS` owns every path.
+- **`develop` only takes squash merges, through the merge queue.** The ruleset offers no other method, so the
+  pull request title becomes the one commit on `develop`. Merge with "Merge when ready": the queue tests each
+  pull request on top of the ones queued before it and merges them in order. CI runs only the jobs whose paths a
+  pull request touches (`.github/workflows/ci.yml`, job `changes`); a skipped job counts as passed.
+- **Releases are prepared on `develop`**, so nothing ever has to come back from `main`. First a pull request such
+  as `chore/prepare-release-0-3-0`, titled `release: prepare version 0.3.0`, bumps `package.json` and writes
+  `CHANGELOG.md`. Then `release/0.3.0` is cut from `develop` with no commits of its own, merged into `main` with a
+  merge commit and tagged `v0.3.0`. A defect found during the release is fixed on `develop` and the release is cut
+  again. This replaces CONTRIBUTING's merge back into `develop`.
 - **A pull request into `develop` does not close its issue**, because only the default branch, `main`, does that.
   Close the issue by hand after the merge.
 - **Four chats, one area each**: Kotlin, Swift, Backend and Docs/Chore. They coordinate through GitHub issues in
   English, labelled `area/kotlin`, `area/swift`, `area/backend`, `area/docs`, plus `contract` when a contract in
-  `docs/api` changes. **Every pull request carries its area label too.** A chat never touches another chat's
-  worktree; what belongs to another area becomes an issue for it.
+  `docs/api` changes. **Every pull request carries its area label too**, and Git conventions fails without one. A
+  chat never touches another chat's worktree; what belongs to another area becomes an issue for it.
 - **One session, one worktree.** Two sessions in the same folder share one index and one set of files: they stage
   each other's changes, overwrite each other's edits and run Gradle or Maven over each other's builds. A second
   session on an area gets its own worktree, `../KApp-worktrees/<area>-<topic>`, on its own branch.
@@ -291,25 +309,86 @@ Rules specific to KApp:
   requests stacked on it, pushing as the K-Forge restack App so their checks run again. Nobody runs git in
   between. A real conflict is left untouched, with the commands to finish by hand in a comment. Stack only when a
   feature needs unmerged code, and keep stacks to two or three levels.
+- **One pull request, one purpose.** See *Pull requests and commits* below; it is what review checks first.
+- **When your pull request merges, leave its branch.** Run `git switch --detach origin/develop` in your worktree
+  (after `git fetch`), or start the next branch from there. The hooks then delete every local branch whose pull
+  request merged: `.githooks/post-checkout` on a switch to develop, `.githooks/post-merge` after a pull. Both run
+  `scripts/prune-local-branches.sh`, which never touches a branch some worktree has checked out or one with
+  commits outside a merged pull request; run it by hand to see what it keeps and why.
+
+### Pull requests and commits
+
+How a company that ships for years works, adapted from Google's engineering practices ("Small CLs", "Writing good CL
+descriptions"). The lead decided on 2026-10-13: **one pull request, one purpose**: neither a pull request for every
+edit, nor everything packed into one.
+
+**What one pull request is**
+
+1. **One purpose you can say in one sentence**, which becomes its title. If the sentence needs an "and", it is two
+   pull requests. It names its issue in the description with `Refs #N` (into `develop`, `Closes` does nothing).
+2. **Complete.** The code, its tests and the docs or contract it changes go together, and `develop` works after
+   the merge. A new endpoint, model or component lands with the code that uses it, never on its own.
+3. **Sized for a real review: about 100 to 400 lines a person has to read.** Lockfiles, generated code, seeds,
+   transcriptions, map data and photos do not count, and they go in a pull request of their own when they are
+   large. Past 400 lines, split by slices that work on their own (sign-in, then renewal, then sign-out), stacked
+   if each needs the previous one; never by layers that do nothing alone.
+4. **Under about 50 lines only when the change stands on its own**: a real defect with the test that proves it,
+   or a dependency update. A comment, a rename or a tweak travels with the next pull request on the same topic.
+   Before opening one, check `gh pr list --label area/<area>`; if one on the same topic is still waiting for
+   review, push to it and update its description.
+5. **Kept apart:** a refactor never shares a pull request with a change in behaviour, and moving files never
+   shares one with editing them.
+
+**Commits inside it**
+
+- **Each commit is one step that builds and passes its tests**, in an order that tells how the change was made:
+  `feat: store the refresh token in the keystore`, then `feat: renew the session before it expires`, then
+  `feat: sign out when a reused token is refused`, then `test: cover renewal, reuse and sign-out`. A feature
+  usually takes three to eight.
+- **No `wip`, `fix typo` or `address review` commits.** Fold them into the commit they correct
+  (`git commit --fixup <sha>` and `git rebase -i --autosquash origin/develop`) before asking for review, then
+  `git push --force-with-lease` on your own branch.
+- On `develop` the pull request becomes one squashed commit titled like the pull request. The commits are for
+  the review, and the one on `develop` is what gets reverted if something breaks.
+
+**The description** follows `.github/pull_request_template.md`: why, what changed (one line per commit), how it
+was tested (commands, and screenshots for anything visible), risks and what is left for later. It is written for
+the person who finds this pull request a year from now.
+
+**The way to merge**
+
+1. Push the branch as soon as it has its first commit, and at least once a day: work that exists only on one laptop
+   is work that can be lost. People may open a draft early to show progress. **An agent opens its pull request
+   ready for review, never as a draft**, once it meets the five points above (it cannot mark a draft ready).
+2. CI must be green before it merges.
+3. Core reviews agent pull requests against this section and tells Brian which are ready. The lead reviews the
+   people's. Brian merges.
+
+**Work shared by both clients.** A feature both apps need is a parent issue without a client label, with one
+sub-issue per client: `[Kotlin] ...` labelled `area/kotlin` and `[Swift] ...` labelled `area/swift` (as in #44 to
+#47). Each client closes its own sub-issue by hand when its pull request merges; the parent shows the progress and
+closes when both are done. Kotlin goes first; Swift resumes when the Android app is finished.
 
 ---
 
 ## Current State
 
-Read `docs/PROGRESS.md` for the detailed status before proposing large changes.
+What each area is doing right now, what waits on whom and what comes next is in
+[`docs/state/`](docs/state/README.md). Milestones are in [`docs/PROGRESS.md`](docs/PROGRESS.md). Both are newer than
+this summary (2026-11-18).
 
-- **Contracts:** the 2.0 set (#42) — semaphore 2.0, schedule 2.0, auth 1.0, user 1.0, map 3.6.
-  `docs/api/CHANGELOG.md` holds the history. Write the spec first; springdoc output is a drift check against it,
-  not the other way round.
-- **Backend:** phase 1 removed Eureka and the frozen services; phase 2 made the academic data read-only, behind the
-  test SINU adapter. Phase 3 is under way: rotating refresh tokens (#82) and development-only password sign-in
-  (#83) are in; Microsoft sign-in, permissions and the new roles are next.
-- **Android:** sign-in, home, profile, semáforo with plans, and timetable, against the mocks.
-- **iOS:** in progress in its own worktree.
-- **Portal:** built, tested in CI, and used by the team to sign in as a role and reproduce a failing call.
-- **Dev server:** the-hive follows `develop`.
-- The 2025 HTML/JS prototype and the legacy PostgreSQL schema were deleted (#51). A better public demo is planned
-  (#92).
+- **Contracts:** semaphore 2.0.1, schedule 2.0.1, auth 1.1, user 1.1, map 3.7. `docs/api/CHANGELOG.md` holds the
+  history. Write the spec first; springdoc output is a drift check against it, not the other way round.
+- **Backend:** phases 1 to 3 are done: no Eureka, academic data read-only behind the test SINU, Microsoft sign-in
+  with rotating refresh tokens, one profile role plus permissions. Phase 5 (EC floors from the plans) is under way.
+- **Android:** every screen works against the dev server as the test student and professor: sign-in, Inicio,
+  Semáforo with plans, Horario, Perfil, and the map with floors drawn from map-service, type icons and selection.
+  Invitación redeems a visitor pass. Santiago owns the client.
+- **iOS:** paused until Android is finished.
+- **Portal:** Angular, bilingual, Microsoft sign-in, a menu by permission and the permissions editor.
+- **Dev server:** the-hive follows `develop`, reachable through Tailscale only.
+- **Evaluation:** `scripts/run-locally.sh` starts everything on any computer with no account of ours (#244).
+- **Releases:** v0.2.0 (2026-10-12) on `main`; v0.3.0 follows the course's Tercera entrega (#234).
 
 ---
 
@@ -319,11 +398,11 @@ The backend plan is phases 1 to 8, one issue each. Keep this list in sync with `
 
 1. Remove Eureka and the frozen services (#54).
 2. Read-only academic data behind a test SINU (#55).
-3. Microsoft sign-in, rotating refresh tokens, profile roles and permissions (#56). The Entra ID test tenant is #62.
+3. Microsoft sign-in, rotating refresh tokens, profile roles and permissions (#56). Done. The Entra ID test tenant is #62.
 4. End-to-end journeys per profile (#57).
-5. EC floors faithful to the plans (#58), blocked on Brian's sketches.
-6. Kubernetes with kind, its guide, and production (#59). Production hardware is agreed with the university's IT
-   director; the fallback is Brian's Mac running kind.
+5. EC floors faithful to the plans (#58): floor 1 in #221, floor 2 in #220; floors 3 to 8 wait for the sketches.
+6. Kubernetes with kind, its guide, and production (#59). To be reviewed after the Tercera entrega (#242): one host
+   with Compose may be enough until the university's IT director decides the production server.
 7. `notification-service`, with an inbox, push and an outbox (#60).
 8. Points, voice, damage reports and lost and found (#61).
 
@@ -334,6 +413,20 @@ through `area/kotlin` and `area/swift` issues.
 
 ## AI Agent Instructions
 
+- **Start every session with [`docs/state/README.md`](docs/state/README.md)**, then read your area's file there.
+  Sessions do not share memory, local or cloud, so that folder is how one session learns what the others did.
+  Update your area's file before you end a piece of work.
+- **One session, one purpose, and Core rotates.** Core coordinates and is the long-lived session; Backend, Kotlin
+  and Swift do the work, one purpose each. When a worker's purpose is done or its conversation has grown long, it
+  hands over through `docs/state/` and sends Core its opening message; Core asks Brian and, on his yes, starts the
+  new session with the same name and archives the old one. The details are in
+  [`docs/state/README.md`](docs/state/README.md), "One session, one purpose".
+- **Pull requests: the worker opens, Core reviews, Brian merges.** A worker pushes its branch from the first commit
+  and opens the pull request **ready for review, never as a draft**, once the work is done and tested: an agent's
+  permission to mark a draft ready is denied, so a draft would wait on Brian. Then it sends Core everything (the
+  link, what changes, how it was tested, what is left). Core reviews it, posts "Revisión de Docs/Chore" and tells
+  Brian which pull requests to merge. Workers never ask Brian to review; they ask him directly only for something
+  only he can do on the emulator or in the admin portal (a real Microsoft sign-in, for example).
 - **Never modify** `.env` files (contains secrets).
 - **Backend location:** all backend work goes in `app/backend/microservices/`. The original monolith was deleted once the migration completed; it is only retrievable from the git history and must not be resurrected.
 - **Schema:** changes go in Mongock change units (see Data), never in a hand-written schema file.

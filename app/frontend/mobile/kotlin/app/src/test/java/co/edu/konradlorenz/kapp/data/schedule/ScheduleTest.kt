@@ -1,5 +1,7 @@
 package co.edu.konradlorenz.kapp.data.schedule
 
+import co.edu.konradlorenz.kapp.data.map.Building
+import co.edu.konradlorenz.kapp.data.map.FloorPlan
 import co.edu.konradlorenz.kapp.ui.home.DayState
 import co.edu.konradlorenz.kapp.ui.home.dayOf
 import kotlinx.coroutines.runBlocking
@@ -114,13 +116,22 @@ class ScheduleTest {
         val space = repository.space("301", "BI")
 
         assertEquals(listOf("301" to "BI"), api.spacesAsked)
-        assertEquals("Bienestar Institucional", space?.building?.name)
+        assertEquals("Bienestar Institucional", (space as RoomLookup.Found).space.building.name)
     }
 
     @Test
-    fun `a room the map cannot find is no answer, not a crash`() = runBlocking {
-        val api = FakeSchedule().apply { error = IOException("offline") }
-        assertNull(ScheduleRepository(api, api).space("301", "BI"))
+    fun `a room the map answers 404 for is not on the map yet, not a failure`() = runBlocking {
+        val api = FakeSchedule().apply { error = HttpException(Response.error<Any>(404, "".toResponseBody())) }
+        assertEquals(RoomLookup.NotOnMap, ScheduleRepository(api, api).space("301", "BI"))
+    }
+
+    @Test
+    fun `a room the map cannot be asked for is a failure, not a crash`() = runBlocking {
+        val offline = FakeSchedule().apply { error = IOException("offline") }
+        assertEquals(RoomLookup.Failed, ScheduleRepository(offline, offline).space("301", "BI"))
+
+        val broken = FakeSchedule().apply { error = HttpException(Response.error<Any>(503, "".toResponseBody())) }
+        assertEquals(RoomLookup.Failed, ScheduleRepository(broken, broken).space("301", "BI"))
     }
 
     @Test
@@ -150,6 +161,11 @@ class ScheduleTest {
             weeksAsked += date
             return WeekAgenda(date.orEmpty(), date.orEmpty(), WeekDays.associateWith { emptyList() })
         }
+
+        override suspend fun buildings(): List<Building> = error("not used here")
+
+        override suspend fun floor(building: String, floor: String, etag: String?): Response<FloorPlan> =
+            error("not used here")
 
         override suspend fun space(room: String, buildingCode: String): SpaceDetail {
             error?.let { throw it }

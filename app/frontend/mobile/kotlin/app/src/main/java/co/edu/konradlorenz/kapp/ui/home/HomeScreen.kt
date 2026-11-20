@@ -2,11 +2,14 @@ package co.edu.konradlorenz.kapp.ui.home
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.PluralsRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -30,17 +33,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -50,17 +57,20 @@ import co.edu.konradlorenz.kapp.R
 import co.edu.konradlorenz.kapp.ui.common.BandContentHeight
 import co.edu.konradlorenz.kapp.ui.common.BrandBand
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
+import co.edu.konradlorenz.kapp.ui.common.coverScrolled
 import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
 import co.edu.konradlorenz.kapp.ui.navigation.KAppDestination
 import co.edu.konradlorenz.kapp.ui.navigation.MainShell
-import co.edu.konradlorenz.kapp.ui.theme.Border
-import co.edu.konradlorenz.kapp.ui.theme.BorderSoft
 import co.edu.konradlorenz.kapp.ui.theme.Brand
 import co.edu.konradlorenz.kapp.ui.theme.InProgress
-import co.edu.konradlorenz.kapp.ui.theme.Passed
 import co.edu.konradlorenz.kapp.ui.theme.KAppTheme
-import co.edu.konradlorenz.kapp.ui.theme.Placeholder
+import co.edu.konradlorenz.kapp.ui.theme.Passed
 import co.edu.konradlorenz.kapp.ui.theme.Subject
+import co.edu.konradlorenz.kapp.ui.theme.tones
+import co.edu.konradlorenz.kapp.ui.theme.toned
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 // Every measurement below is read off docs/design/mobile/HomeAndroid.dc.html, which is drawn on a
@@ -75,9 +85,7 @@ private val TileShape = RoundedCornerShape(16.dp)
  * Inicio.
  *
  * Everything that names another screen opens it through [onOpen]: the four shortcuts, the two
- * section links, "Como llegar", and the button on each of the empty states. All four of those
- * screens are still placeholders, so what the student lands on is a card naming the contract that
- * will fill it - which is the honest version of the destination, not a dead tap.
+ * section links, "Como llegar", and the button on each of the empty states.
  *
  * The bar itself is not here: it belongs to every tab, so it lives in MainShell and this screen
  * only leaves room for it.
@@ -85,11 +93,13 @@ private val TileShape = RoundedCornerShape(16.dp)
  * The data is [SampleHomeUiState] until there is a repository behind [HomeViewModel].
  *
  * [destinations] are the tabs the profile role sees. A card about a screen the role does not have
- * is left out with it: no semester for a professor, no timetable for staff.
+ * is left out with it: no semester for a professor, no timetable for staff. [noRole] is an account
+ * the directory gave no role (#249): its first card says to contact TI.
  */
 @Composable
 fun HomeScreen(
     destinations: List<KAppDestination>,
+    noRole: Boolean = false,
     onOpen: (KAppDestination) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory),
@@ -97,7 +107,9 @@ fun HomeScreen(
     HomeContent(
         state = viewModel.uiState,
         destinations = destinations,
+        noRole = noRole,
         onOpen = onOpen,
+        onRetryDay = viewModel::retryDay,
         modifier = modifier,
     )
 }
@@ -107,11 +119,14 @@ private fun HomeContent(
     state: HomeUiState,
     onOpen: (KAppDestination) -> Unit,
     modifier: Modifier = Modifier,
+    onRetryDay: () -> Unit = {},
     destinations: List<KAppDestination> = KAppDestination.entries,
+    noRole: Boolean = false,
 ) {
     val hasSchedule = KAppDestination.Schedule in destinations
     val hasSemaphore = KAppDestination.Semaphore in destinations
 
+    val scroll = rememberScrollState()
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -119,7 +134,7 @@ private fun HomeContent(
     ) {
         // The band runs to the very top of the display and the system paints the status bar over
         // it, which is why MainActivity forces white status icons: they are always on purple.
-        HomeBand(student = state.student)
+        HomeBand(student = state.student, photo = state.photo, onAvatar = { onOpen(KAppDestination.Profile) })
 
         // The band is 80 dp of content below the status bar, and the headline card climbs 24 dp
         // back into it. Starting the scrolling column 24 dp short of the band's edge puts the card
@@ -130,7 +145,7 @@ private fun HomeContent(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .padding(top = BandContentHeight - CardOverlap)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scroll)
                 .padding(
                     start = ScreenPadding,
                     end = ScreenPadding,
@@ -144,20 +159,25 @@ private fun HomeContent(
                     DayState.NoSchedule -> NoScheduleCard(onOpen)
                     DayState.NoClassesToday -> FreeDayCard(onOpen)
                     DayState.DoneForToday -> FreeDayCard(onOpen, done = true)
-                    DayState.Unavailable -> Text(
-                        text = stringResource(R.string.home_day_unavailable),
-                        modifier = Modifier.padding(top = 8.dp),
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    // A card like the others, not bare text: this slot starts inside the band, and
+                    // a line of grey text there landed on the purple.
+                    DayState.Unavailable -> DayUnavailableCard(onRetryDay)
                     is DayState.Classes -> NextClassCard(state.day.next, onOpen)
                 }
+                Spacer(Modifier.height(16.dp))
+            } else if (noRole) {
+                NoRoleCard()
                 Spacer(Modifier.height(16.dp))
             } else {
                 // The column starts inside the band, where the headline card overlaps it. Without
                 // the card the shortcuts would land on purple, so they start below the band's edge,
                 // as far from it as they sit from the card when there is one.
                 Spacer(Modifier.height(CardOverlap + 16.dp))
+            }
+
+            state.offlineSince?.let {
+                OfflineNote(it)
+                Spacer(Modifier.height(12.dp))
             }
 
             Shortcuts(destinations, onOpen)
@@ -195,35 +215,65 @@ private fun HomeContent(
                 }
             }
         }
+        // Over the content, so what scrolls up goes under the greeting (BrandBand).
+        HomeBand(
+            student = state.student,
+            photo = state.photo,
+            onAvatar = { onOpen(KAppDestination.Profile) },
+            cover = true,
+            scrolled = coverScrolled { scroll.value },
+        )
     }
 }
 
 /**
- * The band of BrandBand, with the greeting in it and the person's initials on the end. Until the
- * profile is here it says only "Hola", and the circle waits for initials to put in it.
+ * The band of BrandBand, with the greeting in it and the person's photo on the end, or their
+ * initials when they have not picked one in Perfil. Until the profile is here it says only "Hola",
+ * and the circle waits for initials to put in it.
  */
 @Composable
-private fun HomeBand(student: Student?) {
+private fun HomeBand(
+    student: Student?,
+    photo: ImageBitmap?,
+    onAvatar: () -> Unit,
+    cover: Boolean = false,
+    scrolled: Dp = 0.dp,
+) {
     if (student == null) {
-        BrandBand(title = stringResource(R.string.home_greeting_anonymous))
+        BrandBand(title = stringResource(R.string.home_greeting_anonymous), cover = cover, scrolled = scrolled)
         return
     }
-    BrandBand(title = stringResource(R.string.home_greeting, student.firstName)) {
-        // Initials rather than a photo: user.openapi.yaml carries a name and no picture.
+    BrandBand(
+        title = stringResource(R.string.home_greeting, student.firstName),
+        cover = cover,
+        scrolled = scrolled,
+    ) {
+        // The photo stays on this phone (LocalAvatar): user 1.x has nowhere to upload one. Tapping
+        // the circle opens Perfil, which is where it is changed.
         Box(
             modifier = Modifier
                 .size(34.dp)
                 .clip(CircleShape)
                 .background(Color.White.copy(alpha = 0.18f))
-                .border(1.dp, Color.White.copy(alpha = 0.28f), CircleShape),
+                .border(1.dp, Color.White.copy(alpha = 0.28f), CircleShape)
+                .clickable(onClickLabel = stringResource(R.string.home_open_profile), onClick = onAvatar),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = student.initials,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White,
-            )
+            if (photo != null) {
+                Image(
+                    bitmap = photo,
+                    contentDescription = stringResource(R.string.profile_avatar_description),
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
+            } else {
+                Text(
+                    text = student.initials,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                )
+            }
         }
     }
 }
@@ -263,7 +313,7 @@ private fun NextClassCard(next: NextClass, onOpen: (KAppDestination) -> Unit) {
                             .padding(horizontal = 9.dp, vertical = 5.dp),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Brand,
+                        color = tones.onLime,
                     )
                 }
             }
@@ -296,7 +346,7 @@ private fun NextClassCard(next: NextClass, onOpen: (KAppDestination) -> Unit) {
  * "Como llegar".
  *
  * The only pink thing on the card, so the only thing on the card that is touchable. It opens the
- * map, which is still a placeholder: the room it should centre on arrives with map-service.
+ * map, which for now lists the buildings: centring on the room comes with the interactive map.
  */
 @Composable
 private fun DirectionsButton(onClick: () -> Unit) {
@@ -334,7 +384,7 @@ private fun DirectionsButton(onClick: () -> Unit) {
 @Composable
 private fun FreeDayCard(onOpen: (KAppDestination) -> Unit, done: Boolean = false) {
     CenteredCard(height = HeadlineCardHeight) {
-        IconBubble(R.drawable.ic_free_day, colour = InProgress, alpha = 0.30f, iconColour = Brand)
+        IconBubble(R.drawable.ic_free_day, colour = InProgress, alpha = 0.30f, iconColour = tones.onLime)
         Spacer(Modifier.height(10.dp))
         Text(
             text = stringResource(if (done) R.string.home_done_title else R.string.home_free_day_title),
@@ -357,6 +407,46 @@ private fun FreeDayCard(onOpen: (KAppDestination) -> Unit, done: Boolean = false
     }
 }
 
+/** `day` could not be read: no network, or the service did not answer. */
+/** An account with no role (#249): nothing academic to show, and who can fix that. */
+@Composable
+private fun NoRoleCard() {
+    CenteredCard(height = HeadlineCardHeight) {
+        IconBubble(R.drawable.ic_person, colour = Brand.toned(), alpha = 0.16f)
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = stringResource(R.string.home_no_role),
+            style = MaterialTheme.typography.titleMedium.copy(lineHeight = 20.sp),
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun DayUnavailableCard(onRetry: () -> Unit) {
+    CenteredCard(height = HeadlineCardHeight) {
+        IconBubble(R.drawable.ic_calendar, colour = Subject.toned(), alpha = 0.16f)
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = stringResource(R.string.home_day_unavailable),
+            style = MaterialTheme.typography.titleMedium.copy(lineHeight = 20.sp),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = stringResource(R.string.home_day_retry),
+            modifier = Modifier
+                .clickable(onClick = onRetry)
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            fontSize = 15.sp,
+            lineHeight = 18.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
 /**
  * A student who has never built a schedule - `day` answers 404.
  *
@@ -366,7 +456,7 @@ private fun FreeDayCard(onOpen: (KAppDestination) -> Unit, done: Boolean = false
 @Composable
 private fun NoScheduleCard(onOpen: (KAppDestination) -> Unit) {
     CenteredCard(height = 208.dp) {
-        IconBubble(R.drawable.ic_calendar_plus, colour = Subject, alpha = 0.16f)
+        IconBubble(R.drawable.ic_calendar_plus, colour = Subject.toned(), alpha = 0.16f)
         Spacer(Modifier.height(10.dp))
         Text(
             text = stringResource(R.string.home_no_schedule_title),
@@ -417,8 +507,8 @@ private fun HeadlineSkeleton() {
         ) {
             SkeletonBar(width = 104.dp, height = 11.dp, radius = 6.dp)
             SkeletonBar(width = 188.dp, height = 20.dp, radius = 7.dp)
-            SkeletonBar(width = 236.dp, height = 13.dp, color = BorderSoft, radius = 6.dp)
-            SkeletonBar(width = 142.dp, height = 44.dp, color = BorderSoft, radius = 14.dp)
+            SkeletonBar(width = 236.dp, height = 13.dp, color = tones.borderSoft, radius = 6.dp)
+            SkeletonBar(width = 142.dp, height = 44.dp, color = tones.borderSoft, radius = 14.dp)
         }
     }
 }
@@ -468,7 +558,7 @@ private fun RowScope.Shortcut(
                 .fillMaxWidth()
                 .height(52.dp)
                 .clip(TileShape)
-                .background(destination.colour.copy(alpha = alpha)),
+                .background(destination.colour.toned().copy(alpha = alpha)),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
@@ -476,7 +566,7 @@ private fun RowScope.Shortcut(
                 // The label below says the same thing.
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint = destination.colour,
+                tint = destination.colour.toned(),
             )
         }
         Text(
@@ -540,8 +630,29 @@ private fun ProgrammeLine(programme: String) {
     )
 }
 
+/**
+ * "Sin conexión · datos de las 07:42": what is on Inicio is the copy saved then, because the phone
+ * has no network now (#232). Small and grey: the data is still right, only not fresh.
+ */
+@Composable
+private fun OfflineNote(savedAt: Long) {
+    val time = remember(savedAt) {
+        Instant.ofEpochMilli(savedAt).atZone(ZoneId.systemDefault()).toLocalTime()
+            .format(DateTimeFormatter.ofPattern("HH:mm"))
+    }
+    Text(
+        text = stringResource(R.string.home_offline_note, time),
+        modifier = Modifier.fillMaxWidth(),
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
 /** Credits through the pensum: passed, being taken, and the rest of the track. */
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 private fun SemesterCard(semester: SemesterState.Ready) {
     Panel(elevation = 2.dp) {
         Column(modifier = Modifier.padding(14.dp)) {
@@ -579,20 +690,31 @@ private fun SemesterCard(semester: SemesterState.Ready) {
                     lineHeight = 28.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = (-0.5).sp,
-                    color = Brand,
+                    color = Brand.toned(),
                 )
             }
             Spacer(Modifier.height(12.dp))
             ProgressBar(semester)
             Spacer(Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.height(14.dp),
+            // The unit once, over the three figures, rather than "créditos" in each of them (#232).
+            Text(
+                text = stringResource(R.string.home_semester_credits),
+                fontSize = 12.sp,
+                lineHeight = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(4.dp))
+            // No fixed height: 12 sp text needs about 16 dp, more with the system font scaled up,
+            // and a 14 dp row cut the descenders off every label. A flow row, so a large system
+            // font wraps the three figures instead of cutting the last one off.
+            FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Legend(Passed, R.plurals.home_credits_passed, semester.creditsPassed)
                 Legend(InProgress, R.plurals.home_credits_in_progress, semester.creditsInProgress)
-                Legend(Border, R.plurals.home_credits_remaining, semester.creditsRemaining)
+                Legend(MaterialTheme.colorScheme.outlineVariant, R.plurals.home_credits_remaining, semester.creditsRemaining)
             }
         }
     }
@@ -615,7 +737,7 @@ private fun ProgressBar(semester: SemesterState.Ready) {
             .fillMaxWidth()
             .height(8.dp)
             .clip(RoundedCornerShape(4.dp))
-            .background(Border),
+            .background(MaterialTheme.colorScheme.outlineVariant),
     ) {
         if (passed > 0f) {
             Box(Modifier.weight(passed).fillMaxHeight().background(Passed))
@@ -644,6 +766,7 @@ private fun Legend(colour: Color, @PluralsRes label: Int, credits: Int) {
         Text(
             text = pluralStringResource(label, credits, credits),
             fontSize = 12.sp,
+            lineHeight = 16.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
         )
@@ -669,8 +792,8 @@ private fun SemesterSkeleton() {
                 SkeletonBar(width = 96.dp, height = 14.dp, radius = 7.dp)
                 SkeletonBar(width = 54.dp, height = 22.dp, radius = 7.dp)
             }
-            SkeletonBar(width = null, height = 10.dp, color = BorderSoft, radius = 5.dp)
-            SkeletonBar(width = 220.dp, height = 11.dp, color = BorderSoft, radius = 6.dp)
+            SkeletonBar(width = null, height = 10.dp, color = tones.borderSoft, radius = 5.dp)
+            SkeletonBar(width = 220.dp, height = 11.dp, color = tones.borderSoft, radius = 6.dp)
         }
     }
 }
@@ -703,7 +826,7 @@ private fun UpcomingRow(upcoming: UpcomingClass) {
                     text = upcoming.endTime,
                     fontSize = 12.sp,
                     lineHeight = 15.sp,
-                    color = Placeholder,
+                    color = tones.placeholder,
                 )
             }
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -829,7 +952,7 @@ private fun IconBubble(
 private fun SkeletonBar(
     width: Dp?,
     height: Dp,
-    color: Color = Border,
+    color: Color = MaterialTheme.colorScheme.outlineVariant,
     radius: Dp = height / 2,
 ) {
     val sizing = if (width == null) Modifier.fillMaxWidth() else Modifier.width(width)

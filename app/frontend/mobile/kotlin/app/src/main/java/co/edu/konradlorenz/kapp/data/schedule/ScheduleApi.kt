@@ -1,7 +1,11 @@
 package co.edu.konradlorenz.kapp.data.schedule
 
+import co.edu.konradlorenz.kapp.data.map.Building
+import co.edu.konradlorenz.kapp.data.map.FloorPlan
 import kotlinx.serialization.Serializable
+import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -31,6 +35,21 @@ interface ScheduleApi {
  * one building (EC and BI both have a 301), and without it the answer is a `409`.
  */
 interface MapApi {
+
+    /** Every building on the map, ordered by code: Mapa's list. */
+    @GET("api/map/buildings")
+    suspend fun buildings(): List<Building>
+
+    /**
+     * One floor and every space on it: what the floor renderer draws. With the `ETag` of a floor
+     * already read in [etag], an unchanged floor answers `304` with no body (FloorRepository).
+     */
+    @GET("api/map/buildings/{code}/floors/{floorCode}")
+    suspend fun floor(
+        @Path("code") building: String,
+        @Path("floorCode") floor: String,
+        @Header("If-None-Match") etag: String?,
+    ): Response<FloorPlan>
 
     @GET("api/map/spaces/{code}")
     suspend fun space(

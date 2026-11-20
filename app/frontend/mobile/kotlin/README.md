@@ -3,6 +3,101 @@
 Native Android client, Kotlin and Jetpack Compose. This is the product, not a prototype — see
 `AGENTS.md`.
 
+## Segunda entrega (Desarrollo de Aplicaciones Móviles, 23-10-2026)
+
+Esta sección es para correr la app sin haber abierto nunca el proyecto, a partir del ZIP
+`Frontend_KApp.zip`. Se usa la variante **demo**: no necesita Docker, ni servidor, ni cuenta de
+Microsoft, ni internet. Los datos que muestra son los ejemplos de los contratos del API, guardados
+dentro de la app.
+
+### Qué necesitas
+
+- **Android Studio 2026.2.2 (Rabbit 2) o más nuevo.** Uno más viejo no puede sincronizar el
+  proyecto. Revisa la versión en *Android Studio > About* (en Windows, *Help > About*). Si tienes
+  Quail 4 o Rabbit 1, actualízalo antes de abrir el proyecto: desde el 4 de noviembre de 2026 (#189) el
+  proyecto usa AGP 9.5, que esas versiones no abren.
+- **JDK:** no instales nada aparte. Android Studio trae el suyo, y si hiciera falta otro, Gradle lo
+  descarga solo.
+- **Emulador recomendado:** Pixel 6 con **API 37 (Android 17)**. Créalo en *Device Manager > Create
+  Virtual Device > Pixel 6*, con la imagen de sistema de API 37. Si Android Studio ofrece instalar la
+  plataforma 37 del SDK, acéptalo.
+
+### Correrla desde el ZIP
+
+1. Descomprime `Frontend_KApp.zip`. Queda una carpeta `Frontend_KApp`.
+2. En Android Studio, *File > Open* y elige esa carpeta `Frontend_KApp`, la que tiene
+   `settings.gradle.kts` adentro. Si pregunta si confías en el proyecto, elige *Trust Project*.
+3. Espera a que termine la sincronización de Gradle. La primera vez descarga Gradle y las
+   dependencias, y puede tardar varios minutos.
+4. Revisa que la variante sea **demo**: *Build > Select Build Variant…*, módulo `app`, columna
+   *Active Build Variant*. El proyecto la marca como predeterminada, así que al abrirlo por primera
+   vez debería venir ya en `demo`; si no, elígela ahí.
+5. Elige el emulador y dale **Run** (▶). La primera vez que abre, la app puede tardar hasta dos
+   minutos en mostrar la primera pantalla; las siguientes veces es inmediato.
+
+No hace falta `local.properties` ni ninguna otra configuración: el ZIP compila tal cual, y Android
+Studio escribe por su cuenta la ruta del SDK al abrirlo. Desde una terminal, después de abrirlo una
+vez en Android Studio y con el emulador abierto, dentro de `Frontend_KApp`: `./gradlew
+:app:installDemo` (en Windows, `gradlew.bat :app:installDemo`).
+
+**Para el equipo, desde el repositorio:** `git clone -b develop https://github.com/K-Forge/KApp.git`
+y abre la carpeta `app/frontend/mobile/kotlin`. A partir de ahí, los pasos 3 a 5 son los mismos.
+
+### Entrar y cambiar de perfil
+
+El login se ve como el del producto, con **Ingresar con Microsoft**, pero en la demo ese botón no
+inicia sesión: avisa que no está disponible. Para entrar, toca **Modo demostración ▾**, debajo del
+enlace de invitación, elige un perfil en *Perfil de demostración* y toca **Ingresar con el perfil
+de demostración**:
+
+| Perfil | Quién es | Pestañas |
+|---|---|---|
+| Estudiante | Pepito Perez Gomez, Ingeniería de Sistemas, semestre 8 | Perfil, Semáforo, Inicio, Mapa, Horario |
+| Profesor | Laura Marcela Gómez Restrepo | Perfil, Inicio, Mapa, Horario |
+| Administrativo | Ana Ruiz Mejía | Perfil, Inicio, Mapa |
+
+Para cambiar de perfil: *Perfil > Cerrar sesión*, elige otro y vuelve a entrar. La demo vive el
+**lunes 21 de septiembre de 2026 a las 10:00**, la fecha de los ejemplos, así que Inicio muestra la
+próxima clase y Horario abre en un día con clases.
+
+### Dónde está cada pantalla
+
+| Pantalla | Cómo llegar |
+|---|---|
+| Login | Es la primera al abrir la app sin sesión. La entrada de la demo está en *Modo demostración ▾*. |
+| Invitación | En el login, *¿Vienes de visita? Usa tu código de invitación*. En la demo funciona el código `KL-V-7K2M-QX9P`; cualquier otro dice que no existe. |
+| Inicio | La que abre al ingresar, en el centro de la barra. |
+| Semáforo | Pestaña *Semáforo* (solo el estudiante). |
+| Horario | Pestaña *Horario* (estudiante y profesor). |
+| Perfil | Pestaña *Perfil*. Ahí está *Cerrar sesión*. |
+| Mapa | Pestaña *Mapa* (los tres perfiles): la lista de los 9 edificios de la sede con código, nombre, dirección y niveles; el mapa interactivo llega en la siguiente fase. |
+
+### Problemas comunes
+
+- **La sincronización falla o pide otra versión del plugin de Android.** Android Studio es más viejo
+  que 2026.2.2 (Rabbit 2): actualízalo.
+- **Falta la plataforma 37 o la imagen del emulador.** Instálalas desde *Settings > Languages &
+  Frameworks > Android SDK*.
+- **No aparece el botón Run o no hay módulo `app`.** Abriste otra carpeta: la de afuera que contiene
+  a `Frontend_KApp`, o `Frontend_KApp/app`. Cierra el proyecto y abre `Frontend_KApp`.
+- **Las pantallas dicen "No pudimos cargar…".** Estás en la variante `debug`, que busca un
+  servidor. Cambia a `demo` (paso 4).
+- **Android pide el permiso de dispositivos cercanos o de red local.** Eso solo lo pide la variante
+  `debug` en Android 17; la `demo` no se conecta a nada. Si aparece, también estás en `debug`.
+- **El emulador va muy lento o se cierra.** Cierra otros programas pesados, revisa que tenga
+  aceleración de hardware y, si sigue, borra sus datos en *Device Manager > Wipe Data*.
+
+### Cómo se arma el ZIP
+
+Desde la raíz del repositorio, con todo guardado en git:
+
+```bash
+git archive --format=zip --prefix=Frontend_KApp/ -o Frontend_KApp.zip HEAD:app/frontend/mobile/kotlin
+```
+
+Crea `Frontend_KApp.zip` (unos 240 KB) con el proyecto completo y sin compilados: el código, el
+wrapper de Gradle y los datos de la demo. El repositorio es <https://github.com/K-Forge/KApp>.
+
 ## State
 
 **Sign-in and the session** are built (issue #46): **Ingresar con Microsoft** runs Microsoft's
@@ -60,10 +155,7 @@ there is a repository, `HomeViewModel` serves `HomeSampleData.kt`, which is the 
 artboard is drawn with.
 
 The bar at the bottom navigates, and so does everything on Inicio that names another screen: the
-four shortcuts, the two section links, **Cómo llegar** and the button on each empty state. What
-they open is `PlaceholderScreen` — the same band and card as Inicio, with the contract that will
-fill that screen printed on it. One placeholder for the four of them: there is nothing to tell
-apart yet, and four identical files would only be four files to delete.
+four shortcuts, the two section links, **Cómo llegar** and the button on each empty state.
 
 The bar shows the tabs of the profile role, as issue #46's table has it: a student sees all five,
 a professor has no Semáforo, staff have neither Semáforo nor Horario. Inicio leaves out the cards
@@ -79,10 +171,23 @@ destinations to somebody who has not signed in.
 
 ## Running it
 
-Requires the Android SDK with platform 36 and a JDK 25: `gradle/gradle-daemon-jvm.properties`
-asks for one and Gradle downloads it when the machine has none. Android Studio's bundled JBR
-already is one. Open the `kotlin/` folder in Android Studio - not `kotlin/app/`, which is a
-module and not the project - or from the command line:
+Requires:
+
+- **Android Studio 2026.2.2 (Rabbit 2) or newer.** The build uses AGP 9.5, and an older Android
+  Studio cannot sync it: the project fails to open instead of building with something else. Quail 4
+  and Rabbit 1 stop at AGP 9.4, so whoever still has one updates before pulling. Check
+  *Android Studio > About* and update before pulling a change that moves AGP. Google's
+  [compatibility table](https://developer.android.com/build/releases/about-agp) gives the oldest
+  Android Studio each AGP release works with.
+- **AGP follows the Android Studio the team uses.** It moves by hand once that Android Studio
+  supports the new version; Dependabot only proposes AGP patches (`.github/dependabot.yml`).
+- The Android SDK with **platform 37**, which is `compileSdk`. Android Studio offers to install it
+  on the first sync.
+- A JDK 25: `gradle/gradle-daemon-jvm.properties` asks for one and Gradle downloads it when the
+  machine has none. Android Studio's bundled JBR already is one.
+
+Open the `kotlin/` folder in Android Studio - not `kotlin/app/`, which is a module and not the
+project - or from the command line:
 
 ```bash
 cd app/frontend/mobile/kotlin
@@ -91,6 +196,28 @@ cd app/frontend/mobile/kotlin
 ./gradlew :app:testDebugUnitTest    # unit tests
 ./gradlew :app:installDebug         # onto a connected device or a running emulator
 ```
+
+## The demo build
+
+The `demo` build type runs with nothing else: no Docker, no backend, no Microsoft account. It is
+debug with every API call answered from the contracts' examples, in `app/src/demo/assets/demo/`
+(issue #159). On a fresh clone it is the selected variant, so Run is enough; otherwise pick
+**demo** in *Build Variants*, or:
+
+```bash
+./gradlew :app:installDemo
+```
+
+- **Who signs in** is the picker under **Ingresar con Microsoft**: Estudiante, Profesor or
+  Administrativo, the three examples of `GET /api/users/me`. Sign out from Perfil to pick another.
+- **It keeps nothing.** A plan created or a course moved in the Semáforo answers with the example
+  plan, and the next read shows the example again.
+- **It sits next to a debug build**, as `co.edu.konradlorenz.kapp.demo`, with its own session.
+- **The files are the Prism mocks' answers**, except Mapa's building list: the contract's example
+  has one building, so that file is the campus out of map-service's seeds. After an example changes
+  in `docs/api/`, start the mocks and run `scripts/capture-demo-data.sh` to copy them again.
+  `DemoBackend` decides which file answers which call; `DemoBackendTest` checks every call the
+  screens make has one.
 
 ## Running against the mocks
 
@@ -112,6 +239,16 @@ curl http://localhost:4000/auth/health    # {"status":"UP"}
 The mocks speak plain HTTP. Only the debug build allows it, and only for `10.0.2.2` and
 `localhost`: `src/debug/res/xml/network_security_config.xml`, merged by `src/debug/AndroidManifest.xml`.
 
+**On Android 17 a debug build asks for local network access the first time it opens.** The app
+targets API 37, and Android 17 blocks connections to private addresses - `10.0.2.2`, a LAN IP -
+for apps that target it, unless they hold `ACCESS_LOCAL_NETWORK`. The system words the dialog as
+*"find, connect to, and determine the relative position of nearby devices"*, because it files local
+network access with the other nearby-device permissions; it is the one that lets the app reach the
+mocks. Tap **Allow**. With **Don't allow**, every request times out and the login says *"No pudimos
+conectar con el servidor"*: grant it again under *Settings > Apps > KApp > Permissions > Nearby
+devices*. `LocalNetworkAccess` in `src/debug` asks; the release build talks to a public host, never
+declares the permission and never asks. Older Android versions do not ask at all.
+
 A debug build with no Microsoft tenant configured (see below) signs in with a fake ID token, which
 the mocks accept, so pressing **Ingresar con Microsoft** goes straight in. Under the button it
 offers **Perfil de prueba en los mocks**: Estudiante, Profesor or Administrativo picks the named
@@ -121,30 +258,92 @@ with it the tabs. The token is a student's whatever is picked; only the profile 
 How the mocks answer, the `Prefer` header for other states, and troubleshooting:
 [`app/backend/microservices/mock/README.md`](../../../backend/microservices/mock/README.md).
 
+## Running against the local backend
+
+The mocks answer with examples. To see what the services really do - sign-in, session renewal,
+the profile, the semáforo and the timetable from SINU - run the backend on your computer and point
+a debug build at it. Start it from `app/backend/microservices`, with the `.env` the
+[runbook](../../../../docs/RUNBOOK.md) describes:
+
+```bash
+KAPP_STACK=kotlin docker compose --profile core --profile academic --profile map up -d --build
+curl http://localhost:8080/auth/health    # {"status":"UP"}
+KAPP_STACK=kotlin docker compose --profile core --profile academic --profile map down    # when done
+```
+
+`KAPP_STACK=kotlin` names the compose project `kapp-kotlin`, so these containers never touch the
+ones another worktree runs. Without it the project is `kapp-back`, Backend's: an `up` there
+recreates its containers and a `down` removes them. Pass it to every compose command.
+
+Then give Gradle two properties, in `~/.gradle/gradle.properties` or with `-P` - never in the
+committed `gradle.properties`, because they are yours, not the project's:
+
+```properties
+kapp.api.baseUrl=http://10.0.2.2:8080/
+kapp.dev.oidcIssuer=http://10.0.2.2:8090/kapp
+```
+
+With them, **Ingresar con Microsoft** opens the backend's
+[fake OIDC server](../../../backend/microservices/fake-oidc/README.md) in the browser. Type
+`estudiante`, `profesor` or `administrativo` and leave the claims box empty: that is who signs in,
+so there is no profile picker under the button. The ID token it returns goes to
+`POST /auth/microsoft`, exactly as Microsoft's will. Remove the two lines to go back to the mocks.
+
+- **Where the code is.** `DevOidc` in `src/debug`: the authorization code flow with PKCE, and
+  `OidcRedirectActivity`, which catches `kapp-dev://oidc/callback`. `src/release` has a `DevOidc`
+  that always answers `null`, so a release build never signs in this way.
+- **The issuer is the address.** auth-service accepts only the issuers in `KAPP_MICROSOFT_ISSUERS`,
+  and the emulator's is `http://10.0.2.2:8090/kapp`. A phone on the same Wi-Fi needs the computer's
+  LAN address in both properties, in that variable, and in the debug network security config.
+- **If Android kills the app while the login page is open**, the sign-in that was waiting is gone:
+  the redirect only reopens the app on the login screen. Sign in again. A real device does this
+  rarely; a busy emulator, more often.
+- **Sessions renew one at a time.** Presenting a refresh token twice revokes its family and ends
+  the session; `SessionManager` already serialises renewals, so this matters only if you add a
+  second path that renews.
+
 ## Microsoft sign-in
 
 Through MSAL, in single-account mode ([ADR 0003](../../../../docs/adr/0003-oidc-over-saml-for-mobile-authentication.md)).
-It needs three values from the university's app registration (issue #62), read from Gradle
-properties so none of them is committed. Put them in `~/.gradle/gradle.properties`:
+It needs three values, read from Gradle properties. The first two identify the app registration
+for the test tenant (issue #62): they are not secrets, but they point at a personal tenant and this
+repository is public, so they are not written here. Brian gives them to you privately. The third is
+yours. Put all three in `~/.gradle/gradle.properties`, never in the committed `gradle.properties`:
+with a client id set, a debug build stops using the mocks' made-up token, so it is an opt-in for
+whoever is working on sign-in.
 
 ```properties
 kapp.msal.clientId=<application (client) id>
-kapp.msal.tenantId=<directory (tenant) id>
-kapp.msal.signatureHash=<base64 SHA-1 of the signing certificate>
+kapp.msal.tenantId=<tenant id>
+kapp.msal.signatureHash=<your debug key's hash, below>
 ```
 
-The signature hash is per signing key, so every developer's debug keystore needs its own entry in
-the registration's Android redirect URIs, `msauth://co.edu.konradlorenz.kapp/<hash>`:
+**Each developer registers their own key.** Microsoft redirects back to
+`msauth://co.edu.konradlorenz.kapp/<hash>`, and the hash is the SHA-1 of the certificate that
+signed the build. Every computer's debug keystore is different, so every developer has their own
+hash, and the team does not share a keystore. Get yours with:
 
 ```bash
 keytool -exportcert -alias androiddebugkey -keystore ~/.android/debug.keystore -storepass android \
   | openssl sha1 -binary | openssl base64
 ```
 
-| Build | No client id | With a client id |
-|---|---|---|
-| Debug | Fake ID token, accepted by the mocks only | Microsoft's sign-in |
-| Release | "todavía no tiene configurado el ingreso con Microsoft" | Microsoft's sign-in |
+Send it to Brian, who adds it in the app registration under *Authentication > Android*, with the
+package `co.edu.konradlorenz.kapp`. Until it is registered, Microsoft will not send the sign-in back
+to the app. A debug build logs MSAL's own messages to logcat (tag `MSAL`, never with personal
+data), which is where a misconfiguration shows up: from the app it looks like a cancelled sign-in.
+
+Which sign-in a build uses:
+
+| Build | `kapp.msal.clientId` set | `kapp.dev.oidcIssuer` set | Neither |
+|---|---|---|---|
+| Debug | Microsoft's sign-in | The local backend's fake OIDC server | Made-up token, mocks only |
+| Release | Microsoft's sign-in | Ignored | "todavía no tiene configurado el ingreso con Microsoft" |
+
+A real ID token works against the mocks too, since they accept any token, so Microsoft's sign-in
+can be tried without running the backend. Against the local backend, auth-service has to trust the
+tenant first: `KAPP_MICROSOFT_*` in its `.env`, as the
+[fake OIDC server's README](../../../backend/microservices/fake-oidc/README.md) describes.
 
 The session, in `data/session/`:
 
@@ -159,12 +358,49 @@ The session, in `data/session/`:
 - **Signed out** with `POST /auth/logout`, then both tokens are forgotten even if the server could
   not be reached.
 
+## Running against the dev server
+
+the-hive runs `develop` with the real services, at `https://the-hive.tail1e5d4e.ts.net` (see the
+[dev server's README](../../../../deploy/dev-server/README.md)). It is reachable only through the
+team's Tailscale network, and it signs in only with Microsoft: no fake OIDC server and no
+passwords. So a debug build pointed at it needs the three `kapp.msal.*` values above, your hash
+registered, and a test user of the tenant (Brian creates them, one per profile role):
+
+```bash
+./gradlew installDebug -Pkapp.api.baseUrl=https://the-hive.tail1e5d4e.ts.net:8080/
+```
+
+- **Port 8080 is the API.** The address without a port is the admin portal, which answers every
+  path with its own page, so a build pointed there fails on the first call that expects JSON.
+- **The emulator needs Tailscale's DNS.** It resolves names through the host's default servers,
+  which do not know `*.ts.net`, so start it with MagicDNS as its server:
+
+  ```bash
+  emulator -avd <your AVD> -dns-server 100.100.100.100
+  ```
+
+  On Windows, `100.100.100.100` answers only `*.ts.net` unless your own tailnet has a nameserver
+  to send the rest to, so Microsoft's sign-in fails with "No pudimos conectar con el servidor"
+  (`UnknownHostException` for `login.microsoftonline.com` in logcat). In the admin console, under
+  *DNS*, add a global nameserver (Cloudflare, say) and turn on *Override DNS servers*. Passing
+  two servers to `-dns-server` does not help: the emulator uses only the first.
+
+  A phone with the Tailscale app connected needs nothing extra.
+- **One profile role per user.** The tabs follow the role the tenant gives the user, so trying
+  another role means signing out and back in as another user; Microsoft keeps the last account
+  in its picker under *Use another account*.
+
+A debug build writes one logcat line per API call, tag `KAppHttp`: method, path and status, or the
+kind of failure that kept it from an answer. It never writes the query, headers or body, so no
+token or personal data reaches it. When a screen says "No pudimos cargar…", that line says whether
+the server refused (`401`), failed (`5xx`), was not there (`404`) or never answered.
+
 ## Previews
 
 Every `@Preview` renders at 360x800, which is the size the mockups are drawn at, so the two can be
 compared side by side without a device. `HomeScreen.kt` has four — the screen and the three states
 of `EstadosHome.dc.html` — `LoginScreen.kt` two, as a release build and as a debug build with an
-error showing, `ProfileScreen.kt` two, loaded and failed, and `PlaceholderScreen.kt` one. The Semáforo has none: it is too long for one 800 dp frame, and the emulator against the mocks shows it better.
+error showing and `ProfileScreen.kt` two, loaded and failed. The Semáforo has none: it is too long for one 800 dp frame, and the emulator against the mocks shows it better.
 
 ## Layout
 
@@ -188,7 +424,7 @@ app/src/main/java/co/edu/konradlorenz/kapp/
     ├── profile/                 ProfileScreen + ProfileViewModel
     ├── semaphore/               SemaphoreScreen + SemaphoreViewModel
     ├── schedule/                ScheduleScreen + ScheduleViewModel
-    ├── placeholder/             Mapa, the one tab not built yet
+    ├── map/                     Mapa: the buildings, until the interactive map
     └── invitation/              stub
 ```
 
@@ -215,7 +451,7 @@ names that sheet assigns. Two rules worth not rediscovering:
 | Visitor passes | `ROLE_GUEST` and `POST /auth/visitor-passes/{code}/redeem`. No issue asks for them in the app yet |
 | Hilt | It earns its place when there are two implementations to swap, not before |
 | A monochrome launcher icon | Themed icons need a single-colour version of the crest, which is a design asset we do not have |
-| Mapa | The one route left on `PlaceholderScreen`. No issue asks for the Kotlin map yet; a class's room is shown from the map API in the timetable's sheet, without drawing the floor |
+| Mapa | The interactive map. For now Mapa says it comes in the next phase and lists the buildings from `GET /api/map/buildings`, with the code a class's room carries in Horario; a class's room is shown from the map API in the timetable's sheet, without drawing the floor |
 | A mockup for the Horario | None exists; the screen is Inicio's band, card and class rows |
 | The period switcher | `GET /api/schedule/me/periods`. Not in issue #45's list; the timetable is the current period's |
 | A mockup for the Semáforo | None exists; the screen is Inicio's band and card with one row per item |
@@ -235,5 +471,8 @@ by hand, so Gradle and the Kotlin compiler move together. Then read the diff: th
 writes a dozen `android.*` flags into `gradle.properties` that pin the behaviour of the previous
 AGP. They are deprecated the moment they are written and AGP 10 removes them, so take them out and
 fix what actually breaks. That is the whole point of upgrading.
+
+Moving AGP can raise the oldest Android Studio that opens the project. When it does, update the
+first line of *Running it* in the same pull request, and tell the team before it merges.
 
 There is no Kotlin Android plugin in the build: AGP 9 compiles Kotlin itself.

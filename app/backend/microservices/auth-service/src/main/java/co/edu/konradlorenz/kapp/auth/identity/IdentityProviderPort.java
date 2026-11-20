@@ -4,9 +4,8 @@ package co.edu.konradlorenz.kapp.auth.identity;
  * The seam between "who is this person" and everything else KApp does.
  *
  * <p>Three methods, and none of them mentions BCrypt, MongoDB, or account creation. That
- * is the whole design: {@code AuthService} depends on this interface, so when the
- * university grants an application registration, an Entra adapter is added beside
- * {@code LocalIdentityProvider} and no caller changes. Widening this signature - a
+ * is the whole design: {@code AuthService} depends on this interface, which is how
+ * {@code EntraIdAdapter} came to sit beside {@code LocalIdentityProvider} with no caller changing. Widening this signature - a
  * {@code createAccount}, a {@code Credential} return type, a password-hash parameter -
  * would quietly re-couple authentication to local storage and undo that.
  *

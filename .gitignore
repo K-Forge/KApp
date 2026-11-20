@@ -348,3 +348,8 @@ tmp/
 
 # Python bytecode from the tools under docs/
 __pycache__/
+
+# ─────────────────────────────────────────────
+# Documents generated from docs/ti/*.md (scripts/build-ti-docs.sh)
+# ─────────────────────────────────────────────
+docs/ti/build/

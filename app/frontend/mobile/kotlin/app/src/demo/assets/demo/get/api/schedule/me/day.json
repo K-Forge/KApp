@@ -1,0 +1,17 @@
+[
+    {
+        "sectionCode": "4127",
+        "sinuCode": "59035",
+        "pensumItemCode": "59035",
+        "courseName": "DESARROLLO DE APLICACIONES MÓVILES",
+        "group": "51",
+        "professor": "GÓMEZ RESTREPO LAURA MARCELA",
+        "startTime": "18:15",
+        "endTime": "20:30",
+        "blocks": 3,
+        "sede": "Sede Principal",
+        "buildingCode": "EC",
+        "room": "405",
+        "color": "#539392"
+    }
+]

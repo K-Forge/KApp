@@ -18,6 +18,9 @@ TYPES='feat|fix|chore|release|hotfix|docs|refactor|test'
 # 72 is the git tradition and what fits git log --oneline; 100 is commitlint's default and what
 # this team's narrative subjects need. The hard limit is 100, the guide asks people to aim for 72.
 MAX_SUBJECT=100
+# LONG_SUBJECT=warn turns the length rule into a warning. Only CI sets it, for Dependabot's titles:
+# they name the whole directory and nobody can make Dependabot write shorter ones.
+LONG_SUBJECT=${LONG_SUBJECT:-error}
 CONTEXT=''
 
 fail() {
@@ -62,6 +65,11 @@ check_subject() {
     return
   fi
   if [ "${#s}" -gt "$MAX_SUBJECT" ]; then
+    if [ "$LONG_SUBJECT" = warn ]; then
+      printf 'warning: %s"%s": %d characters, over %d. Shorten it before merging if you can.\n' \
+        "$CONTEXT" "$s" "${#s}" "$MAX_SUBJECT" >&2
+      return 0
+    fi
     fail "\"$s\": ${#s} characters; the first line is at most $MAX_SUBJECT."
     return
   fi

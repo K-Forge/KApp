@@ -1,6 +1,8 @@
 # ADR 0009 — Atlas is the only development database
 
-- **Status:** Accepted and implemented
+- **Status:** Accepted and implemented. Amended by [ADR 0010](0010-a-local-database-for-evaluation.md):
+  a `local-db` profile, for evaluation and offline runs only, brings back a local MongoDB.
+  For the team, this record still holds.
 - **Date:** 2026-09-19
 
 ## Context

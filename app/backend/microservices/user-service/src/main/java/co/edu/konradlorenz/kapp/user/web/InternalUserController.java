@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.user.web;
 
 import co.edu.konradlorenz.kapp.user.service.UserProfileService;
+import co.edu.konradlorenz.kapp.user.web.dto.InternalUserRolesRequest;
 import co.edu.konradlorenz.kapp.user.web.dto.InternalUserUpsertRequest;
 import co.edu.konradlorenz.kapp.user.web.dto.DirectoryEntry;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -48,6 +50,14 @@ public class InternalUserController {
             description = "Idempotent upsert keyed by e-mail. Returns 200 in both cases.")
     public DirectoryEntry upsert(@Valid @RequestBody InternalUserUpsertRequest request) {
         return users.upsertFromAuth(request);
+    }
+
+    /** auth-service passing on the roles an administrator gave an account. Idempotent. */
+    @PutMapping(path = "/{id}/roles", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Set a profile's roles from another service",
+            description = "Exactly one profile role, never ROLE_GUEST. 404 when no profile carries the id.")
+    public DirectoryEntry setRoles(@PathVariable String id, @Valid @RequestBody InternalUserRolesRequest request) {
+        return users.setRoles(id, request.roles());
     }
 
     /** auth-service removing an account an administrator deleted: its credential is already gone. */

@@ -7,13 +7,11 @@ package co.edu.konradlorenz.kapp.auth.identity;
  * and a sealed hierarchy makes an exhaustive {@code switch} in a provider a compile-time
  * obligation rather than a runtime surprise when a new assertion type appears.
  *
- * <p>{@link AuthorizationCode} is deliberately unimplemented. It exists so the shape of
- * {@link IdentityProviderPort} is proven against the flow Microsoft Entra ID will
- * actually use, instead of being designed around passwords and then bent later. Nothing
- * supports it today, so resolving a provider for one fails loudly.
+ * <p>{@link MicrosoftIdToken} is how members of the university sign in. {@link Password} is for
+ * development, CI and the mocks, behind the local sign-in flag.
  */
 public sealed interface IdentityAssertion
-        permits IdentityAssertion.Password, IdentityAssertion.AuthorizationCode {
+        permits IdentityAssertion.Password, IdentityAssertion.MicrosoftIdToken {
 
     /**
      * E-mail and password, verified against a locally stored BCrypt hash.
@@ -29,17 +27,13 @@ public sealed interface IdentityAssertion
     }
 
     /**
-     * An OAuth2 / OIDC authorization code obtained from an external identity provider.
+     * The ID token a client brought back from Microsoft's sign-in, with which client it is.
      *
-     * <p>Not implemented in the MVP: the university has not granted an application
-     * registration yet. Present because it is the assertion an Entra adapter receives,
-     * and the port has to be able to carry it without changing shape.
-     *
-     * @param code         the authorization code returned to the client's redirect URI
-     * @param redirectUri  the redirect URI the code was issued for
-     * @param codeVerifier the PKCE verifier matching the challenge sent with the request
+     * @param idToken as Microsoft issued it, never trusted before {@code MicrosoftIdTokenVerifier}
+     *                checked it
+     * @param client  the apps or the portal: the portal takes only an account with a permission
      */
-    record AuthorizationCode(String code, String redirectUri, String codeVerifier)
+    record MicrosoftIdToken(String idToken, co.edu.konradlorenz.kapp.auth.domain.RefreshToken.Client client)
             implements IdentityAssertion {
     }
 }

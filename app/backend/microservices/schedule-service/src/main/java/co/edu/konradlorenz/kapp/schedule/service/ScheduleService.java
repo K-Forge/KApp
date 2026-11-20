@@ -3,6 +3,7 @@ package co.edu.konradlorenz.kapp.schedule.service;
 import co.edu.konradlorenz.kapp.common.academic.AcademicPeriod;
 import co.edu.konradlorenz.kapp.common.error.ResourceNotFoundException;
 import co.edu.konradlorenz.kapp.schedule.catalog.PensumCatalogService;
+import co.edu.konradlorenz.kapp.schedule.catalog.PensumCourseView;
 import co.edu.konradlorenz.kapp.schedule.color.CourseColors;
 import co.edu.konradlorenz.kapp.schedule.domain.Meeting;
 import co.edu.konradlorenz.kapp.schedule.domain.MeetingResolution;
@@ -106,13 +107,14 @@ public class ScheduleService {
         return reader.read(person, period).map(reading -> {
             SinuTimetable timetable = reading.timetable();
             Map<String, String> buildings = sedes.bySede();
+            List<PensumCourseView> pensum = person.role() == SinuPerson.Role.STUDENT && timetable.pensumCode() != null
+                    ? catalog.pensumCourses(timetable.pensumCode())
+                    : List.of();
             Map<String, String> colors = CourseColors.assign(
                     timetable.sections().stream().map(SinuSection::sinuCode).toList());
             List<Section> sections = timetable.sections().stream()
                     .map(s -> new Section(s.sectionCode(), s.sinuCode(),
-                            person.role() == SinuPerson.Role.STUDENT
-                                    ? catalog.pensumItemCode(timetable.pensumCode(), s.sinuCode()).orElse(null)
-                                    : null,
+                            PensumCatalogService.pensumItemCode(pensum, s.sinuCode()).orElse(null),
                             s.courseName(), s.level(), s.credits(), s.totalHours(), s.group(), s.subgroup(),
                             s.professor(), s.sede(), s.sede() == null ? null : buildings.get(s.sede().trim()),
                             colors.get(s.sinuCode()), s.meetings()))

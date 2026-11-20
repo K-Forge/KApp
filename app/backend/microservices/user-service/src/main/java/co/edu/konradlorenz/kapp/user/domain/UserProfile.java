@@ -78,6 +78,12 @@ public record UserProfile(
                 createdAt, now);
     }
 
+    /** @return a copy holding these roles */
+    public UserProfile withRoles(List<UserRole> newRoles, Instant now) {
+        return new UserProfile(id, email, firstName, lastName, avatarUrl, newRoles, active, searchTokens,
+                createdAt, now);
+    }
+
     /** @return a copy with the picture set, or cleared with null */
     public UserProfile withAvatarUrl(String newAvatarUrl, Instant now) {
         return new UserProfile(id, email, firstName, lastName, newAvatarUrl, roles, active, searchTokens,

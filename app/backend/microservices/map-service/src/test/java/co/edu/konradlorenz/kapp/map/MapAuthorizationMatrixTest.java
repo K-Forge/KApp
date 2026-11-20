@@ -96,6 +96,10 @@ class MapAuthorizationMatrixTest {
         return asRole("ADMIN");
     }
 
+    private static RequestPostProcessor unassigned() {
+        return asRole("UNASSIGNED");
+    }
+
     // ---------------------------------------------------------- fixtures
 
     /** A building the seed migration does not know about, for writes to mutate freely. */
@@ -173,6 +177,16 @@ class MapAuthorizationMatrixTest {
         mockMvc.perform(get("/api/map/buildings").with(staff())).andExpect(status().isOk());
         mockMvc.perform(get("/api/map/buildings").with(admin())).andExpect(status().isOk());
         mockMvc.perform(get("/api/map/buildings")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("ROLE_UNASSIGNED, a member the directory does not classify, reads the map and writes nothing")
+    void unassigned_readsTheMap() throws Exception {
+        mockMvc.perform(get("/api/map/buildings").with(unassigned())).andExpect(status().isOk());
+        mockMvc.perform(get("/api/map/campuses").with(unassigned())).andExpect(status().isOk());
+        mockMvc.perform(get("/api/map/space-types").with(unassigned())).andExpect(status().isOk());
+        mockMvc.perform(get("/api/map/spaces/search").param("q", "laboratorio").with(unassigned())).andExpect(status().isOk());
+        mockMvc.perform(delete("/api/map/buildings/{code}", "NOPE").with(unassigned())).andExpect(status().isForbidden());
     }
 
     @Test

@@ -69,7 +69,8 @@ public class AuthRateLimitFilter implements WebFilter, Ordered {
      * hour, which a per-address limit would refuse.
      */
     private static boolean isCredentialEndpoint(String path) {
-        return path.equals("/auth/login")
+        return path.equals("/auth/microsoft")
+                || path.equals("/auth/login")
                 // Replacing a password takes the current one, so it is guessed at like login.
                 || path.equals("/auth/password")
                 || path.equals("/auth/register")

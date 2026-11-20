@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
-import { isTokenExpired } from '../../core/auth/jwt.util';
+import { isTokenExpired, secondsUntilExpiry } from '../../core/auth/jwt.util';
 import { TokenStore } from '../../core/auth/token.store';
 import { ClockService } from '../../core/clock/clock.service';
 import { ApiConfigService } from '../../core/config/api-config.service';
@@ -11,7 +11,7 @@ import { ThemeService } from '../../core/theme/theme.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TokenCountdownComponent } from '../../shared/ui/token-countdown/token-countdown.component';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
-import { NAV_GROUPS } from '../nav';
+import { navFor } from '../nav';
 
 
 /** Nav + header shared by every authenticated screen. Login stays outside so it renders alone. */
@@ -137,7 +137,7 @@ import { NAV_GROUPS } from '../nav';
           <div class="nav-backdrop" (click)="closeDrawer()" aria-hidden="true"></div>
         }
         <nav id="shell-nav" class="shell-nav" [attr.aria-label]="'Sections' | t">
-          @for (group of groups; track group.title) {
+          @for (group of groups(); track group.title) {
             <p class="nav-group-title">{{ group.title | t }}</p>
             @for (link of group.links; track link.path) {
               <a
@@ -535,13 +535,31 @@ export class ShellComponent {
       )
       .subscribe(() => this.drawerOpen.set(false));
 
-    // The token's deadline is the session's. The shell is on screen exactly while somebody is
-    // signed in, so it watches the clock and signs out the second the token runs out.
+    // The shell is on screen exactly while somebody is signed in, so it watches the clock. A
+    // minute before the access token runs out it renews the session; when the token runs out
+    // with no renewal, it tries once more and otherwise signs out that second. Each happens once
+    // per access token: a renewal brings a new one.
     const clock = inject(ClockService);
+    let renewedEarlyFor: string | null = null;
+    let endedFor: string | null = null;
     effect(() => {
+      const raw = this.tokenStore.raw();
       const claims = this.tokenStore.decoded()?.claims;
-      if (claims && isTokenExpired(claims, clock.now())) {
-        untracked(() => this.auth.expire());
+      if (!raw || !claims) {
+        return;
+      }
+      if (isTokenExpired(claims, clock.now())) {
+        if (endedFor !== raw) {
+          endedFor = raw;
+          untracked(() => this.renewOrExpire());
+        }
+      } else if (
+        secondsUntilExpiry(claims, clock.now()) <= RENEW_BEFORE_SECONDS &&
+        this.tokenStore.refreshToken() &&
+        renewedEarlyFor !== raw
+      ) {
+        renewedEarlyFor = raw;
+        untracked(() => void this.auth.renew());
       }
     });
   }
@@ -590,7 +608,8 @@ export class ShellComponent {
   protected readonly theme = inject(ThemeService);
   private readonly i18n = inject(I18nService);
 
-  readonly groups = NAV_GROUPS;
+  /** Only the sections this account's permissions open: reception sees visitor passes, not users. */
+  readonly groups = computed(() => navFor(this.tokenStore.roles()));
 
   /** The host alone. The full URL is in the tooltip; the button only has to say which machine. */
   readonly shortBaseUrl = () => {
@@ -640,7 +659,18 @@ export class ShellComponent {
   logout(): void {
     this.auth.logout();
   }
+
+  private renewOrExpire(): void {
+    if (!this.tokenStore.refreshToken()) {
+      this.auth.expire();
+      return;
+    }
+    void this.auth.renew().then((renewed) => renewed || this.auth.expire());
+  }
 }
+
+/** How long before the access token runs out the shell renews it. */
+const RENEW_BEFORE_SECONDS = 60;
 
 const NAV_HIDDEN_KEY = 'kapp-admin:nav-hidden';
 

@@ -19,7 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,8 +32,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import co.edu.konradlorenz.kapp.ui.common.LocalGoHome
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
-import co.edu.konradlorenz.kapp.ui.theme.BorderSoft
+import co.edu.konradlorenz.kapp.ui.theme.tones
 import co.edu.konradlorenz.kapp.ui.theme.Brand
 
 // Read off the bar of docs/design/mobile/HomeAndroid.dc.html, drawn on a 360x800 canvas.
@@ -57,7 +60,8 @@ val BarContentPadding = BarHeight + BarBottomInset + 14.dp
  * in yet.
  *
  * [destinations] are the tabs the profile role sees (destinationsFor), so a professor's bar has
- * four and staff's three. The tabs share the width, so fewer tabs are wider, not gapped.
+ * four and staff's three. The tabs share the width, so fewer tabs are wider, not gapped. A visitor
+ * has the map alone: no bar at all, and a crest that goes nowhere, since there is no Inicio (#232).
  */
 @Composable
 fun MainShell(
@@ -68,13 +72,23 @@ fun MainShell(
     content: @Composable () -> Unit,
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        content()
-        KAppBottomBar(
-            current = current,
-            destinations = destinations,
-            onSelect = onSelect,
-            modifier = Modifier.align(Alignment.BottomCenter),
-        )
+        // The crest on every tab's band goes to Inicio (BrandBand).
+        val goHome = if (KAppDestination.Home in destinations) {
+            { onSelect(KAppDestination.Home) }
+        } else {
+            null
+        }
+        CompositionLocalProvider(LocalGoHome provides goHome) {
+            content()
+        }
+        if (destinations.size > 1) {
+            KAppBottomBar(
+                current = current,
+                destinations = destinations,
+                onSelect = onSelect,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
     }
 }
 
@@ -94,7 +108,7 @@ private fun KAppBottomBar(
             .shadow(12.dp, BarShape, ambientColor = Brand, spotColor = Brand)
             .clip(BarShape)
             .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, BorderSoft, BarShape)
+            .border(1.dp, tones.borderSoft, BarShape)
             .padding(start = 4.dp, end = 4.dp, top = 6.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -125,8 +139,16 @@ private fun RowScope.Tab(
             .weight(1f)
             .clip(TabShape)
             // selectable rather than clickable: a tab is one of a set, and this is what makes
-            // TalkBack say "selected" instead of reading five buttons that all look alike.
-            .selectable(selected = active, role = Role.Tab, onClick = onClick),
+            // TalkBack say "selected" instead of reading five buttons that all look alike. The
+            // press ripples in the brand's pink, the colour the pill turns, rather than Android's
+            // grey, which clashed with it.
+            .selectable(
+                selected = active,
+                interactionSource = null,
+                indication = ripple(color = MaterialTheme.colorScheme.primary),
+                role = Role.Tab,
+                onClick = onClick,
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {

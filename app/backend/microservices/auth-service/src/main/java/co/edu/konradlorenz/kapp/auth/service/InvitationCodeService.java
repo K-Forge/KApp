@@ -126,7 +126,7 @@ public class InvitationCodeService {
      * would mean anyone who can read the repo can escalate. Administrators are promoted
      * deliberately, by someone who already is one.
      */
-    private static final Set<String> GRANTABLE_ROLES = Set.of("ROLE_STUDENT", "ROLE_PROFESSOR");
+    private static final Set<String> GRANTABLE_ROLES = Set.of("ROLE_STUDENT", "ROLE_PROFESSOR", "ROLE_STAFF");
 
     /**
      * @param redeemable when true, only codes that could be redeemed right now: active,
@@ -197,9 +197,9 @@ public class InvitationCodeService {
     public InvitationCode create(InvitationCodeRequest request) {
         if (!GRANTABLE_ROLES.contains(request.role())) {
             throw new BusinessRuleException(
-                    "An invitation code may only grant ROLE_STUDENT or ROLE_PROFESSOR",
+                    "An invitation code may only grant a profile role",
                     List.of(new ApiError.FieldIssue("role",
-                            "must be one of ROLE_STUDENT, ROLE_PROFESSOR")));
+                            "must be one of ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF")));
         }
         String code = nextCode();
 

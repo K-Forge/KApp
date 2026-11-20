@@ -25,36 +25,28 @@ class PensumCatalogServiceTest {
     @Test
     @DisplayName("a course is matched by its SINU code, whatever the item's printed code")
     void matchesBySinuCode() {
-        when(client.listPensumCourses("1015")).thenReturn(List.of(
-                new PensumCourseView("17018", "17080", "17018", "Estadística Descriptiva")));
-
-        assertThat(new PensumCatalogService(client).pensumItemCode("1015", "17080")).contains("17018");
+        assertThat(PensumCatalogService.pensumItemCode(List.of(
+                new PensumCourseView("17018", "17080", "17018", "Estadística Descriptiva")), "17080")).contains("17018");
     }
 
     @Test
     @DisplayName("an item SINU's code is not known for is matched by its printed code")
     void matchesByPrintedCodeWhenSinuCodeIsUnknown() {
-        when(client.listPensumCourses("1015")).thenReturn(List.of(
-                new PensumCourseView("59035", null, "59035", "Desarrollo de Aplicaciones Móviles")));
-
-        assertThat(new PensumCatalogService(client).pensumItemCode("1015", "59035")).contains("59035");
+        assertThat(PensumCatalogService.pensumItemCode(List.of(
+                new PensumCourseView("59035", null, "59035", "Desarrollo de Aplicaciones Móviles")), "59035")).contains("59035");
     }
 
     @Test
     @DisplayName("a printed code is not used once the item has a SINU code of its own")
     void printedCodeDoesNotWinOverSinuCode() {
-        when(client.listPensumCourses("1015")).thenReturn(List.of(
-                new PensumCourseView("17018", "17080", "17018", "Estadística Descriptiva")));
-
-        assertThat(new PensumCatalogService(client).pensumItemCode("1015", "17018")).isEmpty();
+        assertThat(PensumCatalogService.pensumItemCode(List.of(
+                new PensumCourseView("17018", "17080", "17018", "Estadística Descriptiva")), "17018")).isEmpty();
     }
 
     @Test
     @DisplayName("a course that is not in the pensum has no item")
     void noMatch() {
-        when(client.listPensumCourses("1015")).thenReturn(List.of());
-
-        assertThat(new PensumCatalogService(client).pensumItemCode("1015", "99999")).isEmpty();
+        assertThat(PensumCatalogService.pensumItemCode(List.of(), "99999")).isEmpty();
     }
 
     @Test
@@ -65,12 +57,12 @@ class PensumCatalogServiceTest {
         PensumCatalogService service = new PensumCatalogService(client);
 
         assertThat(service.pensumCourses("1015")).isEmpty();
-        assertThat(service.pensumItemCode("1015", "17080")).isEmpty();
     }
 
     @Test
-    @DisplayName("no pensum, as on a professor's timetable, means no lookup at all")
-    void noPensum() {
-        assertThat(new PensumCatalogService(client).pensumItemCode(null, "17080")).isEmpty();
+    @DisplayName("a section with no SINU code has no item")
+    void noSinuCode() {
+        assertThat(PensumCatalogService.pensumItemCode(
+                List.of(new PensumCourseView("17018", "17080", "17018", "Estadística Descriptiva")), null)).isEmpty();
     }
 }

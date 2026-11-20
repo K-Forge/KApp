@@ -10,18 +10,20 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import co.edu.konradlorenz.kapp.KAppApplication
 import co.edu.konradlorenz.kapp.data.schedule.ClassOccurrence
+import co.edu.konradlorenz.kapp.data.schedule.RoomLookup
 import co.edu.konradlorenz.kapp.data.schedule.Schedule
 import co.edu.konradlorenz.kapp.data.schedule.ScheduleRepository
 import co.edu.konradlorenz.kapp.data.schedule.ScheduleResult
 import co.edu.konradlorenz.kapp.data.schedule.SpaceDetail
 import co.edu.konradlorenz.kapp.data.schedule.WeekAgenda
+import java.time.LocalDate
+import java.time.YearMonth
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 /** The three views issue #45 asks for, all drawn from one `GET /api/schedule/me/week`. */
-enum class ScheduleView { Day, TwoDays, Week }
+enum class ScheduleView { Day, TwoDays, Week, Month }
 
 /** The room of the class whose sheet is open. */
 sealed interface RoomState {
@@ -33,6 +35,11 @@ sealed interface RoomState {
 
     data object Loading : RoomState
     data class Ready(val space: SpaceDetail) : RoomState
+
+    /** The building is on the map, this room is not yet (`404`). Said as such, not as a failure. */
+    data object NotOnMap : RoomState
+
+    /** The map could not be asked: no network, or the server failed. */
     data object Failed : RoomState
 }
 
@@ -63,6 +70,13 @@ class ScheduleViewModel(
     var selectedDay by mutableStateOf(today.dayOfWeek.value - 1)
         private set
 
+    /** The day the Mes view marks as today. */
+    val today: LocalDate = today
+
+    /** The month the Mes view shows, which starts on today's. */
+    var month by mutableStateOf(YearMonth.from(today))
+        private set
+
     var openClass by mutableStateOf<ClassOccurrence?>(null)
         private set
 
@@ -87,6 +101,24 @@ class ScheduleViewModel(
 
     fun select(day: Int) {
         selectedDay = day.coerceIn(0, 6)
+    }
+
+    fun previousMonth() {
+        month = month.minusMonths(1)
+    }
+
+    fun nextMonth() {
+        month = month.plusMonths(1)
+    }
+
+    /** A day tapped in the Mes view: Día, on that day's week. */
+    fun openDay(date: LocalDate) {
+        selectedDay = date.dayOfWeek.value - 1
+        view = ScheduleView.Day
+        if (date != anchor) {
+            anchor = date
+            loadWeek()
+        }
     }
 
     fun previousWeek() {
@@ -115,7 +147,11 @@ class ScheduleViewModel(
         }
         if (number != null && building != null) {
             roomJob = viewModelScope.launch {
-                room = repository.space(number, building)?.let { RoomState.Ready(it) } ?: RoomState.Failed
+                room = when (val found = repository.space(number, building)) {
+                    is RoomLookup.Found -> RoomState.Ready(found.space)
+                    RoomLookup.NotOnMap -> RoomState.NotOnMap
+                    RoomLookup.Failed -> RoomState.Failed
+                }
             }
         }
     }
@@ -137,7 +173,8 @@ class ScheduleViewModel(
     companion object {
         val Factory = viewModelFactory {
             initializer {
-                ScheduleViewModel((this[APPLICATION_KEY] as KAppApplication).container.schedule)
+                val container = (this[APPLICATION_KEY] as KAppApplication).container
+                ScheduleViewModel(container.schedule, container.today())
             }
         }
     }

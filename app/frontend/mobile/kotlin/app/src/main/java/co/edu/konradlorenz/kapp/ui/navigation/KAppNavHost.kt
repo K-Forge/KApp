@@ -5,18 +5,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import co.edu.konradlorenz.kapp.AppContainer
+import co.edu.konradlorenz.kapp.data.session.ProfileRole
 import co.edu.konradlorenz.kapp.ui.home.HomeScreen
 import co.edu.konradlorenz.kapp.ui.invitation.InvitationScreen
 import co.edu.konradlorenz.kapp.ui.login.LoginScreen
-import co.edu.konradlorenz.kapp.ui.placeholder.PlaceholderScreen
+import co.edu.konradlorenz.kapp.ui.map.MapScreen
 import co.edu.konradlorenz.kapp.ui.profile.ProfileScreen
 import co.edu.konradlorenz.kapp.ui.schedule.ScheduleScreen
 import co.edu.konradlorenz.kapp.ui.semaphore.SemaphoreScreen
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 // The two routes outside the bar. The other five are in KAppDestination, which is also what the
 // bar iterates, so a destination cannot be added to one and forgotten in the other.
@@ -36,8 +40,25 @@ fun KAppNavHost(container: AppContainer) {
     val session by container.session.session.collectAsState()
     val destinations = destinationsFor(session?.profileRole)
 
-    // Decided once: afterwards the session moves the screens, not the start destination.
-    val start = remember { if (session != null) KAppDestination.Home.route else LOGIN }
+    // Decided once: afterwards the session moves the screens, not the start destination. A visitor
+    // has no Inicio: their pass opens on the map.
+    val start = remember {
+        when {
+            session == null -> LOGIN
+            session?.profileRole == ProfileRole.Guest -> KAppDestination.Map.route
+            else -> KAppDestination.Home.route
+        }
+    }
+    val scope = rememberCoroutineScope()
+
+    // A visitor pass does not renew: when its token runs out the session ends, and the effect below
+    // takes the visitor back to the login, whether or not the map was asking for anything (#232).
+    val visitorExpiresAt = session?.takeIf { it.refreshToken == null }?.accessExpiresAt
+    LaunchedEffect(visitorExpiresAt) {
+        if (visitorExpiresAt == null) return@LaunchedEffect
+        delay((visitorExpiresAt - System.currentTimeMillis()).coerceAtLeast(0))
+        container.session.endIfExpired()
+    }
 
     val signedIn = session != null
     LaunchedEffect(signedIn) {
@@ -46,6 +67,10 @@ fun KAppNavHost(container: AppContainer) {
             navController.navigate(LOGIN) {
                 popUpTo(navController.graph.id) { inclusive = true }
             }
+            // openTab saves each tab it leaves, ViewModel included, and popping to the login does
+            // not drop those. Without this, the next person to sign in on the phone opens Horario
+            // and gets the previous one's week, restored without a single request.
+            KAppDestination.entries.forEach { navController.clearBackStack(it.route) }
         }
     }
 
@@ -63,11 +88,18 @@ fun KAppNavHost(container: AppContainer) {
         }
 
         composable(INVITATION) {
-            InvitationScreen(onBack = { navController.popBackStack() })
+            InvitationScreen(
+                onBack = { navController.popBackStack() },
+                // The pass is now a visitor session: straight to the map, with nothing to go back to.
+                onRedeemed = {
+                    navController.navigate(KAppDestination.Map.route) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                    }
+                },
+            )
         }
 
-        // The tabs, each inside the shell that draws the bar over it. Every one but Mapa has a
-        // screen of its own; Mapa is still the placeholder.
+        // The tabs, each inside the shell that draws the bar over it.
         KAppDestination.entries.forEach { destination ->
             composable(destination.route) {
                 MainShell(
@@ -78,12 +110,19 @@ fun KAppNavHost(container: AppContainer) {
                     when (destination) {
                         KAppDestination.Home -> HomeScreen(
                             destinations = destinations,
+                            noRole = session?.profileRole == ProfileRole.Unassigned,
                             onOpen = { navController.openTab(it) },
                         )
                         KAppDestination.Profile -> ProfileScreen()
                         KAppDestination.Semaphore -> SemaphoreScreen()
                         KAppDestination.Schedule -> ScheduleScreen()
-                        else -> PlaceholderScreen(destination)
+                        KAppDestination.Map -> MapScreen(
+                            onExit = if (session?.profileRole == ProfileRole.Guest) {
+                                { scope.launch { container.session.signOut() } }
+                            } else {
+                                null
+                            },
+                        )
                     }
                 }
             }
@@ -97,7 +136,8 @@ fun KAppNavHost(container: AppContainer) {
  * The tabs sit side by side rather than stacking: every move pops back to Inicio first, so the bar
  * never builds a history of itself and Back from any tab leaves for Inicio rather than retracing
  * which ones were visited. `saveState` and `restoreState` keep what a tab had on it - a scroll
- * position, later a loaded list - so returning to one is not a reload.
+ * position, later a loaded list - so returning to one is not a reload. They are kept only for the
+ * session: signing out clears them.
  *
  * Tapping the tab you are already on lands on the same destination and `launchSingleTop` keeps it
  * rather than putting a second copy on the stack.

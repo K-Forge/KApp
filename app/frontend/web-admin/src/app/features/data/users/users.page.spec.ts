@@ -25,13 +25,15 @@ describe('UsersPage', () => {
   const issued = (email: string, role: string) => ({
     userId: 'u-1',
     email,
-    role,
+    roles: [role],
     temporaryPassword: 'K7QM-X2RP-94TB',
     expiresAt: '2026-10-08T15:00:00Z',
   });
-  const create = vi.fn((request: AccountRequest) => of(issued(request.email, request.role)));
+  const create = vi.fn((request: AccountRequest) => of(issued(request.email, request.profileRole)));
   const issueTemporaryPassword = vi.fn(() => of(issued('pepita@kforge.dev', 'ROLE_STUDENT')));
   const deleteAccount = vi.fn(() => of(undefined));
+  const setRoles = vi.fn((userId: string, request: { profileRole: string; permissions: string[] }) =>
+    of({ userId, roles: [request.profileRole, ...request.permissions] }));
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -43,7 +45,7 @@ describe('UsersPage', () => {
           provide: TokenStore,
           useValue: { decoded: () => ({ claims: { sub: 'me' } }) },
         },
-        { provide: AccountsService, useValue: { create, issueTemporaryPassword, delete: deleteAccount } },
+        { provide: AccountsService, useValue: { create, issueTemporaryPassword, delete: deleteAccount, setRoles } },
       ],
     }).compileComponents();
     page = TestBed.createComponent(UsersPage).componentInstance;
@@ -60,29 +62,22 @@ describe('UsersPage', () => {
   });
 
   it('creates a professor account and shows its temporary password, with the message to send', () => {
-    page.createForm.setValue({ firstName: ' Ana ', lastName: 'Ruiz', email: 'ana.ruiz@konradlorenz.edu.co', role: 'ROLE_PROFESSOR', studentCode: '' });
+    page.createForm.setValue({ firstName: ' Ana ', lastName: 'Ruiz', email: 'ana.ruiz@konradlorenz.edu.co', profileRole: 'ROLE_PROFESSOR' });
 
     page.createAccount();
 
-    expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'ana.ruiz@konradlorenz.edu.co', firstName: 'Ana', lastName: 'Ruiz', role: 'ROLE_PROFESSOR' });
+    expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'ana.ruiz@konradlorenz.edu.co', firstName: 'Ana', lastName: 'Ruiz', profileRole: 'ROLE_PROFESSOR' });
     expect(page.issued()).toMatchObject({ name: 'Ana Ruiz', created: true, password: { temporaryPassword: 'K7QM-X2RP-94TB' } });
     expect(page.message()).toContain('K7QM-X2RP-94TB');
     expect(page.message()).toContain('ana.ruiz@konradlorenz.edu.co');
   });
 
-  it('asks a student account for its code before creating it, and reads its program from it', () => {
-    create.mockClear();
-    page.createForm.setValue({ firstName: 'Pepito', lastName: 'Perez', email: 'pepito@konradlorenz.edu.co', role: 'ROLE_STUDENT', studentCode: '' });
-
-    page.createAccount();
-    expect(create).not.toHaveBeenCalled();
-    expect(page.invalid('studentCode')).toBe(true);
-
-    page.createForm.patchValue({ studentCode: '506900001' });
-    // The program is the code's first three digits: shown, and left to the server to read the same way.
-    expect(page.program()).toBe('506');
-    page.createAccount();
-    expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'pepito@konradlorenz.edu.co', firstName: 'Pepito', lastName: 'Perez', role: 'ROLE_STUDENT', studentCode: '506900001' });
+  it('creates a student or an administrative employee with no code at all: KApp keeps none', () => {
+    for (const profileRole of ['ROLE_STUDENT', 'ROLE_STAFF'] as const) {
+      page.createForm.setValue({ firstName: 'Pepito', lastName: 'Perez', email: 'pepito@konradlorenz.edu.co', profileRole });
+      page.createAccount();
+      expect(create.mock.calls.at(-1)![0]).toEqual({ email: 'pepito@konradlorenz.edu.co', firstName: 'Pepito', lastName: 'Perez', profileRole });
+    }
   });
 
   it('gives somebody else a new temporary password once it is confirmed', () => {
@@ -100,5 +95,70 @@ describe('UsersPage', () => {
     confirm.mockReturnValue(true);
     page.deleteAccount(profile('someone-else'));
     expect(deleteAccount).toHaveBeenCalledWith('someone-else');
+  });
+
+  it('opens the permissions of an account as it holds them, and sends exactly what is chosen', () => {
+    const someone = { ...profile('someone-else'), roles: ['ROLE_PROFESSOR', 'ROLE_RECEPTION'] } as DirectoryEntry;
+    page.result.set({ content: [someone], page: 0, size: 20, totalElements: 1, totalPages: 1, first: true, last: true });
+
+    page.editRoles(someone);
+    expect(page.profileRole()).toBe('ROLE_PROFESSOR');
+    expect(page.chosen()).toEqual(['ROLE_RECEPTION']);
+
+    page.toggle('ROLE_RECEPTION');
+    page.toggle('ROLE_WELLBEING');
+    page.toggle('ROLE_ADMIN');
+    page.saveRoles();
+
+    // In the contract's order, whatever order they were ticked in.
+    expect(setRoles).toHaveBeenCalledWith('someone-else', { profileRole: 'ROLE_PROFESSOR', permissions: ['ROLE_ADMIN', 'ROLE_WELLBEING'] });
+    expect(page.result()?.content[0].roles).toEqual(['ROLE_PROFESSOR', 'ROLE_ADMIN', 'ROLE_WELLBEING']);
+  });
+
+  // Testers saw an account the directory does not classify as "Administrativo": it has no role now,
+  // and the dialog asks for one instead of quietly saving staff.
+  it('asks for a role for an account with none, and saves the one chosen', () => {
+    const nobody = { ...profile('sin-rol'), roles: ['ROLE_UNASSIGNED'] } as DirectoryEntry;
+    page.result.set({ content: [nobody], page: 0, size: 20, totalElements: 1, totalPages: 1, first: true, last: true });
+    setRoles.mockClear();
+
+    page.editRoles(nobody);
+    expect(page.profileRole()).toBeNull();
+    page.saveRoles();
+    expect(setRoles).not.toHaveBeenCalled();
+
+    page.profileRole.set('ROLE_STUDENT');
+    page.saveRoles();
+    expect(setRoles).toHaveBeenCalledWith('sin-rol', { profileRole: 'ROLE_STUDENT', permissions: [] });
+    expect(page.result()?.content[0].roles).toEqual(['ROLE_STUDENT']);
+  });
+
+  // The server refuses it (400); the box is locked so nobody has to find out that way.
+  it('locks your own administration, and only that', () => {
+    expect(page.locked(profile('me'), 'ROLE_ADMIN')).toBe(true);
+    expect(page.locked(profile('me'), 'ROLE_RECEPTION')).toBe(false);
+    expect(page.locked(profile('someone-else'), 'ROLE_ADMIN')).toBe(false);
+  });
+
+  // Saving went through the form's own submit, which the page has to catch: a plain form with no
+  // formGroup gets no ngSubmit, and the browser reloaded the page instead of sending anything.
+  it('saves when the dialog form is submitted, without leaving the page', () => {
+    // jsdom has no <dialog> methods; the dialog closes after a save.
+    const proto = HTMLDialogElement.prototype as { close?: () => void };
+    const had = proto.close;
+    proto.close ??= () => undefined;
+    const fixture = TestBed.createComponent(UsersPage);
+    const users = fixture.componentInstance;
+    users.editing.set(profile('someone-else'));
+    users.chosen.set(['ROLE_RECEPTION']);
+    fixture.detectChanges();
+    setRoles.mockClear();
+
+    const submit = new Event('submit', { cancelable: true });
+    fixture.nativeElement.querySelector('form.roles-form').dispatchEvent(submit);
+
+    expect(submit.defaultPrevented).toBe(true);
+    expect(setRoles).toHaveBeenCalledWith('someone-else', { profileRole: 'ROLE_STAFF', permissions: ['ROLE_RECEPTION'] });
+    proto.close = had;
   });
 });

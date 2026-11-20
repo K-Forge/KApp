@@ -43,15 +43,16 @@ public class PensumCatalogService {
     }
 
     /**
-     * @return the item of the pensum with that SINU code - by {@code sinuCode}, or by the printed code
-     * where SINU's is not known - and empty when the catalogue could not be read or the course is not
-     * in this pensum
+     * @return the item of the pensum with that SINU code, among {@code items} - by {@code sinuCode},
+     * or by the printed code where SINU's is not known - and empty when the course is not in them.
+     * Static, and given the items: a timetable reads its pensum once, through the cache, and matches
+     * every section against that one reading. Calling {@link #pensumCourses} from inside this class
+     * would skip the cache and ask semaphore-service again for each section.
      */
-    public Optional<String> pensumItemCode(String pensumCode, String sinuCode) {
-        if (pensumCode == null || sinuCode == null) {
+    public static Optional<String> pensumItemCode(List<PensumCourseView> items, String sinuCode) {
+        if (sinuCode == null) {
             return Optional.empty();
         }
-        List<PensumCourseView> items = pensumCourses(pensumCode);
         return items.stream().filter(item -> sinuCode.equals(item.sinuCode())).findFirst()
                 .or(() -> items.stream().filter(item -> item.sinuCode() == null && sinuCode.equals(item.code()))
                         .findFirst())

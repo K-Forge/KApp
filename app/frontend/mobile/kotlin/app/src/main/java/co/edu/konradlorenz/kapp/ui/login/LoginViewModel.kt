@@ -1,6 +1,7 @@
 package co.edu.konradlorenz.kapp.ui.login
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,9 +12,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import co.edu.konradlorenz.kapp.KAppApplication
 import co.edu.konradlorenz.kapp.data.auth.MicrosoftSignIn
+import co.edu.konradlorenz.kapp.BuildConfig
 import co.edu.konradlorenz.kapp.data.auth.MicrosoftUnreachableException
 import co.edu.konradlorenz.kapp.data.auth.SignInCancelledException
 import co.edu.konradlorenz.kapp.data.auth.SignInNotConfiguredException
+import co.edu.konradlorenz.kapp.data.network.NetworkStatus
 import co.edu.konradlorenz.kapp.data.profile.MockProfilePreference
 import co.edu.konradlorenz.kapp.data.profile.ProfileRepository
 import co.edu.konradlorenz.kapp.data.session.SessionManager
@@ -63,6 +66,7 @@ class LoginViewModel(
     private val session: SessionManager,
     private val profile: ProfileRepository,
     private val mockProfiles: MockProfilePreference,
+    private val network: NetworkStatus,
 ) : ViewModel() {
 
     var signingIn by mutableStateOf(false)
@@ -86,10 +90,30 @@ class LoginViewModel(
         mockProfiles.example = profile.example
     }
 
+    /**
+     * The demo build only: "Ingresar con Microsoft" is there because the product has it, and
+     * tapping it says the demo does not sign in that way. Its own entry is under "Modo
+     * demostración".
+     */
+    var microsoftUnavailable by mutableStateOf(false)
+        private set
+
+    fun onMicrosoftInDemo() {
+        error = null
+        microsoftUnavailable = true
+    }
+
     fun signIn(activity: Activity, onSignedIn: () -> Unit) {
         if (signingIn) return
-        signingIn = true
         error = null
+        microsoftUnavailable = false
+        // With no network MSAL opens Chrome's offline page instead of failing (L-05, #232), so it
+        // is asked first. Only the first sign-in gets here: a saved session opens the app directly.
+        if (!network.isOnline()) {
+            error = SignInError.Offline
+            return
+        }
+        signingIn = true
         viewModelScope.launch {
             try {
                 session.signIn(microsoft.idToken(activity))
@@ -103,6 +127,10 @@ class LoginViewModel(
             } catch (_: SignInCancelledException) {
                 // Backing out of Microsoft's page is a choice, not a failure: nothing to show.
             } catch (e: Exception) {
+                // The screen shows one sentence per kind of failure, and "offline" covers anything
+                // the network layer throws. A debug build logs the real cause, which is the only
+                // way to tell a refused connection from a blocked one.
+                if (BuildConfig.DEBUG) Log.w(TAG, "Sign-in failed", e)
                 error = classify(e)
             } finally {
                 signingIn = false
@@ -122,6 +150,8 @@ class LoginViewModel(
     }
 
     companion object {
+        private const val TAG = "KAppSignIn"
+
         val Factory = viewModelFactory {
             initializer {
                 val container = (this[APPLICATION_KEY] as KAppApplication).container
@@ -130,6 +160,7 @@ class LoginViewModel(
                     container.session,
                     container.profile,
                     container.mockProfile,
+                    container.network,
                 )
             }
         }

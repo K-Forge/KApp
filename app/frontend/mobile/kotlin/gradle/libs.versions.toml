@@ -1,17 +1,17 @@
 [versions]
-agp = "9.3.2"
-kotlin = "2.2.21"
-coreKtx = "1.16.0"
+agp = "9.5.0"
+kotlin = "2.4.21"
+coreKtx = "1.19.1"
 lifecycle = "2.9.0"
 activityCompose = "1.10.1"
-navigationCompose = "2.9.0"
-composeBom = "2025.06.01"
+navigationCompose = "2.10.2"
+composeBom = "2026.09.00"
 junit = "4.13.2"
 retrofit = "3.0.0"
-okhttp = "4.12.0"
-kotlinxSerialization = "1.9.0"
-msal = "8.5.0"
-coil = "3.3.0"
+okhttp = "5.5.1"
+kotlinxSerialization = "1.12.0"
+msal = "8.6.0"
+coil = "3.6.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -28,8 +28,7 @@ androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graph
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 
-# The network layer: Retrofit over OkHttp, JSON through kotlinx.serialization. OkHttp is pinned to
-# the 4.x line Retrofit 3 is built against, not to the newest 5.x.
+# The network layer: Retrofit over OkHttp, JSON through kotlinx.serialization.
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
@@ -38,7 +37,7 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 # Microsoft sign-in (ADR 0003): OIDC, authorization code with PKCE, against the university tenant.
 msal = { group = "com.microsoft.identity.client", name = "msal", version.ref = "msal" }
 
-# Profile pictures. Its network module is on OkHttp 4.12, the same line as Retrofit's.
+# Profile pictures, loaded through the same OkHttp as the API.
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 

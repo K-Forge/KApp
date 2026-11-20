@@ -362,6 +362,47 @@ class AcademicPlanFlowTest {
                 .containsExactlyElementsOf(before);
     }
 
+    // ── The semáforo's rules ───────────────────────────────────────────────────────
+
+    /**
+     * The test SINU's student is in level 5, with level 5 in progress, so the next period is level
+     * 6. Ingeniería de Software I (47022) sits in level 6 and is still pending.
+     */
+    @Test
+    @DisplayName("a pending course cannot be planned before the level the student is in")
+    void pendingCourseNotBeforeTheCurrentLevel() throws Exception {
+        String id = createPlan("p-pending", "Mi plan");
+
+        mockMvc.perform(put("/api/semaphore/me/plans/{id}/placements/{code}", id, "47022")
+                        .with(student("p-pending"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"plannedLevel\":4}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.details[0].field").value("plannedLevel"))
+                .andExpect(jsonPath("$.details[0].issue").value("must be 5 or later"));
+
+        place("p-pending", id, "47022", 5);
+    }
+
+    /** The test SINU's student lost Lógica Digital y Microprocesadores (31506), a level-4 course. */
+    @Test
+    @DisplayName("a failed course goes to the next period and nowhere else")
+    void failedCourseOnlyInTheNextPeriod() throws Exception {
+        String id = createPlan("p-failed", "Mi plan");
+
+        for (int level : new int[]{4, 5, 7}) {
+            mockMvc.perform(put("/api/semaphore/me/plans/{id}/placements/{code}", id, "31506")
+                            .with(student("p-failed"))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"plannedLevel\":%d}".formatted(level)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.details[0].field").value("plannedLevel"))
+                    .andExpect(jsonPath("$.details[0].issue").value("must be 6, the next period"));
+        }
+
+        place("p-failed", id, "31506", 6);
+    }
+
     // ── Electives ──────────────────────────────────────────────────────────────────
 
     /**

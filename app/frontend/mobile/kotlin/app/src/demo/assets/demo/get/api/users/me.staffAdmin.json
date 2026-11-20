@@ -1,0 +1,13 @@
+{
+    "id": "8e1c4f27-90ab-4d3e-b5f6-1a2b3c4d5e6f",
+    "email": "ana.ruiz@konradlorenz.edu.co",
+    "firstName": "Ana",
+    "lastName": "Ruiz Mejía",
+    "avatarUrl": null,
+    "roles": [
+        "ROLE_STAFF",
+        "ROLE_ADMIN"
+    ],
+    "active": true,
+    "academic": null
+}

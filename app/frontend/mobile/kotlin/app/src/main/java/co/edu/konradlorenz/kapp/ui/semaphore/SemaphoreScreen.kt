@@ -28,7 +28,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -39,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,13 +68,17 @@ import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreData
 import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreItem
 import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreLevel
 import co.edu.konradlorenz.kapp.data.semaphore.SemaphoreState
+import co.edu.konradlorenz.kapp.data.semaphore.allowedLevels
+import co.edu.konradlorenz.kapp.data.semaphore.studentPeriod
 import co.edu.konradlorenz.kapp.data.semaphore.buildSemaphore
 import co.edu.konradlorenz.kapp.data.semaphore.formatGrade
 import co.edu.konradlorenz.kapp.data.semaphore.formatHours
 import co.edu.konradlorenz.kapp.data.semaphore.formatPeriod
+import co.edu.konradlorenz.kapp.data.semaphore.plannableLevels
 import co.edu.konradlorenz.kapp.ui.common.BandContentHeight
 import co.edu.konradlorenz.kapp.ui.common.BrandBand
 import co.edu.konradlorenz.kapp.ui.common.ScreenPadding
+import co.edu.konradlorenz.kapp.ui.common.coverScrolled
 import co.edu.konradlorenz.kapp.ui.common.hexColor
 import co.edu.konradlorenz.kapp.ui.navigation.BarContentPadding
 import co.edu.konradlorenz.kapp.ui.theme.Brand
@@ -80,6 +89,8 @@ import co.edu.konradlorenz.kapp.ui.theme.Passed
 import co.edu.konradlorenz.kapp.ui.theme.Pending
 import co.edu.konradlorenz.kapp.ui.theme.Postponed
 import co.edu.konradlorenz.kapp.ui.theme.TextSoft
+import co.edu.konradlorenz.kapp.ui.theme.tones
+import co.edu.konradlorenz.kapp.ui.theme.toned
 import kotlin.math.roundToInt
 
 private val CardShape = RoundedCornerShape(18.dp)
@@ -100,6 +111,7 @@ private val ItemShape = RoundedCornerShape(12.dp)
 fun SemaphoreScreen(viewModel: SemaphoreViewModel = viewModel(factory = SemaphoreViewModel.Factory)) {
     val state by viewModel.state.collectAsState()
 
+    val scroll = rememberScrollState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -112,7 +124,7 @@ fun SemaphoreScreen(viewModel: SemaphoreViewModel = viewModel(factory = Semaphor
                 .fillMaxSize()
                 .statusBarsPadding()
                 .padding(top = BandContentHeight - 24.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scroll)
                 .padding(start = ScreenPadding, end = ScreenPadding, bottom = BarContentPadding)
                 .navigationBarsPadding(),
         ) {
@@ -122,7 +134,7 @@ fun SemaphoreScreen(viewModel: SemaphoreViewModel = viewModel(factory = Semaphor
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .padding(vertical = 32.dp),
-                        color = Brand,
+                        color = Brand.toned(),
                     )
                 }
                 SemaphoreState.NoProgram -> Card { Message(R.string.semaphore_no_program) }
@@ -136,6 +148,12 @@ fun SemaphoreScreen(viewModel: SemaphoreViewModel = viewModel(factory = Semaphor
                 is SemaphoreState.Ready -> Ready(current.data, viewModel)
             }
         }
+        // Over the content, so what scrolls up goes under the title (BrandBand).
+        BrandBand(
+            title = stringResource(R.string.home_shortcut_semaphore),
+            cover = true,
+            scrolled = coverScrolled { scroll.value },
+        )
     }
 }
 
@@ -155,6 +173,13 @@ private fun Ready(data: SemaphoreData, viewModel: SemaphoreViewModel) {
     // plan that moved everything out of it, and the sheet is where things are moved back.
     levels.filter { it.items.isNotEmpty() }.forEach { level ->
         LevelSection(level, current = level.level == data.semaphore.currentLevel, onOpen = viewModel::open)
+    }
+    // In a plan, the level after the furthest one used is always there, empty until a course is
+    // moved to it: where the courses left for later go (issue #176).
+    if (plan != null) {
+        val extra = plannableLevels(data.pensum.levels, plan).last
+        val lastUsed = levels.lastOrNull { it.items.isNotEmpty() }?.level ?: 0
+        if (extra > lastUsed) ExtraLevel(extra)
     }
 
     val open = levels.flatMap { it.items }.firstOrNull { it.course.pensumItemCode == viewModel.openItem }
@@ -194,7 +219,7 @@ private fun Summary(data: SemaphoreData) {
                 text = "${summary.percentComplete.roundToInt()}%",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
-                color = Brand,
+                color = Brand.toned(),
             )
         }
         Spacer(Modifier.height(12.dp))
@@ -213,7 +238,7 @@ private fun CreditsBar(passed: Int, inProgress: Int, total: Int) {
             .fillMaxWidth()
             .height(8.dp)
             .clip(RoundedCornerShape(4.dp))
-            .background(Pending),
+            .background(MaterialTheme.colorScheme.outlineVariant),
     ) {
         if (total > 0) {
             if (passed > 0) Box(Modifier.weight(passed.toFloat()).fillMaxHeight().background(Passed))
@@ -239,7 +264,7 @@ private fun TestNotice() {
             .padding(12.dp),
         fontSize = 13.sp,
         lineHeight = 18.sp,
-        color = Brand,
+        color = tones.onLime,
     )
 }
 
@@ -258,18 +283,23 @@ private fun PlanBar(data: SemaphoreData, plan: AcademicPlan?, viewModel: Semapho
             onClick = viewModel::showOriginal,
             label = { Text(stringResource(R.string.semaphore_original)) },
         )
-        data.plans.forEach { each ->
-            FilterChip(
-                selected = each.id == plan?.id,
-                onClick = { viewModel.showPlan(each.id) },
-                label = { Text(each.name, maxLines = 1) },
-            )
-        }
-        FilterChip(
-            selected = false,
+        if (data.plans.isNotEmpty()) PlanPicker(data, plan, viewModel)
+        // An action, not one of the set: pink, the colour of what can be touched, rather than an
+        // unselected chip that read as switched off.
+        AssistChip(
             onClick = viewModel::startNaming,
             enabled = !viewModel.saving,
-            label = { Text("+ " + stringResource(R.string.semaphore_new_plan)) },
+            label = {
+                Text(
+                    "+ " + stringResource(R.string.semaphore_new_plan),
+                    fontWeight = FontWeight.SemiBold,
+                )
+            },
+            colors = AssistChipDefaults.assistChipColors(labelColor = MaterialTheme.colorScheme.primary),
+            border = AssistChipDefaults.assistChipBorder(
+                enabled = !viewModel.saving,
+                borderColor = MaterialTheme.colorScheme.primary,
+            ),
         )
     }
     if (plan != null) {
@@ -345,6 +375,76 @@ private fun LevelSection(level: SemaphoreLevel, current: Boolean, onOpen: (Semap
 }
 
 /**
+ * The plans, one chip: "Plan: <name> ▾" names the one shown, or the first while Pensum is, and
+ * opens a menu of all of them with the current one marked, plus "+ Nuevo plan". Switching between
+ * plans is a tap on the chip and one on the plan, however many there are (issue #176).
+ */
+@Composable
+private fun PlanPicker(data: SemaphoreData, plan: AcademicPlan?, viewModel: SemaphoreViewModel) {
+    var open by remember { mutableStateOf(false) }
+    val named = plan ?: data.plans.first()
+    Box {
+        FilterChip(
+            selected = plan != null,
+            onClick = { open = true },
+            label = { Text(stringResource(R.string.semaphore_plan_picker, named.name) + " ▾", maxLines = 1) },
+        )
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            data.plans.forEach { each ->
+                val current = each.id == plan?.id
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = (if (current) "✓ " else "") + each.name,
+                            fontWeight = if (current) FontWeight.SemiBold else FontWeight.Normal,
+                        )
+                    },
+                    onClick = {
+                        open = false
+                        viewModel.showPlan(each.id)
+                    },
+                )
+            }
+            HorizontalDivider()
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        text = "+ " + stringResource(R.string.semaphore_new_plan),
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                },
+                onClick = {
+                    open = false
+                    viewModel.startNaming()
+                },
+            )
+        }
+    }
+}
+
+/** The level after the furthest used, empty: says what it is for and how to fill it. */
+@Composable
+private fun ExtraLevel(level: Int) {
+    Text(
+        text = stringResource(R.string.semaphore_level, level),
+        modifier = Modifier.padding(top = 20.dp, bottom = 8.dp),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+    )
+    Text(
+        text = stringResource(R.string.semaphore_extra_level, level),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+            .padding(14.dp),
+        fontSize = 13.sp,
+        lineHeight = 18.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+/**
  * One item, painted by its status. The area's colour is its left edge: the API sends it, and the
  * client only paints it - the same rule as a subject's colour on Inicio.
  */
@@ -358,7 +458,7 @@ private fun ItemRow(item: SemaphoreItem, onClick: () -> Unit) {
             .background(background)
             .then(
                 if (item.status == CourseStatus.Eligible) {
-                    Modifier.border(BorderStroke(1.5.dp, Passed), ItemShape)
+                    Modifier.border(BorderStroke(1.5.dp, Passed.toned()), ItemShape)
                 } else {
                     Modifier
                 },
@@ -485,9 +585,32 @@ private fun ItemSheet(
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    // Without a plan nothing can be chosen, but the bank is still worth reading
+                    // (S-12, #232): what this semester offers for the slot.
+                    if (item.course.isElectiveSlot && item.entry?.resolvedSinuCode == null) {
+                        LaunchedEffect(Unit) { viewModel.loadBank() }
+                        Text(
+                            text = stringResource(R.string.semaphore_elective_bank),
+                            modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        ElectiveBankList(item, viewModel.bank, chosenCode = null, onChoose = null)
+                    }
                 } else {
                     PlanSection(item, data, plan, viewModel)
                 }
+            } else if (item.status == CourseStatus.Failed) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                )
+                // Its level is not the plan's to choose: it goes to the next period (#232, #253).
+                Text(
+                    text = stringResource(R.string.semaphore_failed_repeat_at, item.level),
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             if (viewModel.saveFailed) SaveFailed()
         }
@@ -521,7 +644,8 @@ private fun Prerequisites(item: SemaphoreItem, data: SemaphoreData) {
 }
 
 /**
- * Where the item goes in [plan]: any level the pensum has, back to its own, and for an elective
+ * Where the item goes in [plan]: the levels allowedLevels leaves it - never a finished semester -,
+ * back to its own when that is one of them, and for an elective
  * slot which course of this semester's bank. Moving it unlocks nothing - the contract is explicit
  * that eligibility ignores plans - so the colour stays what SINU says.
  */
@@ -533,6 +657,8 @@ private fun PlanSection(
     plan: AcademicPlan,
     viewModel: SemaphoreViewModel,
 ) {
+    val current = studentPeriod(data.pensum, data.semaphore).current
+    val allowed = allowedLevels(item.status, current, data.pensum.levels, plan)
     Text(
         text = stringResource(R.string.semaphore_plan_level),
         fontSize = 14.sp,
@@ -543,7 +669,7 @@ private fun PlanSection(
         modifier = Modifier.padding(top = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        (1..data.pensum.levels).forEach { level ->
+        allowed.forEach { level ->
             FilterChip(
                 selected = level == item.level,
                 onClick = { if (level != item.level) viewModel.move(plan, item, level) },
@@ -552,7 +678,7 @@ private fun PlanSection(
             )
         }
     }
-    item.movedFrom?.let { original ->
+    item.movedFrom?.takeIf { it in allowed }?.let { original ->
         TextButton(onClick = { viewModel.reset(plan, item) }, enabled = !viewModel.saving) {
             Text(stringResource(R.string.semaphore_plan_reset, original))
         }
@@ -590,7 +716,7 @@ private fun ElectiveSection(item: SemaphoreItem, plan: AcademicPlan, viewModel: 
         Text(
             text = stringResource(R.string.semaphore_elective_not_offered),
             fontSize = 13.sp,
-            color = ErrorRed,
+            color = MaterialTheme.colorScheme.error,
         )
     }
     Row {
@@ -616,58 +742,91 @@ private fun ElectiveSection(item: SemaphoreItem, plan: AcademicPlan, viewModel: 
             fontSize = 13.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        when (bank) {
-            ElectiveBank.NotAsked, ElectiveBank.Loading -> CircularProgressIndicator(
-                modifier = Modifier.size(24.dp),
-                color = Brand,
-            )
-            ElectiveBank.Failed -> Text(
-                text = stringResource(R.string.semaphore_elective_bank_failed),
-                fontSize = 13.sp,
-                color = ErrorRed,
-            )
-            is ElectiveBank.Ready -> {
-                // An offering fills any slot unless it names the ones it fills.
-                val offerings = bank.offerings.filter {
-                    it.slots.isEmpty() || item.course.pensumItemCode in it.slots
+        ElectiveBankList(
+            item = item,
+            bank = bank,
+            chosenCode = chosen?.sinuCode,
+            onChoose = if (viewModel.saving) {
+                null
+            } else {
+                { code ->
+                    choosing = false
+                    viewModel.chooseElective(plan, item, code)
                 }
-                if (offerings.isEmpty()) {
-                    Text(
-                        text = stringResource(R.string.semaphore_elective_bank_empty),
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                offerings.forEach { offering ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(ItemShape)
-                            .clickable(enabled = !viewModel.saving) {
-                                choosing = false
-                                viewModel.chooseElective(plan, item, offering.sinuCode)
-                            }
-                            .padding(vertical = 10.dp, horizontal = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Box(
-                            Modifier
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (offering.sinuCode == chosen?.sinuCode) Passed else Pending,
-                                ),
+            },
+        )
+    }
+}
+
+/**
+ * This semester's bank for [item]'s slot. With no [onChoose] it is only to read: the sheet shows it
+ * that way when there is no plan to choose into.
+ */
+@Composable
+private fun ElectiveBankList(
+    item: SemaphoreItem,
+    bank: ElectiveBank,
+    chosenCode: String?,
+    onChoose: ((String) -> Unit)?,
+) {
+    when (bank) {
+        ElectiveBank.NotAsked, ElectiveBank.Loading -> CircularProgressIndicator(
+            modifier = Modifier.size(24.dp),
+            color = Brand.toned(),
+        )
+        ElectiveBank.Failed -> Text(
+            text = stringResource(R.string.semaphore_elective_bank_failed),
+            fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.error,
+        )
+        is ElectiveBank.Ready -> {
+            // An offering fills any slot unless it names the ones it fills.
+            val offerings = bank.offerings.filter {
+                it.slots.isEmpty() || item.course.pensumItemCode in it.slots
+            }
+            if (offerings.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.semaphore_elective_bank_empty),
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            offerings.forEach { offering ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(ItemShape)
+                        .then(
+                            if (onChoose != null) {
+                                Modifier.clickable { onChoose(offering.sinuCode) }
+                            } else {
+                                Modifier
+                            },
                         )
-                        Spacer(Modifier.width(10.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text(offering.name, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
-                            Text(
-                                text = "${offering.sinuCode} · " +
-                                    stringResource(R.string.semaphore_credits, offering.credits),
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                        .padding(vertical = 10.dp, horizontal = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (offering.sinuCode == chosenCode) {
+                                    Passed.toned()
+                                } else {
+                                    MaterialTheme.colorScheme.outlineVariant
+                                },
+                            ),
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(offering.name, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                        Text(
+                            text = "${offering.sinuCode} · " +
+                                stringResource(R.string.semaphore_credits, offering.credits),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }
@@ -734,7 +893,7 @@ private fun SaveFailed() {
         text = stringResource(R.string.semaphore_save_failed),
         modifier = Modifier.padding(top = 8.dp),
         fontSize = 13.sp,
-        color = ErrorRed,
+        color = MaterialTheme.colorScheme.error,
     )
 }
 
@@ -772,7 +931,7 @@ private fun Swatch(status: CourseStatus, modifier: Modifier) {
             .background(background)
             .then(
                 if (status == CourseStatus.Eligible) {
-                    Modifier.border(1.5.dp, Passed, RoundedCornerShape(3.dp))
+                    Modifier.border(1.5.dp, Passed.toned(), RoundedCornerShape(3.dp))
                 } else {
                     Modifier
                 },
@@ -782,17 +941,25 @@ private fun Swatch(status: CourseStatus, modifier: Modifier) {
 
 /**
  * Background and text colour per status. Green, lime, red and grey are the K's; white never goes
- * on the lime (1.5:1), purple does. *Eligible* is white with a green edge - free to take, not yet
- * taken - and *blocked* the grey of a course not taken, with softened text.
+ * on the lime (1.5:1), purple does. *Eligible* is the card's own colour with a green edge - free to
+ * take, not yet taken - and *blocked* the grey of a course not taken, with softened text. The
+ * coloured statuses carry their own contrast and look the same in both themes; the white and the
+ * grey ones follow the theme, so a dark grid has no light islands (6.5:1 and more in dark).
  */
-private fun coloursOf(status: CourseStatus): Pair<Color, Color> = when (status) {
-    CourseStatus.Passed -> Passed to Color.White
-    CourseStatus.InProgress -> InProgress to Brand
-    CourseStatus.Eligible -> Color.White to Color(0xFF1C1420)
-    CourseStatus.Blocked -> Pending to TextSoft
-    CourseStatus.Failed -> ErrorRed to Color.White
-    CourseStatus.Postponed -> Postponed to OnPostponed
-    CourseStatus.Other -> Pending to Color(0xFF1C1420)
+@Composable
+private fun coloursOf(status: CourseStatus): Pair<Color, Color> {
+    val scheme = MaterialTheme.colorScheme
+    val dark = tones.dark
+    return when (status) {
+        CourseStatus.Passed -> Passed to Color.White
+        CourseStatus.InProgress -> InProgress to Brand
+        CourseStatus.Eligible -> scheme.surface to scheme.onSurface
+        CourseStatus.Blocked ->
+            if (dark) scheme.outlineVariant to scheme.onSurface.copy(alpha = 0.75f) else Pending to TextSoft
+        CourseStatus.Failed -> ErrorRed to Color.White
+        CourseStatus.Postponed -> Postponed to OnPostponed
+        CourseStatus.Other -> if (dark) scheme.outlineVariant to scheme.onSurface else Pending to scheme.onSurface
+    }
 }
 
 @StringRes

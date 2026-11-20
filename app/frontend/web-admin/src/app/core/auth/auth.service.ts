@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, catchError, tap, throwError } from 'rxjs';
+import { Observable, catchError, firstValueFrom, tap, throwError } from 'rxjs';
 import { ApiConfigService } from '../config/api-config.service';
 import { parseApiError } from '../http/api-error.util';
 import { AppHttpError } from '../http/api-http-error';
 import type { TokenResponse } from './auth.model';
+import { PORTAL_PERMISSIONS } from './permissions';
 import { TokenStore } from './token.store';
 
 /**
@@ -13,8 +14,6 @@ import { TokenStore } from './token.store';
  * attach, and it is also where a bad base URL first becomes visible, so its errors go through
  * the same AppHttpError/ApiError path as everything else rather than a special case.
  */
-/** Who may sign in to this portal. Later, some administrative staff too. */
-export const PORTAL_ROLES = ['ROLE_ADMIN'];
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -22,12 +21,13 @@ export class AuthService {
   private readonly config = inject(ApiConfigService);
   private readonly tokenStore = inject(TokenStore);
   private readonly router = inject(Router);
+  private renewal: Promise<boolean> | null = null;
 
   login(email: string, password: string): Observable<TokenResponse> {
-    // The portal is for administrators: the server refuses any other account here, before it
+    // The portal is for accounts with a permission: the server refuses any other here, before it
     // offers to replace a temporary password - a student's is replaced in the app, not here.
-    return this.http.post<TokenResponse>(`${this.config.baseUrl()}/auth/login`, { email, password, allowedRoles: PORTAL_ROLES }).pipe(
-      tap((response) => this.tokenStore.set(response.accessToken)),
+    return this.http.post<TokenResponse>(`${this.config.baseUrl()}/auth/login`, { email, password, allowedRoles: PORTAL_PERMISSIONS }).pipe(
+      tap((response) => this.tokenStore.start(response)),
       catchError((err) => throwError(() => new AppHttpError(parseApiError(err)))),
     );
   }
@@ -38,15 +38,55 @@ export class AuthService {
    */
   changePassword(email: string, currentPassword: string, newPassword: string): Observable<TokenResponse> {
     return this.http
-      .post<TokenResponse>(`${this.config.baseUrl()}/auth/password`, { email, currentPassword, newPassword, allowedRoles: PORTAL_ROLES })
+      .post<TokenResponse>(`${this.config.baseUrl()}/auth/password`, { email, currentPassword, newPassword, allowedRoles: PORTAL_PERMISSIONS })
       .pipe(
-      tap((response) => this.tokenStore.set(response.accessToken)),
+      tap((response) => this.tokenStore.start(response)),
       catchError((err) => throwError(() => new AppHttpError(parseApiError(err)))),
     );
   }
 
   /**
-   * Clears the session and leaves the portal.
+   * Swaps the refresh token for a new access token and the next refresh token.
+   *
+   * <p>One renewal at a time, in this tab and across the portal's tabs: the server rotates the
+   * refresh token, so a second request with the same one would read as a stolen copy and revoke
+   * the whole session. Callers that ask while a renewal is under way get that one's answer; a tab
+   * that waited while another renewed takes that tab's tokens instead of asking again.
+   *
+   * @returns whether the session goes on; false when there is nothing to renew with or the
+   *          server refused (signed out elsewhere, deactivated, or past its 12 hours)
+   */
+  renew(): Promise<boolean> {
+    if (!this.renewal) {
+      const held = this.tokenStore.refreshToken();
+      this.renewal = withRenewalLock(() => this.refresh(held)).finally(() => (this.renewal = null));
+    }
+    return this.renewal;
+  }
+
+  private async refresh(held: string | null): Promise<boolean> {
+    this.tokenStore.reload();
+    const refreshToken = this.tokenStore.refreshToken();
+    if (!refreshToken) {
+      return false;
+    }
+    if (refreshToken !== held) {
+      // Another tab renewed while this one waited: its tokens are this tab's now.
+      return true;
+    }
+    try {
+      const response = await firstValueFrom(
+        this.http.post<TokenResponse>(`${this.config.baseUrl()}/auth/refresh`, { refreshToken }),
+      );
+      this.tokenStore.start(response);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Ends the session on the server and here, and leaves the portal.
    *
    * <p>The fallback is not defensive padding. `/login` is a lazily loaded route, and its chunk
    * is named by content hash - so after a deploy, a tab that has been open since before it
@@ -56,6 +96,12 @@ export class AuthService {
    * both gets them to the sign-in page and fetches the build that actually exists.
    */
   logout(): void {
+    const refreshToken = this.tokenStore.refreshToken();
+    if (refreshToken) {
+      // Revoked on the server, so the session cannot be renewed from a copy. Always 204, and
+      // signing out does not wait on it: a gateway that is down must not keep anybody in.
+      this.http.post(`${this.config.baseUrl()}/auth/logout`, { refreshToken }).subscribe({ error: () => undefined });
+    }
     this.tokenStore.clear();
     this.leaveFor({});
   }
@@ -89,4 +135,14 @@ export class AuthService {
     const query = new URLSearchParams(queryParams).toString();
     window.location.assign(query ? `/login?${query}` : '/login');
   }
+}
+
+/**
+ * Runs a renewal holding the portal's one renewal lock, so two tabs never send the same refresh
+ * token. Browsers without the Web Locks API run it as is; the storage event still keeps the tabs
+ * in step there.
+ */
+function withRenewalLock<T>(work: () => Promise<T>): Promise<T> {
+  const locks = typeof navigator === 'undefined' ? undefined : navigator.locks;
+  return locks ? locks.request('kapp-admin:renewal', work) : work();
 }

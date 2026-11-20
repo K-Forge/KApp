@@ -8,7 +8,9 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.compose.ui.graphics.asImageBitmap
 import co.edu.konradlorenz.kapp.KAppApplication
+import co.edu.konradlorenz.kapp.data.profile.LocalAvatar
 import co.edu.konradlorenz.kapp.data.profile.ProfileRepository
 import co.edu.konradlorenz.kapp.data.profile.ProfileState
 import co.edu.konradlorenz.kapp.data.schedule.ClassOccurrence
@@ -22,9 +24,12 @@ import co.edu.konradlorenz.kapp.data.session.ProfileRole
 import co.edu.konradlorenz.kapp.data.session.SessionManager
 import co.edu.konradlorenz.kapp.ui.common.hexColor
 import co.edu.konradlorenz.kapp.ui.theme.Subject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -42,6 +47,7 @@ class HomeViewModel(
     private val schedule: ScheduleRepository,
     private val today: () -> LocalDate = LocalDate::now,
     private val now: () -> LocalTime = LocalTime::now,
+    private val localAvatar: LocalAvatar? = null,
 ) : ViewModel() {
 
     var uiState by mutableStateOf(
@@ -49,12 +55,21 @@ class HomeViewModel(
     )
         private set
 
+    /** Which of the three cards are showing an offline copy, and since when. */
+    private val offlineSince = mutableMapOf<String, Long>()
+
+    private fun offline(card: String, since: Long?) {
+        if (since == null) offlineSince.remove(card) else offlineSince[card] = since
+        uiState = uiState.copy(offlineSince = offlineSince.values.minOrNull())
+    }
+
     init {
         viewModelScope.launch {
             profile.state.collect { state ->
                 // A profile that failed to load leaves the greeting without a name rather than
                 // with somebody else's. Perfil is where it can be tried again.
                 uiState = uiState.copy(student = (state as? ProfileState.Ready)?.profile?.toStudent())
+                offline("profile", (state as? ProfileState.Ready)?.offlineSince)
             }
         }
         viewModelScope.launch {
@@ -66,22 +81,50 @@ class HomeViewModel(
             }
         }
         viewModelScope.launch {
-            semaphore.state.collect { state -> uiState = uiState.copy(semester = semesterOf(state)) }
+            semaphore.state.collect { state ->
+                uiState = uiState.copy(semester = semesterOf(state))
+                offline("semester", (state as? SemaphoreState.Ready)?.offlineSince)
+            }
         }
+        localAvatar?.let { avatar ->
+            viewModelScope.launch {
+                // The signed-in person's own photo, read again when they change it in Perfil.
+                val userId = profile.state.map { (it as? ProfileState.Ready)?.profile?.id }.distinctUntilChanged()
+                combine(userId, avatar.changes) { id, _ -> id }.collect { id ->
+                    val photo = id?.let { withContext(Dispatchers.IO) { avatar.photo(it) }?.asImageBitmap() }
+                    uiState = uiState.copy(photo = photo)
+                }
+            }
+        }
+    }
+
+    /** Asks for the day again after it could not be read. The card shows the skeleton meanwhile. */
+    fun retryDay() {
+        uiState = uiState.copy(day = DayState.Loading)
+        viewModelScope.launch { loadDay() }
     }
 
     private suspend fun loadDay() {
         // Read first, then copy: copying the state around the call would write back whatever it
         // held when the call began, undoing a greeting that arrived in the meantime.
-        val day = dayOf(schedule.day(today()), now())
-        uiState = uiState.copy(day = day)
+        val result = schedule.day(today())
+        uiState = uiState.copy(day = dayOf(result, now()))
+        offline("day", (result as? ScheduleResult.Ready)?.offlineSince)
     }
 
     companion object {
         val Factory = viewModelFactory {
             initializer {
                 val container = (this[APPLICATION_KEY] as KAppApplication).container
-                HomeViewModel(container.profile, container.session, container.semaphore, container.schedule)
+                HomeViewModel(
+                    container.profile,
+                    container.session,
+                    container.semaphore,
+                    container.schedule,
+                    container.today,
+                    container.now,
+                    container.localAvatar,
+                )
             }
         }
     }

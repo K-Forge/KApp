@@ -33,14 +33,13 @@ set -euo pipefail
 # these four have to be reissued on a domain we control, or their confirmation mail goes to
 # whoever owns kforge.dev.
 ACCOUNTS=(
-  "brian@kforge.dev|Brian Steven|Vargas Clavijo|506900001"
-  "ivan@kforge.dev|Iván Darío|Ruiz Bernal|506900002"
-  "alejandro@kforge.dev|Alejandro|Parada Estupiñán|506900003"
-  "santiago@kforge.dev|Santiago|Rocha Ramírez|506900004"
+  "brian@kforge.dev|Brian Steven|Vargas Clavijo"
+  "ivan@kforge.dev|Iván Darío|Ruiz Bernal"
+  "alejandro@kforge.dev|Alejandro|Parada Estupiñán"
+  "santiago@kforge.dev|Santiago|Rocha Ramírez"
 )
 
 GATEWAY="${KAPP_GATEWAY:-http://localhost:8080}"
-PROGRAM_CODE="506"
 
 # This script mints its own single-purpose invitation code and deletes it on the way out,
 # rather than leaning on one of the seeded ones.
@@ -110,8 +109,8 @@ mongo_for() {
 }
 
 # The network the stack is on, asked of Compose rather than assumed: the network name comes
-# from the project name, and the project name is KAPP_STACK - `back` here, `swift` in the iOS
-# worktree - so no container name can be hardcoded.
+# from the project name, and the project name comes from KAPP_STACK - `kapp-back` here,
+# `kapp-swift` in the iOS worktree - so no network name can be hardcoded.
 AUTH_CONTAINER=$(docker compose ps -q auth-service 2>/dev/null | head -1)
 COMPOSE_NETWORK=$([ -n "$AUTH_CONTAINER" ] && docker inspect "$AUTH_CONTAINER" \
   --format '{{range $k, $v := .NetworkSettings.Networks}}{{$k}}{{end}}' 2>/dev/null || true)
@@ -170,11 +169,11 @@ cleanup_code() {
 trap cleanup_code EXIT
 
 for entry in "${ACCOUNTS[@]}"; do
-  IFS='|' read -r email first last student_code <<< "$entry"
+  IFS='|' read -r email first last <<< "$entry"
   pw="$(password)"
 
-  body=$(printf '{"email":"%s","password":"%s","firstName":"%s","lastName":"%s","invitationCode":"%s","studentCode":"%s","programCode":"%s"}' \
-    "$email" "$pw" "$first" "$last" "$INVITATION_CODE" "$student_code" "$PROGRAM_CODE")
+  body=$(printf '{"email":"%s","password":"%s","firstName":"%s","lastName":"%s","invitationCode":"%s"}' \
+    "$email" "$pw" "$first" "$last" "$INVITATION_CODE")
 
   response=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 \
     -X POST "$GATEWAY/auth/register" \

@@ -1,0 +1,57 @@
+{
+    "code": "508",
+    "doorCode": "508",
+    "wing": "C",
+    "name": "Aula 508",
+    "typeCode": "CLASSROOM",
+    "aliases": [],
+    "id": "demo-EC-508",
+    "typeName": "Aula",
+    "category": "TEACHING",
+    "buildingId": "demo-EC",
+    "buildingCode": "EC",
+    "campus": "Sede Principal",
+    "floorCode": "P5",
+    "floorLevel": 5,
+    "doors": [],
+    "effectiveAccessibility": "UNKNOWN",
+    "building": {
+        "code": "EC",
+        "name": "Edificio Central",
+        "campus": "Sede Principal",
+        "description": "Tres alas sobre un sótano de parqueadero. El auditorio Sonia Fajardo Forero ocupa los pisos 1 y 2 del ala sur, y el ala sur sigue encima con oficinas y aulas hasta el piso 6.",
+        "aliases": [],
+        "wings": [
+            {
+                "code": "C",
+                "name": "Ala central"
+            },
+            {
+                "code": "N",
+                "name": "Ala norte",
+                "doorSuffix": "-N",
+                "note": "Expansión de cinco pisos. Su terraza, en el piso 6, solo se alcanza por la escalera norte desde el piso 5."
+            },
+            {
+                "code": "S",
+                "name": "Ala sur",
+                "doorSuffix": "-S",
+                "note": "Construida sobre el auditorio: oficinas y aulas del piso 3 al 6."
+            }
+        ],
+        "id": "demo-EC"
+    },
+    "floor": {
+        "code": "P5",
+        "level": 5,
+        "name": "Piso 5",
+        "status": "DRAFT",
+        "accessibility": "UNKNOWN",
+        "width": 2400,
+        "height": 2320,
+        "top": "EAST",
+        "outline": [],
+        "corridors": [],
+        "version": 0
+    }
+}

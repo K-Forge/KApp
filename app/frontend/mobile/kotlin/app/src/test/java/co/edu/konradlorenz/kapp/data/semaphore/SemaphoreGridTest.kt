@@ -167,11 +167,36 @@ class SemaphoreGridTest {
     }
 
     @Test
-    fun `only what is still ahead can be planned`() {
+    fun `only what is still ahead can be planned, and a failed course is placed by itself`() {
         assertEquals(
-            listOf(CourseStatus.Eligible, CourseStatus.Blocked, CourseStatus.Failed, CourseStatus.Postponed, CourseStatus.Other),
+            listOf(CourseStatus.Eligible, CourseStatus.Blocked, CourseStatus.Postponed, CourseStatus.Other),
             CourseStatus.entries.filter { it.plannable },
         )
+    }
+
+    @Test
+    fun `the current level is the highest one in progress, and the next period the one after`() {
+        assertEquals(StudentPeriod(2, 3), studentPeriod(pensum, semaphore(entry("A", "PASSED"), entry("C", "IN_PROGRESS"))))
+    }
+
+    @Test
+    fun `with nothing in progress, the level after the highest passed is both current and next`() {
+        assertEquals(StudentPeriod(3, 3), studentPeriod(pensum, semaphore(entry("A", "PASSED"), entry("D", "PASSED"))))
+        assertEquals(StudentPeriod(1, 1), studentPeriod(pensum, semaphore()))
+    }
+
+    @Test
+    fun `a failed course is drawn in the next period, with or without a plan`() {
+        // B is level 1, failed; C at level 2 is in progress, so B is repeated at level 3.
+        val sinu = semaphore(entry("A", "PASSED"), entry("B", "FAILED"), entry("C", "IN_PROGRESS"))
+        val plan = AcademicPlan("p", "Mi plan", "1015", true, listOf(Placement("B", plannedLevel = 1)))
+
+        for (levels in listOf(buildSemaphore(pensum, sinu, emptySet(), null), buildSemaphore(pensum, sinu, emptySet(), plan))) {
+            val b = levels.flatMap { it.items }.first { it.course.pensumItemCode == "B" }
+            assertEquals(3, b.level)
+            assertEquals(1, b.movedFrom)
+            assertEquals(listOf("B", "E", "F"), levels.first { it.level == 3 }.items.map { it.course.pensumItemCode })
+        }
     }
 
     @Test
@@ -182,5 +207,43 @@ class SemaphoreGridTest {
         assertEquals("5,0", formatGrade(50))
         assertEquals("4", formatHours(4.0))
         assertEquals("4,5", formatHours(4.5))
+    }
+
+    private fun plan(vararg levels: Int) = AcademicPlan(
+        id = "plan",
+        name = "Mi plan",
+        pensumCode = "1015",
+        primary = true,
+        placements = levels.mapIndexed { i, level -> Placement("item$i", level, null, null) },
+    )
+
+    @Test
+    fun `a plan can use one level after the pensum's last`() {
+        assertEquals(1..10, plannableLevels(9, null))
+        assertEquals(1..10, plannableLevels(9, plan(3, 8)))
+    }
+
+    @Test
+    fun `once a plan uses the extra level, the next one opens`() {
+        assertEquals(1..11, plannableLevels(9, plan(10)))
+        assertEquals(1..12, plannableLevels(9, plan(10, 11)))
+    }
+
+    @Test
+    fun `never past the contract's twelve`() {
+        assertEquals(1..12, plannableLevels(9, plan(12)))
+        assertEquals(1..12, plannableLevels(12, null))
+    }
+
+    @Test
+    fun `a pending course is offered the current semester and the ones after it, never a finished one`() {
+        assertEquals((5..10).toList(), allowedLevels(CourseStatus.Eligible, 5, 9, null))
+        assertEquals((5..10).toList(), allowedLevels(CourseStatus.Blocked, 5, 9, null))
+        assertEquals((1..10).toList(), allowedLevels(CourseStatus.Postponed, 1, 9, null))
+    }
+
+    @Test
+    fun `a failed course offers no level to choose`() {
+        assertEquals(emptyList<Int>(), allowedLevels(CourseStatus.Failed, 5, 9, null))
     }
 }

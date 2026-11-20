@@ -100,6 +100,12 @@ EOF
     fi
     return 0
   fi
+  # Retarget before pushing. The push is what fires `synchronize`, and ci.yml only runs for pull
+  # requests whose base is main or develop: pushed while the base was still the merged parent's
+  # branch, the rebased head got no CI at all, and its required checks waited forever (#187).
+  if [ -n "$retarget" ] && [ "$(pr_base "$number")" != "$retarget" ]; then
+    pr_retarget "$number" "$retarget"
+  fi
   if ! git push -q --force-with-lease="refs/heads/$head:$old" "$REMOTE" "HEAD:refs/heads/$head" 2>/dev/null; then
     echo "#$number: the branch moved while it was being rebased, left as it is"
     pr_comment "$number" <<EOF
@@ -115,10 +121,6 @@ EOF
   fi
   # The descendants are rebased onto this new head.
   git update-ref "refs/remotes/$REMOTE/$head" "$new"
-
-  if [ -n "$retarget" ] && [ "$(pr_base "$number")" != "$retarget" ]; then
-    pr_retarget "$number" "$retarget"
-  fi
 
   echo "#$number: rebased onto $onto"
   if [ "$depth" -eq 1 ]; then

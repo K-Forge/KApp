@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp User API
-  version: 1.0.0
+  version: 1.2.0
   summary: Profile service for the KApp platform.
   description: |
     Profile service for KApp, the mobile application of Fundación Universitaria
@@ -37,6 +37,7 @@ info:
     | `ROLE_STUDENT` | profile | Own profile, with the academic block. |
     | `ROLE_PROFESSOR` | profile | Own profile. |
     | `ROLE_STAFF` | profile | Own profile. An administrative employee. |
+    | `ROLE_UNASSIGNED` | profile | Own profile. A member the directory does not classify, until an administrator gives them a role. |
     | `ROLE_ADMIN` | permission | Also the directory and activation state. |
     | `ROLE_RECEPTION`, `ROLE_MAINTENANCE`, `ROLE_MODERATION`, `ROLE_WELLBEING` | permission | Nothing more here. |
     | `ROLE_GUEST` | — | **Nothing here.** A visitor with a day pass has no account. |
@@ -79,7 +80,7 @@ paths:
   /api/users/me:
     get:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
+      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_UNASSIGNED, ROLE_ADMIN]
       operationId: getMyProfile
       summary: Get the authenticated user's profile
       description: |
@@ -113,7 +114,7 @@ paths:
 
     patch:
       # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_ADMIN]
+      x-roles: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF, ROLE_UNASSIGNED, ROLE_ADMIN]
       operationId: updateMyProfile
       summary: Update the authenticated user's profile
       description: |
@@ -457,6 +458,51 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /internal/users/{id}/roles:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, maxLength: 64 }
+        description: The profile's id, the `sub` of the account's tokens.
+    put:
+      # Not role-protected: reachable only from inside the compose network, with the
+      # shared internal token, and it has no gateway route at all.
+      x-roles: [SERVICE_ONLY]
+      operationId: setInternalUserRoles
+      summary: Set a profile's roles from another service
+      description: |
+        Service-to-service endpoint. The Auth API calls it when an administrator changes an
+        account's profile role or permissions, so the directory shows the roles the account holds.
+        Not reachable from outside, with `X-Internal-Token` only, as the upsert above.
+
+        The roles must hold exactly one profile role and never `ROLE_GUEST`, as in the upsert.
+        Idempotent. `404` when no profile carries that id.
+      tags: [Internal]
+      security:
+        - internalToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalUserRoles'
+            example:
+              roles: [ROLE_STAFF, ROLE_RECEPTION]
+      responses:
+        '200':
+          description: The directory entry, with its roles now
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirectoryEntry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -526,12 +572,14 @@ components:
     Role:
       type: string
       description: |
-        A role an account holds. `ROLE_STUDENT`, `ROLE_PROFESSOR` and `ROLE_STAFF` are profile
-        roles, exactly one per account. The rest are permissions, which add to it.
+        A role an account holds. `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF` and
+        `ROLE_UNASSIGNED` are profile roles, exactly one per account. The rest are permissions,
+        which add to it.
       enum:
         - ROLE_STUDENT
         - ROLE_PROFESSOR
         - ROLE_STAFF
+        - ROLE_UNASSIGNED
         - ROLE_ADMIN
         - ROLE_RECEPTION
         - ROLE_MAINTENANCE
@@ -703,6 +751,19 @@ components:
           items:
             $ref: '#/components/schemas/Role'
           example: [ROLE_STUDENT]
+
+    InternalUserRoles:
+      type: object
+      description: An account's roles, as the Auth API now grants them.
+      required: [roles]
+      properties:
+        roles:
+          type: array
+          minItems: 1
+          description: The account's profile role and its permissions.
+          items:
+            $ref: '#/components/schemas/Role'
+          example: [ROLE_STAFF, ROLE_RECEPTION]
 
     PageResponse:
       type: object

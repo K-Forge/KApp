@@ -33,7 +33,8 @@ by an administrator and only open the portal.
 |---|---|---|
 | **Student** | `ROLE_STUDENT` | Their own profile, timetable, semáforo and plans; the map; notifications; the community features |
 | **Professor** | `ROLE_PROFESSOR` | Their own profile and sections; the map; notifications; the community features. No semáforo |
-| **Administrative staff** | `ROLE_STAFF` | The map. Also the default when the directory names no role |
+| **Administrative staff** | `ROLE_STAFF` | The map |
+| **No role yet** | `ROLE_UNASSIGNED` | The map and their own profile, when the directory names no role, until an administrator gives one |
 | **Visitor** | `ROLE_GUEST` | The map, for 24 hours, with a day pass from reception. No account |
 
 | Permission | Manages |

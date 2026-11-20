@@ -8,28 +8,29 @@
     "build": "pnpm run generate:openapi && ng build",
     "watch": "pnpm run generate:openapi && ng build --watch --configuration development",
     "check:i18n": "node scripts/check-i18n.mjs",
-    "test": "pnpm run generate:openapi && pnpm run check:i18n && ng test"
+    "check:headers": "node scripts/check-security-headers.mjs",
+    "test": "pnpm run generate:openapi && pnpm run check:i18n && pnpm run check:headers && ng test"
   },
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
-    "@angular/common": "^22.1.0",
-    "@angular/compiler": "^22.1.0",
-    "@angular/core": "^22.1.0",
-    "@angular/forms": "^22.1.0",
-    "@angular/platform-browser": "^22.1.0",
-    "@angular/router": "^22.1.0",
+    "@angular/common": "^22.2.6",
+    "@angular/compiler": "^22.2.6",
+    "@angular/core": "^22.2.6",
+    "@angular/forms": "^22.2.6",
+    "@angular/platform-browser": "^22.2.6",
+    "@angular/router": "^22.2.6",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.9.1"
   },
   "devDependencies": {
-    "@angular/build": "^22.1.6",
-    "@angular/cli": "^22.1.6",
-    "@angular/compiler-cli": "^22.1.0",
-    "jsdom": "^28.0.0",
-    "prettier": "^3.8.1",
+    "@angular/build": "^22.2.7",
+    "@angular/cli": "^22.2.7",
+    "@angular/compiler-cli": "^22.2.6",
+    "jsdom": "^31.0.1",
+    "prettier": "^3.10.1",
     "typescript": "~6.0.2",
-    "vitest": "^4.0.8",
-    "yaml": "^2.9.0"
+    "vitest": "^5.1.0",
+    "yaml": "^2.9.1"
   }
 }

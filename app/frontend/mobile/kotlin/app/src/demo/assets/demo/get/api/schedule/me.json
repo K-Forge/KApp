@@ -1,0 +1,123 @@
+{
+    "userId": "507f1f77bcf86cd799439011",
+    "period": "20262",
+    "programCode": "506",
+    "pensumCode": "1015",
+    "level": 8,
+    "active": true,
+    "source": "SINU",
+    "readAt": "2026-10-05T14:32:11Z",
+    "sections": [
+        {
+            "sectionCode": "4127",
+            "sinuCode": "59035",
+            "pensumItemCode": "59035",
+            "courseName": "DESARROLLO DE APLICACIONES MÓVILES",
+            "level": 8,
+            "credits": 3,
+            "totalHours": 48,
+            "group": "51",
+            "subgroup": null,
+            "professor": "GÓMEZ RESTREPO LAURA MARCELA",
+            "sede": "Sede Principal",
+            "buildingCode": "EC",
+            "startDate": "2026-07-27",
+            "endDate": "2026-11-30",
+            "color": "#539392",
+            "meetings": [
+                {
+                    "dayOfWeek": "MONDAY",
+                    "startTime": "18:15",
+                    "endTime": "20:30",
+                    "blocks": 3,
+                    "periods": [
+                        {
+                            "from": "2026-07-27",
+                            "to": "2026-08-10",
+                            "room": "405"
+                        },
+                        {
+                            "from": "2026-08-24",
+                            "to": "2026-09-14",
+                            "room": "405"
+                        },
+                        {
+                            "from": "2026-09-21",
+                            "to": "2026-09-28",
+                            "room": null
+                        },
+                        {
+                            "from": "2026-10-19",
+                            "to": "2026-11-30",
+                            "room": "405"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sectionCode": "4133",
+            "sinuCode": "48022",
+            "pensumItemCode": "48022",
+            "courseName": "INGENIERÍA DE SOFTWARE II",
+            "level": 7,
+            "credits": 3,
+            "totalHours": 64,
+            "group": "51",
+            "subgroup": null,
+            "professor": "MARTÍNEZ ACOSTA JORGE ENRIQUE",
+            "sede": "Sede Principal",
+            "buildingCode": "EC",
+            "startDate": "2026-07-29",
+            "endDate": "2026-11-25",
+            "color": "#C9D329",
+            "meetings": [
+                {
+                    "dayOfWeek": "WEDNESDAY",
+                    "startTime": "18:15",
+                    "endTime": "21:15",
+                    "blocks": 4,
+                    "periods": [
+                        {
+                            "from": "2026-07-29",
+                            "to": "2026-11-25",
+                            "room": "508"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "sectionCode": "4140",
+            "sinuCode": "56201",
+            "pensumItemCode": "56201",
+            "courseName": "METODOLOGÍA DE INVESTIGACIÓN",
+            "level": 8,
+            "credits": 2,
+            "totalHours": 32,
+            "group": "51",
+            "subgroup": null,
+            "professor": "RAMÍREZ SALAZAR DIANA PATRICIA",
+            "sede": "Bienestar Institucional",
+            "buildingCode": "BI",
+            "startDate": "2026-08-01",
+            "endDate": "2026-11-28",
+            "color": "#522567",
+            "meetings": [
+                {
+                    "dayOfWeek": "SATURDAY",
+                    "startTime": "07:00",
+                    "endTime": "08:30",
+                    "blocks": 2,
+                    "periods": [
+                        {
+                            "from": "2026-08-01",
+                            "to": "2026-11-28",
+                            "room": "301"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

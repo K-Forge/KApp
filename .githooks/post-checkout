@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Enabled by scripts/install-git-hooks.sh. Switching to develop (or detaching onto it) usually means the last
+# pull request merged, so the local branches whose pull request merged are deleted. $3 is 1 for a branch
+# checkout and 0 for a file checkout.
+[ "${3:-0}" = 1 ] || exit 0
+case $(git rev-parse --abbrev-ref HEAD) in
+  develop | HEAD) exec bash "$(git rev-parse --show-toplevel)/scripts/prune-local-branches.sh" --hook ;;
+esac
+exit 0

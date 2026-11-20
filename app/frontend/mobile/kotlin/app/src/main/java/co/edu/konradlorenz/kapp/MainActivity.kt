@@ -17,6 +17,8 @@ class MainActivity : ComponentActivity() {
         // they read against #522567 - the automatic style would pick dark icons on a light theme.
         enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT))
         super.onCreate(savedInstanceState)
+        // Debug builds only: Android 17 blocks private addresses, where the mocks are. See the class.
+        LocalNetworkAccess.requestIfNeeded(this)
         setContent {
             KAppTheme {
                 KAppNavHost(container = (application as KAppApplication).container)

@@ -25,8 +25,13 @@
     <string name="login_mock_student">Estudiante</string>
     <string name="login_mock_professor">Profesor</string>
     <string name="login_mock_staff">Administrativo</string>
-    <string name="login_first_time">¿Primera vez?</string>
-    <string name="login_invitation_link">Usa tu código de invitación</string>
+    <!-- The demo build's own entry, under the product's login (LoginScreen's DemoSection). -->
+    <string name="login_demo_toggle">Modo demostración</string>
+    <string name="login_demo_body">Entra sin cuenta ni servidor, con uno de los perfiles de ejemplo.</string>
+    <string name="login_demo_submit">Ingresar con el perfil de demostración</string>
+    <string name="login_demo_microsoft_unavailable">El ingreso con Microsoft no está disponible en esta demostración. Entra desde «Modo demostración», más abajo.</string>
+    <string name="login_first_time">¿Vienes de visita?</string>
+    <string name="login_invitation_link">Tengo un código de visitante</string>
     <string name="login_copyright">© 2026 Fundación Universitaria Konrad Lorenz</string>
 
     <string name="home_greeting">Hola, %1$s</string>
@@ -55,6 +60,7 @@
     <string name="home_semester_link">Ver semáforo</string>
     <string name="home_semester_level">Semestre %1$d</string>
     <string name="home_semester_percent">%1$d%%</string>
+    <string name="home_semester_credits">Créditos</string>
 
     <string name="home_rest_title">Resto del día</string>
     <string name="home_rest_link">Ver horario</string>
@@ -67,11 +73,20 @@
     <string name="profile_role_student">Estudiante</string>
     <string name="profile_role_professor">Profesor</string>
     <string name="profile_role_staff">Administrativo</string>
+    <string name="profile_role_unassigned">Sin rol</string>
     <string name="profile_programme">Programa</string>
     <string name="profile_level">Semestre</string>
     <string name="profile_pensum">Pensum</string>
     <string name="profile_remove_avatar">Quitar foto</string>
-    <string name="profile_remove_avatar_failed">No pudimos quitar la foto. Inténtalo otra vez.</string>
+    <string name="profile_avatar_failed">No pudimos cambiar la foto. Inténtalo otra vez.</string>
+    <string name="profile_edit_avatar">Cambiar foto de perfil</string>
+    <string name="profile_avatar_pick">Agregar o cambiar foto</string>
+    <string name="profile_avatar_adjust">Ajustar foto</string>
+    <string name="profile_avatar_local_note">Por ahora la foto se guarda solo en este teléfono: KApp todavía no puede subirla.</string>
+    <string name="avatar_adjust_title">Ajustar foto</string>
+    <string name="avatar_adjust_hint">Arrastra para moverla y pellizca, o usa la barra, para acercarla.</string>
+    <string name="avatar_adjust_save">Guardar</string>
+    <string name="avatar_adjust_cancel">Cancelar</string>
     <string name="profile_where_from">Tu nombre y tu correo vienen de tu cuenta de Microsoft. Si algo no está bien, se corrige allá.</string>
     <string name="profile_where_from_student">Tu nombre y tu correo vienen de tu cuenta de Microsoft, y tus datos académicos de SINU. Si algo no está bien, se corrige allá.</string>
     <string name="profile_failed">No pudimos cargar tu perfil</string>
@@ -81,7 +96,9 @@
     <string name="semaphore_status_in_progress">En curso</string>
     <string name="semaphore_status_eligible">Puedes tomarla</string>
     <string name="semaphore_status_blocked">Bloqueada</string>
-    <string name="semaphore_status_failed">Perdida</string>
+    <string name="semaphore_status_failed">Debe repetirse</string>
+    <!-- A failed course is placed in the next period by itself; its sheet says where (#232). -->
+    <string name="semaphore_failed_repeat_at">Se repite en el semestre %1$d, el siguiente periodo. Ese semestre no se puede cambiar.</string>
     <string name="semaphore_status_postponed">Aplazada</string>
     <string name="semaphore_status_other">Otro estado</string>
     <string name="semaphore_test_notice">Datos de prueba: la universidad todavía no ha conectado SINU, así que nada de esto es tu historia académica real.</string>
@@ -93,6 +110,8 @@
     <string name="semaphore_moved_from">Movida del semestre %1$d</string>
     <string name="semaphore_original">Pensum</string>
     <string name="semaphore_new_plan">Nuevo plan</string>
+    <string name="semaphore_plan_picker">Plan: %1$s</string>
+    <string name="semaphore_extra_level">Para las materias que dejes para después. Abre una materia que te falte y elige el semestre %1$d.</string>
     <string name="semaphore_plan_name">Nombre del plan</string>
     <string name="semaphore_plan_default_name">Mi plan</string>
     <string name="semaphore_create">Crear</string>
@@ -125,7 +144,10 @@
     <string name="semaphore_elective_bank_empty">SINU todavía no ha publicado electivas para este semestre.</string>
     <string name="semaphore_elective_bank_failed">No pudimos cargar las electivas.</string>
     <string name="home_semester_unavailable">No pudimos cargar tu semestre.</string>
-    <string name="home_day_unavailable">No pudimos cargar tus clases de hoy.</string>
+    <string name="home_day_unavailable">No pudimos cargar tus clases de hoy</string>
+    <string name="home_day_retry">Reintentar</string>
+    <!-- Inicio opened with no network shows the last data it saved, and from when (#232). -->
+    <string name="home_offline_note">Sin conexión · datos de las %1$s</string>
     <string name="home_done_title">Ya terminaste las clases de hoy</string>
     <string name="room_number">Salón %1$s</string>
     <string name="room_none">Sin salón asignado</string>
@@ -133,6 +155,7 @@
     <string name="schedule_view_day">Día</string>
     <string name="schedule_view_two_days">2 días</string>
     <string name="schedule_view_week">Semana</string>
+    <string name="schedule_view_month">Mes</string>
     <!-- "21 sep – 27 sep". -->
     <string name="schedule_week_range">%1$d %2$s – %3$d %4$s</string>
     <string name="schedule_no_classes">Sin clases</string>
@@ -158,18 +181,71 @@
     <string name="schedule_access_stairs">Solo por escaleras</string>
     <string name="schedule_room_none_detail">SINU todavía no tiene un salón asignado para esta clase en estas fechas.</string>
     <string name="schedule_room_not_mapped">Esta sede todavía no está en el mapa.</string>
+    <string name="schedule_room_not_on_map">Este salón todavía no está en el mapa.</string>
     <string name="schedule_room_failed">No pudimos buscar el salón en el mapa.</string>
 
-    <string name="placeholder_pending">Esta pantalla todavía no existe</string>
-    <string name="placeholder_profile_contract">Se alimentará de GET /api/users/me.</string>
-    <string name="placeholder_semaphore_contract">Se alimentará de GET /api/semaphore/me.</string>
-    <string name="placeholder_map_contract">Se alimentará de GET /api/map/buildings.</string>
-    <string name="placeholder_schedule_contract">Se alimentará de GET /api/schedule/me/week.</string>
-    <string name="placeholder_home_contract">Se alimentará de GET /api/schedule/me/day.</string>
+    <string name="map_next_title">El mapa del campus, piso por piso</string>
+    <string name="map_next_body">Toca un edificio para ver sus pisos. El código es el que ves junto al salón en tu horario.</string>
+    <plurals name="map_levels">
+        <item quantity="one">%d nivel</item>
+        <item quantity="other">%d niveles</item>
+    </plurals>
+    <string name="map_failed">No pudimos cargar los edificios.</string>
+    <string name="map_retry">Reintentar</string>
+    <!-- A visitor's way out of the map, the only screen a day pass opens (#232). -->
+    <string name="map_visitor_exit">Salir</string>
+    <string name="map_back">Volver a los edificios</string>
+    <string name="map_floor_failed">No pudimos cargar este piso.</string>
+    <string name="map_floor_not_drawn">Este piso todavía no está dibujado.</string>
+    <string name="map_zoom_in">Acercar el mapa</string>
+    <string name="map_zoom_out">Alejar el mapa</string>
+    <plurals name="map_unplaced">
+        <item quantity="one">%d espacio de este piso todavía no está dibujado</item>
+        <item quantity="other">%d espacios de este piso todavía no están dibujados</item>
+    </plurals>
+    <string name="map_unplaced_title">Todavía sin dibujar</string>
+    <string name="map_unplaced_close">Cerrar</string>
+    <string name="map_space_door">Puerta %1$s</string>
+    <string name="map_space_close">Cerrar la información del espacio</string>
 
-    <string name="invitation_title">Código de invitación</string>
-    <string name="invitation_pending">El registro con código de invitación todavía no existe. Su contrato es POST /auth/register en docs/api/auth.openapi.yaml.</string>
+    <string name="band_go_home">Ir a Inicio</string>
+    <string name="home_no_role">Tu cuenta aún no tiene un rol asignado. Comunícate con TI.</string>
+    <string name="home_open_profile">Abrir Perfil</string>
+    <string name="invitation_band">Visitante</string>
+    <string name="invitation_title">Código de visitante</string>
+    <string name="invitation_body">Recepción te entrega un código de visitante. Con él entras al mapa del campus durante 24 horas, sin crear una cuenta.</string>
+    <!-- Empty except in the demo build, which says which code its data accepts. -->
+    <string name="invitation_demo_hint" translatable="false"></string>
+    <string name="invitation_code_label">Código</string>
+    <string name="invitation_code_help">Tiene la forma KL-V-XXXX-XXXX.</string>
+    <string name="invitation_type_label">Tipo de documento</string>
+    <string name="invitation_type_cc">Cédula de ciudadanía</string>
+    <string name="invitation_type_ce">Cédula de extranjería</string>
+    <string name="invitation_type_ti">Tarjeta de identidad</string>
+    <string name="invitation_type_pasaporte">Pasaporte</string>
+    <string name="invitation_type_ppt">Permiso por protección temporal</string>
+    <string name="invitation_number_label">Número de documento</string>
+    <string name="invitation_number_help">Solo letras y números, sin puntos ni guiones.</string>
+    <string name="invitation_name_label">Nombre completo</string>
+    <string name="invitation_privacy">Recepción guarda tu documento y tu nombre como registro de la visita. Se borran solos a los 30 días (Ley 1581 de 2012).</string>
+    <string name="invitation_submit">Validar código</string>
+    <string name="invitation_sending">Validando…</string>
     <string name="invitation_back">Volver</string>
+    <string name="invitation_error_code_empty">Escribe el código que te dio recepción.</string>
+    <string name="invitation_error_code_confusable">Los códigos no usan 0, O, 1 ni I. Revisa esos caracteres.</string>
+    <string name="invitation_error_code_format">El código tiene la forma KL-V-XXXX-XXXX.</string>
+    <string name="invitation_error_type_missing">Elige el tipo de documento.</string>
+    <string name="invitation_error_number_empty">Escribe el número de tu documento.</string>
+    <string name="invitation_error_number_characters">Solo letras y números, sin puntos, guiones ni espacios.</string>
+    <string name="invitation_error_number_short">El número tiene al menos 4 caracteres.</string>
+    <string name="invitation_error_number_long">El número tiene como máximo 20 caracteres.</string>
+    <string name="invitation_error_name_empty">Escribe tu nombre completo.</string>
+    <string name="invitation_error_name_long">El nombre tiene como máximo 120 caracteres.</string>
+    <string name="invitation_result_not_found">Ese código no existe. Revísalo con recepción.</string>
+    <string name="invitation_result_used">Ese pase ya se usó. Pide uno nuevo en recepción.</string>
+    <string name="invitation_result_expired">Ese pase venció. Pide uno nuevo en recepción.</string>
+    <string name="invitation_result_offline">No pudimos conectar con el servidor. Revisa tu conexión e inténtalo otra vez.</string>
+    <string name="invitation_result_failed">No pudimos validar el código. Inténtalo otra vez.</string>
 
     <!--
       The semester card counts credits, which is what GET /api/semaphore/me/summary returns. Only

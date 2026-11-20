@@ -1,0 +1,26 @@
+[
+    {
+        "sinuCode": "59211",
+        "name": "Computación en la Nube",
+        "credits": 3,
+        "weeklyHours": 3,
+        "slots": []
+    },
+    {
+        "sinuCode": "59214",
+        "name": "Inteligencia Artificial Aplicada",
+        "credits": 3,
+        "weeklyHours": 3,
+        "slots": []
+    },
+    {
+        "sinuCode": "59217",
+        "name": "Seguridad de la Información",
+        "credits": 3,
+        "weeklyHours": 3,
+        "slots": [
+            "59096",
+            "59098"
+        ]
+    }
+]

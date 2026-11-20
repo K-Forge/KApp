@@ -1,0 +1,61 @@
+{
+    "weekStart": "2026-09-21",
+    "weekEnd": "2026-09-27",
+    "days": {
+        "MONDAY": [
+            {
+                "sectionCode": "4127",
+                "sinuCode": "59035",
+                "pensumItemCode": "59035",
+                "courseName": "DESARROLLO DE APLICACIONES MÓVILES",
+                "group": "51",
+                "professor": "GÓMEZ RESTREPO LAURA MARCELA",
+                "startTime": "18:15",
+                "endTime": "20:30",
+                "blocks": 3,
+                "sede": "Sede Principal",
+                "buildingCode": "EC",
+                "room": null,
+                "color": "#539392"
+            }
+        ],
+        "TUESDAY": [],
+        "WEDNESDAY": [
+            {
+                "sectionCode": "4133",
+                "sinuCode": "48022",
+                "pensumItemCode": "48022",
+                "courseName": "INGENIERÍA DE SOFTWARE II",
+                "group": "51",
+                "professor": "MARTÍNEZ ACOSTA JORGE ENRIQUE",
+                "startTime": "18:15",
+                "endTime": "21:15",
+                "blocks": 4,
+                "sede": "Sede Principal",
+                "buildingCode": "EC",
+                "room": "508",
+                "color": "#C9D329"
+            }
+        ],
+        "THURSDAY": [],
+        "FRIDAY": [],
+        "SATURDAY": [
+            {
+                "sectionCode": "4140",
+                "sinuCode": "56201",
+                "pensumItemCode": "56201",
+                "courseName": "METODOLOGÍA DE INVESTIGACIÓN",
+                "group": "51",
+                "professor": "RAMÍREZ SALAZAR DIANA PATRICIA",
+                "startTime": "07:00",
+                "endTime": "08:30",
+                "blocks": 2,
+                "sede": "Bienestar Institucional",
+                "buildingCode": "BI",
+                "room": "301",
+                "color": "#522567"
+            }
+        ],
+        "SUNDAY": []
+    }
+}

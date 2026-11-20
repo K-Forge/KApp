@@ -5,12 +5,14 @@ import android.content.Context
 import co.edu.konradlorenz.kapp.BuildConfig
 import com.microsoft.identity.client.AuthenticationCallback
 import com.microsoft.identity.client.IAuthenticationResult
+import com.microsoft.identity.client.Logger
 import com.microsoft.identity.client.IPublicClientApplication
 import com.microsoft.identity.client.ISingleAccountPublicClientApplication
 import com.microsoft.identity.client.PublicClientApplication
 import com.microsoft.identity.client.SignInParameters
 import com.microsoft.identity.client.exception.MsalClientException
 import com.microsoft.identity.client.exception.MsalException
+import com.microsoft.identity.client.exception.MsalUserCancelException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
@@ -52,9 +54,11 @@ interface MicrosoftSignIn {
 
     companion object {
         /**
-         * MSAL when the build has a client id, the fake in a debug build without one, and a sign-in
-         * that explains itself in a release build without one. See "Microsoft sign-in" in the
-         * module README for where the client id comes from.
+         * MSAL when the build has a client id. Without one, a debug build signs in through the
+         * backend's fake OIDC server when `kapp.dev.oidcIssuer` is set (DevOidc, src/debug), and
+         * with a made-up token for the mocks when it is not; a release build gets a sign-in that
+         * explains itself. See "Microsoft sign-in" and "Running against the local backend" in the
+         * module README.
          */
         fun forThisBuild(context: Context): MicrosoftSignIn = when {
             BuildConfig.MSAL_CLIENT_ID.isNotBlank() -> MsalSignIn(
@@ -63,8 +67,7 @@ interface MicrosoftSignIn {
                 tenantId = BuildConfig.MSAL_TENANT_ID,
                 signatureHash = BuildConfig.MSAL_SIGNATURE_HASH,
             )
-            BuildConfig.DEBUG -> FakeSignIn
-            else -> NotConfigured
+            else -> DevOidc.signIn(context) ?: if (BuildConfig.DEBUG) FakeSignIn else NotConfigured
         }
     }
 }
@@ -96,7 +99,18 @@ private class MsalSignIn(
     private val creating = Mutex()
     private var application: ISingleAccountPublicClientApplication? = null
 
-    override suspend fun idToken(activity: Activity): String {
+    /**
+     * One interactive sign-in at a time. A second tap right after cancelling could reach MSAL
+     * while it was still closing the first request, which it refuses as a duplicate - shown as
+     * "No pudimos completar el ingreso" (L-02, #232).
+     */
+    private val interactive = Mutex()
+
+    override suspend fun idToken(activity: Activity): String = interactive.withLock {
+        signInOnce(activity)
+    }
+
+    private suspend fun signInOnce(activity: Activity): String {
         val app = application()
         // Single-account mode refuses to sign in over an account it already holds. One left over
         // from an earlier session is signed out first, so the account picker always shows.
@@ -144,6 +158,13 @@ private class MsalSignIn(
         }
 
     private suspend fun create(): ISingleAccountPublicClientApplication {
+        // MSAL logs nothing by default, and a misconfigured registration usually shows up only as
+        // a cancelled sign-in. A debug build sends its log to logcat (tag MSAL), never with PII.
+        if (BuildConfig.DEBUG) {
+            Logger.getInstance().setEnableLogcatLog(true)
+            Logger.getInstance().setLogLevel(Logger.LogLevel.INFO)
+            Logger.getInstance().setEnablePII(false)
+        }
         val config = withContext(Dispatchers.IO) {
             File(context.noBackupFilesDir, "msal_config.json").apply { writeText(configJson()) }
         }
@@ -191,6 +212,10 @@ private class MsalSignIn(
     }.toString()
 
     private fun translate(exception: MsalException): Exception = when {
+        // A cancel MSAL reports as an error, or a request refused because the cancelled one had
+        // not finished yet: neither is a failure the person needs to read about.
+        exception is MsalUserCancelException || exception.errorCode in CANCELLED_ERRORS ->
+            SignInCancelledException()
         exception is MsalClientException && exception.errorCode in NETWORK_ERRORS ->
             MicrosoftUnreachableException(exception)
         else -> MicrosoftSignInException(exception)
@@ -202,6 +227,8 @@ private class MsalSignIn(
          * for. `User.Read` is the one scope ADR 0003 adds to those.
          */
         val SCOPES = listOf("User.Read")
+
+        val CANCELLED_ERRORS = setOf("user_cancelled", "duplicate_command")
 
         val NETWORK_ERRORS = setOf(
             MsalClientException.DEVICE_NETWORK_NOT_AVAILABLE,

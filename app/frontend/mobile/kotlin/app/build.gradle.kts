@@ -8,13 +8,17 @@ plugins {
 
 android {
     namespace = "co.edu.konradlorenz.kapp"
-    compileSdk = 36
+    // 37 because current Compose, Coil and OkHttp releases refuse to build against anything older.
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "co.edu.konradlorenz.kapp"
         // 26 is the first release with adaptive icons, which is what the launcher icon uses.
         minSdk = 26
-        targetSdk = 36
+        // Targeting 37 turns on Android 17's local network protection: a connection to a private
+        // address times out unless the app holds ACCESS_LOCAL_NETWORK. Only a debug build talks to
+        // one, so only the debug manifest declares it and LocalNetworkAccess asks for it.
+        targetSdk = 37
         versionCode = 1
         versionName = "0.1.0-alpha.1"
 
@@ -29,6 +33,9 @@ android {
         buildConfigField("String", "MSAL_SIGNATURE_HASH", "\"${msal("signatureHash")}\"")
         // The redirect path BrowserTabActivity answers to, in AndroidManifest.xml.
         manifestPlaceholders["msalSignatureHash"] = msal("signatureHash")
+
+        // The demo build type turns it on; see below.
+        buildConfigField("Boolean", "DEMO", "false")
     }
 
     buildTypes {
@@ -40,8 +47,17 @@ android {
         // Release has its own value so it can never point at a mock. KApp has no deployed server
         // yet, so the host is a placeholder until there is one; it is HTTPS because release
         // refuses plain HTTP.
+        //
+        // Two Gradle properties move a debug build from the mocks to the real services on the same
+        // computer, with sign-in through the compose file's fake OIDC server. Set them in
+        // ~/.gradle/gradle.properties or with -P, never in the committed gradle.properties:
+        //   kapp.api.baseUrl=http://10.0.2.2:8080/
+        //   kapp.dev.oidcIssuer=http://10.0.2.2:8090/kapp
+        // See "Running against the local backend" in the module README.
         debug {
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:4000/\"")
+            val property = { name: String, default: String -> providers.gradleProperty(name).getOrElse(default) }
+            buildConfigField("String", "API_BASE_URL", "\"${property("kapp.api.baseUrl", "http://10.0.2.2:4000/")}\"")
+            buildConfigField("String", "DEV_OIDC_ISSUER", "\"${property("kapp.dev.oidcIssuer", "")}\"")
         }
         release {
             buildConfigField("String", "API_BASE_URL", "\"https://kapp.konradlorenz.edu.co/\"")
@@ -50,6 +66,25 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+        }
+        // The class delivery's build (issue #159): a debug build whose every API call is answered
+        // from the contracts' examples in src/demo/assets, so it runs with no Docker, no backend
+        // and no Microsoft account. The default on a fresh clone, so opening the project and
+        // pressing Run is enough; pick debug in Build Variants to work against the mocks.
+        //
+        // Its own application id, so it sits next to a debug build rather than replacing it, and
+        // none of the sign-in properties: whatever ~/.gradle/gradle.properties says, the demo signs
+        // in with the made-up token and the profile picker.
+        create("demo") {
+            initWith(getByName("debug"))
+            isDefault = true
+            applicationIdSuffix = ".demo"
+            matchingFallbacks += "debug"
+            buildConfigField("Boolean", "DEMO", "true")
+            // Never reached: DemoBackend answers before OkHttp opens a connection.
+            buildConfigField("String", "API_BASE_URL", "\"https://demo.invalid/\"")
+            buildConfigField("String", "DEV_OIDC_ISSUER", "\"\"")
+            buildConfigField("String", "MSAL_CLIENT_ID", "\"\"")
         }
     }
 

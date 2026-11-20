@@ -28,7 +28,7 @@ spec: {"frame": "ec-au-p1-pe.json",       the trace spec of the same photo: its 
        "building": "EC", "floor": "P1", "why": "...",
        "rooms": [{
           "code": "P1-AUD-TAQUILLA",       the space; its other fields are copied to the output
-          "name": "...", "typeCode": "...", "wing": "S", "aliases": [],
+          "name": "...", "typeCode": "...", "wing": "S", "aliases": [], "note": "...",
           "strokes": ["green"],            the colours of the strokes that close the room
           "at": [0.457, 0.170],            a point inside it, as fractions of the photo's width
                                            and height
@@ -59,7 +59,8 @@ spec: {"frame": "ec-au-p1-pe.json",       the trace spec of the same photo: its 
                                            marks change: a name, other names; "shape": null for
                                            one the plan does not draw at all
 
-Colours are the ink's, picked by hue: green, cyan, blue, navy, purple, orange, red, black.
+Colours are the ink's, picked by hue: green, cyan, blue, navy, purple, violet, magenta, orange,
+amber, yellow, red, black (see INKS).
 Standard library only; sips (macOS) reads the photo.
 """
 import colorsys
@@ -79,25 +80,34 @@ LETTER = 4               # half the width of a pen stroke of writing, in pixels:
 GROW = 6                 # pixels from the inner edge of a loop to the middle of its pen
 MEET = 14                # how far a room is grown to meet one drawn beside it: half the widest wall
 EPS = 3.0                # pixels an outline may stray from the pen once drawn with few corners
+# A pixel is every pen whose hues it falls in, so a pen named here never takes ink from another.
+# purple and orange are as wide as the auditorium's sketch needed (2026-10-02). magenta and yellow
+# came with the floor sketches of 2026-10-21, measured on EC-P1-PE: purple 280-292 beside magenta
+# 296-316, orange 32-40 beside yellow 44-50. violet and amber are purple and orange without them,
+# for a room drawn in one beside a room drawn in the other.
 INKS = {
     "green": lambda h, s, v: 100 <= h < 150,
     "cyan": lambda h, s, v: 165 <= h < 195,
     "blue": lambda h, s, v: 196 <= h < 224,
     "navy": lambda h, s, v: 226 <= h < 255,
     "purple": lambda h, s, v: 270 <= h < 305,
+    "violet": lambda h, s, v: 270 <= h < 294,
+    "magenta": lambda h, s, v: 294 <= h < 335,
     "orange": lambda h, s, v: 24 <= h < 52 and s > 0.8 and v > 0.8,
+    "amber": lambda h, s, v: 24 <= h < 42 and s > 0.8 and v > 0.8,
+    "yellow": lambda h, s, v: 42 <= h < 62 and s > 0.6 and v > 0.8,
     "red": lambda h, s, v: (h < 8 or h > 352) and s > 0.85 and v > 0.8,
 }
 
 
 def ink(r, g, b):
-    """Which pen a pixel is, or None: the printed plan's colours are duller than any of them."""
+    """The pens a pixel is, none for the printed plan: its colours are duller than any of them."""
     h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
     if v < 0.22 and max(r, g, b) - min(r, g, b) < 40:
-        return "black"
+        return ["black"]
     if s < 0.6 or v < 0.55:
-        return None
-    return next((name for name, is_it in INKS.items() if is_it(h * 360, s, v)), None)
+        return []
+    return [name for name, is_it in INKS.items() if is_it(h * 360, s, v)]
 
 
 def inside(mask, w, h, seed, code):
@@ -195,18 +205,22 @@ def main():
     pw, ph = frame["plaque"]
     to_drawing_matrix = T.homography(frame["corners"], [(0, 0), (pw, 0), (pw, ph), (0, ph)])
     zoom = frame.get("resample", 2800) / w
+    # The drawing is the part of the rectified plaque the frame's "crop" keeps, at its "scale", as
+    # trace.py writes it: a frame that trims the plaque puts every room that much further up-left.
+    u0, v0 = frame.get("crop", [0, 0])[:2]
+    scale = frame.get("scale", 1)
 
     def to_drawing(p):
         x, y = p[0] * zoom, p[1] * zoom
         m = to_drawing_matrix
         d = m[2][0] * x + m[2][1] * y + m[2][2]
-        return ((m[0][0] * x + m[0][1] * y + m[0][2]) / d, (m[1][0] * x + m[1][1] * y + m[1][2]) / d)
+        u, v = (m[0][0] * x + m[0][1] * y + m[0][2]) / d, (m[1][0] * x + m[1][1] * y + m[1][2]) / d
+        return ((u - u0 * pw) * scale, (v - v0 * ph) * scale)
 
     pens = {}
     for y in range(h):
         for x in range(w):
-            name = ink(*rgb(x, y))
-            if name:
+            for name in ink(*rgb(x, y)):
                 pens.setdefault(name, bytearray(w * h))[y * w + x] = 1
 
     regions = {}
@@ -216,6 +230,7 @@ def main():
         to_photo_matrix = T.homography([(0, 0), (pw, 0), (pw, ph), (0, ph)], frame["corners"])
 
         def to_photo(p):
+            p = (p[0] / scale + u0 * pw, p[1] / scale + v0 * ph)
             m = to_photo_matrix
             d = m[2][0] * p[0] + m[2][1] * p[1] + m[2][2]
             return ((m[0][0] * p[0] + m[0][1] * p[1] + m[0][2]) / d / zoom, (m[1][0] * p[0] + m[1][1] * p[1] + m[1][2]) / d / zoom)
@@ -332,6 +347,12 @@ def main():
     for i, v in enumerate(lab):
         if v:
             cells_of.setdefault(v, []).append((i % w, i // w))
+    for number, code in enumerate(order, 1):
+        if number not in cells_of:
+            # Another room's loop took all of this one: two loops that read as one, or a point that
+            # falls in the wrong loop.
+            takers = sorted({order[lab[y * w + x] - 1] for x, y in regions[code] if lab[y * w + x]})
+            sys.exit(f"{code}: nothing is left of it - {', '.join(takers)} took its cells; give each a \"within\"")
 
     def at_corner(x, y):
         """How many rooms, the outside counted, meet at a corner of the lattice."""
@@ -418,7 +439,7 @@ def main():
             if "--draft" not in sys.argv:
                 sys.exit(f"{code}: its outline crosses itself once drawn with few corners")
             print(f"  {code}: crosses itself")
-        space = {key: room[key] for key in ("code", "wing", "name", "typeCode", "aliases") if key in room}
+        space = {key: room[key] for key in ("code", "wing", "name", "typeCode", "aliases", "note") if key in room}
         space["shape"] = shape
         doors = []
         for at in room.get("doors", []):

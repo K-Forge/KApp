@@ -93,7 +93,7 @@ one of its examples.
 
 ## Two stacks at once
 
-The containers are named after `KAPP_STACK`, and the port is `KAPP_MOCK_PORT`. A second worktree
+The containers and the Compose project (`kapp-<stack>`) are named after `KAPP_STACK`, and the port is `KAPP_MOCK_PORT`. A second worktree
 running its own mocks sets both in its `app/backend/microservices/.env`:
 
 ```bash

@@ -7,6 +7,73 @@ The contracts are the source of truth: the mocks serve them as soon as they merg
 (`app/backend/microservices/mock/README.md`), and the services implement them in the pull requests
 that follow. Until a service has caught up, its contract describes where it is going, not where it is.
 
+## November 2026: semaphore 2.0.2 (#250)
+
+- **Two rules on `PUT /api/semaphore/me/plans/{planId}/placements/{pensumItemCode}`**, for a plan
+  over the student's own pensum, answered with `400` and the issue on `plannedLevel`:
+  - a `PENDING` course cannot be planned before the level the student is in;
+  - a `FAILED` course goes only to the next period, since it has to be taken again.
+
+  The student's level is the highest one with a course `IN_PROGRESS`; with none in progress, the
+  level after the highest one with a course `PASSED`. The next period is the level after it while
+  a course is in progress, and the student's own level between periods.
+- **Access, written down:** the catalog refuses `ROLE_UNASSIGNED` as well as `ROLE_GUEST`. Its
+  `x-roles` never listed it.
+
+**Migrating a client:** offer a failed course only the next period, and a pending one only the
+student's level and later. The test SINU's student failed Lógica Digital y Microprocesadores
+(`31506`): it goes to level 6.
+
+## November 2026: auth 1.2.0, user 1.2.0, map 3.8.0, schedule 2.0.2 (additive, #249)
+
+- **New profile role: `ROLE_UNASSIGNED`.** A member the Microsoft directory does not classify signs
+  in with it, instead of `ROLE_STAFF`: testers saw such accounts as "Administrativo". It is still
+  exactly one profile role per account. A profile role an administrator chose still wins, and an
+  administrator cannot give `ROLE_UNASSIGNED` (`ProfileRole` does not list it).
+- **auth 1.2.0 and user 1.2.0:** `Role` lists `ROLE_UNASSIGNED`. `GET` and `PATCH /api/users/me`
+  accept it: the account's own profile, with no academic block.
+- **map 3.8.0:** every read accepts `ROLE_UNASSIGNED`; writes stay `ROLE_ADMIN`.
+- **schedule 2.0.2:** says that `ROLE_UNASSIGNED` is refused everywhere, as it already was. The
+  semáforo and the catalog refuse it too; their `x-roles` never listed it.
+
+**Migrating a client:** treat `ROLE_UNASSIGNED` as a profile role that opens the map and the
+profile, and nothing academic. A client that does not know it yet should not take it for staff.
+
+## November 2026: map 3.7.0 (additive)
+
+- **New:** `Space.labelPoint`, on every space that has a `shape`: in a floor, in a space's detail
+  and in search results. It is where the label and icon go, the point inside the shape farthest
+  from its walls (the pole of inaccessibility, as the polylabel algorithm finds it), in whole
+  units. The centre of `bounds` falls outside an L-shaped room; `labelPoint` never does.
+- **New example:** `CentralGroundFloor`, the first floor of the Edificio Central as the dev server
+  serves it, is now the first example of `GET /api/map/buildings/{code}/floors/{floorCode}`. The
+  mocks serve it, so every client draws the same real floor: rooms in L, a trapezoid wing, doors,
+  corridors, spaces not identified yet and four spaces not drawn yet (#195).
+- **Example updated (#218):** `CentralGroundFloor` follows the floor as it is redrawn: the
+  auditorium's wing follows the walls of its own plan, the floor has its `outline` (the building's
+  walls, with the passage to the Carrera 9A), and only the two corridors that run where the floor
+  is open are left. The auditorium's hall, Audiovisuales and lobby follow Brian's marks over its plan:
+  `P1-26` to `P1-29` are gone (solid concrete, nothing to draw), and the way down to the Carrera 9A
+  gate has three provisional spaces, `P1-9A-PASILLO`, `P1-9A-RAMPA` and `P1-9A-ESCALERA`. The shapes
+  and label points of the wing change; the schema does not.
+
+**Migrating a client:** draw each label and icon at `labelPoint`. Keep the centre of `bounds` only
+as a fallback for a server that does not send it yet.
+
+## October 2026: auth 1.1.0 (additive)
+
+- **New:** `GET /auth/sign-in-options`, public. It says where Microsoft's sign-in is for the server, and
+  whether password sign-in is open. The admin portal reads it to draw its sign-in page.
+
+Nothing to migrate.
+
+## October 2026: user 1.1.0 (additive, internal)
+
+- **New:** `PUT /internal/users/{id}/roles`. The Auth API calls it when an administrator changes an
+  account's roles, so the directory shows them. Service-to-service only: no client calls it.
+
+Nothing to migrate.
+
 ## October 2026: semaphore 2.0.1 (additive)
 
 - **New:** `GET /api/catalog/pensums` lists every pensum without its items (`PensumSummary`),

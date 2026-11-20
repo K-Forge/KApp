@@ -45,10 +45,8 @@ public class AuthService {
     }
 
     /**
-     * @throws IllegalStateException when nothing can evaluate the assertion. That is a
-     *         wiring mistake rather than a client error - today it is what an
-     *         {@link IdentityAssertion.AuthorizationCode} gets, because the Entra adapter
-     *         does not exist yet.
+     * @throws IllegalStateException when nothing can evaluate the assertion: a wiring mistake
+     *         rather than a client error.
      */
     private IdentityProviderPort providerFor(IdentityAssertion assertion) {
         return providers.stream()

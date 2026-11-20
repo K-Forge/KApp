@@ -5,7 +5,8 @@ set -eu
 
 cd "$(git rev-parse --show-toplevel)"
 git config core.hooksPath .githooks
-chmod +x .githooks/* scripts/check-git-conventions.sh
+chmod +x .githooks/* scripts/check-git-conventions.sh scripts/prune-local-branches.sh
 
-echo "Hooks enabled: every commit is now checked against CONTRIBUTING.md."
+echo "Hooks enabled: every commit is now checked against CONTRIBUTING.md, and after a pull or a switch"
+echo "to develop the local branches whose pull request merged are deleted (scripts/prune-local-branches.sh)."
 echo "The same check runs in CI on every pull request, so skipping it locally only moves the failure."

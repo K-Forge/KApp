@@ -24,13 +24,16 @@ spring:
     caffeine:
       spec: expireAfterWrite=5m,maximumSize=1000
 
-# Fail fast rather than let a slow neighbour stall a timetable: both lookups fail open.
-feign:
-  client:
-    config:
-      default:
-        connect-timeout: 3000
-        read-timeout: 5000
+  # Fail fast rather than let a slow neighbour stall a timetable: both lookups fail open, and the
+  # two together stay well inside the gateway's 10 s. Under spring.cloud.openfeign since OpenFeign
+  # 4: the old feign.client prefix is ignored, which left Feign's own 10 s connect and 60 s read.
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 1000
+            read-timeout: 2500
 
 kapp:
   sinu:

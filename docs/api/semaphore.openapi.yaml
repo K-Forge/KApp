@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: KApp Semaphore API
-  version: 2.0.1
+  version: 2.0.2
   summary: Academic catalog and student pensum progress (semáforo) for Fundación Universitaria Konrad Lorenz.
   description: |
     The Semaphore service serves the **academic catalog** (programs and pensums) and each
@@ -65,7 +65,7 @@ info:
 
     | Area | Read | Write |
     |---|---|---|
-    | `/api/catalog/**` | any authenticated role except `ROLE_GUEST` | — |
+    | `/api/catalog/**` | any authenticated role except `ROLE_GUEST` and `ROLE_UNASSIGNED` | — |
     | `POST /api/catalog/pensums/import` | — | `ROLE_ADMIN`, to load the backup |
     | `/api/semaphore/me`, `/summary`, `/eligible` | `ROLE_STUDENT` (the caller's own) | — |
     | `/api/semaphore/me/plans/**` | `ROLE_STUDENT` (the caller's own plans) | `ROLE_STUDENT` |
@@ -73,6 +73,8 @@ info:
     `ROLE_PROFESSOR` and `ROLE_STAFF` read the catalog and nothing else here. Neither follows a
     program, so every `/api/semaphore/**` route refuses them — including the plans. No route
     reads another student's semáforo, administrators included.
+    `ROLE_UNASSIGNED`, a member the directory has not classified yet, reads nothing here, the
+    catalog included.
 
     A caller who is authenticated but lacks the required role receives `403`, never `404`.
 
@@ -87,7 +89,7 @@ tags:
   - name: Catalog
     description: |
       Programs, pensums and each semester's elective bank, as SINU publishes them. Read-only,
-      for any authenticated role except `ROLE_GUEST`.
+      for any authenticated role except `ROLE_GUEST` and `ROLE_UNASSIGNED`.
   - name: Student Progress
     description: |
       The student's semáforo, read from SINU: per-course status, derived summary and eligible
@@ -716,8 +718,16 @@ paths:
         student means to take in it. It is a plan, not an enrolment: the bank is checked when the
         plan is read, not when it is saved, because it changes every semester.
 
-        `400` when the item is not in the pensum, when `plannedLevel` is outside 1–12, or when
-        `electiveSinuCode` is given for an item that is not an elective slot.
+        Two rules follow the student's semáforo, for a plan over their own pensum. The student is
+        at the highest level with a course `IN_PROGRESS`; with none in progress, at the level
+        after the highest one with a course `PASSED`. A `PENDING` course cannot be planned before
+        that level. A `FAILED` course has to be taken again, so it goes only to the next period:
+        the level after the student's while a course is in progress, the student's own between
+        periods.
+
+        `400` when the item is not in the pensum, when `plannedLevel` is outside 1–12, when
+        `electiveSinuCode` is given for an item that is not an elective slot, or when
+        `plannedLevel` breaks one of those two rules, with the issue on `plannedLevel`.
       tags: [Academic Plans]
       requestBody:
         required: true

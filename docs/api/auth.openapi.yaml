@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Auth API
-  version: 1.0.0
+  version: 1.2.0
   summary: Sign-in and token service for the KApp platform.
   description: |
     Authentication service for KApp, the mobile application of Fundación
@@ -54,14 +54,16 @@ info:
     | `ROLE_STUDENT` | profile | The Microsoft directory |
     | `ROLE_PROFESSOR` | profile | The Microsoft directory |
     | `ROLE_STAFF` | profile | The Microsoft directory: an administrative employee |
+    | `ROLE_UNASSIGNED` | profile | Nobody: an account the directory does not classify, until an administrator gives it a role |
     | `ROLE_ADMIN` | permission | An administrator, in the portal |
     | `ROLE_RECEPTION`, `ROLE_MAINTENANCE`, `ROLE_MODERATION`, `ROLE_WELLBEING` | permission | An administrator, in the portal |
     | `ROLE_GUEST` | — | Redeeming a visitor day pass: the campus map only |
 
     - **The profile role comes from a claim of the Microsoft directory.** Which attribute the
       university uses is agreed with its IT office and configured, not written in code.
-    - **An account the directory does not classify** signs in as `ROLE_STAFF`, which opens the
-      map and nothing academic, until an administrator sets its profile role.
+    - **An account the directory does not classify** signs in as `ROLE_UNASSIGNED`, which opens
+      the map and its own profile and nothing academic, until an administrator sets its profile
+      role or the directory classifies it. An administrator cannot give `ROLE_UNASSIGNED`.
     - **The first administrators** come from configuration. Every later permission is granted
       through `PUT /auth/admin/accounts/{userId}/roles`.
 
@@ -166,6 +168,37 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+
+  /auth/sign-in-options:
+    get:
+      # Authorization as the code enforces it, not as prose describes it.
+      x-roles: []          # public - asked before anybody has signed in
+      operationId: getSignInOptions
+      summary: How to sign in to this server
+      description: |
+        What a client needs before anybody has signed in: where Microsoft's sign-in is for this
+        server, and whether password sign-in is open. The admin portal reads it to draw its sign-in
+        page, so the same build works against any server.
+
+        Public endpoint. Nothing in it is a secret: an authority and a client id are what any
+        browser sees in the address bar during a sign-in.
+
+        - `microsoft` is `null` when the server has no Microsoft configuration.
+        - `localSignIn` is `true` only on development servers, where the password routes answer.
+      tags: [Authentication]
+      security: []
+      responses:
+        '200':
+          description: The sign-in options
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignInOptions'
+              example:
+                microsoft:
+                  authority: https://login.microsoftonline.com/8c2b6e0a-5f1d-4b7e-9a3c-1d2e3f4a5b6c/v2.0
+                  clientId: 7f3e1a2b-0c4d-4e5f-8a9b-0c1d2e3f4a5b
+                localSignIn: false
 
   /auth/refresh:
     post:
@@ -1125,14 +1158,15 @@ components:
     Role:
       type: string
       description: |
-        A role a token may carry. `ROLE_STUDENT`, `ROLE_PROFESSOR` and `ROLE_STAFF` are profile
-        roles, exactly one per account. `ROLE_ADMIN`, `ROLE_RECEPTION`, `ROLE_MAINTENANCE`,
+        A role a token may carry. `ROLE_STUDENT`, `ROLE_PROFESSOR`, `ROLE_STAFF` and
+        `ROLE_UNASSIGNED` are profile roles, exactly one per account. `ROLE_ADMIN`, `ROLE_RECEPTION`, `ROLE_MAINTENANCE`,
         `ROLE_MODERATION` and `ROLE_WELLBEING` are permissions, which add to it. `ROLE_GUEST` is
         only ever alone, on a visitor's token.
       enum:
         - ROLE_STUDENT
         - ROLE_PROFESSOR
         - ROLE_STAFF
+        - ROLE_UNASSIGNED
         - ROLE_ADMIN
         - ROLE_RECEPTION
         - ROLE_MAINTENANCE
@@ -1143,7 +1177,9 @@ components:
 
     ProfileRole:
       type: string
-      description: The role that decides what the app shows. Exactly one per account.
+      description: |
+        The role that decides what the app shows. Exactly one per account. `ROLE_UNASSIGNED` is
+        not here: it is what an account holds before anybody chose, never something to give.
       enum: [ROLE_STUDENT, ROLE_PROFESSOR, ROLE_STAFF]
       example: ROLE_STUDENT
 
@@ -1152,6 +1188,37 @@ components:
       description: A role that opens a part of the admin portal, on top of the profile role.
       enum: [ROLE_ADMIN, ROLE_RECEPTION, ROLE_MAINTENANCE, ROLE_MODERATION, ROLE_WELLBEING]
       example: ROLE_RECEPTION
+
+    SignInOptions:
+      type: object
+      required: [microsoft, localSignIn]
+      properties:
+        microsoft:
+          description: |
+            Where to sign in with Microsoft: run OpenID Connect against `authority`, whose discovery
+            document is at `<authority>/.well-known/openid-configuration`, as `clientId`. `null`
+            when Microsoft is not configured on this server.
+          oneOf:
+            - $ref: '#/components/schemas/MicrosoftSignInOptions'
+            - type: 'null'
+        localSignIn:
+          type: boolean
+          description: Whether password sign-in and its routes answer on this server. Development only.
+          example: false
+
+    MicrosoftSignInOptions:
+      type: object
+      required: [authority, clientId]
+      properties:
+        authority:
+          type: string
+          format: uri
+          description: The issuer of the ID tokens this server accepts.
+          example: https://login.microsoftonline.com/8c2b6e0a-5f1d-4b7e-9a3c-1d2e3f4a5b6c/v2.0
+        clientId:
+          type: string
+          description: The application id the admin portal signs in as.
+          example: 7f3e1a2b-0c4d-4e5f-8a9b-0c1d2e3f4a5b
 
     MicrosoftSignInRequest:
       type: object

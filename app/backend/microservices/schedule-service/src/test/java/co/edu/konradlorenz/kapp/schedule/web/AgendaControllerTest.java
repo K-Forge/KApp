@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -120,5 +122,14 @@ class AgendaControllerTest extends AbstractScheduleServiceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.weekStart").value("2026-10-05"))
                 .andExpect(jsonPath("$.weekEnd").value("2026-10-11"));
+    }
+
+    @Test
+    @DisplayName("a week reads the student's pensum from semaphore-service once, not once per class")
+    void week_readsThePensumOnce() throws Exception {
+        mockMvc.perform(get("/api/schedule/me/week").param("date", "2026-10-08").with(student(STUDENT_ID)))
+                .andExpect(status().isOk());
+
+        verify(catalogClient, times(1)).listPensumCourses("1015");
     }
 }

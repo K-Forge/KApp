@@ -1,11 +1,11 @@
 /**
- * The roles an invitation code may grant.
+ * The roles an invitation code may grant: a profile role.
  *
- * `ROLE_ADMIN` is deliberately absent, and the server refuses it too. These codes are seeded in
+ * No permission is here - `ROLE_ADMIN` least of all - and the server refuses them too. These codes are seeded in
  * the repository and read out to whole intakes: a code that could mint an administrator would
  * mean anyone who can read the repository can escalate.
  */
-export const INVITATION_ROLES = ['ROLE_STUDENT', 'ROLE_PROFESSOR'] as const;
+export const INVITATION_ROLES = ['ROLE_STUDENT', 'ROLE_PROFESSOR', 'ROLE_STAFF'] as const;
 export type InvitationRole = (typeof INVITATION_ROLES)[number];
 
 /**

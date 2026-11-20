@@ -1,0 +1,69 @@
+{
+  "interactiveLogin": true,
+  "httpServer": "NettyWrapper",
+  "tokenCallbacks": [
+    {
+      "issuerId": "kapp",
+      "tokenExpiry": 3600,
+      "requestMappings": [
+        {
+          "requestParam": "subject",
+          "match": "estudiante",
+          "claims": {
+            "sub": "${subject}",
+            "aud": ["${clientId}"],
+            "oid": "6f2a3c1e-7b4d-4e5a-9c6f-000000000001",
+            "email": "estudiante@kforge.dev",
+            "preferred_username": "estudiante@kforge.dev",
+            "given_name": "Pepito",
+            "family_name": "Perez Gomez",
+            "name": "Pepito Perez Gomez",
+            "roles": ["Student"]
+          }
+        },
+        {
+          "requestParam": "subject",
+          "match": "profesor",
+          "claims": {
+            "sub": "${subject}",
+            "aud": ["${clientId}"],
+            "oid": "6f2a3c1e-7b4d-4e5a-9c6f-000000000002",
+            "email": "profesor@kforge.dev",
+            "preferred_username": "profesor@kforge.dev",
+            "given_name": "Laura Marcela",
+            "family_name": "Gómez Restrepo",
+            "name": "Laura Marcela Gómez Restrepo",
+            "roles": ["Professor"]
+          }
+        },
+        {
+          "requestParam": "subject",
+          "match": "administrativo",
+          "claims": {
+            "sub": "${subject}",
+            "aud": ["${clientId}"],
+            "oid": "6f2a3c1e-7b4d-4e5a-9c6f-000000000003",
+            "email": "administrativo@kforge.dev",
+            "preferred_username": "administrativo@kforge.dev",
+            "given_name": "Ana",
+            "family_name": "Ruiz Mejía",
+            "name": "Ana Ruiz Mejía",
+            "roles": ["Staff"]
+          }
+        },
+        {
+          "requestParam": "subject",
+          "match": ".*",
+          "claims": {
+            "sub": "${subject}",
+            "aud": ["${clientId}"],
+            "oid": "${subject}",
+            "email": "${subject}@kforge.dev",
+            "preferred_username": "${subject}@kforge.dev",
+            "name": "${subject}"
+          }
+        }
+      ]
+    }
+  ]
+}

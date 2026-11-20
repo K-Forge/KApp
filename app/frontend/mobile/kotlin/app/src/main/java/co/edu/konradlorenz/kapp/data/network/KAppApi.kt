@@ -1,5 +1,6 @@
 package co.edu.konradlorenz.kapp.data.network
 
+import android.util.Log
 import co.edu.konradlorenz.kapp.BuildConfig
 import co.edu.konradlorenz.kapp.data.schedule.MapApi
 import co.edu.konradlorenz.kapp.data.schedule.ScheduleApi
@@ -11,6 +12,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -24,14 +26,21 @@ import java.util.concurrent.TimeUnit
  * [renewAfterRejection] is asked once when a request that carried a token comes back `401`: it
  * answers the token to retry with, or `null` to let the `401` through. Both run on OkHttp's threads
  * and may block - SessionManager renews inside them.
+ *
+ * [answerLocally], when there is one, answers every call itself and nothing goes out: the demo
+ * build's DemoBackend.
  */
 class KAppApi(
     accessToken: () -> String?,
     renewAfterRejection: ((rejected: String) -> String?)? = null,
     baseUrl: String = BuildConfig.API_BASE_URL,
+    answerLocally: Interceptor? = null,
 ) {
     private val client = OkHttpClient.Builder()
         .addInterceptor(bearer(accessToken))
+        .apply { if (BuildConfig.DEBUG) addInterceptor(logCalls) }
+        // After the log, so the demo's answers are logged like a server's.
+        .apply { answerLocally?.let { addInterceptor(it) } }
         .apply { renewAfterRejection?.let { authenticator(retryOnce(it)) } }
         // Short on purpose: against the mocks, a server that has not answered in a few seconds is
         // a server that is not running, and the developer should hear about it now.
@@ -71,6 +80,32 @@ class KAppApi(
             }
             chain.proceed(request)
         }
+
+        /**
+         * Debug builds only: one logcat line per call, with its method, path and status, or the
+         * failure that kept it from getting an answer. Without it a refused call reaches the
+         * screen as "No pudimos cargar…" and its status code can only be found on the server.
+         * The path and nothing else: no query, no headers, no body, so neither a token nor
+         * anybody's data reaches the log.
+         */
+        private val logCalls = Interceptor { chain ->
+            val request = chain.request()
+            val call = "${request.method} ${request.url.encodedPath}"
+            val response = try {
+                chain.proceed(request)
+            } catch (e: IOException) {
+                Log.w(TAG, "$call failed: ${e.javaClass.simpleName}")
+                throw e
+            }
+            if (response.isSuccessful) {
+                Log.d(TAG, "$call -> ${response.code}")
+            } else {
+                Log.w(TAG, "$call -> ${response.code}")
+            }
+            response
+        }
+
+        private const val TAG = "KAppHttp"
 
         /**
          * Retries a `401` once with the token [renew] answers. Once, and only for a request that

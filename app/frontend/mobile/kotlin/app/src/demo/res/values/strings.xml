@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      The demo's login keeps the product's texts and button; its own entry is folded under "Modo
+      demostración". The picker there chooses who signs in, out of the contracts' examples.
+    -->
+    <string name="login_mock_profile_label">Perfil de demostración</string>
+    <string name="invitation_demo_hint" translatable="false">En esta demostración funciona el código KL-V-7K2M-QX9P; cualquier otro dice que no existe.</string>
+</resources>

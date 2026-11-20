@@ -15,3 +15,4 @@ The ones that earn a place move into `trace.py` or `lines.py`.
 | `scan.py`, `obox.py`, `aud.py` | Outline the orange inside a box: an odd-shaped room, the auditorium |
 | `profile.py`, `mag.py` | Profiles across a strip of the photo, to find a wall where the tracer did not |
 | `overlaps.py` | Spaces of a floor whose shapes share area, before the snapshot load refuses them |
+| `aud_walls.py` | EC P1's auditorium wing built from straight lines - the outline's, lines fitted on its plan and on Brian's marks over it - each room an intersection of them, with every seat inside the hall, and the provisional way down to the Carrera 9A gate; numpy, opencv and shapely (#218) |

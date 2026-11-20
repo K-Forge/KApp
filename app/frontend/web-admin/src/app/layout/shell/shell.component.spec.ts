@@ -141,6 +141,65 @@ describe('ShellComponent session', () => {
   });
 });
 
+describe('ShellComponent renewal', () => {
+  const now = Date.now();
+  const clock = signal(now);
+  const expire = vi.fn();
+  const renew = vi.fn<() => Promise<boolean>>();
+
+  beforeEach(async () => {
+    expire.mockReset();
+    renew.mockReset().mockResolvedValue(true);
+    clock.set(now);
+    await TestBed.configureTestingModule({
+      imports: [ShellComponent],
+      providers: [
+        provideHttpClient(),
+        provideRouter([]),
+        { provide: ClockService, useValue: { now: clock.asReadonly() } },
+      ],
+    }).compileComponents();
+    TestBed.inject(TokenStore).start({ accessToken: tokenExpiringAt(now + 120_000), refreshToken: 'rt_1' });
+    const auth = TestBed.inject(AuthService);
+    vi.spyOn(auth, 'expire').mockImplementation(expire);
+    vi.spyOn(auth, 'renew').mockImplementation(renew);
+    TestBed.createComponent(ShellComponent).detectChanges();
+  });
+
+  afterEach(() => TestBed.inject(TokenStore).clear());
+
+  // `exp` is in whole seconds, so the times keep a second away from the edge.
+  it('renews the session a minute before the access token runs out, once', () => {
+    clock.set(now + 58_000);
+    TestBed.tick();
+    expect(renew).not.toHaveBeenCalled();
+
+    clock.set(now + 61_000);
+    TestBed.tick();
+    clock.set(now + 62_000);
+    TestBed.tick();
+    expect(renew).toHaveBeenCalledTimes(1);
+    expect(expire).not.toHaveBeenCalled();
+  });
+
+  it('signs out when the token runs out and the session cannot be renewed', async () => {
+    renew.mockResolvedValue(false);
+
+    clock.set(now + 120_000);
+    TestBed.tick();
+    await vi.waitFor(() => expect(expire).toHaveBeenCalledTimes(1));
+  });
+
+  it('stays signed in when the last-second renewal works', async () => {
+    clock.set(now + 120_000);
+    TestBed.tick();
+    await Promise.resolve();
+
+    expect(renew).toHaveBeenCalled();
+    expect(expire).not.toHaveBeenCalled();
+  });
+});
+
 /** A token decodeJwt reads; nothing here checks its signature. */
 function tokenExpiringAt(ms: number): string {
   const encode = (value: unknown) => btoa(JSON.stringify(value)).replace(/=+$/, '');

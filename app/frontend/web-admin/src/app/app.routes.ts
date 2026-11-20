@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { Router, type Routes } from '@angular/router';
-import { authGuard } from './core/auth/auth.guard';
+import { authGuard, sectionGuard } from './core/auth/auth.guard';
 
 // Grows one feature at a time as each is built (see AGENTS commit history) - a route is only
 // added here once the component behind it exists, so the app always builds at every commit.
@@ -10,8 +10,14 @@ export const routes: Routes = [
     loadComponent: () => import('./features/login/login.page').then((m) => m.LoginPage),
   },
   {
+    // Where Microsoft sends the browser back: outside the guard, since nobody is signed in yet.
+    path: 'auth/callback',
+    loadComponent: () => import('./features/login/microsoft-callback.page').then((m) => m.MicrosoftCallbackPage),
+  },
+  {
     path: '',
     canActivate: [authGuard],
+    canActivateChild: [sectionGuard],
     loadComponent: () => import('./layout/shell/shell.component').then((m) => m.ShellComponent),
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'my-token' },
@@ -80,11 +86,8 @@ export const routes: Routes = [
       { path: 'identity', redirectTo: 'my-token' },
       { path: 'roles', redirectTo: 'who-can-do-what' },
       { path: 'console', redirectTo: 'api-console' },
-      {
-        path: 'data/invitation-codes',
-        loadComponent: () =>
-          import('./features/data/invitation-codes/invitation-codes.page').then((m) => m.InvitationCodesPage),
-      },
+      // Invitation codes are hidden until the final delivery (#255): the page is still in
+      // features/data/invitation-codes, but nothing links to it and no route opens it.
       {
         path: 'data/visitor-passes',
         loadComponent: () =>
