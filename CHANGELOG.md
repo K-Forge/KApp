@@ -4,6 +4,81 @@ What each release of KApp brought, newest first. A release is a merge of `releas
 `main`, tagged `v<version>` (see [CONTRIBUTING.md](CONTRIBUTING.md), "Releases"). The changes to
 each API contract are listed apart, in [docs/api/CHANGELOG.md](docs/api/CHANGELOG.md).
 
+## 0.3.0 (November 2026)
+
+The Tercera entrega of the mobile applications course (DAM), uploaded on 19 November 2026 and presented on
+the 20th. The Android app works end to end against the real backend on the dev server. The whole stack
+runs on one computer with one command, so an evaluator needs no account of the team's.
+
+### Backend
+
+- **Microsoft sign-in, for the app and the portal.** ID tokens are verified against the tenant's keys
+  (#102, #104). The dev server signs people in with Microsoft (#148). The portal signs in with Microsoft
+  and renews its session with the refresh token (#141, #142).
+- **Roles and permissions.** One profile role plus any number of permissions, set by an administrator
+  (#103, #172), with every service tested against them (#119).
+  - An account the directory does not classify gets `ROLE_UNASSIGNED`, "Sin rol": the map and its
+    profile, nothing academic (#252).
+  - A visitor pass, `ROLE_GUEST`, stays a separate type.
+- **Plans follow the rules.** A pending course cannot be planned before the student's current level, and
+  a failed course goes only to the next period (#253). Plans can go past the last semester (#186).
+- **Map.**
+  - Floors are cached by ETag and list the spaces not drawn yet (#206).
+  - Every drawn space carries a label point (#211, #212).
+  - The Edificio Central's first floor is drawn from Brian's sketch and the surveyed plans, then
+    corrected (#183, #193). Its auditorium, the floor's outline and the Carrera 9A exit are redrawn
+    from the plans; the exit stays provisional until it is measured (#221). The survey sheet asks
+    for that exit (#235).
+- **The timetable runs on the dev server** without waiting on its neighbours (#156, #203).
+- **The admin portal** opens to every permission with the menu each one needs (#169), sends a content
+  security policy (#179), and hides the invitation codes page, which goes for good after this release
+  (#257).
+- **Run it locally.** `scripts/run-locally.sh` and `scripts/run-locally.ps1` start the whole stack with a
+  local MongoDB (the `local-db` profile), a fake Microsoft sign-in and secrets generated on the computer
+  (#244, ADR 0010). Development itself stays on Atlas and the tenant.
+
+### Android
+
+- **Seven screens:** login, inicio, semáforo, horario (day, week and month, #184), mapa, perfil and the
+  visitor pass.
+  - Inicio shows the next class and the semester in credits. Without network, it shows the last data
+    it loaded and its time (#238, #258).
+  - Semáforo has plans, the elective bank even without a plan, failed courses marked "Debe repetirse"
+    in the next period, and only the levels a course may go to (#186, #254, #258).
+  - Mapa lists the buildings (#174) and draws each floor with the shared map style (#199, #200). Each
+    space has an icon (#217) and can be tapped for its name, type and door code (#219).
+  - Perfil can change the profile photo (#185).
+  - A redeemed visitor pass opens the campus map for 24 hours (#173, #258).
+  - An account with no role is told to contact TI (#254).
+- **Sign-in.** Microsoft through MSAL, the fake OIDC server in debug builds (#139), a clear message
+  when there is no network, and a single sign-in at a time (#254). Sign-out forgets the last person's
+  tabs and data (#239).
+- **A demo build** that runs with no backend and no account, from the contracts' examples (#171, #180).
+- **Dark mode** that follows the system (#207, #208). Targets API 37 (#124, #147).
+
+### Testing
+
+Iván and Alejandro ran 89 cases on the dev server: 76 passed, 4 failed and 9 were blocked. The four
+failures were fixed in #254. The blocked cases either need data the test SINU does not have, or rooms
+linked to the map (#251).
+
+### Contracts
+
+| Contract | Version |
+|---|---|
+| `auth.openapi.yaml` | 1.2.0 |
+| `user.openapi.yaml` | 1.2.0 |
+| `semaphore.openapi.yaml` | 2.0.2 |
+| `schedule.openapi.yaml` | 2.0.2 |
+| `map.openapi.yaml` | 3.8.0 |
+
+### Repository
+
+- A shared state folder that every agent session reads first (#190, #209, #210), and the rule that
+  agents open ready pull requests and report them to Core (#214).
+- One pull request per purpose, a squash-only merge queue, and local branches deleted once merged
+  (#129, #138, #128).
+
 ## 0.2.0 (October 2026)
 
 The state of the code that the thesis proposal cites. KApp stops copying academic data and reads
