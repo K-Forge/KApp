@@ -110,6 +110,12 @@ class HomeViewModel(
         val result = schedule.day(today())
         uiState = uiState.copy(day = dayOf(result, now()))
         offline("day", (result as? ScheduleResult.Ready)?.offlineSince)
+
+        // Then the building, from the map (#251): the card shows the sede until, and unless, the
+        // room resolves. The map's answer is kept per room, so this asks once a session.
+        val next = (result as? ScheduleResult.Ready)?.let { nextClass(it.value, now()) }?.first ?: return
+        val building = schedule.buildingOf(next) ?: return
+        uiState = uiState.copy(day = uiState.day.withBuilding(next, building))
     }
 
     companion object {
@@ -166,6 +172,16 @@ internal fun dayOf(result: ScheduleResult<List<ClassOccurrence>>, now: LocalTime
             )
         } ?: DayState.DoneForToday
     }
+}
+
+/**
+ * [day] with [building] in place of the sede on the next class's card, if that card is still
+ * [occurrence]'s. The day may have been read again while the map was being asked.
+ */
+internal fun DayState.withBuilding(occurrence: ClassOccurrence, building: String): DayState = when {
+    this !is DayState.Classes -> this
+    next.courseName != occurrence.courseName || next.startTime != occurrence.startTime -> this
+    else -> copy(next = next.copy(building = building))
 }
 
 /** The semester card out of the semáforo: the summary's credits, and the courses being taken. */

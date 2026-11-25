@@ -4,9 +4,11 @@ import co.edu.konradlorenz.kapp.data.map.Building
 import co.edu.konradlorenz.kapp.data.map.FloorPlan
 import co.edu.konradlorenz.kapp.ui.home.DayState
 import co.edu.konradlorenz.kapp.ui.home.dayOf
+import co.edu.konradlorenz.kapp.ui.home.withBuilding
 import kotlinx.coroutines.runBlocking
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -135,6 +137,92 @@ class ScheduleTest {
     }
 
     @Test
+    fun `a room is asked for once, by building and number`() = runBlocking {
+        val api = FakeSchedule()
+        val repository = ScheduleRepository(api, api)
+
+        repository.space("405", "EC")
+        repository.space("405", "EC")
+        repository.space("405", "BI")
+
+        assertEquals(listOf("405" to "EC", "405" to "BI"), api.spacesAsked)
+    }
+
+    @Test
+    fun `a room not on the map is remembered too, a failure is asked again`() = runBlocking {
+        val api = FakeSchedule()
+        val repository = ScheduleRepository(api, api)
+
+        api.error = HttpException(Response.error<Any>(404, "".toResponseBody()))
+        repository.space("612", "EC")
+        api.error = null
+        assertEquals(RoomLookup.NotOnMap, repository.space("612", "EC"))
+
+        api.error = IOException("offline")
+        assertEquals(RoomLookup.Failed, repository.space("405", "EC"))
+        api.error = null
+        assertTrue(repository.space("405", "EC") is RoomLookup.Found)
+
+        assertEquals(listOf("612" to "EC", "405" to "EC", "405" to "EC"), api.spacesAsked)
+    }
+
+    @Test
+    fun `ending the session forgets the rooms`() = runBlocking {
+        val api = FakeSchedule()
+        val repository = ScheduleRepository(api, api)
+
+        repository.space("405", "EC")
+        repository.clear()
+        repository.space("405", "EC")
+
+        assertEquals(2, api.spacesAsked.size)
+    }
+
+    @Test
+    fun `a class's building is the map's name for it, never a code`() = runBlocking {
+        val api = FakeSchedule().apply { buildingName = "Edificio Central" }
+        val building = ScheduleRepository(api, api).buildingOf(occurrence("18:15", "20:30", room = "612"))
+
+        assertEquals("Edificio Central", building)
+        assertFalse(building.orEmpty().contains("EC"))
+    }
+
+    @Test
+    fun `a class whose room does not resolve has no building, and keeps its sede`() = runBlocking {
+        val api = FakeSchedule()
+        val repository = ScheduleRepository(api, api)
+
+        assertNull(repository.buildingOf(occurrence("07:00", "09:15", room = null)))
+        assertNull(repository.buildingOf(occurrence("07:00", "09:15", building = null)))
+        assertTrue("nothing to ask the map", api.spacesAsked.isEmpty())
+
+        api.error = HttpException(Response.error<Any>(404, "".toResponseBody()))
+        assertNull(repository.buildingOf(occurrence("07:00", "09:15", room = "999")))
+        api.error = IOException("offline")
+        assertNull(repository.buildingOf(occurrence("07:00", "09:15", room = "998")))
+    }
+
+    @Test
+    fun `Inicio's card shows the building in place of the sede once the room resolves`() {
+        val next = occurrence("18:15", "20:30")
+        val state = dayOf(ScheduleResult.Ready(listOf(next)), LocalTime.of(17, 0))
+
+        val withBuilding = state.withBuilding(next, "Edificio Central") as DayState.Classes
+
+        assertEquals("Sede Principal", (state as DayState.Classes).next.building)
+        assertEquals("Edificio Central", withBuilding.next.building)
+        assertEquals("405", withBuilding.next.room)
+    }
+
+    @Test
+    fun `a building for a class no longer on the card changes nothing`() {
+        val state = dayOf(ScheduleResult.Ready(day), LocalTime.of(17, 0))
+
+        assertEquals(state, state.withBuilding(occurrence("07:00", "09:15"), "Edificio Central"))
+        assertEquals(DayState.DoneForToday, DayState.DoneForToday.withBuilding(day.first(), "Edificio Central"))
+    }
+
+    @Test
     fun `the week runs Monday to Sunday, as the contract's keys do`() {
         assertEquals("MONDAY", WeekDays.first())
         assertEquals("SUNDAY", WeekDays.last())
@@ -145,6 +233,7 @@ class ScheduleTest {
         var error: Exception? = null
         val weeksAsked = mutableListOf<String?>()
         val spacesAsked = mutableListOf<Pair<String, String>>()
+        var buildingName = "Bienestar Institucional"
 
         override suspend fun mySchedule(): Schedule {
             error?.let { throw it }
@@ -168,12 +257,12 @@ class ScheduleTest {
             error("not used here")
 
         override suspend fun space(room: String, buildingCode: String): SpaceDetail {
-            error?.let { throw it }
             spacesAsked += room to buildingCode
+            error?.let { throw it }
             return SpaceDetail(
                 code = room,
                 floor = SpaceFloor("P3", "Piso 3", 3.0),
-                building = SpaceBuilding(buildingCode, "Bienestar Institucional"),
+                building = SpaceBuilding(buildingCode, buildingName),
             )
         }
     }

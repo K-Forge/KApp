@@ -110,7 +110,10 @@ data class NextClass(
     val endTime: String,
     /** The room number, or `null`: no classroom assigned for this stretch. Drawn, never hidden. */
     val room: String?,
-    /** The sede, as SINU writes it. */
+    /**
+     * The building's name once the map resolves the room ("Edificio Central", #251); until then,
+     * or when it does not, the sede as SINU writes it.
+     */
     val building: String,
     val color: Color,
     val startsInMinutes: Int?,

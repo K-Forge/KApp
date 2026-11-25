@@ -489,7 +489,13 @@ private fun ClassSheet(occurrence: ClassOccurrence, room: RoomState, onDismiss: 
                 pluralStringResource(R.plurals.schedule_blocks, occurrence.blocks, occurrence.blocks),
             )
             Detail(R.string.schedule_detail_professor, occurrence.professor)
-            Detail(R.string.schedule_detail_sede, occurrence.sede)
+            // The building in place of the sede once the map resolves the room (#251): "Edificio
+            // Central" says where to walk, "Sede Principal" does not. Never "EC-612".
+            if (room is RoomState.Ready) {
+                Detail(R.string.schedule_detail_building, room.space.building.name)
+            } else {
+                Detail(R.string.schedule_detail_sede, occurrence.sede)
+            }
 
             Text(
                 text = stringResource(R.string.schedule_where),
@@ -519,13 +525,15 @@ private fun ClassSheet(occurrence: ClassOccurrence, room: RoomState, onDismiss: 
     }
 }
 
-/** What the map knows about a room. Accessibility only when it has been checked. */
+/**
+ * What the map knows about a room. Its building is drawn above, in place of the sede.
+ * Accessibility only when it has been checked.
+ */
 @Composable
 private fun Space(space: SpaceDetail) {
     Detail(R.string.schedule_detail_room, space.code)
     space.name?.let { Detail(R.string.schedule_detail_space_name, it) }
     space.typeName?.let { Detail(R.string.schedule_detail_space_type, it) }
-    Detail(R.string.schedule_detail_building, space.building.name)
     Detail(R.string.schedule_detail_floor, space.floor.name)
     space.capacity?.let { Detail(R.string.schedule_detail_capacity, it.toString()) }
     // UNKNOWN "must not be shown as either answer" (map.openapi.yaml): most rooms are unchecked.
