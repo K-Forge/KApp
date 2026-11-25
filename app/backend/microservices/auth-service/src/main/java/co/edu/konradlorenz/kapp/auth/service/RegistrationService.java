@@ -6,7 +6,6 @@ import co.edu.konradlorenz.kapp.auth.client.UserProfileView;
 import co.edu.konradlorenz.kapp.auth.config.RegistrationProperties;
 import co.edu.konradlorenz.kapp.auth.domain.Credential;
 import co.edu.konradlorenz.kapp.auth.domain.CredentialRepository;
-import co.edu.konradlorenz.kapp.auth.domain.InvitationCode;
 import co.edu.konradlorenz.kapp.auth.error.ProfileServiceUnavailableException;
 import co.edu.konradlorenz.kapp.auth.web.AccountRequest;
 import co.edu.konradlorenz.kapp.auth.web.RegistrationRequest;
@@ -41,9 +40,6 @@ import java.util.List;
  *       it because the credential already exists and registration now answers 409.</li>
  * </ul>
  *
- * <p>The invitation code is claimed before either, and returned if anything after it
- * fails, so a crashed registration does not silently consume an intake slot.
- *
  * <h2>409 comes from the index, not from the pre-check</h2>
  * The existence check up front exists to give a fast, friendly answer and to avoid
  * bothering user-service. It is not the guarantee: two simultaneous registrations for the
@@ -57,59 +53,44 @@ public class RegistrationService {
     private static final Logger log = LoggerFactory.getLogger(RegistrationService.class);
 
     private final CredentialRepository credentials;
-    private final InvitationCodeService invitationCodes;
     private final UserProfileClient userProfiles;
     private final VerificationService verification;
     private final PasswordEncoder passwordEncoder;
     private final RegistrationProperties properties;
 
     public RegistrationService(CredentialRepository credentials,
-                               InvitationCodeService invitationCodes,
                                UserProfileClient userProfiles,
                                VerificationService verification,
                                PasswordEncoder passwordEncoder,
                                RegistrationProperties properties) {
         this.credentials = credentials;
-        this.invitationCodes = invitationCodes;
         this.userProfiles = userProfiles;
         this.verification = verification;
         this.passwordEncoder = passwordEncoder;
         this.properties = properties;
     }
 
-    /** Institutional signup. The invitation code decides the role; this method never grants admin. */
+    /**
+     * Password registration, for local development only: the account has no profile role
+     * ({@code ROLE_UNASSIGNED}) until an administrator gives it one in the portal, and never a
+     * permission.
+     */
     public RegistrationResponse register(RegistrationRequest request) {
         String email = normalise(request.email());
         requireAllowedDomain(email);
         requireAvailable(email);
 
-        InvitationCode code = invitationCodes.redeem(request.invitationCode());
-
-        // roleFrom is deliberately inside this try, not between redeem and it: a code
-        // whose role is rejected - a rogue ROLE_ADMIN entry, say - has still claimed a
-        // slot by this point, and that slot must come back just like any other failure
-        // past this line. Checking the role before redeeming would be safer-looking but
-        // reopens the read-then-write race redeem() exists to close.
-        try {
-            String role = roleFrom(code);
-            Credential credential = createAccount(email, request.password(),
-                    request.firstName(), request.lastName(), role, initialStatus(), null);
-
-            verification.issueAndSend(credential);
-            return respond(credential);
-        } catch (RuntimeException e) {
-            // The slot was claimed for a registration that did not happen. Give it back,
-            // or a failed attempt permanently costs the registrar one account.
-            invitationCodes.release(code.code());
-            throw e;
-        }
+        Credential credential = createAccount(email, request.password(),
+                request.firstName(), request.lastName(), KappRoles.UNASSIGNED, initialStatus(), null);
+        verification.issueAndSend(credential);
+        return respond(credential);
     }
 
     /**
      * An account an administrator creates, with a temporary password the person replaces at
      * first sign-in. The same rules as registration - the domain, a profile role and never a
-     * permission - minus the invitation code: the administrator is the invitation. It may sign
-     * in at once, since somebody vouched for it, but its address is still not verified.
+     * permission - but the administrator chooses the profile role. It may sign in at once, since
+     * somebody vouched for it, but its address is still not verified.
      */
     public PasswordService.Issued createWithTemporaryPassword(AccountRequest request) {
         String email = normalise(request.email());
@@ -176,18 +157,6 @@ public class RegistrationService {
             throw new ProfileServiceUnavailableException(
                     "Registration is temporarily unavailable. Please try again in a moment.", e);
         }
-    }
-
-    /** A permission is never reachable through signup, whatever a code claims. */
-    private String roleFrom(InvitationCode code) {
-        String role = code.role();
-        if (KappRoles.ASSIGNABLE_PROFILE_ROLES.contains(role)) {
-            return role;
-        }
-        log.error("Invitation code {} carries role {}, which registration must not grant",
-                code.code(), role);
-        throw new BusinessRuleException("Invitation code is invalid, expired or already used",
-                List.of(new ApiError.FieldIssue("invitationCode", "Unknown, expired or already used")));
     }
 
     private void requireAllowedDomain(String email) {

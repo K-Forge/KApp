@@ -16,8 +16,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
- * Closes password sign-in and everything around it: registration, e-mail verification, invitation
- * codes, and accounts an administrator creates with a temporary password. Members of the university
+ * Closes password sign-in and everything around it: registration, e-mail verification, and
+ * accounts an administrator creates with a temporary password. Members of the university
  * sign in with Microsoft; these exist for development, CI and the mocks.
  *
  * <p>With local sign-in off - the default, and what production runs - their paths answer
@@ -36,8 +36,6 @@ public class LocalSignInGate extends OncePerRequestFilter {
             "/auth/register",
             "/auth/verify",
             "/auth/verify/resend",
-            "/auth/admin/invitation-codes",
-            "/auth/admin/invitation-codes/*",
             "/auth/admin/accounts",
             "/auth/admin/accounts/*/temporary-password");
 

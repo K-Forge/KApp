@@ -61,7 +61,7 @@ public class AuthController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Register an institutional account",
-            description = "The invitation code decides the role. ROLE_ADMIN is never granted here.")
+            description = "Development only. The account has no profile role until an administrator gives it one.")
     public RegistrationResponse register(@Valid @RequestBody RegistrationRequest request) {
         return registrationService.register(request);
     }

@@ -134,7 +134,7 @@ Tracked in `docs/SECURITY-AUDIT.md`.
 | S8 | Informational | Open. HS512 key length — superseded in practice: signing is RS256 now |
 | S9 | Informational | Open. Sample data credentials |
 | S10 | High | Resolved. Each service holds its own MongoDB account with `readWrite` on one database |
-| S11 | Moderate | Mitigated. The development accounts hold `ROLE_ADMIN` and two seeded invitation codes ship in the repository, but since #83 password sign-in and invitation codes answer only when local sign-in is enabled |
+| S11 | Moderate | Closed. The development accounts were deleted (#246) and invitation codes removed (#255); password sign-in answers only when local sign-in is enabled (#83) |
 | H1 | High | Open. Two development credentials remain readable in git history. Rotation belongs to backend phase 6 |
 
 ---

@@ -84,7 +84,7 @@ Severity reflects the impact if this configuration were deployed as-is on a reac
 | S8 | Informational | HS512 key length requirement is undocumented outside this audit. |
 | S9 | Informational | Sample data ships a known password and its hash. |
 | S10 | High | MongoDB ran without authentication; database separation was a convention, not a rule. **Resolved.** |
-| S11 | Moderate | Development accounts hold `ROLE_ADMIN` and two invitation codes ship in the repository. **Partly closed** — the seeded codes are deactivated and the portal now requires `ROLE_ADMIN`. |
+| S11 | Moderate | Development accounts held `ROLE_ADMIN` and two invitation codes shipped in the repository. **Closed** — the accounts were deleted (#246) and invitation codes removed (#255). |
 | S12 | Moderate | The visitor day pass stores identity documents, which are personal data under Ley 1581. **Built, with a 30-day retention enforced by the database. Dirección de TI has not yet been told.** |
 
 ### H1 — Credentials readable in git history (High)
@@ -275,7 +275,11 @@ five accounts reaching its own database and refused on the other four.
 `admin` rather than in the database they can reach. The privilege scoping is the same; the
 connection strings differ, and `docs/ATLAS-SETUP.md` says how.
 
-### S11 — Development accounts and seeded invitation codes (Moderate) — OPEN BY DECISION
+### S11 — Development accounts and seeded invitation codes (Moderate) — CLOSED (#246, #255)
+
+**Invitation codes, closed on 25 November 2026 (#255).** The endpoints, the service, the portal
+page and the collection are gone (auth-service's V007 drops `invitation_codes`). Registration,
+development only, needs no code and gives no profile role. What follows is the record.
 
 **Evidence** — `scripts/create-dev-accounts.sh` creates four accounts holding `ROLE_ADMIN`.
 `V002_InvitationCodes` seeds `KL-20262-STUDENT` and `KL-20262-STAFF`, both readable by anyone who

@@ -29,12 +29,10 @@ It is not a product for students or staff - it never ships to a store, has no de
 
 ### What's deliberately not here
 
-**Invitation codes** has a nav entry that explains, rather than a form: `docs/api/auth.openapi.yaml`
-requires an `invitationCode` at registration, but defines no admin endpoint to create, list or
-revoke one. Building a form against an endpoint that doesn't exist would mean guessing at a shape
-the server was never built to accept - exactly the failure mode this tool exists to prevent.
-**Programs** is read-only for the same reason: the semaphore contract has no admin write endpoint
-for a program itself, only for its curricula.
+**Programs** is read-only: the semaphore contract has no admin write endpoint for a program
+itself, only for its curricula. Building a form against an endpoint that doesn't exist would mean
+guessing at a shape the server was never built to accept - exactly the failure mode this tool
+exists to prevent.
 
 ## Running it
 
@@ -162,6 +160,5 @@ src/app/
   layout/shell/   # the authenticated nav + header wrapping every page below
   features/
     login/, identity/, console/, roles/
-    data/users/, data/buildings/, data/spaces/, data/programs/, data/curricula/,
-    data/invitation-codes/
+    data/users/, data/buildings/, data/spaces/, data/programs/, data/curricula/
 ```

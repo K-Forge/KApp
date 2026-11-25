@@ -51,8 +51,8 @@ public final class KappRoles {
     public static final java.util.List<String> PROFILE_ROLES = java.util.List.of(STUDENT, PROFESSOR, STAFF, UNASSIGNED);
 
     /**
-     * The profile roles somebody can be given: by an administrator, an account created in the
-     * portal or an invitation code. {@link #UNASSIGNED} is not one: it is what an account holds
+     * The profile roles somebody can be given: by an administrator, or to an account created in
+     * the portal. {@link #UNASSIGNED} is not one: it is what an account holds
      * before anybody chose.
      */
     public static final java.util.List<String> ASSIGNABLE_PROFILE_ROLES = java.util.List.of(STUDENT, PROFESSOR, STAFF);

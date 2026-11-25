@@ -135,8 +135,8 @@ Open it at http://localhost:4300/data/floors.
 
 ### The admin and developer console
 
-An Angular portal at `localhost:4300`: CRUD over programs, pensums, users, buildings, spaces,
-invitation codes and visitor passes; a paste-and-correct importer that turns a pensum PDF into a
+An Angular portal at `localhost:4300`: CRUD over programs, pensums, users, buildings, spaces
+and visitor passes; a paste-and-correct importer that turns a pensum PDF into a
 catalogue entry; an API console driven by the OpenAPI specs themselves, which explains every field
 of a response from the contract; and a role inspector showing what each role may reach. It is a **team console, not a
 product surface** — nothing a student ever sees.
@@ -266,7 +266,7 @@ pnpm run microservices:status    # what came up
 ```
 
 There is nothing to initialise afterwards. Mongock creates every index and loads the seed data —
-pensums, buildings, spaces, invitation codes — the first time a service starts.
+pensums, buildings, spaces — the first time a service starts.
 
 The profiles, what listens on which port, the development accounts, and what to do when something
 will not start are all in
@@ -416,9 +416,8 @@ laptop:
 
 - **S7** — tokens simply expired after an hour, with no refresh. #82 added rotating refresh tokens with reuse
   detection; the audit closes the finding when it is re-run.
-- **S11** — the four development accounts hold `ROLE_ADMIN`, and the two seeded invitation codes ship in this
-  repository. Both are correct while this runs on one machine and **must be revoked before it does not**.
-  Since #83, password sign-in and invitation codes answer only when local sign-in is enabled, in development.
+- **S11** — closed: the four development accounts were deleted (#246) and invitation codes removed (#255).
+  Password sign-in answers only when local sign-in is enabled, in development (#83).
 - **H1** — two development credentials from the deleted monolith remain readable in the git history.
 
 Secrets are generated per machine by `scripts/generate-dev-secrets.sh` and never committed; the working tree carries

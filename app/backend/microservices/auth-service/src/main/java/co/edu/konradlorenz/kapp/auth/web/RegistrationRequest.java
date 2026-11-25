@@ -17,8 +17,8 @@ import jakarta.validation.constraints.Size;
  * accept, with a validation message that pointed at neither. Both paths answer 400 either
  * way, so the contract is unaffected.
  *
- * <p>Development only, and with no student code: KApp keeps none, and the invitation code
- * decides the profile role.
+ * <p>Development only, with no student code, since KApp keeps none, and no profile role: the
+ * account has none until an administrator gives it one.
  */
 public record RegistrationRequest(
 
@@ -42,12 +42,6 @@ public record RegistrationRequest(
         @NotBlank
         @Size(max = 50)
         @Schema(example = "Perez Gomez")
-        String lastName,
-
-        @NotBlank
-        @Size(min = 6, max = 32)
-        @Schema(description = "Issued by the registrar. Carries the role the account receives.",
-                example = "KL-20262-7F3A9C")
-        String invitationCode
+        String lastName
 ) {
 }

@@ -156,10 +156,9 @@ instead:
 
 ## 5. Data model, in one paragraph each
 
-**auth** — `credentials` and `invitation_codes`, which serve password sign-in and registration in development
-only, since members sign in with Microsoft (`credentials`: one per account, BCrypt, verification token stored
-hashed; `invitation_codes`: redeemed by an atomic `findAndModify` guarded on the quota, so two simultaneous
-registrations cannot both take the last use), and `visitor_passes` (with a **TTL index** that deletes
+**auth** — `credentials`, one per account, which also serve password sign-in and registration in
+development only, since members sign in with Microsoft (BCrypt, verification token stored hashed),
+`refresh_tokens`, and `visitor_passes` (with a **TTL index** that deletes
 each record 30 days after redemption — [ADR 0007](adr/0007-visitor-day-pass-instead-of-guest-accounts.md)).
 
 **user** — `users`, with pre-computed `searchTokens` so accent-insensitive search is an index hit

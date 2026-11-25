@@ -182,8 +182,8 @@ docker compose --profile full --profile dev down       # stop your containers
 `-v` no longer has anything to remove here: there are no volumes left in this stack.
 
 **M0 has no backups.** If somebody drops a collection there is no restore: the data is gone. What
-makes that survivable is that almost everything is reproducible — Mongock re-seeds the buildings,
-spaces and invitation codes on startup, and the pensums reload from the CSVs in
+makes that survivable is that almost everything is reproducible — Mongock re-seeds the buildings
+and spaces on startup, and the pensums reload from the CSVs in
 `docs/templates/pensums/`. What is *not* reproducible is anything typed straight into the portal.
 Keep the CSV as the source and import it; do not treat the cluster as the only copy.
 
@@ -308,27 +308,23 @@ The token that comes back lasts 24 hours, carries `ROLE_GUEST`, and is refused e
 `/api/map/**`. The register is at `GET /auth/admin/visitor-passes` and **deletes itself after 30
 days** — MongoDB does it, not a scheduled job. See `SECURITY-AUDIT.md`, S12.
 
-**To register any other account** you need an active invitation code, and **both seeded codes are
-deactivated** — see S11 in `SECURITY-AUDIT.md`. They were the only way into the admin portal that
-did not go through the four accounts above, and the portal now requires `ROLE_ADMIN` anyway.
-
-Mint one from the portal (*Invitation codes → New code*) when the mobile app needs registration,
-then:
+**A password account, for local development only** (local sign-in enabled): registration needs no
+code since #255, and the account has no profile role until an administrator gives it one in the
+portal:
 
 ```bash
 curl -X POST http://localhost:8080/auth/register \
   -H 'Content-Type: application/json' \
   -d '{"email":"you@konradlorenz.edu.co","password":"KForge2026Dev!",
-       "firstName":"Your","lastName":"Name","invitationCode":"KL-20262-STUDENT",
-       "studentCode":"506000000","programCode":"506"}'
+       "firstName":"Your","lastName":"Name"}'
 ```
 
 Register no more than a handful at a time — the gateway allows 10 attempts per minute on the
 credential endpoints and will answer 429.
 
-`ROLE_ADMIN` is never granted by an invitation code, on purpose: the codes ship in the repository,
-so a code that granted admin would let anyone who can read the repo escalate. Promote an existing
-account instead. The role lives in two databases, and no account reaches both, so it is two calls:
+Registration never grants a permission. Give one in the portal, or, with no administrator yet, put
+the address in `KAPP_FIRST_ADMINS`. By hand, the role lives in two databases, and no account
+reaches both, so it is two calls:
 
 ```bash
 cd app/backend/microservices

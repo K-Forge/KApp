@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestPropertySource(properties = "kapp.auth.require-email-verification=true")
 class VerificationRequiredIntegrationTest extends AbstractAuthIntegrationTest {
 
-    private static final String STUDENT_CODE = "KL-20262-STUDENT";
 
     @Test
     @DisplayName("registration leaves the account pending, and login is refused until confirmed")
@@ -72,10 +71,9 @@ class VerificationRequiredIntegrationTest extends AbstractAuthIntegrationTest {
                                     "password": "ExamplePassword123",
                                     "firstName": "Test",
                                     "lastName": "User",
-                                    "invitationCode": "%s",
                                     "studentCode": "%s",
                                     "programCode": "506"
-                                }""".formatted(email, STUDENT_CODE, studentCode)))
+                                }""".formatted(email, studentCode)))
                 .andExpect(status().isCreated());
     }
 

@@ -38,7 +38,7 @@ public class LocalSignInConfig {
     @Bean
     @ConditionalOnProperty(name = "kapp.auth.local-sign-in.enabled", havingValue = "true")
     public ApplicationListener<ApplicationReadyEvent> localSignInWarning() {
-        return ready -> log.warn("Local sign-in is ENABLED: passwords, registration and invitation codes "
+        return ready -> log.warn("Local sign-in is ENABLED: passwords and registration "
                 + "are open. Development and CI only; production signs in with Microsoft.");
     }
 }

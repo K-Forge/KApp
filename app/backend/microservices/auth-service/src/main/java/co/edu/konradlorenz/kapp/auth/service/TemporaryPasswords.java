@@ -7,7 +7,7 @@ import java.time.Duration;
  * Temporary passwords: what an administrator hands over, by voice or by message, for one
  * sign-in that replaces it.
  *
- * <p>Three groups of four from the alphabet invitation codes use - no 0 or O, no 1 or I - so
+ * <p>Three groups of four from an alphabet with no 0 or O and no 1 or I, so
  * it reads out loud without doubt: "K7QM-X2RP-94TB". Twelve characters from thirty-two are 60
  * bits, against a login the gateway allows ten tries a minute, for seven days at most.
  */

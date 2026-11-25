@@ -25,7 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 class VerificationIntegrationTest extends AbstractAuthIntegrationTest {
 
-    private static final String STUDENT_CODE = "KL-20262-STUDENT";
 
     @Test
     @DisplayName("with verification not required, a freshly registered account can log in unverified")
@@ -144,10 +143,9 @@ class VerificationIntegrationTest extends AbstractAuthIntegrationTest {
                                     "password": "ExamplePassword123",
                                     "firstName": "Test",
                                     "lastName": "User",
-                                    "invitationCode": "%s",
                                     "studentCode": "%s",
                                     "programCode": "506"
-                                }""".formatted(email, STUDENT_CODE, studentCode)))
+                                }""".formatted(email, studentCode)))
                 .andExpect(status().isCreated());
     }
 
