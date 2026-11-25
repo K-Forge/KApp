@@ -1,6 +1,6 @@
 # Backend State
 
-> Owner: Backend. As of 2026-11-19, v0.3.0. Backend | Local: idle after #252, #253 and #257.
+> Owner: Backend. As of 2026-11-25, v0.3.0 tagged on `main`. Backend | Local: four PRs open and waiting for review (#266, #268, #271, #272).
 
 ---
 
@@ -8,12 +8,12 @@
 
 | Service | Contract | What it does | Latest migration |
 |---|---|---|---|
-| auth-service | auth 1.2.0 | Microsoft sign-in through `POST /auth/microsoft`, checked by `MicrosoftIdTokenVerifier` (RS256, iss, aud, exp; #102, #104). The PORTAL client requires a permission. Rotating refresh tokens with family revocation on reuse (#82). `GET /auth/sign-in-options` (#141). Password sign-in only behind `KAPP_LOCAL_SIGN_IN`, and 404 when it is off (#83). One profile role (STUDENT, PROFESSOR, STAFF, or UNASSIGNED when the directory says nothing, #252) plus permissions (ADMIN, RECEPTION, MAINTENANCE, MODERATION, WELLBEING). `KAPP_FIRST_ADMINS` grants the first ADMIN. `PUT /auth/admin/accounts/{id}/roles`, synced to user-service (#103). Admin endpoints for accounts, temporary passwords (#116), invitation codes (hidden in the portal, #257; removed in #255) and visitor passes | V005 |
+| auth-service | auth 1.2.0 | Microsoft sign-in through `POST /auth/microsoft`, checked by `MicrosoftIdTokenVerifier` (RS256, iss, aud, exp; #102, #104). The PORTAL client requires a permission. Rotating refresh tokens with family revocation on reuse (#82). `GET /auth/sign-in-options` (#141). Password sign-in only behind `KAPP_LOCAL_SIGN_IN`, and 404 when it is off (#83). One profile role (STUDENT, PROFESSOR, STAFF, or UNASSIGNED when the directory says nothing, #252) plus permissions (ADMIN, RECEPTION, MAINTENANCE, MODERATION, WELLBEING). `KAPP_FIRST_ADMINS` grants the first ADMIN, at every sign-in until #266 merges. `PUT /auth/admin/accounts/{id}/roles`, synced to user-service (#103). Admin endpoints for accounts, temporary passwords (#116), invitation codes (hidden in the portal, #257; removed by #271) and visitor passes | V005 |
 | user-service | user 1.2.0 | Profiles without identity document or phone. `academic` is read-only from the test SINU (#76–#80). `PUT /internal/users/{id}/roles` | V003 |
 | semaphore-service | semaphore 2.0.2 | SINU course statuses, read-only through `SinuRecordPort` and `FakeSinuRecordAdapter` (#79). Editable plans at `/me/plans` (`plannedLevel` 1 to 12; a pending course not before the current level, a failed one only in the next period, #253). The catalogue of the 23 pensums | V010 |
 | schedule-service | schedule 2.0.2 | Current classes only: `/me`, `/me/day`, `/me/week`, `/me/periods`, from the test SINU (`SinuTimetablePort`, #78). No database | none |
 | map-service | map 3.8.0 (#252) | Buildings, floors, layouts, spaces, types, campuses, ground, structures and survey. ETag. `sinuSedes` (#77). `labelPoint` on every drawn space | V017 (EC P1's auditorium, outline and Carrera 9A exit, #221) |
-| api-gateway | none | Routes by name, with no registry (#64). Answers 500 when a service is down (#157) | none |
+| api-gateway | none | Routes by name, with no registry (#64). Answers 500 when a service is down until #272 merges (#157) | none |
 
 - **Local helpers:** fake OIDC (mock-oauth2-server on `:8090`, with test users for student, professor and staff;
   #102) and the Prism mocks on one port, `:4000` (#40).
@@ -39,7 +39,7 @@
   - project `kapp-<KAPP_STACK>` (#146);
   - profiles `mock`, `core`, `academic`, `map`, `full` and `dev`;
   - every service reaches the shared Atlas development cluster;
-  - fake OIDC by default;
+  - fake OIDC by default; with #268 only with `local-db`, and auth-service refuses it on Atlas;
   - `local-db` (ADR 0010, #240): a local MongoDB for evaluation and offline runs only, started by
     `scripts/run-locally.sh` or `.ps1` with secrets generated on that computer. Walkthrough in `docs/RUN-LOCALLY.md`.
 - **Dev server (the-hive):**
@@ -74,6 +74,22 @@
 
 ## In flight
 
+Four PRs from fresh `develop`, opened ready on 2026-11-25. CI runs the Testcontainers tests: Docker Desktop was quit
+on the Mac, not paused, so only compiles and the Docker-free tests ran locally.
+
+| PR | Issue | What | Contract | Migration |
+|---|---|---|---|---|
+| #266 | #241 | `KAPP_FIRST_ADMINS` grants ADMIN only when the account is created, or while it holds no permission and no administrator set its roles; startup logs which listed addresses it still affects | auth 1.2.1 | none |
+| #268 | #246 | Fake OIDC only with `local-db`; `StandInSignInGuard` stops auth-service with a stand-in issuer on Atlas; `create-dev-accounts.sh` removed; ADR 0010 amended | none | auth V006, user V004 delete the `@kforge.dev` accounts and profiles |
+| #271 | #255 | Invitation codes removed everywhere; `/auth/register` stays for local development, with no code, and gives `ROLE_UNASSIGNED` | auth 1.3.0 | auth V007 drops `invitation_codes` |
+| #272 | #157 | The gateway answers 503 when a service is down and 504 when it is too slow, with `ApiError`; `docs/api/README.md` | none (CHANGELOG note) | none |
+
+- **Before #268 merges:** the-hive follows `develop`, so merging runs V006 and V004 on Atlas. The PR has a read-only
+  `mongosh` query for Brian to list what goes first.
+- **#266 and #271 both bump auth** (1.2.1 and 1.3.0): whichever merges second rebases onto the other's version.
+  #268 and #271 touch nearby lines of `RUNBOOK.md` and `SECURITY-AUDIT.md`. Backend rebases the second.
+- **Kotlin still names "invitation"** in `ui/invitation/` and its strings (the visitor pass screen). That is
+  Santiago's, outside #271.
 - **`verticalCode` (#213):** issue open, not started. Contract, service, seed data and portal, one PR each.
 
 ## Map direction (Brian, 2026-11-04)
@@ -107,10 +123,9 @@
 
 ## Known debt
 
-- #157: the gateway should answer 503, not 500.
 - #143: one program name; the catalogue and SINU spell it differently.
 - Not in an issue yet:
-  - the team's development accounts have ADMIN but no profile role (legacy data; fixable with the editor);
+  - the team's `@kforge.dev` development accounts have ADMIN on Atlas, until #268's migrations delete them;
   - local password sign-in opens an APP session (30 days) even from the portal;
   - `render-map-base`'s campus PNG drops to 1x to stay under 1 MB.
 
@@ -118,7 +133,8 @@
 
 ## Next
 
-1. After the delivery: #255 (remove invitation codes), #256 (outlines on every floor), #220 (P2's gallery), the 9A measures.
-2. #157 (gateway 503), in a new Backend | Local session. Then #143 (one program name).
+1. Review and merge #266, #268, #271 and #272. Then close #241, #246, #255 and #157 by hand, since PRs into
+   `develop` do not close issues.
+2. #256 (outlines on every floor), #220 (P2's gallery), the 9A measures, then #143 (one program name).
 3. #213 (`verticalCode`), contract first.
 4. EC P2 as soon as Brian sketches it. Otherwise, start phase 4 (#57).
