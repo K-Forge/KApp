@@ -4,7 +4,8 @@ import SwiftUI
 struct KAppApp: App {
     var body: some Scene {
         WindowGroup {
-            Text("KApp")
+            RootView()
+                .tint(KColor.action)
         }
     }
 }
