@@ -1,0 +1,23 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+
+# El esquema compartido sí se versiona; los personales no.
+#
+# El .gitignore de la raíz ignora *.xcscheme entero (línea 133). Esa regla viene de la
+# plantilla de GitHub y apunta a los esquemas personales, que viven en xcuserdata/ — pero
+# se lleva por delante también el compartido. Sin el compartido, cada quien abre el proyecto
+# y Xcode le genera uno propio, y `xcodebuild -scheme KApp` no encuentra nada en CI.
+!KApp.xcodeproj/xcshareddata/xcschemes/*.xcscheme
+
+# macOS
+.DS_Store
+
+# Swift Package Manager, si algún día se agregan dependencias
+.build/
+.swiftpm/
+Packages/
+Package.resolved
