@@ -88,11 +88,14 @@ services:
       KAPP_JWT_PRIVATE_KEY: ${KAPP_JWT_PRIVATE_KEY:?set it in .env}
       KAPP_JWT_PUBLIC_KEY: ${KAPP_JWT_PUBLIC_KEY:?set it in .env}
       KAPP_INTERNAL_TOKEN: ${KAPP_INTERNAL_TOKEN:?set it in .env}
-      KAPP_ALLOWED_EMAIL_DOMAINS: konradlorenz.edu.co,kforge.dev
+      # No @kforge.dev here: those are the fake sign-in's people, for local-db only (#246).
+      KAPP_ALLOWED_EMAIL_DOMAINS: konradlorenz.edu.co
       KAPP_REQUIRE_EMAIL_VERIFICATION: "false"
       # Signing in with Microsoft, against the tenant .env names (the test tenant, #62). With no
       # tenant, the portal offers passwords only. None of these is a secret, but they name a
-      # personal tenant, so they live in .env, not here.
+      # personal tenant, so they live in .env, not here. There is no KAPP_MICROSOFT_ISSUERS or
+      # KAPP_MICROSOFT_JWKS_URI on purpose: the issuer and the keys are always the tenant's, so this
+      # server cannot be pointed at the fake OIDC server (#246), and auth-service refuses one on Atlas.
       KAPP_MICROSOFT_TENANT_ID: ${KAPP_MICROSOFT_TENANT_ID:-}
       KAPP_MICROSOFT_CLIENT_IDS: ${KAPP_MICROSOFT_CLIENT_IDS:-}
       KAPP_MICROSOFT_PORTAL_CLIENT_ID: ${KAPP_MICROSOFT_PORTAL_CLIENT_ID:-}

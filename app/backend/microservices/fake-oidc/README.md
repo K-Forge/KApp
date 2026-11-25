@@ -1,11 +1,18 @@
 # Fake OIDC server
 
-A stand-in for Microsoft's sign-in, for local development and CI. A client signs in through it as an invented
-person, and auth-service checks the ID token it gets back exactly as it checks a Microsoft one: signature, issuer,
-audience and expiry. Nothing here is real, and nothing here may reach the dev server or production.
+A stand-in for Microsoft's sign-in, **for evaluation only**: running KApp with the `local-db` profile on a computer
+with none of the team's accounts ([ADR 0010](../../../../docs/adr/0010-a-local-database-for-evaluation.md),
+[RUN-LOCALLY.md](../../../../docs/RUN-LOCALLY.md)). A client signs in through it as an invented person, and
+auth-service checks the ID token it gets back exactly as it checks a Microsoft one: signature, issuer, audience and
+expiry. Nothing here is real, and nothing here may reach Atlas, the dev server or production.
 
-It is [mock-oauth2-server](https://github.com/navikt/mock-oauth2-server), started by `docker-compose.yml` with
-every backend profile, at `http://localhost:${KAPP_FAKE_OIDC_PORT:-8090}/kapp`.
+It is [mock-oauth2-server](https://github.com/navikt/mock-oauth2-server), started by `docker-compose.yml` with the
+`local-db` profile only, at `http://localhost:${KAPP_FAKE_OIDC_PORT:-8090}/kapp`.
+
+**The team does not use it** (#246). Development runs on Atlas with Microsoft sign-in against the test tenant: see
+[Against the real tenant](#against-the-real-tenant). auth-service refuses to start when its Microsoft issuer or key
+set is not Microsoft's while its database is on Atlas, so the invented `@kforge.dev` people cannot land there again.
+auth-service's migration V006 and user-service's V004 deleted the ones that had.
 
 ## Who you can be
 
@@ -46,7 +53,8 @@ The token's issuer is the address the client used to reach the server, and auth-
 
 ## Against the real tenant
 
-In `.env`, set all six. An empty value would fall back to this fake server, since that is the compose default:
+This is how the team runs the stack on Atlas. In `.env`, set all six. An empty value would fall back to this fake
+server, since that is the compose default, and auth-service would then refuse to start on Atlas:
 
 ```
 KAPP_MICROSOFT_TENANT_ID=<tenant id>

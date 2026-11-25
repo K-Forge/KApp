@@ -19,7 +19,7 @@ somewhere right.
 | [0007](0007-visitor-day-pass-instead-of-guest-accounts.md) | A visitor day pass instead of guest accounts | Implemented |
 | [0008](0008-invitation-codes-are-temporary.md) | Invitation codes are temporary, and this is how they go away | Step 1 implemented |
 | [0009](0009-atlas-is-the-only-development-database.md) | Atlas is the only development database | Implemented; amended by 0010 |
-| [0010](0010-a-local-database-for-evaluation.md) | A local database for evaluation, in its own Compose profile | Implemented |
+| [0010](0010-a-local-database-for-evaluation.md) | A local database for evaluation, in its own Compose profile | Implemented; amended 2026-11-25 (#246) |
 
 ## Still to record
 

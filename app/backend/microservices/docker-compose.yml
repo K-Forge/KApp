@@ -17,6 +17,12 @@
 # scripts/run-locally.sh writes an .env whose MONGO_*_URI point at it, and starts it with the
 # rest. docs/RUN-LOCALLY.md is the walkthrough. The team never starts this profile.
 #
+# The fake OIDC server comes only with `local-db` (#246). Its invented @kforge.dev people belong
+# to an evaluator's own database, never to Atlas, where they used to land with ADMIN. The team
+# signs in with Microsoft against the test tenant: .env sets the six KAPP_MICROSOFT_* and
+# KAPP_FIRST_ADMINS values fake-oidc/README.md lists, the issuer and key set Microsoft's (an empty
+# value falls back to the fake server). auth-service refuses to start with a stand-in on Atlas.
+#
 # Profiles (never run all of them unless you mean to):
 #
 #   docker compose --profile mock      up -d   # Prism mocks only. No JVM.
@@ -36,7 +42,7 @@
 # Published host ports (defaults; every one is overridable - see KAPP_STACK below):
 #
 #   8080         api-gateway   the only JVM port on the host - see the note below
-#   8090         fake-oidc     the stand-in for Microsoft's sign-in
+#   8090         fake-oidc     the stand-in for Microsoft's sign-in, with the `local-db` profile
 #   4300         web-admin     the admin portal, with the `dev` profile
 #   27017        mongo         the local database, with the `local-db` profile (127.0.0.1 only)
 #   4010-4014    Prism mocks   auth, user, semaphore, schedule, map (in that order)
@@ -238,9 +244,10 @@ services:
       SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-}
       SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-}
 
-      # Signing in with Microsoft, checked against the fake OIDC server below. Its issuer is the
-      # address a client reaches it at: localhost from a browser or the iOS simulator, 10.0.2.2
-      # from the Android emulator. A phone on the network adds its own. See fake-oidc/README.md.
+      # Signing in with Microsoft. The defaults are the fake OIDC server below, for the `local-db`
+      # profile: its issuer is the address a client reaches it at, localhost from a browser or the
+      # iOS simulator, 10.0.2.2 from the Android emulator. On Atlas, .env names the test tenant and
+      # Microsoft's issuer and key set, or auth-service will not start. See fake-oidc/README.md.
       KAPP_MICROSOFT_TENANT_ID: ${KAPP_MICROSOFT_TENANT_ID:-}
       KAPP_MICROSOFT_ISSUERS: ${KAPP_MICROSOFT_ISSUERS:-http://localhost:${KAPP_FAKE_OIDC_PORT:-8090}/kapp,http://10.0.2.2:${KAPP_FAKE_OIDC_PORT:-8090}/kapp}
       KAPP_MICROSOFT_JWKS_URI: ${KAPP_MICROSOFT_JWKS_URI:-http://fake-oidc:8080/kapp/jwks}
@@ -263,13 +270,14 @@ services:
         required: false
     networks: [kapp]
 
-  # A stand-in for Microsoft's sign-in, for development and CI: a client signs in through it as
-  # an invented student, professor or administrative employee, and auth-service checks its ID
-  # tokens exactly as it checks Microsoft's. Who is who is in fake-oidc/config.json.
+  # A stand-in for Microsoft's sign-in, for evaluation with the `local-db` profile only (#246):
+  # a client signs in through it as an invented student, professor or administrative employee,
+  # and auth-service checks its ID tokens exactly as it checks Microsoft's. Who is who is in
+  # fake-oidc/config.json. Never against Atlas: auth-service refuses that combination.
   fake-oidc:
     image: ghcr.io/navikt/mock-oauth2-server:6.0.4
     container_name: ${KAPP_STACK:-back}-fake-oidc
-    profiles: ["core", "academic", "map", "full"]
+    profiles: ["local-db"]
     ports:
       - "${KAPP_FAKE_OIDC_PORT:-8090}:8080"
     environment:

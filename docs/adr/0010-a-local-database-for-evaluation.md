@@ -46,3 +46,23 @@ The [walkthrough](../RUN-LOCALLY.md) is written for someone with the code, Docke
   what the team built, not a copy that drifted.
 - **The academic data does not need a database at all:** it comes from the test SINU built into the
   services, the same on the cluster and locally.
+
+## Amendment, 25 November 2026: the fake sign-in goes with `local-db` (#246)
+
+On 18 November Brian decided that **the team develops only on Atlas, signing in with Microsoft
+against the test tenant**. The fake OIDC server had started with every backend profile, so laptops
+that ran it against the cluster left its invented `@kforge.dev` people there, some of them
+administrators, in the dev server's Usuarios page.
+
+- **The fake OIDC server starts with the `local-db` profile only**, the evaluation stack this ADR
+  describes. `scripts/run-locally.sh` already starts that profile, so evaluation does not change.
+- **auth-service refuses to start** when its Microsoft issuer or key set is not
+  `login.microsoftonline.com` while its database is on Atlas (`StandInSignInGuard`). The dev
+  server's compose cannot name an issuer at all: it always uses the tenant's.
+- **The accounts already there are deleted** by auth-service's migration V006 and user-service's
+  V004: only an address ending in `@kforge.dev`, and in auth-service only one with no real
+  Microsoft id. `scripts/create-dev-accounts.sh`, which made four more on the cluster, is removed.
+
+The choice was between gating the fake server by profile and keeping it everywhere behind a flag.
+The profile is simpler and the guard covers the case a profile cannot, a laptop's `.env` that
+points the issuer at the fake server by hand.
