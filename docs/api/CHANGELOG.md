@@ -7,6 +7,16 @@ The contracts are the source of truth: the mocks serve them as soon as they merg
 (`app/backend/microservices/mock/README.md`), and the services implement them in the pull requests
 that follow. Until a service has caught up, its contract describes where it is going, not where it is.
 
+## November 2026: every contract, 503 and 504 from the gateway (#157)
+
+- **Any route can answer `503` when its service is down, and `504` when it answers too late**, with
+  the `ApiError` body. Before, the gateway answered Spring's `500` and its own body, so a client
+  could not tell a fault from a service that was down for a moment. [README.md](README.md) holds the
+  table. No contract version changes: no operation's shape does.
+
+**Migrating a client:** treat `503` and `504` from any route as "try again in a moment", not as an
+error. `500` is still a fault.
+
 ## November 2026: semaphore 2.0.2 (#250)
 
 - **Two rules on `PUT /api/semaphore/me/plans/{planId}/placements/{pensumItemCode}`**, for a plan

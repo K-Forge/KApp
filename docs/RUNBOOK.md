@@ -557,6 +557,12 @@ Expected, once. Services fetch the signing keys from auth-service lazily — del
 fetching them eagerly would deadlock startup — so the first authenticated request pays for that
 fetch plus JVM warm-up and can exceed the gateway's 10-second timeout. Retry; it will be fast.
 
+### A route answers 503
+
+The service behind it is not running, or is still starting: the gateway could not connect to it
+(#157). The body is an `ApiError` that names no address; the gateway's log says which route, where
+it points and why (`ServiceUnavailableHandler`). `docker compose ps` shows which one is down.
+
 ### 429 Too Many Requests on login or register
 
 The rate limiter, working. Ten attempts per minute per client on the credential endpoints. Wait a
