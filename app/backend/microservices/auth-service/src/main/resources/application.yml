@@ -117,7 +117,7 @@ kapp:
     # local run sets the address itself.
     user-service-url: ${KAPP_USER_SERVICE_URL:http://user-service:8082}
 
-    # Password sign-in, registration, verification, invitation codes and temporary passwords.
+    # Password sign-in, registration, verification and temporary passwords.
     # Off by default, and in production: members sign in with Microsoft. Development, CI and the
     # dev server turn it on; with it off those paths answer 404. See LocalSignInConfig.
     local-sign-in:

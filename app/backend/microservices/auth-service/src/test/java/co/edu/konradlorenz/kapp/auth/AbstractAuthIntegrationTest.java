@@ -9,7 +9,6 @@ import co.edu.konradlorenz.kapp.auth.jwt.JwtIssuer;
 import co.edu.konradlorenz.kapp.auth.jwt.RsaKeyProvider;
 import co.edu.konradlorenz.kapp.auth.service.VerificationMailer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,7 +30,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -142,10 +140,6 @@ abstract class AbstractAuthIntegrationTest {
     @BeforeEach
     void resetSharedFixture() {
         credentials.deleteAll();
-        // Only test-seeded codes, never the Mongock-seeded demo codes: those are shared
-        // across the whole suite and other tests rely on their quotas still standing.
-        mongoTemplate.getCollection("invitation_codes")
-                .deleteMany(new Document("code", new Document("$regex", "^KL-TEST-")));
 
         when(userProfileClient.upsert(any())).thenAnswer(invocation -> {
             // Mockito re-priming a mock that already has a default answer - a test
@@ -181,21 +175,5 @@ abstract class AbstractAuthIntegrationTest {
         org.mockito.Mockito.verify(verificationMailer, org.mockito.Mockito.atLeastOnce())
                 .sendVerificationLink(org.mockito.ArgumentMatchers.eq(email), captor.capture());
         return captor.getValue();
-    }
-
-    /** Inserts an invitation code straight into MongoDB, bypassing the redemption guard. */
-    protected void seedInvitationCode(String code, String role, int maxUses, int timesUsed,
-                                      boolean active, Instant expiresAt) {
-        Instant now = Instant.now();
-        Document doc = new Document()
-                .append("code", code)
-                .append("role", role)
-                .append("maxUses", maxUses)
-                .append("timesUsed", timesUsed)
-                .append("active", active)
-                .append("expiresAt", expiresAt == null ? null : Date.from(expiresAt))
-                .append("createdAt", Date.from(now))
-                .append("updatedAt", Date.from(now));
-        mongoTemplate.getCollection("invitation_codes").insertOne(doc);
     }
 }

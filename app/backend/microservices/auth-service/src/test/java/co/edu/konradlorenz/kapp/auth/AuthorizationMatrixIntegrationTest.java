@@ -33,7 +33,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 class AuthorizationMatrixIntegrationTest extends AbstractAuthIntegrationTest {
 
-    private static final String STUDENT_CODE = "KL-20262-STUDENT";
 
     private String guestToken;
     private String studentToken;
@@ -304,10 +303,9 @@ class AuthorizationMatrixIntegrationTest extends AbstractAuthIntegrationTest {
                     "password": "ExamplePassword123",
                     "firstName": "Matrix",
                     "lastName": "Case",
-                    "invitationCode": "%s",
                     "studentCode": "506777888",
                     "programCode": "506"
-                }""".formatted(email, STUDENT_CODE));
+                }""".formatted(email));
     }
 
     private static MockHttpServletRequestBuilder guestRegisterRequest(String email) {

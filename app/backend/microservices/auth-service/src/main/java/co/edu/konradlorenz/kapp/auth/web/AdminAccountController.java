@@ -22,10 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Accounts an administrator creates, each with a temporary password the person replaces at
- * first sign-in - the way in until the university's own identity provider is: an
- * administrator vouches for somebody instead of an invitation code doing it.
+ * first sign-in, for development: an administrator vouches for somebody.
  *
- * <p>{@code ROLE_ADMIN} on each handler, as on the invitation codes, for the same reason.
+ * <p>{@code ROLE_ADMIN} on each handler.
  */
 @RestController
 @RequestMapping("/auth/admin/accounts")
