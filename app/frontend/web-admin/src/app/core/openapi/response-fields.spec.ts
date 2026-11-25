@@ -40,7 +40,7 @@ describe('describeResponse', () => {
   });
 
   it('says nothing at all for an operation with no response body', () => {
-    const del = operation('/auth/admin/invitation-codes/{code}', 'delete');
+    const del = operation('/auth/admin/visitor-passes/{code}', 'delete');
     expect(describeResponse(auth.doc, del)).toEqual([]);
   });
 

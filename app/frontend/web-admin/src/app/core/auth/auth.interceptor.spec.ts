@@ -73,9 +73,9 @@ describe('authInterceptor', () => {
   it('still sends it to everything else, including other auth endpoints', () => {
     tokenStore.set('a.b.c');
 
-    http.get('/auth/admin/invitation-codes').subscribe();
+    http.get('/auth/admin/visitor-passes').subscribe();
 
-    const req = httpMock.expectOne('/auth/admin/invitation-codes');
+    const req = httpMock.expectOne('/auth/admin/visitor-passes');
     expect(req.request.headers.get('Authorization')).toBe('Bearer a.b.c');
     req.flush([]);
   });

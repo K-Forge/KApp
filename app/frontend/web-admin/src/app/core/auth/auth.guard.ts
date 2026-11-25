@@ -11,10 +11,9 @@ import { TokenStore } from './token.store';
  * administration, reception, maintenance, moderation or Bienestar - renewing an expired one first
  * when the session still can be. Which sections each permission sees is `sectionGuard`'s.
  *
- * <p>The role check is the point. Requiring only a valid token was not enough: an invitation
- * code lets somebody create a `ROLE_STUDENT` account for the mobile app, and that account's
- * token opened this portal and showed the whole navigation — Users, Invitation codes, Visitor
- * passes. The API refused every one of those calls with a `403`, so nothing leaked, but a
+ * <p>The role check is the point. Requiring only a valid token was not enough: a `ROLE_STUDENT`
+ * account made for the mobile app had a token that opened this portal and showed the whole
+ * navigation — Users, Visitor passes and the rest. The API refused every one of those calls with a `403`, so nothing leaked, but a
  * console full of screens that answer "forbidden" is not a boundary, it is a boundary that
  * happens to hold.
  *

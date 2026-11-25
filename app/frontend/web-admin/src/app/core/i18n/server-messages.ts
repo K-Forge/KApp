@@ -37,8 +37,6 @@ export const SERVER_MESSAGES = [
   /* i18n */ 'Invalid parameter',
   /* i18n */ 'Missing required parameter',
   /* i18n */ 'E-mail address has not been confirmed',
-  /* i18n */ 'Invitation code is invalid, expired or already used',
-  /* i18n */ 'Unknown, expired or already used',
   /* i18n */ 'Nothing to update',
   /* i18n */ 'Send at least one field to update',
   /* i18n */ 'The request body must be a JSON object',
