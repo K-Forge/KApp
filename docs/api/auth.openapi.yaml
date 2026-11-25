@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Auth API
-  version: 1.2.0
+  version: 1.2.1
   summary: Sign-in and token service for the KApp platform.
   description: |
     Authentication service for KApp, the mobile application of Fundación
@@ -64,8 +64,12 @@ info:
     - **An account the directory does not classify** signs in as `ROLE_UNASSIGNED`, which opens
       the map and its own profile and nothing academic, until an administrator sets its profile
       role or the directory classifies it. An administrator cannot give `ROLE_UNASSIGNED`.
-    - **The first administrators** come from configuration. Every later permission is granted
-      through `PUT /auth/admin/accounts/{userId}/roles`.
+    - **The first administrators** come from configuration, only to start a server: an address
+      on that list gets `ROLE_ADMIN` when its account is created at its first sign-in, or when its
+      account holds no permission and no administrator has ever set its roles. Once an
+      administrator sets an account's roles, the list no longer touches it, so taking
+      `ROLE_ADMIN` away in the portal sticks. Every later permission is granted through
+      `PUT /auth/admin/accounts/{userId}/roles`.
 
     ## Development only
 
