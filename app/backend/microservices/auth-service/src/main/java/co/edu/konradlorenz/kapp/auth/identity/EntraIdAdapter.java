@@ -14,6 +14,8 @@ import co.edu.konradlorenz.kapp.common.security.KappRoles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
@@ -40,8 +42,9 @@ import java.util.stream.Collectors;
  *       account the directory does not classify is {@code ROLE_UNASSIGNED}: the map, its own
  *       profile and nothing academic, until an administrator gives it a role.</li>
  *   <li><strong>Permissions</strong> are never the directory's. They stay as an administrator left
- *       them, and the first administrators come from configuration, so somebody can open the portal
- *       on a new server.</li>
+ *       them. The first administrators come from configuration ({@code kapp.auth.first-admins}),
+ *       so somebody can open the portal on a new server, but only to start it: see
+ *       {@link #bootstrapsAdmin}.</li>
  *   <li><strong>The profile</strong> in user-service gets the names Microsoft gives and the roles at
  *       every sign-in.</li>
  *   <li><strong>The portal</strong> takes only an account with a permission.</li>
@@ -119,7 +122,8 @@ public class EntraIdAdapter implements IdentityProviderPort {
                         .filter(KappRoles.PERMISSIONS::contains)
                         .collect(Collectors.toCollection(HashSet::new)))
                 .orElseGet(HashSet::new);
-        if (firstAdmins.contains(person.email()) && permissions.add(KappRoles.ADMIN)) {
+        if (firstAdmins.contains(person.email()) && bootstrapsAdmin(existing)) {
+            permissions.add(KappRoles.ADMIN);
             log.info("{} is one of the first administrators: ROLE_ADMIN granted", person.email());
         }
 
@@ -127,6 +131,47 @@ public class EntraIdAdapter implements IdentityProviderPort {
         roles.add(profileRole);
         KappRoles.PERMISSIONS.stream().filter(permissions::contains).forEach(roles::add);
         return roles;
+    }
+
+    /**
+     * Whether an address in {@code kapp.auth.first-admins} is given {@code ROLE_ADMIN} at this
+     * sign-in: when the account is created by it, or when the account exists but holds no
+     * permission and no administrator has ever set its roles - one made locally before, or that
+     * signed in before its address was listed. Once an administrator has set an account's roles in
+     * the portal, the list no longer touches it: taking {@code ROLE_ADMIN} away there sticks.
+     */
+    static boolean bootstrapsAdmin(Optional<Credential> existing) {
+        return existing.isEmpty()
+                || (!existing.get().profileRoleIsAdministrators()
+                    && existing.get().roles().stream().noneMatch(KappRoles.PERMISSIONS::contains));
+    }
+
+    /**
+     * Says at startup which listed addresses already have an account. Those the list no longer
+     * makes administrators unless they hold no permission and no administrator has set their
+     * roles, so an operator can see when the variable has stopped doing anything.
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    void reportFirstAdmins() {
+        if (firstAdmins.isEmpty()) {
+            return;
+        }
+        try {
+            for (String email : firstAdmins.stream().sorted().toList()) {
+                Optional<Credential> account = credentials.findByEmailIgnoreCase(email);
+                if (account.isEmpty()) {
+                    log.info("First administrator {} has no account yet: ROLE_ADMIN at its first sign-in", email);
+                } else if (bootstrapsAdmin(account)) {
+                    log.info("First administrator {} has an account with no permission: ROLE_ADMIN at its next sign-in",
+                            email);
+                } else {
+                    log.info("First administrator {} already has an account managed in the portal: the list no longer changes it",
+                            email);
+                }
+            }
+        } catch (RuntimeException e) {
+            log.warn("Could not check the first administrators' accounts at startup: {}", e.getMessage());
+        }
     }
 
     private static String roleOf(DirectoryProfile profile) {

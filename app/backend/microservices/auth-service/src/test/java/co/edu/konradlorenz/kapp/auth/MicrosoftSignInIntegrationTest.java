@@ -158,6 +158,46 @@ class MicrosoftSignInIntegrationTest extends AbstractAuthIntegrationTest {
     }
 
     @Test
+    @DisplayName("ROLE_ADMIN an administrator takes away from a first administrator does not come back at the next sign-in")
+    void firstAdmin_removedInThePortal_staysRemoved() throws Exception {
+        signsInAs("1a2b3c4d-0000-4000-8000-000000000009", "ana.ruiz@konradlorenz.edu.co", DirectoryProfile.STAFF);
+        String userId = userIdOf(signIn("PORTAL").andExpect(status().isOk())
+                .andExpect(jsonPath("$.roles", contains("ROLE_STAFF", "ROLE_ADMIN"))));
+        Credential admin = seedCredential("otro.admin@konradlorenz.edu.co", "AdminPassword2026",
+                List.of("ROLE_STAFF", "ROLE_ADMIN"), Credential.Status.ACTIVE, true);
+        mockMvc.perform(put("/auth/admin/accounts/{id}/roles", userId)
+                        .header("Authorization", bearerFor(admin.userId(), admin.email(), "ROLE_STAFF", "ROLE_ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"profileRole": "ROLE_STAFF", "permissions": []}"""))
+                .andExpect(status().isOk());
+
+        signIn("APP").andExpect(status().isOk()).andExpect(jsonPath("$.roles", contains("ROLE_STAFF")));
+        signIn("PORTAL").andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("a first administrator whose account existed with no permission, and no administrator's roles, gets ROLE_ADMIN")
+    void firstAdmin_existingAccountWithNoPermission_getsAdmin() throws Exception {
+        Credential local = seedCredential("ana.ruiz@konradlorenz.edu.co", "ExamplePassword123", List.of("ROLE_STAFF"),
+                Credential.Status.ACTIVE, true);
+        when(userProfileClient.upsert(any())).thenReturn(new UserProfileView(local.userId(), local.email()));
+        signsInAs("1a2b3c4d-0000-4000-8000-000000000009", "ana.ruiz@konradlorenz.edu.co", DirectoryProfile.STAFF);
+
+        signIn("PORTAL").andExpect(status().isOk()).andExpect(jsonPath("$.roles", contains("ROLE_STAFF", "ROLE_ADMIN")));
+    }
+
+    @Test
+    @DisplayName("a first administrator whose account already holds a permission is not made an administrator")
+    void firstAdmin_existingAccountWithAPermission_isLeftAlone() throws Exception {
+        Credential local = seedCredential("ana.ruiz@konradlorenz.edu.co", "ExamplePassword123",
+                List.of("ROLE_STAFF", "ROLE_RECEPTION"), Credential.Status.ACTIVE, true);
+        when(userProfileClient.upsert(any())).thenReturn(new UserProfileView(local.userId(), local.email()));
+        signsInAs("1a2b3c4d-0000-4000-8000-000000000009", "ana.ruiz@konradlorenz.edu.co", DirectoryProfile.STAFF);
+
+        signIn("PORTAL").andExpect(status().isOk()).andExpect(jsonPath("$.roles", contains("ROLE_STAFF", "ROLE_RECEPTION")));
+    }
+
+    @Test
     @DisplayName("an account made locally before is adopted by its address, keeping its id")
     void localAccount_isAdopted() throws Exception {
         Credential local = seedCredential(EMAIL, "ExamplePassword123", List.of("ROLE_STUDENT"),
