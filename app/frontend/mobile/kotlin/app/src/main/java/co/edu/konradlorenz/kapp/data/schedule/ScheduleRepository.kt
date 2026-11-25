@@ -11,6 +11,7 @@ import retrofit2.HttpException
 import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalTime
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.cancellation.CancellationException
 
 /** What a read of the timetable ended in. */
@@ -53,6 +54,9 @@ class ScheduleRepository(
     private val current = MutableStateFlow<ScheduleResult<Schedule>?>(null)
     private val weeks = mutableMapOf<String, WeekAgenda>()
 
+    /** What the map answered per room, by building and number. Failures are not kept. */
+    private val rooms = ConcurrentHashMap<String, RoomLookup>()
+
     /** The whole schedule, `null` until it is read. */
     val schedule: StateFlow<ScheduleResult<Schedule>?> = current.asStateFlow()
 
@@ -89,21 +93,43 @@ class ScheduleRepository(
         }
     }
 
-    /** The room of a class, for its sheet. A `404` is a room the map has not drawn yet, not a failure. */
-    suspend fun space(room: String, buildingCode: String): RoomLookup = try {
-        RoomLookup.Found(map.space(room, buildingCode))
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: HttpException) {
-        if (e.code() == 404) RoomLookup.NotOnMap else RoomLookup.Failed
-    } catch (_: Exception) {
-        RoomLookup.Failed
+    /**
+     * The room of a class, for its sheet and Inicio's card. A `404` is a room the map has not drawn
+     * yet, not a failure. Each room is asked once: the answer, found or not on the map, is kept
+     * until the session ends, and only a failure is asked again.
+     */
+    suspend fun space(room: String, buildingCode: String): RoomLookup {
+        val key = "$buildingCode/$room"
+        rooms[key]?.let { return it }
+        val found = try {
+            RoomLookup.Found(map.space(room, buildingCode))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: HttpException) {
+            if (e.code() == 404) RoomLookup.NotOnMap else RoomLookup.Failed
+        } catch (_: Exception) {
+            RoomLookup.Failed
+        }
+        if (found != RoomLookup.Failed) rooms[key] = found
+        return found
+    }
+
+    /**
+     * The name of the building [occurrence]'s room is in, as the map writes it ("Edificio
+     * Central"), or `null` when the room does not resolve: no room, no building, not on the map, or
+     * no answer. Never the space's code: the plaques on the doors say 612, not EC-612 (#251).
+     */
+    suspend fun buildingOf(occurrence: ClassOccurrence): String? {
+        val room = occurrence.room ?: return null
+        val building = occurrence.buildingCode ?: return null
+        return (space(room, building) as? RoomLookup.Found)?.space?.building?.name?.takeIf { it.isNotBlank() }
     }
 
     /** Forgets everything. Called when the session ends. */
     fun clear() {
         current.value = null
         weeks.clear()
+        rooms.clear()
     }
 
     private suspend fun <T> read(call: suspend () -> T): ScheduleResult<T> = try {
