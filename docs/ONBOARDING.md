@@ -173,9 +173,9 @@ Siguen disponibles uno por servicio, en los puertos 4010 a 4014, para quien ya l
 
 ## Tres cosas que NO debes hacer
 
-**No corras `scripts/create-dev-accounts.sh`.** Las cuentas ya existen en la base compartida. Ese
-script las borra y las vuelve a crear con contraseñas nuevas, y dejaría fuera a los otros cinco.
-Sólo Brian, y sólo si hay que rehacerlas.
+**No uses el servidor OIDC falso con la base compartida.** Sus personas inventadas (`@kforge.dev`)
+son sólo para evaluar KApp con el perfil `local-db`, y auth-service no arranca si lo intentas con
+Atlas (#246). Entra con tu cuenta del tenant de prueba de Microsoft.
 
 **No borres datos de la base compartida.** Es la misma para los seis, no tiene copia de
 seguridad, y lo que borres se lo borras a todos. Si hay que hacerlo, avisa primero en el grupo.

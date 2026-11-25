@@ -322,6 +322,12 @@ screens that answer "forbidden" is not a boundary; it is a boundary that happens
 `ROLE_ADMIN` is already impossible to obtain through an invitation code, enforced in
 `InvitationCodeService` as well as in the contract's enum, precisely because the codes are public.
 
+**Development accounts, closed on 25 November 2026 (#246).** `scripts/create-dev-accounts.sh` is
+gone, and auth-service's migration V006 and user-service's V004 deleted every `@kforge.dev` account
+and profile on the cluster. The team signs in with Microsoft against the test tenant, the first
+administrators come from `KAPP_FIRST_ADMINS`, and auth-service refuses to start with the fake OIDC
+server on Atlas. Item 2 above no longer applies.
+
 ### S12 — Identity documents in the visitor register (Moderate) — BUILT, ONE ACTION OUTSTANDING
 
 **What changed.** Reception issues a one-day pass; a visitor redeems it by presenting an
@@ -414,7 +420,7 @@ only tool that could let you back in. The button is disabled on your own row and
 somebody else. Guarding that means counting active administrators on every status change, in a
 service that does not own the credential and cannot see the roles without asking auth-service —
 a query on a hot path to prevent a case that four people who sit together will not hit. The way
-back, if it ever happens, is `scripts/create-dev-accounts.sh --recreate`.
+back, if it ever happens, is setting the account's `status` back to `ACTIVE` in the auth database.
 
 ## 4. Architectural notes
 

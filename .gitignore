@@ -280,8 +280,8 @@ docker-compose.override.yml
 !.env.example
 !.env.template
 
-# Written by scripts/create-dev-accounts.sh. Holds the developers' app passwords
-# in the clear so they survive a reboot; it must never reach a commit.
+# Written by the removed scripts/create-dev-accounts.sh (#246). Still ignored, so a copy left on
+# a laptop, with passwords in the clear, can never reach a commit.
 .dev-accounts
 *.pem
 *.key

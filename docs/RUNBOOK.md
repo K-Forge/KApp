@@ -242,48 +242,24 @@ set one up on any host, and what a push can and cannot change there, is in
 
 ---
 
-## Local accounts
+## Accounts
 
-The four development accounts are created by a script, which generates their passwords on your
-machine and writes them to `app/backend/microservices/.dev-accounts` (mode 600, gitignored):
+**The team signs in with Microsoft**, each with their own account in the test tenant (#62). The
+first sign-in creates the KApp account; nobody creates one by hand. `.env` names the tenant, as
+[`fake-oidc/README.md`](../app/backend/microservices/fake-oidc/README.md) says under "Against the
+real tenant".
 
-```bash
-scripts/create-dev-accounts.sh
-```
+- **The profile role** comes from the tenant's app roles: Student, Professor or Staff. An account
+  the directory does not classify has no role (`ROLE_UNASSIGNED`) until an administrator gives it one.
+- **ADMIN** comes from `KAPP_FIRST_ADMINS` only to start a server. After that, every permission is
+  granted and taken away in the portal.
 
-| E-mail                              | Role       |
-| ----------------------------------- | ---------- |
-| `brian@kforge.dev`     | ADMIN |
-| `ivan@kforge.dev`      | ADMIN |
-| `alejandro@kforge.dev` | ADMIN |
-| `santiago@kforge.dev`  | ADMIN |
-
-**`kforge.dev`, not the university's domain.** These are development identities, not people. One
-of them can never collide with somebody's real institutional address once KApp authenticates
-against Entra ID, and a development account is recognisable as one at a glance — in the
-directory, in a log line, in a screenshot pasted into a chat.
-
-The domain is not registered to us and does not need to be: nothing sends mail to it, because
-e-mail verification is off and these accounts are created ACTIVE. **If verification is ever
-turned on, these four have to be reissued on a domain we control**, or their confirmation mail
-goes to whoever owns `kforge.dev`.
-
-All four hold ADMIN because the team is still building KApp and everyone needs to reach
-everything. There is deliberately no admin/developer split yet — and that has to change before
-KApp is reachable from outside a laptop. It is recorded in `SECURITY-AUDIT.md`.
-
-The passwords are **not** shared here, in the repository or in the group chat: anything said in
-one of those stays in its history forever, and rotating the password later does not remove it.
-Give each teammate their line from `.dev-accounts` privately.
-
-`--recreate` deletes the four and issues new passwords:
-
-```bash
-scripts/create-dev-accounts.sh --recreate
-```
-
-These live in the **shared cluster**, so they are the same four accounts for everybody and they
-survive every `down`. Create them once; running the script again reports them as existing.
+**The fake OIDC server is for evaluation only** (#246): it starts with the `local-db` profile, on a
+computer with none of our accounts ([RUN-LOCALLY.md](RUN-LOCALLY.md)). Its invented `@kforge.dev`
+people never reach the shared cluster: auth-service refuses to start when its Microsoft issuer is
+not Microsoft's and its database is on Atlas. The four `@kforge.dev` team accounts that
+`create-dev-accounts.sh` used to make, and the fake sign-in's people, were deleted by auth-service's
+migration V006 and user-service's V004.
 
 ### Visitors
 
@@ -339,8 +315,6 @@ docker run --rm mongo:7 mongosh "$MONGO_AUTH_URI" --quiet --eval \
 docker run --rm mongo:7 mongosh "$MONGO_USER_URI" --quiet --eval \
   "db.users.updateOne({email:'$EMAIL'}, {\$set:{role:'ROLE_ADMIN'}})"
 ```
-
-`scripts/create-dev-accounts.sh` does exactly this for the four team accounts.
 
 ---
 

@@ -111,7 +111,7 @@ KApp/
 │   ├── prune-local-branches.sh      # Deletes local branches whose pull request merged (run by the hooks)
 │   ├── sync-contributing.sh         # Refreshes CONTRIBUTING.md from the organization
 │   ├── restack.sh                   # Rebases a stack after its bottom is squash merged
-│   └── generate-dev-secrets.sh  create-dev-accounts.sh  verify-db-isolation.sh
+│   └── generate-dev-secrets.sh  verify-db-isolation.sh
 ├── .githooks/
 │   ├── commit-msg                   # Refuses a commit that breaks CONTRIBUTING.md
 │   └── post-checkout  post-merge    # Prune merged local branches after a switch to develop or a pull

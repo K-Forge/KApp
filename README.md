@@ -357,7 +357,6 @@ KApp/
 │   └── ATLAS-SETUP.md                # Standing up the shared development cluster
 ├── scripts/
 │   ├── generate-dev-secrets.sh       # Writes .env — secrets never leave the machine
-│   ├── create-dev-accounts.sh        # The team accounts
 │   ├── verify-db-isolation.sh        # Proves each service reaches its own database and no other
 │   ├── verify-visitor-pass.py        # End-to-end check of the day pass through the gateway
 │   ├── check-git-conventions.sh      # The contributing rules as code, run by CI and the commit hook

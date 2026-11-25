@@ -124,14 +124,12 @@ docker compose ps
 docker compose logs --tail=30 auth-service | grep -i mongo
 ```
 
-All services healthy, and no `MongoSecurityException`. Then create the team's accounts against the
-cloud database, once, for everybody:
+All services healthy, and no `MongoSecurityException`. Nobody creates accounts by hand: everyone
+signs in with their Microsoft account in the test tenant, and auth-service makes the account at the
+first sign-in (`fake-oidc/README.md`, "Against the real tenant"). The fake OIDC server and its
+`@kforge.dev` people never run against the cluster (#246).
 
-```bash
-scripts/create-dev-accounts.sh
-```
-
-And confirm the seed data arrived — Mongock runs against Atlas the same way it runs locally:
+Then confirm the seed data arrived — Mongock runs against Atlas the same way it runs locally:
 
 ```bash
 curl -s http://localhost:8080/api/catalog/programs \
@@ -155,9 +153,9 @@ command you did:
 docker compose --profile academic --profile map --profile dev up -d
 ```
 
-Either way they end up with a working backend without installing MongoDB. Nobody needs to run
-`create-dev-accounts.sh` again — the accounts live in the shared cluster now, so you run it once in
-step 7 and everyone signs in with the same four.
+Either way they end up with a working backend without installing MongoDB. Each one signs in with
+their own account in the test tenant; the first administrators come from `KAPP_FIRST_ADMINS`, and
+every later permission from the portal.
 
 ---
 
