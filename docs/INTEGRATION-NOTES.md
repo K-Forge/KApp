@@ -69,11 +69,6 @@ in: `ACTIVE` when verification is not required, `PENDING_VERIFICATION` when it i
 happened, and once the flag is switched on those accounts are indistinguishable from genuinely
 verified ones.
 
-**Invitation codes.** Redemption is a single `findAndModify` with an
-`$expr: {$lt: ["$timesUsed", "$maxUses"]}` guard, plus a guarded `release()` returning a use when the
-registration it was claimed for fails. Proven with a 10-thread stampede on a single-use code:
-exactly one success. Never read-then-write.
-
 **Verification tokens.** 32 random bytes from `SecureRandom`, URL-safe base64. Store only a SHA-256
 **hash**, so the collection holds nothing replayable if it leaks. Single use. `/verify/resend`
 always returns 202 regardless of whether the account exists.
@@ -82,10 +77,8 @@ always returns 202 regardless of whether the account exists.
 failure then leaves a retryable orphan profile; the reverse leaves a credential that authenticates
 into a void. 409 comes from the unique index, not from the pre-check.
 
-**Seeded invitation codes are public.** `KL-20262-STUDENT` (200 uses) and `KL-20262-STAFF` (20 uses)
-ship in a change unit so the MVP demos without an admin UI. Anyone who reads the repository can
-create an account. Acceptable on a laptop, not acceptable once reachable — **revoke before any
-public deployment** and put it on the pre-deployment checklist.
+**Invitation codes are gone (#255).** They gated registration until members signed in with
+Microsoft; auth-service's V007 dropped the collection.
 
 **Feign to user-service.** `InternalTokenInterceptor` wired in a non-`@Configuration` client config,
 so the secret reaches exactly one downstream endpoint. 3s connect, 5s read, no retries, every Feign

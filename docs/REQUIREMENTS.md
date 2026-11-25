@@ -59,7 +59,7 @@ by an administrator and only open the portal.
 | AUTH-04 | Sign-out, and suspending an account revokes all its sessions | In progress — phase 3 (#56) |
 | AUTH-05 | The profile role comes from a configurable directory claim; permissions are granted by an administrator (`PUT /auth/admin/accounts/{userId}/roles`) | In progress — phase 3 (#56) |
 | AUTH-06 | Visitor day passes: issue, redeem against an identity document, revoke, and a register | Built |
-| AUTH-07 | Password sign-in, registration, verification and invitation codes answer only when local sign-in is enabled, for development and tests | Built (#83) |
+| AUTH-07 | Password sign-in, registration and verification answer only when local sign-in is enabled, for development and tests. Invitation codes were removed (#255) | Built (#83, #255) |
 
 ### 3.2 Profiles (USER)
 

@@ -1,6 +1,7 @@
 # ADR 0008 — Invitation codes are temporary, and this is how they go away
 
-- **Status:** Accepted. Step 1 implemented; steps 2 and 3 are scheduled, not built.
+- **Status:** Accepted. Step 3 done on 2026-11-25 (#255): the codes are gone, and registration,
+  development only, needs none.
 - **Date:** 2026-09-11
 
 ## Context

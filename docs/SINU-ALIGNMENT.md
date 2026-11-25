@@ -11,7 +11,7 @@ that collects data SINU already guards, makes the request to Dirección de TI ha
 
 | Datum | Where it is today | Whose it is | Proposal |
 |---|---|---|---|
-| Password, e-mail verification, invitation codes, temporary passwords | `auth-service` | Entra ID | Goes when Entra ID arrives. Keep as the stated interim until then |
+| Password, e-mail verification, temporary passwords | `auth-service` | Entra ID | Goes when Entra ID arrives. Keep as the stated interim until then |
 | Name, institutional e-mail, role | `auth-service`, `user-service` | Entra ID | Read from the token at sign-in |
 | Identity document and phone of a member | `user-service` (`identification`, `phone`) | SINU | **Removed** in user 1.0 (#80) |
 | Student code, programme, pensum version, level | `user-service` (`academic`) | SINU | **Done** (#80): the student code is gone, and programme, pensum and level are read from SINU when the student asks for their own profile |

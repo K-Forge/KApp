@@ -209,8 +209,8 @@ auth 1.0.0 defines them, and backend phase 3 (#56) implements them:
 - The `roles` claim carries prefixed names (`ROLE_STUDENT`), so the authority prefix is empty.
   Adding `ROLE_` again yields `ROLE_ROLE_STUDENT` and every `hasRole` check fails silently.
 - `POST /internal/**` is authenticated with a shared `X-Internal-Token` and has no gateway route.
-- **Members have no password in production.** Password sign-in, registration, verification and invitation codes
-  answer only when local sign-in is enabled, for development and tests.
+- **Members have no password in production.** Password sign-in, registration and verification answer only when
+  local sign-in is enabled, for development and tests. Invitation codes are gone (#255).
 - Never expose signing keys or DB credentials. Use environment variables.
 
 ### Data
