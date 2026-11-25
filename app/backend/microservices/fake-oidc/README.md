@@ -21,7 +21,9 @@ At its login page, type one of these user names. Leave the claims box empty.
 `config.json` holds them. The profile travels in the `roles` claim, as the university's app roles will.
 
 `administrativo` is also one of the first administrators (`KAPP_FIRST_ADMINS` in `docker-compose.yml`), so it opens
-the admin portal. Grant other permissions from the portal.
+the admin portal. The list only starts a server: it grants `ROLE_ADMIN` when the account is created, or while the
+account holds no permission and no administrator has set its roles. After that, grant and take away permissions
+from the portal; the list does not give `ROLE_ADMIN` back.
 
 ## What a client needs
 

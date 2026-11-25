@@ -7,6 +7,13 @@ The contracts are the source of truth: the mocks serve them as soon as they merg
 (`app/backend/microservices/mock/README.md`), and the services implement them in the pull requests
 that follow. Until a service has caught up, its contract describes where it is going, not where it is.
 
+## November 2026: auth 1.2.1 (#241)
+
+- **The first administrators only start a server.** An address in the server's list of first
+  administrators gets `ROLE_ADMIN` when its account is created, or when its account holds no
+  permission and no administrator has set its roles. Before, it got `ROLE_ADMIN` back at every
+  sign-in, so taking it away in the portal did not stick. Prose only; no shape changes.
+
 ## November 2026: semaphore 2.0.2 (#250)
 
 - **Two rules on `PUT /api/semaphore/me/plans/{planId}/placements/{pensumItemCode}`**, for a plan
