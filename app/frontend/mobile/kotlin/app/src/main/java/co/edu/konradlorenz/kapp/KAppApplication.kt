@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import co.edu.konradlorenz.kapp.data.auth.MicrosoftSignIn
 import co.edu.konradlorenz.kapp.data.cache.OfflineCache
+import co.edu.konradlorenz.kapp.data.crypto.AesGcmCipher
 import co.edu.konradlorenz.kapp.data.demo.DemoBackend
 import co.edu.konradlorenz.kapp.data.demo.DemoClock
 import co.edu.konradlorenz.kapp.data.map.FloorRepository
@@ -71,8 +72,8 @@ class AppContainer(context: Context) {
     /** Debug against the mocks only. See MockProfilePreference. */
     val mockProfile = MockProfilePreference(context)
 
-    /** Inicio's last good answers, for when it opens with no network (#232). */
-    private val offline = OfflineCache(File(context.filesDir, "offline"))
+    /** Inicio's last good answers, for when it opens with no network (#232), sealed like the session. */
+    private val offline = OfflineCache(File(context.filesDir, "offline"), AesGcmCipher.keystore("kapp.offline"))
 
     val profile = ProfileRepository(
         users = api.users,

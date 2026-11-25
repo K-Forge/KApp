@@ -14,6 +14,7 @@ import co.edu.konradlorenz.kapp.data.session.Session
 import co.edu.konradlorenz.kapp.data.session.SessionManager
 import co.edu.konradlorenz.kapp.data.session.SessionStore
 import co.edu.konradlorenz.kapp.data.cache.OfflineCache
+import co.edu.konradlorenz.kapp.data.crypto.testCipher
 import java.io.IOException
 import java.nio.file.Files
 import kotlinx.coroutines.runBlocking
@@ -100,7 +101,7 @@ class ProfileRepositoryTest {
     @Test
     fun `with no network, the last profile saved is shown, and read again once it is back`() = runBlocking {
         val dir = Files.createTempDirectory("offline").toFile()
-        val cache = OfflineCache(dir, now = { 1_700_000_000_000 })
+        val cache = OfflineCache(dir, testCipher(), now = { 1_700_000_000_000 })
         ProfileRepository(users, session, prefer = { null }, offline = cache).load()
 
         users.offline = true
