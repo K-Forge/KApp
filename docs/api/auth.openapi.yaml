@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: KApp Auth API
-  version: 1.2.0
+  version: 1.3.0
   summary: Sign-in and token service for the KApp platform.
   description: |
     Authentication service for KApp, the mobile application of Fundación
@@ -69,9 +69,9 @@ info:
 
     ## Development only
 
-    Password sign-in and everything around it — registration, e-mail verification, invitation
-    codes, accounts an administrator creates with a temporary password — exist for development,
-    for CI and for the mocks. **They answer `404` unless the server runs with local sign-in
+    Password sign-in and everything around it — registration, e-mail verification, accounts an
+    administrator creates with a temporary password — exist for development, for CI and for the
+    mocks. **They answer `404` unless the server runs with local sign-in
     enabled**, which production never does. They keep the shapes they had in 0.3.0, so the
     clients' development builds can still sign in to a development server.
 
@@ -103,7 +103,7 @@ tags:
       e-mail, no password, nothing that outlives the visit.
   - name: Development
     description: |
-      Password sign-in, registration, verification, invitation codes and temporary passwords.
+      Password sign-in, registration, verification and temporary passwords.
       `404` unless local sign-in is enabled: development, CI and the mocks only.
   - name: Health
     description: Liveness probe.
@@ -727,8 +727,8 @@ paths:
         password and asks the User API to create the matching profile.
 
         - `email` must end in one of the configured domains, or it is rejected with `400`.
-        - `invitationCode` is mandatory and decides the profile role. No code grants a
-          permission. An unknown, spent or expired code is rejected with `400`.
+        - The account has no profile role (`ROLE_UNASSIGNED`) until an administrator gives it
+          one, and never a permission. No code is needed; one a client still sends is ignored.
         - The account is created with `emailVerified: false` and a verification e-mail is sent
           where e-mail is configured. Sign-in is refused until the address is confirmed.
       tags: [Development]
@@ -744,7 +744,6 @@ paths:
               password: ExamplePassword123
               firstName: Pepito
               lastName: Perez Gomez
-              invitationCode: KL-7K2M-QX9P
       responses:
         '201':
           description: Account created, verification e-mail sent
@@ -835,144 +834,6 @@ paths:
                 message: If an account exists for that address, a verification e-mail has been sent.
         '400':
           $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
-  /auth/admin/invitation-codes:
-    get:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      x-development-only: true
-      operationId: listInvitationCodes
-      summary: List invitation codes (development only)
-      description: |
-        **Development only**: `404` unless local sign-in is enabled. Requires `ROLE_ADMIN`.
-        Invitation codes gate password registration, so being able to see which exist, how many
-        uses each has left and which are still active is the difference between managing access
-        and guessing at it.
-      tags: [Development]
-      parameters:
-        - name: active
-          in: query
-          required: false
-          schema: { type: boolean }
-          description: >-
-            Filter by whether the code can still be redeemed **right now**, which is
-            narrower than its `active` flag: `true` returns codes that are active, not
-            expired and not spent, and `false` returns every code failing any one of
-            those. Omit it to list all codes. A code with `active: true` that has used
-            all of `maxUses` is therefore returned by `active=false`.
-      responses:
-        '200':
-          description: The codes
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/InvitationCode'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    post:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      x-development-only: true
-      operationId: createInvitationCode
-      summary: Create an invitation code (development only)
-      description: |
-        **Development only**: `404` unless local sign-in is enabled. Requires `ROLE_ADMIN`. The
-        profile role a code grants is fixed at creation. No code grants a permission: an
-        administrator is promoted deliberately, or anyone holding a code could escalate.
-      tags: [Development]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InvitationCodeRequest'
-      responses:
-        '201':
-          description: The created code
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InvitationCode'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
-
-  /auth/admin/invitation-codes/{code}:
-    parameters:
-      - name: code
-        in: path
-        required: true
-        schema: { type: string, maxLength: 40 }
-        example: KL-7K2M-QX9P
-    patch:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      x-development-only: true
-      operationId: updateInvitationCode
-      summary: Activate or deactivate an invitation code (development only)
-      description: |
-        **Development only**: `404` unless local sign-in is enabled. Requires `ROLE_ADMIN`.
-        Deactivating is the reversible way to stop a code being redeemed, and it keeps the record
-        of who used it.
-      tags: [Development]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [active]
-              properties:
-                active: { type: boolean }
-              additionalProperties: false
-      responses:
-        '200':
-          description: The updated code
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InvitationCode'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-    delete:
-      # Authorization as the code enforces it, not as prose describes it.
-      x-roles: [ROLE_ADMIN]
-      x-development-only: true
-      operationId: deleteInvitationCode
-      summary: Delete an invitation code (development only)
-      description: |
-        **Development only**: `404` unless local sign-in is enabled. Requires `ROLE_ADMIN`.
-        Prefer deactivating: deleting a code that has already been redeemed discards the only
-        record of how those accounts were created.
-      tags: [Development]
-      responses:
-        '204':
-          description: Deleted
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
 
@@ -1286,81 +1147,6 @@ components:
             $ref: '#/components/schemas/Role'
           example: [ROLE_STAFF, ROLE_RECEPTION]
 
-    InvitationCode:
-      type: object
-      description: A code that permits one password registration, for a fixed profile role. Development only.
-      required: [code, role, maxUses, timesUsed, active]
-      properties:
-        code:
-          type: string
-          maxLength: 40
-          description: >-
-            Generated by the server: `KL-` then two groups of four, from an alphabet with no
-            O/0 or I/1 — the pairs people misread when a code is read out at a counter.
-          pattern: '^KL-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$'
-          example: KL-7K2M-QX9P
-        role:
-          $ref: '#/components/schemas/ProfileRole'
-        maxUses:
-          description: >-
-            How many accounts this code may create in total, across everybody who uses it.
-          type: integer
-          minimum: 1
-          example: 200
-        timesUsed:
-          type: integer
-          minimum: 0
-          description: Incremented atomically on redemption, so it cannot exceed maxUses.
-          example: 6
-        active:
-          description: >-
-            Whether it is currently accepted. Deactivating stops redemptions while keeping the record of
-            who already used it.
-          type: boolean
-          example: true
-        expiresAt:
-          type: [string, 'null']
-          format: date-time
-          description: Null means it does not expire on its own.
-        notes:
-          description: >-
-            Free text for whoever issued it - which intake, who asked. Never shown to the person redeeming
-            it.
-          type: [string, 'null']
-          maxLength: 200
-          example: Intake for 2026-2
-
-    InvitationCodeRequest:
-      type: object
-      description: |
-        What an administrator supplies to mint a code. **The code itself is not in here** — the
-        server generates it and returns it, and a `code` sent anyway is ignored rather than
-        honoured.
-      required: [role, maxUses]
-      properties:
-        role:
-          $ref: '#/components/schemas/ProfileRole'
-        maxUses:
-          description: >-
-            Total registrations this code may create. Capped at 10000: a code with no practical ceiling is
-            an open door with extra steps.
-          type: integer
-          minimum: 1
-          maximum: 10000
-          example: 200
-        expiresAt:
-          description: >-
-            When it stops being accepted. Null means it never expires on its own and has to be deactivated
-            by hand.
-          type: [string, 'null']
-          format: date-time
-        notes:
-          description: >-
-            Free text for whoever issued it. Never shown to the person redeeming it.
-          type: [string, 'null']
-          maxLength: 200
-      additionalProperties: false
-
     ApiError:
       type: object
       required: [timestamp, status, error, message, path]
@@ -1402,9 +1188,9 @@ components:
     RegistrationRequest:
       type: object
       description: |
-        Password registration payload. Development only. `invitationCode` decides the profile role
-        the account receives.
-      required: [email, password, firstName, lastName, invitationCode]
+        Password registration payload. Development only. The account has no profile role until an
+        administrator gives it one.
+      required: [email, password, firstName, lastName]
       properties:
         email:
           type: string
@@ -1432,14 +1218,6 @@ components:
           minLength: 1
           maxLength: 50
           example: Perez Gomez
-        invitationCode:
-          type: string
-          minLength: 6
-          maxLength: 32
-          description: |
-            Code issued for an intake. It carries the profile role the account will receive.
-            Rejected with `400` when unknown, already spent or expired.
-          example: KL-7K2M-QX9P
 
     VisitorPassRequest:
       type: object

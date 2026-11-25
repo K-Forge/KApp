@@ -7,6 +7,19 @@ The contracts are the source of truth: the mocks serve them as soon as they merg
 (`app/backend/microservices/mock/README.md`), and the services implement them in the pull requests
 that follow. Until a service has caught up, its contract describes where it is going, not where it is.
 
+## November 2026: auth 1.3.0 (#255)
+
+- **Invitation codes are gone.** `/auth/admin/invitation-codes` and
+  `/auth/admin/invitation-codes/{code}`, with the `InvitationCode` and `InvitationCodeRequest`
+  schemas, are removed. They were development only and answered `404` on the dev server and in
+  production. Members sign in with Microsoft, and a visitor gets a day pass, which does not change.
+- **`POST /auth/register` needs no code.** `RegistrationRequest` loses `invitationCode`. It is
+  still development only, and the account has no profile role (`ROLE_UNASSIGNED`) until an
+  administrator gives it one. A client that still sends a code is not refused: the field is
+  ignored.
+
+**Migrating a client:** drop any screen or call for invitation codes. Nothing else changes.
+
 ## November 2026: semaphore 2.0.2 (#250)
 
 - **Two rules on `PUT /api/semaphore/me/plans/{planId}/placements/{pensumItemCode}`**, for a plan
